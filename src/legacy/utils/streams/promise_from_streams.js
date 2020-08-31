@@ -58,7 +58,7 @@ export async function createPromiseFromStreams(streams) {
     );
   }
   return new Promise((resolve, reject) => {
-    pipeline(...streams, err => {
+    pipeline(...streams, (err) => {
       if (err) return reject(err);
       resolve(finalChunk);
     });

@@ -10,20 +10,20 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = es => {
+export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
   let templatesCreated = [];
 
   // Indices
-  const getIndex = index => es.indices.get({ index });
+  const getIndex = (index) => es.indices.get({ index });
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
     return es.indices.create({ index }).then(() => index);
   };
 
-  const deleteIndex = index => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
+  const deleteIndex = (index) => {
+    indicesCreated = indicesCreated.filter((i) => i !== index);
     return es.indices.delete({ index });
   };
 
@@ -39,9 +39,9 @@ export const initElasticsearchHelpers = es => {
     return es.indices.putTemplate({ name, body: template }, { create: true });
   };
 
-  const deleteIndexTemplate = name => {
-    templatesCreated = templatesCreated.filter(i => i !== name);
-    return es.indices.deleteTemplate({ name }).catch(err => {
+  const deleteIndexTemplate = (name) => {
+    templatesCreated = templatesCreated.filter((i) => i !== name);
+    return es.indices.deleteTemplate({ name }).catch((err) => {
       // Silently fail templates not found
       if (err.statusCode !== 404) {
         throw err;

@@ -23,27 +23,35 @@ import Crypto from 'crypto';
 import { promisify } from 'util';
 
 import execa from 'execa';
-import { ToolingLog } from '@kbn/dev-utils';
 
 import { readYarnLock, YarnLock } from './yarn_lock';
 import { ProjectMap } from '../utils/projects';
 import { Project } from '../utils/project';
 import { Kibana } from '../utils/kibana';
+import { Log } from '../utils/log';
 
 export type ChecksumMap = Map<string, string | undefined>;
 /** map of [repo relative path to changed file, type of change] */
-type Changes = Map<string, 'modified' | 'deleted' | 'invalid'>;
+type Changes = Map<string, 'modified' | 'deleted' | 'invalid' | 'untracked'>;
 
 const statAsync = promisify(Fs.stat);
 const projectBySpecificitySorter = (a: Project, b: Project) => b.path.length - a.path.length;
 
 /** Get the changed files for a set of projects */
-async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: ToolingLog) {
+async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Log) {
   log.verbose('getting changed files');
 
   const { stdout } = await execa(
     'git',
-    ['ls-files', '-dmt', '--', ...Array.from(projects.values()).map(p => p.path)],
+    [
+      'ls-files',
+      '-dmto',
+      '--exclude-standard',
+      '--',
+      ...Array.from(projects.values())
+        .filter((p) => kbn.isPartOfRepo(p))
+        .map((p) => p.path),
+    ],
     {
       cwd: kbn.getAbsolute(),
     }
@@ -71,10 +79,13 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
           unassignedChanges.set(path, 'deleted');
           break;
 
+        case '?':
+          unassignedChanges.set(path, 'untracked');
+          break;
+
         case 'H':
         case 'S':
         case 'K':
-        case '?':
         default:
           log.warning(`unexpected modification status "${tag}" for ${path}, please report this!`);
           unassignedChanges.set(path, 'invalid');
@@ -84,9 +95,14 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
   }
 
   const sortedRelevantProjects = Array.from(projects.values()).sort(projectBySpecificitySorter);
-  const changesByProject = new Map<Project, Changes>();
+  const changesByProject = new Map<Project, Changes | undefined>();
 
   for (const project of sortedRelevantProjects) {
+    if (kbn.isOutsideRepo(project)) {
+      changesByProject.set(project, undefined);
+      continue;
+    }
+
     const ownChanges: Changes = new Map();
     const prefix = kbn.getRelative(project.path);
 
@@ -114,6 +130,10 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
 
 /** Get the latest commit sha for a project */
 async function getLatestSha(project: Project, kbn: Kibana) {
+  if (kbn.isOutsideRepo(project)) {
+    return;
+  }
+
   const { stdout } = await execa(
     'git',
     ['log', '-n', '1', '--pretty=format:%H', '--', project.path],
@@ -130,7 +150,7 @@ async function getLatestSha(project: Project, kbn: Kibana) {
  * in the yarn.lock file, does not include other projects in the workspace
  * or their dependencies
  */
-function resolveDepsForProject(project: Project, yarnLock: YarnLock, kbn: Kibana, log: ToolingLog) {
+function resolveDepsForProject(project: Project, yarnLock: YarnLock, kbn: Kibana, log: Log) {
   /** map of [name@range, name@resolved] */
   const resolved = new Map<string, string>();
 
@@ -175,17 +195,17 @@ function resolveDepsForProject(project: Project, yarnLock: YarnLock, kbn: Kibana
  */
 async function getChecksum(
   project: Project,
-  changes: Changes,
+  changes: Changes | undefined,
   yarnLock: YarnLock,
   kbn: Kibana,
-  log: ToolingLog
+  log: Log
 ) {
   const sha = await getLatestSha(project, kbn);
   if (sha) {
     log.verbose(`[${project.name}] local sha:`, sha);
   }
 
-  if (Array.from(changes.values()).includes('invalid')) {
+  if (!changes || Array.from(changes.values()).includes('invalid')) {
     log.warning(`[${project.name}] unable to determine local changes, caching disabled`);
     return;
   }
@@ -236,7 +256,7 @@ async function getChecksum(
  *  - un-committed changes
  *  - resolved dependencies from yarn.lock referenced by project package.json
  */
-export async function getAllChecksums(kbn: Kibana, log: ToolingLog) {
+export async function getAllChecksums(kbn: Kibana, log: Log) {
   const projects = kbn.getAllProjects();
   const changesByProject = await getChangesForProjects(projects, kbn, log);
   const yarnLock = await readYarnLock(kbn);
@@ -245,10 +265,10 @@ export async function getAllChecksums(kbn: Kibana, log: ToolingLog) {
   const cacheKeys: ChecksumMap = new Map();
 
   await Promise.all(
-    Array.from(projects.values()).map(async project => {
+    Array.from(projects.values()).map(async (project) => {
       cacheKeys.set(
         project.name,
-        await getChecksum(project, changesByProject.get(project)!, yarnLock, kbn, log)
+        await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log)
       );
     })
   );

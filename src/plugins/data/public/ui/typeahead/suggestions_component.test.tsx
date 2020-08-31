@@ -19,7 +19,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { autocomplete } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import { SuggestionsComponent } from './suggestions_component';
 
@@ -27,20 +27,20 @@ const noop = () => {
   return;
 };
 
-const mockSuggestions: autocomplete.QuerySuggestion[] = [
+const mockSuggestions: QuerySuggestion[] = [
   {
     description: 'This is not a helpful suggestion',
     end: 0,
     start: 42,
     text: 'as promised, not helpful',
-    type: autocomplete.QuerySuggestionsTypes.Value,
+    type: QuerySuggestionTypes.Value,
   },
   {
     description: 'This is another unhelpful suggestion',
     end: 0,
     start: 42,
     text: 'yep',
-    type: autocomplete.QuerySuggestionsTypes.Field,
+    type: QuerySuggestionTypes.Field,
   },
 ];
 
@@ -119,10 +119,7 @@ describe('SuggestionsComponent', () => {
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('click');
+    component.find(SuggestionComponent).at(1).simulate('click');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1]);
   });
@@ -140,10 +137,7 @@ describe('SuggestionsComponent', () => {
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('mouseenter');
+    component.find(SuggestionComponent).at(1).simulate('mouseenter');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(1);
   });

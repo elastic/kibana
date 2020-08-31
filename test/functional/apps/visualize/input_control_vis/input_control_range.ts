@@ -20,15 +20,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
+  const security = getService('security');
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await esArchiver.load('kibana_sample_data_flights_index_pattern');
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
@@ -63,6 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await security.testUser.restoreDefaults();
     });
   });
 }

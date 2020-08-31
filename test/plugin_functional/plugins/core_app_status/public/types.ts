@@ -21,6 +21,6 @@ import { CoreAppStatusPluginStart } from './plugin';
 
 declare global {
   interface Window {
-    __coreAppStatus: CoreAppStatusPluginStart;
+    _coreAppStatus: CoreAppStatusPluginStart;
   }
 }

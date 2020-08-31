@@ -31,14 +31,12 @@ import warningsMixin from './warnings';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
-import optimizeMixin from '../../optimize';
+import { optimizeMixin } from '../../optimize';
 import * as Plugins from './plugins';
-import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { capabilitiesMixin } from './capabilities';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { sassMixin } from './sass';
 import { i18nMixin } from './i18n';
 
 /**
@@ -112,9 +110,7 @@ export default class KbnServer {
         // tell the config we are done loading plugins
         configCompleteMixin,
 
-        // setup this.uiBundles
         uiMixin,
-        indexPatternsMixin,
 
         // setup saved object routes
         savedObjectsMixin,
@@ -122,12 +118,8 @@ export default class KbnServer {
         // setup capabilities routes
         capabilitiesMixin,
 
-        // ensure that all bundles are built, or that the
-        // watch bundle server is running
+        // setup routes that serve the @kbn/optimizer output
         optimizeMixin,
-
-        // transpiles SCSS into CSS
-        sassMixin,
 
         // initialize the plugins
         Plugins.initializeMixin,
@@ -199,8 +191,7 @@ export default class KbnServer {
   }
 
   applyLoggingConfiguration(settings) {
-    const config = new Config(this.config.getSchema(), settings);
-
+    const config = Config.withDefaultSchema(settings);
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),

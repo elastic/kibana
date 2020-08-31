@@ -40,14 +40,14 @@ export default function GeoHashGridAggResponseFixture() {
     _.range(97, 122) // a-z
   );
 
-  const tags = _.times(_.random(4, 20), function(i) {
+  const tags = _.times(_.random(4, 20), function (i) {
     // random number of tags
     let docCount = 0;
-    const buckets = _.times(_.random(40, 200), function() {
-      return _.sample(geoHashCharts, 3).join('');
+    const buckets = _.times(_.random(40, 200), function () {
+      return _.sampleSize(geoHashCharts, 3).join('');
     })
       .sort()
-      .map(function(geoHash) {
+      .map(function (geoHash) {
         const count = _.random(1, 5000);
 
         docCount += count;

@@ -41,17 +41,15 @@ const typeColors = {
   optmzr: 'white',
   manager: 'green',
   optimize: 'magentaBright',
-  'optimize:dynamic_dll_plugin': 'magentaBright',
-  'optimize:watch_cache': 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',
 };
 
-const color = _.memoize(function(name) {
+const color = _.memoize(function (name) {
   return chalk[typeColors[name]] || _.identity;
 });
 
-const type = _.memoize(function(t) {
+const type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
@@ -63,12 +61,12 @@ export default class KbnLoggerStringFormat extends LogFormat {
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
     const tags = _(data.tags)
-      .sortBy(function(tag) {
+      .sortBy(function (tag) {
         if (color(tag) === _.identity) return `2${tag}`;
         if (_.includes(statuses, tag)) return `0${tag}`;
         return `1${tag}`;
       })
-      .reduce(function(s, t) {
+      .reduce(function (s, t) {
         return s + `[${color(t)(t)}]`;
       }, '');
 

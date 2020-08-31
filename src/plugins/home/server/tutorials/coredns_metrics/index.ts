@@ -36,6 +36,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.corednsMetrics.nameTitle', {
       defaultMessage: 'CoreDNS metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CoreDNS server.',
@@ -48,13 +49,13 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
+    euiIconType: '/plugins/home/assets/logos/coredns.svg',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
@@ -62,7 +63,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/coredns_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

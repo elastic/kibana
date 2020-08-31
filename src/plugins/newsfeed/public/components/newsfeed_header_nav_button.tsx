@@ -21,7 +21,7 @@ import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 import { NewsfeedFlyout } from './flyout_list';
-import { FetchResult } from '../../types';
+import { FetchResult } from '../types';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -48,7 +48,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
       setNewsFetchResult(fetchResult);
     }
 
-    const subscription = apiFetchResult.subscribe(res => handleStatusChange(res));
+    const subscription = apiFetchResult.subscribe((res) => handleStatusChange(res));
     return () => subscription.unsubscribe();
   }, [apiFetchResult]);
 

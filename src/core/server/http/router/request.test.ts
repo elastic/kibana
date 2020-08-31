@@ -16,11 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+}));
+
+import { RouteOptions } from 'hapi';
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
 
 describe('KibanaRequest', () => {
+  describe('id property', () => {
+    it('uses the request.app.requestId property if present', () => {
+      const request = httpServerMock.createRawRequest({
+        app: { requestId: 'fakeId' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('fakeId');
+    });
+
+    it('generates a new UUID if request.app property is not present', () => {
+      // Undefined app property
+      const request = httpServerMock.createRawRequest({
+        app: undefined,
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+
+    it('generates a new UUID if request.app.requestId property is not present', () => {
+      // Undefined app.requestId property
+      const request = httpServerMock.createRawRequest({
+        app: {},
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+  });
+
   describe('get all headers', () => {
     it('returns all headers', () => {
       const request = httpServerMock.createRawRequest({
@@ -114,6 +148,106 @@ describe('KibanaRequest', () => {
       });
       const kibanaRequest = KibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+  });
+
+  describe('route.options.authRequired property', () => {
+    it('handles required auth: undefined', () => {
+      const auth: RouteOptions['auth'] = undefined;
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(true);
+    });
+    it('handles required auth: false', () => {
+      const auth: RouteOptions['auth'] = false;
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(false);
+    });
+    it('handles required auth: { mode: "required" }', () => {
+      const auth: RouteOptions['auth'] = { mode: 'required' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(true);
+    });
+
+    it('handles required auth: { mode: "optional" }', () => {
+      const auth: RouteOptions['auth'] = { mode: 'optional' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+    });
+
+    it('handles required auth: { mode: "try" } as "optional"', () => {
+      const auth: RouteOptions['auth'] = { mode: 'try' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+    });
+
+    it('throws on auth: strategy name', () => {
+      const auth: RouteOptions['auth'] = 'session';
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+
+      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+        `"unexpected authentication options: \\"session\\" for route: /"`
+      );
+    });
+
+    it('throws on auth: { mode: unexpected mode }', () => {
+      const auth: RouteOptions['auth'] = { mode: undefined };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+
+      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+        `"unexpected authentication options: {} for route: /"`
+      );
     });
   });
 

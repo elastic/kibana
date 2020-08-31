@@ -19,7 +19,7 @@
 
 import Color from 'color';
 
-export function getSplitColors(inputColor, size = 10, style = 'gradient') {
+export function getSplitColors(inputColor, size = 10, style = 'kibana') {
   const color = new Color(inputColor);
   const colors = [];
   let workingColor = Color.hsl(color.hsl().object());
@@ -49,7 +49,7 @@ export function getSplitColors(inputColor, size = 10, style = 'gradient') {
       '#0F1419',
       '#666666',
     ];
-  } else {
+  } else if (style === 'gradient') {
     colors.push(color.string());
     const rotateBy = color.luminosity() / (size - 1);
     for (let i = 0; i < size - 1; i++) {

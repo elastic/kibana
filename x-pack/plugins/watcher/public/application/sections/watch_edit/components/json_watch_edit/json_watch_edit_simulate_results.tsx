@@ -46,8 +46,8 @@ export const JsonWatchEditSimulateResults = ({
     if (executeResults && actions) {
       const actionStatuses =
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
-      return Object.keys(actions).map(actionKey => {
-        const actionStatus = actionStatuses.find(status => status.id === actionKey);
+      return Object.keys(actions).map((actionKey) => {
+        const actionStatus = actionStatuses.find((status) => status.id === actionKey);
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),

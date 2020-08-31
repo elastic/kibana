@@ -49,7 +49,7 @@ export function preventParallelCalls<C extends void, A, R>(
     }
   }
 
-  return async function(this: C, arg: A) {
+  return async function (this: C, arg: A) {
     if (filter(arg)) {
       return await fn.call(this, arg);
     }

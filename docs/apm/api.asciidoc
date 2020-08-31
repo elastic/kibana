@@ -1,0 +1,555 @@
+[role="xpack"]
+[[apm-api]]
+== APM app API
+
+++++
+<titleabbrev>REST API</titleabbrev>
+++++
+
+Some APM app features are provided via a REST API:
+
+* <<agent-config-api>>
+* <<apm-annotation-api>>
+* <<kibana-api,Kibana API>>
+
+[float]
+[[apm-api-example]]
+=== Using the APIs
+
+// The following content is reused throughout the API docs
+// tag::using-the-APIs[]
+Interact with APM APIs using cURL or another API tool.
+All APM APIs are Kibana APIs, not Elasticsearch APIs;
+because of this, the Kibana dev tools console cannot be used to interact with APM APIs.
+
+For all APM APIs, you must use a request header.
+Supported headers are `Authorization`, `kbn-xsrf`, and `Content-Type`.
+
+`Authorization: ApiKey {credentials}`::
+Kibana supports token-based authentication with the Elasticsearch API key service.
+The API key returned by the  {ref}/security-api-create-api-key.html[Elasticsearch create API key API]
+can be used by sending a request with an `Authorization` header that has a value of `ApiKey` followed by the `{credentials}`,
+where `{credentials}` is the base64 encoding of `id` and `api_key` joined by a colon.
++
+Alternatively, you can create a user and use their username and password to authenticate API access: `-u $USER:$PASSWORD`.
++
+Whether using `Authorization: ApiKey {credentials}`, or `-u $USER:$PASSWORD`,
+users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+
+`kbn-xsrf: true`::
+  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+
+* The API endpoint uses the `GET` or `HEAD` operations
+* The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
+
+`Content-Type: application/json`::
+  Applicable only when you send a payload in the API request.
+  {kib} API requests and responses use JSON.
+  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+// end::using-the-APIs[]
+
+Here's an example CURL request that adds an annotation to the APM app:
+
+[source,curl]
+----
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-11T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Revert upgrade",
+      "tags": [
+        "elastic.co", "customer"
+      ]
+    }'
+----
+
+////
+*******************************************************
+////
+
+[role="xpack"]
+[[agent-config-api]]
+=== Agent Configuration API
+
+The Agent configuration API allows you to fine-tune your APM agent configuration,
+without needing to redeploy your application.
+
+The following Agent configuration APIs are available:
+
+* <<apm-update-config>> to create or update an Agent configuration
+* <<apm-delete-config>> to delete an Agent configuration.
+* <<apm-list-config>> to list all Agent configurations.
+* <<apm-search-config>> to search for an Agent configuration.
+
+[float]
+[[use-agent-config-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[apm-update-config]]
+==== Create or update configuration
+
+[[apm-update-config-req]]
+===== Request
+
+`PUT /api/apm/settings/agent-configuration`
+
+[role="child_attributes"]
+[[apm-update-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration to create or update.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+`settings`::
+(required) Key/value object with option name and option value.
+
+`agent_name`::
+(optional) The agent name is used by the UI to determine which settings to display.
+
+
+[[apm-update-config-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+PUT /api/apm/settings/agent-configuration
+{
+    "service": {
+        "name": "frontend",
+        "environment": "production"
+    },
+    "settings": {
+        "transaction_sample_rate": "0.4",
+        "capture_body": "off",
+        "transaction_max_spans": "500"
+    },
+    "agent_name": "nodejs"
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-delete-config]]
+==== Delete configuration
+
+[[apm-delete-config-req]]
+===== Request
+
+`DELETE /api/apm/settings/agent-configuration`
+
+[role="child_attributes"]
+[[apm-delete-config-req-body]]
+===== Request body
+`service`::
+(required, object) Service identifying the configuration to delete
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+
+[[apm-delete-config-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+DELETE /api/apm/settings/agent-configuration
+{
+    "service" : {
+        "name": "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-list-config]]
+==== List configuration
+
+
+[[apm-list-config-req]]
+===== Request
+
+`GET  /api/apm/settings/agent-configuration`
+
+[[apm-list-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go",
+      "environment": "production"
+    },
+    "settings": {
+      "transaction_sample_rate": "1",
+      "capture_body": "off",
+      "transaction_max_spans": "200"
+    },
+    "@timestamp": 1581934104843,
+    "applied_by_agent": false,
+    "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+  },
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go"
+    },
+    "settings": {
+      "transaction_sample_rate": "1",
+      "capture_body": "off",
+      "transaction_max_spans": "300"
+    },
+    "@timestamp": 1581934111727,
+    "applied_by_agent": false,
+    "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+  },
+  {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": "1",
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+]
+--------------------------------------------------
+
+[[apm-list-config-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+GET  /api/apm/settings/agent-configuration
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-search-config]]
+==== Search configuration
+
+[[apm-search-config-req]]
+===== Request
+
+`POST /api/apm/settings/agent-configuration/search`
+
+[role="child_attributes"]
+[[apm-search-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+`etag`::
+(required) etag is sent by the agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
+
+[[apm-search-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "_index": ".apm-agent-configuration",
+  "_id": "CIaqXXABmQCdPphWj8EJ",
+  "_score": 2,
+  "_source": {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": "1",
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+}
+--------------------------------------------------
+
+[[apm-search-config-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+POST /api/apm/settings/agent-configuration/search
+{
+    "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+    "service" : {
+        "name": "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[apm-annotation-api]]
+=== Annotation API
+
+The Annotation API allows you to annotate visualizations in the APM app with significant events, like deployments,
+allowing you to easily see how these events are impacting the performance of your existing applications.
+
+By default, annotations are stored in a newly created `observability-annotations` index.
+The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+If you change the default index name, you'll also need to <<apm-app-annotation-user-create,update your user privileges>> accordingly.
+
+The following APIs are available:
+
+* <<apm-annotation-create>> to create an annotation for APM.
+// * <<obs-annotation-create>> POST /api/observability/annotation
+// * <<obs-annotation-get>> GET /api/observability/annotation/:id
+// * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
+
+[float]
+[[use-annotation-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[apm-annotation-create]]
+==== Create or update annotation
+
+[[apm-annotation-config-req]]
+===== Request
+
+`POST /api/apm/services/:serviceName/annotation`
+
+[role="child_attributes"]
+[[apm-annotation-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration to create or update.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`version` :::
+  (required, string) Version of service.
+
+`environment` :::
+  (optional, string) Environment of service.
+======
+
+`@timestamp`::
+(required, string) The date and time of the annotation. Must be in https://www.w3.org/TR/NOTE-datetime[ISO 8601] format.
+
+`message`::
+(optional, string) The message displayed in the annotation. Defaults to `service.version`.
+
+`tags`::
+(optional, array) Tags are used by the APM app to distinguish APM annotations from other annotations.
+Tags may have additional functionality in future releases. Defaults to `[apm]`.
+While you can add additional tags, you cannot remove the `apm` tag.
+
+[[apm-annotation-config-example]]
+===== Example
+
+The following example creates an annotation for a service named `opbeans-java`.
+
+[source,curl]
+--------------------------------------------------
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-08T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Deployment 1.2"
+    }'
+--------------------------------------------------
+
+[[apm-annotation-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "_index": "observability-annotations",
+  "_id": "Lc9I93EBh6DbmkeV7nFX",
+  "_version": 1,
+  "_seq_no": 12,
+  "_primary_term": 1,
+  "found": true,
+  "_source": {
+    "message": "Deployment 1.2",
+    "@timestamp": "2020-05-08T10:31:30.452Z",
+    "service": {
+      "version": "1.2",
+      "name": "opbeans-java"
+    },
+    "tags": [
+      "apm",
+      "elastic.co",
+      "customer"
+    ],
+    "annotation": {
+      "type": "deployment"
+    },
+    "event": {
+      "created": "2020-05-09T02:34:43.937Z"
+    }
+  }
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[kibana-api]]
+=== Kibana API
+
+In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying Kibana.
+An example is below.
+
+[[api-create-apm-index-pattern]]
+==== Customize the APM index pattern
+
+As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
+you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+
+The following example sets the default APM app index pattern to `some-other-pattern-*`:
+
+[source,sh]
+----
+curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
+-d' {
+      "attributes": {
+        "title": "some-other-pattern-*", <2>
+      }
+    }'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+This value should not be changed
+<2> Your custom index pattern matcher.
+
+The API returns the following:
+
+[source,json]
+----
+{
+   "id":"apm_static_index_pattern_id",
+   "type":"index-pattern",
+   "updated_at":"2020-07-06T22:55:59.555Z",
+   "version":"WzYsMV0=",
+   "attributes":{
+      "title":"some-other-pattern-*"
+   }
+}
+----
+
+To view the new APM app index pattern, use the <<saved-objects-api-get,GET object API>>:
+
+[source,sh]
+----
+curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+
+The API returns the following:
+
+[source,json]
+----
+{
+  "id":"apm_static_index_pattern_id",
+  "type":"index-pattern",
+  "updated_at":"2020-07-06T22:55:59.555Z",
+  "version":"WzYsMV0=",
+  "attributes":{...}
+    "fieldFormatMap":"{...}
+    "fields":"[{...},{...},...]
+    "sourceFilters":"[{\"value\":\"sourcemap.sourcemap\"}]",
+    "timeFieldName":"@timestamp",
+    "title":"some-other-pattern-*"
+   },
+   ...
+}
+----
+
+// More examples will go here
+
+More information on Kibana's API is available in <<api,REST API>>.

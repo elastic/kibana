@@ -6,29 +6,41 @@
 
 import request from 'request';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find((header) =>
+      header.startsWith('sid=')
+    );
     return cookie ? request.cookie(cookie) : undefined;
   }
 
   describe('login', () => {
-    it('accepts valid login credentials as 204 status', async () => {
+    it('accepts valid login credentials as 200 status', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
-        .send({ username: 'elastic', password: 'changeme' })
-        .expect(204);
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { username: 'elastic', password: 'changeme' },
+        })
+        .expect(200);
     });
 
     it('sets HttpOnly cookie with valid login', async () => {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
-        .send({ username: 'elastic', password: 'changeme' })
-        .expect(204);
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { username: 'elastic', password: 'changeme' },
+        })
+        .expect(200);
 
       const cookie = extractSessionCookie(response);
       if (!cookie) {
@@ -43,7 +55,12 @@ export default function({ getService }) {
     it('rejects without kbn-xsrf header as 400 status even if credentials are valid', async () => {
       const response = await supertest
         .post('/internal/security/login')
-        .send({ username: 'elastic', password: 'changeme' })
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { username: 'elastic', password: 'changeme' },
+        })
         .expect(400);
 
       if (extractSessionCookie(response)) {
@@ -66,7 +83,12 @@ export default function({ getService }) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
-        .send({ username: 'elastic' })
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { username: 'elastic' },
+        })
         .expect(400);
 
       if (extractSessionCookie(response)) {
@@ -78,7 +100,12 @@ export default function({ getService }) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
-        .send({ password: 'changme' })
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { password: 'changeme' },
+        })
         .expect(400);
 
       if (extractSessionCookie(response)) {
@@ -90,7 +117,12 @@ export default function({ getService }) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
-        .send({ username: 'elastic', password: 'notvalidpassword' })
+        .send({
+          providerType: 'token',
+          providerName: 'token',
+          currentURL: '/',
+          params: { username: 'elastic', password: 'notvalidpassword' },
+        })
         .expect(401);
 
       if (extractSessionCookie(response)) {

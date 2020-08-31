@@ -27,7 +27,7 @@ import successHtml from './status_text_success.html';
 import warningHtml from './status_text_warning.html';
 import errorHtml from './status_text_error.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="StatusText"

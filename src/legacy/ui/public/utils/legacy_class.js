@@ -29,7 +29,7 @@ function describeConst(val) {
 }
 
 const props = {
-  inherits: describeConst(function(SuperClass) {
+  inherits: describeConst(function (SuperClass) {
     const prototype = Object.create(SuperClass.prototype, {
       constructor: describeConst(this),
       superConstructor: describeConst(SuperClass),

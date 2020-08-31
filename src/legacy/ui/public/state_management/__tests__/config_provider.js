@@ -21,13 +21,13 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../config_provider';
 
-describe('State Management Config', function() {
+describe('State Management Config', function () {
   let stateManagementConfig;
 
   describe('is enabled', () => {
     beforeEach(ngMock.module('kibana'));
     beforeEach(
-      ngMock.inject(function(_stateManagementConfig_) {
+      ngMock.inject(function (_stateManagementConfig_) {
         stateManagementConfig = _stateManagementConfig_;
       })
     );
@@ -39,13 +39,13 @@ describe('State Management Config', function() {
 
   describe('can be disabled', () => {
     beforeEach(
-      ngMock.module('kibana', function(stateManagementConfigProvider) {
+      ngMock.module('kibana', function (stateManagementConfigProvider) {
         stateManagementConfigProvider.disable();
       })
     );
 
     beforeEach(
-      ngMock.inject(function(_stateManagementConfig_) {
+      ngMock.inject(function (_stateManagementConfig_) {
         stateManagementConfig = _stateManagementConfig_;
       })
     );

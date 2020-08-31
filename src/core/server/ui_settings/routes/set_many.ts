@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema, ValidationError } from '@kbn/config-schema';
 
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
@@ -24,7 +24,7 @@ import { CannotOverrideError } from '../ui_settings_errors';
 
 const validate = {
   body: schema.object({
-    changes: schema.object({}, { allowUnknowns: true }),
+    changes: schema.object({}, { unknowns: 'allow' }),
   }),
 };
 
@@ -50,7 +50,7 @@ export function registerSetManyRoute(router: IRouter) {
         });
       }
 
-      if (error instanceof CannotOverrideError) {
+      if (error instanceof CannotOverrideError || error instanceof ValidationError) {
         return response.badRequest({ body: error });
       }
 

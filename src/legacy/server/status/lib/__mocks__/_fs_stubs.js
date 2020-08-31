@@ -19,9 +19,7 @@
 
 export function cGroups(hierarchy) {
   if (!hierarchy) {
-    hierarchy = Math.random()
-      .toString(36)
-      .substring(7);
+    hierarchy = Math.random().toString(36).substring(7);
   }
 
   const cpuAcctDir = `/sys/fs/cgroup/cpuacct/${hierarchy}`;
@@ -68,7 +66,7 @@ class FSError extends Error {
 
 let _mockFiles = Object.create({});
 
-export const setMockFiles = mockFiles => {
+export const setMockFiles = (mockFiles) => {
   _mockFiles = Object.create({});
   if (mockFiles) {
     const files = Object.keys(mockFiles);

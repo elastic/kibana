@@ -12,7 +12,7 @@ export interface ReadySignal<T> {
 export function createReadySignal<T>(): ReadySignal<T> {
   let resolver: (value: T) => void;
 
-  const promise = new Promise<T>(resolve => {
+  const promise = new Promise<T>((resolve) => {
     resolver = resolve;
   });
 

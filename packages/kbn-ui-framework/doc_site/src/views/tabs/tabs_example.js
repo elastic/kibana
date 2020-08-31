@@ -35,7 +35,7 @@ import Tabs from './tabs';
 import tabsSource from '!!raw-loader!./tabs';
 const tabsHtml = renderToHtml(Tabs);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Tabs"

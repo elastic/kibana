@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import clusterFixture from './fixtures/cluster';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

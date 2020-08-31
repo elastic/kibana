@@ -1,0 +1,186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SSL Certificate component renders 1`] = `
+Array [
+  .c0.c0.c0 {
+  width: 35%;
+}
+
+<dt
+    class="euiDescriptionList__title c0"
+  >
+    TLS Certificate
+  </dt>,
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  .c0.c0.c0 {
+  width: 65%;
+  overflow-wrap: anywhere;
+}
+
+.c1.c1.c1 {
+  margin: 0 0 0 4px;
+  display: inline-block;
+  color: inherit;
+}
+
+<dd
+    class="euiDescriptionList__description c0"
+  >
+    <a
+      class="eui-displayInline"
+      href="/certificates"
+    >
+      <span
+        class="euiToolTipAnchor"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          <div
+            color="success"
+            data-euiicon-type="lock"
+          />
+          <h4
+            class="c1"
+          >
+            Expires in 2 months
+          </h4>
+        </div>
+      </span>
+    </a>
+  </dd>,
+]
+`;
+
+exports[`SSL Certificate component renders null if invalid date 1`] = `
+Array [
+  .c0.c0.c0 {
+  width: 35%;
+}
+
+<dt
+    class="euiDescriptionList__title c0"
+  >
+    TLS Certificate
+  </dt>,
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  .c0.c0.c0 {
+  width: 65%;
+  overflow-wrap: anywhere;
+}
+
+<dd
+    class="euiDescriptionList__description c0"
+  >
+    <a
+      class="eui-displayInline"
+      href="/certificates"
+    >
+      <span>
+        --
+      </span>
+    </a>
+  </dd>,
+]
+`;
+
+exports[`SSL Certificate component shallow renders 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <MonitorSSLCertificate
+      tls={
+        Object {
+          "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
+          "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
+        }
+      }
+    />
+  </ContextProvider>
+</ContextProvider>
+`;

@@ -37,6 +37,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.iisLogs.nameTitle', {
       defaultMessage: 'IIS logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.iisLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
@@ -49,7 +50,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    // euiIconType: 'logoIIS',
+    euiIconType: '/plugins/home/assets/logos/iis.svg',
     artifacts: {
       dashboards: [
         {
@@ -65,7 +66,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

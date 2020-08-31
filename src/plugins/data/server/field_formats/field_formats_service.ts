@@ -17,16 +17,24 @@
  * under the License.
  */
 import { has } from 'lodash';
-import { fieldFormats } from '../../common/field_formats';
+import {
+  FieldFormatsRegistry,
+  FieldFormatInstanceType,
+  baseFormatters,
+} from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
+import { DateFormat, DateNanosFormat } from './converters';
 
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: fieldFormats.IFieldFormatType[] =
-    fieldFormats.baseFormatters;
+  private readonly fieldFormatClasses: FieldFormatInstanceType[] = [
+    DateFormat,
+    DateNanosFormat,
+    ...baseFormatters,
+  ];
 
   public setup() {
     return {
-      register: (customFieldFormat: fieldFormats.IFieldFormatType) =>
+      register: (customFieldFormat: FieldFormatInstanceType) =>
         this.fieldFormatClasses.push(customFieldFormat),
     };
   }
@@ -34,11 +42,11 @@ export class FieldFormatsService {
   public start() {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
-        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+        const fieldFormatsRegistry = new FieldFormatsRegistry();
         const uiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
 
-        Object.keys(registeredUiSettings).forEach(key => {
+        Object.keys(registeredUiSettings).forEach((key) => {
           if (has(uiConfigs, key) && registeredUiSettings[key].type === 'json') {
             uiConfigs[key] = JSON.parse(uiConfigs[key]);
           }

@@ -33,6 +33,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.statsdMetrics.nameTitle', {
       defaultMessage: 'Statsd metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.statsdMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from statsd.',
@@ -45,7 +46,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-statsd.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/statsd.svg',
+    euiIconType: '/plugins/home/assets/logos/statsd.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {

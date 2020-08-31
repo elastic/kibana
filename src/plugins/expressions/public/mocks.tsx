@@ -20,37 +20,24 @@
 import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
-/* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
-import { inspectorPluginMock } from '../../inspector/public/mocks';
-import { bfetchPluginMock } from '../../bfetch/public/mocks';
-/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    fork: jest.fn(),
+    getFunction: jest.fn(),
+    getFunctions: jest.fn(),
+    getRenderer: jest.fn(),
+    getRenderers: jest.fn(),
+    getType: jest.fn(),
+    getTypes: jest.fn(),
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
-    __LEGACY: {
-      functions: {
-        register: () => {},
-      } as any,
-      renderers: {
-        register: () => {},
-      } as any,
-      types: {
-        register: () => {},
-      } as any,
-      getExecutor: () => ({
-        interpreter: {
-          interpretAst: () => {},
-        },
-      }),
-      loadLegacyServerFunctionWrappers: () => Promise.resolve(),
-    },
+    run: jest.fn(),
   };
   return setupContract;
 };
@@ -58,12 +45,19 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     execute: jest.fn(),
-    ExpressionDataHandler: jest.fn(),
     ExpressionLoader: jest.fn(),
-    ExpressionRenderer: jest.fn(props => <></>),
     ExpressionRenderHandler: jest.fn(),
+    fork: jest.fn(),
+    getFunction: jest.fn(),
+    getFunctions: jest.fn(),
+    getRenderer: jest.fn(),
+    getRenderers: jest.fn(),
+    getType: jest.fn(),
+    getTypes: jest.fn(),
     loader: jest.fn(),
+    ReactExpressionRenderer: jest.fn((props) => <></>),
     render: jest.fn(),
+    run: jest.fn(),
   };
 };
 
@@ -72,10 +66,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    bfetch: bfetchPluginMock.createSetupContract(),
-    inspector: inspectorPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -83,11 +74,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () =>
-      await plugin.start(coreStart, {
-        bfetch: bfetchPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
-      }),
+    doStart: async () => await plugin.start(coreStart),
   };
 };
 

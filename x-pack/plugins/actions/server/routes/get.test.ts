@@ -5,12 +5,13 @@
  */
 
 import { getActionRoute } from './get';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -20,31 +21,25 @@ beforeEach(() => {
 
 describe('getActionRoute', () => {
   it('gets an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getActionRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
 
     const getResult = {
       id: '1',
       actionTypeId: '2',
       name: 'action name',
       config: {},
+      isPreconfigured: false,
     };
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce(getResult),
-    };
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(getResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -60,6 +55,7 @@ describe('getActionRoute', () => {
           "actionTypeId": "2",
           "config": Object {},
           "id": "1",
+          "isPreconfigured": false,
           "name": "action name",
         },
       }
@@ -74,24 +70,24 @@ describe('getActionRoute', () => {
   });
 
   it('ensures the license allows getting actions', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getActionRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce({
-        id: '1',
-        actionTypeId: '2',
-        name: 'action name',
-        config: {},
-      }),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce({
+      id: '1',
+      actionTypeId: '2',
+      name: 'action name',
+      config: {},
+      isPreconfigured: false,
+    });
 
     const [context, req, res] = mockHandlerArguments(
-      actionsClient,
+      { actionsClient },
       {
         params: { id: '1' },
       },
@@ -104,8 +100,8 @@ describe('getActionRoute', () => {
   });
 
   it('ensures the license check prevents getting actions', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -115,17 +111,17 @@ describe('getActionRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce({
-        id: '1',
-        actionTypeId: '2',
-        name: 'action name',
-        config: {},
-      }),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce({
+      id: '1',
+      actionTypeId: '2',
+      name: 'action name',
+      config: {},
+      isPreconfigured: false,
+    });
 
     const [context, req, res] = mockHandlerArguments(
-      actionsClient,
+      { actionsClient },
       {
         params: { id: '1' },
       },

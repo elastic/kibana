@@ -7,7 +7,7 @@
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Role, isReadOnlyRole } from '../../../../../../common/model';
+import { Role, isRoleReadOnly } from '../../../../../../common/model';
 
 interface Props {
   role: Role;
@@ -24,11 +24,11 @@ export class ClusterPrivileges extends Component<Props, {}> {
   public buildComboBox = (items: string[]) => {
     const role = this.props.role;
 
-    const options = items.map(i => ({
+    const options = items.map((i) => ({
       label: i,
     }));
 
-    const selectedOptions = (role.elasticsearch.cluster || []).map(k => ({ label: k }));
+    const selectedOptions = (role.elasticsearch.cluster || []).map((k) => ({ label: k }));
 
     return (
       <EuiFlexItem key={'clusterPrivs'}>
@@ -38,7 +38,7 @@ export class ClusterPrivileges extends Component<Props, {}> {
           selectedOptions={selectedOptions}
           onChange={this.onClusterPrivilegesChange}
           onCreateOption={this.onCreateCustomPrivilege}
-          isDisabled={isReadOnlyRole(role)}
+          isDisabled={isRoleReadOnly(role)}
         />
       </EuiFlexItem>
     );

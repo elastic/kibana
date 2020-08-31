@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field exports the property to JSON 1`] = `
+Object {
+  "aggregatable": true,
+  "conflictDescriptions": Object {
+    "a": Array [
+      "b",
+      "c",
+    ],
+    "d": Array [
+      "e",
+    ],
+  },
+  "count": 1,
+  "esTypes": Array [
+    "type",
+  ],
+  "lang": "lang",
+  "name": "name",
+  "readFromDocValues": false,
+  "script": "script",
+  "scripted": true,
+  "searchable": true,
+  "subType": Object {
+    "multi": Object {
+      "parent": "parent",
+    },
+    "nested": Object {
+      "path": "path",
+    },
+  },
+  "type": "type",
+}
+`;
+
+exports[`Field spec snapshot 1`] = `
+Object {
+  "aggregatable": true,
+  "conflictDescriptions": Object {
+    "a": Array [
+      "b",
+      "c",
+    ],
+    "d": Array [
+      "e",
+    ],
+  },
+  "count": 1,
+  "esTypes": Array [
+    "type",
+  ],
+  "format": Object {
+    "id": "number",
+    "params": Object {
+      "pattern": "$0,0.[00]",
+    },
+  },
+  "lang": "lang",
+  "name": "name",
+  "readFromDocValues": false,
+  "script": "script",
+  "scripted": true,
+  "searchable": true,
+  "subType": Object {
+    "multi": Object {
+      "parent": "parent",
+    },
+    "nested": Object {
+      "path": "path",
+    },
+  },
+  "type": "type",
+}
+`;

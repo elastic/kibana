@@ -22,6 +22,6 @@ import { InternalHttpServiceSetup } from '../../http';
 import { registerCapabilitiesRoutes } from './resolve_capabilities';
 
 export function registerRoutes(http: InternalHttpServiceSetup, resolver: CapabilitiesResolver) {
-  const router = http.createRouter('/api/core/capabilities');
+  const router = http.createRouter('');
   registerCapabilitiesRoutes(router, resolver);
 }

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import fixture from './fixtures/detect_logstash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

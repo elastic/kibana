@@ -47,7 +47,7 @@ module.exports = class extends Generator {
         name: 'folderName',
         type: 'input',
         store: true,
-        default: answers => answers.name,
+        default: (answers) => answers.name,
       });
 
       prompts.push({
@@ -58,7 +58,7 @@ module.exports = class extends Generator {
       });
     }
 
-    return this.prompt(prompts).then(answers => {
+    return this.prompt(prompts).then((answers) => {
       this.config = answers;
     });
   }

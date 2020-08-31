@@ -7,25 +7,32 @@
 import { Actions } from '.';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
-import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
+import { Feature } from '../../../features/server';
 
-type MockAuthzOptions = { rejectCheckPrivileges: any } | { resolveCheckPrivileges: any };
+type MockAuthzOptions =
+  | { rejectCheckPrivileges: any }
+  | { resolveCheckPrivileges: { privileges: Array<{ privilege: string; authorized: boolean }> } };
 
 const actions = new Actions('1.0.0-zeta1');
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
   const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
-  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+  // plug actual ui actions into mock Actions with
+  mock.actions = actions;
+
+  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
-    return jest.fn().mockImplementation(checkActions => {
+    return jest.fn().mockImplementation((checkActions) => {
       if ('rejectCheckPrivileges' in options) {
         throw options.rejectCheckPrivileges;
       }
 
-      expect(checkActions).toEqual(Object.keys(options.resolveCheckPrivileges.privileges));
+      const expected = options.resolveCheckPrivileges.privileges.map((x) => x.privilege);
+      expect(checkActions).toEqual(expected);
       return options.resolveCheckPrivileges;
     });
   });
@@ -38,11 +45,19 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 401, message: 'super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
+        [
+          new Feature({
+            id: 'fooFeature',
+            name: 'Foo Feature',
+            app: ['fooApp', 'foo'],
+            navLinkId: 'foo',
+            privileges: null,
+          }),
+        ],
         mockLoggers.get(),
         mockAuthz
       );
@@ -51,6 +66,7 @@ describe('usingPrivileges', () => {
         Object.freeze({
           navLinks: {
             foo: true,
+            fooApp: true,
             bar: true,
           },
           management: {
@@ -73,6 +89,7 @@ describe('usingPrivileges', () => {
       expect(result).toEqual({
         navLinks: {
           foo: false,
+          fooApp: false,
           bar: true,
         },
         management: {
@@ -91,7 +108,7 @@ describe('usingPrivileges', () => {
         },
       });
 
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 401: super informative message",
@@ -104,11 +121,19 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 403, message: 'even more super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
+        [
+          new Feature({
+            id: 'fooFeature',
+            name: 'Foo Feature',
+            app: ['foo'],
+            navLinkId: 'foo',
+            privileges: null,
+          }),
+        ],
         mockLoggers.get(),
         mockAuthz
       );
@@ -156,7 +181,7 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 403: even more super informative message",
@@ -169,7 +194,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: new Error('something else entirely'),
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -192,7 +217,7 @@ describe('usingPrivileges', () => {
           catalogue: {},
         })
       ).rejects.toThrowErrorMatchingSnapshot();
-      expect(loggingServiceMock.collect(mockLoggers)).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers)).toMatchInlineSnapshot(`
         Object {
           "debug": Array [],
           "error": Array [],
@@ -209,39 +234,39 @@ describe('usingPrivileges', () => {
   test(`disables ui capabilities when they don't have privileges`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: false,
-          [actions.ui.get('navLinks', 'quz')]: false,
-          [actions.ui.get('management', 'kibana', 'indices')]: true,
-          [actions.ui.get('management', 'kibana', 'settings')]: false,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: false,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: false,
-        },
+        privileges: [
+          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+          { privilege: actions.ui.get('navLinks', 'bar'), authorized: false },
+          { privilege: actions.ui.get('navLinks', 'quz'), authorized: false },
+          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+          { privilege: actions.ui.get('management', 'kibana', 'settings'), authorized: false },
+          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: false },
+          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'bar'), authorized: false },
+        ],
       },
     });
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        {
+        new Feature({
           id: 'fooFeature',
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
-          privileges: {},
-        },
-        {
+          privileges: null,
+        }),
+        new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
-          app: [],
-          privileges: {},
-        },
+          app: ['bar'],
+          privileges: null,
+        }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -297,37 +322,37 @@ describe('usingPrivileges', () => {
   test(`doesn't re-enable disabled uiCapabilities`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: true,
-          [actions.ui.get('management', 'kibana', 'indices')]: true,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: true,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: true,
-        },
+        privileges: [
+          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+          { privilege: actions.ui.get('navLinks', 'bar'), authorized: true },
+          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'bar'), authorized: true },
+        ],
       },
     });
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        {
+        new Feature({
           id: 'fooFeature',
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
-          privileges: {},
-        },
-        {
+          privileges: null,
+        }),
+        new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
           app: [],
-          privileges: {},
-        },
+          privileges: null,
+        }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -383,8 +408,16 @@ describe('all', () => {
 
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
-      [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
-      loggingServiceMock.create().get(),
+      [
+        new Feature({
+          id: 'fooFeature',
+          name: 'Foo Feature',
+          app: ['foo'],
+          navLinkId: 'foo',
+          privileges: null,
+        }),
+      ],
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 

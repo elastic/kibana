@@ -54,6 +54,7 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -67,6 +68,7 @@ export interface InjectedMetadataParams {
     };
     uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
       app: {
         id: string;
@@ -115,6 +117,14 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getServerBasePath: () => {
+        return this.state.serverBasePath;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -161,6 +171,7 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getServerBasePath: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
@@ -173,6 +184,7 @@ export interface InjectedMetadataSetup {
   getPlugins: () => InjectedPluginMetadata[];
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
     app: {
       id: string;

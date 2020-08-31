@@ -17,16 +17,20 @@
  * under the License.
  */
 
+import Path from 'path';
+
 import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
 
-import { getFailures } from './get_failures';
-import { GithubApi } from './github_api';
+import { getFailures, TestFailure } from './get_failures';
+import { GithubApi, GithubIssueMini } from './github_api';
 import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
+
+const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
 export function runFailedTestsReporterCli() {
   run(
@@ -49,8 +53,7 @@ export function runFailedTestsReporterCli() {
         }
 
         const isPr = !!process.env.ghprbPullId;
-        const isMasterOrVersion =
-          branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
+        const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
           updateGithub = false;
@@ -68,10 +71,21 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const reportPaths = await globby(['target/junit/**/*.xml'], {
-        cwd: REPO_ROOT,
+      const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      log.info('Searching for reports at', patterns);
+      const reportPaths = await globby(patterns, {
         absolute: true,
       });
+
+      if (!reportPaths.length) {
+        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
+      }
+
+      log.info('found', reportPaths.length, 'junit reports', reportPaths);
+      const newlyCreatedIssues: Array<{
+        failure: TestFailure;
+        newIssue: GithubIssueMini;
+      }> = [];
 
       for (const reportPath of reportPaths) {
         const report = await readTestReport(reportPath);
@@ -94,11 +108,21 @@ export function runFailedTestsReporterCli() {
             continue;
           }
 
-          const existingIssue = await githubApi.findFailedTestIssue(
-            i =>
+          let existingIssue: GithubIssueMini | undefined = await githubApi.findFailedTestIssue(
+            (i) =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
               getIssueMetadata(i.body, 'test.name') === failure.name
           );
+
+          if (!existingIssue) {
+            const newlyCreated = newlyCreatedIssues.find(
+              ({ failure: f }) => f.classname === failure.classname && f.name === failure.name
+            );
+
+            if (newlyCreated) {
+              existingIssue = newlyCreated.newIssue;
+            }
+          }
 
           if (existingIssue) {
             const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
@@ -110,11 +134,12 @@ export function runFailedTestsReporterCli() {
             continue;
           }
 
-          const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
+          const newIssue = await createFailureIssue(buildUrl, failure, githubApi);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
-            pushMessage(`Created new issue: ${newIssueUrl}`);
+            pushMessage(`Created new issue: ${newIssue.html_url}`);
           }
+          newlyCreatedIssues.push({ failure, newIssue });
         }
 
         // mutates report to include messages and writes updated report to disk

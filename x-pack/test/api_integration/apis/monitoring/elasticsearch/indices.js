@@ -10,7 +10,7 @@ import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all
 import indicesRedClusterFixture from './fixtures/indices_red_cluster';
 import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

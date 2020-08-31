@@ -20,7 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
 import { readFileSync } from 'fs';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 
 // `crypto` type definitions doesn't currently include `crypto.constants`, see
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
@@ -65,7 +65,7 @@ export const sslSchema = schema.object(
     ),
   },
   {
-    validate: ssl => {
+    validate: (ssl) => {
       if (ssl.key && ssl.keystore.path) {
         return 'cannot use [key] when [keystore.path] is specified';
       }

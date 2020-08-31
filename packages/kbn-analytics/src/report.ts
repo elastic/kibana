@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
 import { Metric, Stats, UiStatsMetricType, METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 1;
@@ -42,6 +43,13 @@ export interface Report {
       appName: string;
     }
   >;
+  application_usage?: Record<
+    string,
+    {
+      minutesOnScreen: number;
+      numberOfClicks: number;
+    }
+  >;
 }
 
 export class ReportManager {
@@ -57,10 +65,11 @@ export class ReportManager {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    const { uiStatsMetrics, userAgent } = this.report;
+    const { uiStatsMetrics, userAgent, application_usage: appUsage } = this.report;
     const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
     const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
-    return noUiStats && noUserAgent;
+    const noAppUsage = !appUsage || Object.keys(appUsage).length === 0;
+    return noUiStats && noUserAgent && noAppUsage;
   }
   private incrementStats(count: number, stats?: Stats): Stats {
     const { min = 0, max = 0, sum = 0 } = stats || {};
@@ -77,7 +86,7 @@ export class ReportManager {
     };
   }
   assignReports(newMetrics: Metric | Metric[]) {
-    wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
+    wrapArray(newMetrics).forEach((newMetric) => this.assignReport(this.report, newMetric));
     return { report: this.report };
   }
   static createMetricKey(metric: Metric): string {
@@ -92,6 +101,8 @@ export class ReportManager {
         const { appName, eventName, type } = metric;
         return `${appName}-${type}-${eventName}`;
       }
+      case METRIC_TYPE.APPLICATION_USAGE:
+        return metric.appId;
       default:
         throw new UnreachableCaseError(metric);
     }
@@ -129,6 +140,20 @@ export class ReportManager {
         };
         return;
       }
+      case METRIC_TYPE.APPLICATION_USAGE:
+        const { numberOfClicks, startTime } = metric;
+        const minutesOnScreen = moment().diff(startTime, 'minutes', true);
+
+        report.application_usage = report.application_usage || {};
+        const appExistingData = report.application_usage[key] || {
+          minutesOnScreen: 0,
+          numberOfClicks: 0,
+        };
+        report.application_usage[key] = {
+          minutesOnScreen: appExistingData.minutesOnScreen + minutesOnScreen,
+          numberOfClicks: appExistingData.numberOfClicks + numberOfClicks,
+        };
+        break;
       default:
         throw new UnreachableCaseError(metric);
     }

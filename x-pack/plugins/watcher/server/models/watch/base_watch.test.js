@@ -161,7 +161,7 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: props.watchStatus.downstreamJson,
         watchErrors: props.watchErrors.downstreamJson,
-        actions: props.actions.map(a => a.downstreamJson),
+        actions: props.actions.map((a) => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);
@@ -181,7 +181,7 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: undefined,
         watchErrors: undefined,
-        actions: props.actions.map(a => a.downstreamJson),
+        actions: props.actions.map((a) => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);

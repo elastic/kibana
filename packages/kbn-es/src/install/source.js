@@ -99,15 +99,11 @@ async function sourceInfo(cwd, license, log = defaultLog) {
   etag.update(sha);
 
   // for changed files, use last modified times in hash calculation
-  status.files.forEach(file => {
+  status.files.forEach((file) => {
     etag.update(fs.statSync(path.join(cwd, file.path)).mtime.toString());
   });
 
-  const cwdHash = crypto
-    .createHash('md5')
-    .update(cwd)
-    .digest('hex')
-    .substr(0, 8);
+  const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 8);
 
   const basename = `${branch}-${task}-${cwdHash}`;
   const filename = `${basename}.${ext}`;

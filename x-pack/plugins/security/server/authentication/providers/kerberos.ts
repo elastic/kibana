@@ -6,14 +6,15 @@
 
 import Boom from 'boom';
 import {
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens, TokenPair } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
@@ -21,23 +22,19 @@ import { Tokens, TokenPair } from '../tokens';
 type ProviderState = TokenPair;
 
 /**
- * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
- * @param request Request instance to extract authentication scheme for.
- */
-function getRequestAuthenticationScheme(request: KibanaRequest) {
-  const authorization = request.headers.authorization;
-  if (!authorization || typeof authorization !== 'string') {
-    return '';
-  }
-
-  return authorization.split(/\s+/)[0].toLowerCase();
-}
-
-/**
  * Name of the `WWW-Authenticate` we parse out of Elasticsearch responses or/and return to the
  * client to initiate or continue negotiation.
  */
 const WWWAuthenticateHeaderName = 'WWW-Authenticate';
+
+/**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
+}
 
 /**
  * Provider that supports Kerberos request authentication.
@@ -49,6 +46,20 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'kerberos';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+
+    if (HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'negotiate') {
+      return await this.authenticateWithNegotiateScheme(request);
+    }
+
+    return await this.authenticateViaSPNEGO(request);
+  }
+
+  /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -56,24 +67,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getRequestAuthenticationScheme(request);
-    if (
-      authenticationScheme &&
-      authenticationScheme !== 'negotiate' &&
-      authenticationScheme !== 'bearer'
-    ) {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
+      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = AuthenticationResult.notHandled();
-    if (authenticationScheme) {
-      // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-      authenticationResult =
-        authenticationScheme === 'bearer'
-          ? await this.authenticateWithBearerScheme(request)
-          : await this.authenticateWithNegotiateScheme(request);
-    }
+    let authenticationResult = authorizationHeader
+      ? await this.authenticateWithNegotiateScheme(request)
+      : AuthenticationResult.notHandled();
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
@@ -87,7 +89,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we couldn't authenticate by means of all methods above, let's try to check if Elasticsearch can
     // start authentication mechanism negotiation, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaSPNEGO(request, state)
       : authenticationResult;
   }
@@ -100,19 +102,31 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if (!state) {
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
       this.logger.debug('There is no access token invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      await this.options.tokens.invalidate(state);
-    } catch (err) {
-      this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
-      return DeauthenticationResult.failed(err);
+    if (state) {
+      try {
+        await this.options.tokens.invalidate(state);
+      } catch (err) {
+        this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
+        return DeauthenticationResult.failed(err);
+      }
     }
 
-    return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+  }
+
+  /**
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
+   */
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
@@ -139,7 +153,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
 
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
-      const challenge = ElasticsearchErrorHelpers.isNotAuthorizedError(err)
+      const challenge = LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)
         ? this.getNegotiateChallenge(err)
         : undefined;
       if (!challenge) {
@@ -186,7 +200,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${tokens.access_token}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');
@@ -197,26 +213,6 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       });
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
-  }
-
-  /**
-   * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
-   * @param request Request instance.
-   */
-  private async authenticateWithBearerScheme(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate request using "Bearer" authentication scheme.');
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated using "Bearer" authentication scheme.');
-      return AuthenticationResult.succeeded(user);
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
-      );
       return AuthenticationResult.failed(err);
     }
   }
@@ -236,7 +232,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -266,14 +264,19 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
-      this.logger.debug(
-        'Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.'
-      );
-      return this.authenticateViaSPNEGO(request, state);
+      this.logger.debug('Both access and refresh tokens are expired.');
+      return canStartNewSession(request)
+        ? this.authenticateViaSPNEGO(request, state)
+        : AuthenticationResult.notHandled();
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');
@@ -295,7 +298,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let elasticsearchError: ElasticsearchError;
+    let elasticsearchError: LegacyElasticsearchError;
     try {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
@@ -309,7 +312,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (!ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (!LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
         return AuthenticationResult.failed(err);
       }
 
@@ -335,10 +338,10 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
    * @param error Error to extract challenges from.
    */
-  private getNegotiateChallenge(error: ElasticsearchError) {
+  private getNegotiateChallenge(error: LegacyElasticsearchError) {
     const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
 
-    const negotiateChallenge = challenges.find(challenge =>
+    const negotiateChallenge = challenges.find((challenge) =>
       challenge.toLowerCase().startsWith('negotiate')
     );
     if (negotiateChallenge) {

@@ -3,8 +3,12 @@
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> downloading es snapshot"
-node scripts/es snapshot --download-only;
+if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
+  ./test/scripts/jenkins_xpack_build_plugins.sh
+fi
+
+# doesn't persist, also set in kibanaPipeline.groovy
+export KBN_NP_PLUGINS_BUILT=true
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
@@ -26,7 +30,10 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   cd "$KIBANA_DIR"
   node scripts/build --debug --no-oss
   linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
-  installDir="$PARENT_DIR/install/kibana"
+  installDir="$KIBANA_DIR/install/kibana"
   mkdir -p "$installDir"
   tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
+  mkdir -p "$WORKSPACE/kibana-build-xpack"
+  cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
 fi

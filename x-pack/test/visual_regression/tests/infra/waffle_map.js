@@ -6,7 +6,7 @@
 import { DATES } from '../../../functional/apps/infra/constants';
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'infraHome']);
   const visualTesting = getService('visualTesting');
   const esArchiver = getService('esArchiver');

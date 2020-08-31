@@ -27,7 +27,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig } from '.';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 const chance = new Chance();
@@ -50,7 +50,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpsRedirectServer(loggingServiceMock.create().get());
+  server = new HttpsRedirectServer(loggingSystemMock.create().get());
 });
 
 afterEach(async () => {
@@ -100,7 +100,7 @@ test('forwards http requests to https', async () => {
   await supertest(getServerListener(server))
     .get('/')
     .expect(302)
-    .then(res => {
+    .then((res) => {
       expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
     });
 });

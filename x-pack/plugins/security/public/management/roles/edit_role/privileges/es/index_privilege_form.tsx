@@ -6,7 +6,7 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -33,7 +33,7 @@ interface Props {
   availableFields: string[];
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
-  isReadOnlyRole: boolean;
+  isRoleReadOnly: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
@@ -68,7 +68,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiHorizontalRule />
         <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
-          {!this.props.isReadOnlyRole && (
+          {!this.props.isRoleReadOnly && (
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
@@ -109,7 +109,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
                 onCreateOption={this.onCreateIndexPatternOption}
                 onChange={this.onIndexPatternsChange}
-                isDisabled={this.props.isReadOnlyRole}
+                isDisabled={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -128,7 +128,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
-                isDisabled={this.props.isReadOnlyRole}
+                isDisabled={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -149,7 +149,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       allowDocumentLevelSecurity,
       availableFields,
       indexPrivilege,
-      isReadOnlyRole,
+      isRoleReadOnly,
     } = this.props;
 
     if (!allowFieldLevelSecurity) {
@@ -161,7 +161,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     return (
       <>
         <EuiFlexGroup direction="column">
-          {!isReadOnlyRole && (
+          {!isRoleReadOnly && (
             <EuiFlexItem>
               {
                 <EuiSwitch
@@ -193,14 +193,12 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     fullWidth={true}
                     className="indexPrivilegeForm__grantedFieldsRow"
                     helpText={
-                      !isReadOnlyRole && grant.length === 0 ? (
+                      !isRoleReadOnly && grant.length === 0 ? (
                         <FormattedMessage
                           id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                           defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
                         />
-                      ) : (
-                        undefined
-                      )
+                      ) : undefined
                     }
                   >
                     <Fragment>
@@ -210,7 +208,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         selectedOptions={grant.map(toOption)}
                         onCreateOption={this.onCreateGrantedField}
                         onChange={this.onGrantedFieldsChange}
-                        isDisabled={this.props.isReadOnlyRole}
+                        isDisabled={this.props.isRoleReadOnly}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -233,7 +231,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         selectedOptions={except.map(toOption)}
                         onCreateOption={this.onCreateDeniedField}
                         onChange={this.onDeniedFieldsChange}
-                        isDisabled={isReadOnlyRole}
+                        isDisabled={isRoleReadOnly}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -248,7 +246,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getGrantedDocumentsControl = () => {
-    const { allowDocumentLevelSecurity, indexPrivilege, isReadOnlyRole } = this.props;
+    const { allowDocumentLevelSecurity, indexPrivilege, isRoleReadOnly } = this.props;
 
     if (!allowDocumentLevelSecurity) {
       return null;
@@ -256,7 +254,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
 
     return (
       <EuiFlexGroup direction="column">
-        {!this.props.isReadOnlyRole && (
+        {!this.props.isRoleReadOnly && (
           <EuiFlexItem>
             {
               <EuiSwitch
@@ -270,7 +268,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 compressed={true}
                 checked={this.state.queryExpanded}
                 onChange={this.toggleDocumentQuery}
-                disabled={isReadOnlyRole}
+                disabled={isRoleReadOnly}
               />
             }
           </EuiFlexItem>
@@ -292,7 +290,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 fullWidth={true}
                 value={indexPrivilege.query}
                 onChange={this.onQueryChange}
-                readOnly={this.props.isReadOnlyRole}
+                readOnly={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -378,14 +376,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionProps[]) => {
+  private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       names: newPatterns.map(fromOption),
     });
   };
 
-  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionProps[]) => {
+  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
@@ -418,7 +416,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionProps[]) => {
+  private onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {
@@ -447,7 +445,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionProps[]) => {
+  private onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {

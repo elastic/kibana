@@ -1,0 +1,61 @@
+{
+  "delete_by_query": {
+    "url_params": {
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "default_operator": [
+        "AND",
+        "OR"
+      ],
+      "df": "",
+      "from": "0",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "conflicts": [
+        "abort",
+        "proceed"
+      ],
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "lenient": "__flag__",
+      "preference": "random",
+      "q": "",
+      "routing": [],
+      "scroll": "",
+      "search_type": [
+        "query_then_fetch",
+        "dfs_query_then_fetch"
+      ],
+      "search_timeout": "",
+      "size": "",
+      "max_docs": "all documents",
+      "sort": [],
+      "_source": [],
+      "_source_excludes": [],
+      "_source_includes": [],
+      "terminate_after": "",
+      "stats": [],
+      "version": "__flag__",
+      "request_cache": "__flag__",
+      "refresh": "__flag__",
+      "timeout": "",
+      "wait_for_active_shards": "",
+      "scroll_size": "",
+      "wait_for_completion": "__flag__",
+      "requests_per_second": "",
+      "slices": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_delete_by_query"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
+  }
+}

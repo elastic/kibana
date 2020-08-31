@@ -39,7 +39,7 @@ run(async ({ log }) => {
     ],
   });
 
-  const files = paths.map(path => new File(path));
+  const files = paths.map((path) => new File(path));
 
   await checkFileCasing(log, files);
 });

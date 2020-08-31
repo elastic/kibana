@@ -32,7 +32,7 @@ import { ToolBarFooter } from './tool_bar_footer';
 import toolBarFooterSource from '!!raw-loader!./tool_bar_footer'; // eslint-disable-line import/default
 const toolBarFooterHtml = renderToHtml(ToolBarFooter);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="ToolBar"

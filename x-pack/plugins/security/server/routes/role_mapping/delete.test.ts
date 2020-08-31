@@ -7,14 +7,13 @@
 import { routeDefinitionParamsMock } from '../index.mock';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { defineRoleMappingDeleteRoutes } from './delete';
 
 describe('DELETE role mappings', () => {
   it('allows a role mapping to be deleted', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     mockScopedClusterClient.callAsCurrentUser.mockResolvedValue({ acknowledged: true });
 
@@ -33,7 +32,7 @@ describe('DELETE role mappings', () => {
     });
     const mockContext = ({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ state: LICENSE_CHECK_STATE.Valid }) },
+        license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
       },
     } as unknown) as RequestHandlerContext;
 
@@ -67,7 +66,7 @@ describe('DELETE role mappings', () => {
         licensing: {
           license: {
             check: jest.fn().mockReturnValue({
-              state: LICENSE_CHECK_STATE.Invalid,
+              state: 'invalid',
               message: 'test forbidden message',
             }),
           },

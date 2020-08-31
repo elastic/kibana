@@ -22,7 +22,7 @@ import { parallelizeBatches } from './parallelize';
 // As promises resolve async, we use this helper to wait for all promises that
 // have been resolved to complete (aka call `then`).
 const tick = () =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 
@@ -32,7 +32,7 @@ test('parallelizes batches', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     obj.called = true;
     await obj.promise;
   });
@@ -82,7 +82,7 @@ test('schedules at most 4 calls at the same time (concurrency)', async () => {
   const foobar = createPromiseWithResolve();
 
   const batches = [[foo, bar, baz, quux, foobar]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     obj.called = true;
     await obj.promise;
   });
@@ -113,7 +113,7 @@ test('rejects if any promise rejects', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, async obj => {
+  const parallelize = parallelizeBatches(batches, async (obj) => {
     await obj.promise;
   });
 

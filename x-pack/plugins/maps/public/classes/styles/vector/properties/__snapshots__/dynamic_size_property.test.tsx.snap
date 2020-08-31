@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderLegendDetailRow Should render as range 1`] = `
+<RangedStyleLegendRow
+  fieldLabel="foobar_label"
+  header={
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      justifyContent="spaceBetween"
+    >
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "grey",
+                "stroke": "grey",
+                "width": "4px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "grey",
+                "stroke": "grey",
+                "width": "8px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "grey",
+                "stroke": "grey",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+    </EuiFlexGroup>
+  }
+  maxLabel="100_format"
+  minLabel="0_format"
+  propertyLabel="Symbol size"
+/>
+`;

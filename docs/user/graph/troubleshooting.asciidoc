@@ -2,7 +2,7 @@
 [[graph-troubleshooting]]
 == Graph troubleshooting
 ++++
-<titleabbrev>Troubleshooting</titleabbrev>
+<titleabbrev>Troubleshoot</titleabbrev>
 ++++
 
 [discrete]

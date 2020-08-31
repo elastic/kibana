@@ -5,4 +5,11 @@
  */
 
 export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-export * from './feature';
+export { Feature, FeatureConfig } from './feature';
+export {
+  SubFeature,
+  SubFeatureConfig,
+  SubFeaturePrivilegeConfig,
+  SubFeaturePrivilegeGroupConfig,
+  SubFeaturePrivilegeGroupType,
+} from './sub_feature';

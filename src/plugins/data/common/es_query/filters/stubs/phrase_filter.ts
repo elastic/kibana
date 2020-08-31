@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { esFilters } from '../../..';
+import { PhraseFilter, FilterStateStore } from '..';
 
-export const phraseFilter: esFilters.PhraseFilter = {
+export const phraseFilter: PhraseFilter = {
   meta: {
     negate: false,
     index: 'logstash-*',
@@ -33,6 +33,6 @@ export const phraseFilter: esFilters.PhraseFilter = {
     },
   },
   $state: {
-    store: esFilters.FilterStateStore.APP_STATE,
+    store: FilterStateStore.APP_STATE,
   },
 };

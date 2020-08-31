@@ -27,12 +27,13 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
@@ -98,9 +99,9 @@ export default function({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/46305
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -119,6 +120,7 @@ export default function({ getService, getPageObjects }) {
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
+      await security.testUser.restoreDefaults();
     });
 
     it('adding visualizations', async () => {

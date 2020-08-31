@@ -1,0 +1,8 @@
+{
+  "id": "visTypeVega",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

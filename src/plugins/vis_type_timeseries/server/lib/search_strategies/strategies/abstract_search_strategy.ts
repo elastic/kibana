@@ -18,7 +18,7 @@
  */
 
 import {
-  APICaller,
+  LegacyAPICaller,
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -53,17 +53,17 @@ export type ReqFacade = FakeRequest & {
 };
 
 export class AbstractSearchStrategy {
-  public getCallWithRequestInstance: (req: ReqFacade) => APICaller;
+  public getCallWithRequestInstance: (req: ReqFacade) => LegacyAPICaller;
   public getSearchRequest: (req: ReqFacade) => any;
 
   constructor(
     server: any,
-    callWithRequestFactory: (server: any, req: ReqFacade) => APICaller,
+    callWithRequestFactory: (server: any, req: ReqFacade) => LegacyAPICaller,
     SearchRequest: any
   ) {
-    this.getCallWithRequestInstance = req => callWithRequestFactory(server, req);
+    this.getCallWithRequestInstance = (req) => callWithRequestFactory(server, req);
 
-    this.getSearchRequest = req => {
+    this.getSearchRequest = (req) => {
       const callWithRequest = this.getCallWithRequestInstance(req);
 
       return new SearchRequest(req, callWithRequest);

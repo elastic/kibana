@@ -65,7 +65,7 @@ export const ProfileQueryEditor = memo(() => {
     }
   };
 
-  const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);
+  const onEditorReady = useCallback((editorInstance) => (editorRef.current = editorInstance), []);
   const licenseEnabled = getLicenseStatus().valid;
 
   return (
@@ -87,7 +87,7 @@ export const ProfileQueryEditor = memo(() => {
               >
                 <EuiFieldText
                   disabled={!licenseEnabled}
-                  inputRef={ref => {
+                  inputRef={(ref) => {
                     if (ref) {
                       indexInputRef.current = ref;
                       ref.value = DEFAULT_INDEX_VALUE;
@@ -120,7 +120,12 @@ export const ProfileQueryEditor = memo(() => {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiButton fill disabled={!licenseEnabled} onClick={() => handleProfileClick()}>
+            <EuiButton
+              data-test-subj="profileButton"
+              fill
+              disabled={!licenseEnabled}
+              onClick={() => handleProfileClick()}
+            >
               <EuiText>
                 {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
                   defaultMessage: 'Profile',

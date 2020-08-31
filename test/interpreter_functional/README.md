@@ -22,6 +22,7 @@ node scripts/functional_test_runner.js --config test/interpreter_functional/conf
 Look into test_suites/run_pipeline/basic.ts for examples
 
 to update baseline screenshots and snapshots run with:
+
 ```
 node scripts/functional_test_runner.js --config test/interpreter_functional/config.ts --updateBaselines
 ```

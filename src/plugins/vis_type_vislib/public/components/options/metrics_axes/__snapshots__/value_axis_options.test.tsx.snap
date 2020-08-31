@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ValueAxisOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <SelectOption
+    label="Position"
+    options={
+      Array [
+        Object {
+          "disabled": false,
+          "text": "Top",
+          "value": "top",
+        },
+        Object {
+          "disabled": true,
+          "text": "Left",
+          "value": "left",
+        },
+        Object {
+          "disabled": true,
+          "text": "Right",
+          "value": "right",
+        },
+        Object {
+          "disabled": false,
+          "text": "Bottom",
+          "value": "bottom",
+        },
+      ]
+    }
+    paramName="position"
+    setValue={[Function]}
+    value="left"
+  />
+  <SelectOption
+    id="valueAxisMode0"
+    label="Mode"
+    options={
+      Array [
+        Object {
+          "text": "Normal",
+          "value": "normal",
+        },
+        Object {
+          "text": "Percentage",
+          "value": "percentage",
+        },
+        Object {
+          "text": "Wiggle",
+          "value": "wiggle",
+        },
+        Object {
+          "text": "Silhouette",
+          "value": "silhouette",
+        },
+      ]
+    }
+    paramName="mode"
+    setValue={[Function]}
+  />
+  <SelectOption
+    id="scaleSelectYAxis-ValueAxis-1"
+    label="Scale type"
+    options={
+      Array [
+        Object {
+          "text": "Linear",
+          "value": "linear",
+        },
+        Object {
+          "text": "Log",
+          "value": "log",
+        },
+        Object {
+          "text": "Square root",
+          "value": "square root",
+        },
+      ]
+    }
+    paramName="type"
+    setValue={[Function]}
+    value="linear"
+  />
+  <EuiHorizontalRule
+    margin="m"
+  />
+  <SwitchOption
+    data-test-subj="valueAxisShow-ValueAxis-1"
+    label="Show axis lines and labels"
+    paramName="show"
+    setValue={[Function]}
+    value={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TextInputOption
+    data-test-subj="valueAxisTitle0"
+    label="Title"
+    paramName="text"
+    setValue={[Function]}
+    value=""
+  />
+  <LabelOptions
+    axisFilterCheckboxName="yAxisFilterLabelsCheckbox-ValueAxis-1"
+    axisLabels={
+      Object {
+        "color": "black",
+        "filter": true,
+        "show": true,
+        "truncate": 0,
+      }
+    }
+    setAxisLabel={[Function]}
+  />
+  <EuiHorizontalRule
+    margin="s"
+  />
+  <EuiAccordion
+    aria-label="Toggle custom extents"
+    arrowDisplay="left"
+    buttonContent="Custom extents"
+    buttonContentClassName="euiText euiText--small"
+    className="visEditorSidebar__section visEditorSidebar__collapsible"
+    id="yAxisOptionsAccordionValueAxis-1"
+    initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
+    paddingSize="none"
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <CustomExtentsOptions
+      axisScale={
+        Object {
+          "boundsMargin": 1,
+          "defaultYExtents": true,
+          "max": 2,
+          "min": 1,
+          "setYExtents": true,
+          "type": "linear",
+        }
+      }
+      setMultipleValidity={[MockFunction]}
+      setValueAxis={[Function]}
+      setValueAxisScale={[Function]}
+    />
+  </EuiAccordion>
+</Fragment>
+`;

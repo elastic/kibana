@@ -6,16 +6,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'security',
-    'spaceSelector',
-    'settings',
-  ]);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -46,8 +40,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Dev Tools');
       });
 
@@ -84,29 +77,37 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Dev Tools');
       });
 
-      it(`navigating to console redirect to homepage`, async () => {
+      it(`navigating to console shows 404`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`navigating to search profiler redirect to homepage`, async () => {
+      it(`navigating to search profiler shows 404`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
-      it(`navigating to grok debugger redirect to homepage`, async () => {
+      it(`navigating to grok debugger shows 404`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

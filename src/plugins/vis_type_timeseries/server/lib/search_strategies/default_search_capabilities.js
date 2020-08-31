@@ -23,7 +23,7 @@ import {
 } from '../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 
-const getTimezoneFromRequest = request => {
+const getTimezoneFromRequest = (request) => {
   return request.payload.timerange.timezone;
 };
 

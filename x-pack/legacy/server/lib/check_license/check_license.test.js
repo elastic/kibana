@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { checkLicense } from './check_license';
 import {
   LICENSE_STATUS_UNAVAILABLE,
@@ -13,7 +13,7 @@ import {
   LICENSE_TYPE_BASIC,
 } from '../../../common/constants';
 
-describe('check_license', function() {
+describe('check_license', function () {
   const pluginName = 'Foo';
   const minimumLicenseRequired = LICENSE_TYPE_BASIC;
   let mockLicenseInfo;

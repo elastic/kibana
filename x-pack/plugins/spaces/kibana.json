@@ -4,7 +4,20 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "spaces"],
   "requiredPlugins": ["features", "licensing"],
-  "optionalPlugins": ["security", "home", "usageCollection"],
+  "optionalPlugins": [
+    "advancedSettings",
+    "home",
+    "management",
+    "security",
+    "usageCollection",
+    "savedObjectsManagement"
+  ],
   "server": true,
-  "ui": false
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "kibanaReact",
+    "savedObjectsManagement",
+    "home"
+  ]
 }

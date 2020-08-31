@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptInDetailsComponent renders as expected 1`] = `
+<EuiPortal>
+  <EuiFlyout
+    maxWidth={true}
+    onClose={[MockFunction]}
+    ownFocus={true}
+  >
+    <EuiFlyoutHeader>
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Cluster statistics"
+            id="telemetry.callout.clusterStatisticsTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiTextColor
+        color="subdued"
+      >
+        <EuiText>
+          <FormattedMessage
+            defaultMessage="This is an example of the basic cluster statistics that we'll collect. It includes the number of indices, shards, and nodes. It also includes high-level usage statistics, such as whether monitoring is turned on."
+            id="telemetry.callout.clusterStatisticsDescription"
+            values={Object {}}
+          />
+        </EuiText>
+      </EuiTextColor>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiLoadingSpinner
+            size="xl"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutBody>
+  </EuiFlyout>
+</EuiPortal>
+`;

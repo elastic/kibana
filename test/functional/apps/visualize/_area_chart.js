@@ -19,11 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -58,33 +61,44 @@ export default function({ getService, getPageObjects }) {
       return PageObjects.visEditor.clickGo();
     };
 
-    before(initAreaChart);
+    before(async function () {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
+      await initAreaChart();
+    });
 
-    it('should save and load with special characters', async function() {
+    after(async function () {
+      await security.testUser.restoreDefaults();
+    });
+
+    it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load with non-ascii characters', async function() {
+    it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function() {
+    it('should show correct chart', async function () {
       const xAxisLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',
@@ -133,7 +147,7 @@ export default function({ getService, getPageObjects }) {
       expect(paths).to.eql(expectedAreaChartData);
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       const expectedTableData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
@@ -270,8 +284,8 @@ export default function({ getService, getPageObjects }) {
     describe('embedded mode', () => {
       it('should hide side editor if embed is set to true in url', async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize/').pop() + '&embed=true';
-        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        const embedUrl = url.split('/visualize#').pop() + '&embed=true';
+        await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
         expect(sideEditorExists).to.be(false);
@@ -279,15 +293,12 @@ export default function({ getService, getPageObjects }) {
 
       after(async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url
-          .split('/visualize/')
-          .pop()
-          .replace('embed=true', '');
-        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        const embedUrl = url.split('/visualize#').pop().replace('embed=true', '');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
       });
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initAreaChart);
       const axisId = 'ValueAxis-1';
 
@@ -297,57 +308,25 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -422,7 +401,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Yearly');
+        await PageObjects.visEditor.setInterval('Year');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
@@ -445,7 +424,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Monthly');
+        await PageObjects.visEditor.setInterval('Month');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)
@@ -454,6 +433,168 @@ export default function({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
+
+    describe('date histogram when no date field', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no date field]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should show error message for field', async () => {
+        const fieldErrorMessage = await find.byCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        const errorMessage = await fieldErrorMessage.getVisibleText();
+        expect(errorMessage).to.be(
+          'The index pattern test_index* does not contain any of the following compatible field types: date'
+        );
+      });
+    });
+
+    describe('date histogram when no time filter', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no time filter]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should not show error message on init when the field is not selected', async () => {
+        const fieldValues = await PageObjects.visEditor.getField();
+        expect(fieldValues[0]).to.be(undefined);
+        const isFieldErrorMessageExists = await find.existsByCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        expect(isFieldErrorMessageExists).to.be(false);
+      });
+
+      describe('interval errors', () => {
+        before(async () => {
+          // to trigger displaying of error messages
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          // this will avoid issues with the play tooltip covering the interval field
+          await testSubjects.scrollIntoView('advancedParams-2');
+        });
+
+        it('should not fail during changing interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('m');
+          const intervalValues = await PageObjects.visEditor.getInterval();
+          expect(intervalValues[0]).to.be('Millisecond');
+        });
+
+        it('should not fail during changing custom interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('4d', { type: 'custom' });
+          const isInvalidIntervalExists = await find.existsByCssSelector(
+            '.euiComboBox-isInvalid[data-test-subj="visEditorInterval"]'
+          );
+          expect(isInvalidIntervalExists).to.be(false);
+        });
+
+        it('should show error when interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('xx', { type: 'custom' });
+          const isIntervalErrorMessageExists = await find.existsByCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          expect(isIntervalErrorMessageExists).to.be(true);
+        });
+
+        it('should show error when calendar interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          const intervalErrorMessage = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          let errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+
+          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
+          errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+        });
+      });
+    });
+
+    describe('date histogram interval', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('Visualization AreaChart');
+        await PageObjects.visChart.waitForVisualization();
+      });
+
+      beforeEach(async () => {
+        const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      });
+
+      it('should update collapsed accordion label when time range is changed', async () => {
+        const accordionLabel = await find.byCssSelector(
+          '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
+        );
+        let accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 30 minutes');
+        const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 10 minutes');
+      });
+
+      describe('expanded accordion', () => {
+        before(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
+
+        it('should update label inside the opened accordion when scaled to milliseconds', async () => {
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(false);
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+        });
+
+        it('should display updated scaled label text after time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('Millisecond');
+
+          // Apply interval
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 30 seconds');
+        });
+
+        it('should update scaled label text after custom interval is set and time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to minute');
+        });
       });
     });
   });

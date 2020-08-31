@@ -35,9 +35,9 @@ const { REPO_ROOT, STORY_ENTRY_PATH } = require('./constants');
 const STORE_ENTRY_DIR = dirname(STORY_ENTRY_PATH);
 
 exports.generateStorybookEntry = ({ log, storyGlobs }) => {
-  const globs = ['built_assets/css/**/*.light.css', ...storyGlobs];
+  const globs = [...storyGlobs];
   log.info('Storybook globs:\n', globs);
-  const norm = p => normalize(relative(STORE_ENTRY_DIR, p));
+  const norm = (p) => normalize(relative(STORE_ENTRY_DIR, p));
 
   return Rx.defer(() =>
     glob(globs, {
@@ -46,20 +46,20 @@ exports.generateStorybookEntry = ({ log, storyGlobs }) => {
       onlyFiles: true,
     })
   ).pipe(
-    map(paths => {
+    map((paths) => {
       log.info('Discovered Storybook entry points:\n', paths);
       return new Set(paths.map(norm));
     }),
     mergeMap(
-      paths =>
-        new Rx.Observable(observer => {
+      (paths) =>
+        new Rx.Observable((observer) => {
           observer.next(paths);
 
           const chokidar = watch(globs, { cwd: REPO_ROOT })
-            .on('add', path => {
+            .on('add', (path) => {
               observer.next(paths.add(norm(resolve(REPO_ROOT, path))));
             })
-            .on('unlink', path => {
+            .on('unlink', (path) => {
               observer.next(paths.delete(norm(resolve(REPO_ROOT, path))));
             });
 

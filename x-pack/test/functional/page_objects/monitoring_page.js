@@ -5,9 +5,10 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'header', 'security', 'login', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
+  const find = getService('find');
 
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
@@ -19,10 +20,15 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       });
 
       if (!useSuperUser) {
-        await PageObjects.common.navigateToApp('login');
-        await PageObjects.shield.login('basic_monitoring_user', 'monitoring_user_password');
+        await PageObjects.security.forceLogout();
+        await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
       }
       await PageObjects.common.navigateToApp('monitoring');
+    }
+
+    async getWelcome() {
+      const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
+      return await el.getVisibleText();
     }
 
     async getAccessDeniedMessage() {

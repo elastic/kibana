@@ -1,0 +1,40 @@
+{
+  "list_id": "detection_list",
+  "_tags": ["detection"],
+  "tags": ["test_tag", "detection", "no_more_bad_guys"],
+  "type": "simple",
+  "description": "This is a sample detection type exception that has no item_id so it creates a new id each time",
+  "name": "Sample Detection Exception List Item",
+  "comments": [{ "comment": "This is a short little comment." }],
+  "entries": [
+    {
+      "field": "actingProcess.file.signer",
+      "operator": "excluded",
+      "type": "exists"
+    },
+    {
+      "field": "host.name",
+      "operator": "included",
+      "type": "match_any",
+      "value": ["some host", "another host"]
+    },
+    {
+      "field": "file.signature",
+      "type": "nested",
+      "entries": [
+        {
+          "field": "signer",
+          "type": "match",
+          "operator": "included",
+          "value": "Evil"
+        },
+        {
+          "field": "trusted",
+          "type": "match",
+          "operator": "included",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

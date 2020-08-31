@@ -37,7 +37,8 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
       defaultMessage: 'CoreDNS logs',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Coredns.',
     }),
@@ -50,7 +51,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
+    euiIconType: '/plugins/home/assets/logos/coredns.svg',
     artifacts: {
       dashboards: [
         {
@@ -66,7 +67,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_logs/screenshot.jpg',
+    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.jpg',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

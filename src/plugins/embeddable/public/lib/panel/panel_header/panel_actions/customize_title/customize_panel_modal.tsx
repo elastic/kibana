@@ -64,7 +64,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
   };
 
   private onHideTitleToggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       hideTitle: !prevState.hideTitle,
     }));
   };
@@ -118,7 +118,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               disabled={this.state.hideTitle}
               placeholder={this.props.embeddable.getOutput().defaultTitle}
               value={this.state.title || ''}
-              onChange={e => this.updateTitle(e.target.value)}
+              onChange={(e) => this.updateTitle(e.target.value)}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
                 {

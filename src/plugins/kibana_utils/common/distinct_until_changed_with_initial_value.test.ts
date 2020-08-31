@@ -41,7 +41,7 @@ describe('distinctUntilChangedWithInitialValue', () => {
     const result = subject
       .pipe(
         distinctUntilChangedWithInitialValue(
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolve(1);
             setTimeout(() => {
               subject.next(2);

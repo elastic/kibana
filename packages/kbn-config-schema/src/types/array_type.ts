@@ -28,10 +28,7 @@ export type ArrayOptions<T> = TypeOptions<T[]> & {
 
 export class ArrayType<T> extends Type<T[]> {
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
-    let schema = internals
-      .array()
-      .items(type.getSchema().optional())
-      .sparse();
+    let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
     if (options.minSize !== undefined) {
       schema = schema.min(options.minSize);
@@ -49,6 +46,10 @@ export class ArrayType<T> extends Type<T[]> {
       case 'any.required':
       case 'array.base':
         return `expected value of type [array] but got [${typeDetect(value)}]`;
+      case 'array.sparse':
+        return `sparse array are not allowed`;
+      case 'array.parse':
+        return `could not parse array value from json input`;
       case 'array.min':
         return `array size is [${value.length}], but cannot be smaller than [${limit}]`;
       case 'array.max':

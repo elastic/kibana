@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { toastNotifications, Toast, ToastInput } from './toasts';
+export { toastNotifications } from './toasts';
 export { fatalError } from './fatal_error';

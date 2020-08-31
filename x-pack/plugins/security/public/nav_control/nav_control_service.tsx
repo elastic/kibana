@@ -15,6 +15,7 @@ import { AuthenticationServiceSetup } from '../authentication';
 interface SetupDeps {
   securityLicense: SecurityLicense;
   authc: AuthenticationServiceSetup;
+  logoutUrl: string;
 }
 
 interface StartDeps {
@@ -24,14 +25,16 @@ interface StartDeps {
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private authc!: AuthenticationServiceSetup;
+  private logoutUrl!: string;
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense, authc }: SetupDeps) {
+  public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.authc = authc;
+    this.logoutUrl = logoutUrl;
   }
 
   public start({ core }: StartDeps) {
@@ -57,7 +60,7 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'application'>
+    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application'>
   ) {
     const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
@@ -67,8 +70,8 @@ export class SecurityNavControlService {
 
         const props = {
           user: currentUserPromise,
-          editProfileUrl: core.http.basePath.prepend('/app/kibana#/account'),
-          logoutUrl: core.http.basePath.prepend(`/logout`),
+          editProfileUrl: core.http.basePath.prepend('/security/account'),
+          logoutUrl: this.logoutUrl,
         };
         ReactDOM.render(
           <I18nContext>

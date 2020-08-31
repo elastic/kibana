@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');

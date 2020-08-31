@@ -8,12 +8,12 @@ import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common']);
 
-  describe('rollup job', function() {
+  describe('rollup job', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision.
     const rollupJobName = 'rollup-to-be-' + Date.now();
@@ -31,9 +31,9 @@ export default function({ getService, getPageObjects }) {
     it('create new rollup job', async () => {
       const interval = '1000ms';
 
-      pastDates.map(async day => {
+      for (const day of pastDates) {
         await es.index(mockIndices(day, rollupSourceDataPrepend));
-      });
+      }
 
       await PageObjects.common.navigateToApp('rollupJob');
       await PageObjects.rollup.createNewRollUpJob(

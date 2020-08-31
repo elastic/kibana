@@ -38,7 +38,10 @@
 import { modifyUrl } from '../../utils';
 
 export class BasePath {
-  constructor(private readonly basePath: string = '') {}
+  constructor(
+    private readonly basePath: string = '',
+    public readonly serverBasePath: string = basePath
+  ) {}
 
   public get = () => {
     return this.basePath;
@@ -46,7 +49,7 @@ export class BasePath {
 
   public prepend = (path: string): string => {
     if (!this.basePath) return path;
-    return modifyUrl(path, parts => {
+    return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.basePath}${parts.pathname}`;
       }

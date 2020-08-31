@@ -31,7 +31,7 @@ const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
  * @param series - specific series
  * @return {boolean}
  */
-const hasOverriddenIndexPattern = series => Boolean(series[OVERRIDE_INDEX_PATTERN_KEY]);
+const hasOverriddenIndexPattern = (series) => Boolean(series[OVERRIDE_INDEX_PATTERN_KEY]);
 
 /**
  * Get value of Time Range Mode for panel
@@ -39,7 +39,7 @@ const hasOverriddenIndexPattern = series => Boolean(series[OVERRIDE_INDEX_PATTER
  * @param panel - panel configuration
  * @return {string} - value of TIME_RANGE_DATA_MODES type
  */
-const getPanelTimeRangeMode = panel => panel[TIME_RANGE_MODE_KEY];
+const getPanelTimeRangeMode = (panel) => panel[TIME_RANGE_MODE_KEY];
 
 /**
  * Get value of Time Range Mode for series
@@ -47,7 +47,7 @@ const getPanelTimeRangeMode = panel => panel[TIME_RANGE_MODE_KEY];
  * @param series - specific series
  * @return {string} - value of TIME_RANGE_DATA_MODES type
  */
-const getSeriesTimeRangeMode = series => series[TIME_RANGE_MODE_KEY];
+const getSeriesTimeRangeMode = (series) => series[TIME_RANGE_MODE_KEY];
 
 /**
  * Check if 'Entire Time Range' mode active or not.

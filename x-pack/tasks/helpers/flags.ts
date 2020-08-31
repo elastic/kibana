@@ -19,7 +19,7 @@ import { findPluginSpecs } from '../../../src/legacy/plugin_discovery';
     One of more plugins can be specified, and each one should be command separated, like so:
       gulp testserver --plugins monitoring,reporting
     If using with yarn:
-      yarn test:server --plugins graph
+      yarn test:mocha --plugins graph
 */
 
 const opts = Object.freeze(
@@ -50,7 +50,7 @@ export const FLAGS = {
   plugins: opts.plugins
     ? String(opts.plugins)
         .split(',')
-        .map(id => id.trim())
+        .map((id) => id.trim())
     : undefined,
 };
 
@@ -66,5 +66,5 @@ export async function getEnabledPlugins() {
   });
 
   const enabledPlugins: Array<{ getId: () => string }> = await spec$.pipe(toArray()).toPromise();
-  return enabledPlugins.map(spec => spec.getId());
+  return enabledPlugins.map((spec) => spec.getId());
 }

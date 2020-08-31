@@ -9,7 +9,7 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 [[logstash-configuration-management-api-create-request]]
 ==== Request
 
-`PUT /api/logstash/pipeline/<id>`
+`PUT <kibana host>:<port>/api/logstash/pipeline/<id>`
 
 [[logstash-configuration-management-api-create-params]]
 ==== Path parameters
@@ -19,6 +19,9 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 
 [[logstash-configuration-management-api-create-request-body]]
 ==== Request body
+
+`id`::
+  (Required, string) The pipeline ID.
 
 `description`::
   (Optional, string) The pipeline description.
@@ -39,9 +42,9 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 [[logstash-configuration-management-api-create-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT api/logstash/pipeline/hello-world
+$ curl -X PUT api/logstash/pipeline/hello-world
 {
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {

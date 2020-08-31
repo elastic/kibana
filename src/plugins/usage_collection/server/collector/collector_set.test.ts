@@ -21,9 +21,9 @@ import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
-import { loggingServiceMock } from '../../../../core/server/mocks';
+import { loggingSystemMock } from '../../../../core/server/mocks';
 
-const logger = loggingServiceMock.createLogger();
+const logger = loggingSystemMock.createLogger();
 
 const loggerSpies = {
   debug: jest.spyOn(logger, 'debug'),
@@ -41,7 +41,7 @@ describe('CollectorSet', () => {
       loggerSpies.warn.mockRestore();
     });
 
-    const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
+    const mockCallCluster = jest.fn().mockResolvedValue({ passTest: 1000 });
 
     it('should throw an error if non-Collector type of object is registered', () => {
       const collectors = new CollectorSet({ logger });
@@ -58,6 +58,23 @@ describe('CollectorSet', () => {
       );
     });
 
+    it('should throw when 2 collectors with the same type are registered', () => {
+      const collectorSet = new CollectorSet({ logger });
+      collectorSet.registerCollector(
+        new Collector(logger, { type: 'test_duplicated', fetch: () => 1, isReady: () => true })
+      );
+      expect(() =>
+        collectorSet.registerCollector(
+          // Even for Collector vs. UsageCollector
+          new UsageCollector(logger, {
+            type: 'test_duplicated',
+            fetch: () => 2,
+            isReady: () => false,
+          })
+        )
+      ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
+    });
+
     it('should log debug status of fetching from the collector', async () => {
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
@@ -68,7 +85,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster);
       expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
@@ -93,7 +110,7 @@ describe('CollectorSet', () => {
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockCallCluster as any);
+        result = await collectors.bulkFetch(mockCallCluster);
       } catch (err) {
         // Do nothing
       }
@@ -111,7 +128,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -129,7 +146,7 @@ describe('CollectorSet', () => {
         } as any)
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -144,7 +161,7 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          formatForBulkUpload: result => ({
+          formatForBulkUpload: (result) => ({
             type: 'MY_TEST_COLLECTOR',
             payload: { test: result.test * 2 },
           }),
@@ -152,7 +169,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster);
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',

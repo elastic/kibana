@@ -17,11 +17,100 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
+// Kibana Platform.
+export { ExpressionsServerPlugin as Plugin };
+export * from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsServerPlugin(initializerContext);
 }
+
+// Static exports.
+export {
+  AnyExpressionFunctionDefinition,
+  AnyExpressionTypeDefinition,
+  ArgumentType,
+  buildExpression,
+  buildExpressionFunction,
+  Datatable,
+  DatatableColumn,
+  DatatableColumnType,
+  DatatableRow,
+  Execution,
+  ExecutionContainer,
+  ExecutionContext,
+  ExecutionParams,
+  ExecutionState,
+  Executor,
+  ExecutorContainer,
+  ExecutorState,
+  ExpressionAstArgument,
+  ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+  ExpressionAstFunctionBuilder,
+  ExpressionAstNode,
+  ExpressionFunction,
+  ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
+  ExpressionFunctionKibana,
+  ExpressionFunctionParameter,
+  ExpressionImage,
+  ExpressionRenderDefinition,
+  ExpressionRenderer,
+  ExpressionRendererRegistry,
+  ExpressionType,
+  ExpressionTypeDefinition,
+  ExpressionTypeStyle,
+  ExpressionValue,
+  ExpressionValueBoxed,
+  ExpressionValueConverter,
+  ExpressionValueError,
+  ExpressionValueNum,
+  ExpressionValueRender,
+  ExpressionValueSearchContext,
+  ExpressionValueUnboxed,
+  ExpressionValueFilter,
+  Font,
+  FontLabel,
+  FontStyle,
+  FontValue,
+  FontWeight,
+  format,
+  formatExpression,
+  FunctionsRegistry,
+  IInterpreterRenderHandlers,
+  InterpreterErrorType,
+  IRegistry,
+  isExpressionAstBuilder,
+  KIBANA_CONTEXT_NAME,
+  KibanaContext,
+  KibanaDatatable,
+  KibanaDatatableColumn,
+  KibanaDatatableColumnMeta,
+  KibanaDatatableRow,
+  KnownTypeToString,
+  Overflow,
+  parse,
+  parseExpression,
+  PointSeries,
+  PointSeriesColumn,
+  PointSeriesColumnName,
+  PointSeriesColumns,
+  PointSeriesRow,
+  Range,
+  SerializedDatatable,
+  SerializedFieldFormat,
+  Style,
+  TextAlignment,
+  TextDecoration,
+  TypesRegistry,
+  TypeString,
+  TypeToString,
+  UnmappedTypeStrings,
+  ExpressionValueRender as Render,
+} from '../common';

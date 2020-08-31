@@ -18,6 +18,8 @@
  */
 
 import React from 'react';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
@@ -27,7 +29,7 @@ import { npStart } from 'ui/new_platform';
 export const I18nContext = npStart.core.i18n.Context;
 
 export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
-  const ContextWrapper: React.FC<P> = props => {
+  const ContextWrapper: React.FC<P> = (props) => {
     return (
       <I18nContext>
         <ComponentToWrap {...props} />
@@ -44,7 +46,7 @@ export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
 }
 
 uiModules
-  .get('i18n')
+  .get('i18n', ['ngSanitize'])
   .provider('i18n', I18nProvider)
   .filter('i18n', i18nFilter)
   .directive('i18nId', i18nDirective);

@@ -27,7 +27,7 @@ export function mapValuesOfMap<T, G, H>(map: Map<T, G>, mapper: (item: G) => H):
 
 export function groupIntoMap<T, G, H>(collection: T[], groupBy: (item: T) => G): Map<G, T[]> {
   const map = new Map<G, T[]>();
-  collection.forEach(item => {
+  collection.forEach((item) => {
     const key = groupBy(item);
     const values = map.get(key) || [];
     values.push(item);

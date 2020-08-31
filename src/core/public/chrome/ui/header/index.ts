@@ -18,7 +18,7 @@
  */
 
 export { Header, HeaderProps } from './header';
-export { HeaderWrapper } from './header_wrapper';
+export { OnIsLockedUpdate, NavType } from './types';
 export {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
@@ -26,5 +26,3 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './header_help_menu';
-export type NavSetting = 'grouped' | 'individual';
-export type OnIsLockedUpdate = (isLocked: boolean) => void;

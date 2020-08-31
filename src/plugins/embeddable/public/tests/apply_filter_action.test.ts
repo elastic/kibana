@@ -30,19 +30,18 @@ import {
   FilterableContainerFactory,
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
-// eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters } from '../../../data/public';
+import { applyFilterTrigger } from '../../../ui_actions/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
-  const { doStart } = testPlugin();
-  const api = doStart();
+  const { doStart, setup } = testPlugin();
 
-  const factory1 = new FilterableContainerFactory(api.getEmbeddableFactory);
   const factory2 = new FilterableEmbeddableFactory();
+  const factory1 = new FilterableContainerFactory(async () => await api.getEmbeddableFactory);
+  setup.registerEmbeddableFactory(factory2.type, factory2);
+  setup.registerEmbeddableFactory(factory1.type, factory1);
 
-  api.registerEmbeddableFactory(factory1.type, factory1);
-  api.registerEmbeddableFactory(factory2.type, factory2);
+  const api = doStart();
 
   const applyFilterAction = createFilterAction();
 
@@ -63,7 +62,9 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     FilterableContainer
   >(FILTERABLE_CONTAINER, { panels: {}, id: 'Node2' });
 
-  if (isErrorEmbeddable(node1) || isErrorEmbeddable(node2)) throw new Error();
+  if (isErrorEmbeddable(node1) || isErrorEmbeddable(node2)) {
+    throw new Error();
+  }
 
   const embeddable = await node2.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -85,7 +86,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     query: { match: { extension: { query: 'foo' } } },
   };
 
-  await applyFilterAction.execute({ embeddable, filters: [filter] });
+  await applyFilterAction.execute({ embeddable, filters: [filter], trigger: applyFilterTrigger });
   expect(root.getInput().filters.length).toBe(1);
   expect(node1.getInput().filters.length).toBe(1);
   expect(embeddable.getInput().filters.length).toBe(1);
@@ -93,27 +94,16 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
 });
 
 test('ApplyFilterAction is incompatible if the root container does not accept a filter as input', async () => {
-  const { doStart, coreStart } = testPlugin();
-  const api = doStart();
-  const inspector = inspectorPluginMock.createStartContract();
-
-  const applyFilterAction = createFilterAction();
-  const parent = new HelloWorldContainer(
-    { id: 'root', panels: {} },
-    {
-      getActions: () => Promise.resolve([]),
-      getEmbeddableFactory: api.getEmbeddableFactory,
-      getAllEmbeddableFactories: api.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector,
-      SavedObjectFinder: () => null,
-    }
-  );
+  const { doStart, setup } = testPlugin();
 
   const factory = new FilterableEmbeddableFactory();
-  api.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
+  const api = doStart();
+  const applyFilterAction = createFilterAction();
 
+  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, {
+    getEmbeddableFactory: api.getEmbeddableFactory,
+  } as any);
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,
     EmbeddableOutput,
@@ -129,26 +119,17 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
 });
 
 test('trying to execute on incompatible context throws an error ', async () => {
-  const { doStart, coreStart } = testPlugin();
-  const api = doStart();
-  const inspector = inspectorPluginMock.createStartContract();
+  const { doStart, setup } = testPlugin();
 
   const factory = new FilterableEmbeddableFactory();
-  api.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
 
+  const api = doStart();
   const applyFilterAction = createFilterAction();
-  const parent = new HelloWorldContainer(
-    { id: 'root', panels: {} },
-    {
-      getActions: () => Promise.resolve([]),
-      getEmbeddableFactory: api.getEmbeddableFactory,
-      getAllEmbeddableFactories: api.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector,
-      SavedObjectFinder: () => null,
-    }
-  );
+
+  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, {
+    getEmbeddableFactory: api.getEmbeddableFactory,
+  } as any);
 
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,

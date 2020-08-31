@@ -57,7 +57,7 @@ export class PersistedLog<T = any> {
     const nextItems = [
       val,
       // remove any duplicate items
-      ...[...this.items$.value].filter(item => !this.isEqual(item, val)),
+      ...[...this.items$.value].filter((item) => !this.isEqual(item, val)),
     ].slice(0, this.maxLength); // truncate
 
     // Persist the stack to storage
@@ -73,7 +73,7 @@ export class PersistedLog<T = any> {
   }
 
   public get$() {
-    return this.items$.pipe(map(items => cloneDeep(items)));
+    return this.items$.pipe(map((items) => cloneDeep(items)));
   }
 
   private loadItems() {

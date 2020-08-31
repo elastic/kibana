@@ -6,19 +6,15 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { RolesAPIClient } from '../roles';
-import { RoleMappingsAPIClient } from './role_mappings_api_client';
 import { DocumentationLinksService } from './documentation_links';
-import { RoleMappingsGridPage } from './role_mappings_grid';
-import { EditRoleMappingPage } from './edit_role_mapping';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const roleMappingsManagementApp = Object.freeze({
@@ -30,16 +26,30 @@ export const roleMappingsManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.roleMappingsTitle', {
         defaultMessage: 'Role Mappings',
       }),
-      async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ docLinks, http, notifications, i18n: i18nStart }] = await getStartServices();
+      async mount({ element, setBreadcrumbs, history }) {
+        const [coreStart] = await getStartServices();
         const roleMappingsBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
               defaultMessage: 'Role Mappings',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
+
+        const [
+          [{ docLinks, http, notifications, i18n: i18nStart }],
+          { RoleMappingsGridPage },
+          { EditRoleMappingPage },
+          { RoleMappingsAPIClient },
+          { RolesAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./role_mappings_grid'),
+          import('./edit_role_mapping'),
+          import('./role_mappings_api_client'),
+          import('../roles'),
+        ]);
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(http);
         const dockLinksService = new DocumentationLinksService(docLinks);
@@ -48,8 +58,11 @@ export const roleMappingsManagementApp = Object.freeze({
           return (
             <RoleMappingsGridPage
               notifications={notifications}
+              rolesAPIClient={new RolesAPIClient(http)}
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
+              history={history}
+              navigateToApp={coreStart.application.navigateToApp}
             />
           );
         };
@@ -60,7 +73,7 @@ export const roleMappingsManagementApp = Object.freeze({
           setBreadcrumbs([
             ...roleMappingsBreadcrumbs,
             name
-              ? { text: name, href: `#${basePath}/edit/${encodeURIComponent(name)}` }
+              ? { text: name, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -75,15 +88,16 @@ export const roleMappingsManagementApp = Object.freeze({
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               docLinks={dockLinksService}
+              history={history}
             />
           );
         };
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact={true}>
+                <Route path={['/', '']} exact={true}>
                   <RoleMappingsGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/edit/:name?">

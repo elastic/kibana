@@ -20,7 +20,7 @@
 import { withTimeout } from './promise';
 
 const delay = (ms: number, resolveValue?: any) =>
-  new Promise(resolve => setTimeout(resolve, ms, resolveValue));
+  new Promise((resolve) => setTimeout(resolve, ms, resolveValue));
 
 describe('withTimeout', () => {
   it('resolves with a promise value if resolved in given timeout', async () => {
@@ -44,7 +44,7 @@ describe('withTimeout', () => {
 
     await expect(
       withTimeout({
-        promise: new Promise(i => i),
+        promise: new Promise((i) => i),
         timeout: 10,
         errorMessage: 'error-message',
       })

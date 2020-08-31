@@ -28,7 +28,7 @@ export const createGetterSetter = <T extends object>(name: string): [Get<T>, Set
     return value;
   };
 
-  const set: Set<T> = newValue => {
+  const set: Set<T> = (newValue) => {
     value = newValue;
   };
 

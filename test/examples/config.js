@@ -20,14 +20,27 @@
 import path from 'path';
 import { services } from '../plugin_functional/services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [require.resolve('./search'), require.resolve('./embeddables')],
+    testFiles: [
+      require.resolve('./embeddables'),
+      require.resolve('./bfetch_explorer'),
+      require.resolve('./ui_actions'),
+      require.resolve('./state_sync'),
+      require.resolve('./routing'),
+    ],
     services: {
       ...functionalConfig.get('services'),
       ...services,
+    },
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+      },
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),

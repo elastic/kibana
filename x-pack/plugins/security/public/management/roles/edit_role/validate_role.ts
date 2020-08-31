@@ -85,7 +85,7 @@ export class RoleValidator {
 
     const areIndicesValid =
       role.elasticsearch.indices
-        .map(indexPriv => this.validateIndexPrivilege(indexPriv))
+        .map((indexPriv) => this.validateIndexPrivilege(indexPriv))
         .find((result: RoleValidationResult) => result.isInvalid) == null;
 
     if (areIndicesValid) {
@@ -171,7 +171,7 @@ export class RoleValidator {
 
     const privileges = role.kibana || [];
 
-    const arePrivilegesValid = privileges.every(assignedPrivilege => {
+    const arePrivilegesValid = privileges.every((assignedPrivilege) => {
       return assignedPrivilege.base.length > 0 || Object.keys(assignedPrivilege.feature).length > 0;
     });
 

@@ -19,22 +19,23 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { createPluginInitializerContext } from './plugin_context';
+import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
 let server: Server;
+let instanceInfo: InstanceInfo;
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -43,6 +44,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     configPath: 'path',
     kibanaVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
+    requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
     ui: true,
@@ -50,9 +52,12 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
-describe('Plugin Context', () => {
+describe('createPluginInitializerContext', () => {
   beforeEach(async () => {
     coreId = Symbol('core');
+    instanceInfo = {
+      uuid: 'instance-uuid',
+    };
     env = Env.createDefault(getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
@@ -66,7 +71,8 @@ describe('Plugin Context', () => {
     const pluginInitializerContext = createPluginInitializerContext(
       coreContext,
       opaqueId,
-      manifest
+      manifest,
+      instanceInfo
     );
 
     expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -75,7 +81,11 @@ describe('Plugin Context', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      kibana: { index: '.kibana' },
+      kibana: {
+        index: '.kibana',
+        autocompleteTerminateAfter: duration(100000),
+        autocompleteTimeout: duration(1000),
+      },
       elasticsearch: {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),
@@ -84,5 +94,20 @@ describe('Plugin Context', () => {
       },
       path: { data: fromRoot('data') },
     });
+  });
+
+  it('allow to access the provided instance uuid', () => {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    instanceInfo = {
+      uuid: 'kibana-uuid',
+    };
+    const pluginInitializerContext = createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    );
+    expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
   });
 });

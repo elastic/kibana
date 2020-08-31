@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CategoryAxisPanel component should init with the default set of props 1`] = `
+<EuiPanel
+  paddingSize="s"
+>
+  <EuiTitle
+    size="xs"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="X-axis"
+        id="visTypeVislib.controls.pointSeries.categoryAxis.xAxisTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <SelectOption
+    data-test-subj="categoryAxisPosition"
+    label="Position"
+    options={
+      Array [
+        Object {
+          "text": "Top",
+          "value": "top",
+        },
+        Object {
+          "text": "Left",
+          "value": "left",
+        },
+        Object {
+          "text": "Right",
+          "value": "right",
+        },
+        Object {
+          "text": "Bottom",
+          "value": "bottom",
+        },
+      ]
+    }
+    paramName="position"
+    setValue={[Function]}
+    value="bottom"
+  />
+  <SwitchOption
+    label="Show axis lines and labels"
+    paramName="show"
+    setValue={[Function]}
+    value={true}
+  />
+  <LabelOptions
+    axisFilterCheckboxName="xAxisFilterLabelsCheckboxCategoryAxis-1"
+    axisLabels={
+      Object {
+        "color": "black",
+        "filter": true,
+        "show": true,
+        "truncate": 0,
+      }
+    }
+    setAxisLabel={[Function]}
+  />
+</EuiPanel>
+`;

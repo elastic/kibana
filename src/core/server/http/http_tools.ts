@@ -21,6 +21,7 @@ import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from
 import Hoek from 'hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
+import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
@@ -36,6 +37,10 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     host: config.host,
     port: config.port,
     routes: {
+      cache: {
+        privacy: 'private',
+        otherwise: 'private, no-cache, no-store, must-revalidate',
+      },
       cors: config.cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),
@@ -49,7 +54,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         // This is a default payload validation which applies to all LP routes which do not specify their own
         // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
         // (All NP routes are already required to specify their own validation in order to access the payload)
-        payload: value => Promise.resolve(validateObject(value)),
+        payload: (value) => Promise.resolve(validateObject(value)),
       },
     },
     state: {
@@ -100,7 +105,7 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
 
   server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
-  server.listener.on('timeout', socket => {
+  server.listener.on('timeout', (socket) => {
     socket.destroy();
   });
   server.listener.on('clientError', (err, socket) => {
@@ -151,7 +156,7 @@ export function defaultValidationErrorHandler(
     const validationError: HapiValidationError = err as HapiValidationError;
     const validationKeys: string[] = [];
 
-    validationError.details.forEach(detail => {
+    validationError.details.forEach((detail) => {
       if (detail.path.length > 0) {
         validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
       } else {
@@ -164,4 +169,13 @@ export function defaultValidationErrorHandler(
   }
 
   throw err;
+}
+
+export function getRequestId(request: Request, options: HttpConfig['requestId']): string {
+  return options.allowFromAnyIp ||
+    // socket may be undefined in integration tests that connect via the http listener directly
+    (request.raw.req.socket?.remoteAddress &&
+      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
+    ? request.headers['x-opaque-id'] ?? uuid.v4()
+    : uuid.v4();
 }

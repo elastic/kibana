@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -85,11 +86,13 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * Returns items count on landing page
      * @param appName 'visualize' | 'dashboard'
      */
-    public async getItemsCount(appName: 'visualize' | 'dashboard'): Promise<number> {
-      const elements = await find.allByCssSelector(
-        `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
-      );
-      return elements.length;
+    public async expectItemsCount(appName: 'visualize' | 'dashboard', count: number) {
+      await retry.try(async () => {
+        const elements = await find.allByCssSelector(
+          `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
+        );
+        expect(elements.length).to.equal(count);
+      });
     }
 
     /**
@@ -116,12 +119,18 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * @param appName 'visualize' | 'dashboard'
      * @param name item name
      */
-    public async searchAndGetItemsCount(appName: 'visualize' | 'dashboard', name: string) {
+    public async searchAndExpectItemsCount(
+      appName: 'visualize' | 'dashboard',
+      name: string,
+      count: number
+    ) {
       await this.searchForItemWithName(name);
-      const links = await testSubjects.findAll(
-        `${prefixMap[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
-      );
-      return links.length;
+      await retry.try(async () => {
+        const links = await testSubjects.findAll(
+          `${prefixMap[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
+        );
+        expect(links.length).to.equal(count);
+      });
     }
 
     public async clickDeleteSelected() {
@@ -170,9 +179,12 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * @param promptBtnTestSubj testSubj locator for Prompt button
      */
     public async clickNewButton(promptBtnTestSubj: string): Promise<void> {
-      await retry.try(async () => {
+      await retry.tryForTime(20000, async () => {
         // newItemButton button is only visible when there are items in the listing table is displayed.
-        if (await testSubjects.exists('newItemButton')) {
+        const isnNewItemButtonPresent = await testSubjects.exists('newItemButton', {
+          timeout: 10000,
+        });
+        if (isnNewItemButtonPresent) {
           await testSubjects.click('newItemButton');
         } else {
           // no items exist, click createPromptButton to create new dashboard/visualization

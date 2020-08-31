@@ -52,7 +52,7 @@ import { ListingTableLoadingItems } from './listing_table_loading_items';
 import listingTableLoadingItemsSource from '!!raw-loader!./listing_table_loading_items'; // eslint-disable-line import/default
 const listingTableLoadingItemsHtml = renderToHtml(ListingTableLoadingItems);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Table"

@@ -17,81 +17,89 @@
  * under the License.
  */
 
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { ConfigSchema } from './config';
-import loadFunctions from './lib/load_functions';
-import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
-import { runRoute } from './routes/run';
-import { ConfigManager } from './lib/config_manager';
+import { schema } from '@kbn/config-schema';
+import { TimelionConfigType } from './config';
+import { timelionSheetSavedObjectType } from './saved_objects';
 
 /**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
+ * Deprecated since 7.0, the Timelion app will be removed in 8.0.
+ * To continue using your Timelion worksheets, migrate them to a dashboard.
+ *
+ *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
+ **/
+const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logger) => {
+  const { savedObjects } = core;
+  const savedObjectsClient = savedObjects.createInternalRepository();
 
-/**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
- */
-export class Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  savedObjectsClient
+    .find({
+      type: 'timelion-sheet',
+      perPage: 1,
+    })
+    .then(
+      ({ total }) =>
+        total &&
+        logger.warn(
+          'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation.'
+        )
+    );
+};
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
-      .pipe(first())
-      .toPromise();
+export class TimelionPlugin implements Plugin {
+  private logger: Logger;
 
-    const configManager = new ConfigManager(this.initializerContext.config);
-
-    const functions = loadFunctions('series_functions');
-
-    const getFunction = (name: string) => {
-      if (functions[name]) {
-        return functions[name];
-      }
-
-      throw new Error(
-        i18n.translate('timelion.noFunctionErrorMessage', {
-          defaultMessage: 'No such function: {name}',
-          values: { name },
-        })
-      );
-    };
-
-    const logger = this.initializerContext.logger.get('timelion');
-
-    const router = core.http.createRouter();
-
-    const deps = {
-      configManager,
-      functions,
-      getFunction,
-      logger,
-    };
-
-    functionsRoute(router, deps);
-    runRoute(router, deps);
-    validateEsRoute(router);
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
+  constructor(context: PluginInitializerContext<TimelionConfigType>) {
+    this.logger = context.logger.get();
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
+  public setup(core: CoreSetup) {
+    core.capabilities.registerProvider(() => ({
+      timelion: {
+        save: true,
+      },
+    }));
+    core.savedObjects.registerType(timelionSheetSavedObjectType);
 
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
+    core.uiSettings.register({
+      'timelion:showTutorial': {
+        name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
+          defaultMessage: 'Show tutorial',
+        }),
+        value: false,
+        description: i18n.translate('timelion.uiSettings.showTutorialDescription', {
+          defaultMessage: 'Should I show the tutorial by default when entering the timelion app?',
+        }),
+        category: ['timelion'],
+        schema: schema.boolean(),
+      },
+      'timelion:default_columns': {
+        name: i18n.translate('timelion.uiSettings.defaultColumnsLabel', {
+          defaultMessage: 'Default columns',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultColumnsDescription', {
+          defaultMessage: 'Number of columns on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+      'timelion:default_rows': {
+        name: i18n.translate('timelion.uiSettings.defaultRowsLabel', {
+          defaultMessage: 'Default rows',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultRowsDescription', {
+          defaultMessage: 'Number of rows on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+    });
   }
+  start(core: CoreStart) {
+    showWarningMessageIfTimelionSheetWasFound(core, this.logger);
+  }
+  stop() {}
 }

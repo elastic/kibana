@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as React from 'react';
 import { Container, isErrorEmbeddable } from '../lib';
@@ -31,41 +30,44 @@ import {
   ContactCardEmbeddableFactory,
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { EmbeddableApi } from '../api';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { mount } from 'enzyme';
+import { EmbeddableStart } from '../plugin';
+import { createEmbeddablePanelMock } from '../mocks';
 
-let api: EmbeddableApi;
+let api: EmbeddableStart;
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const { doStart, coreStart, uiActions } = testPlugin(
+  const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  api = doStart();
 
   const contactCardFactory = new ContactCardEmbeddableFactory(
-    {},
     uiActions.executeTriggerActions,
     {} as any
   );
-  api.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
+  setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 
+  api = doStart();
+
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: api.getEmbeddableFactory,
+    getAllEmbeddableFactories: api.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   container = new HelloWorldContainer(
     { id: '123', panels: {} },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: api.getEmbeddableFactory,
-      getAllEmbeddableFactories: api.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
   const contactCardEmbeddable = await container.addNewEmbeddable<

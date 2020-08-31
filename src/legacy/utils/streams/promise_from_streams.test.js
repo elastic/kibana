@@ -25,9 +25,9 @@ describe('promiseFromStreams', () => {
   test('pipes together an array of streams', async () => {
     const str1 = createListStream([1, 2, 3]);
     const str2 = createReduceStream((acc, n) => acc + n, 0);
-    const sumPromise = new Promise(resolve => str2.once('data', resolve));
+    const sumPromise = new Promise((resolve) => str2.once('data', resolve));
     createPromiseFromStreams([str1, str2]);
-    await new Promise(resolve => str2.once('end', resolve));
+    await new Promise((resolve) => str2.once('end', resolve));
     expect(await sumPromise).toBe(6);
   });
 
@@ -88,7 +88,7 @@ describe('promiseFromStreams', () => {
 
           write(chunk, enc, cb) {
             duplexReadQueue.push(
-              new Promise(resolve => {
+              new Promise((resolve) => {
                 setTimeout(() => {
                   written += chunk;
                   cb();

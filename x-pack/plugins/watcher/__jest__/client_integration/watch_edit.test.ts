@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
@@ -15,18 +16,22 @@ import { getRandomString } from '../../../../test_utils';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../../public/application/lib/api', () => ({
-  ...jest.requireActual('../../public/application/lib/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
+
+  return {
+    ...original,
+    loadIndexPatterns: async () => {
+      const INDEX_PATTERNS = [
+        { attributes: { title: 'index1' } },
+        { attributes: { title: 'index2' } },
+        { attributes: { title: 'index3' } },
+      ];
+      return await INDEX_PATTERNS;
+    },
+    getHttpClient: () => mockHttpClient,
+  };
+});
 
 const { setup } = pageHelpers.watchEdit;
 
@@ -96,6 +101,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type: watch.type,
             isNew: false,
+            isActive: true,
             actions: [
               {
                 id: DEFAULT_LOGGING_ACTION_ID,
@@ -189,6 +195,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type,
             isNew: false,
+            isActive: true,
             actions: [],
             timeField,
             triggerIntervalSize,

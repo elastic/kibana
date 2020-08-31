@@ -18,7 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
+import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -56,12 +56,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await chartTypeField.parseDomContent();
       return $('button')
         .toArray()
-        .map(chart =>
-          $(chart)
-            .findTestSubject('visTypeTitle')
-            .text()
-            .trim()
-        );
+        .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
     public async waitForVisualizationSelectPage() {
@@ -77,6 +72,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await common.navigateToApp('visualize');
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
+    }
+
+    public async hasVisType(type: string) {
+      return await testSubjects.exists(`visType-${type}`);
     }
 
     public async clickVisType(type: string) {
@@ -100,6 +99,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.clickVisType('region_map');
     }
 
+    public async hasRegionMap() {
+      return await this.hasVisType('region_map');
+    }
+
     public async clickMarkdownWidget() {
       await this.clickVisType('markdown');
     }
@@ -118,6 +121,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickTileMap() {
       await this.clickVisType('tile_map');
+    }
+
+    public async hasTileMap() {
+      return await this.hasVisType('tile_map');
     }
 
     public async clickTagCloud() {
@@ -142,6 +149,18 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickInputControlVis() {
       await this.clickVisType('input_control_vis');
+    }
+
+    public async clickLensWidget() {
+      await this.clickVisType('lens');
+    }
+
+    public async clickMapsApp() {
+      await this.clickVisType('maps');
+    }
+
+    public async hasMapsApp() {
+      return await this.hasVisType('maps');
     }
 
     public async createSimpleMarkdownViz(vizName: string) {
@@ -209,7 +228,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickUnlinkSavedSearch() {
-      await testSubjects.doubleClick('unlinkSavedSearch');
+      await testSubjects.click('showUnlinkSavedSearchPopover');
+      await testSubjects.click('unlinkSavedSearch');
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -225,12 +245,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
-    }
-
-    public async clickVisualizationByName(vizName: string) {
-      log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      await find.clickByPartialLinkText(vizName);
+      await find.clickByCssSelector('[href="#/"]');
     }
 
     public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
@@ -241,7 +256,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async openSavedVisualization(vizName: string) {
-      await this.clickVisualizationByName(vizName);
+      const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
+      await testSubjects.click(dataTestSubj, 20000);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -260,7 +276,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
-      return await testSubjects.exists('visualizeLandingPage');
+      return await testSubjects.exists('visualizationLandingPage');
     }
 
     public async gotoLandingPage() {
@@ -275,12 +291,25 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualization(
+      vizName: string,
+      { saveAsNew = false, redirectToOrigin = false } = {}
+    ) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
-      if (saveAsNew) {
-        log.debug('Check save as new visualization');
-        await testSubjects.click('saveAsNewCheckbox');
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'check' : 'uncheck';
+        log.debug('save as new checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        log.debug('redirect to origin checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
       log.debug('Click Save Visualization button');
 
@@ -295,8 +324,11 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       return message;
     }
 
-    public async saveVisualizationExpectSuccess(vizName: string, { saveAsNew = false } = {}) {
-      const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
+    public async saveVisualizationExpectSuccess(
+      vizName: string,
+      { saveAsNew = false, redirectToOrigin = false } = {}
+    ) {
+      const saveMessage = await this.saveVisualization(vizName, { saveAsNew, redirectToOrigin });
       if (!saveMessage) {
         throw new Error(
           `Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`
@@ -306,17 +338,29 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async saveVisualizationExpectSuccessAndBreadcrumb(
       vizName: string,
-      { saveAsNew = false } = {}
+      { saveAsNew = false, redirectToOrigin = false } = {}
     ) {
-      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
+      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew, redirectToOrigin });
       await retry.waitFor(
         'last breadcrumb to have new vis name',
         async () => (await globalNav.getLastBreadcrumb()) === vizName
       );
     }
 
-    public async clickLensWidget() {
-      await this.clickVisType('lens');
+    public async saveVisualizationAndReturn() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
+    }
+
+    public async linkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async notLinkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('visualizesaveAndReturnButton');
     }
   }
 

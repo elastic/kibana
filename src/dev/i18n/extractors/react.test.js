@@ -83,7 +83,7 @@ describe('dev/i18n/extractors/react', () => {
   describe('extractIntlMessages', () => {
     test('extracts messages from "intl.formatMessage" function call', () => {
       const ast = parse(intlFormatMessageCallSource, { plugins: ['jsx'] });
-      const expressionNode = [...traverseNodes(ast.program.body)].find(node =>
+      const expressionNode = [...traverseNodes(ast.program.body)].find((node) =>
         isCallExpression(node)
       );
 
@@ -93,7 +93,7 @@ describe('dev/i18n/extractors/react', () => {
     test('throws if message id is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[0];
       const ast = parse(source, { plugins: ['jsx'] });
-      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find((node) =>
         isCallExpression(node)
       );
 
@@ -103,7 +103,7 @@ describe('dev/i18n/extractors/react', () => {
     test('throws if defaultMessage value is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[1];
       const ast = parse(source, { plugins: ['jsx'] });
-      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find((node) =>
         isCallExpression(node)
       );
 
@@ -113,7 +113,7 @@ describe('dev/i18n/extractors/react', () => {
     test('throws if description value is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[2];
       const ast = parse(source, { plugins: ['jsx'] });
-      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find((node) =>
         isCallExpression(node)
       );
 
@@ -125,7 +125,7 @@ describe('dev/i18n/extractors/react', () => {
     test('extracts messages from "<FormattedMessage>" element', () => {
       const ast = parse(formattedMessageElementSource, { plugins: ['jsx'] });
       const jsxOpeningElementNode = [...traverseNodes(ast.program.body)].find(
-        node =>
+        (node) =>
           isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' })
       );
 

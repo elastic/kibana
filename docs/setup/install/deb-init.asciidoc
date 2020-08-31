@@ -1,4 +1,4 @@
-==== Running Kibana with SysV `init`
+==== Run {kib} with SysV `init`
 
 Use the `update-rc.d` command to configure Kibana to start automatically
 when the system boots up:
@@ -18,4 +18,3 @@ sudo -i service kibana stop
 
 If Kibana fails to start for any reason, it will print the reason for
 failure to `STDOUT`. Log files can be found in `/var/log/kibana/`.
-

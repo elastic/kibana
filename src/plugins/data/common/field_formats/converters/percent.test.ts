@@ -18,11 +18,12 @@
  */
 
 import { PercentFormat } from './percent';
+import { UI_SETTINGS } from '../../constants';
 
 describe('PercentFormat', () => {
   const config: Record<string, any> = {};
 
-  config['format:percent:defaultPattern'] = '0,0.[000]%';
+  config[UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN] = '0,0.[000]%';
 
   const getConfig = (key: string) => config[key];
 

@@ -1,0 +1,96 @@
+.dscSidebar__container {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  background-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.dscIndexPattern__container {
+  display: flex;
+  align-items: center;
+  height: $euiSize * 3;
+  margin-top: -$euiSizeS;
+}
+
+.dscIndexPattern__triggerButton {
+  @include euiTitle('xs');
+  line-height: $euiSizeXXL;
+}
+
+.dscFieldList {
+  list-style: none;
+  margin-bottom: 0;
+}
+
+.dscFieldListHeader {
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
+}
+
+.dscFieldList--popular {
+  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
+}
+
+.dscFieldChooser {
+  padding-left: $euiSize;
+}
+
+.dscFieldChooser__toggle {
+  color: $euiColorMediumShade;
+  margin-left: $euiSizeS !important;
+}
+
+.dscSidebarItem {
+  &:hover,
+  &:focus-within,
+  &[class*='-isActive'] {
+    .dscSidebarItem__action {
+      opacity: 1;
+    }
+  }
+}
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.dscSidebarItem__action {
+  opacity: 0; /* 1 */
+  transition: none;
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+  font-size: $euiFontSizeXS;
+  padding: 2px 6px !important;
+  height: 22px !important;
+  min-width: auto !important;
+  .euiButton__content {
+    padding: 0 4px;
+  }
+}
+
+.dscFieldSearch {
+  padding: $euiSizeS;
+}
+
+.dscFieldSearch__toggleButton {
+  width: calc(100% - #{$euiSizeS});
+  color: $euiColorPrimary;
+  padding-left: $euiSizeXS;
+  margin-left: $euiSizeXS;
+}
+
+.dscFieldSearch__filterWrapper {
+  flex-grow: 0;
+}
+
+.dscFieldSearch__formWrapper {
+  padding: $euiSizeM;
+}
+
+.dscFieldDetails {
+  color: $euiTextColor;
+  margin-bottom: $euiSizeS;
+}

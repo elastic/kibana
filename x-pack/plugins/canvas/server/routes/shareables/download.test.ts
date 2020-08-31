@@ -7,14 +7,10 @@
 jest.mock('fs');
 
 import fs from 'fs';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import { httpServiceMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 import { initializeDownloadShareableWorkpadRoute } from './download';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {} as RequestHandlerContext;
 const path = `api/canvas/workpad/find`;
@@ -24,14 +20,10 @@ describe('Download Canvas shareables runtime', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeDownloadShareableWorkpadRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeDownloadShareableWorkpadRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   afterAll(() => {

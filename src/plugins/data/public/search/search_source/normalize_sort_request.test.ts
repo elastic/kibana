@@ -21,16 +21,24 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
 import { IIndexPattern } from '../..';
 
-jest.mock('ui/new_platform');
-
-describe('SearchSource#normalizeSortRequest', function() {
+describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {
-    name: 'script string',
+    name: 'script number',
     type: 'number',
     scripted: true,
     sortable: true,
     script: 'foo',
     lang: 'painless',
+  };
+  const stringScriptedField = {
+    ...scriptedField,
+    name: 'script string',
+    type: 'string',
+  };
+  const booleanScriptedField = {
+    ...scriptedField,
+    name: 'script boolean',
+    type: 'boolean',
   };
   const murmurScriptedField = {
     ...scriptedField,
@@ -39,10 +47,10 @@ describe('SearchSource#normalizeSortRequest', function() {
     type: 'murmur3',
   };
   const indexPattern = {
-    fields: [scriptedField, murmurScriptedField],
+    fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
   } as IIndexPattern;
 
-  it('should return an array', function() {
+  it('should return an array', function () {
     const sortable = { someField: SortDirection.desc };
     const result = normalizeSortRequest(sortable, indexPattern);
     expect(result).toEqual([
@@ -57,7 +65,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     expect(sortable).toEqual({ someField: SortDirection.desc });
   });
 
-  it('should make plain string sort into the more verbose format', function() {
+  it('should make plain string sort into the more verbose format', function () {
     const result = normalizeSortRequest([{ someField: SortDirection.desc }], indexPattern);
     expect(result).toEqual([
       {
@@ -68,7 +76,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should append default sort options', function() {
+  it('should append default sort options', function () {
     const defaultSortOptions = {
       unmapped_type: 'boolean',
     };
@@ -87,7 +95,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should enable script based sorting', function() {
+  it('should enable script based sorting', function () {
     const result = normalizeSortRequest(
       {
         [scriptedField.name]: SortDirection.desc,
@@ -108,7 +116,55 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should use script based sorting only on sortable types', function() {
+  it('should use script based sorting with string type', function () {
+    const result = normalizeSortRequest(
+      [
+        {
+          [stringScriptedField.name]: SortDirection.asc,
+        },
+      ],
+      indexPattern
+    );
+
+    expect(result).toEqual([
+      {
+        _script: {
+          script: {
+            source: stringScriptedField.script,
+            lang: stringScriptedField.lang,
+          },
+          type: 'string',
+          order: SortDirection.asc,
+        },
+      },
+    ]);
+  });
+
+  it('should use script based sorting with boolean type as string type', function () {
+    const result = normalizeSortRequest(
+      [
+        {
+          [booleanScriptedField.name]: SortDirection.asc,
+        },
+      ],
+      indexPattern
+    );
+
+    expect(result).toEqual([
+      {
+        _script: {
+          script: {
+            source: booleanScriptedField.script,
+            lang: booleanScriptedField.lang,
+          },
+          type: 'string',
+          order: SortDirection.asc,
+        },
+      },
+    ]);
+  });
+
+  it('should use script based sorting only on sortable types', function () {
     const result = normalizeSortRequest(
       [
         {
@@ -127,7 +183,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should remove unmapped_type parameter from _score sorting', function() {
+  it('should remove unmapped_type parameter from _score sorting', function () {
     const result = normalizeSortRequest({ _score: SortDirection.desc }, indexPattern, {
       unmapped_type: 'boolean',
     });

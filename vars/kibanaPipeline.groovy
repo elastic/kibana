@@ -1,100 +1,128 @@
-def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
-  return {
-    jobRunner('tests-xl', true) {
-      withGcsArtifactUpload(machineName, {
-        withPostBuildReporting {
-          doSetup()
-          preWorkerClosure()
+def withPostBuildReporting(Closure closure) {
+  try {
+    closure()
+  } finally {
+    def parallelWorkspaces = []
+    try {
+      parallelWorkspaces = getParallelWorkspaces()
+    } catch(ex) {
+      print ex
+    }
 
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
+    catchErrors {
+      runErrorReporter([pwd()] + parallelWorkspaces)
+    }
 
-            return {
-              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-              def delay = (workerNumber-1)*20
-              sleep(delay)
+    catchErrors {
+      publishJunit()
+    }
 
-              workerClosure(workerNumber)
+    catchErrors {
+      def parallelWorkspace = "${env.WORKSPACE}/parallel"
+      if (fileExists(parallelWorkspace)) {
+        dir(parallelWorkspace) {
+          def workspaceTasks = [:]
+
+          parallelWorkspaces.each { workspaceDir ->
+            workspaceTasks[workspaceDir] = {
+              dir(workspaceDir) {
+                catchErrors {
+                  runbld.junit()
+                }
+              }
             }
           }
 
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
+          if (workspaceTasks) {
+            parallel(workspaceTasks)
           }
-
-          parallel(workers)
-        }
-      })
-    }
-  }
-}
-
-def withWorker(machineName, label, Closure closure) {
-  return {
-    jobRunner(label, false) {
-      withGcsArtifactUpload(machineName) {
-        withPostBuildReporting {
-          doSetup()
-          closure()
         }
       }
     }
   }
 }
 
-def intakeWorker(jobName, String script) {
-  return withWorker(jobName, 'linux && immutable') {
-    withEnv([
-      "JOB=${jobName}",
-    ]) {
-      runbld(script, "Execute ${jobName}")
+def getParallelWorkspaces() {
+  def workspaces = []
+  def parallelWorkspace = "${env.WORKSPACE}/parallel"
+  if (fileExists(parallelWorkspace)) {
+    dir(parallelWorkspace) {
+      // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
+      workspaces = findFiles(glob: '*/kibana/package.json')
+        .collect {
+          // get the paths to the kibana directories for the parallel workspaces
+          return parallelWorkspace + '/' + it.path.tokenize('/').dropRight(1).join('/')
+        }
     }
   }
+
+  return workspaces
 }
 
-def withPostBuildReporting(Closure closure) {
+def notifyOnError(Closure closure) {
   try {
     closure()
-  } finally {
-    catchError {
-      runErrorReporter()
+  } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
+    catchErrors {
+      githubPr.sendComment(false)
     }
-
-    catchError {
-      runbld.junit()
+    catchErrors {
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
+      }
     }
+    throw ex
+  }
+}
 
-    catchError {
-      publishJunit()
+def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
+  // This can go away once everything that uses the deprecated workers.parallelProcesses() is moved to task queue
+  def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
+
+  def kibanaPort = "61${parallelId}1"
+  def esPort = "61${parallelId}2"
+  def esTransportPort = "61${parallelId}3"
+  def ingestManagementPackageRegistryPort = "61${parallelId}4"
+  def alertingProxyPort = "61${parallelId}5"
+
+  withEnv([
+    "CI_GROUP=${parallelId}",
+    "REMOVE_KIBANA_INSTALL_DIR=1",
+    "CI_PARALLEL_PROCESS_NUMBER=${parallelId}",
+    "TEST_KIBANA_HOST=localhost",
+    "TEST_KIBANA_PORT=${kibanaPort}",
+    "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
+    "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+    "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+    "KBN_NP_PLUGINS_BUILT=true",
+    "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
+    "ALERTING_PROXY_PORT=${alertingProxyPort}"
+  ] + additionalEnvs) {
+    closure()
+  }
+}
+
+def functionalTestProcess(String name, Closure closure) {
+  return {
+    withFunctionalTestEnv(["JOB=${name}"], closure)
+  }
+}
+
+def functionalTestProcess(String name, String script) {
+  return functionalTestProcess(name) {
+    notifyOnError {
+      retryable(name) {
+        runbld(script, "Execute ${name}")
+      }
     }
   }
 }
 
-def getPostBuildWorker(name, closure) {
-  return { workerNumber ->
-    def kibanaPort = "61${workerNumber}1"
-    def esPort = "61${workerNumber}2"
-    def esTransportPort = "61${workerNumber}3"
-
-    withEnv([
-      "CI_WORKER_NUMBER=${workerNumber}",
-      "TEST_KIBANA_HOST=localhost",
-      "TEST_KIBANA_PORT=${kibanaPort}",
-      "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
-      "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
-      "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "IS_PIPELINE_JOB=1",
-    ]) {
-      closure()
-    }
-  }
-}
-
-def getOssCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("ciGroup" + ciGroup, {
+def ossCiGroupProcess(ciGroup) {
+  return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -103,67 +131,17 @@ def getOssCiGroupWorker(ciGroup) {
         runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
       }
     }
-  })
+  }
 }
 
-def getXpackCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+def xpackCiGroupProcess(ciGroup) {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
       retryable("xpack-kibana-ciGroup${ciGroup}") {
         runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
-      }
-    }
-  })
-}
-
-def jobRunner(label, useRamDisk, closure) {
-  node(label) {
-    agentInfo.print()
-
-    if (useRamDisk) {
-      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
-      def originalWorkspace = env.WORKSPACE
-      ws('/tmp/workspace') {
-        sh(
-          script: """
-            mkdir -p /dev/shm/workspace
-            mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-            rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
-            ln -s /dev/shm/workspace '${originalWorkspace}'
-          """,
-          label: "Move workspace to RAM - /dev/shm/workspace"
-        )
-      }
-    }
-
-    def scmVars
-
-    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retryWithDelay(8, 15) {
-      scmVars = checkout scm
-    }
-
-    withEnv([
-      "CI=true",
-      "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
-      "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
-    ]) {
-      withCredentials([
-        string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
-        string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
-        string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
-      ]) {
-        // scm is configured to check out to the ./kibana directory
-        dir('kibana') {
-          closure()
-        }
       }
     }
   }
@@ -195,10 +173,17 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
+    'target/test-metrics/*',
+    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
-    'test/**/screenshots/**/*.png',
+    'target/test-suites-ci-plan.json',
+    'test/**/screenshots/session/*.png',
+    'test/**/screenshots/failure/*.png',
+    'test/**/screenshots/diff/*.png',
     'test/functional/failure_debug/html/*.html',
-    'x-pack/test/**/screenshots/**/*.png',
+    'x-pack/test/**/screenshots/session/*.png',
+    'x-pack/test/**/screenshots/failure/*.png',
+    'x-pack/test/**/screenshots/diff/*.png',
     'x-pack/test/functional/failure_debug/html/*.html',
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
   ]
@@ -209,9 +194,15 @@ def withGcsArtifactUpload(workerName, closure) {
     try {
       closure()
     } finally {
-      catchError {
+      catchErrors {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
+        }
+
+        dir(env.WORKSPACE) {
+          ARTIFACT_PATTERNS.each { pattern ->
+            uploadGcsArtifact(uploadPrefix, "parallel/*/kibana/${pattern}")
+          }
         }
       }
     }
@@ -225,9 +216,13 @@ def withGcsArtifactUpload(workerName, closure) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+
+  dir(env.WORKSPACE) {
+    junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  }
 }
 
-def sendMail() {
+def sendMail(Map params = [:]) {
   // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
   // The e-mail plugin for the infra e-mail depends upon this being set
   currentBuild.result = currentBuild.result ?: 'SUCCESS'
@@ -236,13 +231,13 @@ def sendMail() {
   if (buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
     node('flyweight') {
       sendInfraMail()
-      sendKibanaMail()
+      sendKibanaMail(params)
     }
   }
 }
 
 def sendInfraMail() {
-  catchError {
+  catchErrors {
     step([
       $class: 'Mailer',
       notifyEveryUnstableBuild: true,
@@ -252,12 +247,14 @@ def sendInfraMail() {
   }
 }
 
-def sendKibanaMail() {
-  catchError {
+def sendKibanaMail(Map params = [:]) {
+  def config = [to: 'build-kibana@elastic.co'] + params
+
+  catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
-        to: 'build-kibana@elastic.co',
+        config.to,
         subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
@@ -274,28 +271,194 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  notifyOnError {
+    retryWithDelay(2, 15) {
+      try {
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
+      }
+    }
+  }
 }
 
-def buildOss() {
-  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+def buildOss(maxWorkers = '') {
+  notifyOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+    }
+  }
 }
 
-def buildXpack() {
-  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+def buildXpack(maxWorkers = '') {
+  notifyOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+    }
+  }
 }
 
 def runErrorReporter() {
+  return runErrorReporter([pwd()])
+}
+
+def runErrorReporter(workspaces) {
   def status = buildUtils.getBuildStatus()
   def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
+  def globs = workspaces.collect { "'${it}/target/junit/**/*.xml'" }.join(" ")
 
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )
+}
+
+def call(Map params = [:], Closure closure) {
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
+
+  stage("Kibana Pipeline") {
+    timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
+      timestamps {
+        ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
+          if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Creates a task queue using withTaskQueue, and copies the bootstrapped kibana repo into each process's workspace
+// Note that node_modules are mostly symlinked to save time/space. See test/scripts/jenkins_setup_parallel_workspace.sh
+def withCiTaskQueue(Map options = [:], Closure closure) {
+  def setupClosure = {
+    // This can't use runbld, because it expects the source to be there, which isn't yet
+    bash("${env.WORKSPACE}/kibana/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
+  }
+
+  def config = [parallel: 24, setup: setupClosure] + options
+
+  withTaskQueue(config) {
+    closure.call()
+  }
+}
+
+def scriptTask(description, script) {
+  return {
+    withFunctionalTestEnv {
+      notifyOnError {
+        runbld(script, description)
+      }
+    }
+  }
+}
+
+def scriptTaskDocker(description, script) {
+  return {
+    withDocker(scriptTask(description, script))
+  }
+}
+
+def buildDocker() {
+  sh(
+    script: """
+      cp /usr/local/bin/runbld .ci/
+      cp /usr/local/bin/bash_standard_lib.sh .ci/
+      cd .ci
+      docker build -t kibana-ci -f ./Dockerfile .
+    """,
+    label: 'Build CI Docker image'
+  )
+}
+
+def withDocker(Closure closure) {
+  docker
+    .image('kibana-ci')
+    .inside(
+      "-v /etc/runbld:/etc/runbld:ro -v '${env.JENKINS_HOME}:${env.JENKINS_HOME}' -v '/dev/shm/workspace:/dev/shm/workspace' --shm-size 2GB --cpus 4",
+      closure
+    )
+}
+
+def buildOssPlugins() {
+  runbld('./test/scripts/jenkins_build_plugins.sh', 'Build OSS Plugins')
+}
+
+def buildXpackPlugins() {
+  runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
+}
+
+def withTasks(Map params = [worker: [:]], Closure closure) {
+  catchErrors {
+    def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
+
+    workers.ci(config) {
+      withCiTaskQueue(parallel: 24) {
+        parallel([
+          docker: {
+            retry(2) {
+              buildDocker()
+            }
+          },
+
+          // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
+          ossPlugins: { buildOssPlugins() },
+          xpackPlugins: { buildXpackPlugins() },
+        ])
+
+        catchErrors {
+          closure()
+        }
+      }
+    }
+  }
+}
+
+def allCiTasks() {
+  withTasks {
+    tasks.check()
+    tasks.lint()
+    tasks.test()
+    tasks.functionalOss()
+    tasks.functionalXpack()
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
+      }
+    }
+  }
 }
 
 return this

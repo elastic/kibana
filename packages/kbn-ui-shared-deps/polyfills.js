@@ -20,6 +20,13 @@
 require('core-js/stable');
 require('regenerator-runtime/runtime');
 require('custom-event-polyfill');
+
+if (typeof window.Event === 'object') {
+  // IE11 doesn't support unknown event types, required by react-use
+  // https://github.com/streamich/react-use/issues/73
+  window.Event = CustomEvent;
+}
+
 require('whatwg-fetch');
 require('abortcontroller-polyfill/dist/polyfill-patch-fetch');
 require('./vendor/childnode_remove_polyfill');

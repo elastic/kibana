@@ -3,13 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './change_all_privileges.scss';
+
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { KibanaPrivilege } from '../../../../model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 interface Props {
   onChange: (privilege: string) => void;
-  privileges: string[];
+  privileges: KibanaPrivilege[];
   disabled?: boolean;
 }
 
@@ -24,7 +29,11 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiLink onClick={this.onButtonClick} className={'secPrivilegeFeatureChangeAllLink'}>
+      <EuiLink
+        onClick={this.onButtonClick}
+        className={'secPrivilegeFeatureChangeAllLink'}
+        data-test-subj="changeAllPrivilegesButton"
+      >
         <FormattedMessage
           id="xpack.security.management.editRole.changeAllPrivilegesLink"
           defaultMessage="(change all)"
@@ -32,19 +41,33 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = this.props.privileges.map(privilege => {
+    const items = this.props.privileges.map((privilege) => {
       return (
         <EuiContextMenuItem
-          key={privilege}
+          key={privilege.id}
+          data-test-subj={`changeAllPrivileges-${privilege.id}`}
           onClick={() => {
-            this.onSelectPrivilege(privilege);
+            this.onSelectPrivilege(privilege.id);
           }}
           disabled={this.props.disabled}
         >
-          {_.capitalize(privilege)}
+          {_.upperFirst(privilege.id)}
         </EuiContextMenuItem>
       );
     });
+
+    items.push(
+      <EuiContextMenuItem
+        key={NO_PRIVILEGE_VALUE}
+        data-test-subj={`changeAllPrivileges-${NO_PRIVILEGE_VALUE}`}
+        onClick={() => {
+          this.onSelectPrivilege(NO_PRIVILEGE_VALUE);
+        }}
+        disabled={this.props.disabled}
+      >
+        {_.upperFirst(NO_PRIVILEGE_VALUE)}
+      </EuiContextMenuItem>
+    );
 
     return (
       <EuiPopover

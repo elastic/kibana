@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 
+import classNames from 'classnames';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBarProps, DataPublicPluginStart } from '../../../data/public';
+import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
 
-export type TopNavMenuProps = Partial<SearchBarProps> & {
-  appName: string;
+export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
+  showQueryBar?: boolean;
+  showQueryInput?: boolean;
+  showDatePicker?: boolean;
+  showFilterBar?: boolean;
   data?: DataPublicPluginStart;
+  className?: string;
 };
 
 /*
@@ -42,44 +46,62 @@ export type TopNavMenuProps = Partial<SearchBarProps> & {
  *
  **/
 
-export function TopNavMenu(props: TopNavMenuProps) {
+export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   const { config, showSearchBar, ...searchBarProps } = props;
-  function renderItems() {
-    if (!config) return;
+
+  if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
+    return null;
+  }
+
+  function renderItems(): ReactElement[] | null {
+    if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
       return (
-        <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
+        <EuiFlexItem
+          grow={false}
+          key={`nav-menu-${i}`}
+          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
+        >
           <TopNavMenuItem {...menuItem} />
         </EuiFlexItem>
       );
     });
   }
 
-  function renderSearchBar() {
+  function renderMenu(className: string): ReactElement | null {
+    if (!config || config.length === 0) return null;
+    return (
+      <EuiFlexGroup
+        data-test-subj="top-nav"
+        justifyContent="flexStart"
+        alignItems="center"
+        gutterSize="none"
+        className={className}
+        responsive={false}
+      >
+        {renderItems()}
+      </EuiFlexGroup>
+    );
+  }
+
+  function renderSearchBar(): ReactElement | null {
     // Validate presense of all required fields
-    if (!showSearchBar || !props.data) return;
+    if (!showSearchBar || !props.data) return null;
     const { SearchBar } = props.data.ui;
     return <SearchBar {...searchBarProps} />;
   }
 
   function renderLayout() {
+    const className = classNames('kbnTopNavMenu', props.className);
     return (
       <span className="kbnTopNavMenu__wrapper">
-        <EuiFlexGroup
-          data-test-subj="top-nav"
-          justifyContent="flexStart"
-          gutterSize="none"
-          className="kbnTopNavMenu"
-          responsive={false}
-        >
-          {renderItems()}
-        </EuiFlexGroup>
+        {renderMenu(className)}
         {renderSearchBar()}
       </span>
     );
   }
 
-  return <I18nProvider>{renderLayout()}</I18nProvider>;
+  return renderLayout();
 }
 
 TopNavMenu.defaultProps = {

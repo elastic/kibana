@@ -9,7 +9,7 @@ NOTE: All commands here should be run as the user which will run Kibana.
 
 [float]
 [[creating-keystore]]
-=== Creating the keystore
+=== Create the keystore
 
 To create the `kibana.keystore`, use the `create` command:
 
@@ -23,7 +23,7 @@ The file `kibana.keystore` will be created in the directory defined by the
 
 [float]
 [[list-settings]]
-=== Listing settings in the keystore
+=== List settings in the keystore
 
 A list of the settings in the keystore is available with the `list` command:
 
@@ -34,7 +34,7 @@ bin/kibana-keystore list
 
 [float]
 [[add-string-to-keystore]]
-=== Adding string settings
+=== Add string settings
 
 Sensitive string settings, like authentication credentials for Elasticsearch
 can be added using the `add` command:
@@ -65,7 +65,7 @@ cat /file/containing/setting/value | bin/kibana-keystore add the.setting.name.to
 
 [float]
 [[remove-settings]]
-=== Removing settings
+=== Remove settings
 
 To remove a setting from the keystore, use the `remove` command:
 

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { legacyBackDoorToSettings } from '../../application';
-
-const $ = require('jquery');
-const _ = require('lodash');
-const es = require('../es/es');
+import $ from 'jquery';
+import _ from 'lodash';
+import * as es from '../es/es';
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
@@ -34,7 +32,7 @@ let templates = [];
 
 const mappingObj = {};
 
-function expandAliases(indicesOrAliases) {
+export function expandAliases(indicesOrAliases) {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
   // returns a list for multiple values or a string for a single.
 
@@ -45,7 +43,7 @@ function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function(iOrA) {
+  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
     }
@@ -54,7 +52,7 @@ function expandAliases(indicesOrAliases) {
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
   let last;
-  ret = $.map(ret, function(v) {
+  ret = $.map(ret, function (v) {
     const r = last === v ? null : v;
     last = v;
     return r;
@@ -62,11 +60,11 @@ function expandAliases(indicesOrAliases) {
   return ret.length > 1 ? ret : ret[0];
 }
 
-function getTemplates() {
+export function getTemplates() {
   return [...templates];
 }
 
-function getFields(indices, types) {
+export function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret = [];
   indices = expandAliases(indices);
@@ -82,7 +80,7 @@ function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function(type, fields) {
+      $.each(typeDict, function (type, fields) {
         if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
           ret.push(fields);
         }
@@ -92,7 +90,7 @@ function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function(index) {
+    $.each(perIndexTypes, function (index) {
       if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
         ret.push(getFields(index, types));
       }
@@ -100,12 +98,12 @@ function getFields(indices, types) {
     ret = [].concat.apply([], ret);
   }
 
-  return _.uniq(ret, function(f) {
+  return _.uniqBy(ret, function (f) {
     return f.name + ':' + f.type;
   });
 }
 
-function getTypes(indices) {
+export function getTypes(indices) {
   let ret = [];
   indices = expandAliases(indices);
   if (typeof indices === 'string') {
@@ -115,12 +113,12 @@ function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function(type) {
+    $.each(typeDict, function (type) {
       ret.push(type);
     });
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function(index) {
+    $.each(perIndexTypes, function (index) {
       if (!indices || $.inArray(index, indices) !== -1) {
         ret.push(getTypes(index));
       }
@@ -131,13 +129,13 @@ function getTypes(indices) {
   return _.uniq(ret);
 }
 
-function getIndices(includeAliases) {
+export function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function(index) {
+  $.each(perIndexTypes, function (index) {
     ret.push(index);
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function(alias) {
+    $.each(perAliasIndexes, function (alias) {
       ret.push(alias);
     });
   }
@@ -153,7 +151,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function(f) {
+      return $.map(nestedFieldNames, function (f) {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -176,7 +174,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function(fieldMapping, fieldName) {
+    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -188,12 +186,12 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList = $.map(properties, function(fieldMapping, fieldName) {
+  const fieldList = $.map(properties, function (fieldMapping, fieldName) {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
 
   // deduping
-  return _.uniq(fieldList, function(f) {
+  return _.uniqBy(fieldList, function (f) {
     return f.name + ':' + f.type;
   });
 }
@@ -202,10 +200,10 @@ function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
-function loadMappings(mappings) {
+export function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function(index, indexMapping) {
+  $.each(mappings, function (index, indexMapping) {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
@@ -213,7 +211,7 @@ function loadMappings(mappings) {
       indexMapping = indexMapping.mappings;
     }
 
-    $.each(indexMapping, function(typeName, typeMapping) {
+    $.each(indexMapping, function (typeName, typeMapping) {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -226,13 +224,13 @@ function loadMappings(mappings) {
   });
 }
 
-function loadAliases(aliases) {
+export function loadAliases(aliases) {
   perAliasIndexes = {};
-  $.each(aliases || {}, function(index, omdexAliases) {
+  $.each(aliases || {}, function (index, omdexAliases) {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function(alias) {
+    $.each(omdexAliases.aliases || {}, function (alias) {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
@@ -248,14 +246,13 @@ function loadAliases(aliases) {
   perAliasIndexes._all = getIndices(false);
 }
 
-function clear() {
+export function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
   templates = [];
 }
 
 function retrieveSettings(settingsKey, settingsToRetrieve) {
-  const currentSettings = legacyBackDoorToSettings().getAutocomplete();
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -263,16 +260,17 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
-  if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
+  if (settingsToRetrieve[settingsKey] === true) {
     return es.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
-    // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
-    if (currentSettings[settingsKey]) {
+    if (settingsToRetrieve[settingsKey] === false) {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
+      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
+    } else {
+      // If the user doesn't want autocomplete suggestions, then clear any that exist
       return settingsPromise.resolve();
     }
-    // If the user doesn't want autocomplete suggestions, then clear any that exist
-    return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
   }
 }
 
@@ -287,15 +285,18 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-function clearSubscriptions() {
+export function clearSubscriptions() {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
   }
 }
 
-function retrieveAutoCompleteInfo(
-  settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()
-) {
+/**
+ *
+ * @param settings Settings A way to retrieve the current settings
+ * @param settingsToRetrieve any
+ */
+export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
@@ -334,22 +335,9 @@ function retrieveAutoCompleteInfo(
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
-      if (legacyBackDoorToSettings().getPolling()) {
-        retrieveAutoCompleteInfo();
+      if (settings.getPolling()) {
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
     }, POLL_INTERVAL);
   });
 }
-
-export default {
-  getFields,
-  getTemplates,
-  getIndices,
-  getTypes,
-  loadMappings,
-  loadAliases,
-  expandAliases,
-  clear,
-  retrieveAutoCompleteInfo,
-  clearSubscriptions,
-};

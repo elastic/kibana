@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { Feature } from '../../../../../plugins/features/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -86,10 +86,7 @@ export default function({ getService }: FtrProviderContext) {
 
     describe('with trial license', () => {
       it('should return a full feature set', async () => {
-        const { body } = await supertest
-          .get('/api/features')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.get('/api/features').set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.be.an(Array);
 
@@ -100,6 +97,8 @@ export default function({ getService }: FtrProviderContext) {
             'visualize',
             'dashboard',
             'dev_tools',
+            'actions',
+            'enterpriseSearch',
             'advancedSettings',
             'indexPatterns',
             'timelion',
@@ -108,13 +107,14 @@ export default function({ getService }: FtrProviderContext) {
             'savedObjectsManagement',
             'ml',
             'apm',
+            'builtInAlerts',
             'canvas',
             'infrastructure',
             'logs',
             'maps',
             'uptime',
             'siem',
-            'endpoint',
+            'ingestManager',
           ].sort()
         );
       });

@@ -17,7 +17,7 @@ export function registerLicenseChecker(server, pluginId, pluginName, minimumLice
     // to re-compute the license check results for this plugin
     xpackMainPlugin.info
       .feature(pluginId)
-      .registerLicenseCheckResultsGenerator(xpackLicenseInfo => {
+      .registerLicenseCheckResultsGenerator((xpackLicenseInfo) => {
         return checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo);
       });
   });

@@ -8,24 +8,8 @@ import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../src/core/server';
-import { SpacesServiceSetup } from '../../../plugins/spaces/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
-// @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
-import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
-import { migrateToKibana660 } from './server/lib/migrations';
-// @ts-ignore
-import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
-
-export interface LegacySpacesPlugin {
-  getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
-  getActiveSpace: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getActiveSpace']>;
-  spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
-  namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
-  getBasePath: SpacesServiceSetup['getBasePath'];
-}
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -33,46 +17,14 @@ export const spaces = (kibana: Record<string, any>) =>
     configPrefix: 'xpack.spaces',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-
-    uiCapabilities() {
-      return {
-        spaces: {
-          manage: true,
-        },
-        management: {
-          kibana: {
-            spaces: true,
-          },
-        },
-      };
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
+        .unknown()
+        .default();
     },
-
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: [],
-      apps: [
-        {
-          id: 'space_selector',
-          title: 'Spaces',
-          main: 'plugins/spaces/space_selector',
-          url: 'space_selector',
-          hidden: true,
-        },
-      ],
-      hacks: ['plugins/spaces/legacy'],
-      mappings,
-      migrations: {
-        space: {
-          '6.6.0': migrateToKibana660,
-        },
-      },
-      savedObjectSchemas: {
-        space: {
-          isNamespaceAgnostic: true,
-          hidden: true,
-        },
-      },
-      home: [],
       injectDefaultVars(server: Server) {
         return {
           serverBasePath: server.config().get('server.basePath'),
@@ -86,7 +38,7 @@ export const spaces = (kibana: Record<string, any>) =>
       ) {
         // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
         // Known usages:
-        // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
+        // - x-pack/plugins/infra/public/utils/use_kibana_space_id.ts
         const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');
@@ -117,29 +69,6 @@ export const spaces = (kibana: Record<string, any>) =>
       if (!spacesPlugin) {
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
-
-      const config = server.config();
-
-      const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
-
-      registerLegacyAPI({
-        legacyConfig: {
-          kibanaIndex: config.get('kibana.index'),
-        },
-        savedObjects: server.savedObjects,
-        auditLogger: {
-          create: (pluginId: string) =>
-            new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
-        },
-        xpackMain: server.plugins.xpack_main,
-      });
-
-      initEnterSpaceView(server);
-      initSpaceSelectorView(server);
-
-      watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-        await createDefaultSpace();
-      });
 
       server.expose('getSpaceId', (request: Legacy.Request) =>
         spacesPlugin.spacesService.getSpaceId(request)

@@ -58,9 +58,9 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
 
   return pipe(
     serverArgs,
-    args => (installDir ? args.filter(a => a !== '--oss') : args),
-    args => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    args => args.concat(extraKbnOpts || [])
+    (args) => (installDir ? args.filter((a) => a !== '--oss') : args),
+    (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
+    (args) => args.concat(extraKbnOpts || [])
   );
 }
 
@@ -79,7 +79,7 @@ function filterCliArgs(args) {
     // the current val. If so, skip this val.
     if (
       !allowsDuplicate(val) &&
-      findIndexFrom(args, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1
+      findIndexFrom(args, ++ind, (opt) => opt.split('=')[0] === val.split('=')[0]) > -1
     ) {
       return acc;
     }
@@ -112,7 +112,7 @@ function isBasePathSettingOverridden(args, val, ind) {
   const basePathKeys = ['--no-base-path', '--server.basePath'];
 
   if (basePathKeys.includes(key)) {
-    if (findIndexFrom(args, ++ind, opt => basePathKeys.includes(opt.split('=')[0])) > -1) {
+    if (findIndexFrom(args, ++ind, (opt) => basePathKeys.includes(opt.split('=')[0])) > -1) {
       return true;
     }
   }

@@ -40,10 +40,14 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
-  optimize: boolean;
   open: boolean;
   oss: boolean;
+  /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
+  optimize?: boolean;
   runExamples: boolean;
+  disableOptimizer: boolean;
+  cache: boolean;
+  dist: boolean;
 }
 
 export class Env {
@@ -100,11 +104,18 @@ export class Env {
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
 
+    /**
+     * BEWARE: this needs to stay roughly synchronized with the @kbn/optimizer
+     * `packages/kbn-optimizer/src/optimizer_config.ts` determines the paths
+     * that should be searched for plugins to build
+     */
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
       ...(options.cliArgs.oss ? [] : [resolve(this.homeDir, 'x-pack', 'plugins')]),
       resolve(this.homeDir, 'plugins'),
-      ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
+      ...(options.cliArgs.runExamples
+        ? [resolve(this.homeDir, 'examples'), resolve(this.homeDir, 'x-pack', 'examples')]
+        : []),
       resolve(this.homeDir, '..', 'kibana-extra'),
     ];
 

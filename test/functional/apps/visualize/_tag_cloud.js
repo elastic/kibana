@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
   const inspector = getService('inspector');
@@ -37,11 +37,11 @@ export default function({ getService, getPageObjects }) {
     'tagCloud',
   ]);
 
-  describe('tag cloud chart', function() {
+  describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
     const termsField = 'machine.ram';
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickTagCloud');
@@ -60,11 +60,11 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct tag cloud data', async function() {
+    it('should show correct tag cloud data', async function () {
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
@@ -76,7 +76,7 @@ export default function({ getService, getPageObjects }) {
       ]);
     });
 
-    it('should collapse the sidebar', async function() {
+    it('should collapse the sidebar', async function () {
       const editorSidebar = await find.byCssSelector('.visEditorSidebar');
       await PageObjects.visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
@@ -86,7 +86,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickEditorSidebarCollapse();
     });
 
-    it('should still show all tags after sidebar has been collapsed', async function() {
+    it('should still show all tags after sidebar has been collapsed', async function () {
       await PageObjects.visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
@@ -104,7 +104,7 @@ export default function({ getService, getPageObjects }) {
       ]);
     });
 
-    it('should still show all tags after browser was resized very small', async function() {
+    it('should still show all tags after browser was resized very small', async function () {
       await browser.setWindowSize(200, 200);
       await PageObjects.common.sleep(1000);
       await browser.setWindowSize(1200, 800);
@@ -119,21 +119,21 @@ export default function({ getService, getPageObjects }) {
       ]);
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should show the tags and relative size', function() {
-      return PageObjects.tagCloud.getTextSizes().then(function(results) {
+    it('should show the tags and relative size', function () {
+      return PageObjects.tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
         expect(results).to.eql(['72px', '63px', '25px', '32px', '18px']);
       });
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       const expectedTableData = [
         ['32,212,254,720', '737'],
         ['21,474,836,480', '728'],
@@ -147,8 +147,8 @@ export default function({ getService, getPageObjects }) {
       await inspector.expectTableData(expectedTableData);
     });
 
-    describe('formatted field', function() {
-      before(async function() {
+    describe('formatted field', function () {
+      before(async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -165,7 +165,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visChart.waitForVisualization();
       });
 
-      after(async function() {
+      after(async function () {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -176,13 +176,13 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.controlChangeSave();
       });
 
-      it('should format tags with field formatter', async function() {
+      it('should format tags with field formatter', async function () {
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
         expect(data).to.eql(['30GB', '20GB', '19GB', '18GB', '17GB']);
       });
 
-      it('should apply filter with unformatted value', async function() {
+      it('should apply filter with unformatted value', async function () {
         await PageObjects.tagCloud.selectTagCloudTag('30GB');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.tagCloud.getTextTag();

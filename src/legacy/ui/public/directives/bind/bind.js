@@ -20,7 +20,7 @@
 import angular from 'angular';
 import { uiModules } from '../../modules';
 
-uiModules.get('kibana').config(function($provide) {
+uiModules.get('kibana').config(function ($provide) {
   function strictEquality(a, b) {
     // are the values equal? or, are they both NaN?
     return a === b || (a !== a && b !== b);
@@ -37,7 +37,7 @@ uiModules.get('kibana').config(function($provide) {
     );
   }
 
-  $provide.decorator('$rootScope', function($delegate, $parse) {
+  $provide.decorator('$rootScope', function ($delegate, $parse) {
     /**
      * Two-way bind a value from scope to another property on scope. This
      * allow values on scope that work like they do in an isolate scope, but
@@ -48,7 +48,7 @@ uiModules.get('kibana').config(function($provide) {
      * @param  {Scope} $sourceScope - the scope to read "from" expression from
      * @return {undefined}
      */
-    $delegate.constructor.prototype.$bind = function(to, from, $sourceScope) {
+    $delegate.constructor.prototype.$bind = function (to, from, $sourceScope) {
       const $source = $sourceScope || this.$parent;
       const $target = this;
 
@@ -58,16 +58,16 @@ uiModules.get('kibana').config(function($provide) {
       const $from = $parse(from);
 
       // bind scopes to expressions
-      const getTarget = function() {
+      const getTarget = function () {
         return $to($target);
       };
-      const setTarget = function(v) {
+      const setTarget = function (v) {
         return $to.assign($target, v);
       };
-      const getSource = function() {
+      const getSource = function () {
         return $from($source);
       };
-      const setSource = function(v) {
+      const setSource = function (v) {
         return $from.assignOrFail($source, v);
       };
 
@@ -80,7 +80,7 @@ uiModules.get('kibana').config(function($provide) {
 
       $from.assignOrFail =
         $from.assign ||
-        function() {
+        function () {
           // revert the change and throw an error, child writes aren't supported
           $to($target, (lastSourceVal = $from($source)));
           errorNotAssignable(from, to);
@@ -94,7 +94,7 @@ uiModules.get('kibana').config(function($provide) {
       setTarget(lastSourceVal);
 
       $target.$watch(
-        function() {
+        function () {
           const sourceVal = getSource();
           const targetVal = getTarget();
 

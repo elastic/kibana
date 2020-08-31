@@ -20,7 +20,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { text, to } = action;
-  const toOptions = to ? to.map(label => ({ label })) : [];
+  const toOptions = to ? to.map((label) => ({ label })) : [];
 
   return (
     <Fragment>
@@ -41,12 +41,12 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           data-test-subj="slackRecipientComboBox"
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
-            editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
+            editAction({ key: 'to', value: newOptions.map((newOption) => newOption.label) });
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction({
               key: 'to',
-              value: selectedOptions.map(selectedOption => selectedOption.label),
+              value: selectedOptions.map((selectedOption) => selectedOption.label),
             });
           }}
         />
@@ -66,7 +66,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           name="text"
           value={text}
           data-test-subj="slackMessageTextarea"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'text', value: e.target.value });
           }}
         />

@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { CSV_QUOTE_VALUES_SETTING } from '../../../../../../src/plugins/share/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
@@ -20,9 +21,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   const expectResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
+    if (result.response && result.response.statusCode === 400) {
+      // expect a change of telemetry settings to fail in cloud environment
+      expect(result.response.body.message).to.be(
+        '{"error":"Not allowed to change Opt-in Status."}'
+      );
+    } else {
+      expect(result.error).to.be(undefined);
+      expect(result.response).not.to.be(undefined);
+      expect(result.response).to.have.property('statusCode', 200);
+    }
   };
 
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {
@@ -32,7 +40,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .post(`${basePath}/api/kibana/settings`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
-      .send({ changes: { 'csv:quoteValues': null } })
+      .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }

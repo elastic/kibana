@@ -17,31 +17,78 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { ManagementSetup, ManagementStart } from './types';
-import { ManagementService } from './management_service';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
-// @ts-ignore
-import { LegacyManagementAdapter } from './legacy';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
+  AppMountParameters,
+} from '../../../core/public';
+
+import {
+  ManagementSectionsService,
+  getSectionsServiceStartPrivate,
+} from './management_sections_service';
+
+interface ManagementSetupDependencies {
+  home?: HomePublicPluginSetup;
+}
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
-  private managementSections = new ManagementService();
-  private legacyManagement = new LegacyManagementAdapter();
+  private readonly managementSections = new ManagementSectionsService();
 
-  public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
+    const kibanaVersion = this.initializerContext.env.packageInfo.version;
+
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'stack-management',
+        title: i18n.translate('management.stackManagement.managementLabel', {
+          defaultMessage: 'Stack Management',
+        }),
+        description: i18n.translate('management.stackManagement.managementDescription', {
+          defaultMessage: 'Your center console for managing the Elastic Stack.',
+        }),
+        icon: 'managementApp',
+        path: '/app/management',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
+    core.application.register({
+      id: 'management',
+      title: i18n.translate('management.stackManagement.title', {
+        defaultMessage: 'Stack Management',
+      }),
+      order: 9040,
+      euiIconType: 'managementApp',
+      category: DEFAULT_APP_CATEGORIES.management,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+
+        return renderApp(params, {
+          sections: getSectionsServiceStartPrivate(),
+          kibanaVersion,
+          setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+        });
+      },
+    });
+
     return {
-      sections: this.managementSections.setup(
-        kibana_legacy,
-        this.legacyManagement.getManagement,
-        core.getStartServices
-      ),
+      sections: this.managementSections.setup(),
     };
   }
 
   public start(core: CoreStart) {
-    return {
-      sections: this.managementSections.start(core.application.navigateToApp),
-      legacy: this.legacyManagement.init(core.application.capabilities),
-    };
+    this.managementSections.start({ capabilities: core.application.capabilities });
+    return {};
   }
 }

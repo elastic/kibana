@@ -2,8 +2,12 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> downloading es snapshot"
-node scripts/es snapshot --license=oss --download-only;
+if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
+  ./test/scripts/jenkins_build_plugins.sh
+fi
+
+# doesn't persist, also set in kibanaPipeline.groovy
+export KBN_NP_PLUGINS_BUILT=true
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 yarn run grunt functionalTests:ensureAllTestsInCiGroup;
@@ -12,4 +16,7 @@ yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 if [[ -z "$CODE_COVERAGE" ]] ; then
   echo " -> building and extracting OSS Kibana distributable for use in functional tests"
   node scripts/build --debug --oss
+
+  mkdir -p "$WORKSPACE/kibana-build-oss"
+  cp -pR build/oss/kibana-*-SNAPSHOT-linux-x86_64/. $WORKSPACE/kibana-build-oss/
 fi

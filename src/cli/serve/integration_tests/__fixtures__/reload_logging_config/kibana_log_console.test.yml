@@ -1,0 +1,22 @@
+server:
+  autoListen: false
+  port: 8274
+logging:
+  loggers:
+    - context: root
+      appenders:
+        - console
+      level: debug
+  appenders:
+    console:
+      kind: console
+      layout:
+        kind: json
+  root:
+    level: debug
+optimize:
+  enabled: false
+plugins:
+  initialize: false
+migrations:
+  skip: true

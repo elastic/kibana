@@ -13,15 +13,27 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { ConfigType } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
 
-const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
+const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = [
+  'any',
+  'copySavedObjectsIntoSpace',
+  'findSavedObjects',
+  'shareSavedObjectsIntoSpace',
+];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
-  (authorization: SecurityPluginSetup['authz']) => string
+  (authorization: SecurityPluginSetup['authz']) => string[]
 > = {
-  any: authorization => authorization.actions.login,
-  copySavedObjectsIntoSpace: authorization =>
+  any: (authorization) => [authorization.actions.login],
+  copySavedObjectsIntoSpace: (authorization) => [
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+  ],
+  findSavedObjects: (authorization) => {
+    return [authorization.actions.savedObject.get('config', 'find')];
+  },
+  shareSavedObjectsIntoSpace: (authorization) => [
+    authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+  ],
 };
 
 export class SpacesClient {
@@ -58,6 +70,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -74,37 +87,36 @@ export class SpacesClient {
 
       const privilege = privilegeFactory(this.authorization!);
 
-      const { username, spacePrivileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][privilege];
-      });
+      const authorized = privileges.filter((x) => x.authorized).map((x) => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
           authorized.length
-        } spaces, derived from ES privilege check: ${JSON.stringify(spacePrivileges)}`
+        } spaces, derived from ES privilege check: ${JSON.stringify(privileges)}`
       );
 
       if (authorized.length === 0) {
         this.debugLogger(
-          `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces.`
+          `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
         this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
         throw Boom.forbidden();
       }
 
-      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized);
+      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
       const filteredSpaces: Space[] = spaces.filter((space: any) => authorized.includes(space.id));
       this.debugLogger(
         `SpacesClient.getAll(), using RBAC. returning spaces: ${filteredSpaces
-          .map(s => s.id)
+          .map((s) => s.id)
           .join(',')}`
       );
       return filteredSpaces;
     } else {
       this.debugLogger(`SpacesClient.getAll(), NOT USING RBAC. querying all spaces`);
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -211,9 +223,9 @@ export class SpacesClient {
       throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
     }
 
-    await repository.delete('space', id);
-
     await repository.deleteByNamespace(id);
+
+    await repository.delete('space', id);
   }
 
   private useRbac(): boolean {

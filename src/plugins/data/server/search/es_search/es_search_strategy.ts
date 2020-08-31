@@ -17,41 +17,55 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { APICaller } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { ES_SEARCH_STRATEGY } from '../../../common/search';
-import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { ISearchContext } from '..';
+import { Observable } from 'rxjs';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchUsage } from '../collectors/usage';
+import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
-export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  caller: APICaller
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+export const esSearchStrategyProvider = (
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy => {
   return {
-    search: async (request, options) => {
-      const config = await context.config$.pipe(first()).toPromise();
+    search: async (context, request, options) => {
+      logger.debug(`search ${request.params?.index}`);
+      const config = await config$.pipe(first()).toPromise();
+      const defaultParams = getDefaultSearchParams(config);
+
+      // Only default index pattern type is supported here.
+      // See data_enhanced for other type support.
+      if (!!request.indexType) {
+        throw new Error(`Unsupported index pattern type ${request.indexType}`);
+      }
+
       const params = {
-        timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
-        ignoreUnavailable: true, // Don't fail if the index/indices don't exist
-        restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+        ...defaultParams,
         ...request.params,
       };
-      if (request.debug) {
-        // eslint-disable-next-line
-        console.log(JSON.stringify(params, null, 2));
-      }
-      const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return {
-        total: esSearchResponse._shards.total,
-        loaded:
-          esSearchResponse._shards.failed +
-          esSearchResponse._shards.skipped +
-          esSearchResponse._shards.successful,
-        rawResponse: esSearchResponse,
-      };
+      try {
+        const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(
+          params
+        )) as ApiResponse<SearchResponse<any>>;
+        const rawResponse = esResponse.body;
+
+        if (usage) usage.trackSuccess(rawResponse.took);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return {
+          isPartial: false,
+          isRunning: false,
+          rawResponse,
+          ...getTotalLoaded(rawResponse._shards),
+        };
+      } catch (e) {
+        if (usage) usage.trackError();
+        throw e;
+      }
     },
   };
 };

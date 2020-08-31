@@ -5,7 +5,7 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
+import { ILegacyClusterClient, KibanaRequest } from '../../../../../src/core/server';
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import { HasPrivilegesResponse, HasPrivilegesResponseApplication } from './types';
@@ -16,32 +16,17 @@ interface CheckPrivilegesActions {
   version: string;
 }
 
-interface CheckPrivilegesAtResourcesResponse {
+export interface CheckPrivilegesResponse {
   hasAllRequested: boolean;
   username: string;
-  resourcePrivileges: {
-    [resource: string]: {
-      [privilege: string]: boolean;
-    };
-  };
-}
-
-export interface CheckPrivilegesAtResourceResponse {
-  hasAllRequested: boolean;
-  username: string;
-  privileges: {
-    [privilege: string]: boolean;
-  };
-}
-
-export interface CheckPrivilegesAtSpacesResponse {
-  hasAllRequested: boolean;
-  username: string;
-  spacePrivileges: {
-    [spaceId: string]: {
-      [privilege: string]: boolean;
-    };
-  };
+  privileges: Array<{
+    /**
+     * If this attribute is undefined, this element is a privilege for the global resource.
+     */
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>;
 }
 
 export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
@@ -50,24 +35,24 @@ export interface CheckPrivileges {
   atSpace(
     spaceId: string,
     privilegeOrPrivileges: string | string[]
-  ): Promise<CheckPrivilegesAtResourceResponse>;
+  ): Promise<CheckPrivilegesResponse>;
   atSpaces(
     spaceIds: string[],
     privilegeOrPrivileges: string | string[]
-  ): Promise<CheckPrivilegesAtSpacesResponse>;
-  globally(privilegeOrPrivileges: string | string[]): Promise<CheckPrivilegesAtResourceResponse>;
+  ): Promise<CheckPrivilegesResponse>;
+  globally(privilegeOrPrivileges: string | string[]): Promise<CheckPrivilegesResponse>;
 }
 
 export function checkPrivilegesWithRequestFactory(
   actions: CheckPrivilegesActions,
-  clusterClient: IClusterClient,
+  clusterClient: ILegacyClusterClient,
   applicationName: string
 ) {
   const hasIncompatibleVersion = (
     applicationPrivilegesResponse: HasPrivilegesResponseApplication
   ) => {
     return Object.values(applicationPrivilegesResponse).some(
-      resource => !resource[actions.version] && resource[actions.login]
+      (resource) => !resource[actions.version] && resource[actions.login]
     );
   };
 
@@ -75,7 +60,7 @@ export function checkPrivilegesWithRequestFactory(
     const checkPrivilegesAtResources = async (
       resources: string[],
       privilegeOrPrivileges: string | string[]
-    ): Promise<CheckPrivilegesAtResourcesResponse> => {
+    ): Promise<CheckPrivilegesResponse> => {
       const privileges = Array.isArray(privilegeOrPrivileges)
         ? privilegeOrPrivileges
         : [privilegeOrPrivileges];
@@ -106,55 +91,43 @@ export function checkPrivilegesWithRequestFactory(
         );
       }
 
+      // we need to filter out the non requested privileges from the response
+      const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {
+        result[key!] = pick(value, privileges);
+      }) as HasPrivilegesResponseApplication;
+      const privilegeArray = Object.entries(resourcePrivileges)
+        .map(([key, val]) => {
+          // we need to turn the resource responses back into the space ids
+          const resource =
+            key !== GLOBAL_RESOURCE ? ResourceSerializer.deserializeSpaceResource(key!) : undefined;
+          return Object.entries(val).map(([privilege, authorized]) => ({
+            resource,
+            privilege,
+            authorized,
+          }));
+        })
+        .flat();
+
       return {
         hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
-        // we need to filter out the non requested privileges from the response
-        resourcePrivileges: transform(applicationPrivilegesResponse, (result, value, key) => {
-          result[key!] = pick(value, privileges);
-        }),
-      };
-    };
-
-    const checkPrivilegesAtResource = async (
-      resource: string,
-      privilegeOrPrivileges: string | string[]
-    ) => {
-      const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources(
-        [resource],
-        privilegeOrPrivileges
-      );
-      return {
-        hasAllRequested,
-        username,
-        privileges: resourcePrivileges[resource],
+        privileges: privilegeArray,
       };
     };
 
     return {
       async atSpace(spaceId: string, privilegeOrPrivileges: string | string[]) {
         const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
-        return await checkPrivilegesAtResource(spaceResource, privilegeOrPrivileges);
+        return await checkPrivilegesAtResources([spaceResource], privilegeOrPrivileges);
       },
       async atSpaces(spaceIds: string[], privilegeOrPrivileges: string | string[]) {
-        const spaceResources = spaceIds.map(spaceId =>
+        const spaceResources = spaceIds.map((spaceId) =>
           ResourceSerializer.serializeSpaceResource(spaceId)
         );
-        const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources(
-          spaceResources,
-          privilegeOrPrivileges
-        );
-        return {
-          hasAllRequested,
-          username,
-          // we need to turn the resource responses back into the space ids
-          spacePrivileges: transform(resourcePrivileges, (result, value, key) => {
-            result[ResourceSerializer.deserializeSpaceResource(key!)] = value;
-          }),
-        };
+        return await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
       },
       async globally(privilegeOrPrivileges: string | string[]) {
-        return await checkPrivilegesAtResource(GLOBAL_RESOURCE, privilegeOrPrivileges);
+        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privilegeOrPrivileges);
       },
     };
   };

@@ -20,7 +20,6 @@ import React from 'react';
 import { HelloWorldEmbeddable } from '../../../../../../examples/embeddable_examples/public';
 import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 test('EmbeddableRoot renders an embeddable', async () => {
@@ -34,6 +33,15 @@ test('EmbeddableRoot renders an embeddable', async () => {
   ).toBe(1);
   expect(findTestSubject(component, 'embedSpinner').length).toBe(0);
   expect(findTestSubject(component, 'embedError').length).toBe(0);
+});
+
+test('EmbeddableRoot updates input', async () => {
+  const embeddable = new HelloWorldEmbeddable({ id: 'hello' });
+  const component = mount(<EmbeddableRoot embeddable={embeddable} />);
+  const spy = jest.spyOn(embeddable, 'updateInput');
+  const newInput = { id: 'hello', something: 'new' };
+  component.setProps({ embeddable, input: newInput });
+  expect(spy).toHaveBeenCalledWith(newInput);
 });
 
 test('EmbeddableRoot renders a spinner if loading an no embeddable given', async () => {

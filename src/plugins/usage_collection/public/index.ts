@@ -21,7 +21,7 @@ import { PluginInitializerContext } from '../../../core/public';
 import { UsageCollectionPlugin } from './plugin';
 
 export { METRIC_TYPE } from '@kbn/analytics';
-export { UsageCollectionSetup } from './plugin';
+export { UsageCollectionSetup, UsageCollectionStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UsageCollectionPlugin(initializerContext);

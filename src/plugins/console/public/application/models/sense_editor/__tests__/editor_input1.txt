@@ -25,3 +25,9 @@ GET index_1/type1/1/_source?_source_include=f
 
 DELETE index_2
 
+
+POST /_sql?format=txt
+{
+  "query": "SELECT prenom FROM claude_index WHERE prenom = 'claude' ",
+  "fetch_size": 1
+}

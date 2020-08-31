@@ -17,15 +17,38 @@
  * under the License.
  */
 
-import { Logger } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Logger, LegacyAPICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
+
+export type AllowedSchemaTypes =
+  | 'keyword'
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'long'
+  | 'date'
+  | 'float';
+
+export interface SchemaField {
+  type: string;
+}
+
+export type RecursiveMakeSchemaFrom<U> = U extends object
+  ? MakeSchemaFrom<U>
+  : { type: AllowedSchemaTypes };
+
+export type MakeSchemaFrom<Base> = {
+  [Key in keyof Base]: Base[Key] extends Array<infer U>
+    ? RecursiveMakeSchemaFrom<U>
+    : RecursiveMakeSchemaFrom<Base[Key]>;
+};
 
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
-  fetch: (callCluster: CallCluster) => Promise<T> | T;
+  schema?: MakeSchemaFrom<Required<T>>; // Using Required to enforce all optional keys in the object
+  fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
@@ -85,7 +108,7 @@ export class Collector<T = unknown, U = T> {
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: this.type,
-      payload: result,
+      payload: (result as unknown) as U,
     };
   }
 }

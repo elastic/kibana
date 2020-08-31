@@ -37,6 +37,7 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.postgresqlLogs.nameTitle', {
       defaultMessage: 'PostgreSQL logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
@@ -68,7 +69,7 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/postgresql_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

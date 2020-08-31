@@ -30,13 +30,15 @@ import {
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function windowsEventLogsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'windows';
   return {
     id: 'windowsEventLogs',
     name: i18n.translate('home.tutorials.windowsEventLogs.nameTitle', {
       defaultMessage: 'Windows Event Log',
     }),
+    moduleName,
     isBeta: false,
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
       defaultMessage: 'Fetch logs from the Windows Event Log.',
     }),

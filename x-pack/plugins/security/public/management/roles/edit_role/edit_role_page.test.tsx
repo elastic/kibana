@@ -9,29 +9,25 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../features/public';
-// These modules should be moved into a common directory
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Actions } from '../../../../server/authorization/actions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
+import { Space } from '../../../../../spaces/public';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 
 const buildFeatures = () => {
   return [
-    {
+    new Feature({
       id: 'feature1',
       name: 'Feature 1',
       icon: 'addDataApp',
@@ -45,9 +41,17 @@ const buildFeatures = () => {
             read: [],
           },
         },
+        read: {
+          app: ['feature1App'],
+          ui: ['feature1-ui'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
       },
-    },
-    {
+    }),
+    new Feature({
       id: 'feature2',
       name: 'Feature 2',
       icon: 'addDataApp',
@@ -61,15 +65,17 @@ const buildFeatures = () => {
             read: ['config'],
           },
         },
+        read: {
+          app: ['feature2App'],
+          ui: ['feature2-ui'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+        },
       },
-    },
+    }),
   ] as Feature[];
-};
-
-const buildRawKibanaPrivileges = () => {
-  return privilegesFactory(new Actions('unit_test_version'), {
-    getFeatures: () => buildFeatures(),
-  }).get();
 };
 
 const buildBuiltinESPrivileges = () => {
@@ -144,7 +150,7 @@ function getProps({
   userAPIClient.getUsers.mockResolvedValue([]);
 
   const privilegesAPIClient = privilegesAPIClientMock.create();
-  privilegesAPIClient.getAll.mockResolvedValue(buildRawKibanaPrivileges());
+  privilegesAPIClient.getAll.mockResolvedValue(createRawKibanaPrivileges(buildFeatures()));
   privilegesAPIClient.getBuiltIn.mockResolvedValue(buildBuiltinESPrivileges());
 
   const license = licenseMock.create();
@@ -156,12 +162,13 @@ function getProps({
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
-    if (path === '/api/features') {
-      return buildFeatures();
-    }
-
     if (path === '/api/spaces/space') {
-      return buildSpaces();
+      if (spacesEnabled) {
+        return buildSpaces();
+      }
+
+      const notFoundError = { response: { status: 404 } };
+      throw notFoundError;
     }
   });
 
@@ -175,11 +182,12 @@ function getProps({
     privilegesAPIClient,
     rolesAPIClient,
     userAPIClient,
+    getFeatures: () => Promise.resolve(buildFeatures()),
     notifications,
     docLinks: new DocumentationLinksService(docLinks),
     fatalErrors,
-    spacesEnabled,
     uiCapabilities: buildUICapabilities(canManageSpaces),
+    history: scopedHistoryMock.create(),
   };
 }
 
@@ -200,10 +208,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -226,10 +231,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -240,10 +242,7 @@ describe('<EditRolePage />', () => {
     it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(<EditRolePage {...getProps({ action: 'edit' })} />);
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -275,10 +274,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -301,10 +297,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -333,10 +326,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -360,10 +350,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -387,10 +374,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -403,10 +387,7 @@ describe('<EditRolePage />', () => {
         <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -438,10 +419,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -464,10 +442,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -497,10 +472,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -522,10 +494,7 @@ describe('<EditRolePage />', () => {
 
     const wrapper = mountWithIntl(<EditRolePage {...{ ...getProps({ action: 'edit' }), http }} />);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitForRender(wrapper);
 
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -540,13 +509,17 @@ describe('<EditRolePage />', () => {
       <EditRolePage {...{ ...getProps({ action: 'edit' }), indexPatterns }} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitForRender(wrapper);
 
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);
   });
 });
+
+async function waitForRender(wrapper: ReactWrapper<any>) {
+  await act(async () => {
+    await nextTick();
+    wrapper.update();
+  });
+}

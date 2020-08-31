@@ -120,7 +120,7 @@ export class GuideNav extends Component {
     });
 
     const componentNavItems = this.props.components
-      .filter(item => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
+      .filter((item) => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
       .map((item, index) => {
         const icon = item.hasReact ? <div className="guideNavItem__reactLogo" /> : undefined;
         return (
@@ -135,7 +135,7 @@ export class GuideNav extends Component {
       });
 
     const sandboxNavItems = this.props.sandboxes
-      .filter(item => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
+      .filter((item) => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
       .map((item, index) => {
         const icon = item.hasReact ? <div className="guideNavItem__reactLogo" /> : undefined;
         return (

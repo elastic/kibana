@@ -23,15 +23,16 @@ const TEST_INDEX_PATTERN = 'date_nanos_custom_timestamp';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
-  // skipped due to a recent change in ES that caused search_after queries with data containing
-  // custom timestamp formats like in the testdata to fail
-  describe.skip('context view for date_nanos with custom timestamp', () => {
-    before(async function() {
+
+  describe('context view for date_nanos with custom timestamp', () => {
+    before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
       await esArchiver.loadIfNeeded('date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
@@ -40,11 +41,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos_custom');
-    });
-
-    it('displays predessors - anchor - successors in right order ', async function() {
+    it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
@@ -53,6 +50,11 @@ export default function({ getService, getPageObjects }) {
         'Oct 21, 2019 @ 00:30:04.828723000 -',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
+    });
+
+    after(async function () {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos_custom');
     });
   });
 }

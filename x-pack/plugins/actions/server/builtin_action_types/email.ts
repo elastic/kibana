@@ -9,21 +9,32 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 
-import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
-import { nullableType } from './lib/nullable';
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
+export type EmailActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchemaProps = {
-  service: nullableType(schema.string()),
-  host: nullableType(schema.string()),
-  port: nullableType(portSchema()),
-  secure: nullableType(schema.boolean()),
+  service: schema.nullable(schema.string()),
+  host: schema.nullable(schema.string()),
+  port: schema.nullable(portSchema()),
+  secure: schema.nullable(schema.boolean()),
   from: schema.string(),
 };
 
@@ -31,10 +42,9 @@ const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: any
+  configObject: ActionTypeConfigType
 ): string | void {
-  // avoids circular reference ...
-  const config: ActionTypeConfigType = configObject;
+  const config = configObject;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
@@ -56,16 +66,16 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
-      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isWhitelistedHostname(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
 }
@@ -75,8 +85,8 @@ function validateConfig(
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
 const SecretsSchema = schema.object({
-  user: schema.string(),
-  password: schema.string(),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -96,9 +106,9 @@ const ParamsSchema = schema.object(
   }
 );
 
-function validateParams(paramsObject: any): string | void {
+function validateParams(paramsObject: unknown): string | void {
   // avoids circular reference ...
-  const params: ActionParamsType = paramsObject;
+  const params = paramsObject as ActionParamsType;
 
   const { to, cc, bcc } = params;
   const addrs = to.length + cc.length + bcc.length;
@@ -114,10 +124,11 @@ interface GetActionTypeParams {
 }
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
+export function getActionType(params: GetActionTypeParams): EmailActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
@@ -136,27 +147,32 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: EmailActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
-  const transport: any = {
-    user: secrets.user,
-    password: secrets.password,
-  };
+  const transport: Transport = {};
+
+  if (secrets.user != null) {
+    transport.user = secrets.user;
+  }
+  if (secrets.password != null) {
+    transport.password = secrets.password;
+  }
 
   if (config.service !== null) {
     transport.service = config.service;
   } else {
-    transport.host = config.host;
-    transport.port = config.port;
+    // already validated service or host/port is not null ...
+    transport.host = config.host!;
+    transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
-  const sendEmailOptions = {
+  const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
       from: config.from,
@@ -168,6 +184,7 @@ async function executor(
       subject: params.subject,
       message: params.message,
     },
+    proxySettings: execOptions.proxySettings,
   };
 
   let result;

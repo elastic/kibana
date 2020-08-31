@@ -23,7 +23,7 @@ import { Capabilities } from '../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSchemaDefinition } from '../../core/server/saved_objects/schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsManagementDefinition } from '../../core/server/saved_objects/management';
+import { SavedObjectsLegacyManagementDefinition } from '../../core/server/saved_objects/types';
 import { AppCategory } from '../../core/types';
 
 /**
@@ -66,14 +66,12 @@ export interface LegacyPluginOptions {
     hacks: string[];
     visualize: string[];
     devTools: string[];
-    styleSheetPaths: string;
     injectDefaultVars: (server: Server) => Record<string, any>;
-    noParse: string[];
     home: string[];
     mappings: any;
     migrations: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
-    savedObjectsManagement: SavedObjectsManagementDefinition;
+    savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
     visTypes: string[];
     embeddableActions?: string[];
     embeddableFactories?: string[];

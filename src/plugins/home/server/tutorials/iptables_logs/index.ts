@@ -37,7 +37,8 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
     }),
@@ -52,13 +53,13 @@ number and the action performed on the traffic (allow/deny).. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    // euiIconType: 'logoUbiquiti',
+    euiIconType: '/plugins/home/assets/logos/ubiquiti.svg',
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {
@@ -66,7 +67,7 @@ number and the action performed on the traffic (allow/deny).. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/iptables_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/iptables_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

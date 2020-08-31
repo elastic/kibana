@@ -1,15 +1,15 @@
 [[upgrade]]
-== Upgrading {kib}
+== Upgrade {kib}
 
 Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
-varies. 
+varies.
 
-NOTE: {kib} upgrades automatically when starting a new version, as described in 
+NOTE: {kib} upgrades automatically when starting a new version, as described in
 <<upgrade-migrations, this document>>.
 Although you do not need to manually back up {kib} before upgrading, we recommend
-that you have a backup on hand. You can use  
+that you have a backup on hand. You can use
 <<snapshot-repositories, Snapshot and Restore>> to back up {kib}
-data by targeting `.kibana*` indices. If you are using the Reporting plugin, 
+data by targeting `.kibana*` indices. If you are using the Reporting plugin,
 you can also target `.reporting*` indices.
 
 [float]
@@ -23,44 +23,44 @@ Before you upgrade {kib}:
 * Back up your data with {es} {ref}/modules-snapshots.html[snapshots].
   To roll back to an earlier version, you **must** have a backup of your data.
 * If you are using custom plugins, check that a compatible version is
-  available. 
-* Shut down all {kib} nodes. Running more than one {kib} version against the 
-  same Elasticseach index is unsupported. If you upgrade while older {kib} nodes are 
+  available.
+* Shut down all {kib} nodes. Running more than one {kib} version against the
+  same Elasticseach index is unsupported. If you upgrade while older {kib} nodes are
   running, the upgrade can fail.
 
-To identify the changes you need to make to upgrade, and to enable you to 
-perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to 
+To identify the changes you need to make to upgrade, and to enable you to
+perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
 6.7 before you upgrade to 7.0.
 
-For a comprehensive overview of the upgrade process, refer to 
+For a comprehensive overview of the upgrade process, refer to
 *{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]*.
 
 [float]
 [[upgrade-5x-earlier]]
-=== Upgrading from 5.x or earlier
-{es} can read indices created in the previous major version. Before you upgrade 
-to 7.0.0, you must reindex or delete any indices created in 5.x or earlier. 
-For more information, refer to 
+=== Upgrade from 5.x or earlier
+{es} can read indices created in the previous major version. Before you upgrade
+to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
+For more information, refer to
 {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack].
 
-When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>> 
-instructions. 
+When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
+instructions.
 
 [float]
 [[upgrade-6x]]
-=== Upgrading from 6.x
+=== Upgrade from 6.x
 
-The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it 
-easier to identify the required changes, and enables you to use the Upgrade 
+The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it
+easier to identify the required changes, and enables you to use the Upgrade
 Assistant to prepare for your upgrade to 7.0.
 
-TIP: The ability to import {kib} 6.x saved searches, visualizations, and 
+TIP: The ability to import {kib} 6.x saved searches, visualizations, and
 dashboards is supported.
 
 [float]
 [[upgrade-67]]
-=== Upgrading from 6.8
-To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant] 
+=== Upgrade from 6.8
+To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant]
 To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 After you have addressed any issues that were identified by the Upgrade
@@ -70,4 +70,3 @@ Assistant, <<upgrade-standard,upgrade to 7.0>>.
 include::upgrade/upgrade-standard.asciidoc[]
 
 include::upgrade/upgrade-migrations.asciidoc[]
-

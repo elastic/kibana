@@ -19,6 +19,7 @@
 
 export { ApplicationService } from './application_service';
 export { Capabilities } from './capabilities';
+export { ScopedHistory } from './scoped_history';
 export {
   App,
   AppBase,
@@ -38,7 +39,11 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
   LegacyApp,
+  NavigateToAppOptions,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
+  // Internal types
+  InternalApplicationSetup,
+  InternalApplicationStart,
 } from './types';

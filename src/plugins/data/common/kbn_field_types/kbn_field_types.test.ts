@@ -55,10 +55,10 @@ describe('utils/kbn_field_types', () => {
       expect(kbnFieldType).toHaveProperty('name', ES_FIELD_TYPES.STRING);
     });
 
-    test('returns undefined for invalid name', () => {
+    test('returns unknown for invalid name', () => {
       const kbnFieldType = getKbnFieldType('wrongType');
 
-      expect(kbnFieldType).toBeUndefined();
+      expect(kbnFieldType).toHaveProperty('name', KBN_FIELD_TYPES.UNKNOWN);
     });
   });
 
@@ -87,6 +87,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.DATE,
         KBN_FIELD_TYPES.GEO_POINT,
         KBN_FIELD_TYPES.GEO_SHAPE,
+        KBN_FIELD_TYPES.HISTOGRAM,
         KBN_FIELD_TYPES.IP,
         KBN_FIELD_TYPES.MURMUR3,
         KBN_FIELD_TYPES.NESTED,

@@ -17,40 +17,36 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getSplits } from '../../helpers/get_splits';
-import { getLastMetric } from '../../helpers/get_last_metric';
-import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+import { getSplits, getLastMetric, getSiblingAggValue } from '../../helpers';
 
 export function stdDeviationSibling(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      getSplits(resp, panel, series, meta).forEach(split => {
-        const mapBucketByMode = mode => {
-          return bucket => {
-            return [bucket.key, getSiblingAggValue(split, _.assign({}, metric, { mode }))];
-          };
-        };
-
-        const upperData = split.timeseries.buckets.map(mapBucketByMode('upper'));
-        const lowerData = split.timeseries.buckets.map(mapBucketByMode('lower'));
+      getSplits(resp, panel, series, meta).forEach((split) => {
+        const data = split.timeseries.buckets.map((bucket) => [
+          bucket.key,
+          getSiblingAggValue(split, { ...metric, mode: 'upper' }),
+          getSiblingAggValue(split, { ...metric, mode: 'lower' }),
+        ]);
 
         results.push({
-          id: `${split.id}:lower`,
-          lines: { show: true, fill: false, lineWidth: 0 },
-          points: { show: false },
-          color: split.color,
-          data: lowerData,
-        });
-        results.push({
-          id: `${split.id}:upper`,
+          id: split.id,
           label: split.label,
           color: split.color,
-          lines: { show: true, fill: 0.5, lineWidth: 0 },
+          lines: {
+            show: series.chart_type === 'line',
+            fill: 0.5,
+            lineWidth: 0,
+            mode: 'band',
+          },
+          bars: {
+            show: series.chart_type === 'bar',
+            fill: 0.5,
+            mode: 'band',
+          },
           points: { show: false },
-          fillBetween: `${split.id}:lower`,
-          data: upperData,
+          data,
         });
       });
     }

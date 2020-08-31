@@ -36,6 +36,8 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     name: i18n.translate('home.tutorials.zookeeperMetrics.nameTitle', {
       defaultMessage: 'Zookeeper metrics',
     }),
+    moduleName,
+    euiIconType: '/plugins/home/assets/logos/zookeeper.svg',
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
@@ -55,7 +57,7 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
         label: i18n.translate('home.tutorials.zookeeperMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

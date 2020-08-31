@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { parse } from 'query-string';
 
-import qs from 'querystring';
-
+/** @internal */
 export function parseQueryString() {
   // window.location.search is an empty string
   // get search from href
@@ -27,5 +27,5 @@ export function parseQueryString() {
     return {};
   }
 
-  return qs.parse(hrefSplit[1]);
+  return parse(hrefSplit[1], { sort: false });
 }

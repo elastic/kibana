@@ -33,7 +33,7 @@ export class Poller {
 
         this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis);
       })
-      .catch(e => {
+      .catch((e) => {
         this.errorFunction(e);
         if (!this._isRunning) {
           return;

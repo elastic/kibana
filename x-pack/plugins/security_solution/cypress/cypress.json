@@ -1,0 +1,8 @@
+{
+  "baseUrl": "http://localhost:5601",
+  "defaultCommandTimeout": 120000,
+  "screenshotsFolder": "../../../target/kibana-security-solution/cypress/screenshots",
+  "trashAssetsBeforeRuns": false,
+  "video": false,
+  "videosFolder": "../../../target/kibana-security-solution/cypress/videos"
+}

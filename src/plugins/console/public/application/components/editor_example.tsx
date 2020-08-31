@@ -16,28 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
 import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
 
 interface EditorExampleProps {
   panel: string;
 }
 
+const exampleText = `
+# index a doc
+PUT index/_doc/1
+{
+  "body": "here"
+}
+
+# and get it ...
+GET index/_doc/1
+`;
+
 export function EditorExample(props: EditorExampleProps) {
   const elemId = `help-example-${props.panel}`;
+  const inputId = `help-example-${props.panel}-input`;
 
   useEffect(() => {
-    const el = document.querySelector<HTMLElement>(`#${elemId}`)!;
+    const el = document.getElementById(elemId)!;
     el.textContent = exampleText.trim();
     const editor = createReadOnlyAceEditor(el);
+    const textarea = el.querySelector('textarea')!;
+    textarea.setAttribute('id', inputId);
+    textarea.setAttribute('readonly', 'true');
 
     return () => {
       editor.destroy();
     };
-  }, [elemId]);
+  }, [elemId, inputId]);
 
-  return <div id={elemId} className="conHelp__example" />;
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <label htmlFor={inputId}>
+          {i18n.translate('console.exampleOutputTextarea', {
+            defaultMessage: 'Dev Tools Console editor example',
+          })}
+        </label>
+      </EuiScreenReaderOnly>
+      <div id={elemId} className="conHelp__example" />
+    </>
+  );
 }

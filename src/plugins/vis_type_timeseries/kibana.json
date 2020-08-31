@@ -1,7 +1,10 @@
 {
-  "id": "metrics",
+  "id": "visTypeTimeseries",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,
-  "optionalPlugins": ["usageCollection"]
+  "ui": true,
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

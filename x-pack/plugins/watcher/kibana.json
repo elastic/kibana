@@ -1,5 +1,6 @@
 {
   "id": "watcher",
+  "configPath": ["xpack", "watcher"],
   "version": "kibana",
   "requiredPlugins": [
     "home",
@@ -9,5 +10,9 @@
     "data"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact"
+  ]
 }

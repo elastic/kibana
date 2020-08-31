@@ -22,6 +22,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {
@@ -47,8 +48,9 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-
-    expect(component).toMatchSnapshot();
+    component.find(EuiButtonEmpty).simulate('click');
+    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeFalsy();
   });
 
   it('should toggle on if language is kuery', () => {
@@ -60,7 +62,8 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-
-    expect(component).toMatchSnapshot();
+    component.find(EuiButtonEmpty).simulate('click');
+    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
   });
 });

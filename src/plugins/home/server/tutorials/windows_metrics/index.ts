@@ -36,6 +36,7 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.windowsMetrics.nameTitle', {
       defaultMessage: 'Windows metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.windowsMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.windowsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

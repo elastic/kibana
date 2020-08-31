@@ -49,18 +49,8 @@ describe('offsetTime(req, by)', () => {
     const { from, to } = offsetTime(req, '1h');
     expect(moment.isMoment(from)).toBeTruthy();
     expect(moment.isMoment(to)).toBeTruthy();
-    expect(
-      moment
-        .utc('2017-01-01T00:00:00Z')
-        .subtract(1, 'h')
-        .isSame(from)
-    ).toBeTruthy();
-    expect(
-      moment
-        .utc('2017-01-01T01:00:00Z')
-        .subtract(1, 'h')
-        .isSame(to)
-    ).toBeTruthy();
+    expect(moment.utc('2017-01-01T00:00:00Z').subtract(1, 'h').isSame(from)).toBeTruthy();
+    expect(moment.utc('2017-01-01T01:00:00Z').subtract(1, 'h').isSame(to)).toBeTruthy();
   });
 
   test('should return a moment object for to and from offset by -2 minute', () => {

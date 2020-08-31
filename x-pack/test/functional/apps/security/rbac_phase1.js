@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
-export default function({ getService, getPageObjects }) {
+import { keyBy } from 'lodash';
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'security',
     'settings',
@@ -20,7 +20,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('rbac ', function() {
+  describe('rbac ', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
@@ -70,7 +70,7 @@ export default function({ getService, getPageObjects }) {
         roles: ['rbac_all'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.kibanauser.roles);
       expect(users.kibanauser.roles).to.eql(['rbac_all']);
@@ -88,7 +88,7 @@ export default function({ getService, getPageObjects }) {
         roles: ['rbac_read'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users1 = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       const user = users1.kibanareadonly;
       log.debug('actualUsers = %j', users1);
       log.debug('roles: ', user.roles);
@@ -99,7 +99,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
-    it('rbac all role can save a visualization', async function() {
+    it('rbac all role can save a visualization', async function () {
       const vizName1 = 'Visualization VerticalBarChart';
 
       log.debug('log in as kibanauser with rbac_all role');
@@ -122,7 +122,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.security.forceLogout();
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.security.forceLogout();
     });
   });

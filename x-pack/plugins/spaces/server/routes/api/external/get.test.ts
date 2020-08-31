@@ -6,18 +6,17 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContextWithInvalidLicense,
   mockRouteContext,
 } from '../__fixtures__';
 import { initGetSpaceApi } from './get';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
 import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
@@ -27,24 +26,24 @@ import { securityMock } from '../../../../../security/server/mocks';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
-    const legacyAPI = createLegacyAPI({ spaces });
+    const coreStart = coreMock.createStart();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
+    const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -64,7 +63,8 @@ describe('GET space', () => {
 
     initGetSpaceApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });
@@ -106,7 +106,7 @@ describe('GET space', () => {
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces.find(s => s.id === 'default'));
+    expect(response.payload).toEqual(spaces.find((s) => s.id === 'default'));
   });
 
   it(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {

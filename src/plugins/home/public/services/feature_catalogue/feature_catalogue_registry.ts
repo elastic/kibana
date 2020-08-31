@@ -43,10 +43,32 @@ export interface FeatureCatalogueEntry {
   readonly path: string;
   /** Whether or not this link should be shown on the front page of Kibana. */
   readonly showOnHomePage: boolean;
+  /** An ordinal used to sort features relative to one another for display on the home page */
+  readonly order?: number;
+}
+
+/** @public */
+export interface FeatureCatalogueSolution {
+  /** Unique string identifier for this solution. */
+  readonly id: string;
+  /** Title of solution displayed to the user. */
+  readonly title: string;
+  /** The tagline of the solution displayed to the user. */
+  readonly subtitle: string;
+  /** A list of use cases for this solution displayed to the user. */
+  readonly descriptions: string[];
+  /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
+  readonly icon: IconType;
+  /** URL path to link to this future. Should not include the basePath. */
+  readonly path: string;
+  /** An ordinal used to sort solutions relative to one another for display on the home page */
+  readonly order?: number;
 }
 
 export class FeatureCatalogueRegistry {
+  private capabilities: Capabilities | null = null;
   private readonly features = new Map<string, FeatureCatalogueEntry>();
+  private readonly solutions = new Map<string, FeatureCatalogueSolution>();
 
   public setup() {
     return {
@@ -59,21 +81,44 @@ export class FeatureCatalogueRegistry {
 
         this.features.set(feature.id, feature);
       },
+      registerSolution: (solution: FeatureCatalogueSolution) => {
+        if (this.solutions.has(solution.id)) {
+          throw new Error(
+            `Solution with id [${solution.id}] has already been registered. Use a unique id.`
+          );
+        }
+
+        this.solutions.set(solution.id, solution);
+      },
     };
   }
 
   public start({ capabilities }: { capabilities: Capabilities }) {
-    return {
-      get: (): readonly FeatureCatalogueEntry[] =>
-        [...this.features.values()]
-          .filter(entry => capabilities.catalogue[entry.id] !== false)
-          .sort(compareByKey('title')),
-    };
+    this.capabilities = capabilities;
+  }
+
+  public get(): readonly FeatureCatalogueEntry[] {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return [...this.features.values()]
+      .filter((entry) => capabilities.catalogue[entry.id] !== false)
+      .sort(compareByKey('title'));
+  }
+
+  public getSolutions(): readonly FeatureCatalogueSolution[] {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return [...this.solutions.values()]
+      .filter((solution) => capabilities.catalogue[solution.id] !== false)
+      .sort(compareByKey('title'));
   }
 }
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;
-export type FeatureCatalogueRegistryStart = ReturnType<FeatureCatalogueRegistry['start']>;
 
 const compareByKey = <T>(key: keyof T) => (left: T, right: T) => {
   if (left[key] < right[key]) {

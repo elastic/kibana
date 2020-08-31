@@ -24,10 +24,10 @@ const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
+const { ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
-exports.runStorybookCli = config => {
+exports.runStorybookCli = (config) => {
   const { name, storyGlobs } = config;
   run(
     async ({ flags, log, procRunner }) => {
@@ -45,14 +45,6 @@ exports.runStorybookCli = config => {
         procRunner,
       });
 
-      // Build sass and continue when initial build complete
-      await procRunner.run('watch sass', {
-        cmd: process.execPath,
-        args: ['scripts/build_sass', '--watch'],
-        cwd: REPO_ROOT,
-        wait: /scss bundles created/,
-      });
-
       const subj = new Rx.ReplaySubject(1);
       generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
 
@@ -62,21 +54,30 @@ exports.runStorybookCli = config => {
         // route errors
         subj.toPromise(),
 
-        new Promise(() => {
+        new Promise(async () => {
           // storybook never completes, so neither will this promise
           const configDir = join(__dirname, 'storybook_config');
           log.debug('Config dir:', configDir);
-          storybook({
-            mode: 'dev',
+
+          const config = {
+            mode: flags.site ? 'static' : 'dev',
             port: 9001,
             configDir,
-          });
+          };
+          if (flags.site) {
+            config.outputDir = join(ASSET_DIR, name);
+          }
+
+          await storybook(config);
+
+          // Line is only reached when building the static version
+          if (flags.site) process.exit();
         }),
       ]);
     },
     {
       flags: {
-        boolean: ['rebuildDll'],
+        boolean: ['rebuildDll', 'site'],
       },
       description: `
         Run the storybook examples for ${name}

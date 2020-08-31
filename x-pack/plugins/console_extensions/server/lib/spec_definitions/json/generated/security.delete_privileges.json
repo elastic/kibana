@@ -1,0 +1,18 @@
+{
+  "security.delete_privileges": {
+    "url_params": {
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_security/privilege/{application}/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-privilege.html"
+  }
+}

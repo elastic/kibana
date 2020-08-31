@@ -9,7 +9,7 @@ or SAML.
 
 Role mappings have no effect for users inside the `native` or `file` realms.
 
-To manage your role mappings, use *Management > Security > Role Mappings*.
+To manage your role mappings, open the menu, then go to *Stack Management > Security > Role Mappings*.
 
 With *Role mappings*, you can:
 
@@ -23,12 +23,13 @@ image:user/security/role-mappings/images/role-mappings-grid.png["Role mappings"]
 [float]
 === Create a role mapping
 
-To create a role mapping, navigate to *Management > Security > Role Mappings*, and click **Create role mapping**.
-Give your role mapping a unique name, and choose which roles you wish to assign to your users.
+. Open the menu, then go to *Stack Management > Security > Role Mappings*.
+. Click *Create role mapping*.
+. Give your role mapping a unique name, and choose which roles you wish to assign to your users.
++
 If you need more flexibility, you can use {ref}/security-api-put-role-mapping.html#_role_templates[role templates] instead.
-
-Next, define the rules describing which users should receive the roles you defined. Rules can optionally grouped and nested, allowing for sophisticated logic to suite complex requirements.
-View the {ref}/role-mapping-resources.html[role mapping resources for an overview of the allowed rule types].
+. Define the rules describing which users should receive the roles you defined. Rules can optionally grouped and nested, allowing for sophisticated logic to suite complex requirements.
+. View the {ref}/role-mapping-resources.html[role mapping resources for an overview of the allowed rule types].
 
 
 [float]

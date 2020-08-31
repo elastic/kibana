@@ -13,7 +13,6 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
@@ -49,10 +48,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const selectTab = (tab: 'execution history' | 'action statuses') => {
     const tabs = ['execution history', 'action statuses'];
 
-    testBed
-      .find('tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickToggleActivationButton = async () => {

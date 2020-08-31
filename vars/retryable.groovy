@@ -27,7 +27,7 @@ def getFlakyFailures() {
 }
 
 def printFlakyFailures() {
-  catchError {
+  catchErrors {
     def failures = getFlakyFailures()
 
     if (failures && failures.size() > 0) {

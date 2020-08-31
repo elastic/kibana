@@ -7,15 +7,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { APIKeysGridPage } from './api_keys_grid';
-import { APIKeysAPIClient } from './api_keys_api_client';
 import { DocumentationLinksService } from './documentation_links';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const apiKeysManagementApp = Object.freeze({
@@ -27,20 +25,30 @@ export const apiKeysManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.apiKeysTitle', {
         defaultMessage: 'API Keys',
       }),
-      async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ docLinks, http, notifications, i18n: i18nStart }] = await getStartServices();
+      async mount({ element, setBreadcrumbs }) {
         setBreadcrumbs([
           {
             text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
               defaultMessage: 'API Keys',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
+        ]);
+
+        const [
+          [{ docLinks, http, notifications, i18n: i18nStart, application }],
+          { APIKeysGridPage },
+          { APIKeysAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./api_keys_grid'),
+          import('./api_keys_api_client'),
         ]);
 
         render(
           <i18nStart.Context>
             <APIKeysGridPage
+              navigateToApp={application.navigateToApp}
               notifications={notifications}
               docLinks={new DocumentationLinksService(docLinks)}
               apiKeysAPIClient={new APIKeysAPIClient(http)}

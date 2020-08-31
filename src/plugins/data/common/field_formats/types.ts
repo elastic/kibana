@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { GetConfigFn } from '../types';
 import { FieldFormat } from './field_format';
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
-export type ContentType = 'html' | 'text';
+export type FieldFormatsContentType = 'html' | 'text';
 
 /** @internal **/
 export interface HtmlContextTypeOptions {
@@ -66,23 +68,29 @@ export enum FIELD_FORMAT_IDS {
   URL = 'url',
 }
 
-export interface IFieldFormatConfig {
-  id: IFieldFormatId;
+export interface FieldFormatConfig {
+  id: FieldFormatId;
   params: Record<string, any>;
   es?: boolean;
 }
 
-export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
 
 /**
  * @string id type is needed for creating custom converters.
  */
-export type IFieldFormatId = FIELD_FORMAT_IDS | string;
+export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-export type IFieldFormatType = (new (params?: any, getConfig?: GetConfigFn) => FieldFormat) & {
-  id: IFieldFormatId;
+/** @internal **/
+export type FieldFormatInstanceType = (new (
+  params?: any,
+  getConfig?: FieldFormatsGetConfigFn
+) => FieldFormat) & {
+  // Static properties:
+  id: FieldFormatId;
+  title: string;
   fieldType: string | string[];
 };
 
@@ -94,3 +102,5 @@ export interface IFieldFormatMetaParams {
     basePath?: string;
   };
 }
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

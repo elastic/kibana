@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, trimRight, trimLeft, get } from 'lodash';
+import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 
@@ -120,8 +120,8 @@ describe('FieldFormat class', () => {
       test('does escape the output of the text converter if used in an html context', () => {
         const f = getTestFormat(undefined, constant('<script>alert("xxs");</script>'));
 
-        const expected = trimRight(
-          trimLeft(f.convert('', 'html'), '<span ng-non-bindable>'),
+        const expected = trimEnd(
+          trimStart(f.convert('', 'html'), '<span ng-non-bindable>'),
           '</span>'
         );
 

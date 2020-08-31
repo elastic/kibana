@@ -36,6 +36,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.mssqlMetrics.nameTitle', {
       defaultMessage: 'Microsoft SQL Server Metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mssqlMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from a Microsoft SQL Server instance',
@@ -48,7 +49,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    // euiIconType: 'logoMSSQL',
+    euiIconType: '/plugins/home/assets/logos/mssql.svg',
     isBeta: false,
     artifacts: {
       dashboards: [
@@ -65,7 +66,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/mssql_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/mssql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

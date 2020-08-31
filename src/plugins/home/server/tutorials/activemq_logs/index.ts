@@ -37,6 +37,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.activemqLogs.nameTitle', {
       defaultMessage: 'ActiveMQ logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.activemqLogs.shortDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat.',
@@ -48,7 +49,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-activemq.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/activemq.svg',
+    euiIconType: '/plugins/home/assets/logos/activemq.svg',
     artifacts: {
       dashboards: [
         {
@@ -64,7 +65,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/activemq_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/activemq_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

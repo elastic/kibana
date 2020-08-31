@@ -1,0 +1,21 @@
+{
+  "id": "monitoring",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["monitoring"],
+  "requiredPlugins": [
+    "licensing",
+    "features",
+    "data",
+    "navigation",
+    "kibanaLegacy",
+    "triggers_actions_ui",
+    "alerts",
+    "actions",
+    "encryptedSavedObjects"
+  ],
+  "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
+}

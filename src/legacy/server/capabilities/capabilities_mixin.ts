@@ -24,12 +24,12 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
   const registerLegacyCapabilities = async () => {
     const capabilitiesList = await Promise.all(
       kbnServer.pluginSpecs
-        .map(spec => spec.getUiCapabilitiesProvider())
-        .filter(provider => !!provider)
-        .map(provider => provider(server))
+        .map((spec) => spec.getUiCapabilitiesProvider())
+        .filter((provider) => !!provider)
+        .map((provider) => provider(server))
     );
 
-    capabilitiesList.forEach(capabilities => {
+    capabilitiesList.forEach((capabilities) => {
       kbnServer.newPlatform.setup.core.capabilities.registerProvider(() => capabilities);
     });
   };

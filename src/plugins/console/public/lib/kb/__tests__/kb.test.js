@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { populateContext } from '../../autocomplete/engine';
 
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
-const kb = require('../../kb');
-const mappings = require('../../mappings/mappings');
+import * as kb from '../../kb';
+import * as mappings from '../../mappings/mappings';
 
 describe('Knowledge base', () => {
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe('Knowledge base', () => {
 
   function testUrlContext(tokenPath, otherTokenValues, expectedContext) {
     if (expectedContext.autoCompleteSet) {
-      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
         if (_.isString(t)) {
           t = { name: t };
         }
@@ -111,7 +111,7 @@ describe('Knowledge base', () => {
   }
 
   function indexTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function() {
+    test(name, function () {
       // eslint-disable-next-line new-cap
       const testApi = new kb._test.loadApisFromJson(
         {
@@ -161,7 +161,7 @@ describe('Knowledge base', () => {
   });
 
   function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function() {
+    test(name, function () {
       const testApi = kb._test.loadApisFromJson(
         {
           typeTest: {

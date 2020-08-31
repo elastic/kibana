@@ -22,12 +22,14 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { coreMock } from '../mocks';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { environmentServiceMock } from '../environment/environment_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
@@ -44,11 +46,14 @@ let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
+let environmentSetup: ReturnType<typeof environmentServiceMock.createSetupContract>;
 
 const setupDeps = coreMock.createInternalSetup();
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
-['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
+expect.addSnapshotSerializer(createAbsolutePathSerializer());
+
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5', 'path-6', 'path-7', 'path-8'].forEach((path) => {
   jest.doMock(join(path, 'server'), () => ({}), {
     virtual: true,
   });
@@ -61,6 +66,7 @@ const createPlugin = (
     disabled = false,
     version = 'some-version',
     requiredPlugins = [],
+    requiredBundles = [],
     optionalPlugins = [],
     kibanaVersion = '7.0.0',
     configPath = [path],
@@ -71,6 +77,7 @@ const createPlugin = (
     disabled?: boolean;
     version?: string;
     requiredPlugins?: string[];
+    requiredBundles?: string[];
     optionalPlugins?: string[];
     kibanaVersion?: string;
     configPath?: ConfigPath;
@@ -86,6 +93,7 @@ const createPlugin = (
       configPath: `${configPath}${disabled ? '-disabled' : ''}`,
       kibanaVersion,
       requiredPlugins,
+      requiredBundles,
       optionalPlugins,
       server,
       ui,
@@ -117,6 +125,9 @@ describe('PluginsService', () => {
     pluginsService = new PluginsService({ coreId, env, logger, configService });
 
     [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
+    mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+
+    environmentSetup = environmentServiceMock.createSetupContract();
   });
 
   afterEach(() => {
@@ -130,11 +141,12 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentSetup })).rejects
+        .toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Invalid JSON (invalid-manifest, path-1)]
             `);
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Invalid JSON (invalid-manifest, path-1)],
@@ -151,11 +163,12 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentSetup })).rejects
+        .toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Incompatible version (incompatible-version, path-3)]
             `);
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Incompatible version (incompatible-version, path-3)],
@@ -185,7 +198,9 @@ describe('PluginsService', () => {
         ]),
       });
 
-      await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(
+      await expect(
+        pluginsService.discover({ environment: environmentSetup })
+      ).rejects.toMatchInlineSnapshot(
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
 
@@ -196,10 +211,9 @@ describe('PluginsService', () => {
     it('properly detects plugins that should be disabled.', async () => {
       jest
         .spyOn(configService, 'isEnabledAtPath')
-        .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
+        .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
       mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
-      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
 
       mockDiscover.mockReturnValue({
         error$: from([]),
@@ -224,32 +238,56 @@ describe('PluginsService', () => {
             path: 'path-4',
             configPath: 'path-4-disabled',
           }),
+          createPlugin('plugin-with-disabled-optional-dep', {
+            path: 'path-5',
+            configPath: 'path-5',
+            optionalPlugins: ['explicitly-disabled-plugin'],
+          }),
+          createPlugin('plugin-with-missing-optional-dep', {
+            path: 'path-6',
+            configPath: 'path-6',
+            optionalPlugins: ['missing-plugin'],
+          }),
+          createPlugin('plugin-with-disabled-nested-transitive-dep', {
+            path: 'path-7',
+            configPath: 'path-7',
+            requiredPlugins: ['plugin-with-disabled-transitive-dep'],
+          }),
+          createPlugin('plugin-with-missing-nested-dep', {
+            path: 'path-8',
+            configPath: 'path-8',
+            requiredPlugins: ['plugin-with-missing-required-deps'],
+          }),
         ]),
       });
 
-      await pluginsService.discover();
+      await pluginsService.discover({ environment: environmentSetup });
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.public).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.internal).toBeInstanceOf(Map);
-      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
-      expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
             "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [missing-plugin]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [another-explicitly-disabled-plugin]",
           ],
           Array [
             "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-disabled-transitive-dep]",
+          ],
+          Array [
+            "Plugin \\"plugin-with-missing-nested-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-missing-required-deps]",
           ],
         ]
       `);
@@ -270,7 +308,8 @@ describe('PluginsService', () => {
         plugin$: from([firstPlugin, secondPlugin]),
       });
 
-      await expect(pluginsService.discover()).resolves.toBeUndefined();
+      const { pluginTree } = await pluginsService.discover({ environment: environmentSetup });
+      expect(pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
@@ -305,7 +344,8 @@ describe('PluginsService', () => {
         plugin$: from([firstPlugin, secondPlugin, thirdPlugin, lastPlugin, missingDepsPlugin]),
       });
 
-      await expect(pluginsService.discover()).resolves.toBeUndefined();
+      const { pluginTree } = await pluginsService.discover({ environment: environmentSetup });
+      expect(pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
@@ -337,7 +377,7 @@ describe('PluginsService', () => {
         plugin$: from([firstPlugin, secondPlugin]),
       });
 
-      await pluginsService.discover();
+      await pluginsService.discover({ environment: environmentSetup });
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
@@ -354,10 +394,11 @@ describe('PluginsService', () => {
             resolve(process.cwd(), '..', 'kibana-extra'),
           ],
         },
-        { coreId, env, logger, configService }
+        { coreId, env, logger, configService },
+        { uuid: 'uuid' }
       );
 
-      const logs = loggingServiceMock.collect(logger);
+      const logs = loggingSystemMock.collect(logger);
       expect(logs.info).toHaveLength(0);
       expect(logs.error).toHaveLength(0);
     });
@@ -385,7 +426,7 @@ describe('PluginsService', () => {
           }),
         ]),
       });
-      await pluginsService.discover();
+      await pluginsService.discover({ environment: environmentSetup });
       expect(configService.setSchema).toBeCalledWith('path', configSchema);
     });
 
@@ -416,7 +457,7 @@ describe('PluginsService', () => {
           }),
         ]),
       });
-      await pluginsService.discover();
+      await pluginsService.discover({ environment: environmentSetup });
       expect(configService.addDeprecationProvider).toBeCalledWith(
         'config-path',
         deprecationProvider
@@ -431,6 +472,7 @@ describe('PluginsService', () => {
         id: plugin.name,
         configPath: plugin.manifest.configPath,
         requiredPlugins: [],
+        requiredBundles: [],
         optionalPlugins: [],
       },
     ];
@@ -463,12 +505,8 @@ describe('PluginsService', () => {
       });
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
-      await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
-
-      const uiConfig$ = browserConfigs.get('plugin-with-expose');
+      const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+      const uiConfig$ = uiPlugins.browserConfigs.get('plugin-with-expose');
       expect(uiConfig$).toBeDefined();
 
       const uiConfig = await uiConfig$!.pipe(take(1)).toPromise();
@@ -503,50 +541,68 @@ describe('PluginsService', () => {
       });
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
-      await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
-
-      expect([...browserConfigs.entries()]).toHaveLength(0);
+      const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+      expect([...uiPlugins.browserConfigs.entries()]).toHaveLength(0);
     });
   });
 
   describe('#setup()', () => {
+    beforeEach(() => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('plugin-1', {
+            path: 'path-1',
+            version: 'some-version',
+            configPath: 'plugin1',
+          }),
+          createPlugin('plugin-2', {
+            path: 'path-2',
+            version: 'some-version',
+            configPath: 'plugin2',
+          }),
+        ]),
+      });
+
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+    });
+
     describe('uiPlugins.internal', () => {
       it('includes disabled plugins', async () => {
-        mockDiscover.mockReturnValue({
-          error$: from([]),
-          plugin$: from([
-            createPlugin('plugin-1', {
-              path: 'path-1',
-              version: 'some-version',
-              configPath: 'plugin1',
-            }),
-            createPlugin('plugin-2', {
-              path: 'path-2',
-              version: 'some-version',
-              configPath: 'plugin2',
-            }),
-          ]),
-        });
-
-        mockPluginSystem.uiPlugins.mockReturnValue(new Map());
-
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-
-        await pluginsService.discover();
-        const { uiPlugins } = await pluginsService.setup({} as any);
+        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {
-              "entryPointPath": "path-1/public",
+              "publicAssetsDir": <absolute path>/path-1/public/assets,
+              "publicTargetDir": <absolute path>/path-1/target/public,
+              "requiredBundles": Array [],
             },
             "plugin-2" => Object {
-              "entryPointPath": "path-2/public",
+              "publicAssetsDir": <absolute path>/path-2/public/assets,
+              "publicTargetDir": <absolute path>/path-2/target/public,
+              "requiredBundles": Array [],
             },
           }
         `);
+      });
+    });
+
+    describe('plugin initialization', () => {
+      it('does initialize if plugins.initialize is true', async () => {
+        config$.next({ plugins: { initialize: true } });
+        await pluginsService.discover({ environment: environmentSetup });
+        const { initialized } = await pluginsService.setup(setupDeps);
+        expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
+        expect(initialized).toBe(true);
+      });
+
+      it('does not initialize if plugins.initialize is false', async () => {
+        config$.next({ plugins: { initialize: false } });
+        await pluginsService.discover({ environment: environmentSetup });
+        const { initialized } = await pluginsService.setup(setupDeps);
+        expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+        expect(initialized).toBe(false);
       });
     });
   });

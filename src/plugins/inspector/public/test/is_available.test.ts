@@ -18,8 +18,8 @@
  */
 
 import { inspectorPluginMock } from '../mocks';
-import { DataAdapter } from '../adapters/data/data_adapter';
-import { RequestAdapter } from '../adapters/request/request_adapter';
+import { DataAdapter } from '../../common/adapters/data/data_adapter';
+import { RequestAdapter } from '../../common/adapters/request/request_adapter';
 
 const adapter1 = new DataAdapter();
 const adapter2 = new RequestAdapter();

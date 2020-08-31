@@ -7,12 +7,17 @@
 import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { ActionType } from '../../common';
+import { ActionsClientMock, actionsClientMock } from '../actions_client.mock';
 
 export function mockHandlerArguments(
-  { actionsClient, listTypes: listTypesRes = [] }: any,
-  req: any,
+  {
+    actionsClient = actionsClientMock.create(),
+    listTypes: listTypesRes = [],
+  }: { actionsClient?: ActionsClientMock; listTypes?: ActionType[] },
+  req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
+): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
@@ -31,7 +36,7 @@ export function mockHandlerArguments(
         },
       },
     } as unknown) as RequestHandlerContext,
-    req as KibanaRequest<any, any, any, any>,
+    req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
 }

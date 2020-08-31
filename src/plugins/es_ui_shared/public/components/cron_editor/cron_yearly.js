@@ -46,7 +46,7 @@ export const CronYearly = ({
       <EuiSelect
         options={monthOptions}
         value={month}
-        onChange={e => onChange({ month: e.target.value })}
+        onChange={(e) => onChange({ month: e.target.value })}
         fullWidth
         prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldMonth.textInLabel', {
           defaultMessage: 'In',
@@ -65,7 +65,7 @@ export const CronYearly = ({
       <EuiSelect
         options={dateOptions}
         value={date}
-        onChange={e => onChange({ date: e.target.value })}
+        onChange={(e) => onChange({ date: e.target.value })}
         fullWidth
         prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldDate.textOnTheLabel', {
           defaultMessage: 'On the',
@@ -89,7 +89,7 @@ export const CronYearly = ({
             aria-label={i18n.translate('esUi.cronEditor.cronYearly.hourSelectLabel', {
               defaultMessage: 'Hour',
             })}
-            onChange={e => onChange({ hour: e.target.value })}
+            onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
             prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldHour.textAtLabel', {
               defaultMessage: 'At',
@@ -105,7 +105,7 @@ export const CronYearly = ({
             aria-label={i18n.translate('esUi.cronEditor.cronYearly.minuteSelectLabel', {
               defaultMessage: 'Minute',
             })}
-            onChange={e => onChange({ minute: e.target.value })}
+            onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
             data-test-subj="cronFrequencyYearlyMinuteSelect"

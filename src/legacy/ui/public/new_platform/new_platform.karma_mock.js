@@ -20,11 +20,28 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { setSetupServices, setStartServices } from './set_services';
+import {
+  AggTypesRegistry,
+  getAggTypes,
+  AggConfigs,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../src/plugins/data/common/search/aggs';
 import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public/';
+import {
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../src/plugins/share/public';
 
 const mockObservable = () => {
   return {
     subscribe: () => {},
+    pipe: () => {
+      return {
+        subscribe: () => {},
+      };
+    },
   };
 };
 
@@ -32,32 +49,159 @@ const mockComponent = () => {
   return null;
 };
 
+let refreshInterval = undefined;
+let isTimeRangeSelectorEnabled = true;
+let isAutoRefreshSelectorEnabled = true;
+
 export const mockUiSettings = {
-  get: item => {
-    return mockUiSettings[item];
+  get: (item, defaultValue) => {
+    const defaultValues = {
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'UTC',
+      [UI_SETTINGS.SHORT_DOTS_ENABLE]: true,
+      [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
+      [UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+      [UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+      [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: '($0,0.[00])',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
+      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'en',
+      [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
+      [CSV_SEPARATOR_SETTING]: ',',
+      [CSV_QUOTE_VALUES_SETTING]: true,
+      [UI_SETTINGS.SEARCH_QUERY_LANGUAGE]: 'kuery',
+      'state:storeInSessionStorage': false,
+    };
+
+    return defaultValues[item] || defaultValue;
   },
   getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
-  'query:allowLeadingWildcards': true,
-  'query:queryString:options': {},
-  'courier:ignoreFilterIfFieldNotInIndex': true,
-  'dateFormat:tz': 'Browser',
-  'format:defaultTypeMap': {},
+  isDefault: sinon.fake(),
 };
 
-const mockCore = {
+const mockCoreSetup = {
   chrome: {},
-  uiSettings: mockUiSettings,
   http: {
     basePath: {
       get: sinon.fake.returns(''),
     },
   },
+  injectedMetadata: {},
+  uiSettings: mockUiSettings,
 };
 
+const mockCoreStart = {
+  application: {
+    capabilities: {},
+  },
+  chrome: {
+    overlays: {
+      openModal: sinon.fake(),
+    },
+  },
+  http: {
+    basePath: {
+      get: sinon.fake.returns(''),
+    },
+  },
+  notifications: {
+    toasts: {},
+  },
+  i18n: {},
+  overlays: {},
+  savedObjects: {
+    client: {},
+  },
+  uiSettings: mockUiSettings,
+};
+
+const querySetup = {
+  state$: mockObservable(),
+  filterManager: {
+    getFetches$: sinon.fake(),
+    getFilters: sinon.fake(),
+    getAppFilters: sinon.fake(),
+    getGlobalFilters: sinon.fake(),
+    removeFilter: sinon.fake(),
+    addFilters: sinon.fake(),
+    setFilters: sinon.fake(),
+    removeAll: sinon.fake(),
+    getUpdates$: mockObservable,
+  },
+  timefilter: {
+    timefilter: {
+      getFetch$: mockObservable,
+      getAutoRefreshFetch$: mockObservable,
+      getEnabledUpdated$: mockObservable,
+      getTimeUpdate$: mockObservable,
+      getRefreshIntervalUpdate$: mockObservable,
+      isTimeRangeSelectorEnabled: () => {
+        return isTimeRangeSelectorEnabled;
+      },
+      isAutoRefreshSelectorEnabled: () => {
+        return isAutoRefreshSelectorEnabled;
+      },
+      disableAutoRefreshSelector: () => {
+        isAutoRefreshSelectorEnabled = false;
+      },
+      enableAutoRefreshSelector: () => {
+        isAutoRefreshSelectorEnabled = true;
+      },
+      getRefreshInterval: () => {
+        return refreshInterval;
+      },
+      setRefreshInterval: (interval) => {
+        refreshInterval = interval;
+      },
+      enableTimeRangeSelector: () => {
+        isTimeRangeSelectorEnabled = true;
+      },
+      disableTimeRangeSelector: () => {
+        isTimeRangeSelectorEnabled = false;
+      },
+      getTime: sinon.fake(),
+      setTime: sinon.fake(),
+      getActiveBounds: sinon.fake(),
+      getBounds: sinon.fake(),
+      calculateBounds: sinon.fake(),
+      createFilter: sinon.fake(),
+    },
+    history: sinon.fake(),
+  },
+  savedQueries: {
+    saveQuery: sinon.fake(),
+    getAllSavedQueries: sinon.fake(),
+    findSavedQueries: sinon.fake(),
+    getSavedQuery: sinon.fake(),
+    deleteSavedQuery: sinon.fake(),
+    getSavedQueryCount: sinon.fake(),
+  },
+};
+
+const mockAggTypesRegistry = () => {
+  const registry = new AggTypesRegistry();
+  const registrySetup = registry.setup();
+  const aggTypes = getAggTypes({
+    calculateBounds: sinon.fake(),
+    getConfig: sinon.fake(),
+    getFieldFormatsStart: () => ({
+      deserialize: sinon.fake(),
+      getDefaultInstance: sinon.fake(),
+    }),
+    isDefaultTimezone: () => true,
+  });
+  aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
+  aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
+
+  return registry;
+};
+
+const aggTypesRegistry = mockAggTypesRegistry();
+
 export const npSetup = {
-  core: mockCore,
+  core: mockCoreSetup,
   plugins: {
     advancedSettings: {
       component: {
@@ -77,53 +221,36 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
-      __LEGACY: {
-        renderers: {
-          register: () => undefined,
-          get: () => null,
-        },
-        getExecutor: () => ({
-          interpreter: {
-            interpretAst: () => {},
-          },
-        }),
-      },
     },
     data: {
       autocomplete: {
         addProvider: sinon.fake(),
         getProvider: sinon.fake(),
       },
-      query: {
-        filterManager: sinon.fake(),
-        timefilter: {
-          timefilter: sinon.fake(),
-          history: sinon.fake(),
+      query: querySetup,
+      search: {
+        aggs: {
+          types: aggTypesRegistry.setup(),
         },
-        savedQueries: {
-          saveQuery: sinon.fake(),
-          getAllSavedQueries: sinon.fake(),
-          findSavedQueries: sinon.fake(),
-          getSavedQuery: sinon.fake(),
-          deleteSavedQuery: sinon.fake(),
-          getSavedQueryCount: sinon.fake(),
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
         },
       },
-      __LEGACY: {
-        esClient: {
-          search: sinon.fake(),
-          msearch: sinon.fake(),
-        },
-      },
-      fieldFormats: getFieldFormatsRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCoreSetup),
     },
     share: {
       register: () => {},
+      urlGenerators: {
+        registerUrlGenerator: () => {},
+      },
     },
-    dev_tools: {
+    devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
       config: {
@@ -153,11 +280,17 @@ export const npSetup = {
       config: {
         disableWelcomeScreen: false,
       },
+      tutorials: {
+        setVariable: sinon.fake(),
+      },
     },
     charts: {
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
+      },
+      colors: {
+        seedColors: ['white', 'black'],
       },
     },
     management: {
@@ -167,17 +300,36 @@ export const npSetup = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: { addListConfig: sinon.fake() },
+      creation: { addCreationConfig: sinon.fake() },
+    },
+    discover: {
+      docViews: {
+        addDocView: sinon.fake(),
+        setAngularInjectorGetter: sinon.fake(),
+      },
+    },
+    visTypeVega: {
+      config: sinon.fake(),
+    },
+    visualizations: {
+      createBaseVisualization: sinon.fake(),
+      createReactVisualization: sinon.fake(),
+      registerAlias: sinon.fake(),
+      hideTypes: sinon.fake(),
+    },
+
+    mapsLegacy: {
+      serviceSettings: sinon.fake(),
+      getPrecision: sinon.fake(),
+      getZoomPrecision: sinon.fake(),
+    },
   },
 };
 
-let refreshInterval = undefined;
-let isTimeRangeSelectorEnabled = true;
-let isAutoRefreshSelectorEnabled = true;
-
 export const npStart = {
-  core: {
-    chrome: {},
-  },
+  core: mockCoreStart,
   plugins: {
     management: {
       legacy: {
@@ -193,6 +345,17 @@ export const npStart = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: {
+        getType: sinon.fake(),
+        getIndexPatternCreationOptions: sinon.fake(),
+      },
+      creation: {
+        getIndexPatternTags: sinon.fake(),
+        getFieldInfo: sinon.fake(),
+        areScriptedFieldsEnabled: sinon.fake(),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -203,22 +366,38 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    dev_tools: {
-      getSortedDevTools: () => [],
-    },
-    kibana_legacy: {
-      getApps: () => [],
+    kibanaLegacy: {
       getForwards: () => [],
+      loadFontAwesome: () => {},
       config: {
         defaultAppId: 'home',
       },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
+      },
+    },
+    dashboard: {
+      getSavedDashboardLoader: sinon.fake(),
     },
     data: {
+      actions: {
+        createFiltersFromValueClickAction: Promise.resolve(['yes']),
+        createFiltersFromRangeSelectAction: sinon.fake(),
+      },
       autocomplete: {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
-      indexPatterns: sinon.fake(),
+      indexPatterns: {
+        get: sinon.spy((indexPatternId) =>
+          Promise.resolve({
+            id: indexPatternId,
+            isTimeNanosBased: () => false,
+            popularizeField: () => {},
+          })
+        ),
+      },
       ui: {
         IndexPatternSelect: mockComponent,
         SearchBar: mockComponent,
@@ -257,7 +436,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: interval => {
+            setRefreshInterval: (interval) => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {
@@ -277,6 +456,16 @@ export const npStart = {
         },
       },
       search: {
+        aggs: {
+          calculateAutoTimeExpression: sinon.fake(),
+          createAggConfigs: (indexPattern, configStates = []) => {
+            return new AggConfigs(indexPattern, configStates, {
+              typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
+            });
+          },
+          types: aggTypesRegistry.start(),
+        },
         __LEGACY: {
           esClient: {
             search: sinon.fake(),
@@ -284,7 +473,7 @@ export const npStart = {
           },
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCoreStart),
     },
     share: {
       toggleShareContextMenu: () => {},
@@ -306,16 +495,15 @@ export const npStart = {
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
     },
-    home: {
-      featureCatalogue: {
-        register: sinon.fake(),
-      },
-      environment: {
-        get: sinon.fake(),
-      },
-      config: {
-        disableWelcomeScreen: false,
-      },
+    visualizations: {
+      get: sinon.fake(),
+      all: sinon.fake(),
+      getAliases: sinon.fake(),
+      savedVisualizationsLoader: {},
+      showNewVisModal: sinon.fake(),
+      createVis: sinon.fake(),
+      convertFromSerializedVis: sinon.fake(),
+      convertToSerializedVis: sinon.fake(),
     },
     navigation: {
       ui: {
@@ -328,6 +516,12 @@ export const npStart = {
         useChartsTheme: sinon.fake(),
       },
     },
+    discover: {
+      docViews: {
+        DocViewer: () => null,
+      },
+      savedSearchLoader: {},
+    },
   },
 };
 
@@ -337,8 +531,20 @@ export function __setup__(coreSetup) {
   // no-op application register calls (this is overwritten to
   // bootstrap an LP plugin outside of tests)
   npSetup.core.application.register = () => {};
+
+  npSetup.core.uiSettings.get = mockUiSettings.get;
+
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setSetupServices(npSetup);
 }
 
 export function __start__(coreStart) {
   npStart.core = coreStart;
+
+  npStart.core.uiSettings.get = mockUiSettings.get;
+
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setStartServices(npStart);
 }

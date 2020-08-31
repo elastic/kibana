@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
               id,
               name: title,
               isSelected: true,
-              items: items.map(route => ({
+              items: items.map((route) => ({
                 id: route.id,
                 name: route.title,
                 onClick: () => history.push(`/${route.id}`),

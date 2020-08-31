@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import apmInstanceFixture from './fixtures/instance';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

@@ -3,8 +3,14 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "security"],
-  "requiredPlugins": ["data", "features", "licensing"],
+  "requiredPlugins": ["data", "features", "licensing", "taskManager"],
   "optionalPlugins": ["home", "management"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "spaces",
+    "esUiShared"
+  ]
 }

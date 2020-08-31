@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -11,53 +12,81 @@ import {
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  ClusterClient,
+  LegacyClusterClient,
+  SharedGlobalConfig,
+  IContextProvider,
+  RequestHandler,
 } from 'src/core/server';
+import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
-import { IEventLogConfig, IEventLogService, IEventLogger, IEventLogConfig$ } from './types';
+import {
+  IEventLogConfig,
+  IEventLogService,
+  IEventLogger,
+  IEventLogConfig$,
+  IEventLogClientService,
+} from './types';
+import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
+import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
-// TODO - figure out how to get ${kibana.index} for `.kibana`
-const KIBANA_INDEX = '.kibana';
+const PROVIDER = 'eventLog';
 
-const PROVIDER = 'event_log';
 const ACTIONS = {
   starting: 'starting',
   stopping: 'stopping',
 };
 
-export class Plugin implements CorePlugin<IEventLogService> {
+interface PluginSetupDeps {
+  spaces?: SpacesPluginSetup;
+}
+
+export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
   private readonly config$: IEventLogConfig$;
   private systemLogger: Logger;
-  private eventLogService?: IEventLogService;
+  private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
+  private globalConfig$: Observable<SharedGlobalConfig>;
+  private eventLogClientService?: EventLogClientService;
+  private spacesService?: SpacesServiceSetup;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
+    this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
+  async setup(core: CoreSetup, { spaces }: PluginSetupDeps): Promise<IEventLogService> {
+    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const kibanaIndex = globalConfig.kibana.index;
+
     this.systemLogger.debug('setting up plugin');
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.spacesService = spaces?.spacesService;
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
-      indexNameRoot: KIBANA_INDEX,
-      clusterClient: core.elasticsearch.adminClient,
+      indexNameRoot: kibanaIndex,
+      clusterClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
     });
 
     this.eventLogService = new EventLogService({
       config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
-      kibanaUUID: core.uuid.getInstanceUuid(),
+      kibanaUUID: this.context.env.instanceUuid,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -66,10 +95,17 @@ export class Plugin implements CorePlugin<IEventLogService> {
       event: { provider: PROVIDER },
     });
 
+    core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
+
+    // Routes
+    const router = core.http.createRouter();
+    // Register routes
+    findRoute(router, this.systemLogger);
+
     return this.eventLogService;
   }
 
-  async start(core: CoreStart) {
+  async start(core: CoreStart): Promise<IEventLogClientService> {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');
@@ -84,9 +120,32 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
-      message: 'event_log starting',
+      message: 'eventLog starting',
     });
+
+    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
+      const client = core.savedObjects.getScopedClient(request);
+      return client.get.bind(client);
+    });
+
+    this.eventLogClientService = new EventLogClientService({
+      esContext: this.esContext,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      spacesService: this.spacesService,
+    });
+    return this.eventLogClientService;
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<unknown, unknown, unknown>,
+    'eventLog'
+  > => {
+    return async (context, request) => {
+      return {
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
+      };
+    };
+  };
 
   stop() {
     this.systemLogger.debug('stopping plugin');
@@ -97,7 +156,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     // when Kibana is actuaelly stopping, as it's written asynchronously
     this.eventLogger.logEvent({
       event: { action: ACTIONS.stopping },
-      message: 'event_log stopping',
+      message: 'eventLog stopping',
     });
   }
 }

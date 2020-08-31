@@ -41,6 +41,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 - `max_attempts` - The maximum number of times a task will be attempted before being abandoned as failed
 - `poll_interval` - How often the background worker should check the task_manager index for more work
+- `max_poll_inactivity_cycles` - How many poll intervals is work allowed to block polling for before it's timed out. This does not include task execution, as task execution does not block the polling, but rather includes work needed to manage Task Manager's state.
 - `index` - The name of the index that the task_manager
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
@@ -261,6 +262,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   remove: (id: string) =>  {
     // ...
   },
+  get: (id: string) =>  {
+    // ...
+  },
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) => {
     // ...
   },
@@ -453,6 +457,6 @@ The task manager's public API is create / delete / list. Updates aren't directly
    ```
 - Integration tests:
    ```
-   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.js
-   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.js
+   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
+   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
    ```

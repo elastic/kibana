@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../../core/server';
-import { EsSearchService } from './es_search_service';
-
 export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
-
-export function esSearchService(initializerContext: PluginInitializerContext) {
-  return new EsSearchService(initializerContext);
-}
+export { esSearchStrategyProvider } from './es_search_strategy';
+export { getDefaultSearchParams } from './get_default_search_params';
+export { getTotalLoaded } from './get_total_loaded';

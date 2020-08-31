@@ -45,8 +45,5 @@
       "total": 0
     }
   },
-  "alerts": {
-    "message": "Cluster Alerts are not displayed because the [production] cluster's license could not be determined."
-  },
   "isPrimary": false
 }]

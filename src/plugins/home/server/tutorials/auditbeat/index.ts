@@ -31,12 +31,14 @@ import {
 
 export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
+  const moduleName = 'auditbeat';
   return {
     id: 'auditbeat',
     name: i18n.translate('home.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',
     }),
@@ -53,9 +55,9 @@ processes, users, logins, sockets information, file accesses, and more. \
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.auditbeat.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {
@@ -63,7 +65,7 @@ processes, users, logins, sockets information, file accesses, and more. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/auditbeat/screenshot.png',
+    previewImagePath: '/plugins/home/assets/auditbeat/screenshot.png',
     onPrem: onPremInstructions(platforms, context),
     elasticCloud: cloudInstructions(platforms),
     onPremElasticCloud: onPremCloudInstructions(platforms),

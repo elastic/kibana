@@ -21,133 +21,131 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
   mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
 };
 
 describe('#atSpace', () => {
-  const checkPrivilegesAtSpaceTest = (
-    description: string,
-    options: {
-      spaceId: string;
-      privilegeOrPrivileges: string | string[];
-      esHasPrivilegesResponse: HasPrivilegesResponse;
-      expectedResult?: any;
-      expectErrorThrown?: any;
+  const checkPrivilegesAtSpaceTest = async (options: {
+    spaceId: string;
+    privilegeOrPrivileges: string | string[];
+    esHasPrivilegesResponse: HasPrivilegesResponse;
+  }) => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      options.esHasPrivilegesResponse
+    );
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      mockClusterClient,
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+
+    let actualResult;
+    let errorThrown = null;
+    try {
+      actualResult = await checkPrivileges.atSpace(options.spaceId, options.privilegeOrPrivileges);
+    } catch (err) {
+      errorThrown = err;
     }
-  ) => {
-    test(description, async () => {
-      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
-        options.esHasPrivilegesResponse
-      );
-      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
-        mockActions,
-        mockClusterClient,
-        application
-      );
-      const request = httpServerMock.createKibanaRequest();
-      const checkPrivileges = checkPrivilegesWithRequest(request);
 
-      let actualResult;
-      let errorThrown = null;
-      try {
-        actualResult = await checkPrivileges.atSpace(
-          options.spaceId,
-          options.privilegeOrPrivileges
-        );
-      } catch (err) {
-        errorThrown = err;
-      }
-
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'shield.hasPrivileges',
-        {
-          body: {
-            applications: [
-              {
-                application,
-                resources: [`space:${options.spaceId}`],
-                privileges: uniq([
-                  mockActions.version,
-                  mockActions.login,
-                  ...(Array.isArray(options.privilegeOrPrivileges)
-                    ? options.privilegeOrPrivileges
-                    : [options.privilegeOrPrivileges]),
-                ]),
-              },
-            ],
+    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+      body: {
+        applications: [
+          {
+            application,
+            resources: [`space:${options.spaceId}`],
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...(Array.isArray(options.privilegeOrPrivileges)
+                ? options.privilegeOrPrivileges
+                : [options.privilegeOrPrivileges]),
+            ]),
           },
-        }
-      );
-
-      if (options.expectedResult) {
-        expect(errorThrown).toBeNull();
-        expect(actualResult).toEqual(options.expectedResult);
-      }
-
-      if (options.expectErrorThrown) {
-        expect(errorThrown).toMatchSnapshot();
-      }
+        ],
+      },
     });
+
+    if (errorThrown) {
+      return errorThrown;
+    }
+    return actualResult;
   };
 
-  checkPrivilegesAtSpaceTest('successful when checking for login and user has login', {
-    spaceId: 'space_1',
-    privilegeOrPrivileges: mockActions.login,
-    esHasPrivilegesResponse: {
-      has_all_requested: true,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
+  test('successful when checking for login and user has login', async () => {
+    const result = await checkPrivilegesAtSpaceTest({
+      spaceId: 'space_1',
+      privilegeOrPrivileges: mockActions.login,
+      esHasPrivilegesResponse: {
+        has_all_requested: true,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: true,
-      username: 'foo-username',
-      privileges: {
-        [mockActions.login]: true,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "resource": "space_1",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
-  checkPrivilegesAtSpaceTest(`failure when checking for login and user doesn't have login`, {
-    spaceId: 'space_1',
-    privilegeOrPrivileges: mockActions.login,
-    esHasPrivilegesResponse: {
-      has_all_requested: false,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: false,
-            [mockActions.version]: true,
+  test(`failure when checking for login and user doesn't have login`, async () => {
+    const result = await checkPrivilegesAtSpaceTest({
+      spaceId: 'space_1',
+      privilegeOrPrivileges: mockActions.login,
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: false,
+              [mockActions.version]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: false,
-      username: 'foo-username',
-      privileges: {
-        [mockActions.login]: false,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "resource": "space_1",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
-  checkPrivilegesAtSpaceTest(
-    `throws error when checking for login and user has login but doesn't have version`,
-    {
+  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
+    const result = await checkPrivilegesAtSpaceTest({
       spaceId: 'space_1',
       privilegeOrPrivileges: mockActions.login,
       esHasPrivilegesResponse: {
@@ -162,74 +160,99 @@ describe('#atSpace', () => {
           },
         },
       },
-      expectErrorThrown: true,
-    }
-  );
-
-  checkPrivilegesAtSpaceTest(`successful when checking for two actions and the user has both`, {
-    spaceId: 'space_1',
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: true,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
-          },
-        },
-      },
-    },
-    expectedResult: {
-      hasAllRequested: true,
-      username: 'foo-username',
-      privileges: {
-        [`saved_object:${savedObjectTypes[0]}/get`]: true,
-        [`saved_object:${savedObjectTypes[1]}/get`]: true,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(
+      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
+    );
   });
 
-  checkPrivilegesAtSpaceTest(`failure when checking for two actions and the user has only one`, {
-    spaceId: 'space_1',
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: false,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
-            [`saved_object:${savedObjectTypes[0]}/get`]: false,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+  test(`successful when checking for two actions and the user has both`, async () => {
+    const result = await checkPrivilegesAtSpaceTest({
+      spaceId: 'space_1',
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: true,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: false,
-      username: 'foo-username',
-      privileges: {
-        [`saved_object:${savedObjectTypes[0]}/get`]: false,
-        [`saved_object:${savedObjectTypes[1]}/get`]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
+
+  test(`failure when checking for two actions and the user has only one`, async () => {
+    const result = await checkPrivilegesAtSpaceTest({
+      spaceId: 'space_1',
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
+          },
+        },
       },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
   describe('with a malformed Elasticsearch response', () => {
-    checkPrivilegesAtSpaceTest(
-      `throws a validation error when an extra privilege is present in the response`,
-      {
+    test(`throws a validation error when an extra privilege is present in the response`, async () => {
+      const result = await checkPrivilegesAtSpaceTest({
         spaceId: 'space_1',
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -246,13 +269,14 @@ describe('#atSpace', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+      );
+    });
 
-    checkPrivilegesAtSpaceTest(
-      `throws a validation error when privileges are missing in the response`,
-      {
+    test(`throws a validation error when privileges are missing in the response`, async () => {
+      const result = await checkPrivilegesAtSpaceTest({
         spaceId: 'space_1',
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -267,82 +291,69 @@ describe('#atSpace', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+      );
+    });
   });
 });
 
 describe('#atSpaces', () => {
-  const checkPrivilegesAtSpacesTest = (
-    description: string,
-    options: {
-      spaceIds: string[];
-      privilegeOrPrivileges: string | string[];
-      esHasPrivilegesResponse: HasPrivilegesResponse;
-      expectedResult?: any;
-      expectErrorThrown?: any;
+  const checkPrivilegesAtSpacesTest = async (options: {
+    spaceIds: string[];
+    privilegeOrPrivileges: string | string[];
+    esHasPrivilegesResponse: HasPrivilegesResponse;
+  }) => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      options.esHasPrivilegesResponse
+    );
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      mockClusterClient,
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+
+    let actualResult;
+    let errorThrown = null;
+    try {
+      actualResult = await checkPrivileges.atSpaces(
+        options.spaceIds,
+        options.privilegeOrPrivileges
+      );
+    } catch (err) {
+      errorThrown = err;
     }
-  ) => {
-    test(description, async () => {
-      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
-        options.esHasPrivilegesResponse
-      );
-      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
-        mockActions,
-        mockClusterClient,
-        application
-      );
-      const request = httpServerMock.createKibanaRequest();
-      const checkPrivileges = checkPrivilegesWithRequest(request);
 
-      let actualResult;
-      let errorThrown = null;
-      try {
-        actualResult = await checkPrivileges.atSpaces(
-          options.spaceIds,
-          options.privilegeOrPrivileges
-        );
-      } catch (err) {
-        errorThrown = err;
-      }
-
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'shield.hasPrivileges',
-        {
-          body: {
-            applications: [
-              {
-                application,
-                resources: options.spaceIds.map(spaceId => `space:${spaceId}`),
-                privileges: uniq([
-                  mockActions.version,
-                  mockActions.login,
-                  ...(Array.isArray(options.privilegeOrPrivileges)
-                    ? options.privilegeOrPrivileges
-                    : [options.privilegeOrPrivileges]),
-                ]),
-              },
-            ],
+    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+      body: {
+        applications: [
+          {
+            application,
+            resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...(Array.isArray(options.privilegeOrPrivileges)
+                ? options.privilegeOrPrivileges
+                : [options.privilegeOrPrivileges]),
+            ]),
           },
-        }
-      );
-
-      if (options.expectedResult) {
-        expect(errorThrown).toBeNull();
-        expect(actualResult).toEqual(options.expectedResult);
-      }
-
-      if (options.expectErrorThrown) {
-        expect(errorThrown).toMatchSnapshot();
-      }
+        ],
+      },
     });
+
+    if (errorThrown) {
+      return errorThrown;
+    }
+    return actualResult;
   };
 
-  checkPrivilegesAtSpacesTest(
-    'successful when checking for login and user has login at both spaces',
-    {
+  test('successful when checking for login and user has login at both spaces', async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: mockActions.login,
       esHasPrivilegesResponse: {
@@ -361,24 +372,29 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: true,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [mockActions.login]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "resource": "space_1",
           },
-          space_2: {
-            [mockActions.login]: true,
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "resource": "space_2",
           },
-        },
-      },
-    }
-  );
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
-  checkPrivilegesAtSpacesTest(
-    'failure when checking for login and user has login at only one space',
-    {
+  test('failure when checking for login and user has login at only one space', async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: mockActions.login,
       esHasPrivilegesResponse: {
@@ -397,24 +413,29 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: false,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [mockActions.login]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "resource": "space_1",
           },
-          space_2: {
-            [mockActions.login]: false,
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "resource": "space_2",
           },
-        },
-      },
-    }
-  );
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
-  checkPrivilegesAtSpacesTest(
-    `throws error when checking for login and user has login but doesn't have version`,
-    {
+  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: mockActions.login,
       esHasPrivilegesResponse: {
@@ -433,38 +454,43 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectErrorThrown: true,
-    }
-  );
+    });
+    expect(result).toMatchInlineSnapshot(
+      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
+    );
+  });
 
-  checkPrivilegesAtSpacesTest(`throws error when Elasticsearch returns malformed response`, {
-    spaceIds: ['space_1', 'space_2'],
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: true,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          'space:space_1': {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
-          },
-          'space:space_2': {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+  test(`throws error when Elasticsearch returns malformed response`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: true,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
+            'space:space_2': {
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
           },
         },
       },
-    },
-    expectErrorThrown: true,
+    });
+    expect(result).toMatchInlineSnapshot(
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+    );
   });
 
-  checkPrivilegesAtSpacesTest(
-    `successful when checking for two actions at two spaces and user has it all`,
-    {
+  test(`successful when checking for two actions at two spaces and user has it all`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: [
         `saved_object:${savedObjectTypes[0]}/get`,
@@ -490,26 +516,39 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: true,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
           },
-          space_2: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
           },
-        },
-      },
-    }
-  );
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_2",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_2",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
-  checkPrivilegesAtSpacesTest(
-    `failure when checking for two actions at two spaces and user has one action at one space`,
-    {
+  test(`failure when checking for two actions at two spaces and user has one action at one space`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: [
         `saved_object:${savedObjectTypes[0]}/get`,
@@ -535,26 +574,39 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: false,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: false,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
           },
-          space_2: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: false,
-            [`saved_object:${savedObjectTypes[1]}/get`]: false,
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
           },
-        },
-      },
-    }
-  );
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_2",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
-  checkPrivilegesAtSpacesTest(
-    `failure when checking for two actions at two spaces and user has two actions at one space`,
-    {
+  test(`failure when checking for two actions at two spaces and user has two actions at one space`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: [
         `saved_object:${savedObjectTypes[0]}/get`,
@@ -580,26 +632,39 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: false,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
           },
-          space_2: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: false,
-            [`saved_object:${savedObjectTypes[1]}/get`]: false,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
           },
-        },
-      },
-    }
-  );
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_2",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
-  checkPrivilegesAtSpacesTest(
-    `failure when checking for two actions at two spaces and user has two actions at one space & one action at the other`,
-    {
+  test(`failure when checking for two actions at two spaces and user has two actions at one space & one action at the other`, async () => {
+    const result = await checkPrivilegesAtSpacesTest({
       spaceIds: ['space_1', 'space_2'],
       privilegeOrPrivileges: [
         `saved_object:${savedObjectTypes[0]}/get`,
@@ -625,27 +690,40 @@ describe('#atSpaces', () => {
           },
         },
       },
-      expectedResult: {
-        hasAllRequested: false,
-        username: 'foo-username',
-        spacePrivileges: {
-          space_1: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_1",
           },
-          space_2: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: false,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_1",
           },
-        },
-      },
-    }
-  );
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "resource": "space_2",
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
 
   describe('with a malformed Elasticsearch response', () => {
-    checkPrivilegesAtSpacesTest(
-      `throws a validation error when an extra privilege is present in the response`,
-      {
+    test(`throws a validation error when an extra privilege is present in the response`, async () => {
+      const result = await checkPrivilegesAtSpacesTest({
         spaceIds: ['space_1', 'space_2'],
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -659,7 +737,7 @@ describe('#atSpaces', () => {
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
-              // @ts-ignore this is wrong on purpose
+              // @ts-expect-error this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
@@ -668,13 +746,14 @@ describe('#atSpaces', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+      );
+    });
 
-    checkPrivilegesAtSpacesTest(
-      `throws a validation error when privileges are missing in the response`,
-      {
+    test(`throws a validation error when privileges are missing in the response`, async () => {
+      const result = await checkPrivilegesAtSpacesTest({
         spaceIds: ['space_1', 'space_2'],
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -686,7 +765,7 @@ describe('#atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
               },
-              // @ts-ignore this is wrong on purpose
+              // @ts-expect-error this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
@@ -695,13 +774,14 @@ describe('#atSpaces', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+      );
+    });
 
-    checkPrivilegesAtSpacesTest(
-      `throws a validation error when an extra space is present in the response`,
-      {
+    test(`throws a validation error when an extra space is present in the response`, async () => {
+      const result = await checkPrivilegesAtSpacesTest({
         spaceIds: ['space_1', 'space_2'],
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -727,13 +807,14 @@ describe('#atSpaces', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because ["space:space_3" is not allowed]]]`
+      );
+    });
 
-    checkPrivilegesAtSpacesTest(
-      `throws a validation error when an a space is missing in the response`,
-      {
+    test(`throws a validation error when an a space is missing in the response`, async () => {
+      const result = await checkPrivilegesAtSpacesTest({
         spaceIds: ['space_1', 'space_2'],
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
@@ -749,124 +830,127 @@ describe('#atSpaces', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+      );
+    });
   });
 });
 
 describe('#globally', () => {
-  const checkPrivilegesGloballyTest = (
-    description: string,
-    options: {
-      privilegeOrPrivileges: string | string[];
-      esHasPrivilegesResponse: HasPrivilegesResponse;
-      expectedResult?: any;
-      expectErrorThrown?: any;
+  const checkPrivilegesGloballyTest = async (options: {
+    privilegeOrPrivileges: string | string[];
+    esHasPrivilegesResponse: HasPrivilegesResponse;
+  }) => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      options.esHasPrivilegesResponse
+    );
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      mockActions,
+      mockClusterClient,
+      application
+    );
+    const request = httpServerMock.createKibanaRequest();
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+
+    let actualResult;
+    let errorThrown = null;
+    try {
+      actualResult = await checkPrivileges.globally(options.privilegeOrPrivileges);
+    } catch (err) {
+      errorThrown = err;
     }
-  ) => {
-    test(description, async () => {
-      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
-        options.esHasPrivilegesResponse
-      );
-      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
-        mockActions,
-        mockClusterClient,
-        application
-      );
-      const request = httpServerMock.createKibanaRequest();
-      const checkPrivileges = checkPrivilegesWithRequest(request);
 
-      let actualResult;
-      let errorThrown = null;
-      try {
-        actualResult = await checkPrivileges.globally(options.privilegeOrPrivileges);
-      } catch (err) {
-        errorThrown = err;
-      }
-
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'shield.hasPrivileges',
-        {
-          body: {
-            applications: [
-              {
-                application,
-                resources: [GLOBAL_RESOURCE],
-                privileges: uniq([
-                  mockActions.version,
-                  mockActions.login,
-                  ...(Array.isArray(options.privilegeOrPrivileges)
-                    ? options.privilegeOrPrivileges
-                    : [options.privilegeOrPrivileges]),
-                ]),
-              },
-            ],
+    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+      body: {
+        applications: [
+          {
+            application,
+            resources: [GLOBAL_RESOURCE],
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...(Array.isArray(options.privilegeOrPrivileges)
+                ? options.privilegeOrPrivileges
+                : [options.privilegeOrPrivileges]),
+            ]),
           },
-        }
-      );
-
-      if (options.expectedResult) {
-        expect(errorThrown).toBeNull();
-        expect(actualResult).toEqual(options.expectedResult);
-      }
-
-      if (options.expectErrorThrown) {
-        expect(errorThrown).toMatchSnapshot();
-      }
+        ],
+      },
     });
+
+    if (errorThrown) {
+      return errorThrown;
+    }
+    return actualResult;
   };
 
-  checkPrivilegesGloballyTest('successful when checking for login and user has login', {
-    privilegeOrPrivileges: mockActions.login,
-    esHasPrivilegesResponse: {
-      has_all_requested: true,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          [GLOBAL_RESOURCE]: {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
+  test('successful when checking for login and user has login', async () => {
+    const result = await checkPrivilegesGloballyTest({
+      privilegeOrPrivileges: mockActions.login,
+      esHasPrivilegesResponse: {
+        has_all_requested: true,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: true,
-      username: 'foo-username',
-      privileges: {
-        [mockActions.login]: true,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "resource": undefined,
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
-  checkPrivilegesGloballyTest(`failure when checking for login and user doesn't have login`, {
-    privilegeOrPrivileges: mockActions.login,
-    esHasPrivilegesResponse: {
-      has_all_requested: false,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          [GLOBAL_RESOURCE]: {
-            [mockActions.login]: false,
-            [mockActions.version]: true,
+  test(`failure when checking for login and user doesn't have login`, async () => {
+    const result = await checkPrivilegesGloballyTest({
+      privilegeOrPrivileges: mockActions.login,
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: false,
+              [mockActions.version]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: false,
-      username: 'foo-username',
-      privileges: {
-        [mockActions.login]: false,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "resource": undefined,
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
-  checkPrivilegesGloballyTest(
-    `throws error when checking for login and user has login but doesn't have version`,
-    {
+  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
+    const result = await checkPrivilegesGloballyTest({
       privilegeOrPrivileges: mockActions.login,
       esHasPrivilegesResponse: {
         has_all_requested: false,
@@ -880,92 +964,121 @@ describe('#globally', () => {
           },
         },
       },
-      expectErrorThrown: true,
-    }
-  );
-
-  checkPrivilegesGloballyTest(`throws error when Elasticsearch returns malformed response`, {
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: false,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          [GLOBAL_RESOURCE]: {
-            [`saved_object:${savedObjectTypes[0]}/get`]: false,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
-          },
-        },
-      },
-    },
-    expectErrorThrown: true,
+    });
+    expect(result).toMatchInlineSnapshot(
+      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
+    );
   });
 
-  checkPrivilegesGloballyTest(`successful when checking for two actions and the user has both`, {
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: true,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          [GLOBAL_RESOURCE]: {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
-            [`saved_object:${savedObjectTypes[0]}/get`]: true,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+  test(`throws error when Elasticsearch returns malformed response`, async () => {
+    const result = await checkPrivilegesGloballyTest({
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: true,
-      username: 'foo-username',
-      privileges: {
-        [`saved_object:${savedObjectTypes[0]}/get`]: true,
-        [`saved_object:${savedObjectTypes[1]}/get`]: true,
-      },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+    );
   });
 
-  checkPrivilegesGloballyTest(`failure when checking for two actions and the user has only one`, {
-    privilegeOrPrivileges: [
-      `saved_object:${savedObjectTypes[0]}/get`,
-      `saved_object:${savedObjectTypes[1]}/get`,
-    ],
-    esHasPrivilegesResponse: {
-      has_all_requested: false,
-      username: 'foo-username',
-      application: {
-        [application]: {
-          [GLOBAL_RESOURCE]: {
-            [mockActions.login]: true,
-            [mockActions.version]: true,
-            [`saved_object:${savedObjectTypes[0]}/get`]: false,
-            [`saved_object:${savedObjectTypes[1]}/get`]: true,
+  test(`successful when checking for two actions and the user has both`, async () => {
+    const result = await checkPrivilegesGloballyTest({
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: true,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
           },
         },
       },
-    },
-    expectedResult: {
-      hasAllRequested: false,
-      username: 'foo-username',
-      privileges: {
-        [`saved_object:${savedObjectTypes[0]}/get`]: false,
-        [`saved_object:${savedObjectTypes[1]}/get`]: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "resource": undefined,
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": undefined,
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
+  });
+
+  test(`failure when checking for two actions and the user has only one`, async () => {
+    const result = await checkPrivilegesGloballyTest({
+      privilegeOrPrivileges: [
+        `saved_object:${savedObjectTypes[0]}/get`,
+        `saved_object:${savedObjectTypes[1]}/get`,
+      ],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
+            },
+          },
+        },
       },
-    },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "resource": undefined,
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "resource": undefined,
+          },
+        ],
+        "username": "foo-username",
+      }
+    `);
   });
 
   describe('with a malformed Elasticsearch response', () => {
-    checkPrivilegesGloballyTest(
-      `throws a validation error when an extra privilege is present in the response`,
-      {
+    test(`throws a validation error when an extra privilege is present in the response`, async () => {
+      const result = await checkPrivilegesGloballyTest({
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
           has_all_requested: false,
@@ -981,13 +1094,14 @@ describe('#globally', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+      );
+    });
 
-    checkPrivilegesGloballyTest(
-      `throws a validation error when privileges are missing in the response`,
-      {
+    test(`throws a validation error when privileges are missing in the response`, async () => {
+      const result = await checkPrivilegesGloballyTest({
         privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
         esHasPrivilegesResponse: {
           has_all_requested: false,
@@ -1001,8 +1115,10 @@ describe('#globally', () => {
             },
           },
         },
-        expectErrorThrown: true,
-      }
-    );
+      });
+      expect(result).toMatchInlineSnapshot(
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+      );
+    });
   });
 });

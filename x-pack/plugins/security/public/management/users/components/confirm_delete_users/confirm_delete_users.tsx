@@ -13,7 +13,7 @@ import { UserAPIClient } from '../..';
 
 interface Props {
   usersToDelete: string[];
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsStart;
   onCancel: () => void;
   callback?: (usersToDelete: string[], errors: string[]) => void;
@@ -58,7 +58,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
                   />
                 </p>
                 <ul>
-                  {usersToDelete.map(username => (
+                  {usersToDelete.map((username) => (
                     <li key={username}>{username}</li>
                   ))}
                 </ul>
@@ -77,11 +77,11 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
   }
 
   private deleteUsers = () => {
-    const { usersToDelete, callback, apiClient, notifications } = this.props;
+    const { usersToDelete, callback, userAPIClient, notifications } = this.props;
     const errors: string[] = [];
-    usersToDelete.forEach(async username => {
+    usersToDelete.forEach(async (username) => {
       try {
-        await apiClient.deleteUser(username);
+        await userAPIClient.deleteUser(username);
         notifications.toasts.addSuccess(
           i18n.translate(
             'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',

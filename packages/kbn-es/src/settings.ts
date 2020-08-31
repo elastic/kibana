@@ -25,7 +25,7 @@ const SECURE_SETTINGS_LIST = [
 ];
 
 function isSecureSetting(settingName: string) {
-  return SECURE_SETTINGS_LIST.some(secureSettingNameRegex =>
+  return SECURE_SETTINGS_LIST.some((secureSettingNameRegex) =>
     secureSettingNameRegex.test(settingName)
   );
 }

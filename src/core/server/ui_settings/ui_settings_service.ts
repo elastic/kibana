@@ -24,6 +24,7 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
 import { SavedObjectsClientContract } from '../saved_objects/types';
+import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
@@ -33,11 +34,13 @@ import {
   UiSettingsParams,
 } from './types';
 import { mapToObject } from '../../utils/';
-
+import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
+import { getCoreSettings } from './settings';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
 }
 
 /** @internal */
@@ -53,19 +56,25 @@ export class UiSettingsService
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
-  public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
-    registerRoutes(deps.http.createRouter(''));
+  public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
+
+    savedObjects.registerType(uiSettingsType);
+    registerRoutes(http.createRouter(''));
+    this.register(getCoreSettings());
+
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;
 
     return {
       register: this.register.bind(this),
-      asScopedToClient: this.getScopedClientFactory(),
     };
   }
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
+    this.validatesDefinitions();
+    this.validatesOverrides();
+
     return {
       asScopedToClient: this.getScopedClientFactory(),
     };
@@ -96,5 +105,22 @@ export class UiSettingsService
       }
       this.uiSettingsDefaults.set(key, value);
     });
+  }
+
+  private validatesDefinitions() {
+    for (const [key, definition] of this.uiSettingsDefaults) {
+      if (definition.schema) {
+        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      }
+    }
+  }
+
+  private validatesOverrides() {
+    for (const [key, value] of Object.entries(this.overrides)) {
+      const definition = this.uiSettingsDefaults.get(key);
+      if (definition?.schema) {
+        definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
+      }
+    }
   }
 }

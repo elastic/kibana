@@ -36,6 +36,7 @@ export function nginxMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.nginxMetrics.nameTitle', {
       defaultMessage: 'Nginx metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.nginxMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Nginx HTTP server.',
@@ -69,7 +70,7 @@ which must be enabled in your Nginx installation. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/nginx_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nginx_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

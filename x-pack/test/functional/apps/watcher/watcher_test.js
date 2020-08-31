@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 const watchID = 'watchID';
 const watchName = 'watch Name';
 const updatedName = 'updatedName';
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -21,7 +21,7 @@ export default function({ getService, getPageObjects }) {
   // Still flaky test :c
   // https://github.com/elastic/kibana/pull/56361
   // https://github.com/elastic/kibana/pull/56304
-  describe.skip('watcher_test', function() {
+  describe.skip('watcher_test', function () {
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API
@@ -36,10 +36,23 @@ export default function({ getService, getPageObjects }) {
       }
 
       await browser.setWindowSize(1600, 1000);
-      // TODO: Remove the retry.try wrapper once https://github.com/elastic/kibana/issues/55985 is resolved
-      retry.try(async () => {
-        await PageObjects.common.navigateToApp('watcher');
-        await testSubjects.find('createWatchButton');
+
+      // License values are emitted ES -> Kibana Server -> Kibana Public. The current implementation
+      // creates a situation where the Watcher plugin may not have received a minimum required license at setup time
+      // so the public app may not have registered in the UI.
+      //
+      // For functional testing this is a problem. The temporary solution is we wait for watcher
+      // to be visible.
+      //
+      // See this issue https://github.com/elastic/kibana/issues/55985.
+      await retry.waitFor('watcher to display in management UI', async () => {
+        try {
+          await PageObjects.common.navigateToApp('watcher');
+          await testSubjects.find('createWatchButton');
+        } catch (e) {
+          return false;
+        }
+        return true;
       });
     });
 
@@ -61,7 +74,7 @@ export default function({ getService, getPageObjects }) {
     it('should delete the watch', async () => {
       // Navigate to the main list page
       await PageObjects.common.navigateToApp('watcher');
-      const watchList = indexBy(await PageObjects.watcher.getWatches(), 'id');
+      const watchList = keyBy(await PageObjects.watcher.getWatches(), 'id');
       log.debug(watchList);
       expect(watchList.watchID.name).to.eql([watchName]);
       await PageObjects.watcher.deleteWatch(watchID);

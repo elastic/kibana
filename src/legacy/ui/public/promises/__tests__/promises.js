@@ -35,7 +35,7 @@ describe('Promise service', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject($injector => {
+    ngMock.inject(($injector) => {
       sandbox.useFakeTimers();
 
       Promise = $injector.get('Promise');
@@ -126,8 +126,8 @@ describe('Promise service', () => {
 
   describe('Promise.race()', () => {
     it(`resolves with the first resolved promise's value`, () => {
-      const p1 = new Promise(resolve => setTimeout(resolve, 100, 1));
-      const p2 = new Promise(resolve => setTimeout(resolve, 200, 2));
+      const p1 = new Promise((resolve) => setTimeout(resolve, 100, 1));
+      const p2 = new Promise((resolve) => setTimeout(resolve, 200, 2));
       const onResolve = sinon.stub();
       Promise.race([p1, p2]).then(onResolve);
 
@@ -155,10 +155,10 @@ describe('Promise service', () => {
 
     it('does not wait for subsequent promises to resolve/reject', () => {
       const onP1Resolve = sinon.stub();
-      const p1 = new Promise(resolve => setTimeout(resolve, 100)).then(onP1Resolve);
+      const p1 = new Promise((resolve) => setTimeout(resolve, 100)).then(onP1Resolve);
 
       const onP2Resolve = sinon.stub();
-      const p2 = new Promise(resolve => setTimeout(resolve, 101)).then(onP2Resolve);
+      const p2 = new Promise((resolve) => setTimeout(resolve, 101)).then(onP2Resolve);
 
       const onResolve = sinon.stub();
       Promise.race([p1, p2]).then(onResolve);
@@ -226,8 +226,8 @@ describe('Promise service', () => {
     describe('argument is a generator', () => {
       it('resolves with the first resolved value', () => {
         function* gen() {
-          yield new Promise(resolve => setTimeout(resolve, 100, 1));
-          yield new Promise(resolve => setTimeout(resolve, 200, 2));
+          yield new Promise((resolve) => setTimeout(resolve, 100, 1));
+          yield new Promise((resolve) => setTimeout(resolve, 200, 2));
         }
 
         const onResolve = sinon.stub();
@@ -242,7 +242,7 @@ describe('Promise service', () => {
       it('resolves with the first non-promise value', () => {
         function* gen() {
           yield 1;
-          yield new Promise(resolve => setTimeout(resolve, 200, 2));
+          yield new Promise((resolve) => setTimeout(resolve, 200, 2));
         }
 
         const onResolve = sinon.stub();
@@ -260,7 +260,7 @@ describe('Promise service', () => {
           yieldCount += 1;
           yield 1;
           yieldCount += 1;
-          yield new Promise(resolve => setTimeout(resolve, 200, 2));
+          yield new Promise((resolve) => setTimeout(resolve, 200, 2));
         }
 
         const onResolve = sinon.stub();

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import overviewFixture from './fixtures/overview';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

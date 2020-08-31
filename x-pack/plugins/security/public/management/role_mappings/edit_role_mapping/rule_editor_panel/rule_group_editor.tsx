@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './rule_group_editor.scss';
+
 import React, { Component, Fragment } from 'react';
 import {
   EuiPanel,
@@ -88,7 +90,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 parentRule={this.props.rule}
                 allowAdd={this.props.allowAdd}
                 ruleDepth={this.props.ruleDepth + 1}
-                onChange={updatedSubRule => {
+                onChange={(updatedSubRule) => {
                   const updatedRule = this.props.rule.clone() as RuleGroup;
                   updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                   this.props.onChange(updatedRule);
@@ -110,7 +112,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
           <EuiFlexItem>
             <FieldRuleEditor
               rule={subRule as FieldRule}
-              onChange={updatedSubRule => {
+              onChange={(updatedSubRule) => {
                 const updatedRule = this.props.rule.clone() as RuleGroup;
                 updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                 this.props.onChange(updatedRule);

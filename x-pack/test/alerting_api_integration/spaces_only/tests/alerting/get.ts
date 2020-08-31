@@ -20,23 +20,23 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('should handle get alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         id: createdAlert.id,
         name: 'abc',
         tags: ['foo'],
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
         actions: [],
@@ -57,14 +57,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't find alert from another space`, async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await supertest
-        .get(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert/${createdAlert.id}`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -73,7 +73,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1`).expect(404, {
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1`).expect(404, {
         statusCode: 404,
         error: 'Not Found',
         message: 'Saved object [alert/1] not found',

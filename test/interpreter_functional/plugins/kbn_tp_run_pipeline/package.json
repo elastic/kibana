@@ -1,14 +1,21 @@
 {
   "name": "kbn_tp_run_pipeline",
   "version": "1.0.0",
+  "main": "target/test/interpreter_functional/plugins/kbn_tp_run_pipeline",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "@elastic/eui": "18.3.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "@elastic/eui": "28.2.0",
+    "@kbn/plugin-helpers": "1.0.0",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "typescript": "4.0.2"
   }
 }

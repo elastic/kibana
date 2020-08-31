@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { CoreService } from 'src/core/types';
-import { first, filter, take } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { first, filter, take, switchMap } from 'rxjs/operators';
+import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
-  SavedObjectsSchema,
   SavedObjectsClientProvider,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
@@ -29,47 +29,49 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
-import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
+import {
+  ElasticsearchClient,
+  IClusterClient,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
-import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
-import { SavedObjectsConfigType } from './saved_objects_config';
-import { KibanaRequest } from '../http';
-import { SavedObjectsClientContract } from './types';
+import {
+  SavedObjectsConfigType,
+  SavedObjectsMigrationConfigType,
+  SavedObjectConfig,
+} from './saved_objects_config';
+import { KibanaRequest, InternalHttpServiceSetup } from '../http';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
-import { SavedObjectsMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { convertLegacyTypes } from './utils';
+import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
-
+import { SavedObjectsSerializer } from './serialization';
+import { registerRoutes } from './routes';
+import { ServiceStatus } from '../status';
+import { calculateStatus$ } from './status';
+import { createMigrationEsClient } from './migrations/core/';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The
- * SavedObjectsServiceSetup API exposes methods for creating and registering
- * Saved Object client wrappers.
+ * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
+ * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
  *
  * @remarks
- * Note: The Saved Object setup API's should only be used for creating and
- * registering client wrappers. Constructing a Saved Objects client or
- * repository for use within your own plugin won't have any of the registered
- * wrappers applied and is considered an anti-pattern. Use the Saved Objects
- * client from the
- * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
- * method or the {@link RequestHandlerContext | route handler context} instead.
- *
  * When plugins access the Saved Objects client, a new client is created using
  * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`. To create a factory or wrapper,
- * plugins will have to construct a Saved Objects client. First create a
- * repository by calling `scopedRepository` or `internalRepository` and then
- * use this repository as the argument to the {@link SavedObjectsClient}
- * constructor.
+ * registered through `addClientWrapper`.
+ *
+ * All the setup APIs will throw if called after the service has started, and therefor cannot be used
+ * from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
  *
  * @example
+ * ```ts
  * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
  *
  * export class Plugin() {
@@ -79,6 +81,19 @@ import { PropertyValidators } from './validation';
  *     })
  *   }
  * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+ * import { mySoType } from './saved_objects'
+ *
+ * export class Plugin() {
+ *   setup: (core: CoreSetup) => {
+ *     core.savedObjects.registerType(mySoType);
+ *   }
+ * }
+ * ```
  *
  * @public
  */
@@ -97,12 +112,67 @@ export interface SavedObjectsServiceSetup {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ) => void;
+
+  /**
+   * Register a {@link SavedObjectsType | savedObjects type} definition.
+   *
+   * See the {@link SavedObjectsTypeMappingDefinition | mappings format} and
+   * {@link SavedObjectMigrationMap | migration format} for more details about these.
+   *
+   * @example
+   * ```ts
+   * // src/plugins/my_plugin/server/saved_objects/my_type.ts
+   * import { SavedObjectsType } from 'src/core/server';
+   * import * as migrations from './migrations';
+   *
+   * export const myType: SavedObjectsType = {
+   *   name: 'MyType',
+   *   hidden: false,
+   *   namespaceType: 'multiple',
+   *   mappings: {
+   *     properties: {
+   *       textField: {
+   *         type: 'text',
+   *       },
+   *       boolField: {
+   *         type: 'boolean',
+   *       },
+   *     },
+   *   },
+   *   migrations: {
+   *     '2.0.0': migrations.migrateToV2,
+   *     '2.1.0': migrations.migrateToV2_1
+   *   },
+   * };
+   *
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType(myType);
+   *   }
+   * }
+   * ```
+   *
+   * @remarks The type definition is an aggregation of the legacy savedObjects `schema`, `mappings` and `migration` concepts.
+   * This API is the single entry point to register saved object types in the new platform.
+   */
+  registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * Returns the maximum number of objects allowed for import or export operations.
+   */
+  getImportExportObjectLimit: () => number;
 }
 
 /**
  * @internal
  */
-export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
+export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
+  status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+}
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -132,20 +202,32 @@ export interface SavedObjectsServiceStart {
    * Elasticsearch.
    *
    * @param req - The request to create the scoped repository from.
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    *
    * @remarks
    * Prefer using `getScopedClient`. This should only be used when using methods
    * not exposed on {@link SavedObjectsClientContract}
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
+   */
+  createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
+   * {@link SavedObjectsType | saved object types}
+   */
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -171,20 +253,24 @@ export interface SavedObjectsRepositoryFactory {
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
+  http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
 }
@@ -196,21 +282,24 @@ interface WrappedClientFactoryWrapper {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsStartDeps {}
+export interface SavedObjectsStartDeps {
+  elasticsearch: InternalElasticsearchServiceStart;
+  pluginsInitialized?: boolean;
+}
 
 export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
+  private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private mappings: SavedObjectsMapping[] = [];
-  private migrations: MigrationDefinition = {};
-  private schemas: SavedObjectsSchemaDefinition = {};
+  private migrator$ = new Subject<KibanaMigrator>();
+  private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
+  private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -221,39 +310,69 @@ export class SavedObjectsService
 
     this.setupDeps = setupDeps;
 
-    const {
-      savedObjectSchemas: savedObjectsSchemasDefinition,
-      savedObjectMappings,
-      savedObjectMigrations,
-      savedObjectValidations,
-    } = setupDeps.legacyPlugins.uiExports;
-    this.mappings = savedObjectMappings;
-    this.migrations = savedObjectMigrations;
-    this.schemas = savedObjectsSchemasDefinition;
-    this.validations = savedObjectValidations;
+    const legacyTypes = convertLegacyTypes(
+      setupDeps.legacyPlugins.uiExports,
+      setupDeps.legacyPlugins.pluginExtendedConfig
+    );
+    legacyTypes.forEach((type) => this.typeRegistry.registerType(type));
+    this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
+
+    const savedObjectsConfig = await this.coreContext.configService
+      .atPath<SavedObjectsConfigType>('savedObjects')
+      .pipe(first())
+      .toPromise();
+    const savedObjectsMigrationConfig = await this.coreContext.configService
+      .atPath<SavedObjectsMigrationConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+
+    registerRoutes({
+      http: setupDeps.http,
+      logger: this.logger,
+      config: this.config,
+      migratorPromise: this.migrator$.pipe(first()).toPromise(),
+    });
 
     return {
-      setClientFactoryProvider: provider => {
+      status$: calculateStatus$(
+        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        setupDeps.elasticsearch.status$
+      ),
+      setClientFactoryProvider: (provider) => {
+        if (this.started) {
+          throw new Error('cannot call `setClientFactoryProvider` after service startup.');
+        }
         if (this.clientFactoryProvider) {
           throw new Error('custom client factory is already set, and can only be set once');
         }
         this.clientFactoryProvider = provider;
       },
       addClientWrapper: (priority, id, factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addClientWrapper` after service startup.');
+        }
         this.clientFactoryWrappers.push({
           priority,
           id,
           factory,
         });
       },
+      registerType: (type) => {
+        if (this.started) {
+          throw new Error('cannot call `registerType` after service startup.');
+        }
+        this.typeRegistry.registerType(type);
+      },
+      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
   public async start(
-    core: SavedObjectsStartDeps,
+    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
-    if (!this.setupDeps) {
+    if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
 
@@ -263,12 +382,16 @@ export class SavedObjectsService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
-    const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+    const client = elasticsearch.client;
+
+    const migrator = this.createMigrator(
+      kibanaConfig,
+      this.config.migration,
+      elasticsearch.client,
+      migrationsRetryDelay
+    );
+
+    this.migrator$.next(migrator);
 
     /**
      * Note: We want to ensure that migrations have completed before
@@ -279,9 +402,11 @@ export class SavedObjectsService
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
+     *
+     * We also cannot safely run migrations if plugins are not initialized since
+     * not plugin migrations won't be registered.
      */
-    const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(
@@ -291,8 +416,16 @@ export class SavedObjectsService
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
+
+      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.logger.error(message);
+        }
+      });
+
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter(nodes => nodes.isCompatible),
+        filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
@@ -300,29 +433,32 @@ export class SavedObjectsService
       await migrator.runMigrations();
     }
 
-    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+    const createRepository = (
+      esClient: ElasticsearchClient,
+      includedHiddenTypes: string[] = []
+    ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
-        new SavedObjectsSchema(this.schemas),
-        this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+        this.typeRegistry,
         kibanaConfig.index,
-        callCluster,
-        extraTypes
+        esClient,
+        includedHiddenTypes
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (extraTypes?: string[]) =>
-        createRepository(adminClient.callAsInternalUser, extraTypes),
-      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+      createInternalRepository: (includedHiddenTypes?: string[]) =>
+        createRepository(client.asInternalUser, includedHiddenTypes),
+      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
+        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request }) {
-        const repository = repositoryFactory.createScopedRepository(request);
+      defaultClientFactory({ request, includedHiddenTypes }) {
+        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
         return new SavedObjectsClient(repository);
       },
+      typeRegistry: this.typeRegistry,
     });
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
@@ -332,12 +468,16 @@ export class SavedObjectsService
       clientProvider.addClientWrapperFactory(priority, id, factory);
     });
 
+    this.started = true;
+
     return {
       migrator,
       clientProvider,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
+      createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 
@@ -345,27 +485,18 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsConfigType,
+    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    client: IClusterClient,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
-    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
-    const adminClient = this.setupDeps!.elasticsearch.adminClient;
-
     return new KibanaMigrator({
-      savedObjectSchemas,
-      savedObjectMappings: this.mappings,
-      savedObjectMigrations: this.migrations,
-      savedObjectValidations: this.validations,
+      typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
+      savedObjectValidations: this.validations,
       kibanaConfig,
-      callCluster: migrationsRetryCallCluster(
-        adminClient.callAsInternalUser,
-        this.logger,
-        migrationsRetryDelay
-      ),
+      client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
     });
   }
 }

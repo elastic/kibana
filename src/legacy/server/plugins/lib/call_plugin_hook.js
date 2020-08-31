@@ -20,7 +20,7 @@
 import { last } from 'lodash';
 
 export async function callPluginHook(hookName, plugins, id, history) {
-  const plugin = plugins.find(plugin => plugin.id === id);
+  const plugin = plugins.find((plugin) => plugin.id === id);
 
   // make sure this is a valid plugin id
   if (!plugin) {

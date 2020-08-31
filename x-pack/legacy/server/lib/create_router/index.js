@@ -12,7 +12,7 @@ import { licensePreRoutingFactory } from './license_pre_routing_factory';
 export { wrapEsError, wrapUnknownError, wrapCustomError } from './error_wrappers';
 
 // Sometimes consumers will need to check if errors are ES errors, too.
-export const isEsErrorFactory = server => {
+export const isEsErrorFactory = (server) => {
   return createIsEsError(server);
 };
 
@@ -25,7 +25,7 @@ export const createRouter = (server, pluginId, apiBasePath = '', config) => {
 
   const callWithRequestInstance = callWithRequestFactory(server, pluginId, config);
 
-  const requestHandler = handler => async (request, h) => {
+  const requestHandler = (handler) => async (request, h) => {
     try {
       const callWithRequest = (...args) => {
         return callWithRequestInstance(request, ...args);

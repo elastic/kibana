@@ -6,17 +6,20 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
+  createExportSavedObjectsToStreamMock,
+  createImportSavedObjectsFromStreamMock,
+  createResolveSavedObjectsImportErrorsMock,
+  createMockSavedObjectsService,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
@@ -25,27 +28,57 @@ import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
+jest.mock('../../../../../../../src/core/server', () => {
+  return {
+    exportSavedObjectsToStream: jest.fn(),
+    importSavedObjectsFromStream: jest.fn(),
+    resolveSavedObjectsImportErrors: jest.fn(),
+    kibanaResponseFactory: jest.requireActual('src/core/server').kibanaResponseFactory,
+  };
+});
+import {
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
+} from '../../../../../../../src/core/server';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
+
+  beforeEach(() => {
+    (exportSavedObjectsToStream as jest.Mock).mockReset();
+    (importSavedObjectsFromStream as jest.Mock).mockReset();
+    (resolveSavedObjectsImportErrors as jest.Mock).mockReset();
+  });
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const legacyAPI = createLegacyAPI({ spaces });
+    const router = httpService.createRouter();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    (exportSavedObjectsToStream as jest.Mock).mockImplementation(
+      createExportSavedObjectsToStreamMock()
+    );
+    (importSavedObjectsFromStream as jest.Mock).mockImplementation(
+      createImportSavedObjectsFromStreamMock()
+    );
+    (resolveSavedObjectsImportErrors as jest.Mock).mockImplementation(
+      createResolveSavedObjectsImportErrorsMock()
+    );
 
-    const service = new SpacesService(log, () => legacyAPI);
+    const log = loggingSystemMock.create().get('spaces');
+
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects = createMockSavedObjectsService(spaces);
+
+    const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -65,7 +98,8 @@ describe('copy to space', () => {
 
     initCopyToSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });
@@ -76,6 +110,7 @@ describe('copy to space', () => {
     ] = router.post.mock.calls;
 
     return {
+      coreStart,
       copyToSpace: {
         routeValidation: ctsRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: ctsRouteHandler,
@@ -85,7 +120,6 @@ describe('copy to space', () => {
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
-      legacyAPI,
     };
   };
 
@@ -115,7 +149,7 @@ describe('copy to space', () => {
         objects: [],
       };
 
-      const { copyToSpace, legacyAPI } = await setup();
+      const { copyToSpace, coreStart } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -124,12 +158,9 @@ describe('copy to space', () => {
 
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          excludedWrappers: ['spaces'],
-        }
-      );
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        excludedWrappers: ['spaces'],
+      });
     });
 
     it(`requires space IDs to be unique`, async () => {
@@ -160,6 +191,21 @@ describe('copy to space', () => {
       );
     });
 
+    it(`does not allow "overwrite" to be used with "createNewCopies"`, async () => {
+      const payload = {
+        spaces: ['a-space'],
+        objects: [{ type: 'foo', id: 'bar' }],
+        overwrite: true,
+        createNewCopies: true,
+      };
+
+      const { copyToSpace } = await setup();
+
+      expect(() =>
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
+    });
+
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
@@ -176,48 +222,13 @@ describe('copy to space', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        spaces: ['a-space'],
-        objects: [
-          { type: 'globalType', id: 'bar' },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { copyToSpace, legacyAPI } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await copyToSpace.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.importSavedObjects).toHaveBeenCalledTimes(1);
-      const [importCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[0];
-
-      expect(importCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
-    });
-
     it('copies to multiple spaces', async () => {
       const payload = {
         spaces: ['a-space', 'b-space'],
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      const { copyToSpace, legacyAPI } = await setup();
+      const { copyToSpace } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -233,16 +244,14 @@ describe('copy to space', () => {
       const { status } = response;
 
       expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.importSavedObjects).toHaveBeenCalledTimes(2);
-      const [firstImportCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[0];
+      expect(importSavedObjectsFromStream).toHaveBeenCalledTimes(2);
+      const [firstImportCallOptions] = (importSavedObjectsFromStream as jest.Mock).mock.calls[0];
 
       expect(firstImportCallOptions).toMatchObject({
         namespace: 'a-space',
       });
 
-      const [secondImportCallOptions] = (legacyAPI.savedObjects.importExport
-        .importSavedObjects as any).mock.calls[1];
+      const [secondImportCallOptions] = (importSavedObjectsFromStream as jest.Mock).mock.calls[1];
 
       expect(secondImportCallOptions).toMatchObject({
         namespace: 'b-space',
@@ -284,7 +293,7 @@ describe('copy to space', () => {
         objects: [{ type: 'visualization', id: 'bar' }],
       };
 
-      const { resolveConflicts, legacyAPI } = await setup();
+      const { resolveConflicts, coreStart } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -293,12 +302,9 @@ describe('copy to space', () => {
 
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(legacyAPI.savedObjects.getScopedSavedObjectsClient).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          excludedWrappers: ['spaces'],
-        }
-      );
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        excludedWrappers: ['spaces'],
+      });
     });
 
     it(`requires objects to be unique`, async () => {
@@ -340,57 +346,6 @@ describe('copy to space', () => {
       );
     });
 
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        retries: {
-          ['a-space']: [
-            {
-              type: 'visualization',
-              id: 'bar',
-              overwrite: true,
-            },
-            {
-              type: 'globalType',
-              id: 'bar',
-              overwrite: true,
-            },
-          ],
-        },
-        objects: [
-          {
-            type: 'globalType',
-            id: 'bar',
-          },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { resolveConflicts, legacyAPI } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await resolveConflicts.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.resolveImportErrors).toHaveBeenCalledTimes(1);
-      const [resolveImportErrorsCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[0];
-
-      expect(resolveImportErrorsCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
-    });
-
     it('resolves conflicts for multiple spaces', async () => {
       const payload = {
         objects: [{ type: 'visualization', id: 'bar' }],
@@ -412,7 +367,7 @@ describe('copy to space', () => {
         },
       };
 
-      const { resolveConflicts, legacyAPI } = await setup();
+      const { resolveConflicts } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -428,22 +383,18 @@ describe('copy to space', () => {
       const { status } = response;
 
       expect(status).toEqual(200);
-      expect(legacyAPI.savedObjects.importExport.resolveImportErrors).toHaveBeenCalledTimes(2);
-      const [resolveImportErrorsFirstCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[0];
+      expect(resolveSavedObjectsImportErrors).toHaveBeenCalledTimes(2);
+      const [
+        resolveImportErrorsFirstCallOptions,
+      ] = (resolveSavedObjectsImportErrors as jest.Mock).mock.calls[0];
 
-      expect(resolveImportErrorsFirstCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsFirstCallOptions).toMatchObject({ namespace: 'a-space' });
 
-      const [resolveImportErrorsSecondCallOptions] = (legacyAPI.savedObjects.importExport
-        .resolveImportErrors as any).mock.calls[1];
+      const [
+        resolveImportErrorsSecondCallOptions,
+      ] = (resolveSavedObjectsImportErrors as jest.Mock).mock.calls[1];
 
-      expect(resolveImportErrorsSecondCallOptions).toMatchObject({
-        namespace: 'b-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsSecondCallOptions).toMatchObject({ namespace: 'b-space' });
     });
   });
 });

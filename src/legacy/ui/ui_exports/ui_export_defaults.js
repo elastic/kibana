@@ -17,35 +17,4 @@
  * under the License.
  */
 
-import { dirname, resolve } from 'path';
-const ROOT = dirname(require.resolve('../../../../package.json'));
-
-export const UI_EXPORT_DEFAULTS = {
-  webpackNoParseRules: [
-    /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
-    /node_modules[\/\\](mocha|moment)[\/\\]/,
-  ],
-
-  webpackAliases: {
-    ui: resolve(ROOT, 'src/legacy/ui/public'),
-    __kibanaCore__$: resolve(ROOT, 'src/core/public'),
-    test_harness: resolve(ROOT, 'src/test_harness/public'),
-    querystring: 'querystring-browser',
-    moment$: resolve(ROOT, 'webpackShims/moment'),
-    'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone'),
-  },
-
-  styleSheetPaths: ['light', 'dark'].map(theme => ({
-    theme,
-    localPath: resolve(ROOT, 'src/core/public/index.scss'),
-    publicPath: `core.${theme}.css`,
-    urlImports: {
-      urlBase: 'built_assets/css/',
-      publicDir: resolve(ROOT, 'src/core/public'),
-    },
-  })),
-
-  appExtensions: {
-    fieldFormatEditors: ['ui/field_editor/components/field_format_editor/register'],
-  },
-};
+export const UI_EXPORT_DEFAULTS = {};

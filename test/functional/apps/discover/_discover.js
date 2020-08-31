@@ -19,11 +19,11 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
   };
 
   describe('discover test', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -44,11 +44,10 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('query', function() {
-      this.tags(['skipFirefox']);
+    describe('query', function () {
       const queryName1 = 'Query # 1';
 
-      it('should show correct time range string by timepicker', async function() {
+      it('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
@@ -57,57 +56,75 @@ export default function({ getService, getPageObjects }) {
         expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
       });
 
-      it('save query should show toast message and display query name', async function() {
+      it('save query should show toast message and display query name', async function () {
         await PageObjects.discover.saveSearch(queryName1);
         const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
         expect(actualQueryNameString).to.be(queryName1);
       });
 
-      it('load query should show query name', async function() {
+      it('load query should show query name', async function () {
         await PageObjects.discover.loadSavedSearch(queryName1);
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
         });
       });
 
-      it('should show the correct hit count', async function() {
+      it('renaming a saved query should modify name in breadcrumb', async function () {
+        const queryName2 = 'Modified Query # 1';
+        await PageObjects.discover.loadSavedSearch(queryName1);
+        await PageObjects.discover.saveSearch(queryName2);
+
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName2);
+        });
+      });
+
+      it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
         });
       });
 
-      it('should show correct time range string in chart', async function() {
+      it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
         const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
-      it('should modify the time range when a bar is clicked', async function() {
+      it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.clickHistogramBar();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
+        await retry.waitFor('doc table to contain the right search result', async () => {
+          const rowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table: ${rowData}`);
+          return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+        });
       });
 
-      it('should modify the time range when the histogram is brushed', async function() {
+      it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.brushHistogram();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(25);
-        const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(Date.parse(rowData)).to.be.within(
-          Date.parse('Sep 20, 2015 @ 22:00:00.000'),
-          Date.parse('Sep 20, 2015 @ 23:30:00.000')
-        );
+        expect(Math.round(newDurationHours)).to.be(24);
+
+        await retry.waitFor('doc table to contain the right search result', async () => {
+          const rowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table: ${rowData}`);
+          const dateParsed = Date.parse(rowData);
+          //compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
+          return dateParsed >= 1442770200000 && dateParsed <= 1442791800000;
+        });
       });
 
-      it('should show correct initial chart interval of Auto', async function() {
+      it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
@@ -116,7 +133,7 @@ export default function({ getService, getPageObjects }) {
         expect(actualInterval).to.be(expectedInterval);
       });
 
-      it('should show Auto chart interval', async function() {
+      it('should show Auto chart interval', async function () {
         const expectedChartInterval = 'Auto';
 
         const actualInterval = await PageObjects.discover.getChartInterval();
@@ -126,6 +143,23 @@ export default function({ getService, getPageObjects }) {
       it('should not show "no results"', async () => {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(false);
+      });
+
+      it('should reload the saved search with persisted query to show the initial hit count', async function () {
+        // apply query some changes
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be('22');
+        });
+
+        // reset to persisted state
+        await PageObjects.discover.clickResetSavedSearchButton();
+        const expectedHitCount = '14,004';
+        await retry.try(async function () {
+          expect(await queryBar.getQueryString()).to.be('');
+          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        });
       });
     });
 
@@ -157,16 +191,16 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
-      it('should support querying on nested fields', async function() {
+      it('should support querying on nested fields', async function () {
         await queryBar.setQuery('nestedField:{ child: nestedValue }');
         await queryBar.submitQuery();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
       });
     });
 
-    describe('data-shared-item', function() {
+    describe('data-shared-item', function () {
       it('should have correct data-shared-item title and description', async () => {
         const expected = {
           title: 'A Saved Search',
@@ -186,10 +220,13 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('time zone switch', () => {
-      it('should show bars in the correct time zone after switching', async function() {
+      it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
-        await browser.refresh();
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
+        await queryBar.setQuery('');
+        // To remove focus of the of the search bar so date/time picker can show
+        await PageObjects.discover.selectIndexPattern(defaultSettings.defaultIndex);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(
@@ -197,6 +234,64 @@ export default function({ getService, getPageObjects }) {
         );
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
+      });
+    });
+    describe('usage of discover:searchOnPageLoad', () => {
+      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
+      });
+
+      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+      });
+    });
+
+    describe('invalid time range in URL', function () {
+      it('should get the default timerange', async function () {
+        const prevTime = await PageObjects.timePicker.getTimeConfig();
+        await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be(prevTime.start);
+        expect(time.end).to.be(prevTime.end);
+      });
+    });
+
+    describe('empty query', function () {
+      it('should update the histogram timerange when the query is resubmitted', async function () {
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+        });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+        const initialTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.submitQuery();
+        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        expect(refreshedTimeString).not.to.be(initialTimeString);
+      });
+    });
+
+    describe('managing fields', function () {
+      it('should add a field, sort by it, remove it and also sorting by it', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldSort('_score');
+        const currentUrlWithScore = await browser.getCurrentUrl();
+        expect(currentUrlWithScore).to.contain('_score');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        const currentUrlWithoutScore = await browser.getCurrentUrl();
+        expect(currentUrlWithoutScore).not.to.contain('_score');
       });
     });
   });

@@ -17,22 +17,25 @@ import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
-import { EuiComboBox } from '@elastic/eui';
 import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
+import { RoleComboBox } from '../../role_combo_box';
 
 describe('EditRoleMappingPage', () => {
+  const history = scopedHistoryMock.create();
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
+
   beforeEach(() => {
     rolesAPI = rolesAPIClientMock.create();
     (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
       { name: 'foo_role' },
       { name: 'bar role' },
+      { name: 'some-deprecated-role', metadata: { _deprecated: true } },
     ] as Role[]);
   });
 
@@ -53,6 +56,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -63,10 +67,7 @@ describe('EditRoleMappingPage', () => {
       target: { value: 'my-role-mapping' },
     });
 
-    (wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
-      .props() as any).onChange([{ label: 'foo_role' }]);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
 
@@ -118,6 +119,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -126,10 +128,7 @@ describe('EditRoleMappingPage', () => {
 
     findTestSubject(wrapper, 'switchToRolesButton').simulate('click');
 
-    (wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
-      .props() as any).onChange([{ label: 'foo_role' }]);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     wrapper.find('button[id="addRuleOption"]').simulate('click');
@@ -168,6 +167,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -195,6 +195,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -205,6 +206,43 @@ describe('EditRoleMappingPage', () => {
 
     expect(wrapper.find(SectionLoading)).toHaveLength(0);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(1);
+  });
+
+  it('renders a message when editing a mapping with deprecated roles assigned', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      roles: ['some-deprecated-role'],
+      enabled: true,
+      rules: {
+        field: { username: '*' },
+      },
+    });
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage
+        name={'foo'}
+        roleMappingsAPI={roleMappingsAPI}
+        rolesAPIClient={rolesAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
+      />
+    );
+
+    expect(findTestSubject(wrapper, 'deprecatedRolesAssigned')).toHaveLength(0);
+
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'deprecatedRolesAssigned')).toHaveLength(1);
   });
 
   it('renders a warning when editing a mapping with a stored role template, when stored scripts are disabled', async () => {
@@ -236,6 +274,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -278,6 +317,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -332,6 +372,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 
@@ -387,6 +428,7 @@ describe('EditRoleMappingPage', () => {
         rolesAPIClient={rolesAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
 

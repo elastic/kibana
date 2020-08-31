@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
+import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const getApiPath = (dateRangeStart: string, dateRangeEnd: string, filters?: string) =>
@@ -12,7 +12,7 @@ const getApiPath = (dateRangeStart: string, dateRangeEnd: string, filters?: stri
     filters ? `&filters=${filters}` : ''
   }`;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('filter group endpoint', () => {

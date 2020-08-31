@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { merge } from './merge';
 
 describe('merge', () => {
@@ -60,6 +61,29 @@ describe('merge', () => {
     expect(merge({}, { a: 1 }, { a: 2 })).toEqual({ a: 2 });
     expect(merge({ a: 0 }, {}, {})).toEqual({ a: 0 });
     expect(merge({ a: 0 }, { a: 1 }, {})).toEqual({ a: 1 });
+  });
+
+  test('does not merge class instances', () => {
+    class Folder {
+      constructor(public readonly path: string) {}
+      getPath() {
+        return this.path;
+      }
+    }
+    class File {
+      constructor(public readonly content: string) {}
+      getContent() {
+        return this.content;
+      }
+    }
+    const folder = new Folder('/etc');
+    const file = new File('yolo');
+
+    const result = merge({}, { content: folder }, { content: file });
+    expect(result).toStrictEqual({
+      content: file,
+    });
+    expect(result.content.getContent()).toBe('yolo');
   });
 
   test(`doesn't pollute prototypes`, () => {

@@ -23,7 +23,7 @@ import xpack from '../x-pack/package.json';
 
 function getMismatches(depType) {
   return Object.keys(kibana[depType])
-    .map(key => {
+    .map((key) => {
       const xpackValue = xpack[depType][key];
       const kibanaValue = kibana[depType][key];
       if (xpackValue && kibanaValue && xpackValue !== kibanaValue && !key.includes('@kbn/')) {
@@ -34,7 +34,7 @@ function getMismatches(depType) {
         };
       }
     })
-    .filter(key => !!key);
+    .filter((key) => !!key);
 }
 
 export default function verifyDependencyVersions(grunt) {

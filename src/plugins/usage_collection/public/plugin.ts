@@ -18,6 +18,7 @@
  */
 
 import { Reporter, METRIC_TYPE } from '@kbn/analytics';
+import { Subject, merge } from 'rxjs';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter } from './services';
 import {
@@ -27,6 +28,7 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
+import { reportApplicationUsage } from './services/application_usage';
 
 interface PublicConfigType {
   uiMetric: {
@@ -39,6 +41,20 @@ export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
   reportUiStats: Reporter['reportUiStats'];
   METRIC_TYPE: typeof METRIC_TYPE;
+  __LEGACY: {
+    /**
+     * Legacy handler so we can report the actual app being used inside "kibana#/{appId}".
+     * To be removed when we get rid of the legacy world
+     *
+     * @deprecated
+     */
+    appChanged: (appId: string) => void;
+  };
+}
+
+export interface UsageCollectionStart {
+  reportUiStats: Reporter['reportUiStats'];
+  METRIC_TYPE: typeof METRIC_TYPE;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -46,7 +62,8 @@ export function isUnauthenticated(http: HttpSetup) {
   return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
+  private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
   private config: PublicConfigType;
@@ -70,12 +87,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       },
       reportUiStats: this.reporter.reportUiStats,
       METRIC_TYPE,
+      __LEGACY: {
+        appChanged: (appId) => this.legacyAppId$.next(appId),
+      },
     };
   }
 
-  public start({ http }: CoreStart) {
+  public start({ http, application }: CoreStart) {
     if (!this.reporter) {
-      return;
+      throw new Error('Usage collection reporter not set up correctly');
     }
 
     if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
@@ -85,6 +105,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
+
+    reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
+
+    return {
+      reportUiStats: this.reporter.reportUiStats,
+      METRIC_TYPE,
+    };
   }
 
   public stop() {}

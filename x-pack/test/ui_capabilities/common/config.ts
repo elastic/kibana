@@ -14,7 +14,6 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
 }
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
@@ -43,7 +42,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackFunctionalTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
         ],
       },

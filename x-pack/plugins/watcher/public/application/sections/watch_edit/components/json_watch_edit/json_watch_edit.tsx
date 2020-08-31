@@ -63,7 +63,7 @@ const EXECUTE_DETAILS_INITIAL_STATE = {
 
 function getActions(watch: BaseWatch) {
   const actions = (watch.watch && watch.watch.actions) || {};
-  return Object.keys(actions).map(actionKey => ({
+  return Object.keys(actions).map((actionKey) => ({
     actionId: actionKey,
     type: getActionType(actions[actionKey]),
     actionMode: ACTION_MODES.SIMULATE,
@@ -93,7 +93,7 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
   const executeWatchErrors = executeDetails.validate();
   const hasExecuteWatchErrors = !!Object.keys(executeWatchErrors).find(
-    errorKey => executeWatchErrors[errorKey].length >= 1
+    (errorKey) => executeWatchErrors[errorKey].length >= 1
   );
   return (
     <EuiPageContent>

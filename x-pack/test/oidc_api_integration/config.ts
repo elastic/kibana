@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const plugin = resolve(__dirname, './fixtures/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = resolve(__dirname, './fixtures/jwks.json');
@@ -17,6 +17,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack OpenID Connect API Integration Tests',
@@ -48,14 +49,8 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--xpack.security.authc.providers=["oidc"]',
+        `--xpack.security.authc.providers=${JSON.stringify(['oidc', 'basic'])}`,
         '--xpack.security.authc.oidc.realm="oidc1"',
-        '--server.xsrf.whitelist',
-        JSON.stringify([
-          '/api/security/oidc/initiate_login',
-          '/api/oidc_provider/token_endpoint',
-          '/api/oidc_provider/userinfo_endpoint',
-        ]),
       ],
     },
   };

@@ -43,7 +43,7 @@ describe('splitByEverything(req, panel, series)', () => {
   });
 
   it('returns a valid filter with match_all', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = splitByEverything(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {
@@ -59,7 +59,7 @@ describe('splitByEverything(req, panel, series)', () => {
   it('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
     series.terms_field = 'host';
-    const next = jest.fn(doc => doc);
+    const next = jest.fn((doc) => doc);
     const doc = splitByEverything(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

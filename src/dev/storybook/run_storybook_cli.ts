@@ -24,7 +24,7 @@ import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
 
 run(
-  async params => {
+  async (params) => {
     const { flags, log } = params;
     const {
       _: [alias],
@@ -52,6 +52,7 @@ run(
 
     log.verbose('Loading Storybook:', absolute);
     process.chdir(join(absolute, '..', '..'));
+
     require(absolute);
   },
   {
@@ -61,7 +62,7 @@ run(
 
       Available aliases:
         ${Object.keys(storybookAliases)
-          .map(alias => `📕 ${alias}`)
+          .map((alias) => `📕 ${alias}`)
           .join('\n        ')}
 
       Add your alias in src/dev/storybook/aliases.ts
@@ -69,9 +70,10 @@ run(
     flags: {
       default: {},
       string: [],
-      boolean: ['clean'],
+      boolean: ['clean', 'site'],
       help: `
       --clean            Clean Storybook build folder.
+      --site             Build static version of Storybook.
     `,
     },
   }

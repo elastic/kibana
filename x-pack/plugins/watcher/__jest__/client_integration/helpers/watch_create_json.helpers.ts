@@ -5,15 +5,13 @@
  */
 import { withAppContext } from './app_context.mock';
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    onRouter: router => registerRouter(router),
+    onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/new-watch/${WATCH_TYPES.JSON}`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/new-watch/:type`,
   },
@@ -40,10 +38,7 @@ export const setup = async (): Promise<WatchCreateJsonTestBed> => {
   const selectTab = (tab: 'edit' | 'simulate') => {
     const tabs = ['edit', 'simulate'];
 
-    testBed
-      .find('tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickSubmitButton = () => {

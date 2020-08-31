@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/mocks';
@@ -30,7 +29,9 @@ import { usageCollectionPluginMock } from '../../../../../plugins/usage_collecti
 import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
 import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
 import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
+import { visualizationsPluginMock } from '../../../../../plugins/visualizations/public/mocks';
+import { discoverPluginMock } from '../../../../../plugins/discover/public/mocks';
 
 export const pluginsMock = {
   createSetup: () => ({
@@ -43,7 +44,10 @@ export const pluginsMock = {
     uiActions: uiActionsPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     advancedSettings: advancedSettingsMock.createSetupContract(),
-    kibana_legacy: kibanaLegacyPluginMock.createSetupContract(),
+    visualizations: visualizationsPluginMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    discover: discoverPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
@@ -55,7 +59,10 @@ export const pluginsMock = {
     uiActions: uiActionsPluginMock.createStartContract(),
     management: managementPluginMock.createStartContract(),
     advancedSettings: advancedSettingsMock.createStartContract(),
-    kibana_legacy: kibanaLegacyPluginMock.createStartContract(),
+    visualizations: visualizationsPluginMock.createStartContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+    discover: discoverPluginMock.createStartContract(),
   }),
 };
 

@@ -58,16 +58,18 @@ export const buildQueryFromFilters = (
   indexPattern: IIndexPattern | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
 ) => {
-  filters = filters.filter(filter => filter && !isFilterDisabled(filter));
+  filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter(filterNegate(negate))
-      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(filter => {
+      .filter(
+        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
+      )
+      .map((filter) => {
         return migrateFilter(filter, indexPattern);
       })
-      .map(filter => handleNestedFilter(filter, indexPattern))
+      .map((filter) => handleNestedFilter(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter);
   };

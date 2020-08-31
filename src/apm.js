@@ -20,7 +20,7 @@
 const { join } = require('path');
 const { readFileSync } = require('fs');
 const { execSync } = require('child_process');
-const merge = require('lodash.merge');
+const { merge } = require('lodash');
 const { name, version, build } = require('../package.json');
 
 const ROOT_DIR = join(__dirname, '..');
@@ -85,7 +85,7 @@ function getConfig(serviceName) {
  */
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
-module.exports = function(serviceName = name) {
+module.exports = function (serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
   const conf = getConfig(serviceName);

@@ -1,0 +1,28 @@
+[role="xpack"]
+[[alerting-scale-performance]]
+== Scale and performance
+
+{kib} alerting run both alert checks and actions as persistent background tasks. This has two major benefits:
+
+* *Persistence*: all task state and scheduling is stored in {es}, so if {kib} is restarted, alerts and actions will pick up where they left off. 
+* *Scaling*: multiple {kib} instances can read from and update the same task queue in {es}, allowing the alerting and action load to be distributed across instances. In cases where a {kib} instance no longer has capacity to run alert checks or actions, capacity can be increased by adding additional {kib} instances.
+
+[float]
+=== Running background alert checks and actions
+
+{kib} background tasks are managed by:
+
+* Polling an {es} task index for overdue tasks at 3 second intervals.
+* Tasks are then claiming them by updating them in the {es} index, using optimistic concurrency control to prevent conflicts. Each {kib} instance can run a maximum of 10 concurrent tasks, so a maximum of 10 tasks are claimed each interval. 
+* Tasks are run on the {kib} server. 
+* In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
+
+[IMPORTANT]
+==============================================
+Because tasks are polled at 3 second intervals and only 10 tasks can run concurrently per {kib} instance, it is possible for alert and action tasks to be run late. This can happen if: 
+
+* Alerts use a small *check interval*. The lowest interval possible is 3 seconds, though intervals of 30 seconds or higher are recommended.
+* Many alerts or actions must be *run at once*. In this case pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. 
+* *Long running tasks* occupy slots for an extended time, leaving fewer slots for other tasks. 
+
+==============================================

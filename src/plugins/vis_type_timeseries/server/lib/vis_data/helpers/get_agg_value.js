@@ -26,8 +26,8 @@ const aggFns = {
   min,
   sum,
   noop,
-  concat: values => values.join(', '),
-  avg: values => sum(values) / values.length,
+  concat: (values) => values.join(', '),
+  avg: (values) => sum(values) / values.length,
 };
 
 export const getAggValue = (row, metric) => {
@@ -56,7 +56,7 @@ export const getAggValue = (row, metric) => {
       }
 
       const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map(doc => get(doc, `_source.${metric.field}`));
+      const values = hits.map((doc) => get(doc, `_source.${metric.field}`));
       const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
 
       return aggWith(values);

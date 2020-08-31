@@ -23,12 +23,14 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiScreenReaderOnly,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
+import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -36,23 +38,61 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
-  badges: IAction[];
+  badges: Array<Action<EmbeddableContext>>;
+  notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
 }
 
-function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
-  return badges.map(badge => (
+function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
+  return badges.map((badge) => (
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable })}
-      onClick={() => badge.execute({ embeddable })}
-      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
-      {badge.getDisplayName({ embeddable })}
+      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
   ));
+}
+
+function renderNotifications(
+  notifications: Array<Action<EmbeddableContext>>,
+  embeddable: IEmbeddable
+) {
+  return notifications.map((notification) => {
+    const context = { embeddable };
+
+    let badge = (
+      <EuiNotificationBadge
+        data-test-subj={`embeddablePanelNotification-${notification.id}`}
+        key={notification.id}
+        style={{ marginTop: '4px', marginRight: '4px' }}
+        onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
+      >
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
+      </EuiNotificationBadge>
+    );
+
+    if (notification.getDisplayNameTooltip) {
+      const tooltip = notification.getDisplayNameTooltip({
+        ...context,
+        trigger: panelNotificationTrigger,
+      });
+
+      if (tooltip) {
+        badge = (
+          <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            {badge}
+          </EuiToolTip>
+        );
+      }
+    }
+
+    return badge;
+  });
 }
 
 function renderTooltip(description: string) {
@@ -87,6 +127,7 @@ export function PanelHeader({
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
+  notifications,
   embeddable,
   headerId,
 }: PanelHeaderProps) {
@@ -94,6 +135,7 @@ export function PanelHeader({
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
   const showPanelBar = badges.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
 
@@ -146,7 +188,7 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-
+      {renderNotifications(notifications, embeddable)}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}

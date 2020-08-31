@@ -5,36 +5,42 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
-export default function({ getService, getPageObjects }) {
+import { keyBy } from 'lodash';
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
   const log = getService('log');
 
-  describe('users', function() {
-    this.tags('smoke');
+  describe('users', function () {
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
-    it('should show the default elastic and kibana users', async function() {
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+    it('should show the default elastic and kibana_system users', async function () {
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
       if (config.get('servers.elasticsearch.hostname') === 'localhost') {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
+        expect(users.elastic.deprecated).to.be(false);
+
+        expect(users.kibana_system.roles).to.eql(['kibana_system']);
+        expect(users.kibana_system.reserved).to.be(true);
+        expect(users.kibana_system.deprecated).to.be(false);
+
         expect(users.kibana.roles).to.eql(['kibana_system']);
         expect(users.kibana.reserved).to.be(true);
+        expect(users.kibana.deprecated).to.be(true);
       } else {
         expect(users.anonymous.roles).to.eql(['anonymous']);
         expect(users.anonymous.reserved).to.be(true);
       }
     });
 
-    it('should add new user', async function() {
+    it('should add new user', async function () {
       await PageObjects.security.addUser({
         username: 'Lee',
         password: 'LeePwd',
@@ -44,7 +50,7 @@ export default function({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.Lee.roles).to.eql(['kibana_admin']);
       expect(users.Lee.fullname).to.eql('LeeFirst LeeLast');
@@ -52,7 +58,7 @@ export default function({ getService, getPageObjects }) {
       expect(users.Lee.reserved).to.be(false);
     });
 
-    it('should add new user with optional fields left empty', async function() {
+    it('should add new user with optional fields left empty', async function () {
       await PageObjects.security.addUser({
         username: 'OptionalUser',
         password: 'OptionalUserPwd',
@@ -60,7 +66,7 @@ export default function({ getService, getPageObjects }) {
         save: true,
         roles: [],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.OptionalUser.roles).to.eql(['']);
       expect(users.OptionalUser.fullname).to.eql('');
@@ -68,27 +74,48 @@ export default function({ getService, getPageObjects }) {
       expect(users.OptionalUser.reserved).to.be(false);
     });
 
-    it('should delete user', async function() {
+    it('should delete user', async function () {
       const alertMsg = await PageObjects.security.deleteUser('Lee');
       log.debug('alertMsg = %s', alertMsg);
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users).to.not.have.key('Lee');
     });
 
-    it('should show the default roles', async function() {
+    it('should show the default roles', async function () {
       await PageObjects.security.clickElasticsearchRoles();
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       // This only contains the first page of alphabetically sorted results, so the assertions are only for the first handful of expected roles.
       expect(roles.apm_system.reserved).to.be(true);
+      expect(roles.apm_system.deprecated).to.be(false);
+
       expect(roles.apm_user.reserved).to.be(true);
+      expect(roles.apm_user.deprecated).to.be(false);
+
       expect(roles.beats_admin.reserved).to.be(true);
+      expect(roles.beats_admin.deprecated).to.be(false);
+
       expect(roles.beats_system.reserved).to.be(true);
+      expect(roles.beats_system.deprecated).to.be(false);
+
       expect(roles.kibana_admin.reserved).to.be(true);
+      expect(roles.kibana_admin.deprecated).to.be(false);
+
+      expect(roles.kibana_user.reserved).to.be(true);
+      expect(roles.kibana_user.deprecated).to.be(true);
+
+      expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
+      expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);
+
       expect(roles.kibana_system.reserved).to.be(true);
+      expect(roles.kibana_system.deprecated).to.be(false);
+
       expect(roles.logstash_system.reserved).to.be(true);
+      expect(roles.logstash_system.deprecated).to.be(false);
+
       expect(roles.monitoring_user.reserved).to.be(true);
+      expect(roles.monitoring_user.deprecated).to.be(false);
     });
   });
 }

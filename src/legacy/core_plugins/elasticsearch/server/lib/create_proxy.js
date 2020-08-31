@@ -43,7 +43,7 @@ export function createProxy(server) {
           body: payload.toString('utf8'),
         },
         { signal }
-      ).finally(r => h.response(r));
+      ).finally((r) => h.response(r));
     }),
   });
 

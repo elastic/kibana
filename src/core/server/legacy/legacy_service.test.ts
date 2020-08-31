@@ -22,11 +22,13 @@ jest.mock('../../../cli/cluster/cluster_manager');
 jest.mock('./config/legacy_deprecation_adapters', () => ({
   convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
 }));
-import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
+import {
+  findLegacyPluginSpecsMock,
+  logLegacyThirdPartyPluginDeprecationWarningMock,
+} from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
-// @ts-ignore: implicit any for JS file
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
@@ -35,17 +37,22 @@ import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
-import { uuidServiceMock } from '../uuid/uuid_service.mock';
+import { environmentServiceMock } from '../environment/environment_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
+import { coreMock } from '../mocks';
+import { statusServiceMock } from '../status/status_service.mock';
+import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -57,15 +64,15 @@ let setupDeps: LegacyServiceSetupDeps;
 
 let startDeps: LegacyServiceStartDeps;
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
-let uuidSetup: ReturnType<typeof uuidServiceMock.createSetupContract>;
+let environmentSetup: ReturnType<typeof environmentServiceMock.createSetupContract>;
 
 beforeEach(() => {
   coreId = Symbol();
   env = Env.createDefault(getEnvOptions());
   configService = configServiceMock.create();
-  uuidSetup = uuidServiceMock.createSetupContract();
+  environmentSetup = environmentServiceMock.createSetupContract();
 
   findLegacyPluginSpecsMock.mockClear();
   MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
@@ -78,31 +85,43 @@ beforeEach(() => {
       elasticsearch: { legacy: {} } as any,
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
-        ...httpServiceMock.createSetupContract(),
+        ...httpServiceMock.createInternalSetupContract(),
         auth: {
           getAuthHeaders: () => undefined,
         } as any,
       },
-      savedObjects: savedObjectsServiceMock.createSetupContract(),
+      httpResources: httpResourcesMock.createSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
+        initialized: true,
         contracts: new Map([['plugin-id', 'plugin-value']]),
-        uiPlugins: {
-          public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
-          browserConfigs: new Map(),
-        },
       },
       rendering: renderingServiceMock,
-      uuid: uuidSetup,
+      environment: environmentSetup,
+      status: statusServiceMock.createInternalSetupContract(),
+      auditTrail: auditTrailServiceMock.createSetupContract(),
+      logging: loggingServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
+    uiPlugins: {
+      public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+      internal: new Map([
+        [
+          'plugin-id',
+          {
+            requiredBundles: [],
+            publicTargetDir: 'path/to/target/public',
+            publicAssetsDir: '/plugins/name/assets/',
+          },
+        ],
+      ]),
+      browserConfigs: new Map(),
+    },
   };
 
   startDeps = {
     core: {
-      capabilities: capabilitiesServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
-      uiSettings: uiSettingsServiceMock.createStartContract(),
+      ...coreMock.createInternalStart(),
       plugins: { contracts: new Map() },
     },
     plugins: {},
@@ -263,7 +282,7 @@ describe('once LegacyService is set up with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     mockKbnServer.applyLoggingConfiguration.mockImplementation(() => {
@@ -272,7 +291,7 @@ describe('once LegacyService is set up with connection info', () => {
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
 
-    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([[configError]]);
   });
 
   test('logs error if config service fails.', async () => {
@@ -288,13 +307,13 @@ describe('once LegacyService is set up with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     config$.error(configError);
 
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([[configError]]);
   });
 });
 
@@ -335,7 +354,7 @@ describe('once LegacyService is set up without connection info', () => {
 
 describe('once LegacyService is set up in `devClusterMaster` mode', () => {
   beforeEach(() => {
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );
@@ -429,7 +448,7 @@ describe('#discoverPlugins()', () => {
 
   it(`register legacy plugin's deprecation providers`, async () => {
     findLegacyPluginSpecsMock.mockImplementation(
-      settings =>
+      (settings) =>
         Promise.resolve({
           pluginSpecs: [
             {
@@ -461,6 +480,38 @@ describe('#discoverPlugins()', () => {
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
   });
+
+  it(`logs deprecations for legacy third party plugins`, async () => {
+    const pluginSpecs = [
+      { getId: () => 'pluginA', getDeprecationsProvider: () => undefined },
+      { getId: () => 'pluginB', getDeprecationsProvider: () => undefined },
+    ];
+    findLegacyPluginSpecsMock.mockImplementation(
+      (settings) =>
+        Promise.resolve({
+          pluginSpecs,
+          pluginExtendedConfig: settings,
+          disabledPluginSpecs: [],
+          uiExports: {},
+          navLinks: [],
+        }) as any
+    );
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledTimes(1);
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledWith({
+      specs: pluginSpecs,
+      log: expect.any(Object),
+    });
+  });
 });
 
 test('Sets the server.uuid property on the legacy configuration', async () => {
@@ -472,7 +523,7 @@ test('Sets the server.uuid property on the legacy configuration', async () => {
     configService: configService as any,
   });
 
-  uuidSetup.getInstanceUuid.mockImplementation(() => 'UUID_FROM_SERVICE');
+  environmentSetup.instanceUuid = 'UUID_FROM_SERVICE';
 
   const configSetMock = jest.fn();
 

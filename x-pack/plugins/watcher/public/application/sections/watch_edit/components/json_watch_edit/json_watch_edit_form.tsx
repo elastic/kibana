@@ -20,8 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import { useXJsonMode } from '../../../../shared_imports';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
@@ -35,9 +37,10 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
 
   const { errors } = watch.validate();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
@@ -160,9 +163,9 @@ export const JsonWatchEditForm = () => {
           errors={jsonErrors}
         >
           <EuiCodeEditor
-            mode="json"
+            mode={xJsonMode}
             width="100%"
-            theme="github"
+            theme="textmate"
             data-test-subj="jsonEditor"
             aria-label={i18n.translate(
               'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
@@ -170,12 +173,14 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Code editor',
               }
             )}
-            value={watch.watchString}
-            onChange={(json: string) => {
+            value={xJson}
+            onChange={(xjson: string) => {
               if (validationError) {
                 setValidationError(null);
               }
-              setWatchProperty('watchString', json);
+              setXJson(xjson);
+              // Keep the watch in sync with the editor content
+              setWatchProperty('watchString', convertToJson(xjson));
             }}
           />
         </ErrableFormRow>

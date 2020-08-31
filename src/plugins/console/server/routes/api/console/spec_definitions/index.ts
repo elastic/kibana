@@ -16,33 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IRouter, RequestHandler } from 'kibana/server';
-import { resolveApi } from '../../../../lib/spec_definitions';
+import { RequestHandler } from 'kibana/server';
+import { RouteDependencies } from '../../../';
 
-export const registerSpecDefinitionsRoute = ({ router }: { router: IRouter }) => {
-  const handler: RequestHandler<unknown, TypeOf<typeof validate.query>> = async (
-    ctx,
-    request,
-    response
-  ) => {
-    const { sense_version: version, apis } = request.query;
+interface SpecDefinitionsRouteResponse {
+  es: {
+    name: string;
+    globals: Record<string, any>;
+    endpoints: Record<string, any>;
+  };
+}
+
+export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
+  const handler: RequestHandler = async (ctx, request, response) => {
+    const specResponse: SpecDefinitionsRouteResponse = {
+      es: services.specDefinitionService.asJson(),
+    };
 
     return response.ok({
-      body: resolveApi(version, apis.split(',')),
+      body: specResponse,
       headers: {
         'Content-Type': 'application/json',
       },
     });
   };
 
-  const validate = {
-    query: schema.object({
-      sense_version: schema.string({ defaultValue: '' }),
-      apis: schema.string(),
-    }),
-  };
-
-  router.get({ path: '/api/console/api_server', validate }, handler);
-  router.post({ path: '/api/console/api_server', validate }, handler);
+  router.get({ path: '/api/console/api_server', validate: false }, handler);
+  router.post({ path: '/api/console/api_server', validate: false }, handler);
 };

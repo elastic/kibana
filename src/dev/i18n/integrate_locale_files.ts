@@ -31,7 +31,7 @@ import {
   normalizePath,
   readFileAsync,
   writeFileAsync,
-  // @ts-ignore
+  verifyICUMessage,
 } from './utils';
 
 import { I18nConfig } from './config';
@@ -41,6 +41,7 @@ export interface IntegrateOptions {
   sourceFileName: string;
   targetFileName?: string;
   dryRun: boolean;
+  ignoreMalformed: boolean;
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
@@ -105,6 +106,23 @@ export function verifyMessages(
     }
   }
 
+  for (const messageId of localizedMessagesIds) {
+    const defaultMessage = defaultMessagesMap.get(messageId);
+    if (defaultMessage) {
+      try {
+        const message = localizedMessagesMap.get(messageId)!;
+        verifyICUMessage(typeof message === 'string' ? message : message?.text);
+      } catch (err) {
+        if (options.ignoreMalformed) {
+          localizedMessagesMap.delete(messageId);
+          options.log.warning(`Malformed translation ignored (${messageId}): ${err}`);
+        } else {
+          errorMessage += `\nMalformed translation (${messageId}): ${err}\n`;
+        }
+      }
+    }
+  }
+
   if (errorMessage) {
     throw createFailError(errorMessage);
   }
@@ -116,7 +134,7 @@ function groupMessagesByNamespace(
 ) {
   const localizedMessagesByNamespace = new Map();
   for (const [messageId, messageValue] of localizedMessagesMap) {
-    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
+    const namespace = knownNamespaces.find((key) => messageId.startsWith(`${key}.`));
     if (!namespace) {
       throw createFailError(`Unknown namespace in id ${messageId}.`);
     }

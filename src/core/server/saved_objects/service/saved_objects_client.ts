@@ -20,7 +20,7 @@
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
-  SavedObjectAttributes,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
@@ -38,31 +38,41 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
+   **/
+  version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
  *
  * @public
  */
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
   type: string;
   attributes: T;
+  version?: string;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
+export interface SavedObjectsBulkUpdateObject<T = unknown>
   extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
@@ -76,8 +86,19 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T = unknown> {
   saved_objects: Array<SavedObject<T>>;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+  /**
+   * The Elasticsearch `_score` of this result.
+   */
+  score: number;
 }
 
 /**
@@ -88,11 +109,32 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
-  saved_objects: Array<SavedObject<T>>;
+export interface SavedObjectsFindResponse<T = unknown> {
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsResponse {
+  errors: Array<{
+    id: string;
+    type: string;
+    error: SavedObjectError;
+  }>;
 }
 
 /**
@@ -106,6 +148,44 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  version?: string;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
 }
 
 /**
@@ -141,7 +221,7 @@ export interface SavedObjectsBulkGetObject {
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T = unknown> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -149,7 +229,7 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkUpdateResponse<T = unknown> {
   saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -157,7 +237,7 @@ export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes 
  *
  * @public
  */
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
+export interface SavedObjectsUpdateResponse<T = unknown>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
@@ -185,11 +265,7 @@ export class SavedObjectsClient {
    * @param attributes
    * @param options
    */
-  async create<T extends SavedObjectAttributes = any>(
-    type: string,
-    attributes: T,
-    options?: SavedObjectsCreateOptions
-  ) {
+  async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
     return await this._repository.create(type, attributes, options);
   }
 
@@ -199,11 +275,25 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async bulkCreate<T extends SavedObjectAttributes = any>(
+  async bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.bulkCreate(objects, options);
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
   }
 
   /**
@@ -222,9 +312,7 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T extends SavedObjectAttributes = any>(
-    options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     return await this._repository.find(options);
   }
 
@@ -239,7 +327,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T extends SavedObjectAttributes = any>(
+  async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -253,7 +341,7 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async get<T extends SavedObjectAttributes = any>(
+  async get<T = unknown>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -268,7 +356,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async update<T extends SavedObjectAttributes = any>(
+  async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -278,11 +366,45 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Adds namespaces to a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async addToNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsAddToNamespacesOptions = {}
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
+    return await this._repository.addToNamespaces(type, id, namespaces, options);
+  }
+
+  /**
+   * Removes namespaces from a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async deleteFromNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
+    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
+  }
+
+  /**
    * Bulk Updates multiple SavedObject at once
    *
    * @param objects
    */
-  async bulkUpdate<T extends SavedObjectAttributes = any>(
+  async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {

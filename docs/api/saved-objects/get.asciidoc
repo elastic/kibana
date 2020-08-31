@@ -9,9 +9,9 @@ experimental[] Retrieve a single {kib} saved object by ID.
 [[saved-objects-api-get-request]]
 ==== Request
 
-`GET /api/saved_objects/<type>/<id>`
+`GET <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-`GET /s/<space_id>/api/saved_objects/<type>/<id>`
+`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
 [[saved-objects-api-get-params]]
 ==== Path parameters
@@ -37,15 +37,15 @@ experimental[] Retrieve a single {kib} saved object by ID.
 
 Retrieve the index pattern object with the `my-pattern` ID:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/index-pattern/my-pattern
+$ curl -X GET api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern",
@@ -57,17 +57,17 @@ The API returns the following:
 }
 --------------------------------------------------
 
-The following example retrieves a dashboard object in the `testspace` by id.
+Retrieve a dashboard object in the `testspace` by ID:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET /s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
+$ curl -X GET s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
 --------------------------------------------------
 // KIBANA
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",

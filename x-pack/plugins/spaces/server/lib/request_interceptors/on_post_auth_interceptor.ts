@@ -7,13 +7,12 @@ import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
 import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
-import { LegacyAPI, PluginsSetup } from '../../plugin';
+import { PluginsSetup } from '../../plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import { addSpaceIdToPath } from '../../../common';
 
 export interface OnPostAuthInterceptorDeps {
-  getLegacyAPI(): LegacyAPI;
   http: CoreSetup['http'];
   features: PluginsSetup['features'];
   spacesService: SpacesServiceSetup;
@@ -22,7 +21,6 @@ export interface OnPostAuthInterceptorDeps {
 
 export function initSpacesOnPostAuthRequestInterceptor({
   features,
-  getLegacyAPI,
   spacesService,
   log,
   http,
@@ -40,13 +38,12 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
-    const spacesClient = await spacesService.scopedClient(request);
-
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth credentials,
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
+        const spacesClient = await spacesService.scopedClient(request);
         const spaces = await spacesClient.getAll();
 
         if (spaces.length === 1) {
@@ -79,6 +76,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       try {
         log.debug(`Verifying access to space "${spaceId}"`);
 
+        const spacesClient = await spacesService.scopedClient(request);
         space = await spacesClient.get(spaceId);
       } catch (error) {
         const wrappedError = wrapError(error);
@@ -112,13 +110,13 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         const allFeatures = features.getFeatures();
 
-        const isRegisteredApp = allFeatures.some(feature => feature.app.includes(appId));
+        const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
           const enabledFeatures = allFeatures.filter(
-            feature => !space.disabledFeatures.includes(feature.id)
+            (feature) => !space.disabledFeatures.includes(feature.id)
           );
 
-          const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
+          const isAvailableInSpace = enabledFeatures.some((feature) => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
             log.debug(`App ${appId} is not enabled within space "${spaceId}".`);

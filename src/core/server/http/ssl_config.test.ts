@@ -45,7 +45,7 @@ describe('#SslConfig', () => {
     beforeEach(() => {
       const realFs = jest.requireActual('fs');
       mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-      const utils = jest.requireActual('../../utils');
+      const utils = jest.requireActual('../utils');
       mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
         utils.readPkcs12Keystore(path, password)
       );
@@ -293,16 +293,16 @@ describe('#sslSchema', () => {
 
       expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
 "[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1] but got [SOMEv100500]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+- [supportedProtocols.0.0]: expected value to equal [TLSv1]
+- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
+- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]"
 `);
       expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
         .toThrowErrorMatchingInlineSnapshot(`
 "[supportedProtocols.3]: types that failed validation:
-- [supportedProtocols.3.0]: expected value to equal [TLSv1] but got [SOMEv100500]
-- [supportedProtocols.3.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [supportedProtocols.3.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+- [supportedProtocols.3.0]: expected value to equal [TLSv1]
+- [supportedProtocols.3.1]: expected value to equal [TLSv1.1]
+- [supportedProtocols.3.2]: expected value to equal [TLSv1.2]"
 `);
     });
   });

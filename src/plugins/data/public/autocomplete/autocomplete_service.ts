@@ -17,27 +17,35 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { QuerySuggestionsGetFn } from './providers/query_suggestion_provider';
+import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
+  getEmptyValueSuggestions,
   setupValueSuggestionProvider,
   ValueSuggestionsGetFn,
 } from './providers/value_suggestion_provider';
 
+import { ConfigSchema } from '../../config';
+
 export class AutocompleteService {
-  private readonly querySuggestionProviders: Map<string, QuerySuggestionsGetFn> = new Map();
+  autocompleteConfig: ConfigSchema['autocomplete'];
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    const { autocomplete } = initializerContext.config.get<ConfigSchema>();
+
+    this.autocompleteConfig = autocomplete;
+  }
+
+  private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
-  private addQuerySuggestionProvider = (
-    language: string,
-    provider: QuerySuggestionsGetFn
-  ): void => {
-    if (language && provider) {
+  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
+    if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
       this.querySuggestionProviders.set(language, provider);
     }
   };
 
-  private getQuerySuggestions: QuerySuggestionsGetFn = args => {
+  private getQuerySuggestions: QuerySuggestionGetFn = (args) => {
     const { language } = args;
     const provider = this.querySuggestionProviders.get(language);
 
@@ -50,7 +58,9 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(core: CoreSetup) {
-    this.getValueSuggestions = setupValueSuggestionProvider(core);
+    this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
+      ? setupValueSuggestionProvider(core)
+      : getEmptyValueSuggestions;
 
     return {
       addQuerySuggestionProvider: this.addQuerySuggestionProvider,

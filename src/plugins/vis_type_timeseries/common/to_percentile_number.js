@@ -18,5 +18,5 @@
  */
 const percentileNumberTest = /\d+\.\d+/;
 
-export const toPercentileNumber = value =>
+export const toPercentileNumber = (value) =>
   percentileNumberTest.test(`${value}`) ? value : `${value}.0`;

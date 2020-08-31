@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { map, reduce, mapValues, get, keys, pick } from 'lodash';
+import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 
@@ -112,7 +112,7 @@ export const buildRangeFilter = (
     filter.meta.formattedValue = formattedValue;
   }
 
-  params = mapValues(params, value => (field.type === 'number' ? parseFloat(value) : value));
+  params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
@@ -148,7 +148,7 @@ export const buildRangeFilter = (
 };
 
 export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
-  const knownParams = pick(params, (val, key: any) => key in operators);
+  const knownParams = pickBy(params, (val, key: any) => key in operators);
   let script = map(
     knownParams,
     (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key

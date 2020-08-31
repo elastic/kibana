@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { resolve } from 'path';
 import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
+import pkg from '../../../../../package.json';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
@@ -30,12 +30,12 @@ import { IRouter, RouteRegistrar } from '../router';
 import { configServiceMock } from '../../config/config_service.mock';
 import { contextServiceMock } from '../../context/context_service.mock';
 
-const pkgPath = resolve(__dirname, '../../../../../package.json');
-const actualVersion = require(pkgPath).version;
+const actualVersion = pkg.version;
 const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
+const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
@@ -62,6 +62,10 @@ describe('core lifecycle handlers', () => {
           'some-header': 'some-value',
         },
         xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: [],
+        },
       } as any)
     );
     server = createHttpServer({ configService });
@@ -93,9 +97,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('accepts requests that do not include a version header', async () => {
-      await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
     });
 
     it('rejects requests with an incorrect version passed in the version header', async () => {
@@ -121,9 +123,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the kbn-name header', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
@@ -133,9 +133,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the kbn-name header in case of error', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testErrorRoute)
-        .expect(400);
+      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
@@ -145,17 +143,13 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the custom headers', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
     });
 
     it('adds the custom headers in case of error', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testErrorRoute)
-        .expect(400);
+      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
     });
@@ -175,7 +169,7 @@ describe('core lifecycle handlers', () => {
         return res.ok({ body: 'ok' });
       });
 
-      destructiveMethods.forEach(method => {
+      destructiveMethods.forEach((method) => {
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
           { path: testPath, validate: false },
           (context, req, res) => {
@@ -188,12 +182,18 @@ describe('core lifecycle handlers', () => {
             return res.ok({ body: 'ok' });
           }
         );
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+          { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
+          (context, req, res) => {
+            return res.ok({ body: 'ok' });
+          }
+        );
       });
 
       await server.start();
     });
 
-    nonDestructiveMethods.forEach(method => {
+    nonDestructiveMethods.forEach((method) => {
       describe(`When using non-destructive ${method} method`, () => {
         it('accepts requests without a token', async () => {
           await getSupertest(method.toLowerCase(), testPath).expect(
@@ -210,7 +210,7 @@ describe('core lifecycle handlers', () => {
       });
     });
 
-    destructiveMethods.forEach(method => {
+    destructiveMethods.forEach((method) => {
       describe(`When using destructive ${method} method`, () => {
         it('accepts requests with the xsrf header', async () => {
           await getSupertest(method.toLowerCase(), testPath)
@@ -234,6 +234,10 @@ describe('core lifecycle handlers', () => {
 
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
           await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+        });
+
+        it('accepts requests on a route with disabled xsrf protection', async () => {
+          await getSupertest(method.toLowerCase(), xsrfDisabledTestPath).expect(200, 'ok');
         });
       });
     });

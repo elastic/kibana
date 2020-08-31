@@ -159,6 +159,12 @@
         "namespace": {
           "type": "keyword"
         },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "originId": {
+          "type": "keyword"
+        },
         "search": {
           "properties": {
             "columns": {
@@ -318,6 +324,19 @@
             },
             "visState": {
               "type": "text"
+            }
+          }
+        },
+        "sharedtype": {
+          "properties": {
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
             }
           }
         }

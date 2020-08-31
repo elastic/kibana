@@ -25,7 +25,7 @@ async function split(stream, input) {
   stream.pipe(concat);
   const output = createPromiseFromStreams([concat]);
 
-  input.forEach(i => {
+  input.forEach((i) => {
     stream.write(i);
   });
   stream.end();

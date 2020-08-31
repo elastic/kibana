@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const config = getService('config');
@@ -360,10 +360,7 @@ export default function({ getService }) {
     });
     describe('Delete Role', () => {
       it('should delete the roles we created', async () => {
-        await supertest
-          .delete('/api/security/role/empty_role')
-          .set('kbn-xsrf', 'xxx')
-          .expect(204);
+        await supertest.delete('/api/security/role/empty_role').set('kbn-xsrf', 'xxx').expect(204);
         await supertest
           .delete('/api/security/role/role_with_privileges')
           .set('kbn-xsrf', 'xxx')

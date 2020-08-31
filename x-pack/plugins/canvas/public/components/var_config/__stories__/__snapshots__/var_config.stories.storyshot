@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Variables/VarConfig default 1`] = `
+<div
+  className="canvasSidebar__expandable canvasVarConfig__container "
+>
+  <div
+    className="canvasVarConfig__innerContainer"
+  >
+    <div
+      className="euiAccordion canvasVarConfig__listView canvasSidebar__accordion"
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="accordion-variables"
+          aria-expanded={false}
+          className="euiAccordion__button"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__iconWrapper"
+          >
+            <div
+              className="euiAccordion__icon"
+              data-euiicon-type="arrowRight"
+              size="m"
+            />
+          </span>
+          <span
+            className="euiIEFlexWrapFix"
+          >
+            <span
+              className="euiToolTipAnchor"
+              onKeyUp={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              <span
+                onBlur={[Function]}
+                onFocus={[Function]}
+              >
+                Variables
+              </span>
+            </span>
+          </span>
+        </button>
+        <div
+          className="euiAccordion__optionalAction"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-label="Add a variable"
+              className="euiButtonIcon euiButtonIcon--primary"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              type="button"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="plusInCircle"
+                size="m"
+              />
+            </button>
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiAccordion__childWrapper"
+        id="accordion-variables"
+      />
+    </div>
+    <div
+      className="canvasVarConfig__editView canvasSidebar__accordion"
+    />
+  </div>
+</div>
+`;

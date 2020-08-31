@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 
 export function dropLastBucket(resp, panel, series) {
-  return next => results => {
+  return (next) => (results) => {
     const shouldDropLastBucket = isLastValueTimerangeMode(panel, series);
 
     if (shouldDropLastBucket) {
@@ -29,7 +29,7 @@ export function dropLastBucket(resp, panel, series) {
       const dropLastBucket = get(panel, 'drop_last_bucket', seriesDropLastBucket);
 
       if (dropLastBucket) {
-        results.forEach(item => {
+        results.forEach((item) => {
           item.data = item.data.slice(0, item.data.length - 1);
         });
       }

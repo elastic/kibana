@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
@@ -27,8 +28,6 @@ import { fromRoot } from '../../core/server/utils';
 import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
-
-import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
 function canRequire(path) {
   try {
@@ -54,9 +53,9 @@ const CAN_REPL = canRequire(REPL_PATH);
 const XPACK_DIR = resolve(__dirname, '../../../x-pack');
 const XPACK_INSTALLED = canRequire(XPACK_DIR);
 
-const pathCollector = function() {
+const pathCollector = function () {
   const paths = [];
-  return function(path) {
+  return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
@@ -67,7 +66,7 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
-  const set = _.partial(_.set, rawConfig);
+  const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
@@ -78,10 +77,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     set('env', 'development');
-    set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana');
+      set('elasticsearch.username', 'kibana_system');
     }
 
     if (!has('elasticsearch.password')) {
@@ -90,7 +88,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH } = require('@kbn/dev-utils');
+      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
         : [].concat(get('elasticsearch.hosts') || []);
@@ -104,13 +102,14 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
+      ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
         ]
-      ).map(hostUrl => {
+      ).map((hostUrl) => {
         const parsedUrl = url.parse(hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(
@@ -121,10 +120,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       });
 
       set('server.ssl.enabled', true);
-      // TODO: change this cert/key to KBN_CERT_PATH and KBN_KEY_PATH from '@kbn/dev-utils'; will require some work to avoid breaking
-      // functional tests. Once that is done, the existing test cert/key at DEV_SSL_CERT_PATH and DEV_SSL_KEY_PATH can be deleted.
-      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
-      set('server.ssl.key', DEV_SSL_KEY_PATH);
+      set('server.ssl.certificate', KBN_CERT_PATH);
+      set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
       set('elasticsearch.hosts', elasticsearchHosts);
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
@@ -137,11 +135,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.silent) set('logging.silent', true);
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
-
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
-  }
 
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set(
@@ -156,12 +149,12 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   );
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }
 
-export default function(program) {
+export default function (program) {
   const command = program.command('serve');
 
   command
@@ -195,7 +188,7 @@ export default function(program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Optimize and then stop the server');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
@@ -215,15 +208,18 @@ export default function(program) {
       .option('--dev', 'Run the server with development mode defaults')
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
+      .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
-  command.action(async function(opts) {
+  command.action(async function (opts) {
     if (opts.dev && opts.devConfig !== false) {
       try {
         const kbnDevConfig = fromRoot('config/kibana.dev.yml');
@@ -254,13 +250,16 @@ export default function(program) {
         // elastic.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
+        disableOptimizer: !opts.optimizer,
         oss: !!opts.oss,
+        cache: !!opts.cache,
+        dist: !!opts.dist,
       },
       features: {
         isClusterModeSupported: CAN_CLUSTER,
         isReplModeSupported: CAN_REPL,
       },
-      applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
 }

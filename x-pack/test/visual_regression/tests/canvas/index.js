@@ -7,11 +7,11 @@ import { DEFAULT_OPTIONS } from '../../../../../test/visual_regression/services/
 
 const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
 
-export default function({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('canvas app visual regression', function() {
+  describe('canvas app visual regression', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');

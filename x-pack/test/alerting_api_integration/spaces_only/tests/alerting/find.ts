@@ -20,19 +20,19 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     it('should handle find alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const response = await supertest.get(
         `${getUrlPrefix(
           Spaces.space1.id
-        )}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+        )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body.page).to.equal(1);
       expect(response.body.perPage).to.be.greaterThan(0);
       expect(response.body.total).to.be.greaterThan(0);
@@ -42,7 +42,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         name: 'abc',
         tags: ['foo'],
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
         actions: [],
@@ -63,21 +63,21 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't find alert from another space`, async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await supertest
         .get(
           `${getUrlPrefix(
             Spaces.other.id
-          )}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+          )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
         )
         .expect(200, {
           page: 1,
-          perPage: 20,
+          perPage: 10,
           total: 0,
           data: [],
         });

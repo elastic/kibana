@@ -27,7 +27,7 @@ export function buildQueryFromKuery(
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string
 ) {
-  const queryASTs = queries.map(query => {
+  const queryASTs = queries.map((query) => {
     return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
 

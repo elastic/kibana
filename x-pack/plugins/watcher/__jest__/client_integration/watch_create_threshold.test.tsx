@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
@@ -48,32 +49,40 @@ const WATCH_VISUALIZE_DATA = {
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../../public/application/lib/api', () => ({
-  ...jest.requireActual('../../public/application/lib/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj="mockComboBox"
-      onChange={(syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-}));
+  return {
+    ...original,
+    loadIndexPatterns: async () => {
+      const INDEX_PATTERNS = [
+        { attributes: { title: 'index1' } },
+        { attributes: { title: 'index2' } },
+        { attributes: { title: 'index3' } },
+      ];
+      return await INDEX_PATTERNS;
+    },
+    getHttpClient: () => mockHttpClient,
+  };
+});
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj="mockComboBox"
+        onChange={(syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+  };
+});
 
 const { setup } = pageHelpers.watchCreateThreshold;
 
@@ -241,6 +250,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'logging_1',
@@ -280,23 +290,15 @@ describe('<ThresholdWatchEdit /> create route', () => {
         });
 
         test('should simulate an index action', async () => {
-          const { form, find, actions, exists } = testBed;
-
-          const INDEX = 'my_index';
+          const { form, actions, exists } = testBed;
 
           actions.clickAddActionButton();
           actions.clickActionLink('index');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
-          // First, provide invalid field and verify
+          // Verify an empty index is allowed
           form.setInputValue('indexInput', '');
-
-          expect(form.getErrorsMessages()).toContain('Index name is required.');
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
-
-          // Next, provide valid field and verify
-          form.setInputValue('indexInput', INDEX);
 
           await act(async () => {
             actions.clickSimulateButton();
@@ -311,12 +313,13 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'index_1',
                 type: 'index',
                 index: {
-                  index: INDEX,
+                  index: '',
                 },
               },
             ],
@@ -373,6 +376,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'slack_1',
@@ -445,6 +449,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'email_1',
@@ -537,6 +542,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'webhook_1',
@@ -626,6 +632,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'jira_1',
@@ -706,6 +713,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [
               {
                 id: 'pagerduty_1',
@@ -769,6 +777,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
+            isActive: true,
             actions: [],
             index: MATCH_INDICES,
             timeField: WATCH_TIME_FIELD,

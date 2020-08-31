@@ -1,6 +1,6 @@
 [role="xpack"]
 [[managing-indices]]
-== Index management
+== Index Management
 
 *Index Management* enables you to view index settings,
 mappings, and statistics and perform index-level operations.
@@ -13,7 +13,7 @@ the amount of bookkeeping when working with indices. Instead of manually
 setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
-To manage your indices, go to *Management > {es} > Index Management*.
+To manage your indices, open the menu, then go to *Stack Management > Data > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
@@ -126,8 +126,25 @@ under the *Mapped fields* tab as follows:
 [role="screenshot"]
 image::images/management-index-templates-mappings.png[Mapped fields page]
 
+Alternatively, you can click the *Load JSON* link and define the mapping as JSON:
+
+[source,js]
+----------------------------------
+{
+  "properties": {
+    "geo": {
+      "properties": {
+        "coordinates": {
+          "type": "geo_point"
+        }
+      }
+    }
+  }
+}
+----------------------------------
+
 You can create additional mapping configurations in the *Dynamic templates* and
-*Advanced options* tabs. No additional mappings are required for this example. 
+*Advanced options* tabs. No additional mappings are required for this example.
 
 In the fourth step, define an alias named `logstash`.
 

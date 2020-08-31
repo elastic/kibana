@@ -3,6 +3,10 @@
   padding: 0px $euiSizeS $euiSizeS $euiSizeS;
 }
 
+.globalQueryBar:first-child {
+  padding-top: $euiSizeS;
+}
+
 .globalQueryBar:not(:empty) {
   padding-bottom: $euiSizeS;
 }

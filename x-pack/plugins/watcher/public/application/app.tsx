@@ -7,32 +7,29 @@
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import {
-  ChromeStart,
   DocLinksStart,
   HttpSetup,
   ToastsSetup,
   IUiSettingsClient,
+  ApplicationStart,
 } from 'kibana/public';
 
-import {
-  HashRouter,
-  Switch,
-  Route,
-  Redirect,
-  withRouter,
-  RouteComponentProps,
-} from 'react-router-dom';
+import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import {
+  RegisterManagementAppArgs,
+  ManagementAppMountParams,
+} from '../../../../../src/plugins/management/public';
 
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
-import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
@@ -42,7 +39,6 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
-  chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
@@ -50,7 +46,9 @@ export interface AppDeps {
   theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
-  MANAGEMENT_BREADCRUMB: any;
+  setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
+  history: ManagementAppMountParams['history'];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 export const App = (deps: AppDeps) => {
@@ -74,7 +72,7 @@ export const App = (deps: AppDeps) => {
         iconType="help"
       >
         {message}{' '}
-        <EuiLink href="#/management/elasticsearch/license_management/home">
+        <EuiLink href={deps.getUrlForApp('management', { path: 'stack/license_management/home' })}>
           <FormattedMessage
             id="xpack.watcher.app.licenseErrorLinkText"
             defaultMessage="Manage your license."
@@ -84,27 +82,24 @@ export const App = (deps: AppDeps) => {
     );
   }
   return (
-    <HashRouter>
+    <Router history={deps.history}>
       <ShareRouter>
         <AppContextProvider value={deps}>
           <AppWithoutRouter />
         </AppContextProvider>
       </ShareRouter>
-    </HashRouter>
+    </Router>
   );
 };
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={`${BASE_PATH}watches`} component={WatchList} />
-    <Route exact path={`${BASE_PATH}watches/watch/:id/status`} component={WatchStatus} />
-    <Route exact path={`${BASE_PATH}watches/watch/:id/edit`} component={WatchEdit} />
-    <Route
-      exact
-      path={`${BASE_PATH}watches/new-watch/:type(json|threshold)`}
-      component={WatchEdit}
-    />
-    <Redirect from={BASE_PATH} to={`${BASE_PATH}watches`} />
+    <Route exact path="/watches" component={WatchList} />
+    <Route exact path="/watches/watch/:id/status" component={WatchStatus} />
+    <Route exact path="/watches/watch/:id/edit" component={WatchEdit} />
+    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEdit} />
+    <Redirect exact from="/" to="/watches" />
+    <Redirect exact from="" to="/watches" />
   </Switch>
 );

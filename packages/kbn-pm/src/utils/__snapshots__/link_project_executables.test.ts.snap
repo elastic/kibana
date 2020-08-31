@@ -68,14 +68,3 @@ Object {
   "unlink": Array [],
 }
 `;
-
-exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: logs 1`] = `
-Array [
-  Array [
-    "[foo] bar -> ../bar/bin/bar.js",
-  ],
-  Array [
-    "[baz] bar -> ../bar/bin/bar.js",
-  ],
-]
-`;

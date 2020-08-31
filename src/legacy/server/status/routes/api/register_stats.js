@@ -19,9 +19,10 @@
 
 import Joi from 'joi';
 import boom from 'boom';
+import { defaultsDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
-import { KIBANA_STATS_TYPE } from '../../constants';
+import { getKibanaInfoForStats } from '../../lib';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
   defaultMessage: 'Stats are not ready yet. Please try again later.',
@@ -37,18 +38,29 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
  *   - Any other value causes a statusCode 400 response (Bad Request)
  * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
-export function registerStatsApi(usageCollection, server, config) {
+export function registerStatsApi(usageCollection, server, config, kbnServer) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
-  const getClusterUuid = async callCluster => {
+  const getClusterUuid = async (callCluster) => {
     const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
-  const getUsage = async callCluster => {
+  const getUsage = async (callCluster) => {
     const usage = await usageCollection.bulkFetchUsage(callCluster);
     return usageCollection.toObject(usage);
   };
+
+  let lastMetrics = null;
+  /* kibana_stats gets singled out from the collector set as it is used
+   * for health-checking Kibana and fetch does not rely on fetching data
+   * from ES */
+  server.newPlatform.start.core.metrics.getOpsMetrics$().subscribe((metrics) => {
+    lastMetrics = {
+      ...metrics,
+      timestamp: new Date().toISOString(),
+    };
+  });
 
   server.route(
     wrapAuth({
@@ -109,10 +121,9 @@ export function registerStatsApi(usageCollection, server, config) {
                     },
                   };
                 } else {
-                  accum = {
-                    ...accum,
-                    [usageKey]: usage[usageKey],
-                  };
+                  // I don't think we need to it this for the above conditions, but do it for most as it will
+                  // match the behavior done in monitoring/bulk_uploader
+                  defaultsDeep(accum, { [usageKey]: usage[usageKey] });
                 }
 
                 return accum;
@@ -133,15 +144,15 @@ export function registerStatsApi(usageCollection, server, config) {
           }
         }
 
-        /* kibana_stats gets singled out from the collector set as it is used
-         * for health-checking Kibana and fetch does not rely on fetching data
-         * from ES */
-        const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
-        if (!(await kibanaStatsCollector.isReady())) {
+        if (!lastMetrics) {
           return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
-        let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = usageCollection.toApiFieldNames(kibanaStats);
+        const kibanaStats = usageCollection.toApiFieldNames({
+          ...lastMetrics,
+          kibana: getKibanaInfoForStats(server, kbnServer),
+          last_updated: new Date().toISOString(),
+          collection_interval_in_millis: config.get('ops.interval'),
+        });
 
         return {
           ...kibanaStats,

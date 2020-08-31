@@ -42,8 +42,10 @@ export function UserMenuProvider({ getService }) {
         return;
       }
 
-      await testSubjects.click('userMenuButton');
-      await retry.waitFor('user menu opened', async () => await testSubjects.exists('userMenu'));
+      await retry.try(async () => {
+        await testSubjects.click('userMenuButton');
+        await testSubjects.existOrFail('userMenu');
+      });
     }
   })();
 }

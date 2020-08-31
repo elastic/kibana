@@ -20,11 +20,11 @@
 
 export const intl = {
   formatMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
-  formatDate: jest.fn().mockImplementation(value => value),
-  formatTime: jest.fn().mockImplementation(value => value),
-  formatRelative: jest.fn().mockImplementation(value => value),
-  formatNumber: jest.fn().mockImplementation(value => value),
-  formatPlural: jest.fn().mockImplementation(value => value),
+  formatDate: jest.fn().mockImplementation((value) => value),
+  formatTime: jest.fn().mockImplementation((value) => value),
+  formatRelative: jest.fn().mockImplementation((value) => value),
+  formatNumber: jest.fn().mockImplementation((value) => value),
+  formatPlural: jest.fn().mockImplementation((value) => value),
   formatHTMLMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
   now: jest.fn().mockImplementation(() => new Date(1531834573179)),
   textComponent: 'span',

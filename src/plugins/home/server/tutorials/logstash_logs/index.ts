@@ -37,6 +37,7 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.logstashLogs.nameTitle', {
       defaultMessage: 'Logstash logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.logstashLogs.shortDescription', {
       defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
@@ -65,7 +66,7 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/logstash_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/logstash_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

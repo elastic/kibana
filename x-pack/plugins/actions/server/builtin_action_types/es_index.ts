@@ -8,16 +8,24 @@ import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { nullableType } from './lib/nullable';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+
+export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
+export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  {},
+  ActionParamsType
+>;
 
 // config definition
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchema = schema.object({
-  index: nullableType(schema.string()),
+  index: schema.string(),
+  refresh: schema.boolean({ defaultValue: false }),
+  executionTimeField: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -28,16 +36,14 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
-  index: schema.maybe(schema.string()),
-  executionTimeField: schema.maybe(schema.string()),
-  refresh: schema.maybe(schema.boolean()),
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
 });
 
 // action type definition
-export function getActionType({ logger }: { logger: Logger }): ActionType {
+export function getActionType({ logger }: { logger: Logger }): ESIndexActionType {
   return {
     id: '.index',
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
@@ -53,48 +59,31 @@ export function getActionType({ logger }: { logger: Logger }): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: ESIndexActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const params = execOptions.params;
   const services = execOptions.services;
 
-  if (config.index == null && params.index == null) {
-    const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
-      defaultMessage: 'index param needs to be set because not set in config for action',
-    });
-    return {
-      status: 'error',
-      actionId,
-      message,
-    };
-  }
-
-  if (config.index != null && params.index != null) {
-    logger.debug(`index passed in params overridden by index set in config for action ${actionId}`);
-  }
-
-  const index = config.index || params.index;
+  const index = config.index;
 
   const bulkBody = [];
   for (const document of params.documents) {
-    if (params.executionTimeField != null) {
-      document[params.executionTimeField] = new Date();
+    const timeField = config.executionTimeField == null ? '' : config.executionTimeField.trim();
+    if (timeField !== '') {
+      document[timeField] = new Date();
     }
 
     bulkBody.push({ index: {} });
     bulkBody.push(document);
   }
 
-  const bulkParams: any = {
+  const bulkParams = {
     index,
     body: bulkBody,
+    refresh: config.refresh,
   };
-
-  if (params.refresh != null) {
-    bulkParams.refresh = params.refresh;
-  }
 
   let result;
   try {
@@ -103,6 +92,7 @@ async function executor(
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
       defaultMessage: 'error indexing documents',
     });
+    logger.error(`error indexing documents: ${err.message}`);
     return {
       status: 'error',
       actionId,

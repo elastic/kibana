@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
 import { filter } from 'rxjs/operators';
+import { Option, some, none } from 'fp-ts/lib/Option';
 
 import {
   TaskDictionary,
@@ -15,15 +16,17 @@ import {
   TaskInstance,
   TaskStatus,
   TaskLifecycleResult,
+  SerializedConcreteTaskInstance,
+  ConcreteTaskInstance,
 } from './task';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   SavedObjectsSerializer,
-  SavedObjectsSchema,
+  SavedObjectTypeRegistry,
   SavedObjectAttributes,
-} from '../../../../src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 
@@ -46,11 +49,12 @@ const taskDefinitions: TaskDictionary<TaskDefinition> = {
 };
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
 
 beforeEach(() => jest.resetAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -62,17 +66,15 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
 describe('TaskStore', () => {
   describe('schedule', () => {
-    async function testSchedule(task: TaskInstance) {
+    async function testSchedule(task: unknown) {
       const callCluster = jest.fn();
-      savedObjectsClient.create.mockImplementation(
-        async (type: string, attributes: SavedObjectAttributes) => ({
-          id: 'testid',
-          type,
-          attributes,
-          references: [],
-          version: '123',
-        })
-      );
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'testid',
+        type,
+        attributes,
+        references: [],
+        version: '123',
+      }));
       const store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
@@ -82,7 +84,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.schedule(task);
+      const result = await store.schedule(task as TaskInstance);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -155,14 +157,16 @@ describe('TaskStore', () => {
     test('sets runAt to now if not specified', async () => {
       await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      const attributes = savedObjectsClient.create.mock
+        .calls[0][1] as SerializedConcreteTaskInstance;
       expect(new Date(attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
     });
 
     test('ensures params and state are not null', async () => {
-      await testSchedule({ taskType: 'yawn' } as any);
+      await testSchedule({ taskType: 'yawn' });
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      const attributes = savedObjectsClient.create.mock
+        .calls[0][1] as SerializedConcreteTaskInstance;
       expect(attributes.params).toEqual('{}');
       expect(attributes.state).toEqual('{}');
     });
@@ -175,8 +179,8 @@ describe('TaskStore', () => {
   });
 
   describe('fetch', () => {
-    async function testFetch(opts?: SearchOpts, hits: any[] = []) {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
+    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
+      const callCluster = sinon.spy(async (name: string, params?: unknown) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
@@ -235,11 +239,11 @@ describe('TaskStore', () => {
       claimingOpts,
     }: {
       opts: Partial<StoreOpts>;
-      hits?: any[];
+      hits?: unknown[];
       claimingOpts: OwnershipClaimingOpts;
     }) {
       const versionConflicts = 2;
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: hits.length + versionConflicts,
@@ -272,7 +276,7 @@ describe('TaskStore', () => {
     }
 
     test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({
+      const callCluster = sinon.spy(async (name: string, params?: unknown) => ({
         total: 0,
         updated: 0,
       }));
@@ -413,9 +417,9 @@ describe('TaskStore', () => {
                               { term: { 'task.status': 'running' } },
                               { term: { 'task.status': 'claiming' } },
                             ],
+                            must: { range: { 'task.retryAt': { gt: 'now' } } },
                           },
                         },
-                        { range: { 'task.retryAt': { gt: 'now' } } },
                       ],
                     },
                   },
@@ -559,9 +563,9 @@ describe('TaskStore', () => {
                               { term: { 'task.status': 'running' } },
                               { term: { 'task.status': 'claiming' } },
                             ],
+                            must: { range: { 'task.retryAt': { gt: 'now' } } },
                           },
                         },
-                        { range: { 'task.retryAt': { gt: 'now' } } },
                       ],
                     },
                   },
@@ -623,7 +627,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('it returns task objects', async () => {
+    test('it filters out running tasks', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
@@ -637,7 +641,7 @@ if (doc['task.runAt'].size()!=0) {
               taskType: 'foo',
               schedule: undefined,
               attempts: 0,
-              status: 'idle',
+              status: 'claiming',
               params: '{ "hello": "world" }',
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
@@ -711,7 +715,103 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting'],
           state: { baby: 'Henhen' },
-          status: 'idle',
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it returns task objects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
           taskType: 'foo',
           user: 'jimbo',
           ownerId: taskManagerId,
@@ -724,7 +824,7 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting', 'ceo'],
           state: { henry: 'The 8th' },
-          status: 'running',
+          status: 'claiming',
           taskType: 'bar',
           user: 'dabo',
           ownerId: taskManagerId,
@@ -850,7 +950,7 @@ if (doc['task.runAt'].size()!=0) {
         type,
         attributes: {
           ..._.omit(task, 'id'),
-          ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+          ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
         },
         references: [],
         version: '123',
@@ -878,7 +978,7 @@ if (doc['task.runAt'].size()!=0) {
     test('returns the task status if the task exists ', async () => {
       expect.assertions(4);
       return Promise.all(
-        Object.values(TaskStatus).map(async status => {
+        Object.values(TaskStatus).map(async (status) => {
           const id = `id-${_.random(1, 20)}`;
           const task = {
             runAt: mockedDate,
@@ -901,7 +1001,7 @@ if (doc['task.runAt'].size()!=0) {
             type,
             attributes: {
               ..._.omit(task, 'id'),
-              ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+              ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
             },
             references: [],
             version: '123',
@@ -969,7 +1069,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'claimed-by-id',
           _source: {
             type: 'task',
             task: {
@@ -977,7 +1077,7 @@ if (doc['task.runAt'].size()!=0) {
               taskType: 'foo',
               schedule: undefined,
               attempts: 0,
-              status: 'idle',
+              status: 'claiming',
               params: '{ "hello": "world" }',
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
@@ -993,7 +1093,31 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'bbb',
+          _id: 'claimed-by-schedule',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+        {
+          _id: 'already-running',
           _source: {
             type: 'task',
             task: {
@@ -1021,9 +1145,9 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async done => {
+    test('emits an event when a task is succesfully claimed by id', async (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1042,19 +1166,24 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'aaa'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'claimed-by-id'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
-                'aaa',
+                'claimed-by-id',
                 asOk({
-                  id: 'aaa',
+                  id: 'claimed-by-id',
                   runAt,
                   taskType: 'foo',
                   schedule: undefined,
                   attempts: 0,
-                  status: 'idle' as TaskStatus,
+                  status: 'claiming' as TaskStatus,
                   params: { hello: 'world' },
                   state: { baby: 'Henhen' },
                   user: 'jimbo',
@@ -1072,15 +1201,15 @@ if (doc['task.runAt'].size()!=0) {
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['aaa'],
+        claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
-    test('emits an event when a task is succesfully by scheduling', async done => {
+    test('emits an event when a task is succesfully by scheduling', async (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1099,19 +1228,24 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'bbb'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'claimed-by-schedule'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
-                'bbb',
+                'claimed-by-schedule',
                 asOk({
-                  id: 'bbb',
+                  id: 'claimed-by-schedule',
                   runAt,
                   taskType: 'bar',
                   schedule: { interval: '5m' },
                   attempts: 2,
-                  status: 'running' as TaskStatus,
+                  status: 'claiming' as TaskStatus,
                   params: { shazm: 1 },
                   state: { henry: 'The 8th' },
                   user: 'dabo',
@@ -1129,15 +1263,15 @@ if (doc['task.runAt'].size()!=0) {
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['aaa'],
+        claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
-    test('emits an event when the store fails to claim a required task by id', async done => {
-      const { taskManagerId, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+    test('emits an event when the store fails to claim a required task by id', async (done) => {
+      const { taskManagerId, runAt, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1156,11 +1290,36 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'ccc'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'already-running'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
             expect(event).toMatchObject(
-              asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
+              asTaskClaimEvent(
+                'already-running',
+                asErr(
+                  some({
+                    id: 'already-running',
+                    runAt,
+                    taskType: 'bar',
+                    schedule: { interval: '5m' },
+                    attempts: 2,
+                    status: 'running' as TaskStatus,
+                    params: { shazm: 1 },
+                    state: { henry: 'The 8th' },
+                    user: 'dabo',
+                    scope: ['reporting', 'ceo'],
+                    ownerId: taskManagerId,
+                    startedAt: null,
+                    retryAt: null,
+                    scheduledAt: new Date(),
+                  })
+                )
+              )
             );
             sub.unsubscribe();
             done();
@@ -1168,7 +1327,49 @@ if (doc['task.runAt'].size()!=0) {
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['ccc'],
+        claimTasksById: ['already-running'],
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
+    });
+
+    test('emits an event when the store fails to find a task which was required by id', async (done) => {
+      const { taskManagerId, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
+        name === 'updateByQuery'
+          ? {
+              total: tasks.length,
+              updated: tasks.length,
+            }
+          : { hits: { hits: tasks } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        taskManagerId,
+        index: '',
+      });
+
+      const sub = store.events
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'unknown-task'
+          )
+        )
+        .subscribe({
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
+            expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
+            sub.unsubscribe();
+            done();
+          },
+        });
+
+      await store.claimAvailableTasks({
+        claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });

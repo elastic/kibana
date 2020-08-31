@@ -28,7 +28,7 @@ const sassLintConfig = safeLoad(fs.readFileSync(sassLintPath));
 const {
   files: { include: includeGlobs },
 } = sassLintConfig;
-const includeRegex = includeGlobs.map(glob => makeRe(glob));
+const includeRegex = includeGlobs.map((glob) => makeRe(glob));
 
 function matchesInclude(file) {
   for (let i = 0; i < includeRegex.length; i++) {
@@ -40,5 +40,5 @@ function matchesInclude(file) {
 }
 
 export function pickFilesToLint(log, files) {
-  return files.filter(file => file.isSass()).filter(matchesInclude);
+  return files.filter((file) => file.isSass()).filter(matchesInclude);
 }

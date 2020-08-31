@@ -4,14 +4,14 @@
 <titleabbrev>Upgrade readiness status</titleabbrev>
 ++++
 
-Check the status of your cluster.
+experimental[] Check the status of your cluster.
 
-experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+Check the status of your cluster.
 
 [[upgrade-assistant-api-status-request]]
 ==== Request
 
-`GET /api/upgrade_assistant/status`
+`GET <kibana host>:<port>/api/upgrade_assistant/status`
 
 [[upgrade-assistant-api-status-response-codes]]
 ==== Response codes
@@ -24,7 +24,7 @@ experimental["The underlying Upgrade Assistant concepts are stable, but the APIs
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "readyForUpgrade": false,

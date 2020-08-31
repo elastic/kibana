@@ -36,6 +36,7 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.redisMetrics.nameTitle', {
       defaultMessage: 'Redis metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Redis.',
@@ -64,7 +65,7 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/redis_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

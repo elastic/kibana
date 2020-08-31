@@ -17,38 +17,35 @@
  * under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-
-// Node v5 querystring for browser.
+import { parse } from 'query-string';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { ace } from '../../../../../../../es_ui_shared/public';
 // @ts-ignore
-import * as qs from 'querystring-browser';
-
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useServicesContext, useEditorReadContext } from '../../../../contexts';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
+import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
-
-import { autoIndent, getDocumentation } from '../console_menu_actions';
-import { registerCommands } from './keyboard_shortcuts';
-import { applyCurrentSettings } from './apply_editor_settings';
-
+import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
+  useSaveCurrentTextObject,
   useSendCurrentRequestToES,
   useSetInputEditor,
-  useSaveCurrentTextObject,
 } from '../../../../hooks';
-
 import * as senseEditor from '../../../../models/sense_editor';
-// @ts-ignore
-import mappings from '../../../../../lib/mappings/mappings';
-
+import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { applyCurrentSettings } from './apply_editor_settings';
+import { registerCommands } from './keyboard_shortcuts';
+
+const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+}
+
+interface QueryParams {
+  load_from: string;
 }
 
 const abs: CSSProperties = {
@@ -66,11 +63,12 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
+const inputId = 'ConAppInputTextarea';
+
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications },
+    services: { history, notifications, settings: settingsService, esHostService },
     docLinkVersion,
-    elasticsearchUrl,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -95,10 +93,16 @@ function EditorUI({ initialTextValue }: EditorProps) {
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
+    const textareaElement = editorRef.current!.querySelector('textarea');
+
+    if (textareaElement) {
+      textareaElement.setAttribute('id', inputId);
+    }
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
-      return qs.parse(queryString || '');
+
+      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {
@@ -116,7 +120,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
         }
 
         // Fire and forget.
-        $.ajax(loadFrom).done(async data => {
+        $.ajax(loadFrom).done(async (data) => {
           const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
           editor.moveToNextRequestEdge(false);
@@ -138,6 +142,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     window.addEventListener('hashchange', onHashChange);
 
     const initialQueryParams = readQueryParams();
+
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
@@ -168,26 +173,23 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    mappings.retrieveAutoCompleteInfo();
+    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      mappings.clearSubscriptions();
+      clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
     applyCurrentSettings(editor!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editor!
-      .getCoreEditor()
-      .getContainer()
-      .focus();
+    editor!.getCoreEditor().getContainer().focus();
   }, [settings]);
 
   useEffect(() => {
@@ -211,14 +213,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <EuiToolTip
               content={i18n.translate('console.sendRequestButtonTooltip', {
-                defaultMessage: 'click to send request',
+                defaultMessage: 'Click to send request',
               })}
             >
               <button
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
-                  defaultMessage: 'click to send request',
+                  defaultMessage: 'Click to send request',
                 })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
               >
@@ -229,7 +231,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
+                return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);
@@ -242,19 +244,19 @@ function EditorUI({ initialTextValue }: EditorProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
-        automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
-        satisfy Axe. */}
-
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label className="conApp__textAreaLabelHack">
-          <div
-            ref={editorRef}
-            id="ConAppEditor"
-            className="conApp__editorContent"
-            data-test-subj="request-editor"
-          />
-        </label>
+        <EuiScreenReaderOnly>
+          <label htmlFor={inputId}>
+            {i18n.translate('console.inputTextarea', {
+              defaultMessage: 'Dev Tools Console',
+            })}
+          </label>
+        </EuiScreenReaderOnly>
+        <div
+          ref={editorRef}
+          id="ConAppEditor"
+          className="conApp__editorContent"
+          data-test-subj="request-editor"
+        />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@
 
 export {
   UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
   ImageValidation,

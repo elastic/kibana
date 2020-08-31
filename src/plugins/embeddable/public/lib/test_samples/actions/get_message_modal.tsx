@@ -58,7 +58,7 @@ export class GetMessageModal extends Component<Props, State> {
               <EuiFieldText
                 name="popfirst"
                 value={this.state.message}
-                onChange={e => this.setState({ message: e.target.value })}
+                onChange={(e) => this.setState({ message: e.target.value })}
               />
             </EuiFormRow>
           </EuiForm>

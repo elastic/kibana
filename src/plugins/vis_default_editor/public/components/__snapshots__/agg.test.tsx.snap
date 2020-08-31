@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
+<EuiAccordion
+  aria-label="Toggle metric editor"
+  arrowDisplay="left"
+  buttonClassName="eui-textTruncate"
+  buttonContent={
+    <React.Fragment>
+      metric
+       
+    </React.Fragment>
+  }
+  buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+  className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
+  data-test-subj="visEditorAggAccordion1"
+  extraAction={
+    <div>
+      <EuiToolTip
+        content="Enable aggregation"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Enable aggregation"
+          color="text"
+          data-test-subj="toggleDisableAggregationBtn enable"
+          iconType="eyeClosed"
+          onClick={[Function]}
+        />
+      </EuiToolTip>
+    </div>
+  }
+  id="visEditorAggAccordion1"
+  initialIsOpen={true}
+  isLoading={false}
+  isLoadingMessage={false}
+  onToggle={[Function]}
+  paddingSize="none"
+>
+  <EuiSpacer
+    size="m"
+  />
+  <DefaultEditorAggParams
+    agg={
+      Object {
+        "brandNew": true,
+        "getIndexPattern": [Function],
+        "id": "1",
+        "params": Object {},
+        "schema": "metric",
+        "title": "Metrics",
+      }
+    }
+    aggIndex={0}
+    aggIsTooLow={false}
+    formIsTouched={false}
+    groupName="metrics"
+    indexPattern={Object {}}
+    metricAggs={Array []}
+    onAggTypeChange={[Function]}
+    schemas={
+      Array [
+        Object {
+          "name": "metric",
+        },
+      ]
+    }
+    setAggParamValue={[MockFunction]}
+    setTouched={[Function]}
+    setValidity={[Function]}
+    state={
+      Object {
+        "params": Object {},
+      }
+    }
+  />
+</EuiAccordion>
+`;

@@ -17,61 +17,36 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { BfetchServerSetup, BfetchServerStart } from '../../bfetch/server';
-import {
-  LegacyInterpreterServerApi,
-  createLegacyServerInterpreterApi,
-  createLegacyServerEndpoints,
-} from './legacy';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
-// eslint-disable-next-line
-export interface ExpressionsServerSetupDependencies {
-  bfetch: BfetchServerSetup;
-}
+export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
-// eslint-disable-next-line
-export interface ExpressionsServerStartDependencies {
-  bfetch: BfetchServerStart;
-}
-
-export interface ExpressionsServerSetup {
-  __LEGACY: LegacyInterpreterServerApi;
-}
-
-// eslint-disable-next-line
-export interface ExpressionsServerStart {}
+export type ExpressionsServerStart = ExpressionsServiceStart;
 
 export class ExpressionsServerPlugin
-  implements
-    Plugin<
-      ExpressionsServerSetup,
-      ExpressionsServerStart,
-      ExpressionsServerSetupDependencies,
-      ExpressionsServerStartDependencies
-    > {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart> {
+  readonly expressions: ExpressionsService = new ExpressionsService();
 
-  public setup(
-    core: CoreSetup,
-    plugins: ExpressionsServerSetupDependencies
-  ): ExpressionsServerSetup {
-    const logger = this.initializerContext.logger.get();
+  constructor(initializerContext: PluginInitializerContext) {}
 
-    const legacyApi = createLegacyServerInterpreterApi();
-    createLegacyServerEndpoints(legacyApi, logger, core, plugins);
+  public setup(core: CoreSetup): ExpressionsServerSetup {
+    this.expressions.executor.extendContext({
+      environment: 'server',
+    });
 
-    return {
-      __LEGACY: legacyApi,
-    };
+    const setup = this.expressions.setup();
+
+    return Object.freeze(setup);
   }
 
-  public start(
-    core: CoreStart,
-    plugins: ExpressionsServerStartDependencies
-  ): ExpressionsServerStart {
-    return {};
+  public start(core: CoreStart): ExpressionsServerStart {
+    const start = this.expressions.start();
+
+    return Object.freeze(start);
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }

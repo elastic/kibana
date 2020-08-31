@@ -75,7 +75,7 @@ describe('normalizeQuery', () => {
   });
 
   beforeEach(() => {
-    next = jest.fn(x => x);
+    next = jest.fn((x) => x);
     panel = {};
     series = {
       id: seriesId,

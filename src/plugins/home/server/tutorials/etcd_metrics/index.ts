@@ -36,6 +36,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
       defaultMessage: 'Etcd metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
         label: i18n.translate('home.tutorials.etcdMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

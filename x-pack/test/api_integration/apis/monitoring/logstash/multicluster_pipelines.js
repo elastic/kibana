@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import fixture from './fixtures/multicluster_pipelines';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe.skip('pipelines listing multicluster', () => {
+  describe('pipelines listing multicluster', () => {
     const archive = 'monitoring/logstash_pipelines_multicluster';
     const timeRange = {
       min: '2019-11-11T15:13:45.266Z',

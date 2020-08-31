@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('custom visualizations', function() {
+  describe('custom visualizations', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');

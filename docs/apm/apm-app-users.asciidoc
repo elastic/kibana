@@ -1,0 +1,304 @@
+[role="xpack"]
+[[apm-app-users]]
+== APM app users and privileges
+
+:beat_default_index_prefix: apm
+:beat_kib_app: APM app
+:annotation_index: observability-annotations
+
+++++
+<titleabbrev>Users and privileges</titleabbrev>
+++++
+
+You can use role-based access control to grant users access to secured
+resources. The roles that you set up depend on your organization's security
+requirements and the minimum privileges required to use specific features.
+
+{es-security-features} provides {ref}/built-in-roles.html[built-in roles] that grant a
+subset of the privileges needed by APM users.
+When possible, assign users the built-in roles to minimize the affect of future changes on your security strategy.
+If no built-in role is available, you can assign users the privileges needed to accomplish a specific task.
+In general, there are three types of privileges you'll work with:
+
+* **Elasticsearch cluster privileges**: Manage the actions a user can perform against your cluster.
+* **Elasticsearch index privileges**: Control access to the data in specific indices your cluster.
+* **Kibana space privileges**: Grant users write or read access to features and apps within Kibana.
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-reader]]
+=== APM reader user
+
+++++
+<titleabbrev>Create an APM reader user</titleabbrev>
+++++
+
+[[apm-app-reader-full]]
+==== Full APM reader
+
+APM reader users typically need to view the APM app, dashboards, and visualizations that contain APM data.
+These users might also need to create and edit dashboards, visualizations, and machine learning jobs.
+
+. Assign the following built-in roles:
++
+[options="header"]
+|====
+|Role | Purpose
+
+|`kibana_admin`
+|Grants access to all features in Kibana.
+
+|`apm_user`
+|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
+
+|`machine_learning_admin`
+|Grants the privileges required to create, update, and view machine learning jobs
+|====
+
+[[apm-app-reader-partial]]
+==== Partial APM reader
+
+In some instances, you may wish to restrict certain Kibana apps that a user has access to.
+
+. Assign the following built in roles:
++
+[options="header"]
+|====
+|Role | Purpose
+|`apm_user`
+|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
+|====
+
+. Assign space privileges to any Kibana space that the user needs access to.
+Here are two examples:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+| `Read` or `All` on the {beat_kib_app}
+| Allow the use of the the {beat_kib_app}
+
+| Spaces
+| `Read` or `All` on Dashboards, Visualize, and Discover
+| Allow the user to view, edit, and create dashboards, as well as browse data.
+|====
+
+. Finally, assign the following role if a user needs to enable and edit machine learning features:
++
+[options="header"]
+|====
+|Role | Purpose
+
+|`machine_learning_admin`
+|Grants the privileges required to create, update, and view machine learning jobs
+|====
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-annotation-user-create]]
+=== APM app annotation user
+
+++++
+<titleabbrev>Create an annotation user</titleabbrev>
+++++
+
+NOTE: By default, the `apm_user` built-in role provides access to Observability annotations.
+You only need to create an annotation user if the default annotation index
+defined in <<apm-settings-kb,`xpack.observability.annotations.index`>> has been customized.
+
+[[apm-app-annotation-user]]
+==== Annotation user
+
+View deployment annotations in the APM app.
+
+. Create a new role, named something like `annotation_user`,
+and assign the following privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+|Index
+|`read` on +\{ANNOTATION_INDEX\}+^1^
+|Read-only access to the observability annotation index
+
+|Index
+|`view_index_metadata` on +\{ANNOTATION_INDEX\}+^1^
+|Read-only access to observability annotation index metadata
+|====
++
+^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
+<<apm-settings-kb,`xpack.observability.annotations.index`>>.
+
+. Assign the `annotation_user` created previously, and the built-in roles necessary to create
+a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
+
+[[apm-app-annotation-api]]
+==== Annotation API
+
+See <<apm-app-api-user>>.
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-central-config-user]]
+=== APM app central config user
+
+++++
+<titleabbrev>Create a central config user</titleabbrev>
+++++
+
+[[apm-app-central-config-manager]]
+==== Central configuration manager
+
+Central configuration users need to be able to view, create, update, and delete Agent configurations.
+
+. Assign the following built-in roles:
++
+[options="header"]
+|====
+|Role | Purpose
+
+|`apm_user`
+|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
+|====
+
+. Assign the following Kibana space privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+|`All` on {beat_kib_app}
+|Allow full use of the {beat_kib_app}
+|====
+
+[[apm-app-central-config-reader]]
+==== Central configuration reader
+
+In some instances, you may wish to create a user that can only read central configurations,
+but not create, update, or delete them.
+
+. Assign the following built-in roles:
++
+[options="header"]
+|====
+|Role | Purpose
+|`apm_user`
+|Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
+|====
+
+. Assign the following Kibana space privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+|`read` on the {beat_kib_app}
+|Allow read access to the {beat_kib_app}
+|====
+
+[[apm-app-central-config-api]]
+==== Central configuration API
+
+See <<apm-app-api-user>>.
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-api-user]]
+=== APM app API user
+
+++++
+<titleabbrev>Create an API user</titleabbrev>
+++++
+
+[[apm-app-api-config-manager]]
+==== Central configuration API
+
+Users can list, search, create, update, and delete central configurations via the APM app API.
+
+. Assign the following Kibana space privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+|`all` on the {beat_kib_app}
+|Allow all access to the {beat_kib_app}
+|====
+
+[[apm-app-api-config-reader]]
+==== Central configuration API reader
+
+Sometimes a user only needs to list and search central configurations via the APM app API.
+
+. Assign the following Kibana space privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+|`read` on the {beat_kib_app}
+|Allow read access to the {beat_kib_app}
+|====
+
+[[apm-app-api-annotation-manager]]
+==== Annotation API
+
+Users can use the annotation API to create annotations on their APM data.
+
+. Create a new role, named something like `annotation_role`,
+and assign the following privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+|Index
+|`manage` on +{annotation_index}+ index
+|Check if the +{annotation_index}+ index exists
+
+|Index
+|`read` on +{annotation_index}+ index
+|Read the +{annotation_index}+ index
+
+|Index
+|`create_index` on +{annotation_index}+ index
+|Create the +{annotation_index}+ index
+
+|Index
+|`create_doc` on +{annotation_index}+ index
+|Create new annotations in the +{annotation_index}+ index
+|====
+
+. Assign the `annotation_role` created previously,
+and the following Kibana space privileges to any annotation API users:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+| Spaces
+|`all` on the {beat_kib_app}
+|Allow all access to the {beat_kib_app}
+|====
+
+//LEARN MORE
+//Learn more about <<kibana-feature-privileges,feature privileges>>.

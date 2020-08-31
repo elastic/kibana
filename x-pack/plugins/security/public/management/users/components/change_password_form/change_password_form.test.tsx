@@ -40,7 +40,7 @@ describe('<ChangePasswordForm>', () => {
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
-          apiClient={userAPIClientMock.create()}
+          userAPIClient={userAPIClientMock.create()}
           notifications={coreMock.createStart().notifications}
         />
       );
@@ -68,7 +68,7 @@ describe('<ChangePasswordForm>', () => {
           user={user}
           isUserChangingOwnPassword={true}
           onChangePassword={callback}
-          apiClient={apiClientMock}
+          userAPIClient={apiClientMock}
           notifications={coreMock.createStart().notifications}
         />
       );
@@ -107,7 +107,7 @@ describe('<ChangePasswordForm>', () => {
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={false}
-          apiClient={userAPIClientMock.create()}
+          userAPIClient={userAPIClientMock.create()}
           notifications={coreMock.createStart().notifications}
         />
       );

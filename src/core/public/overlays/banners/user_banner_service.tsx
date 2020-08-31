@@ -63,7 +63,7 @@ export class UserBannerService {
 
       id = banners.replace(
         id,
-        el => {
+        (el) => {
           ReactDOM.render(
             <i18n.Context>
               <EuiCallOut

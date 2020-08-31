@@ -20,35 +20,43 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('import', () => {
+    // mock success results including metadata
+    const indexPattern = {
+      type: 'index-pattern',
+      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+    };
+    const visualization = {
+      type: 'visualization',
+      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+    };
+    const dashboard = {
+      type: 'dashboard',
+      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+      meta: { title: 'Requests', icon: 'dashboardApp' },
+    };
+    const createError = (object, type) => ({
+      ...object,
+      title: object.meta.title,
+      error: { type },
+    });
+
     describe('with kibana index', () => {
       describe('with basic data existing', () => {
         before(() => esArchiver.load('saved_objects/basic'));
         after(() => esArchiver.unload('saved_objects/basic'));
 
-        it('should return 200', async () => {
-          await supertest
-            .post('/api/saved_objects/_import')
-            .query({ overwrite: true })
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(200)
-            .then(resp => {
-              expect(resp.body).to.eql({
-                success: true,
-                successCount: 3,
-              });
-            });
-        });
-
         it('should return 415 when no file passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
             .expect(415)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 415,
                 error: 'Unsupported Media Type',
@@ -62,35 +70,14 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
                 errors: [
-                  {
-                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                    type: 'index-pattern',
-                    title: 'logstash-*',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    type: 'visualization',
-                    title: 'Count of requests',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
-                  {
-                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                    type: 'dashboard',
-                    title: 'Requests',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
+                  createError(indexPattern, 'conflict'),
+                  createError(visualization, 'conflict'),
+                  createError(dashboard, 'conflict'),
                 ],
               });
             });
@@ -99,15 +86,18 @@ export default function({ getService }) {
         it('should return 200 when conflicts exist but overwrite is passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .query({
-              overwrite: true,
-            })
+            .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
               });
             });
         });
@@ -121,7 +111,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -130,9 +120,8 @@ export default function({ getService }) {
                     id: '1',
                     type: 'wigwags',
                     title: 'my title',
-                    error: {
-                      type: 'unsupported_type',
-                    },
+                    meta: { title: 'my title' },
+                    error: { type: 'unsupported_type' },
                   },
                 ],
               });
@@ -148,7 +137,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -162,7 +151,7 @@ export default function({ getService }) {
             JSON.stringify({
               type: 'visualization',
               id: '1',
-              attributes: {},
+              attributes: { title: 'My visualization' },
               references: [
                 {
                   name: 'ref_0',
@@ -181,7 +170,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -189,9 +178,10 @@ export default function({ getService }) {
                   {
                     type: 'visualization',
                     id: '1',
+                    title: 'My visualization',
+                    meta: { title: 'My visualization', icon: 'visualizeApp' },
                     error: {
                       type: 'missing_references',
-                      blocking: [],
                       references: [
                         {
                           type: 'index-pattern',

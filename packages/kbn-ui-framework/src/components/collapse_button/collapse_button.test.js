@@ -27,7 +27,7 @@ import { DIRECTIONS, KuiCollapseButton } from './collapse_button';
 describe('KuiCollapseButton', () => {
   describe('Props', () => {
     describe('direction', () => {
-      DIRECTIONS.forEach(direction => {
+      DIRECTIONS.forEach((direction) => {
         describe(`${direction}`, () => {
           test(`renders the ${direction} class`, () => {
             const component = <KuiCollapseButton direction={direction} {...requiredProps} />;

@@ -18,10 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from './instruction_variant';
+import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createAuditbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -30,9 +31,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -46,9 +47,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -67,9 +68,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Auditbeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+          linkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -91,7 +92,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.auditbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Auditbeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
+            'First time using Auditbeat? See the [Quick Start]({guideLinkUrl}).\n\
  1. Download the Auditbeat Windows zip file from the [Download]({auditbeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Auditbeat`.\n\
@@ -100,7 +101,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
  5. From the PowerShell prompt, run the following commands to install Auditbeat as a Windows service.',
           values: {
             folderPath: '`C:\\Program Files`',
-            guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
+            guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
             auditbeatLinkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
             directoryName: 'auditbeat-{config.kibana.version}-windows',
           },
@@ -305,13 +306,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.debTitle', {
@@ -327,13 +322,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.rpmTitle', {
@@ -349,13 +338,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate(
@@ -374,13 +357,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
-import { ISearchSetup, ISearchStart } from './search';
+import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+
+export interface DataPublicPluginEnhancements {
+  search: SearchEnhancements;
+}
 
 export interface DataSetupDependencies {
-  uiActions: IUiActionsSetup;
+  expressions: ExpressionsSetup;
+  uiActions: UiActionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface DataStartDependencies {
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export interface DataPublicPluginSetup {
@@ -41,9 +51,17 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
 export interface DataPublicPluginStart {
+  actions: {
+    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+    createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
+  };
   autocomplete: AutocompleteStart;
   indexPatterns: IndexPatternsContract;
   search: ISearchStart;

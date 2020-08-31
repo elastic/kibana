@@ -6,18 +6,16 @@
 
 import { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
-import { getEsNames } from './es/names';
-import { createMockEsContext } from './es/context.mock';
-import { loggingServiceMock } from '../../../../src/core/server/logging/logging_service.mock';
+import { contextMock } from './es/context.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const systemLogger = loggingService.get();
+const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
 
 describe('EventLogService', () => {
-  const esContext = createMockEsContext({
-    esNames: getEsNames('ABC'),
-    logger: systemLogger,
-  });
+  const esContext = contextMock.create();
 
   function getService(config: IEventLogConfig) {
     const { enabled, logEntries, indexEntries } = config;
@@ -25,6 +23,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled,
         logEntries,
@@ -69,6 +68,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled: true,
         logEntries: true,
@@ -106,6 +106,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled: true,
         logEntries: true,
@@ -115,5 +116,25 @@ describe('EventLogService', () => {
     const service = new EventLogService(params);
     const eventLogger = service.getLogger({});
     expect(eventLogger).toBeTruthy();
+  });
+
+  describe('registerSavedObjectProvider', () => {
+    test('register SavedObject Providers in the registry', () => {
+      const params = {
+        esContext,
+        systemLogger,
+        kibanaUUID: '42',
+        savedObjectProviderRegistry,
+        config: {
+          enabled: true,
+          logEntries: true,
+          indexEntries: true,
+        },
+      };
+      const service = new EventLogService(params);
+      const provider = jest.fn();
+      service.registerSavedObjectProvider('myType', provider);
+      expect(savedObjectProviderRegistry.registerProvider).toHaveBeenCalledWith('myType', provider);
+    });
   });
 });

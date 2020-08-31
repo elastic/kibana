@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 
 export function metricBuckets(req, panel, esQueryConfig, indexPatternObject) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval);
-    panel.series.forEach(column => {
+    panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       column.metrics
-        .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
-        .forEach(metric => {
+        .filter((row) => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+        .forEach((metric) => {
           const fn = bucketTransform[metric.type];
           if (fn) {
             try {
               const bucket = fn(metric, column.metrics, intervalString);
-              _.set(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, bucket);
+              overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, bucket);
             } catch (e) {
               // meh
             }

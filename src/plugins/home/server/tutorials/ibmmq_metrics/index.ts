@@ -36,6 +36,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.ibmmqMetrics.nameTitle', {
       defaultMessage: 'IBM MQ metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from IBM MQ instances.',
@@ -48,14 +49,14 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/ibmmq.svg',
+    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
     isBeta: true,
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.ibmmqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
@@ -63,7 +64,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/ibmmq_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/ibmmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

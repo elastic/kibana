@@ -25,7 +25,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 
-import { notificationServiceMock } from '../../../../../../../../core/public/mocks';
+import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import {
@@ -61,21 +61,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
 
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
-    mockedAppContextValue = {
-      elasticsearchUrl: 'test',
-      services: {
-        trackUiMetric: { count: () => {}, load: () => {} },
-        settings: {} as any,
-        storage: {} as any,
-        history: {
-          getSavedEditorState: () => ({} as any),
-          updateCurrentState: jest.fn(),
-        } as any,
-        notifications: notificationServiceMock.createSetupContract(),
-        objectStorageClient: {} as any,
-      },
-      docLinkVersion: 'NA',
-    };
+    mockedAppContextValue = serviceContextMock.create();
   });
 
   afterEach(() => {

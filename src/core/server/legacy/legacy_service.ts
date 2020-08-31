@@ -28,7 +28,7 @@ import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
-import { findLegacyPluginSpecs } from './plugins';
+import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
 import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
@@ -91,7 +91,7 @@ export class LegacyService implements CoreService {
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
       .atPath<DevConfigType>(devConfig.path)
-      .pipe(map(rawConfig => new DevConfig(rawConfig)));
+      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
@@ -108,7 +108,7 @@ export class LegacyService implements CoreService {
           this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
-      tap({ error: err => this.log.error(err) }),
+      tap({ error: (err) => this.log.error(err) }),
       publishReplay(1)
     ) as ConnectableObservable<[Config, PathConfigType]>;
 
@@ -133,6 +133,11 @@ export class LegacyService implements CoreService {
       this.coreContext.env.packageInfo
     );
 
+    logLegacyThirdPartyPluginDeprecationWarning({
+      specs: pluginSpecs,
+      log: this.log,
+    });
+
     this.legacyPlugins = {
       pluginSpecs,
       disabledPluginSpecs,
@@ -141,14 +146,14 @@ export class LegacyService implements CoreService {
     };
 
     const deprecationProviders = await pluginSpecs
-      .map(spec => spec.getDeprecationsProvider())
+      .map((spec) => spec.getDeprecationsProvider())
       .reduce(async (providers, current) => {
         if (current) {
           return [...(await providers), await convertLegacyDeprecationProvider(current)];
         }
         return providers;
       }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach(provider =>
+    deprecationProviders.forEach((provider) =>
       this.coreContext.configService.addDeprecationProvider('', provider)
     );
 
@@ -183,7 +188,7 @@ export class LegacyService implements CoreService {
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals(
       this.legacyPlugins.uiExports,
@@ -258,21 +263,32 @@ export class LegacyService implements CoreService {
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
+      elasticsearch: startDeps.core.elasticsearch,
+      http: {
+        auth: startDeps.core.http.auth,
+        basePath: startDeps.core.http.basePath,
+        getServerInfo: startDeps.core.http.getServerInfo,
+      },
       savedObjects: {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
+        getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
+      },
+      metrics: {
+        getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
+    const router = setupDeps.core.http.createRouter('', this.legacyId);
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        adminClient: setupDeps.core.elasticsearch.adminClient,
-        dataClient: setupDeps.core.elasticsearch.dataClient,
-        createClient: setupDeps.core.elasticsearch.createClient,
+        legacy: setupDeps.core.elasticsearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -280,7 +296,9 @@ export class LegacyService implements CoreService {
           null,
           this.legacyId
         ),
-        createRouter: () => setupDeps.core.http.createRouter('', this.legacyId),
+        createRouter: () => router,
+        resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -291,20 +309,26 @@ export class LegacyService implements CoreService {
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
         },
         csp: setupDeps.core.http.csp,
-        isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
+      },
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
+        registerType: setupDeps.core.savedObjects.registerType,
+        getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
+      },
+      status: {
+        core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
-      uuid: {
-        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
-      },
-      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
+      auditTrail: setupDeps.core.auditTrail,
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -326,12 +350,14 @@ export class LegacyService implements CoreService {
           plugins: startDeps.plugins,
         },
         __internals: {
+          http: {
+            registerStaticDir: setupDeps.core.http.registerStaticDir,
+          },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
-          uiPlugins: setupDeps.core.plugins.uiPlugins,
+          uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
-          uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
           legacy: this.legacyInternals,
         },
@@ -344,6 +370,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

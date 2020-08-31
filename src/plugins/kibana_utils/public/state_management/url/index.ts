@@ -25,4 +25,6 @@ export {
   getStatesFromKbnUrl,
   IKbnUrlControls,
 } from './kbn_url_storage';
+export { createKbnUrlTracker } from './kbn_url_tracker';
 export { createUrlTracker } from './url_tracker';
+export { withNotifyOnErrors, saveStateInUrlErrorTitle, restoreUrlErrorTitle } from './errors';

@@ -11,5 +11,5 @@ import { LicensingPluginSetup } from '../../licensing/public';
 export interface AppPublicPluginDependencies {
   licensing: LicensingPluginSetup;
   home: HomePublicPluginSetup;
-  dev_tools: DevToolsSetup;
+  devTools: DevToolsSetup;
 }

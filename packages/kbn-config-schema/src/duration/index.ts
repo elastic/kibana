@@ -28,7 +28,7 @@ function stringToDuration(text: string) {
     const number = Number(text);
     if (typeof number !== 'number' || isNaN(number)) {
       throw new Error(
-        `Failed to parse [${text}] as time value. Value must be a duration in milliseconds, or follow the format ` +
+        `Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format ` +
           `<count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer.`
       );
     }
@@ -43,9 +43,7 @@ function stringToDuration(text: string) {
 
 function numberToDuration(numberMs: number) {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
-    throw new Error(
-      `Value in milliseconds is expected to be a safe positive integer, but provided [${numberMs}].`
-    );
+    throw new Error(`Value in milliseconds is expected to be a safe positive integer.`);
   }
 
   return momentDuration(numberMs);

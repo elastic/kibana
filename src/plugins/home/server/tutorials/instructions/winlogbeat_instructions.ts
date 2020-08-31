@@ -18,10 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from './instruction_variant';
+import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -33,7 +34,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.winlogbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Winlogbeat? See the [Getting Started Guide]({winlogbeatLink}).\n\
+            'First time using Winlogbeat? See the [Quick Start]({winlogbeatLink}).\n\
  1. Download the Winlogbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Winlogbeat`.\n\
@@ -43,7 +44,8 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`winlogbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            winlogbeatLink: '{config.docs.beats.winlogbeat}/winlogbeat-getting-started.html',
+            winlogbeatLink:
+              '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
           },
         }
@@ -130,13 +132,7 @@ export const createWinlogbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

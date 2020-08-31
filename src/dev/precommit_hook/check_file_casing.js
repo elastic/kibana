@@ -29,13 +29,14 @@ import {
   IGNORE_FILE_GLOBS,
   TEMPORARILY_IGNORED_PATHS,
   KEBAB_CASE_DIRECTORY_GLOBS,
+  REMOVE_EXTENSION,
 } from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function listPaths(paths) {
-  return paths.map(path => ` - ${path}`).join('\n');
+  return paths.map((path) => ` - ${path}`).join('\n');
 }
 
 /**
@@ -78,7 +79,7 @@ async function checkForKebabCase(log, files) {
 
       return acc.concat(
         parents.filter(
-          parent =>
+          (parent) =>
             matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) &&
             NON_KEBAB_CASE_RE.test(basename(parent))
         )
@@ -109,7 +110,7 @@ async function checkForSnakeCase(log, files) {
   const errorPaths = [];
   const warningPaths = [];
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const path = file.getRelativePath();
 
     if (TEMPORARILY_IGNORED_PATHS.includes(path)) {
@@ -143,6 +144,10 @@ async function checkForSnakeCase(log, files) {
 }
 
 export async function checkFileCasing(log, files) {
+  files = files.map((f) =>
+    matchesAnyGlob(f.getRelativePath(), REMOVE_EXTENSION) ? f.getWithoutExtension() : f
+  );
+
   await checkForKebabCase(log, files);
   await checkForSnakeCase(log, files);
 }

@@ -4,123 +4,376 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { merge } from 'lodash';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import { KibanaPrivileges } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { Role } from '../../../../../../../common/model';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { rawKibanaPrivileges } from './__fixtures__';
+import React from 'react';
+import { Space } from '../../../../../../../../spaces/public';
+import { EuiSuperSelect } from '@elastic/eui';
+import { FeatureTable } from '../feature_table';
+import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
+import { findTestSubject } from 'test_utils/find_test_subject';
+import { SpaceSelector } from './space_selector';
 
-type RecursivePartial<T> = {
-  [P in keyof T]?: RecursivePartial<T[P]>;
-};
-
-const buildProps = (
-  overrides?: RecursivePartial<PrivilegeSpaceForm['props']>
-): PrivilegeSpaceForm['props'] => {
-  const kibanaPrivileges = new KibanaPrivileges(rawKibanaPrivileges);
-  const defaultProps: PrivilegeSpaceForm['props'] = {
-    spaces: [
-      {
-        id: 'default',
-        name: 'Default Space',
-        description: '',
-        disabledFeatures: [],
-        _reserved: true,
-      },
-      {
-        id: 'marketing',
-        name: 'Marketing',
-        description: '',
-        disabledFeatures: [],
-      },
-    ],
-    kibanaPrivileges,
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(kibanaPrivileges),
-    features: [],
-    role: {
-      name: 'test role',
-      elasticsearch: {
-        cluster: ['all'],
-        indices: [] as any[],
-        run_as: [] as string[],
-      },
-      kibana: [{ spaces: [], base: [], feature: {} }],
-    },
-    onChange: jest.fn(),
-    onCancel: jest.fn(),
-    intl: {} as any,
-    editingIndex: 0,
+const createRole = (kibana: Role['kibana'] = []): Role => {
+  return {
+    name: 'my_role',
+    elasticsearch: { cluster: [], run_as: [], indices: [] },
+    kibana,
   };
-  return merge(defaultProps, overrides || {});
 };
 
-describe('<PrivilegeSpaceForm>', () => {
-  it('renders without crashing', () => {
-    expect(shallowWithIntl(<PrivilegeSpaceForm {...buildProps()} />)).toMatchSnapshot();
+const displaySpaces: Space[] = [
+  {
+    id: 'foo',
+    name: 'Foo Space',
+    disabledFeatures: [],
+  },
+  {
+    id: 'default',
+    name: 'Default Space',
+    disabledFeatures: [],
+  },
+  {
+    id: '*',
+    name: 'Global',
+    disabledFeatures: [],
+  },
+];
+
+describe('PrivilegeSpaceForm', () => {
+  it('renders an empty form when the role contains no Kibana privileges', () => {
+    const role = createRole();
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        onChange={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
+    expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+      }
+    `);
+
+    expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
   });
 
-  it(`defaults to "Custom" for new global entries`, () => {
-    const props = buildProps({
-      role: {
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {},
-          },
-        ],
+  it('renders when a base privilege is selected', () => {
+    const role = createRole([
+      {
+        base: ['all'],
+        feature: {},
+        spaces: ['foo'],
       },
-      editingIndex: 0,
-    });
-    const component = mountWithIntl(<PrivilegeSpaceForm {...props} />);
-    const basePrivilegeComboBox = findTestSubject(component, `basePrivilegeComboBox`);
-    expect(basePrivilegeComboBox.text()).toBe('Custom');
-  });
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
-  it(`defaults to "Custom" for new space entries`, () => {
-    const props = buildProps({
-      role: {
-        kibana: [
-          {
-            spaces: ['space:default'],
-            base: [],
-            feature: {},
-          },
-        ],
-      },
-      editingIndex: 0,
-    });
-    const component = mountWithIntl(<PrivilegeSpaceForm {...props} />);
-    const basePrivilegeComboBox = findTestSubject(component, `basePrivilegeComboBox`);
-    expect(basePrivilegeComboBox.text()).toBe('Custom');
-  });
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        privilegeIndex={0}
+        onChange={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
 
-  describe('when an existing global all privilege', () => {
-    it(`defaults to "Custom" for new entries`, () => {
-      const props = buildProps({
-        role: {
-          kibana: [
-            {
-              spaces: ['*'],
-              base: ['all'],
-              feature: {},
-            },
-            {
-              spaces: ['default'],
-              base: [],
-              feature: {},
-            },
+    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_all`);
+    expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
+    expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "with_sub_features_cool_toggle_1",
+            "with_sub_features_cool_toggle_2",
+            "cool_all",
           ],
         },
-        editingIndex: 1,
-      });
-      const component = mountWithIntl(<PrivilegeSpaceForm {...props} />);
-      const basePrivilegeComboBox = findTestSubject(component, `basePrivilegeComboBox`);
-      expect(basePrivilegeComboBox.text()).toBe('Custom');
-    });
+      }
+    `);
+
+    expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
+  });
+
+  it('renders when a feature privileges are selected', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['read'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        privilegeIndex={0}
+        onChange={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
+    expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "read",
+          "subFeaturePrivileges": Array [
+            "with_sub_features_cool_toggle_2",
+            "cool_read",
+          ],
+        },
+      }
+    `);
+
+    expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
+  });
+
+  it('renders a warning when configuring a global privilege after space privileges are already defined', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['read'],
+        },
+        spaces: ['foo'],
+      },
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        onChange={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    wrapper.find(SpaceSelector).props().onChange(['*']);
+
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'globalPrivilegeWarning')).toHaveLength(1);
+  });
+
+  it('renders a warning when space privileges are less permissive than configured global privileges', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['read'],
+        },
+        spaces: ['foo'],
+      },
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        privilegeIndex={0}
+        onChange={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
+    expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "read",
+          "subFeaturePrivileges": Array [
+            "with_sub_features_cool_toggle_2",
+            "cool_read",
+          ],
+        },
+      }
+    `);
+
+    expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'globalPrivilegeWarning')).toHaveLength(0);
+  });
+
+  it('allows all feature privileges to be changed via "change all"', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all', 'with_sub_features_cool_toggle_2', 'cool_read'],
+        },
+        spaces: ['foo'],
+      },
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['bar'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
+        privilegeIndex={0}
+        onChange={onChange}
+        onCancel={jest.fn()}
+      />
+    );
+
+    findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
+    findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
+    findTestSubject(wrapper, 'createSpacePrivilegeButton').simulate('click');
+
+    expect(onChange).toHaveBeenCalledWith(
+      createRole([
+        {
+          base: [],
+          feature: {
+            excluded_from_base: ['read'],
+            with_excluded_sub_features: ['read'],
+            no_sub_features: ['read'],
+            with_sub_features: ['read'],
+          },
+          spaces: ['foo'],
+        },
+        // this set remains unchanged from the original
+        {
+          base: [],
+          feature: {
+            with_sub_features: ['all'],
+          },
+          spaces: ['bar'],
+        },
+      ])
+    );
+  });
+
+  it('passes the `canCustomizeSubFeaturePrivileges` prop to the FeatureTable', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const onChange = jest.fn();
+
+    const canCustomize = (Symbol('can customize') as unknown) as boolean;
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={canCustomize}
+        privilegeIndex={0}
+        onChange={onChange}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(FeatureTable).props().canCustomizeSubFeaturePrivileges).toBe(canCustomize);
   });
 });

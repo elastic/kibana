@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import './styles/_index.scss';
 import { SearchProfilerUIPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new SearchProfilerUIPlugin(ctx);
+export function plugin() {
+  return new SearchProfilerUIPlugin();
 }

@@ -4,103 +4,113 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
 import {
   EuiButtonGroup,
-  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiText,
-  IconType,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Feature } from '../../../../../../../../features/public';
-import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../common/model';
-import {
-  AllowedPrivilege,
-  CalculatedPrivilege,
-  PrivilegeExplanation,
-} from '../kibana_privilege_calculator';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
+import { i18n } from '@kbn/i18n';
+import React, { Component } from 'react';
+import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
+import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import { FeatureTableCell } from '../feature_table_cell';
+import { KibanaPrivileges, SecuredFeature, KibanaPrivilege } from '../../../../model';
 
 interface Props {
   role: Role;
-  features: Feature[];
-  calculatedPrivileges: CalculatedPrivilege;
-  allowedPrivileges: AllowedPrivilege;
-  rankedFeaturePrivileges: FeaturesPrivileges;
+  privilegeCalculator: PrivilegeFormCalculator;
   kibanaPrivileges: KibanaPrivileges;
-  spacesIndex: number;
+  privilegeIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
+  canCustomizeSubFeaturePrivileges: boolean;
   disabled?: boolean;
 }
 
-interface TableFeature extends Feature {
-  hasAnyPrivilegeAssigned: boolean;
+interface State {
+  expandedFeatures: string[];
 }
 
 interface TableRow {
-  feature: TableFeature;
+  featureId: string;
+  feature: SecuredFeature;
+  inherited: KibanaPrivilege[];
+  effective: KibanaPrivilege[];
   role: Role;
 }
 
-export class FeatureTable extends Component<Props, {}> {
+export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
-    spacesIndex: -1,
+    privilegeIndex: -1,
     showLocks: true,
   };
 
-  public render() {
-    const { role, features, calculatedPrivileges, rankedFeaturePrivileges } = this.props;
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      expandedFeatures: [],
+    };
+  }
 
-    const items: TableRow[] = features
+  public render() {
+    const { role, kibanaPrivileges } = this.props;
+
+    const featurePrivileges = kibanaPrivileges
+      .getSecuredFeatures()
+      .filter((feature) => feature.privileges != null || feature.reserved != null);
+
+    const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {
-        if (
-          Object.keys(feature1.privileges).length === 0 &&
-          Object.keys(feature2.privileges).length > 0
-        ) {
+        if (feature1.reserved && !feature2.reserved) {
           return 1;
         }
 
-        if (
-          Object.keys(feature2.privileges).length === 0 &&
-          Object.keys(feature1.privileges).length > 0
-        ) {
+        if (feature2.reserved && !feature1.reserved) {
           return -1;
         }
 
         return 0;
       })
-      .map(feature => {
-        const calculatedFeaturePrivileges = calculatedPrivileges.feature[feature.id];
-        const hasAnyPrivilegeAssigned = Boolean(
-          calculatedFeaturePrivileges &&
-            calculatedFeaturePrivileges.actualPrivilege !== NO_PRIVILEGE_VALUE
-        );
+      .map((feature) => {
         return {
-          feature: {
-            ...feature,
-            hasAnyPrivilegeAssigned,
-          },
+          featureId: feature.id,
+          feature,
+          inherited: [],
+          effective: [],
           role,
         };
       });
 
-    // TODO: This simply grabs the available privileges from the first feature we encounter.
-    // As of now, features can have 'all' and 'read' as available privileges. Once that assumption breaks,
-    // this will need updating. This is a simplifying measure to enable the new UI.
-    const availablePrivileges = Object.values(rankedFeaturePrivileges)[0];
-
     return (
       <EuiInMemoryTable
         responsive={false}
-        columns={this.getColumns(availablePrivileges)}
+        columns={this.getColumns()}
+        itemId={'featureId'}
+        itemIdToExpandedRowMap={this.state.expandedFeatures.reduce((acc, featureId) => {
+          return {
+            ...acc,
+            [featureId]: (
+              <FeatureTableExpandedRow
+                feature={featurePrivileges.find((f) => f.id === featureId)!}
+                privilegeIndex={this.props.privilegeIndex}
+                onChange={this.props.onChange}
+                privilegeCalculator={this.props.privilegeCalculator}
+                selectedFeaturePrivileges={
+                  this.props.role.kibana[this.props.privilegeIndex].feature[featureId] ?? []
+                }
+                disabled={this.props.disabled}
+              />
+            ),
+          };
+        }, {})}
         items={items}
       />
     );
@@ -115,171 +125,161 @@ export class FeatureTable extends Component<Props, {}> {
     }
   };
 
-  private getColumns = (availablePrivileges: string[]) => [
-    {
-      field: 'feature',
-      name: i18n.translate(
-        'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
-        { defaultMessage: 'Feature' }
-      ),
-      render: (feature: TableFeature) => {
-        let tooltipElement = null;
-        if (feature.privilegesTooltip) {
-          const tooltipContent = (
-            <EuiText>
-              <p>{feature.privilegesTooltip}</p>
-            </EuiText>
-          );
-          tooltipElement = (
-            <EuiIconTip
-              iconProps={{
-                className: 'eui-alignTop',
-              }}
-              type={'iInCircle'}
-              color={'subdued'}
-              content={tooltipContent}
+  private getColumns = () => {
+    const basePrivileges = this.props.kibanaPrivileges.getBasePrivileges(
+      this.props.role.kibana[this.props.privilegeIndex]
+    );
+
+    const columns = [];
+
+    if (this.props.canCustomizeSubFeaturePrivileges) {
+      columns.push({
+        width: '30px',
+        isExpander: true,
+        field: 'featureId',
+        name: '',
+        render: (featureId: string, record: TableRow) => {
+          const { feature } = record;
+          const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
+          if (!hasSubFeaturePrivileges) {
+            return null;
+          }
+          return (
+            <EuiButtonIcon
+              onClick={() => this.toggleExpandedFeature(featureId)}
+              data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
+              aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+              iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
             />
           );
-        }
+        },
+      });
+    }
 
-        return (
-          <span>
-            <EuiIcon size="m" type={feature.icon as IconType} className="secPrivilegeFeatureIcon" />
-            {feature.name} {tooltipElement}
-          </span>
-        );
+    columns.push(
+      {
+        field: 'feature',
+        width: '200px',
+        name: i18n.translate(
+          'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
+          {
+            defaultMessage: 'Feature',
+          }
+        ),
+        render: (feature: SecuredFeature) => {
+          return <FeatureTableCell feature={feature} />;
+        },
       },
-    },
-    {
-      field: 'privilege',
-      name: (
-        <span>
-          <FormattedMessage
-            id="xpack.security.management.editRole.featureTable.enabledRoleFeaturesEnabledColumnTitle"
-            defaultMessage="Privilege"
-          />
-          {!this.props.disabled && (
-            <ChangeAllPrivilegesControl
-              privileges={[...availablePrivileges, NO_PRIVILEGE_VALUE]}
-              onChange={this.onChangeAllFeaturePrivileges}
-            />
-          )}
-        </span>
-      ),
-      render: (roleEntry: Role, record: TableRow) => {
-        const { id: featureId, name: featureName, reserved, privileges } = record.feature;
-
-        if (reserved && Object.keys(privileges).length === 0) {
-          return <EuiText size={'s'}>{reserved.description}</EuiText>;
-        }
-
-        const featurePrivileges = this.props.kibanaPrivileges
-          .getFeaturePrivileges()
-          .getPrivileges(featureId);
-
-        if (featurePrivileges.length === 0) {
-          return null;
-        }
-
-        const enabledFeaturePrivileges = this.getEnabledFeaturePrivileges(
-          featurePrivileges,
-          featureId
-        );
-
-        const privilegeExplanation = this.getPrivilegeExplanation(featureId);
-
-        const allowsNone = this.allowsNoneForPrivilegeAssignment(featureId);
-
-        const actualPrivilegeValue = privilegeExplanation.actualPrivilege;
-
-        const canChangePrivilege =
-          !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
-
-        if (!canChangePrivilege) {
-          const assignedBasePrivilege =
-            this.props.role.kibana[this.props.spacesIndex].base.length > 0;
-
-          const excludedFromBasePrivilegsTooltip = (
+      {
+        field: 'privilege',
+        width: '200px',
+        name: (
+          <span>
             <FormattedMessage
-              id="xpack.security.management.editRole.featureTable.excludedFromBasePrivilegsTooltip"
-              defaultMessage='Use "Custom" privileges to grant access. {featureName} isn&apos;t part of the base privileges.'
-              values={{ featureName }}
+              id="xpack.security.management.editRole.featureTable.enabledRoleFeaturesEnabledColumnTitle"
+              defaultMessage="Privilege"
             />
+            {!this.props.disabled && (
+              <ChangeAllPrivilegesControl
+                privileges={basePrivileges}
+                onChange={this.onChangeAllFeaturePrivileges}
+              />
+            )}
+          </span>
+        ),
+        mobileOptions: {
+          // Table isn't responsive, so skip rendering this for mobile. <ChangeAllPrivilegesControl /> isn't free...
+          header: false,
+        },
+        render: (roleEntry: Role, record: TableRow) => {
+          const { feature } = record;
+
+          const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
+
+          if (feature.reserved && primaryFeaturePrivileges.length === 0) {
+            return (
+              <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+                {feature.reserved.description}
+              </EuiText>
+            );
+          }
+
+          if (primaryFeaturePrivileges.length === 0) {
+            return null;
+          }
+
+          const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
+            feature.id,
+            this.props.privilegeIndex
           );
+
+          const options = primaryFeaturePrivileges.map((privilege) => {
+            return {
+              id: `${feature.id}_${privilege.id}`,
+              label: privilege.name,
+              isDisabled: this.props.disabled,
+            };
+          });
+
+          options.push({
+            id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
+            label: 'None',
+            isDisabled: this.props.disabled,
+          });
+
+          let warningIcon = <EuiIconTip type="empty" content={null} />;
+          if (
+            this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
+              feature.id,
+              this.props.privilegeIndex
+            )
+          ) {
+            warningIcon = (
+              <EuiIconTip
+                type="iInCircle"
+                content={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip"
+                    defaultMessage="Feature has customized sub-feature privileges. Expand this row for more information."
+                  />
+                }
+              />
+            );
+          }
 
           return (
-            <PrivilegeDisplay
-              privilege={actualPrivilegeValue}
-              explanation={privilegeExplanation}
-              tooltipContent={
-                assignedBasePrivilege && actualPrivilegeValue === NO_PRIVILEGE_VALUE
-                  ? excludedFromBasePrivilegsTooltip
-                  : undefined
-              }
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>{warningIcon}</EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  name={`featurePrivilege_${feature.id}`}
+                  data-test-subj={`primaryFeaturePrivilegeControl`}
+                  buttonSize="compressed"
+                  color={'primary'}
+                  isFullWidth={true}
+                  options={options}
+                  idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
+                  onChange={this.onChange(feature.id)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
-        }
-
-        const options = availablePrivileges.map(priv => {
-          return {
-            id: `${featureId}_${priv}`,
-            label: _.capitalize(priv),
-            isDisabled: !enabledFeaturePrivileges.includes(priv),
-          };
-        });
-
-        options.push({
-          id: `${featureId}_${NO_PRIVILEGE_VALUE}`,
-          label: 'None',
-          isDisabled: !allowsNone,
-        });
-
-        return (
-          <EuiButtonGroup
-            name={`featurePrivilege_${featureId}`}
-            options={options}
-            idSelected={`${featureId}_${actualPrivilegeValue || NO_PRIVILEGE_VALUE}`}
-            onChange={this.onChange(featureId)}
-          />
-        );
-      },
-    },
-  ];
-
-  private getEnabledFeaturePrivileges = (featurePrivileges: string[], featureId: string) => {
-    const { allowedPrivileges } = this.props;
-
-    if (this.isConfiguringGlobalPrivileges()) {
-      // Global feature privileges are not limited by effective privileges.
-      return featurePrivileges;
-    }
-
-    const allowedFeaturePrivileges = allowedPrivileges.feature[featureId];
-    if (allowedFeaturePrivileges == null) {
-      throw new Error('Unable to get enabled feature privileges for a feature without privileges');
-    }
-
-    return allowedFeaturePrivileges.privileges;
+        },
+      }
+    );
+    return columns;
   };
 
-  private getPrivilegeExplanation = (featureId: string): PrivilegeExplanation => {
-    const { calculatedPrivileges } = this.props;
-    const calculatedFeaturePrivileges = calculatedPrivileges.feature[featureId];
-    if (calculatedFeaturePrivileges == null) {
-      throw new Error('Unable to get privilege explanation for a feature without privileges');
+  private toggleExpandedFeature = (featureId: string) => {
+    if (this.state.expandedFeatures.includes(featureId)) {
+      this.setState({
+        expandedFeatures: this.state.expandedFeatures.filter((ef) => ef !== featureId),
+      });
+    } else {
+      this.setState({
+        expandedFeatures: [...this.state.expandedFeatures, featureId],
+      });
     }
-
-    return calculatedFeaturePrivileges;
-  };
-
-  private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
-    const { allowedPrivileges } = this.props;
-    const allowedFeaturePrivileges = allowedPrivileges.feature[featureId];
-    if (allowedFeaturePrivileges == null) {
-      throw new Error('Unable to determine if none is allowed for a feature without privileges');
-    }
-
-    return allowedFeaturePrivileges.canUnassign;
   };
 
   private onChangeAllFeaturePrivileges = (privilege: string) => {
@@ -289,7 +289,4 @@ export class FeatureTable extends Component<Props, {}> {
       this.props.onChangeAll([privilege]);
     }
   };
-
-  private isConfiguringGlobalPrivileges = () =>
-    isGlobalPrivilegeDefinition(this.props.role.kibana[this.props.spacesIndex]);
 }

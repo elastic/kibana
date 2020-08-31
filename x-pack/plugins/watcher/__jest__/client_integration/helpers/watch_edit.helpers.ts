@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
@@ -14,7 +12,7 @@ import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    onRouter: router => registerRouter(router),
+    onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/edit`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/edit`,
   },

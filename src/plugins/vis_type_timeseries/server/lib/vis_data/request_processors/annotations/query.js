@@ -22,7 +22,7 @@ import { getTimerange } from '../../helpers/get_timerange';
 import { esQuery } from '../../../../../../data/server';
 
 export function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
-  return next => doc => {
+  return (next) => (doc) => {
     const timeField = annotation.time_field;
     const { bucketSize } = getBucketSize(req, 'auto', capabilities);
     const { from, to } = getTimerange(req);
@@ -56,7 +56,7 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
 
     if (annotation.fields) {
       const fields = annotation.fields.split(/[,\s]+/) || [];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         doc.query.bool.must.push({ exists: { field } });
       });
     }

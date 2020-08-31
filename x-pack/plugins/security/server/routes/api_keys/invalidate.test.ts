@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { LicenseCheck } from '../../../../licensing/server';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -23,16 +23,11 @@ interface TestOptions {
 describe('Invalidate API keys', () => {
   const postInvalidateTest = (
     description: string,
-    {
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponses = [],
-      asserts,
-      payload,
-    }: TestOptions
+    { licenseCheckResult = { state: 'valid' }, apiResponses = [], asserts, payload }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       for (const apiResponse of apiResponses) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
@@ -116,7 +111,7 @@ describe('Invalidate API keys', () => {
 
   describe('failure', () => {
     postInvalidateTest('returns result of license checker', {
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       payload: { apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }], isAdmin: true },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });

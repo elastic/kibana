@@ -37,7 +37,8 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.zeekLogs.nameTitle', {
       defaultMessage: 'Zeek logs',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Zeek/Bro.',
     }),
@@ -50,7 +51,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    // TODO: euiIconType: 'logoZeek',
+    euiIconType: '/plugins/home/assets/logos/zeek.svg',
     artifacts: {
       dashboards: [
         {
@@ -66,7 +67,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/zeek_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/zeek_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

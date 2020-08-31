@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('index management', () => {
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./mapping'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./data_streams'));
     loadTestFile(require.resolve('./templates'));
+    loadTestFile(require.resolve('./component_templates'));
   });
 }

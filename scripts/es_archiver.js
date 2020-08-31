@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/es_archiver/cli');
+require('@kbn/es-archiver').runCli();

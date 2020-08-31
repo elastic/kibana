@@ -18,3 +18,4 @@
  */
 
 export { findLegacyPluginSpecs } from './find_legacy_plugin_specs';
+export { logLegacyThirdPartyPluginDeprecationWarning } from './log_legacy_plugins_warning';

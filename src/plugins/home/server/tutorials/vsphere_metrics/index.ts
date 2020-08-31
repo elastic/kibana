@@ -36,6 +36,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.vsphereMetrics.nameTitle', {
       defaultMessage: 'vSphere metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.vsphereMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from vSphere.',
@@ -48,14 +49,14 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',
       },
     }),
-    // euiIconType: 'logoVSphere',
+    euiIconType: '/plugins/home/assets/logos/vsphere.svg',
     isBeta: true,
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.vsphereMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
@@ -63,7 +64,6 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/vsphere_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

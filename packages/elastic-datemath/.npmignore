@@ -1,4 +1,2 @@
-/src
-/test
 /tsconfig.json
-/.babelrc
+/__tests__

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -38,13 +38,13 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    it('create new dashboard opens in edit mode', async function() {
+    it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
     });
 
-    it('existing dashboard opens in view mode', async function() {
+    it('existing dashboard opens in view mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -52,8 +52,8 @@ export default function({ getService, getPageObjects }) {
       expect(inViewMode).to.equal(true);
     });
 
-    describe('save', function() {
-      it('auto exits out of edit mode', async function() {
+    describe('save', function () {
+      it('auto exits out of edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName);
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -61,13 +61,13 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('shows lose changes warning', function() {
-      describe('and loses changes on confirmation', function() {
-        beforeEach(async function() {
+    describe('shows lose changes warning', function () {
+      describe('and loses changes on confirmation', function () {
+        beforeEach(async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         });
 
-        it('when time changed is stored with dashboard', async function() {
+        it('when time changed is stored with dashboard', async function () {
           await PageObjects.timePicker.setDefaultDataRange();
 
           const originalTime = await PageObjects.timePicker.getTimeConfig();
@@ -92,7 +92,7 @@ export default function({ getService, getPageObjects }) {
           expect(newTime.end).to.equal(originalTime.end);
         });
 
-        it('when the query is edited and applied', async function() {
+        it('when the query is edited and applied', async function () {
           const originalQuery = await queryBar.getQueryString();
           await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
@@ -106,7 +106,7 @@ export default function({ getService, getPageObjects }) {
           expect(query).to.equal(originalQuery);
         });
 
-        it('when a filter is deleted', async function() {
+        it('when a filter is deleted', async function () {
           // This may seem like a pointless line but there was a bug that only arose when the dashboard
           // was loaded initially
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -129,14 +129,17 @@ export default function({ getService, getPageObjects }) {
           expect(hasFilter).to.be(true);
         });
 
-        it('when a new vis is added', async function() {
+        it('when a new vis is added', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.ensureAddPanelIsShowing();
           await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {
+            saveAsNew: false,
+            redirectToOrigin: true,
+          });
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
           // for this sleep see https://github.com/elastic/kibana/issues/22299
@@ -149,7 +152,7 @@ export default function({ getService, getPageObjects }) {
           expect(panelCount).to.eql(originalPanelCount);
         });
 
-        it('when an existing vis is added', async function() {
+        it('when an existing vis is added', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');
@@ -163,8 +166,8 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('and preserves edits on cancel', function() {
-        it('when time changed is stored with dashboard', async function() {
+      describe('and preserves edits on cancel', function () {
+        it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
@@ -193,8 +196,8 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('and preserves edits on cancel', function() {
-      it('when time changed is stored with dashboard', async function() {
+    describe('and preserves edits on cancel', function () {
+      it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.timePicker.setDefaultDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
@@ -219,8 +222,8 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('Does not show lose changes warning', function() {
-      it('when time changed is not stored with dashboard', async function() {
+    describe('Does not show lose changes warning', function () {
+      it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.switchToEditMode();
@@ -234,7 +237,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       // See https://github.com/elastic/kibana/issues/10110 - this is intentional.
-      it('when the query is edited but not applied', async function() {
+      it('when the query is edited but not applied', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await queryBar.getQueryString();

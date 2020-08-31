@@ -17,22 +17,19 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
 
   describe('actionType not enabled', () => {
     // loads action PREWRITTEN_ACTION_ID with actionType DISABLED_ACTION_TYPE
-    before(() => esArchiver.load('alerting'));
-    after(() => esArchiver.unload('alerting'));
+    before(() => esArchiver.load('actions'));
+    after(() => esArchiver.unload('actions'));
 
     it('should handle create action with disabled actionType request appropriately', async () => {
-      const response = await supertest
-        .post(`/api/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'My action',
-          actionTypeId: DISABLED_ACTION_TYPE,
-        });
+      const response = await supertest.post(`/api/actions/action`).set('kbn-xsrf', 'foo').send({
+        name: 'My action',
+        actionTypeId: DISABLED_ACTION_TYPE,
+      });
 
-      expect(response.statusCode).to.eql(400);
+      expect(response.status).to.eql(403);
       expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
+        statusCode: 403,
+        error: 'Forbidden',
         message:
           'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
@@ -40,57 +37,58 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
 
     it(`should handle execute request with disabled actionType appropriately`, async () => {
       const response = await supertest
-        .post(`/api/action/${PREWRITTEN_ACTION_ID}/_execute`)
+        .post(`/api/actions/action/${PREWRITTEN_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(403);
       expect(response.body).to.eql({
-        status: 'error',
-        retry: false,
-        actionId: PREWRITTEN_ACTION_ID,
+        statusCode: 403,
+        error: 'Forbidden',
         message:
           'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
     });
 
     it('should handle get action request with disabled actionType appropriately', async () => {
-      const response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
+      const response = await supertest.get(`/api/actions/action/${PREWRITTEN_ACTION_ID}`);
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         actionTypeId: 'test.not-enabled',
         config: {},
         id: 'uuid-actionId',
+        isPreconfigured: false,
         name: 'an action created before test.not-enabled was disabled',
       });
     });
 
     it('should handle update action request with disabled actionType appropriately', async () => {
       const responseUpdate = await supertest
-        .put(`/api/action/${PREWRITTEN_ACTION_ID}`)
+        .put(`/api/actions/action/${PREWRITTEN_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'an action created before test.not-enabled was disabled (updated)',
         });
 
-      expect(responseUpdate.statusCode).to.eql(200);
+      expect(responseUpdate.status).to.eql(403);
       expect(responseUpdate.body).to.eql({
-        actionTypeId: 'test.not-enabled',
-        config: {},
-        id: 'uuid-actionId',
-        name: 'an action created before test.not-enabled was disabled (updated)',
+        statusCode: 403,
+        error: 'Forbidden',
+        message:
+          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
 
-      const response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
-      expect(response.statusCode).to.eql(200);
+      const response = await supertest.get(`/api/actions/action/${PREWRITTEN_ACTION_ID}`);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         actionTypeId: 'test.not-enabled',
         config: {},
         id: 'uuid-actionId',
-        name: 'an action created before test.not-enabled was disabled (updated)',
+        isPreconfigured: false,
+        name: 'an action created before test.not-enabled was disabled',
       });
     });
 
@@ -98,12 +96,12 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
       let response;
 
       response = await supertest
-        .delete(`/api/action/${PREWRITTEN_ACTION_ID}`)
+        .delete(`/api/actions/action/${PREWRITTEN_ACTION_ID}`)
         .set('kbn-xsrf', 'foo');
-      expect(response.statusCode).to.eql(204);
+      expect(response.status).to.eql(204);
 
-      response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
-      expect(response.statusCode).to.eql(404);
+      response = await supertest.get(`/api/actions/action/${PREWRITTEN_ACTION_ID}`);
+      expect(response.status).to.eql(404);
     });
   });
 }

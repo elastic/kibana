@@ -7,35 +7,30 @@
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   kibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
-import { ConfigType } from '../../config';
+import { Session } from '../../session_management';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
-import {
-  elasticsearchServiceMock,
-  loggingServiceMock,
-  httpServiceMock,
-  httpServerMock,
-} from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authorizationMock } from '../../authorization/index.mock';
-import { authenticationMock } from '../../authentication/index.mock';
+import { sessionMock } from '../../session_management/session.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: RequestHandlerContext;
@@ -51,38 +46,26 @@ describe('Change password', () => {
   }
 
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    authc = authenticationMock.create();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
+    authc = routeParamsMock.authc;
+    session = routeParamsMock.session;
 
-    authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user' }));
+    authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-    authc.getSessionInfo.mockResolvedValue({
-      now: Date.now(),
-      idleTimeoutExpiration: null,
-      lifespanExpiration: null,
-      provider: 'basic',
-    });
+    session.get.mockResolvedValue(sessionMock.createValue());
 
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockClusterClient = routeParamsMock.clusterClient;
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
     mockContext = ({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
     } as unknown) as RequestHandlerContext;
 
-    defineChangeUserPasswordRoutes({
-      router,
-      clusterClient: mockClusterClient,
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineChangeUserPasswordRoutes(routeParamsMock);
 
     const [changePasswordRouteConfig, changePasswordRouteHandler] = router.post.mock.calls[0];
     routeConfig = changePasswordRouteConfig;
@@ -97,12 +80,12 @@ describe('Change password', () => {
       `"[username]: expected value of type [string] but got [undefined]"`
     );
     expect(() => paramsSchema.validate({ username: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value is [] but it must have a minimum length of [1]."`
+      `"[username]: value has length [0] but it must have a minimum length of [1]."`
     );
     expect(() =>
       paramsSchema.validate({ username: 'a'.repeat(1025) })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must have a maximum length of [1024]."`
+      `"[username]: value has length [1025] but it must have a maximum length of [1024]."`
     );
 
     const bodySchema = (routeConfig.validate as any).body as ObjectType;
@@ -110,12 +93,12 @@ describe('Change password', () => {
       `"[newPassword]: expected value of type [string] but got [undefined]"`
     );
     expect(() => bodySchema.validate({ newPassword: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[newPassword]: value is [] but it must have a minimum length of [1]."`
+      `"[newPassword]: value has length [0] but it must have a minimum length of [1]."`
     );
     expect(() =>
       bodySchema.validate({ newPassword: '123456', password: '' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[password]: value is [] but it must have a minimum length of [1]."`
+      `"[password]: value has length [0] but it must have a minimum length of [1]."`
     );
   });
 
@@ -203,7 +186,7 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { name: 'basic1' },
         value: { username, password: 'new-password' },
       });
     });
@@ -211,10 +194,13 @@ describe('Change password', () => {
     it('successfully changes own password if provided old password is correct for non-basic provider.', async () => {
       const mockUser = mockAuthenticatedUser({
         username: 'user',
-        authentication_provider: 'token',
+        authentication_provider: 'token1',
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
+      session.get.mockResolvedValue(
+        sessionMock.createValue({ provider: { type: 'token', name: 'token1' } })
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -230,13 +216,13 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'token',
+        provider: { name: 'token1' },
         value: { username, password: 'new-password' },
       });
     });
 
     it('successfully changes own password but does not re-login if current session does not exist.', async () => {
-      authc.getSessionInfo.mockResolvedValue(null);
+      session.get.mockResolvedValue(null);
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(204);

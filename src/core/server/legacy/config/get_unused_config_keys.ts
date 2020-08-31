@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { difference, get, set } from 'lodash';
-// @ts-ignore
+import { set } from '@elastic/safer-lodash-set';
+import { difference, get } from 'lodash';
+// @ts-expect-error
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset } from '../../../../legacy/utils';
 import { getFlattenedObject } from '../../../utils';
@@ -72,8 +73,8 @@ export async function getUnusedConfigKeys({
 
   // Filter out keys that are marked as used in the core (e.g. by new core plugins).
   return difference(inputKeys, appliedKeys).filter(
-    unusedConfigKey =>
-      !coreHandledConfigPaths.some(usedInCoreConfigKey =>
+    (unusedConfigKey) =>
+      !coreHandledConfigPaths.some((usedInCoreConfigKey) =>
         hasConfigPathIntersection(unusedConfigKey, usedInCoreConfigKey)
       )
   );

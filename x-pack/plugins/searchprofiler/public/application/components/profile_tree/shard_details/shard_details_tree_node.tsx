@@ -94,6 +94,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
             </EuiCodeBlock>
             <EuiLink
               type="button"
+              data-test-subj="viewShardDetails"
               onClick={() => highlight({ indexName: index.name, operation, shard })}
             >
               {i18n.translate('xpack.searchProfiler.profileTree.body.viewDetailsLabel', {

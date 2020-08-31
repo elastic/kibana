@@ -1,39 +1,39 @@
 [[set-time-filter]]
-== Setting the time filter
-If your index contains time-based events, and a time-field is configured for the 
+== Set the time filter
+If your index contains time-based events, and a time-field is configured for the
 selected <<index-patterns, index pattern>>, set a time filter that displays only the data within the
 specified time range.
 
-You can use the time filter to change the time range, or select a specific time 
+You can use the time filter to change the time range, or select a specific time
 range in the histogram.
 
 [float]
 [[use-time-filter]]
 === Use the time filter
 
-Use the time filter to change the time range. By default, the time filter is set 
+Use the time filter to change the time range. By default, the time filter is set
 to the last 15 minutes.
 
-. Click image:images/time-filter-calendar.png[]. 
+. Click image:images/time-filter-calendar.png[].
 
 . Choose one of the following:
 
-* *Quick select* to use a recent time range, then use the back and forward 
+* *Quick select* to use a recent time range, then use the back and forward
   arrows to move through the time ranges.
-  
-* *Commonly used* to use a time range from options such as *Last 15 minutes*, 
+
+* *Commonly used* to use a time range from options such as *Last 15 minutes*,
   *Today*, and *Week to date*.
-  
-* *Recently used date ranges* to use a previously selected data range that 
+
+* *Recently used date ranges* to use a previously selected data range that
   you recently used.
-  
+
 * *Refresh every* to specify an automatic refresh rate.
 +
 [role="screenshot"]
 image::images/Timepicker-View.png[Time filter menu]
 
-. To set the start and end times, click the bar next to the time filter. 
-In the popup, select *Absolute*, *Relative* or *Now*, then specify the required 
+. To set the start and end times, click the bar next to the time filter.
+In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
 options.
 +
 [role="screenshot"]
@@ -54,4 +54,3 @@ when you hover over a valid start point.
 
 [role="screenshot"]
 image::images/Histogram-Time.png[Time range selector in Histogram]
-

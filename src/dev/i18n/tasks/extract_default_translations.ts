@@ -30,7 +30,7 @@ export function extractDefaultMessages(config: I18nConfig, inputPaths: string[])
       )} None of input paths is covered by the mappings in .i18nrc.json.`
     );
   }
-  return filteredPaths.map(filteredPath => ({
+  return filteredPaths.map((filteredPath) => ({
     task: async (context: {
       messages: Map<string, { message: string }>;
       reporter: ErrorReporter;

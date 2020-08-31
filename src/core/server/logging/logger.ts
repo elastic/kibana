@@ -162,6 +162,7 @@ export class BaseLogger implements Logger {
         message: errorOrMessage.message,
         meta,
         timestamp: new Date(),
+        pid: process.pid,
       };
     }
 
@@ -171,6 +172,7 @@ export class BaseLogger implements Logger {
       message: errorOrMessage,
       meta,
       timestamp: new Date(),
+      pid: process.pid,
     };
   }
 }

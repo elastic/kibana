@@ -18,6 +18,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
@@ -32,19 +33,29 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       if (dom) {
-        dom.update();
+        await act(async () => {
+          dom.update();
+        });
       }
       setImmediate(() => resolve(dom)); // flushes any pending promises
     });
 };
 
-export const createAppMounter = (
-  appId: string,
-  html: string,
-  appRoute = `/app/${appId}`
-): MockedMounterTuple<App> => {
+export const createAppMounter = ({
+  appId,
+  html = `<div>App ${appId}</div>`,
+  appRoute = `/app/${appId}`,
+  exactRoute = false,
+  extraMountHook,
+}: {
+  appId: string;
+  html?: string;
+  appRoute?: string;
+  exactRoute?: boolean;
+  extraMountHook?: (params: AppMountParameters) => void;
+}): MockedMounterTuple<App> => {
   const unmount = jest.fn();
   return [
     appId,
@@ -52,11 +63,17 @@ export const createAppMounter = (
       mounter: {
         appRoute,
         appBasePath: appRoute,
-        mount: jest.fn(async ({ appBasePath: basename, element }: AppMountParameters) => {
+        legacy: false,
+        exactRoute,
+        mount: jest.fn(async (params: AppMountParameters) => {
+          const { appBasePath: basename, element } = params;
           Object.assign(element, {
             innerHTML: `<div>\nbasename: ${basename}\nhtml: ${html}\n</div>`,
           });
           unmount.mockImplementation(() => Object.assign(element, { innerHTML: '' }));
+          if (extraMountHook) {
+            extraMountHook(params);
+          }
           return unmount;
         }),
       },
@@ -75,6 +92,8 @@ export const createLegacyAppMounter = (
       appRoute: `/app/${appId.split(':')[0]}`,
       appBasePath: `/app/${appId.split(':')[0]}`,
       unmountBeforeMounting: true,
+      legacy: true,
+      exactRoute: false,
       mount: legacyMount,
     },
     unmount: jest.fn(),

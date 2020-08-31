@@ -1,0 +1,10 @@
+.spaceCard {
+  width: $euiSizeL * 10 !important; // sass-lint:disable-line no-important
+
+  min-height: $euiSize * 12.5; // 200px
+
+  // SASSTODO: Fix EuiCard to truncate or forcewrap long text
+  .euiCard__content {
+    overflow: hidden;
+  }
+}

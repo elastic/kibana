@@ -6,60 +6,61 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction } from './types';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
-  getBasePath: GetBasePathFunction;
+  isESOUsingEphemeralEncryptionKey: boolean;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ExecuteOptions {
   id: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   spaceId: string;
   apiKey: string | null;
 }
 
-export function createExecuteFunction({
-  getBasePath,
-  taskManager,
-  getScopedSavedObjectsClient,
-}: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
-    const requestHeaders: Record<string, string> = {};
+export type ExecutionEnqueuer = (
+  savedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions
+) => Promise<void>;
 
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
+export function createExecutionEnqueuerFunction({
+  taskManager,
+  actionTypeRegistry,
+  isESOUsingEphemeralEncryptionKey,
+  preconfiguredActions,
+}: CreateExecuteFunctionOptions) {
+  return async function execute(
+    savedObjectsClient: SavedObjectsClientContract,
+    { id, params, spaceId, apiKey }: ExecuteOptions
+  ) {
+    if (isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
     }
 
-    // Since we're using API keys and accessing elasticsearch can only be done
-    // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: any = {
-      headers: requestHeaders,
-      getBasePath: () => getBasePath(spaceId),
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
+    const actionTypeId = await getActionTypeId(id);
 
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get('action', id);
-    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
-      actionId: id,
-      params,
-      apiKey,
-    });
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
+    const actionTaskParamsRecord = await savedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: id,
+        params,
+        apiKey,
+      }
+    );
 
     await taskManager.schedule({
-      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      taskType: `actions:${actionTypeId}`,
       params: {
         spaceId,
         actionTaskParamsId: actionTaskParamsRecord.id,
@@ -67,5 +68,15 @@ export function createExecuteFunction({
       state: {},
       scope: ['actions'],
     });
+
+    async function getActionTypeId(actionId: string): Promise<string> {
+      const pcAction = preconfiguredActions.find((action) => action.id === actionId);
+      if (pcAction) {
+        return pcAction.actionTypeId;
+      }
+
+      const actionSO = await savedObjectsClient.get<RawAction>('action', actionId);
+      return actionSO.attributes.actionTypeId;
+    }
   };
 }

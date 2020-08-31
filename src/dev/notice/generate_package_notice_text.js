@@ -19,7 +19,7 @@
 
 import { getBundledNotices } from './bundled_notices';
 
-const concatNotices = notices => notices.map(notice => notice.text).join('\n');
+const concatNotices = (notices) => notices.map((notice) => notice.text).join('\n');
 
 export async function generatePackageNoticeText(pkg) {
   const bundledNotices = concatNotices(await getBundledNotices(pkg.directory));

@@ -34,7 +34,7 @@ export function TagCloudPageProvider({ getService, getPageObjects }: FtrProvider
     public async getTextTag() {
       await visChart.waitForVisualization();
       const elements = await find.allByCssSelector('text');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
     }
 
     public async getTextSizes() {

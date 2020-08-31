@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('runPipeline', function() {
+  describe('runPipeline', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -46,5 +46,6 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
     loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./esaggs'));
   });
 }

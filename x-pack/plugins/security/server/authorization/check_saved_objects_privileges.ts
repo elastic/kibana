@@ -6,32 +6,44 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
+import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './check_privileges';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest
 ) => CheckSavedObjectsPrivileges;
+
 export type CheckSavedObjectsPrivileges = (
   actions: string | string[],
-  namespace?: string
-) => Promise<CheckPrivilegesAtResourceResponse>;
+  namespaceOrNamespaces?: string | string[]
+) => Promise<CheckPrivilegesResponse>;
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   getSpacesService: () => SpacesService | undefined
 ): CheckSavedObjectsPrivilegesWithRequest => {
-  return function checkSavedObjectsPrivilegesWithRequest(request: KibanaRequest) {
+  return function checkSavedObjectsPrivilegesWithRequest(
+    request: KibanaRequest
+  ): CheckSavedObjectsPrivileges {
     return async function checkSavedObjectsPrivileges(
       actions: string | string[],
-      namespace?: string
+      namespaceOrNamespaces?: string | string[]
     ) {
       const spacesService = getSpacesService();
-      return spacesService
-        ? await checkPrivilegesWithRequest(request).atSpace(
-            spacesService.namespaceToSpaceId(namespace),
-            actions
-          )
-        : await checkPrivilegesWithRequest(request).globally(actions);
+      if (!spacesService) {
+        // Spaces disabled, authorizing globally
+        return await checkPrivilegesWithRequest(request).globally(actions);
+      } else if (Array.isArray(namespaceOrNamespaces)) {
+        // Spaces enabled, authorizing against multiple spaces
+        if (!namespaceOrNamespaces.length) {
+          throw new Error(`Can't check saved object privileges for 0 namespaces`);
+        }
+        const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
+        return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
+      } else {
+        // Spaces enabled, authorizing against a single space
+        const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
+        return await checkPrivilegesWithRequest(request).atSpace(spaceId, actions);
+      }
     };
   };
 };

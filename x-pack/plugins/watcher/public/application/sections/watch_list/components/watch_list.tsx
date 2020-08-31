@@ -43,11 +43,13 @@ import { useLoadWatches } from '../../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 import { useAppContext } from '../../../app_context';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
 export const WatchList = () => {
   // hooks
   const {
-    chrome,
-    MANAGEMENT_BREADCRUMB,
+    setBreadcrumbs,
+    history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [selection, setSelection] = useState([]);
@@ -57,8 +59,8 @@ export const WatchList = () => {
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
-  }, [chrome, MANAGEMENT_BREADCRUMB]);
+    setBreadcrumbs([listBreadcrumb]);
+  }, [setBreadcrumbs]);
 
   const { isLoading: isWatchesLoading, data: watches, error } = useLoadWatches(
     REFRESH_INTERVALS.WATCH_LIST
@@ -227,7 +229,7 @@ export const WatchList = () => {
             defaultMessage="Error loading watches"
           />
         }
-        error={error as Error}
+        error={(error as unknown) as Error}
       />
     );
   } else if (availableWatches) {
@@ -243,7 +245,7 @@ export const WatchList = () => {
           return (
             <EuiLink
               data-test-subj={`watchIdColumn-${id}`}
-              href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
+              {...reactRouterNavigate(history, `/watches/watch/${id}/status`)}
             >
               {id}
             </EuiLink>
@@ -327,7 +329,7 @@ export const WatchList = () => {
                     )}
                     iconType="pencil"
                     color="primary"
-                    href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`}
+                    {...reactRouterNavigate(history, `/watches/watch/${watch.id}/edit`)}
                     data-test-subj="editWatchButton"
                   />
                 </EuiToolTip>
@@ -381,27 +383,28 @@ export const WatchList = () => {
       box: {
         incremental: true,
       },
-      toolsLeft: selection.length && (
-        <EuiButton
-          data-test-subj="btnDeleteWatches"
-          onClick={() => {
-            setWatchesToDelete(selection.map((selected: any) => selected.id));
-          }}
-          color="danger"
-        >
-          {selection.length > 1 ? (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-              defaultMessage="Delete watches"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-              defaultMessage="Delete watch"
-            />
-          )}
-        </EuiButton>
-      ),
+      toolsLeft:
+        selection.length > 0 ? (
+          <EuiButton
+            data-test-subj="btnDeleteWatches"
+            onClick={() => {
+              setWatchesToDelete(selection.map((selected: any) => selected.id));
+            }}
+            color="danger"
+          >
+            {selection.length > 1 ? (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                defaultMessage="Delete watches"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                defaultMessage="Delete watch"
+              />
+            )}
+          </EuiButton>
+        ) : undefined,
       toolsRight: createWatchContextMenu,
     };
 

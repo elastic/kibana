@@ -30,18 +30,22 @@ const INSPECTING =
 const urlPartsSchema = () =>
   Joi.object()
     .keys({
-      protocol: Joi.string()
-        .valid('http', 'https')
-        .default('http'),
-      hostname: Joi.string()
-        .hostname()
-        .default('localhost'),
+      protocol: Joi.string().valid('http', 'https').default('http'),
+      hostname: Joi.string().hostname().default('localhost'),
       port: Joi.number(),
       auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
       username: Joi.string(),
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
+      ssl: Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(false),
+          certificate: Joi.string().optional(),
+          certificateAuthorities: Joi.string().optional(),
+          key: Joi.string().optional(),
+        })
+        .default(),
     })
     .default();
 
@@ -53,6 +57,27 @@ const appUrlPartsSchema = () =>
     })
     .default();
 
+const requiredWhenEnabled = (schema: Joi.Schema) => {
+  return Joi.when('enabled', {
+    is: true,
+    then: schema.required(),
+    otherwise: schema.optional(),
+  });
+};
+
+const dockerServerSchema = () =>
+  Joi.object()
+    .keys({
+      enabled: Joi.boolean().required(),
+      image: requiredWhenEnabled(Joi.string()),
+      port: requiredWhenEnabled(Joi.number()),
+      portInContainer: requiredWhenEnabled(Joi.number()),
+      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitFor: Joi.func().optional(),
+      args: Joi.array().items(Joi.string()).optional(),
+    })
+    .default();
+
 const defaultRelativeToConfigPath = (path: string) => {
   const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
   makeDefault.description = `<config.js directory>/${path}`;
@@ -61,36 +86,26 @@ const defaultRelativeToConfigPath = (path: string) => {
 
 export const schema = Joi.object()
   .keys({
-    testFiles: Joi.array()
-      .items(Joi.string())
-      .when('$primary', {
-        is: true,
-        then: Joi.required(),
-        otherwise: Joi.any().default([]),
-      }),
+    testFiles: Joi.array().items(Joi.string()),
+    testRunner: Joi.func(),
 
-    excludeTestFiles: Joi.array()
-      .items(Joi.string())
-      .default([]),
-
-    suiteTags: Joi.object()
+    suiteFiles: Joi.object()
       .keys({
-        include: Joi.array()
-          .items(Joi.string())
-          .default([]),
-        exclude: Joi.array()
-          .items(Joi.string())
-          .default([]),
+        include: Joi.array().items(Joi.string()).default([]),
+        exclude: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
 
-    services: Joi.object()
-      .pattern(ID_PATTERN, Joi.func().required())
+    suiteTags: Joi.object()
+      .keys({
+        include: Joi.array().items(Joi.string()).default([]),
+        exclude: Joi.array().items(Joi.string()).default([]),
+      })
       .default(),
 
-    pageObjects: Joi.object()
-      .pattern(ID_PATTERN, Joi.func().required())
-      .default(),
+    services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
+
+    pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     timeouts: Joi.object()
       .keys({
@@ -133,11 +148,10 @@ export const schema = Joi.object()
 
     browser: Joi.object()
       .keys({
-        type: Joi.string()
-          .valid('chrome', 'firefox', 'ie')
-          .default('chrome'),
+        type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
+        acceptInsecureCerts: Joi.boolean().default(false),
       })
       .default(),
 
@@ -208,9 +222,7 @@ export const schema = Joi.object()
       .default(),
 
     // definition of apps that work with `common.navigateToApp()`
-    apps: Joi.object()
-      .pattern(ID_PATTERN, appUrlPartsSchema())
-      .default(),
+    apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
     // settings for the esArchiver module
     esArchiver: Joi.object()
@@ -253,5 +265,22 @@ export const schema = Joi.object()
         fixedHeaderHeight: Joi.number().default(50),
       })
       .default(),
+
+    // settings for the security service if there is no defaultRole defined, then default to superuser role.
+    security: Joi.object()
+      .keys({
+        roles: Joi.object().default(),
+        defaultRoles: Joi.array()
+          .items(Joi.string())
+          .when('$primary', {
+            is: true,
+            then: Joi.array().min(1),
+          })
+          .default(['superuser']),
+        disableTestUser: Joi.boolean(),
+      })
+      .default(),
+
+    dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
   })
   .default();

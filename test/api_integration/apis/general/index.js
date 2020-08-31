@@ -17,10 +17,9 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('general', () => {
     loadTestFile(require.resolve('./cookies'));
     loadTestFile(require.resolve('./csp'));
-    loadTestFile(require.resolve('./prototype_pollution'));
   });
 }

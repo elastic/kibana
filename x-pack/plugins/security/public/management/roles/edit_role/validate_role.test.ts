@@ -62,7 +62,7 @@ describe('validateRoleName', () => {
   });
 
   const charList = `!#%^&*()+=[]{}\|';:"/,<>?`.split('');
-  charList.forEach(element => {
+  charList.forEach((element) => {
     test(`it cannot support the "${element}" character`, () => {
       const role = {
         name: `role-${element}`,

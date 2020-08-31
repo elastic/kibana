@@ -1,7 +1,9 @@
 {
   "id": "management",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": ["kibana_legacy"]
+  "requiredPlugins": ["kibanaLegacy"],
+  "optionalPlugins": ["home"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
 }

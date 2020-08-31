@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ClusterClient } from 'src/core/server';
+import { Logger, LegacyClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
+import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 export interface EsContext {
   logger: Logger;
   esNames: EsNames;
+  esAdapter: IClusterClientAdapter;
   initialize(): void;
   waitTillReady(): Promise<boolean>;
-  callEs(operation: string, body?: any): Promise<any>;
+  initialized: boolean;
 }
 
 export interface EsError {
@@ -31,23 +33,26 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient: EsClusterClient;
+  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
 }
 
 class EsContextImpl implements EsContext {
   public readonly logger: Logger;
   public readonly esNames: EsNames;
-  private readonly clusterClient: EsClusterClient;
+  public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
-  private initialized: boolean;
+  public initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
     this.esNames = getEsNames(params.indexNameRoot);
-    this.clusterClient = params.clusterClient;
     this.readySignal = createReadySignal();
     this.initialized = false;
+    this.esAdapter = new ClusterClientAdapter({
+      logger: params.logger,
+      clusterClientPromise: params.clusterClientPromise,
+    });
   }
 
   initialize() {
@@ -59,9 +64,9 @@ class EsContextImpl implements EsContext {
 
     setImmediate(async () => {
       try {
-        await this._initialize();
-        this.logger.debug('readySignal.signal(true)');
-        this.readySignal.signal(true);
+        const success = await this._initialize();
+        this.logger.debug(`readySignal.signal(${success})`);
+        this.readySignal.signal(success);
       } catch (err) {
         this.logger.debug('readySignal.signal(false)');
         this.readySignal.signal(false);
@@ -69,31 +74,13 @@ class EsContextImpl implements EsContext {
     });
   }
 
+  // waits till the ES initialization is done, returns true if it was successful,
+  // false if it was not successful
   async waitTillReady(): Promise<boolean> {
     return await this.readySignal.wait();
   }
 
-  async callEs(operation: string, body?: any): Promise<any> {
-    try {
-      this.debug(`callEs(${operation}) calls:`, body);
-      const result = await this.clusterClient.callAsInternalUser(operation, body);
-      this.debug(`callEs(${operation}) result:`, result);
-      return result;
-    } catch (err) {
-      this.debug(`callEs(${operation}) error:`, {
-        message: err.message,
-        statusCode: err.statusCode,
-      });
-      throw err;
-    }
-  }
-
-  private async _initialize() {
-    await initializeEs(this);
-  }
-
-  private debug(message: string, object?: any) {
-    const objectString = object == null ? '' : JSON.stringify(object);
-    this.logger.debug(`esContext: ${message} ${objectString}`);
+  private async _initialize(): Promise<boolean> {
+    return await initializeEs(this);
   }
 }

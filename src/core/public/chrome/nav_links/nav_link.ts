@@ -45,6 +45,12 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
+   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
+   * If unset, `baseUrl` will be used instead.
+   */
+  readonly url?: string;
+
+  /**
    * An ordinal used to sort nav links relative to one another for display.
    */
   readonly order?: number;
@@ -56,7 +62,7 @@ export interface ChromeNavLink {
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   readonly euiIconType?: string;
 
@@ -65,6 +71,14 @@ export interface ChromeNavLink {
    * if `euiIconType` is not provided.
    */
   readonly icon?: string;
+
+  /**
+   * Settled state between `url`, `baseUrl`, and `active`
+   *
+   * @internalRemarks
+   * This should be required once legacy apps are gone.
+   */
+  readonly href?: string;
 
   /** LEGACY FIELDS */
 
@@ -98,18 +112,6 @@ export interface ChromeNavLink {
    * @deprecated
    */
   readonly linkToLastSubUrl?: boolean;
-
-  /**
-   * A url that legacy apps can set to deep link into their applications.
-   *
-   * @internalRemarks
-   * Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
-   * be removed once the ApplicationService is implemented and mounting apps. At that
-   * time, each app can handle opening to the previous location when they are mounted.
-   *
-   * @deprecated
-   */
-  readonly url?: string;
 
   /**
    * Indicates whether or not this app is currently on the screen.
@@ -150,7 +152,7 @@ export interface ChromeNavLink {
 
 /** @public */
 export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
+  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -168,7 +170,7 @@ export class NavLinkWrapper {
 
   public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
+    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

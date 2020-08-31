@@ -37,6 +37,7 @@ export function awsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.awsLogs.nameTitle', {
       defaultMessage: 'AWS S3 based logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.awsLogs.shortDescription', {
       defaultMessage: 'Collect AWS logs from S3 bucket with Filebeat.',
@@ -65,7 +66,7 @@ export function awsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/aws_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/aws_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

@@ -28,7 +28,6 @@ import '../private';
 import '../promises';
 import '../directives/storage';
 import '../directives/watch_multi';
-import './services';
 import '../react_components';
 import '../i18n';
 
@@ -80,14 +79,8 @@ initChromeThemeApi(chrome);
 
 npStart.core.chrome.setAppTitle(chrome.getAppTitle());
 
-const waitForBootstrap = new Promise(resolve => {
-  chrome.bootstrap = function(targetDomElement) {
-    // import chrome nav controls and hacks now so that they are executed after
-    // everything else, can safely import the chrome, and interact with services
-    // and such setup by all other modules
-    require('uiExports/chromeNavControls');
-    require('uiExports/hacks');
-
+const waitForBootstrap = new Promise((resolve) => {
+  chrome.bootstrap = function (targetDomElement) {
     // sets attribute on body for stylesheet sandboxing
     document.body.setAttribute('id', `${internals.app.id}-app`);
 
@@ -115,7 +108,7 @@ const waitForBootstrap = new Promise(resolve => {
  * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then(targetDomElement => {
+  return waitForBootstrap.then((targetDomElement) => {
     const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
       return Promise.reject('targetDomElement had no angular context after bootstrapping');

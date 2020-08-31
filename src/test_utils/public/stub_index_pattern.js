@@ -22,14 +22,14 @@ import sinon from 'sinon';
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
-import { FieldList, IndexPattern, indexPatterns, KBN_FIELD_TYPES } from '../../plugins/data/public';
+import { IndexPattern, indexPatterns, KBN_FIELD_TYPES, FieldList } from '../../plugins/data/public';
 
 import { setFieldFormats } from '../../plugins/data/public/services';
 
 setFieldFormats({
   getDefaultInstance: () => ({
-    getConverterFor: () => value => value,
-    convert: value => JSON.stringify(value),
+    getConverterFor: () => (value) => value,
+    convert: (value) => JSON.stringify(value),
   }),
 });
 
@@ -50,7 +50,6 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.getSourceFiltering = sinon.stub();
   this.metaFields = ['_id', '_type', '_source'];
   this.fieldFormatMap = {};
-  this.routes = indexPatterns.getRoutes();
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
@@ -60,12 +59,15 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   );
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
+  this.getFormatterForField = () => ({
+    convert: () => '',
+  });
 
-  this._reindexFields = function() {
-    this.fields = new FieldList(this, this.fields || fields);
+  this._reindexFields = function () {
+    this.fields = new FieldList(this, this.fields || fields, false);
   };
 
-  this.stubSetFieldFormat = function(fieldName, id, params) {
+  this.stubSetFieldFormat = function (fieldName, id, params) {
     const FieldFormat = registeredFieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();

@@ -32,9 +32,4 @@ module.exports = babelJest.createTransformer({
       },
     ],
   ],
-  plugins: [
-    // enables jest to parse and execute dynamic import() calls
-    '@babel/plugin-syntax-dynamic-import',
-    'dynamic-import-node',
-  ],
 });

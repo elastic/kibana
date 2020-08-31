@@ -47,6 +47,25 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
   }
 }
 
+export async function unwrapPromise<T, E>(future: Promise<Result<T, E>>): Promise<T> {
+  return future
+    .catch(
+      // catch rejection as we expect the result of the rejected promise
+      // to be wrapped in a Result - sadly there's no way to "Type" this
+      // requirment in Typescript as Promises do not enfore a type on their
+      // rejection
+      // The `then` will then unwrap the Result from around `ex` for us
+      (ex: Err<E>) => ex
+    )
+    .then((result: Result<T, E>) =>
+      map(
+        result,
+        (value: T) => Promise.resolve(value),
+        (err: E) => Promise.reject(err)
+      )
+    );
+}
+
 export function unwrap<T, E>(result: Result<T, E>): T | E {
   return isOk(result) ? result.value : result.error;
 }
@@ -76,7 +95,7 @@ export function map<T, E, Resolution>(
   return isOk(result) ? onOk(result.value) : onErr(result.error);
 }
 
-export const mapR = curry(function<T, E, Resolution>(
+export const mapR = curry(function <T, E, Resolution>(
   onOk: (value: T) => Resolution,
   onErr: (error: E) => Resolution,
   result: Result<T, E>
@@ -84,14 +103,14 @@ export const mapR = curry(function<T, E, Resolution>(
   return map(result, onOk, onErr);
 });
 
-export const mapOk = curry(function<T, T2, E>(
+export const mapOk = curry(function <T, T2, E>(
   onOk: (value: T) => Result<T2, E>,
   result: Result<T, E>
 ): Result<T2, E> {
   return isOk(result) ? onOk(result.value) : result;
 });
 
-export const mapErr = curry(function<T, E, E2>(
+export const mapErr = curry(function <T, E, E2>(
   onErr: (error: E) => Result<T, E2>,
   result: Result<T, E>
 ): Result<T, E2> {

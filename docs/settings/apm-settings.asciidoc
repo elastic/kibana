@@ -5,11 +5,14 @@
 <titleabbrev>APM settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the APM app. It is enabled by default.
+These settings allow the APM app to function, and specify the data that it surfaces.
+Unless you've customized your setup,
+you do not need to configure any settings to use the APM app.
+It is enabled by default.
 
 [float]
 [[apm-indices-settings-kb]]
-==== APM Indices
+==== APM indices
 
 // This content is reused in the APM app documentation.
 // Any changes made in this file will be seen there as well.
@@ -32,30 +35,48 @@ image::settings/images/apm-settings.png[APM app settings in Kibana]
 // tag::general-apm-settings[]
 
 If you'd like to change any of the default values,
-copy and paste the relevant settings below into your `kibana.yml` configuration file.
+copy and paste the relevant settings into your `kibana.yml` configuration file.
+Changing these settings may disable features of the APM App.
 
-xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
-`true`.
+[cols="2*<"]
+|===
+| `xpack.apm.enabled`
+  | Set to `false` to disable the APM app. Defaults to `true`.
 
-xpack.apm.ui.enabled:: Set to `false` to hide the APM plugin {kib} from the menu. Defaults to
-`true`.
+| `xpack.apm.ui.enabled` {ess-icon}
+  | Set to `false` to hide the APM app from the menu. Defaults to `true`.
 
-xpack.apm.ui.transactionGroupBucketSize:: Number of top transaction groups displayed in APM plugin in Kibana. Defaults to `100`.
+| `xpack.apm.ui.transactionGroupBucketSize`
+  | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
 
-xpack.apm.ui.maxTraceItems:: Max number of child items displayed when viewing trace details. Defaults to `1000`.
+| `xpack.apm.ui.maxTraceItems` {ess-icon}
+  | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
-apm_oss.indexPattern:: Index pattern is used for integrations with Machine Learning and Kuery Bar. It must match all apm indices. Defaults to `apm-*`.
+| `xpack.observability.annotations.index`
+  | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
-apm_oss.errorIndices:: Matcher for indices containing error documents. Defaults to `apm-*`.
+| `apm_oss.indexPattern` {ess-icon}
+  | The index pattern used for integrations with Machine Learning and Query Bar.
+  It must match all apm indices. Defaults to `apm-*`.
 
-apm_oss.onboardingIndices:: Matcher for indices containing onboarding documents. Defaults to `apm-*`.
+| `apm_oss.errorIndices` {ess-icon}
+  | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `apm-*`.
 
-apm_oss.spanIndices:: Matcher for indices containing span documents. Defaults to `apm-*`.
+| `apm_oss.onboardingIndices`
+  | Matcher for all onboarding indices. Defaults to `apm-*`.
 
-apm_oss.transactionIndices:: Matcher for indices containing transaction documents. Defaults to `apm-*`.
+| `apm_oss.spanIndices` {ess-icon}
+  | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
 
-apm_oss.metricsIndices:: Matcher for indices containing metric documents. Defaults to `apm-*`.
+| `apm_oss.transactionIndices` {ess-icon}
+  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
 
-apm_oss.sourcemapIndices:: Matcher for indices containing sourcemap documents. Defaults to `apm-*`.
+| `apm_oss.metricsIndices`
+  | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `apm-*`.
+
+| `apm_oss.sourcemapIndices`
+  | Matcher for all {apm-server-ref}/sourcemap-indices.html[source map indices]. Defaults to `apm-*`.
+
+|===
 
 // end::general-apm-settings[]

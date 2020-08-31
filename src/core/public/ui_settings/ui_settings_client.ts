@@ -21,14 +21,14 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
 
 interface UiSettingsClientParams {
   api: UiSettingsApi;
-  defaults: Record<string, UiSettingsParams>;
+  defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
 }
@@ -39,8 +39,8 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
-  private readonly defaults: Record<string, UiSettingsParams>;
-  private cache: Record<string, UiSettingsParams & UserProvidedValues>;
+  private readonly defaults: Record<string, PublicUiSettingsParams>;
+  private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
@@ -97,7 +97,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return concat(
       defer(() => of(this.get(key, defaultOverride))),
       this.update$.pipe(
-        filter(update => update.key === key),
+        filter((update) => update.key === key),
         map(() => this.get(key, defaultOverride))
       )
     );

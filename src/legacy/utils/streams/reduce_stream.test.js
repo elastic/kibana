@@ -20,7 +20,7 @@
 import { createReduceStream, createPromiseFromStreams, createListStream } from './';
 
 const promiseFromEvent = (name, emitter) =>
-  new Promise(resolve => emitter.on(name, () => resolve(name)));
+  new Promise((resolve) => emitter.on(name, () => resolve(name)));
 
 describe('reduceStream', () => {
   test('calls the reducer for each item provided', async () => {
@@ -41,7 +41,7 @@ describe('reduceStream', () => {
   test('provides the return value of the last iteration of the reducer', async () => {
     const result = await createPromiseFromStreams([
       createListStream('abcdefg'.split('')),
-      createReduceStream(acc => acc + 1, 0),
+      createReduceStream((acc) => acc + 1, 0),
     ]);
     expect(result).toBe(7);
   });

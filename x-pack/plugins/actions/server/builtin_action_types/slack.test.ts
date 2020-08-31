@@ -4,26 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '../../../../../src/core/server';
+import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType } from './slack';
-import { configUtilsMock } from '../actions_config.mock';
+import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
+import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
+import { createActionTypeRegistry } from './index.test';
+
+jest.mock('@slack/webhook', () => {
+  return {
+    IncomingWebhook: jest.fn().mockImplementation(() => {
+      return { send: (message: string) => {} };
+    }),
+  };
+});
 
 const ACTION_TYPE_ID = '.slack';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: SlackActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
+  const { logger } = createActionTypeRegistry();
   actionType = getActionType({
-    async executor(options: ActionTypeExecutorOptions): Promise<any> {},
-    configurationUtilities: configUtilsMock,
+    async executor(options) {
+      return { status: 'ok', actionId: options.actionId };
+    },
+    configurationUtilities: actionsConfigMock.create(),
+    logger,
   });
+  mockedLogger = logger;
+  expect(actionType).toBeTruthy();
 });
 
 describe('action registeration', () => {
@@ -74,13 +88,20 @@ describe('validateActionTypeSecrets()', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
+
+    expect(() => {
+      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+    );
   });
 
-  test('should validate and pass when the slack webhookUrl is whitelisted', () => {
+  test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
-        ensureWhitelistedUri: url => {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://api.slack.com/');
         },
       },
@@ -91,12 +112,13 @@ describe('validateActionTypeSecrets()', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
-        ensureWhitelistedUri: url => {
-          throw new Error(`target url is not whitelisted`);
+        ...actionsConfigMock.create(),
+        ensureHostnameAllowed: () => {
+          throw new Error(`target hostname is not added to allowedHosts`);
         },
       },
     });
@@ -104,14 +126,14 @@ describe('validateActionTypeSecrets()', () => {
     expect(() => {
       validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target url is not whitelisted"`
+      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
     );
   });
 });
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
+    async function mockSlackExecutor(options: SlackActionTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
       if (message == null) throw new Error('message property required in parameter');
@@ -124,12 +146,15 @@ describe('execute()', () => {
 
       return {
         text: `slack mockExecutor success: ${message}`,
-      };
+        actionId: '',
+        status: 'ok',
+      } as ActionTypeExecutorResult<void>;
     }
 
     actionType = getActionType({
       executor: mockSlackExecutor,
-      configurationUtilities: configUtilsMock,
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
     });
   });
 
@@ -140,12 +165,18 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
+      proxySettings: {
+        proxyUrl: 'https://someproxyhost',
+        rejectUnauthorizedCertificates: false,
+      },
     });
     expect(response).toMatchInlineSnapshot(`
-Object {
-  "text": "slack mockExecutor success: this invocation should succeed",
-}
-`);
+      Object {
+        "actionId": "",
+        "status": "ok",
+        "text": "slack mockExecutor success: this invocation should succeed",
+      }
+    `);
   });
 
   test('calls the mock executor with failure', async () => {
@@ -159,6 +190,27 @@ Object {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
+    );
+  });
+
+  test('calls the mock executor with success proxy', async () => {
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+      proxySettings: {
+        proxyUrl: 'https://someproxyhost',
+        rejectUnauthorizedCertificates: false,
+      },
+    });
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
     );
   });
 });

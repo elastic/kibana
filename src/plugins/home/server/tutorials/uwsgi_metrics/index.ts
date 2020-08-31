@@ -36,6 +36,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.uwsgiMetrics.nameTitle', {
       defaultMessage: 'uWSGI metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uwsgiMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the uWSGI server.',
@@ -48,7 +49,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
       },
     }),
-    // euiIconType: 'logouWSGI',
+    euiIconType: '/plugins/home/assets/logos/uwsgi.svg',
     isBeta: false,
     artifacts: {
       dashboards: [
@@ -65,7 +66,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/uwsgi_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/uwsgi_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

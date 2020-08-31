@@ -13,7 +13,7 @@ import { createSessionTimeoutMock } from './session_timeout.mock';
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 const setupHttp = (basePath: string) => {
-  const { http } = setup(injectedMetadata => {
+  const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
   return http;

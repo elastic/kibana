@@ -39,7 +39,7 @@ describe('createMapStream()', () => {
   test('send the return value from the mapper on the output stream', async () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createMapStream(n => n * 100),
+      createMapStream((n) => n * 100),
       createConcatStream([]),
     ]);
 

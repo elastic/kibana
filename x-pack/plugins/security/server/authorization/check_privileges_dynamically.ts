@@ -6,11 +6,11 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
+import { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './check_privileges';
 
 export type CheckPrivilegesDynamically = (
   privilegeOrPrivileges: string | string[]
-) => Promise<CheckPrivilegesAtResourceResponse>;
+) => Promise<CheckPrivilegesResponse>;
 
 export type CheckPrivilegesDynamicallyWithRequest = (
   request: KibanaRequest

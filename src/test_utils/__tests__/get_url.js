@@ -20,8 +20,8 @@
 import expect from '@kbn/expect';
 import getUrl from '../get_url';
 
-describe('getUrl', function() {
-  it('should convert to a url', function() {
+describe('getUrl', function () {
+  it('should convert to a url', function () {
     const url = getUrl(
       {
         protocol: 'http',
@@ -35,7 +35,7 @@ describe('getUrl', function() {
     expect(url).to.be('http://localhost/foo');
   });
 
-  it('should convert to a url with port', function() {
+  it('should convert to a url with port', function () {
     const url = getUrl(
       {
         protocol: 'http',
@@ -50,7 +50,7 @@ describe('getUrl', function() {
     expect(url).to.be('http://localhost:9220/foo');
   });
 
-  it('should convert to a secure hashed url', function() {
+  it('should convert to a secure hashed url', function () {
     expect(
       getUrl(
         {

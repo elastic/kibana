@@ -86,6 +86,12 @@ import { stanMetricsSpecProvider } from './stan_metrics';
 import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 import { ibmmqMetricsSpecProvider } from './ibmmq_metrics';
 import { statsdMetricsSpecProvider } from './statsd_metrics';
+import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
+import { openmetricsMetricsSpecProvider } from './openmetrics_metrics';
+import { oracleMetricsSpecProvider } from './oracle_metrics';
+import { iisMetricsSpecProvider } from './iis_metrics';
+import { azureLogsSpecProvider } from './azure_logs';
+import { googlecloudMetricsSpecProvider } from './googlecloud_metrics';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -158,4 +164,10 @@ export const builtInTutorials = [
   stanMetricsSpecProvider,
   envoyproxyMetricsSpecProvider,
   statsdMetricsSpecProvider,
+  redisenterpriseMetricsSpecProvider,
+  openmetricsMetricsSpecProvider,
+  oracleMetricsSpecProvider,
+  iisMetricsSpecProvider,
+  azureLogsSpecProvider,
+  googlecloudMetricsSpecProvider,
 ];

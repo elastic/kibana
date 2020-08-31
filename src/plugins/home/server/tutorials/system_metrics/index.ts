@@ -36,6 +36,7 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.systemMetrics.nameTitle', {
       defaultMessage: 'System metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.systemMetrics.shortDescription', {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
@@ -49,6 +50,7 @@ It collects system wide statistics and statistics per process and filesystem. \
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-system.html',
       },
     }),
+    euiIconType: '/plugins/home/assets/logos/system.svg',
     artifacts: {
       dashboards: [
         {
@@ -64,7 +66,7 @@ It collects system wide statistics and statistics per process and filesystem. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/system_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

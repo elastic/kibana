@@ -36,6 +36,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.couchdbMetrics.nameTitle', {
       defaultMessage: 'CouchDB metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchdbMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CouchdB server.',
@@ -48,7 +49,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchdb.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/couchdb.svg',
+    euiIconType: '/plugins/home/assets/logos/couchdb.svg',
     artifacts: {
       dashboards: [
         {
@@ -67,7 +68,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/couchdb_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/couchdb_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

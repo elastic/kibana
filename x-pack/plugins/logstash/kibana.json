@@ -1,0 +1,18 @@
+{
+  "id": "logstash",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "logstash"],
+  "requiredPlugins": [
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "home",
+    "monitoring",
+    "security"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["home"]
+}

@@ -49,7 +49,7 @@ class KuiTabsExample extends React.Component {
     };
   }
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });

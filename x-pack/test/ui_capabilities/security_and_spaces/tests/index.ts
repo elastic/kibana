@@ -14,7 +14,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
   const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
-  describe('ui capabilities', function() {
+  describe('ui capabilities', function () {
     this.tags('ciGroup9');
 
     before(async () => {
@@ -34,7 +34,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {

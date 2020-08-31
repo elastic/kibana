@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
+import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
+import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+  getWebhookServer,
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -27,15 +32,17 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   async function createWebhookAction(
-    urlWithCreds: string,
-    config: Record<string, string | Record<string, string>> = {}
+    webhookSimulatorURL: string,
+    config: Record<string, string | Record<string, string>> = {},
+    kibanaUrlWithCreds: string
   ): Promise<string> {
-    const { url: fullUrl, user, password } = extractCredentialsFromUrl(urlWithCreds);
-    const url = config.url && typeof config.url === 'object' ? parsePort(config.url) : fullUrl;
+    const { user, password } = extractCredentialsFromUrl(kibanaUrlWithCreds);
+    const url =
+      config.url && typeof config.url === 'object' ? parsePort(config.url) : webhookSimulatorURL;
     const composedConfig = {
       headers: {
         'Content-Type': 'text/plain',
@@ -45,7 +52,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     };
 
     const { body: createdAction } = await supertest
-      .post('/api/action')
+      .post('/api/actions/action')
       .set('kbn-xsrf', 'test')
       .send({
         name: 'A generic Webhook action',
@@ -62,20 +69,35 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook action', () => {
-    let webhookSimulatorURL: string = '<could not determine kibana url>';
+    let webhookSimulatorURL: string = '';
+    let webhookServer: http.Server;
+    let kibanaURL: string = '<could not determine kibana url>';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
-    before(() => {
-      webhookSimulatorURL = kibanaServer.resolveUrl(
+    before(async () => {
+      webhookServer = await getWebhookServer();
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      webhookServer.listen(availablePort);
+      webhookSimulatorURL = `http://localhost:${availablePort}`;
+
+      kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
+
+      proxyServer = await getHttpProxyServer(
+        webhookSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
-
     it('should return 200 when creating a webhook action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
@@ -92,6 +114,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
@@ -103,11 +126,12 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
+        .get(`/api/actions/action/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
@@ -118,9 +142,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     });
 
     it('should send authentication to the webhook target', async () => {
-      const webhookActionId = await createWebhookAction(webhookSimulatorURL);
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -133,9 +157,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     });
 
     it('should support the POST method against webhook target', async () => {
-      const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'post' });
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'post' },
+        kibanaURL
+      );
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -148,9 +176,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     });
 
     it('should support the PUT method against webhook target', async () => {
-      const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'put' });
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'put' },
+        kibanaURL
+      );
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -159,12 +191,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result.status).to.eql('ok');
     });
 
-    it('should handle target webhooks that are not whitelisted', async () => {
+    it('should handle target webhooks that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
@@ -174,19 +207,23 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             password: 'mypassphrase',
           },
           config: {
-            url: 'http://a.none.whitelisted.webhook/endpoint',
+            url: 'http://a.none.allowedHosts.webhook/endpoint',
           },
         })
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
+      expect(result.message).to.match(/is not added to the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {
-      const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
+      const webhookActionId = await createWebhookAction(
+        'http://some.non.existent.com/endpoint',
+        {},
+        kibanaURL
+      );
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -196,13 +233,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, unexpected error/);
+      expect(result.message).to.match(/error calling webhook, retry later/);
     });
 
     it('should handle failing webhook targets', async () => {
-      const webhookActionId = await createWebhookAction(webhookSimulatorURL);
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -212,8 +249,15 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, invalid response/);
-      expect(result.serviceMessage).to.eql('[400] Bad Request');
+      expect(result.message).to.match(/error calling webhook, retry later/);
+      expect(result.serviceMessage).to.eql('[500] Internal Server Error');
+    });
+
+    after(() => {
+      webhookServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }

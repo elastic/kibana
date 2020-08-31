@@ -69,7 +69,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         disabledFeatures: [],
       },
     ];
-    expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
+    expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
   };
 
   const makeGetTest = (describeFn: DescribeFn) => (

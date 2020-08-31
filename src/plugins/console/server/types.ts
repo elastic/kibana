@@ -25,6 +25,11 @@ export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Prom
   ? U
   : ReturnType<ConsoleServerPlugin['setup']>;
 
+/** @public */
+export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
+  ? U
+  : ReturnType<ConsoleServerPlugin['start']>;
+
 /** @internal */
 export interface ESConfigForProxy {
   hosts: string[];
@@ -33,8 +38,8 @@ export interface ESConfigForProxy {
   requestTimeout: Duration;
   ssl?: {
     verificationMode: 'none' | 'certificate' | 'full';
-    certificateAuthorities: string[] | string;
     alwaysPresentCertificate: boolean;
+    certificateAuthorities?: string[];
     certificate?: string;
     key?: string;
     keyPassphrase?: string;

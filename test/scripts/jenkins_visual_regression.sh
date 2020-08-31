@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-source test/scripts/jenkins_test_setup_xpack.sh
+source src/dev/ci_setup/setup_env.sh
 source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
-checks-reporter-with-killswitch "Kibana visual regression tests" \
-  yarn run percy exec -t 500 \
+echo " -> building and extracting OSS Kibana distributable for use in functional tests"
+node scripts/build --debug --oss
+linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+installDir="$PARENT_DIR/install/kibana"
+mkdir -p "$installDir"
+tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
+echo " -> running visual regression tests from kibana directory"
+yarn percy exec -t 10000 -- -- \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$installDir" \

@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -21,17 +19,16 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('tsvb integration', function() {
+  describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
     const rollupSourceIndexName = 'rollup-source-data';
     const rollupTargetIndexName = `rollup-target-data`;
-    const now = new Date();
     const pastDates = [
-      datemath.parse('now-1m', { forceNow: now }),
-      datemath.parse('now-2m', { forceNow: now }),
-      datemath.parse('now-3m', { forceNow: now }),
+      new Date('October 15, 2019 05:35:32'),
+      new Date('October 15, 2019 05:34:32'),
+      new Date('October 15, 2019 05:33:32'),
     ];
 
     before(async () => {
@@ -70,17 +67,19 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
-      await PageObjects.timePicker.openQuickSelectTimeMenu();
-      await testSubjects.click('superDatePickerCommonlyUsed_Last_24 hours');
       await PageObjects.visualBuilder.clickMetric();
       await PageObjects.visualBuilder.checkMetricTabIsPresent();
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Oct 15, 2019 @ 00:00:01.000',
+        'Oct 15, 2019 @ 19:31:44.000'
+      );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
       await PageObjects.visualBuilder.setIntervalValue('1d');

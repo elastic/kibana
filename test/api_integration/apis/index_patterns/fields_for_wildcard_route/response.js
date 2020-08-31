@@ -20,11 +20,11 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  const ensureFieldsAreSorted = resp => {
+  const ensureFieldsAreSorted = (resp) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 

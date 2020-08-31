@@ -21,11 +21,21 @@ import { PluginInitializerContext } from 'kibana/public';
 
 export {
   FeatureCatalogueSetup,
-  FeatureCatalogueStart,
+  EnvironmentSetup,
+  TutorialSetup,
   HomePublicPluginSetup,
-  HomePublicPluginStart,
 } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
+export {
+  FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
+  FeatureCatalogueCategory,
+  Environment,
+  TutorialVariables,
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+  TutorialModuleNoticeComponent,
+} from './services';
+export * from '../common/instruction_variant';
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

@@ -19,6 +19,7 @@
 
 import 'jquery';
 import 'angular';
+// required for `ngSanitize` angular module
 import 'angular-sanitize';
 import 'ui-select/dist/select';
 

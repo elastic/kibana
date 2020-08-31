@@ -58,7 +58,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
     setIsDeleteInProgress(true);
 
     try {
-      result = await roleMappingsAPI.deleteRoleMappings(roleMappings.map(rm => rm.name));
+      result = await roleMappingsAPI.deleteRoleMappings(roleMappings.map((rm) => rm.name));
     } catch (e) {
       notifications.toasts.addError(e, {
         title: i18n.translate(
@@ -76,8 +76,8 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
 
     closeModal();
 
-    const successfulDeletes = result.filter(res => res.success);
-    const erroredDeletes = result.filter(res => !res.success);
+    const successfulDeletes = result.filter((res) => res.success);
+    const erroredDeletes = result.filter((res) => !res.success);
 
     // Surface success notifications
     if (successfulDeletes.length > 0) {

@@ -67,7 +67,7 @@ describe('timeShift(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = timeShift(resp, panel, series)(results => results);
+    const next = timeShift(resp, panel, series)((results) => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
     expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');

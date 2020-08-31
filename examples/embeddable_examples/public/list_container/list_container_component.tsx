@@ -24,30 +24,35 @@ import {
   withEmbeddableSubscription,
   ContainerInput,
   ContainerOutput,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import { EmbeddableListItem } from './embeddable_list_item';
 
 interface Props {
   embeddable: IContainer;
   input: ContainerInput;
   output: ContainerOutput;
+  embeddableServices: EmbeddableStart;
 }
 
-function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
+function renderList(
+  embeddable: IContainer,
+  panels: ContainerInput['panels'],
+  embeddableServices: EmbeddableStart
+) {
   let number = 0;
-  const list = Object.values(panels).map(panel => {
+  const list = Object.values(panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     number++;
     return (
       <EuiPanel key={number.toString()}>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText>
               <h3>{number}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EmbeddableListItem embeddable={child} />
+            <embeddableServices.EmbeddablePanel embeddable={child} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -56,12 +61,12 @@ function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
   return list;
 }
 
-export function ListContainerComponentInner(props: Props) {
+export function ListContainerComponentInner({ embeddable, input, embeddableServices }: Props) {
   return (
     <div>
-      <h2 data-test-subj="listContainerTitle">{props.embeddable.getTitle()}</h2>
+      <h2 data-test-subj="listContainerTitle">{embeddable.getTitle()}</h2>
       <EuiSpacer size="l" />
-      {renderList(props.embeddable, props.input.panels)}
+      {renderList(embeddable, input.panels, embeddableServices)}
     </div>
   );
 }
@@ -71,4 +76,9 @@ export function ListContainerComponentInner(props: Props) {
 // anything on input or output state changes.  If you don't want that to happen (for example
 // if you expect something on input or output state to change frequently that your react
 // component does not care about, then you should probably hook this up manually).
-export const ListContainerComponent = withEmbeddableSubscription(ListContainerComponentInner);
+export const ListContainerComponent = withEmbeddableSubscription<
+  ContainerInput,
+  ContainerOutput,
+  IContainer,
+  { embeddableServices: EmbeddableStart }
+>(ListContainerComponentInner);

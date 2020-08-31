@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { capitalize, isFunction } from 'lodash';
+import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
+import { EuiButton } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -39,24 +40,30 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     props.run(e.currentTarget);
   }
 
-  const btn = (
-    <EuiButtonEmpty
-      size="xs"
-      isDisabled={isDisabled()}
-      onClick={handleClick}
-      data-test-subj={props.testId}
-      className={props.className}
-    >
-      {capitalize(props.label || props.id!)}
+  const commonButtonProps = {
+    isDisabled: isDisabled(),
+    onClick: handleClick,
+    iconType: props.iconType,
+    iconSide: props.iconSide,
+    'data-test-subj': props.testId,
+    className: props.className,
+  };
+
+  const btn = props.emphasize ? (
+    <EuiButton {...commonButtonProps} size="s" fill>
+      {upperFirst(props.label || props.id!)}
+    </EuiButton>
+  ) : (
+    <EuiButtonEmpty {...commonButtonProps} size="xs">
+      {upperFirst(props.label || props.id!)}
     </EuiButtonEmpty>
   );
 
   const tooltip = getTooltip();
   if (tooltip) {
     return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
-  } else {
-    return btn;
   }
+  return btn;
 }
 
 TopNavMenuItem.defaultProps = {

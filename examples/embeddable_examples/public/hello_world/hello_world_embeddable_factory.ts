@@ -21,11 +21,13 @@ import { i18n } from '@kbn/i18n';
 import {
   IContainer,
   EmbeddableInput,
+  EmbeddableFactoryDefinition,
   EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
 
-export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
+export type HelloWorldEmbeddableFactory = EmbeddableFactory;
+export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 
   /**
@@ -33,7 +35,7 @@ export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
    * embeddables should check the UI Capabilities service to be sure of
    * the right permissions.
    */
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

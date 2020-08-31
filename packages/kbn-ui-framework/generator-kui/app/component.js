@@ -39,7 +39,7 @@ module.exports = class extends Generator {
           },
         ],
       },
-    ]).then(answers => {
+    ]).then((answers) => {
       this.config = answers;
     });
   }

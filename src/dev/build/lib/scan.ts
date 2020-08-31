@@ -50,7 +50,7 @@ export function scan$(directory: string) {
     return Rx.concat(
       [path],
       getStat$(path).pipe(
-        mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+        mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
         mergeMap(getPaths$)
       )
     );

@@ -7,14 +7,14 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
+import { LocationDescriptorObject } from 'history';
 import {
-  chromeServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
+  scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
 import { LicenseStatus } from '../../../common/types/license_status';
 
@@ -28,11 +28,16 @@ class MockTimeBuckets {
     };
   }
 }
+
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+});
+
 export const mockContextValue = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
-  chrome: chromeServiceMock.createStartContract(),
-  MANAGEMENT_BREADCRUMB: { text: 'test' },
+  setBreadcrumbs: jest.fn(),
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
@@ -41,6 +46,8 @@ export const mockContextValue = {
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
+  history,
+  getUrlForApp: jest.fn(),
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {

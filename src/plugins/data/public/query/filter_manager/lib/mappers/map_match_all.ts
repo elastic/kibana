@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../../common';
+import { Filter, isMatchAllFilter, FILTERS } from '../../../../../common';
 
-export const mapMatchAll = (filter: esFilters.Filter) => {
-  if (esFilters.isMatchAllFilter(filter)) {
+export const mapMatchAll = (filter: Filter) => {
+  if (isMatchAllFilter(filter)) {
     return {
-      type: esFilters.FILTERS.MATCH_ALL,
+      type: FILTERS.MATCH_ALL,
       key: filter.meta.field,
       value: filter.meta.formattedValue || 'all',
     };

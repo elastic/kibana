@@ -19,13 +19,20 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const retry = getService('retry');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
+  const TEST_COLUMN_NAMES = ['@message'];
+  const TEST_FILTER_COLUMN_NAMES = [
+    ['extension', 'jpg'],
+    ['geo.src', 'IN'],
+  ];
 
   describe('Discover', () => {
     before(async () => {
@@ -57,8 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // skipping the test for new because we can't fix it right now
-    it.skip('Click on new to clear the search', async () => {
+    it('Click on new to clear the search', async () => {
       await PageObjects.discover.clickNewSearchButton();
       await a11y.testAppSnapshot();
     });
@@ -94,7 +100,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // unable to validate on EUI pop-over
     it('click share button', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
@@ -109,5 +114,36 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.closeSidebarFieldFilter();
       await a11y.testAppSnapshot();
     });
+
+    it('Add a field from sidebar', async () => {
+      for (const columnName of TEST_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItemAdd(columnName);
+      }
+      await a11y.testAppSnapshot();
+    });
+
+    it('Add more fields from sidebar', async () => {
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+      }
+      await a11y.testAppSnapshot();
+    });
+
+    // Context view test
+    it('should open context view on a doc', async () => {
+      await retry.try(async () => {
+        await docTable.clickRowToggle();
+        // click the open action
+        const rowActions = await docTable.getRowActions();
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[0].click();
+      });
+      await a11y.testAppSnapshot();
+    });
+
+    // Adding rest of the tests after https://github.com/elastic/kibana/issues/53888 is resolved
   });
 }

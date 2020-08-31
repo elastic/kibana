@@ -54,21 +54,23 @@ export interface TodosSelectors {
 }
 
 export const pureTransitions: TodoActions = {
-  add: state => todo => ({ todos: [...state.todos, todo] }),
-  edit: state => todo => ({
-    todos: state.todos.map(item => (item.id === todo.id ? { ...item, ...todo } : item)),
+  add: (state) => (todo) => ({ todos: [...state.todos, todo] }),
+  edit: (state) => (todo) => ({
+    todos: state.todos.map((item) => (item.id === todo.id ? { ...item, ...todo } : item)),
   }),
-  delete: state => id => ({ todos: state.todos.filter(item => item.id !== id) }),
-  complete: state => id => ({
-    todos: state.todos.map(item => (item.id === id ? { ...item, completed: true } : item)),
+  delete: (state) => (id) => ({ todos: state.todos.filter((item) => item.id !== id) }),
+  complete: (state) => (id) => ({
+    todos: state.todos.map((item) => (item.id === id ? { ...item, completed: true } : item)),
   }),
-  completeAll: state => () => ({ todos: state.todos.map(item => ({ ...item, completed: true })) }),
-  clearCompleted: state => () => ({ todos: state.todos.filter(({ completed }) => !completed) }),
+  completeAll: (state) => () => ({
+    todos: state.todos.map((item) => ({ ...item, completed: true })),
+  }),
+  clearCompleted: (state) => () => ({ todos: state.todos.filter(({ completed }) => !completed) }),
 };
 
 export const pureSelectors: TodosSelectors = {
-  todos: state => () => state.todos,
-  todo: state => id => state.todos.find(todo => todo.id === id) ?? null,
+  todos: (state) => () => state.todos,
+  todo: (state) => (id) => state.todos.find((todo) => todo.id === id) ?? null,
 };
 
 const container = createStateContainer<TodoState, TodoActions, TodosSelectors>(

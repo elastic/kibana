@@ -45,7 +45,7 @@ export const MultiSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) 
       <EuiSelectable
         allowExclusions={false}
         height={300}
-        onChange={options => {
+        onChange={(options) => {
           field.setValue(options);
         }}
         options={field.value as any[]}

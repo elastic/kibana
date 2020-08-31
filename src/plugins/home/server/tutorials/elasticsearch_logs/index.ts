@@ -37,6 +37,7 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.elasticsearchLogs.nameTitle', {
       defaultMessage: 'Elasticsearch logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
@@ -56,7 +57,7 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
         label: i18n.translate('home.tutorials.elasticsearchLogs.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

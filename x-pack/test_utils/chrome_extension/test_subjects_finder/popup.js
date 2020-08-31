@@ -14,7 +14,7 @@
 // };
 
 const isTrackingTestSubjects = () =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     chrome.tabs.executeScript(
       undefined,
       { code: '(() => Boolean(window.__test_utils__ && window.__test_utils__.isTracking))()' },
@@ -59,26 +59,26 @@ chrome.storage.sync.get(
       depthInput.value = depth;
     }
 
-    document.querySelectorAll('#outputTypeSelect option').forEach(node => {
+    document.querySelectorAll('#outputTypeSelect option').forEach((node) => {
       if (node.value === outputType) {
         node.setAttribute('selected', 'selected');
       }
     });
 
     // FORM events
-    domRootInput.addEventListener('change', e => {
+    domRootInput.addEventListener('change', (e) => {
       const { value } = e.target;
       chrome.storage.sync.set({ domTreeRoot: value });
     });
 
-    depthInput.addEventListener('change', e => {
+    depthInput.addEventListener('change', (e) => {
       const { value } = e.target;
       if (value) {
         chrome.storage.sync.set({ depth: value });
       }
     });
 
-    outputTypeSelect.addEventListener('change', e => {
+    outputTypeSelect.addEventListener('change', (e) => {
       const { value } = e.target;
       chrome.storage.sync.set({ outputType: value });
     });
@@ -97,7 +97,7 @@ chrome.storage.sync.get(
   }
 );
 
-chrome.runtime.onMessage.addListener(request => {
+chrome.runtime.onMessage.addListener((request) => {
   if (request === 'TRACK_SUBJECTS_ERROR') {
     onStopTracking();
   }

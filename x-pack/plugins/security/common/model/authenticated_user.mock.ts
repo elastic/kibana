@@ -15,7 +15,8 @@ export function mockAuthenticatedUser(user: Partial<AuthenticatedUser> = {}) {
     enabled: true,
     authentication_realm: { name: 'native1', type: 'native' },
     lookup_realm: { name: 'native1', type: 'native' },
-    authentication_provider: 'basic',
+    authentication_provider: 'basic1',
+    authentication_type: 'realm',
     ...user,
   };
 }

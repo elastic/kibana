@@ -17,41 +17,55 @@
  * under the License.
  */
 
-import { KibanaMigrator } from './kibana_migrator';
+import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
-import { SavedObjectsMapping } from '../../mappings';
-const { mergeProperties } = jest.requireActual('./kibana_migrator');
+const { mergeTypes } = jest.requireActual('./kibana_migrator');
+import { SavedObjectsType } from '../../types';
+import { BehaviorSubject } from 'rxjs';
 
-const defaultSavedObjectMappings = [
+const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
-    pluginId: 'testplugin',
-    properties: {
-      testtype: {
-        properties: {
-          name: { type: 'keyword' },
-        },
+    name: 'testtype',
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
       },
     },
+    migrations: {},
   },
 ];
 
 const createMigrator = (
   {
-    savedObjectMappings,
+    types,
   }: {
-    savedObjectMappings: SavedObjectsMapping[];
-  } = { savedObjectMappings: defaultSavedObjectMappings }
+    types: SavedObjectsType[];
+  } = { types: defaultSavedObjectTypes }
 ) => {
   const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),
+    getStatus$: jest.fn(
+      () =>
+        new BehaviorSubject<KibanaMigratorStatus>({
+          status: 'completed',
+          result: [
+            {
+              status: 'migrated',
+              destIndex: '.test-kibana_2',
+              sourceIndex: '.test-kibana_1',
+              elapsedMs: 10,
+            },
+          ],
+        })
+    ),
   };
 
-  mockMigrator.getActiveMappings.mockReturnValue(
-    buildActiveMappings({ properties: mergeProperties(savedObjectMappings) })
-  );
-  mockMigrator.migrateDocument.mockImplementation(doc => doc);
+  mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
+  mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
 };
 

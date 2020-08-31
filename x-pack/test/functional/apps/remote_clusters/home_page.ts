@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'remoteClusters']);
 
-  describe('Home page', function() {
-    this.tags('smoke');
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('remoteClusters');
     });

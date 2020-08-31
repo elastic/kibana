@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`icon should use vector icon 1`] = `
+<div
+  data-euiicon-type="vector"
+  size="m"
+/>
+`;

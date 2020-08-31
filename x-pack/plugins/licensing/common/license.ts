@@ -9,7 +9,7 @@ import {
   LicenseType,
   ILicense,
   LicenseStatus,
-  LICENSE_CHECK_STATE,
+  LicenseCheck,
   LICENSE_TYPE,
   PublicLicenseJSON,
   PublicLicense,
@@ -98,10 +98,10 @@ export class License implements ILicense {
     return LICENSE_TYPE[minimumLicenseRequired] <= LICENSE_TYPE[type];
   }
 
-  check(pluginName: string, minimumLicenseRequired: LicenseType) {
+  check(pluginName: string, minimumLicenseRequired: LicenseType): LicenseCheck {
     if (!this.isAvailable) {
       return {
-        state: LICENSE_CHECK_STATE.Unavailable,
+        state: 'unavailable',
         message: i18n.translate('xpack.licensing.check.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
@@ -112,7 +112,7 @@ export class License implements ILicense {
 
     if (!this.isActive) {
       return {
-        state: LICENSE_CHECK_STATE.Expired,
+        state: 'expired',
         message: i18n.translate('xpack.licensing.check.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
@@ -123,7 +123,7 @@ export class License implements ILicense {
 
     if (!this.hasAtLeast(minimumLicenseRequired)) {
       return {
-        state: LICENSE_CHECK_STATE.Invalid,
+        state: 'invalid',
         message: i18n.translate('xpack.licensing.check.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
@@ -132,7 +132,7 @@ export class License implements ILicense {
       };
     }
 
-    return { state: LICENSE_CHECK_STATE.Valid };
+    return { state: 'valid' };
   }
 
   getFeature(name: string) {

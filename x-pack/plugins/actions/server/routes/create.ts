@@ -13,8 +13,8 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { ActionResult } from '../types';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -23,30 +23,37 @@ export const bodySchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-export const createActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const createActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `/api/action`,
+      path: `${BASE_ACTION_API_PATH}/action`,
       validate: {
         body: bodySchema,
       },
-      options: {
-        tags: ['access:actions-all'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
+      req: KibanaRequest<unknown, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
 
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const action = req.body;
-      const actionRes: ActionResult = await actionsClient.create({ action });
-      return res.ok({
-        body: actionRes,
-      });
+      try {
+        const actionRes: ActionResult = await actionsClient.create({ action });
+        return res.ok({
+          body: actionRes,
+        });
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

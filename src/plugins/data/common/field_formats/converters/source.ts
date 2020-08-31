@@ -18,12 +18,29 @@
  */
 
 import { template, escape, keys } from 'lodash';
-// @ts-ignore
-import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { UI_SETTINGS } from '../../constants';
+
+/**
+ * Remove all of the whitespace between html tags
+ * so that inline elements don't have extra spaces.
+ *
+ * If you have inline elements (span, a, em, etc.) and any
+ * amount of whitespace around them in your markup, then the
+ * browser will push them apart. This is ugly in certain
+ * scenarios and is only fixed by removing the whitespace
+ * from the html in the first place (or ugly css hacks).
+ *
+ * @param  {string} html - the html to modify
+ * @return {string} - modified html
+ */
+function noWhiteSpace(html: string) {
+  const TAGS_WITH_WS = />\s+</g;
+  return html.replace(TAGS_WITH_WS, '><');
+}
 
 const templateHtml = `
   <dl class="source truncate-by-height">
@@ -40,7 +57,7 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = value => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
 
   htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
     const { field, hit } = options;
@@ -55,9 +72,9 @@ export class SourceFormat extends FieldFormat {
     const formatted = field.indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
-    const isShortDots = this.getConfig!('shortDots:enable');
+    const isShortDots = this.getConfig!(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
-    keys(formatted).forEach(key => {
+    keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const newField = isShortDots ? shortenDottedString(key) : key;
       const val = formatted[key];

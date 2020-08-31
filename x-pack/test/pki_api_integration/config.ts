@@ -6,12 +6,11 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-// @ts-ignore
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),
@@ -28,6 +27,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis')],
     servers,
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack PKI API Integration Tests',

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { updateActionRoute } from './update';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -19,32 +20,25 @@ beforeEach(() => {
 
 describe('updateActionRoute', () => {
   it('updates an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     updateActionRoute(router, licenseState);
 
     const [config, handler] = router.put.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-all",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
 
     const updateResult = {
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -85,8 +79,8 @@ describe('updateActionRoute', () => {
   });
 
   it('ensures the license allows deleting actions', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     updateActionRoute(router, licenseState);
 
@@ -97,11 +91,11 @@ describe('updateActionRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -124,8 +118,8 @@ describe('updateActionRoute', () => {
   });
 
   it('ensures the license check prevents deleting actions', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -140,11 +134,11 @@ describe('updateActionRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -164,5 +158,26 @@ describe('updateActionRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the action type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateActionRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

@@ -47,10 +47,13 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     cwd: directory,
     nodir: true,
     ignore: [
-      '{node_modules,build,target,dist,data,built_assets}/**',
-      'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,data}/**',
-      'x-pack/packages/*/{node_modules,build,target,dist}/**',
+      '{node_modules,build,dist,data,built_assets}/**',
+      'packages/*/{node_modules,build,dist}/**',
+      'src/plugins/*/{node_modules,build,dist}/**',
+      'x-pack/{node_modules,build,dist,data}/**',
+      'x-pack/packages/*/{node_modules,build,dist}/**',
+      'x-pack/plugins/*/{node_modules,build,dist}/**',
+      '**/target/**',
     ],
   };
 
@@ -62,7 +65,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
   const noticeComments: string[] = [];
   await new Promise((resolve, reject) => {
     files
-      .on('data', file => {
+      .on('data', (file) => {
         log.verbose(`Checking for @notice comments in ${file.relative}`);
 
         const source = file.contents.toString('utf8');
@@ -86,7 +89,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     noticeText += '\n---\n';
     noticeText += comment
       .split(NEWLINE_RE)
-      .map(line =>
+      .map((line) =>
         line
           // trim whitespace
           .trim()

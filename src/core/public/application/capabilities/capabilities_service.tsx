@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { Capabilities } from '../../../types/capabilities';
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze } from '../../../utils';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
@@ -37,8 +38,7 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
-    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
-    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+    const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
       body: JSON.stringify({ applications: appIds }),
     });
 

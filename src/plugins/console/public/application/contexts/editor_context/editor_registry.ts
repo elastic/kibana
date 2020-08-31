@@ -20,7 +20,7 @@
 import { SenseEditor } from '../../models/sense_editor';
 
 export class EditorRegistry {
-  inputEditor: SenseEditor | undefined;
+  private inputEditor: SenseEditor | undefined;
 
   setInputEditor(inputEditor: SenseEditor) {
     this.inputEditor = inputEditor;

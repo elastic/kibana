@@ -12,7 +12,7 @@ Elasticsearch will run with a basic license. To run with a trial license, includ
 
 Example: `yarn es snapshot --license trial --password changeme`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana` user which `elasticsearch.username` defaults to in development. If you wish to specific a password for a given native realm account, you can do that like so: `--password.kibana=notsecure`
+By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
 ## Running specific tests
@@ -25,8 +25,8 @@ Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
     `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
   - Run the x-pack api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
-    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
+    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts`
+    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
 
 In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
 
@@ -44,26 +44,18 @@ If you want to run tests only for a specific plugin (to save some time), you can
 yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc.
 ```
 
-#### Debugging browser tests
-```
-yarn test:browser:dev
-```
-Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
-
-Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
-
 #### Running server unit tests
-You can run server-side unit tests by running:
+You can run mocha unit tests by running:
 
 ```
-yarn test:server
+yarn test:mocha
 ```
 
 #### Running functional tests
 
 For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
 
-The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
+The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.ts)).
 
 The script runs all sets of tests sequentially like so:
 * builds Elasticsearch and X-Pack

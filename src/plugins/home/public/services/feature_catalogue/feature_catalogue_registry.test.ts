@@ -21,6 +21,7 @@ import {
   FeatureCatalogueRegistry,
   FeatureCatalogueCategory,
   FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
 } from './feature_catalogue_registry';
 
 const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
@@ -33,13 +34,30 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   category: FeatureCatalogueCategory.DATA,
 };
 
+const KIBANA_SOLUTION: FeatureCatalogueSolution = {
+  id: 'kibana',
+  title: 'Kibana',
+  subtitle: 'Visualize & analyze',
+  descriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
+  icon: 'kibanaApp',
+  path: `/app/home`,
+};
+
 describe('FeatureCatalogueRegistry', () => {
   describe('setup', () => {
-    test('throws when registering duplicate id', () => {
+    test('throws when registering a feature with a duplicate id', () => {
       const setup = new FeatureCatalogueRegistry().setup();
       setup.register(DASHBOARD_FEATURE);
       expect(() => setup.register(DASHBOARD_FEATURE)).toThrowErrorMatchingInlineSnapshot(
         `"Feature with id [dashboard] has already been registered. Use a unique id."`
+      );
+    });
+
+    test('throws when registering a solution with a duplicate id', () => {
+      const setup = new FeatureCatalogueRegistry().setup();
+      setup.registerSolution(KIBANA_SOLUTION);
+      expect(() => setup.registerSolution(KIBANA_SOLUTION)).toThrowErrorMatchingInlineSnapshot(
+        `"Solution with id [kibana] has already been registered. Use a unique id."`
       );
     });
   });
@@ -50,21 +68,24 @@ describe('FeatureCatalogueRegistry', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: {} } as any;
-        expect(service.start({ capabilities }).get()).toEqual([DASHBOARD_FEATURE]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
       });
 
       test('retains items with true in capabilities', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: true } } as any;
-        expect(service.start({ capabilities }).get()).toEqual([DASHBOARD_FEATURE]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
       });
 
       test('removes items with false in capabilities', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: false } } as any;
-        expect(service.start({ capabilities }).get()).toEqual([]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([]);
       });
     });
   });
@@ -77,7 +98,8 @@ describe('FeatureCatalogueRegistry', () => {
       setup.register({ id: '2', title: 'Apple' } as any);
       setup.register({ id: '3', title: 'Banana' } as any);
       const capabilities = { catalogue: {} } as any;
-      expect(service.start({ capabilities }).get()).toEqual([
+      service.start({ capabilities });
+      expect(service.get()).toEqual([
         { id: '2', title: 'Apple' },
         { id: '3', title: 'Banana' },
         { id: '1', title: 'Orange' },

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function() {
+  describe('discover app', function () {
     this.tags('ciGroup6');
 
-    before(function() {
+    before(function () {
       return browser.setWindowSize(1300, 800);
     });
 
@@ -35,6 +35,8 @@ export default function({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_histogram'));
+    loadTestFile(require.resolve('./_doc_table'));
+    loadTestFile(require.resolve('./_field_visualize'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
@@ -46,5 +48,6 @@ export default function({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_doc_navigation'));
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));
+    loadTestFile(require.resolve('./_indexpattern_without_timefield'));
   });
 }

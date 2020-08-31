@@ -15,8 +15,8 @@ export default function alertingApiIntegrationTests({
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  describe('alerting api integration spaces only', function() {
-    this.tags('ciGroup1');
+  describe('alerting api integration spaces only', function () {
+    this.tags('ciGroup9');
 
     before(async () => {
       for (const space of Object.values(Spaces)) {
@@ -27,7 +27,7 @@ export default function alertingApiIntegrationTests({
       }
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
+    after(async () => await esArchiver.unload('empty_kibana'));
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));

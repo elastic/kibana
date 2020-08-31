@@ -35,11 +35,11 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
   _config[CONFIG_PATH] = settings;
   const migrated = applyDeprecations(
     _config,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,
@@ -227,7 +227,7 @@ describe('throws when config is invalid', () => {
   beforeAll(() => {
     const realFs = jest.requireActual('fs');
     mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-    const utils = jest.requireActual('../../utils');
+    const utils = jest.requireActual('../utils');
     mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
       utils.readPkcs12Keystore(path, password)
     );
@@ -315,12 +315,21 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana\\" user instead.",
+        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
       ]
     `);
   });
 
-  it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+  it('logs a warning if elasticsearch.username is set to "kibana"', () => {
+    const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+      ]
+    `);
+  });
+
+  it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'otheruser' });
     expect(messages).toHaveLength(0);
   });
@@ -358,6 +367,8 @@ test('#username throws if equal to "elastic", only while running from source', (
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingSnapshot();
+  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
+    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
+  );
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });

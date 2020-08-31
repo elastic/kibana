@@ -37,7 +37,8 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.envoyproxyLogs.nameTitle', {
       defaultMessage: 'Envoyproxy',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.envoyproxyLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
     }),
@@ -50,13 +51,13 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
       },
     }),
-    // euiIconType: 'logoCisco',
+    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.envoyproxyLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {
@@ -64,7 +65,7 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/envoyproxy_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/envoyproxy_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

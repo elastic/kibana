@@ -23,13 +23,14 @@ import {
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
 } from './filterable_embeddable';
-import { EmbeddableFactory } from '../../embeddables';
+import { EmbeddableFactoryDefinition } from '../../embeddables';
 import { IContainer } from '../../containers';
 
-export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmbeddableInput> {
+export class FilterableEmbeddableFactory
+  implements EmbeddableFactoryDefinition<FilterableEmbeddableInput> {
   public readonly type = FILTERABLE_EMBEDDABLE;
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

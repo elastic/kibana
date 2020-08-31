@@ -16,22 +16,70 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { VisualizationsSetup, VisualizationsStart } from '.';
 
-export type Setup = jest.Mocked<VisualizationsSetup>;
-export type Start = jest.Mocked<VisualizationsStart>;
+import { PluginInitializerContext } from '../../../core/public';
+import { VisualizationsSetup, VisualizationsStart } from './';
+import { VisualizationsPlugin } from './plugin';
+import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
+import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
+import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
+import { dataPluginMock } from '../../../plugins/data/public/mocks';
+import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
+import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
+import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 
-const createSetupContract = (): Setup => {
-  const setupContract: Setup = undefined;
-  return setupContract;
+const createSetupContract = (): VisualizationsSetup => ({
+  createBaseVisualization: jest.fn(),
+  createReactVisualization: jest.fn(),
+  registerAlias: jest.fn(),
+  hideTypes: jest.fn(),
+});
+
+const createStartContract = (): VisualizationsStart => ({
+  get: jest.fn(),
+  all: jest.fn(),
+  getAliases: jest.fn(),
+  savedVisualizationsLoader: {
+    get: jest.fn(),
+  } as any,
+  showNewVisModal: jest.fn(),
+  createVis: jest.fn(),
+  convertFromSerializedVis: jest.fn(),
+  convertToSerializedVis: jest.fn(),
+  __LEGACY: {
+    createVisEmbeddableFromObject: jest.fn(),
+  },
+});
+
+const createInstance = async () => {
+  const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
+
+  const setup = plugin.setup(coreMock.createSetup(), {
+    data: dataPluginMock.createSetupContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
+    inspector: inspectorPluginMock.createSetupContract(),
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+  });
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      data: dataPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
+      application: applicationServiceMock.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
+    });
+
+  return {
+    plugin,
+    setup,
+    doStart,
+  };
 };
 
-const createStartContract = (): Start => {
-  const startContract: Start = undefined;
-  return startContract;
-};
-
-export const expressionsPluginMock = {
+export const visualizationsPluginMock = {
   createSetupContract,
   createStartContract,
+  createInstance,
 };

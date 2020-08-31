@@ -8,26 +8,29 @@ import { flatten } from 'lodash';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
 import { getAutocompleteService } from '../../../services';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+} from '../../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values
-    .filter(value => value.toLowerCase().includes(query.toLowerCase()))
-    .map(value => ({
-      type: autocomplete.QuerySuggestionsTypes.Value,
+    .filter((value) => value.toLowerCase().includes(query.toLowerCase()))
+    .map((value) => ({
+      type: QuerySuggestionTypes.Value,
       text: `${value} `,
       start,
       end,
     }));
 
-export const setupGetValueSuggestions: KqlQuerySuggestionProvider = core => {
+export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (core) => {
   return async (
     { indexPatterns, boolFilter, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
-  ): Promise<autocomplete.QuerySuggestion[]> => {
+  ): Promise<QuerySuggestion[]> => {
     const allFields = flatten(
-      indexPatterns.map(indexPattern =>
-        indexPattern.fields.map(field => ({
+      indexPatterns.map((indexPattern) =>
+        indexPattern.fields.map((field) => ({
           ...field,
           indexPattern,
         }))
@@ -35,20 +38,20 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = core => {
     );
 
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
-    const fields = allFields.filter(field => field.name === fullFieldName);
+    const fields = allFields.filter((field) => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
     const { getValueSuggestions } = getAutocompleteService();
 
     const data = await Promise.all(
-      fields.map(field =>
+      fields.map((field) =>
         getValueSuggestions({
           indexPattern: field.indexPattern,
           field,
           query,
           boolFilter,
           signal,
-        }).then(valueSuggestions => {
-          const quotedValues = valueSuggestions.map(value =>
+        }).then((valueSuggestions) => {
+          const quotedValues = valueSuggestions.map((value) =>
             typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
           );
 

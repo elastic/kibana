@@ -1,0 +1,51 @@
+- name: coredns
+  type: group
+  description: >
+    coredns fields after normalization
+  fields:
+    - name: id
+      type: keyword
+      description: >
+        id of the DNS transaction
+
+    - name: query.size
+      type: integer
+      format: bytes
+      description: >
+        size of the DNS query
+
+    - name: query.class
+      type: keyword
+      description: >
+        DNS query class
+
+    - name: query.name
+      type: keyword
+      description: >
+        DNS query name
+
+    - name: query.type
+      type: keyword
+      description: >
+        DNS query type
+
+    - name: response.code
+      type: keyword
+      description: >
+        DNS response code
+
+    - name: response.flags
+      type: keyword
+      description: >
+        DNS response flags
+
+    - name: response.size
+      type: integer
+      format: bytes
+      description: >
+        size of the DNS response
+
+    - name: dnssec_ok
+      type: boolean
+      description: >
+        dnssec flag

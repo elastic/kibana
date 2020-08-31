@@ -27,7 +27,7 @@ import { REPO_ROOT } from '../constants';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
-    pattern =>
+    (pattern) =>
       new Minimatch(resolve(directory, pattern), {
         dot: true,
       })
@@ -45,18 +45,22 @@ function parseTsConfig(path: string) {
 }
 
 function testMatchers(matchers: IMinimatch[], path: string) {
-  return matchers.some(matcher => matcher.match(path));
+  return matchers.some((matcher) => matcher.match(path));
 }
 
 export class Project {
   public directory: string;
   public name: string;
   public config: any;
+  public disableTypeCheck: boolean;
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
 
-  constructor(public tsConfigPath: string, name?: string) {
+  constructor(
+    public tsConfigPath: string,
+    options: { name?: string; disableTypeCheck?: boolean } = {}
+  ) {
     this.config = parseTsConfig(tsConfigPath);
 
     const { files, include, exclude = [] } = this.config as {
@@ -72,7 +76,8 @@ export class Project {
     }
 
     this.directory = dirname(this.tsConfigPath);
-    this.name = name || relative(REPO_ROOT, this.directory) || basename(this.directory);
+    this.disableTypeCheck = options.disableTypeCheck || false;
+    this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
   }

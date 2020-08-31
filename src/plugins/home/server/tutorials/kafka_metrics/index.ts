@@ -36,6 +36,7 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.kafkaMetrics.nameTitle', {
       defaultMessage: 'Kafka metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
         label: i18n.translate('home.tutorials.kafkaMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

@@ -18,10 +18,11 @@
  */
 
 import angular from 'angular';
+import { fatalError } from 'ui/notify/fatal_error';
 import chrome from '../chrome';
 import { isPlainObject } from 'lodash';
 import { uiModules } from '../modules';
-import { subscribeWithScope } from '../utils/subscribe_with_scope';
+import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
 
 const module = uiModules.get('kibana/config');
 
@@ -30,7 +31,7 @@ const module = uiModules.get('kibana/config');
  * to expose the exact same API as the config service that has existed since forever.
  * @name config
  */
-module.service(`config`, function($rootScope, Promise) {
+module.service(`config`, function ($rootScope, Promise) {
   const uiSettings = chrome.getUiSettingsClient();
 
   // direct bind sync methods
@@ -42,7 +43,7 @@ module.service(`config`, function($rootScope, Promise) {
   this.isOverridden = (...args) => uiSettings.isOverridden(...args);
 
   // modify remove() to use angular Promises
-  this.remove = key => Promise.resolve(uiSettings.remove(key));
+  this.remove = (key) => Promise.resolve(uiSettings.remove(key));
 
   // modify set() to use angular Promises and angular.toJson()
   this.set = (key, value) =>
@@ -52,15 +53,20 @@ module.service(`config`, function($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = subscribeWithScope($rootScope, uiSettings.getUpdate$(), {
-    next: ({ key, newValue, oldValue }) => {
-      $rootScope.$broadcast('change:config', newValue, oldValue, key, this);
-      $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
+  const subscription = subscribeWithScope(
+    $rootScope,
+    uiSettings.getUpdate$(),
+    {
+      next: ({ key, newValue, oldValue }) => {
+        $rootScope.$broadcast('change:config', newValue, oldValue, key, this);
+        $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
+      },
     },
-  });
+    fatalError
+  );
   $rootScope.$on('$destroy', () => subscription.unsubscribe());
 
-  this.watchAll = function(handler, scope = $rootScope) {
+  this.watchAll = function (handler, scope = $rootScope) {
     // call handler immediately to initialize
     handler(null, null, null, this);
 
@@ -69,7 +75,7 @@ module.service(`config`, function($rootScope, Promise) {
     });
   };
 
-  this.watch = function(key, handler, scope = $rootScope) {
+  this.watch = function (key, handler, scope = $rootScope) {
     if (!this.isDeclared(key)) {
       throw new Error(`Unexpected \`config.watch("${key}", fn)\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before binding
@@ -94,8 +100,8 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
    *                             be stored. Defaults to the config key
    * @return {function} - an unbind function
    */
-  this.bindToScope = function(scope, key, property = key) {
-    const onUpdate = newVal => {
+  this.bindToScope = function (scope, key, property = key) {
+    const onUpdate = (newVal) => {
       scope[property] = newVal;
     };
 

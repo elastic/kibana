@@ -19,7 +19,8 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -35,7 +36,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   describe('saved queries saved objects', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -47,8 +48,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function() {
-      before(async function() {
+    describe('saved query management component functionality', function () {
+      before(async function () {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');
         await queryBar.setQuery('response:200');
@@ -74,6 +75,7 @@ export default function({ getService, getPageObjects }) {
           true
         );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
 
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
@@ -92,7 +94,10 @@ export default function({ getService, getPageObjects }) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        expect(await PageObjects.discover.getHitCount()).to.be('2,792');
+        await retry.waitFor(
+          'the right hit count',
+          async () => (await PageObjects.discover.getHitCount()) === '2,792'
+        );
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
@@ -145,6 +150,22 @@ export default function({ getService, getPageObjects }) {
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
+
+      it('allows clearing if non default language was remembered in localstorage', async () => {
+        await queryBar.switchQueryLanguage('lucene');
+        await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.expectQueryLanguageOrFail('kql');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await queryBar.expectQueryLanguageOrFail('lucene');
+      });
+
+      it('changing language removes saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
     });

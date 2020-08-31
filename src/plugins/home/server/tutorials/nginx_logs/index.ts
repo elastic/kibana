@@ -37,6 +37,7 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.nginxLogs.nameTitle', {
       defaultMessage: 'Nginx logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.nginxLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Nginx HTTP server.',
@@ -65,7 +66,7 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/nginx_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nginx_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

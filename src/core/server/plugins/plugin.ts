@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
@@ -53,6 +53,7 @@ export class PluginWrapper<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
+  public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
@@ -61,7 +62,7 @@ export class PluginWrapper<
 
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(
@@ -81,6 +82,7 @@ export class PluginWrapper<
     this.configPath = params.manifest.configPath;
     this.requiredPlugins = params.manifest.requiredPlugins;
     this.optionalPlugins = params.manifest.optionalPlugins;
+    this.requiredBundles = params.manifest.requiredBundles;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
   }
@@ -94,8 +96,6 @@ export class PluginWrapper<
    */
   public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
-
-    this.log.info('Setting up plugin');
 
     return this.instance.setup(setupContext, plugins);
   }
@@ -113,7 +113,7 @@ export class PluginWrapper<
     }
 
     const startContract = await this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins]);
+    this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
   }
 
@@ -124,8 +124,6 @@ export class PluginWrapper<
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
-
-    this.log.info('Stopping plugin');
 
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();
@@ -148,7 +146,7 @@ export class PluginWrapper<
     }
 
     const configDescriptor = pluginDefinition.config;
-    if (!(configDescriptor.schema instanceof Type)) {
+    if (!isConfigSchema(configDescriptor.schema)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
     return configDescriptor;

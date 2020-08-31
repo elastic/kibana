@@ -21,7 +21,7 @@ import { SavedObject } from '../types';
 import { SavedObjectsImportRetry } from './types';
 
 export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
-  const retryKeys = new Set<string>(retries.map(retry => `${retry.type}:${retry.id}`));
+  const retryKeys = new Set<string>(retries.map((retry) => `${retry.type}:${retry.id}`));
   return (obj: SavedObject) => {
     return retryKeys.has(`${obj.type}:${obj.id}`);
   };

@@ -7,7 +7,7 @@
 import { API_BASE_PATH } from './constants';
 
 export const registerHelpers = ({ supertest }) => {
-  const getIndexMapping = indexName => supertest.get(`${API_BASE_PATH}/mapping/${indexName}`);
+  const getIndexMapping = (indexName) => supertest.get(`${API_BASE_PATH}/mapping/${indexName}`);
 
   return {
     getIndexMapping,

@@ -17,23 +17,27 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { UI_SETTINGS } from '../../constants';
 
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
-  static title = 'Percentage';
+  static title = i18n.translate('data.fieldFormats.percent.title', {
+    defaultMessage: 'Percentage',
+  });
 
   id = PercentFormat.id;
   title = PercentFormat.title;
   allowsNumericalAggregations = true;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig!('format:percent:defaultPattern'),
+    pattern: this.getConfig!(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN),
     fractional: true,
   });
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     const formatted = super.getConvertedValue(val);
 
     if (this.param('fractional')) {

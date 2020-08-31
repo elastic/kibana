@@ -16,40 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import {
-  ErrorToastOptions,
-  NotificationsSetup,
-  Toast,
-  ToastInput,
-} from '../../../../../core/public';
-
-export { Toast, ToastInput };
-
-export class ToastNotifications {
-  public list: Toast[] = [];
-
-  private onChangeCallback?: () => void;
-
-  constructor(private readonly toasts: NotificationsSetup['toasts']) {
-    toasts.get$().subscribe(list => {
-      this.list = list;
-
-      if (this.onChangeCallback) {
-        this.onChangeCallback();
-      }
-    });
-  }
-
-  public onChange = (callback: () => void) => {
-    this.onChangeCallback = callback;
-  };
-
-  public add = (toastOrTitle: ToastInput) => this.toasts.add(toastOrTitle);
-  public remove = (toast: Toast) => this.toasts.remove(toast);
-  public addSuccess = (toastOrTitle: ToastInput) => this.toasts.addSuccess(toastOrTitle);
-  public addWarning = (toastOrTitle: ToastInput) => this.toasts.addWarning(toastOrTitle);
-  public addDanger = (toastOrTitle: ToastInput) => this.toasts.addDanger(toastOrTitle);
-  public addError = (error: Error, options: ErrorToastOptions) =>
-    this.toasts.addError(error, options);
-}
+/**
+ * ToastNotifications is deprecated! Please use npSetup.core.notifications.toasts instead
+ */
+export { ToastNotifications } from '../../../../../plugins/kibana_legacy/public';

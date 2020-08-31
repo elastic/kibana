@@ -3,8 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "bfetch",
-    "inspector"
+  "extraPublicDirs": ["common", "common/fonts"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "inspector",
+    "data"
   ]
 }

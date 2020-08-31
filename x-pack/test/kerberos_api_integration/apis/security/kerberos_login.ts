@@ -8,10 +8,14 @@ import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  getMutualAuthenticationResponseToken,
+  getSPNEGOToken,
+} from '../../fixtures/kerberos_tools';
 
-export default function({ getService }: FtrProviderContext) {
-  const spnegoToken =
-    'YIIChwYGKwYBBQUCoIICezCCAnegDTALBgkqhkiG9xIBAgKiggJkBIICYGCCAlwGCSqGSIb3EgECAgEAboICSzCCAkegAwIBBaEDAgEOogcDBQAAAAAAo4IBW2GCAVcwggFToAMCAQWhERsPVEVTVC5FTEFTVElDLkNPohwwGqADAgEDoRMwERsESFRUUBsJbG9jYWxob3N0o4IBGTCCARWgAwIBEqEDAgECooIBBwSCAQNBN2a1Rso+KEJsDwICYLCt7ACLzdlbhEZF5YNsehO109b/WiZR1VTK6kCQyDdBdQFefyvV8EiC35mz7XnTb239nWz6xBGbdmtjSfF0XzpXKbL/zGzLEKkEXQuqFLPUN6qEJXsh0OoNdj9OWwmTr93FVyugs1hO/E5wjlAe2SDYpBN6uZICXu6dFg9nLQKkb/XgbgKM7ZZvgA/UElWDgHav4nPO1VWppCCLKHqXTRnvpr/AsxeON4qeJLaukxBigfIaJlLFMNQal5H7MyXa0j3Y1sckbURnWoBt6r4XE7c8F8cz0rYoGwoCO+Cs5tNutKY6XcsAFbLh59hjgIkhVBhhyTeypIHSMIHPoAMCARKigccEgcSsXqIRAcHfZivrbHfsnvbFgmzmnrKVPFNtJ9Hl23KunCsNW49nP4VF2dEf9n12prDaIguJDV5LPHpTew9rmCj1GCahKJ9bJbRKIgImLFd+nelm3E2zxRqAhrgM1469oDg0ksE3+5lJBuJlVEECMp0F/gxvEiL7DhasICqw+FOJ/jD9QUYvg+E6BIxWgZyPszaxerzBBszAhIF1rxCHRRL1KLjskNeJlBhH77DkAO6AEmsYGdsgEq7b7uCov9PKPiiPAuFF';
+export default function ({ getService }: FtrProviderContext) {
+  const spnegoToken = getSPNEGOToken();
+
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -46,10 +50,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
+      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
 
     it('does not prevent basic login', async () => {
@@ -57,8 +58,13 @@ export default function({ getService }: FtrProviderContext) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username, password })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
 
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -75,6 +81,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.eql('realm');
     });
 
     describe('initiating SPNEGO', () => {
@@ -105,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Verify that mutual authentication works.
         expect(response.headers['www-authenticate']).to.be(
-          'Negotiate oRQwEqADCgEAoQsGCSqGSIb3EgECAg=='
+          `Negotiate ${getMutualAuthenticationResponseToken()}`
         );
 
         const cookies = response.headers['set-cookie'];
@@ -114,13 +121,22 @@ export default function({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
+        const isAnonymousAccessEnabled = (config.get(
+          'esTestCluster.serverArgs'
+        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+
+        // `superuser_anonymous` role is derived from the enabled anonymous access.
+        const expectedUserRoles = isAnonymousAccessEnabled
+          ? ['kibana_admin', 'superuser_anonymous']
+          : ['kibana_admin'];
+
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_admin'],
+            roles: expectedUserRoles,
             full_name: null,
             email: null,
             metadata: {
@@ -131,6 +147,7 @@ export default function({ getService }: FtrProviderContext) {
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: 'kerberos',
+            authentication_type: 'token',
           });
       });
 
@@ -199,7 +216,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -242,7 +259,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
 
         // Token that was stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
@@ -284,7 +301,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should refresh token and update existing cookie', async function() {
+      it('AJAX call should refresh token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -315,7 +332,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse.headers['www-authenticate']).to.be(undefined);
       });
 
-      it('non-AJAX call should refresh token and update existing cookie', async function() {
+      it('non-AJAX call should refresh token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -369,12 +386,10 @@ export default function({ getService }: FtrProviderContext) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse)
-          .to.have.property('deleted')
-          .greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
-      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('AJAX call should initiate SPNEGO and clear existing cookie', async function () {
         const apiResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -388,7 +403,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
-      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function () {
         const nonAjaxResponse = await supertest
           .get('/')
           .set('Cookie', sessionCookie.cookieString())

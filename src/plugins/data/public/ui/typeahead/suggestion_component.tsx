@@ -19,8 +19,8 @@
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { FunctionComponent } from 'react';
-import { autocomplete } from '../..';
+import React from 'react';
+import { QuerySuggestion } from '../../autocomplete';
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -40,19 +40,20 @@ function getEuiIconType(type: string) {
 }
 
 interface Props {
-  onClick: (suggestion: autocomplete.QuerySuggestion) => void;
+  onClick: (suggestion: QuerySuggestion) => void;
   onMouseEnter: () => void;
   selected: boolean;
-  suggestion: autocomplete.QuerySuggestion;
+  suggestion: QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
 }
 
-export const SuggestionComponent: FunctionComponent<Props> = props => {
+export function SuggestionComponent(props: Props) {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         kbnTypeahead__item: true,
         active: props.selected,
       })}
@@ -75,4 +76,4 @@ export const SuggestionComponent: FunctionComponent<Props> = props => {
       </div>
     </div>
   );
-};
+}

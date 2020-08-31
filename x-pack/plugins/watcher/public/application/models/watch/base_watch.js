@@ -32,12 +32,13 @@ export class BaseWatch {
     this.isSystemWatch = Boolean(get(props, 'isSystemWatch'));
     this.watchStatus = WatchStatus.fromUpstreamJson(get(props, 'watchStatus'));
     this.watchErrors = WatchErrors.fromUpstreamJson(get(props, 'watchErrors'));
+    this.isActive = this.watchStatus.isActive ?? true;
 
     const actions = get(props, 'actions', []);
     this.actions = actions.map(Action.fromUpstreamJson);
   }
 
-  updateWatchStatus = watchStatus => {
+  updateWatchStatus = (watchStatus) => {
     this.watchStatus = watchStatus;
   };
 
@@ -61,7 +62,7 @@ export class BaseWatch {
     this.addAction(action);
   };
 
-  addAction = action => {
+  addAction = (action) => {
     if (checkActionIdCollision(this.actions, action)) {
       action.id = createActionId(this.actions, action.type);
     }
@@ -69,7 +70,7 @@ export class BaseWatch {
     this.actions.push(action);
   };
 
-  deleteAction = action => {
+  deleteAction = (action) => {
     remove(this.actions, action);
   };
 
@@ -78,11 +79,7 @@ export class BaseWatch {
   };
 
   get displayName() {
-    if (this.isNew) {
-      return i18n.translate('xpack.watcher.models.baseWatch.displayName', {
-        defaultMessage: 'New Watch',
-      });
-    } else if (this.name) {
+    if (this.name) {
       return this.name;
     } else {
       return this.id;
@@ -115,11 +112,12 @@ export class BaseWatch {
       name: this.name,
       type: this.type,
       isNew: this.isNew,
-      actions: map(this.actions, action => action.upstreamJson),
+      isActive: this.isActive,
+      actions: map(this.actions, (action) => action.upstreamJson),
     };
   }
 
-  isEqualTo = otherWatch => {
+  isEqualTo = (otherWatch) => {
     // We need to create a POJO copies because isEqual would return false
     // because of property getters
     const cleanWatch = {

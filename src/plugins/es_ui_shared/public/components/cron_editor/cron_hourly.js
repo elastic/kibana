@@ -36,7 +36,7 @@ export const CronHourly = ({ minute, minuteOptions, onChange }) => (
       <EuiSelect
         options={minuteOptions}
         value={minute}
-        onChange={e => onChange({ minute: e.target.value })}
+        onChange={(e) => onChange({ minute: e.target.value })}
         fullWidth
         prepend={i18n.translate('esUi.cronEditor.cronHourly.fieldMinute.textAtLabel', {
           defaultMessage: 'At',

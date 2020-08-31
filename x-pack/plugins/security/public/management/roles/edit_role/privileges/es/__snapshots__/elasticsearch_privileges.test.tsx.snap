@@ -13,7 +13,7 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
           values={Object {}}
         />
-        <ForwardRef
+        <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
           target="_blank"
@@ -23,11 +23,9 @@ exports[`it renders without crashing 1`] = `
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </p>
     }
-    fullWidth={false}
-    gutterSize="l"
     title={
       <h3>
         <FormattedMessage
@@ -37,7 +35,6 @@ exports[`it renders without crashing 1`] = `
         />
       </h3>
     }
-    titleSize="xs"
   >
     <EuiFormRow
       describedByIds={Array []}
@@ -79,7 +76,7 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
           values={Object {}}
         />
-        <ForwardRef
+        <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#_run_as_privilege"
           target="_blank"
@@ -89,11 +86,9 @@ exports[`it renders without crashing 1`] = `
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </p>
     }
-    fullWidth={false}
-    gutterSize="l"
     title={
       <h3>
         <FormattedMessage
@@ -103,7 +98,6 @@ exports[`it renders without crashing 1`] = `
         />
       </h3>
     }
-    titleSize="xs"
   >
     <EuiFormRow
       describedByIds={Array []}
@@ -114,6 +108,7 @@ exports[`it renders without crashing 1`] = `
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}
@@ -124,6 +119,7 @@ exports[`it renders without crashing 1`] = `
         placeholder="Add a user…"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>

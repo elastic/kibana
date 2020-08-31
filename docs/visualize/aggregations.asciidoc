@@ -58,8 +58,6 @@ You can also nest these aggregations. For example, if you want to produce a thir
 
 {ref}/search-aggregations-pipeline-serialdiff-aggregation.html[Serial diff]:: Values in a time series are subtracted from itself at different time lags or periods.
 
-Custom {kib} plugins can <<development-visualize-index, add more capabilities to the default editor>>, which includes support for adding more aggregations.
-
 [float]
 [[visualize-sibling-pipeline-aggregations]]
 === Sibling pipeline aggregations
@@ -87,9 +85,9 @@ Bucket aggregations sort documents into buckets, depending on the contents of th
 {ref}/search-aggregations-bucket-filter-aggregation.html[Filter]:: Each filter creates a bucket of documents. You can specify a filter as a
 <<kuery-query, KQL>> or <<lucene-query, Lucene>> query string.
 
-{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash. Supported by the tile map and data table visualizations.
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash. Supported by data table visualizations and <<maps>>.
 
-{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling. Supported by the tile map and data table visualizations.
+{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling. Supported by data table visualizations and <<maps>>.
 
 {ref}/search-aggregations-bucket-histogram-aggregation.html[Histogram]:: Builds from a numeric field.
 

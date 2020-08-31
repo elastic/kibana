@@ -78,9 +78,7 @@ describe('updateFailureIssue()', () => {
       'https://build-url',
       {
         html_url: 'https://github.com/issues/1234',
-        labels: ['some-label'],
         number: 1234,
-        title: 'issue title',
         body: dedent`
           # existing issue body
 

@@ -5,18 +5,22 @@
 <titleabbrev>Spaces settings</titleabbrev>
 ++++
 
-By default, Spaces is enabled in Kibana, and you can secure Spaces using 
+By default, Spaces is enabled in Kibana, and you can secure Spaces using
 roles when Security is enabled.
 
 [float]
 [[spaces-settings]]
 ==== Spaces settings
 
-`xpack.spaces.enabled`::
-Set to `true` (default) to enable Spaces in {kib}.
+[cols="2*<"]
+|===
+| `xpack.spaces.enabled`
+  | Set to `true` (default) to enable Spaces in {kib}.
 
-`xpack.spaces.maxSpaces`::
-The maximum amount of Spaces that can be used with this instance of Kibana. Some operations
-in Kibana return all spaces using a single `_search` from Elasticsearch, so this must be
-set lower than the `index.max_result_window` in Elasticsearch.
-Defaults to `1000`.
+| `xpack.spaces.maxSpaces`
+  | The maximum amount of Spaces that can be used with this instance of {kib}. Some operations
+  in {kib} return all spaces using a single `_search` from {es}, so this must be
+  set lower than the `index.max_result_window` in {es}.
+  Defaults to `1000`.
+
+|===

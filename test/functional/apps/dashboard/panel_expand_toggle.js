@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -56,7 +56,7 @@ export default function({ getService, getPageObjects }) {
 
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?
-      retry.try(async () => {
+      await retry.try(async () => {
         const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
         expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
       });

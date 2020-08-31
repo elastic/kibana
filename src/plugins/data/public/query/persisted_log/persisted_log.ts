@@ -64,7 +64,7 @@ export class PersistedLog<T = any> {
 
     // remove any matching items from the stack if option is set
     if (this.filterDuplicates) {
-      _.remove(this.items, item => {
+      _.remove(this.items, (item) => {
         return this.isDuplicate(item, val);
       });
     }

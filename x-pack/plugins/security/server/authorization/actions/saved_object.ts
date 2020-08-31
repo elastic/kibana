@@ -13,10 +13,6 @@ export class SavedObjectActions {
     this.prefix = `saved_object:${versionNumber}:`;
   }
 
-  public get all(): string {
-    return `${this.prefix}*`;
-  }
-
   public get(type: string, operation: string): string {
     if (!type || !isString(type)) {
       throw new Error('type is required and must be a string');

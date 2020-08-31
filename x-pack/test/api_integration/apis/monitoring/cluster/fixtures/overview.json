@@ -114,22 +114,6 @@
       "total": null
     }
   },
-  "alerts": [{
-    "metadata": {
-      "severity": 1100,
-      "cluster_uuid": "y1qOsQPiRrGtmdEuM3APJw",
-      "version_created": 6000026,
-      "watch": "elasticsearch_cluster_status",
-      "link": "elasticsearch/indices",
-      "alert_index": ".monitoring-alerts-6",
-      "type": "monitoring"
-    },
-    "update_timestamp": "2017-08-23T21:45:31.882Z",
-    "prefix": "Elasticsearch cluster status is yellow.",
-    "message": "Allocate missing replica shards.",
-    "resolved_timestamp": "2017-08-23T21:45:31.882Z",
-    "timestamp": "2017-08-23T21:28:25.639Z"
-  }],
   "isCcrEnabled": true,
   "isPrimary": true,
   "status": "green"

@@ -12,30 +12,30 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const getActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const getActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `/api/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       return res.ok({

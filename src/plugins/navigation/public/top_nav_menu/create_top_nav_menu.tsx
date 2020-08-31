@@ -18,17 +18,26 @@
  */
 
 import React from 'react';
+import { I18nStart } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
-export function createTopNav(data: DataPublicPluginStart, extraConfig: RegisteredTopNavMenuData[]) {
+export function createTopNav(
+  data: DataPublicPluginStart,
+  extraConfig: RegisteredTopNavMenuData[],
+  i18n: I18nStart
+) {
   return (props: TopNavMenuProps) => {
     const relevantConfig = extraConfig.filter(
-      dataItem => dataItem.appName === undefined || dataItem.appName === props.appName
+      (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
     const config = (props.config || []).concat(relevantConfig);
 
-    return <TopNavMenu {...props} data={data} config={config} />;
+    return (
+      <i18n.Context>
+        <TopNavMenu {...props} data={data} config={config} />
+      </i18n.Context>
+    );
   };
 }

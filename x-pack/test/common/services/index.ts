@@ -5,11 +5,13 @@
  */
 
 import { services as kibanaCommonServices } from '../../../../test/common/services';
+import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 
 import { SpacesServiceProvider } from './spaces';
 
 export const services = {
   ...kibanaCommonServices,
+  supertest: kibanaApiIntegrationServices.supertest,
 
   spaces: SpacesServiceProvider,
 };

@@ -17,201 +17,151 @@
  * under the License.
  */
 
-import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient, ScopeableRequest } from './cluster_client';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
+import {
+  LegacyClusterClient,
+  ILegacyCustomClusterClient,
+  LegacyElasticsearchClientConfig,
+} from './legacy';
+import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup } from './types';
-import { CallAPIOptions } from './api_types';
+import { AuditTrailStart, AuditorFactory } from '../audit_trail';
+import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
-
-/** @internal */
-interface CoreClusterClients {
-  config: ElasticsearchConfig;
-  adminClient: ClusterClient;
-  dataClient: ClusterClient;
-}
+import { calculateStatus$ } from './status';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
+interface StartDeps {
+  auditTrail: AuditTrailStart;
+}
+
 /** @internal */
-export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
+export class ElasticsearchService
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscriptions: {
-    client?: Subscription;
-    esNodesCompatibility?: Subscription;
-  } = {
-    client: undefined,
-    esNodesCompatibility: undefined,
-  };
+  private auditorFactory?: AuditorFactory;
+  private stop$ = new Subject();
   private kibanaVersion: string;
+  private getAuthHeaders?: GetAuthHeaders;
+
+  private createLegacyCustomClient?: (
+    type: string,
+    clientConfig?: Partial<LegacyElasticsearchClientConfig>
+  ) => ILegacyCustomClusterClient;
+  private legacyClient?: LegacyClusterClient;
+
+  private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
-    const clients$ = this.config$.pipe(
-      filter(() => {
-        if (this.subscriptions.client !== undefined) {
-          this.log.error('Clients cannot be changed after they are created');
-          return false;
-        }
-
-        return true;
-      }),
-      switchMap(
-        config =>
-          new Observable<CoreClusterClients>(subscriber => {
-            this.log.debug(`Creating elasticsearch clients`);
-
-            const coreClients = {
-              config,
-              adminClient: this.createClusterClient('admin', config),
-              dataClient: this.createClusterClient('data', config, deps.http.getAuthHeaders),
-            };
-
-            subscriber.next(coreClients);
-
-            return () => {
-              this.log.debug(`Closing elasticsearch clients`);
-
-              coreClients.adminClient.close();
-              coreClients.dataClient.close();
-            };
-          })
-      ),
-      publishReplay(1)
-    ) as ConnectableObservable<CoreClusterClients>;
-
-    this.subscriptions.client = clients$.connect();
-
     const config = await this.config$.pipe(first()).toPromise();
 
-    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
-    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
-
-    const adminClient = {
-      async callAsInternalUser(
-        endpoint: string,
-        clientParams: Record<string, any> = {},
-        options?: CallAPIOptions
-      ) {
-        const client = await adminClient$.pipe(take(1)).toPromise();
-        return await client.callAsInternalUser(endpoint, clientParams, options);
-      },
-      asScoped(request: ScopeableRequest) {
-        return {
-          callAsInternalUser: adminClient.callAsInternalUser,
-          async callAsCurrentUser(
-            endpoint: string,
-            clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
-          ) {
-            const client = await adminClient$.pipe(take(1)).toPromise();
-            return await client
-              .asScoped(request)
-              .callAsCurrentUser(endpoint, clientParams, options);
-          },
-        };
-      },
-    };
-    const dataClient = {
-      async callAsInternalUser(
-        endpoint: string,
-        clientParams: Record<string, any> = {},
-        options?: CallAPIOptions
-      ) {
-        const client = await dataClient$.pipe(take(1)).toPromise();
-        return await client.callAsInternalUser(endpoint, clientParams, options);
-      },
-      asScoped(request: ScopeableRequest) {
-        return {
-          callAsInternalUser: dataClient.callAsInternalUser,
-          async callAsCurrentUser(
-            endpoint: string,
-            clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
-          ) {
-            const client = await dataClient$.pipe(take(1)).toPromise();
-            return await client
-              .asScoped(request)
-              .callAsCurrentUser(endpoint, clientParams, options);
-          },
-        };
-      },
-    };
+    this.getAuthHeaders = deps.http.getAuthHeaders;
+    this.legacyClient = this.createLegacyClusterClient('data', config);
+    this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: adminClient.callAsInternalUser,
+      internalClient: this.client.asInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(publishReplay(1));
+    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.subscriptions.esNodesCompatibility = (esNodesCompatibility$ as ConnectableObservable<
-      unknown
-    >).connect();
-
-    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
+    this.createLegacyCustomClient = (type, clientConfig = {}) => {
+      const finalConfig = merge({}, config, clientConfig);
+      return this.createLegacyClusterClient(type, finalConfig);
+    };
 
     return {
-      legacy: { config$: clients$.pipe(map(clients => clients.config)) },
-
-      adminClient,
-      dataClient,
+      legacy: {
+        config$: this.config$,
+        client: this.legacyClient,
+        createClient: this.createLegacyCustomClient,
+      },
       esNodesCompatibility$,
+      status$: calculateStatus$(esNodesCompatibility$),
+    };
+  }
+  public async start({ auditTrail }: StartDeps): Promise<InternalElasticsearchServiceStart> {
+    this.auditorFactory = auditTrail;
+    if (!this.legacyClient || !this.createLegacyCustomClient) {
+      throw new Error('ElasticsearchService needs to be setup before calling start');
+    }
 
-      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
-        const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
+    const config = await this.config$.pipe(first()).toPromise();
+
+    const createClient = (
+      type: string,
+      clientConfig: Partial<ElasticsearchClientConfig> = {}
+    ): ICustomClusterClient => {
+      const finalConfig = merge({}, config, clientConfig);
+      return this.createClusterClient(type, finalConfig);
+    };
+
+    return {
+      client: this.client!,
+      createClient,
+      legacy: {
+        config$: this.config$,
+        client: this.legacyClient,
+        createClient: this.createLegacyCustomClient,
       },
     };
   }
 
-  public async start() {}
-
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.client?.unsubscribe();
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.esNodesCompatibility?.unsubscribe();
-    this.subscriptions = { client: undefined, esNodesCompatibility: undefined };
+    this.stop$.next();
+    if (this.client) {
+      await this.client.close();
+    }
+    if (this.legacyClient) {
+      this.legacyClient.close();
+    }
   }
 
-  private createClusterClient(
-    type: string,
-    config: ElasticsearchClientConfig,
-    getAuthHeaders?: GetAuthHeaders
-  ) {
+  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
-      getAuthHeaders
+      this.getAuthHeaders
     );
   }
+
+  private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
+    return new LegacyClusterClient(
+      config,
+      this.coreContext.logger.get('elasticsearch', type),
+      this.getAuditorFactory,
+      this.getAuthHeaders
+    );
+  }
+
+  private getAuditorFactory = () => {
+    if (!this.auditorFactory) {
+      throw new Error('auditTrail has not been initialized');
+    }
+    return this.auditorFactory;
+  };
 }

@@ -17,68 +17,38 @@
  * under the License.
  */
 
-import React from 'react';
-import { groupBy, sortBy } from 'lodash';
+import { EuiHorizontalRule, EuiNavDrawer, EuiNavDrawerGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
-import { NavSetting, OnIsLockedUpdate } from './';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../../..';
-import { AppCategory } from '../../../../types';
+import React from 'react';
+import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
+import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { NavLink } from './nav_link';
+import { OnIsLockedUpdate } from './';
+import { createEuiListItem, createRecentNavLink } from './nav_link';
 import { RecentLinks } from './recent_links';
 
-function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
-  const allCategories = {} as Record<string, AppCategory | undefined>;
-
-  for (const [key, value] of Object.entries(allCategorizedLinks)) {
-    allCategories[key] = value[0].category;
-  }
-
-  return allCategories;
-}
-
-function getOrderedCategories(
-  mainCategories: Record<string, NavLink[]>,
-  categoryDictionary: ReturnType<typeof getAllCategories>
-) {
-  return sortBy(
-    Object.keys(mainCategories),
-    categoryName => categoryDictionary[categoryName]?.order
-  );
-}
-
 export interface Props {
-  navSetting: NavSetting;
-  isLocked?: boolean;
-  onIsLockedUpdate?: OnIsLockedUpdate;
-  navLinks: NavLink[];
-  chromeNavLinks: ChromeNavLink[];
-  recentlyAccessedItems: ChromeRecentlyAccessedHistoryItem[];
+  appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
+  isLocked?: boolean;
+  legacyMode: boolean;
+  navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  navigateToApp: CoreStart['application']['navigateToApp'];
+  onIsLockedUpdate?: OnIsLockedUpdate;
 }
 
-function navDrawerRenderer(
-  {
-    navSetting,
-    isLocked,
-    onIsLockedUpdate,
-    navLinks,
-    chromeNavLinks,
-    recentlyAccessedItems,
-    basePath,
-  }: Props,
-  ref: React.Ref<HTMLElement>
+function NavDrawerRenderer(
+  { isLocked, onIsLockedUpdate, basePath, legacyMode, navigateToApp, ...observables }: Props,
+  ref: React.Ref<EuiNavDrawer>
 ) {
-  const disableGroupedNavSetting = navSetting === 'individual';
-  const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
-  const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
-  const { Management: management, ...mainCategories } = allCategorizedLinks;
-  const categoryDictionary = getAllCategories(allCategorizedLinks);
-  const orderedCategories = getOrderedCategories(mainCategories, categoryDictionary);
-  const showUngroupedNav =
-    disableGroupedNavSetting || navLinks.length < 7 || Object.keys(mainCategories).length === 1;
+  const appId = useObservable(observables.appId$, '');
+  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const recentNavLinks = useObservable(observables.recentlyAccessed$, []).map((link) =>
+    createRecentNavLink(link, navLinks, basePath)
+  );
 
   return (
     <EuiNavDrawer
@@ -90,81 +60,26 @@ function navDrawerRenderer(
         defaultMessage: 'Primary',
       })}
     >
-      {RecentLinks({
-        recentlyAccessedItems,
-        navLinks: chromeNavLinks,
-        basePath,
-      })}
+      {RecentLinks({ recentNavLinks })}
       <EuiHorizontalRule margin="none" />
-      {showUngroupedNav ? (
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerAppsMenu"
-          listItems={navLinks}
-          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-            defaultMessage: 'Primary navigation links',
-          })}
-        />
-      ) : (
-        <>
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-            listItems={[
-              ...orderedCategories.map(categoryName => {
-                const category = categoryDictionary[categoryName]!;
-                const links = mainCategories[categoryName];
-
-                if (links.length === 1) {
-                  return {
-                    ...links[0],
-                    label: category.label,
-                    iconType: category.euiIconType || links[0].iconType,
-                  };
-                }
-
-                return {
-                  'data-test-subj': 'navDrawerCategory',
-                  iconType: category.euiIconType,
-                  label: category.label,
-                  flyoutMenu: {
-                    title: category.label,
-                    listItems: sortBy(links, 'order').map(link => {
-                      link['data-test-subj'] = 'navDrawerFlyoutLink';
-                      return link;
-                    }),
-                  },
-                };
-              }),
-              ...sortBy(unknowns, 'order'),
-            ]}
-          />
-          <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerManagementMenu"
-            aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-              defaultMessage: 'Management navigation links',
-            })}
-            listItems={[
-              {
-                label: categoryDictionary.Management!.label,
-                iconType: categoryDictionary.Management!.euiIconType,
-                'data-test-subj': 'navDrawerCategory',
-                flyoutMenu: {
-                  title: categoryDictionary.Management!.label,
-                  listItems: sortBy(management, 'order').map(link => {
-                    link['data-test-subj'] = 'navDrawerFlyoutLink';
-                    return link;
-                  }),
-                },
-              },
-            ]}
-          />
-        </>
-      )}
+      <EuiNavDrawerGroup
+        data-test-subj="navDrawerAppsMenu"
+        listItems={navLinks.map((link) =>
+          createEuiListItem({
+            link,
+            legacyMode,
+            appId,
+            basePath,
+            navigateToApp,
+            dataTestSubj: 'navDrawerAppsMenuLink',
+          })
+        )}
+        aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+          defaultMessage: 'Primary navigation links',
+        })}
+      />
     </EuiNavDrawer>
   );
 }
 
-export const NavDrawer = React.forwardRef(navDrawerRenderer);
+export const NavDrawer = React.forwardRef(NavDrawerRenderer);

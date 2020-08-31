@@ -18,7 +18,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { Adapters, InspectorViewDescription } from './types';
+import { InspectorViewDescription } from './types';
+import { Adapters } from '../common';
 
 /**
  * @callback viewShouldShowFunc
@@ -69,6 +70,6 @@ export class InspectorViewRegistry extends EventEmitter {
     if (!adapters) {
       return [];
     }
-    return this.views.filter(view => !view.shouldShow || view.shouldShow(adapters));
+    return this.views.filter((view) => !view.shouldShow || view.shouldShow(adapters));
   }
 }

@@ -1,5 +1,5 @@
 [[document-context]]
-== Viewing a document in context
+== View a document in context
 
 Once you've narrowed your search to a specific event,
 you might want to inspect the documents that occurred

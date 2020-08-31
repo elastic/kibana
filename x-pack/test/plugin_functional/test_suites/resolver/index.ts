@@ -6,21 +6,21 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
-  describe('Resolver embeddable test app', function() {
+  describe('Resolver embeddable test app', function () {
     this.tags('ciGroup7');
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       await pageObjects.common.navigateToApp('resolverTest');
     });
 
-    it('renders a container div for the embeddable', async function() {
+    it('renders a container div for the embeddable', async function () {
       await testSubjects.existOrFail('resolverEmbeddableContainer');
     });
-    it('renders resolver', async function() {
+    it('renders resolver', async function () {
       await testSubjects.existOrFail('resolverEmbeddable');
     });
   });

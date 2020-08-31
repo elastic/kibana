@@ -4,43 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ClusterClient } from '../../../../../src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
 import { EsContext } from './context';
+import { namesMock } from './names.mock';
+import { IClusterClientAdapter } from './cluster_client_adapter';
+import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
 
-import { EsNames } from './names';
+const createContextMock = () => {
+  const mock: jest.Mocked<EsContext> & {
+    esAdapter: jest.Mocked<IClusterClientAdapter>;
+  } = {
+    logger: loggingSystemMock.createLogger(),
+    esNames: namesMock.create(),
+    initialize: jest.fn(),
+    waitTillReady: jest.fn(async () => true),
+    esAdapter: clusterClientAdapterMock.create(),
+    initialized: true,
+  };
+  return mock;
+};
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
-
-export interface EsError {
-  readonly statusCode: number;
-  readonly message: string;
-}
-
-interface CreateMockEsContextParams {
-  logger: Logger;
-  esNames: EsNames;
-}
-
-export function createMockEsContext(params: CreateMockEsContextParams): EsContext {
-  return new EsContextMock(params);
-}
-
-class EsContextMock implements EsContext {
-  public logger: Logger;
-  public esNames: EsNames;
-
-  constructor(params: CreateMockEsContextParams) {
-    this.logger = params.logger;
-    this.esNames = params.esNames;
-  }
-
-  initialize() {}
-
-  async waitTillReady(): Promise<boolean> {
-    return true;
-  }
-
-  async callEs(operation: string, body?: any): Promise<any> {
-    return {};
-  }
-}
+export const contextMock = {
+  create: createContextMock,
+};

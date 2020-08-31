@@ -18,20 +18,16 @@
  */
 
 import _ from 'lodash';
-import { join } from 'path';
 
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
-
-const path = join(getDataPath(), 'kibana.keystore');
-const keystore = new Keystore(path);
 
 import { createCli } from './create';
 import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
+import { getKeystore } from './get_keystore';
 
 const argv = process.env.kbnWorkerArgv
   ? JSON.parse(process.env.kbnWorkerArgv)
@@ -42,6 +38,8 @@ program
   .version(pkg.version)
   .description('A tool for managing settings stored in the Kibana keystore');
 
+const keystore = new Keystore(getKeystore());
+
 createCli(program, keystore);
 listCli(program, keystore);
 addCli(program, keystore);
@@ -50,13 +48,13 @@ removeCli(program, keystore);
 program
   .command('help <command>')
   .description('get the help for a specific command')
-  .action(function(cmdName) {
+  .action(function (cmdName) {
     const cmd = _.find(program.commands, { _name: cmdName });
     if (!cmd) return program.error(`unknown command ${cmdName}`);
     cmd.help();
   });
 
-program.command('*', null, { noHelp: true }).action(function(cmd) {
+program.command('*', null, { noHelp: true }).action(function (cmd) {
   program.error(`unknown command ${cmd}`);
 });
 

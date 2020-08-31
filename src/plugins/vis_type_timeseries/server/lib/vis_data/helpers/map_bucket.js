@@ -20,5 +20,5 @@
 import { getAggValue } from './get_agg_value';
 
 export function mapBucket(metric) {
-  return bucket => [bucket.key, getAggValue(bucket, metric)];
+  return (bucket) => [bucket.key, getAggValue(bucket, metric)];
 }

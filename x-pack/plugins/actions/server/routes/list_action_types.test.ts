@@ -5,12 +5,14 @@
  */
 
 import { listActionTypesRoute } from './list_action_types';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { LicenseType } from '../../../../plugins/licensing/server';
+import { actionsClientMock } from '../mocks';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -20,45 +22,44 @@ beforeEach(() => {
 
 describe('listActionTypesRoute', () => {
   it('lists action types with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     listActionTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
 
     const listTypes = [
       {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
-    const [context, req, res] = mockHandlerArguments({ listTypes }, {}, ['ok']);
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Array [
           Object {
             "enabled": true,
+            "enabledInConfig": true,
+            "enabledInLicense": true,
             "id": "1",
+            "minimumLicenseRequired": "gold",
             "name": "name",
           },
         ],
       }
     `);
-
-    expect(context.actions.listTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
@@ -66,32 +67,31 @@ describe('listActionTypesRoute', () => {
   });
 
   it('ensures the license allows listing action types', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     listActionTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
 
     const listTypes = [
       {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { actionsClient },
       {
         params: { id: '1' },
       },
@@ -104,8 +104,8 @@ describe('listActionTypesRoute', () => {
   });
 
   it('ensures the license check prevents listing action types', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -115,25 +115,24 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
 
     const listTypes = [
       {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { actionsClient },
       {
         params: { id: '1' },
       },

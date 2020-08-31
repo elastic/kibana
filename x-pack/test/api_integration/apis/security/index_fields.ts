@@ -7,7 +7,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Index Fields', () => {
@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
               'space.name',
             ];
 
-            sampleOfExpectedFields.forEach(field => expect(response.body).to.contain(field));
+            sampleOfExpectedFields.forEach((field) => expect(response.body).to.contain(field));
           });
       });
     });

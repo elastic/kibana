@@ -18,29 +18,33 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
-// eslint-disable-next-line
-import { uiActionsTestPlugin } from 'src/plugins/ui_actions/public/tests';
-import { IUiActionsApi } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../ui_actions/public';
+import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
+import { inspectorPluginMock } from '../../../inspector/public/mocks';
+import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
-import { EmbeddablePublicPlugin, IEmbeddableSetup, IEmbeddableStart } from '../plugin';
+import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
   coreSetup: CoreSetup;
   coreStart: CoreStart;
-  setup: IEmbeddableSetup;
-  doStart: (anotherCoreStart?: CoreStart) => IEmbeddableStart;
-  uiActions: IUiActionsApi;
+  setup: EmbeddableSetup;
+  doStart: (anotherCoreStart?: CoreStart) => EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
 export const testPlugin = (
   coreSetup: CoreSetup = coreMock.createSetup(),
   coreStart: CoreStart = coreMock.createStart()
 ): TestPluginReturn => {
-  const uiActions = uiActionsTestPlugin(coreSetup, coreStart);
+  const uiActions = uiActionsPluginMock.createPlugin(coreSetup, coreStart);
   const initializerContext = {} as any;
   const plugin = new EmbeddablePublicPlugin(initializerContext);
-  const setup = plugin.setup(coreSetup, { uiActions: uiActions.setup });
+  const setup = plugin.setup(coreSetup, {
+    data: dataPluginMock.createSetupContract(),
+    uiActions: uiActions.setup,
+  });
 
   return {
     plugin,
@@ -48,7 +52,11 @@ export const testPlugin = (
     coreStart,
     setup,
     doStart: (anotherCoreStart: CoreStart = coreStart) => {
-      const start = plugin.start(anotherCoreStart);
+      const start = plugin.start(anotherCoreStart, {
+        data: dataPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+        uiActions: uiActionsPluginMock.createStartContract(),
+      });
       return start;
     },
     uiActions: uiActions.doStart(coreStart),

@@ -8,30 +8,38 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
-import { getActionType } from './pagerduty';
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
+import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  getActionType,
+  PagerDutyActionType,
+  PagerDutyActionTypeExecutorOptions,
+} from './pagerduty';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: PagerDutyActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 
@@ -56,12 +64,12 @@ describe('validateConfig()', () => {
     );
   });
 
-  test('should validate and pass when the pagerduty url is whitelisted', () => {
+  test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
-        ensureWhitelistedUri: url => {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
       },
@@ -72,13 +80,13 @@ describe('validateConfig()', () => {
     ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
-        ensureWhitelistedUri: _ => {
-          throw new Error(`target url is not whitelisted`);
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not added to allowedHosts`);
         },
       },
     });
@@ -86,7 +94,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not whitelisted"`
+      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });
@@ -137,10 +145,29 @@ describe('validateParams()', () => {
       validateParams(actionType, { eventAction: 'ackynollage' });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger] but got [ackynollage]
-- [eventAction.1]: expected value to equal [resolve] but got [ackynollage]
-- [eventAction.2]: expected value to equal [acknowledge] but got [ackynollage]"
+- [eventAction.0]: expected value to equal [trigger]
+- [eventAction.1]: expected value to equal [resolve]
+- [eventAction.2]: expected value to equal [acknowledge]"
 `);
+  });
+
+  test('should validate and throw error when timestamp has spaces', () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const timestamp = `  ${randoDate}`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
+
+  test('should validate and throw error when timestamp is invalid', () => {
+    const timestamp = `1963-09-55 90:23:45`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 });
 
@@ -151,7 +178,7 @@ describe('execute()', () => {
 
   test('should succeed with minimal valid params', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -159,7 +186,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -203,7 +230,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'trigger',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -220,7 +247,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -268,7 +295,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'acknowledge',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -285,7 +312,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -324,7 +351,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'resolve',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -341,7 +368,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -374,7 +401,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury throws', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -382,7 +409,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -402,7 +429,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 429', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -410,7 +437,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -430,7 +457,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 501', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -438,7 +465,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -458,7 +485,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 418', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -466,7 +493,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,

@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { RefreshInterval } from '../../../../common';
 import { InputTimeRange } from '../types';
 
-const valueOf = function(o: any) {
+const valueOf = function (o: any) {
   if (o) return o.valueOf();
 };
 

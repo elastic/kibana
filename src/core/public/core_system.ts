@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './core.css';
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -44,14 +42,16 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
-  useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
+  requireLegacyFiles?: LegacyPlatformParams['requireLegacyFiles'];
+  requireLegacyBootstrapModule?: LegacyPlatformParams['requireLegacyBootstrapModule'];
+  requireNewPlatformShimModule?: LegacyPlatformParams['requireNewPlatformShimModule'];
 }
 
 /** @internal */
@@ -100,6 +100,7 @@ export class CoreSystem {
   private readonly rendering: RenderingService;
   private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
+  private readonly coreApp: CoreApp;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
@@ -111,7 +112,8 @@ export class CoreSystem {
       browserSupportsCsp,
       injectedMetadata,
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     } = params;
 
     this.rootDomElement = rootDomElement;
@@ -142,10 +144,12 @@ export class CoreSystem {
 
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    this.coreApp = new CoreApp(this.coreContext);
 
     this.legacy = new LegacyPlatformService({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
   }
 
@@ -159,6 +163,7 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
+      this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
@@ -175,6 +180,7 @@ export class CoreSystem {
         ]),
       });
       const application = this.application.setup({ context, http, injectedMetadata });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
@@ -210,8 +216,8 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
-      const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
+      const docLinks = this.docLinks.start({ injectedMetadata });
+      const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
@@ -241,6 +247,8 @@ export class CoreSystem {
         notifications,
         uiSettings,
       });
+
+      this.coreApp.start({ application, http, notifications, uiSettings });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
         application: pick(application, ['capabilities', 'navigateToApp']),
@@ -291,6 +299,10 @@ export class CoreSystem {
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
       });
+
+      return {
+        application,
+      };
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);
@@ -305,6 +317,7 @@ export class CoreSystem {
   public stop() {
     this.legacy.stop();
     this.plugins.stop();
+    this.coreApp.stop();
     this.notifications.stop();
     this.http.stop();
     this.integrations.stop();

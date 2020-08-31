@@ -11,11 +11,10 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
-import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -25,40 +24,45 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any()),
 });
 
-export const executeActionRoute = (
-  router: IRouter,
-  licenseState: LicenseState,
-  actionExecutor: ActionExecutorContract
-) => {
+export const executeActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: '/api/action/{id}/_execute',
+      path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
       validate: {
         body: bodySchema,
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
+
+      const actionsClient = context.actions.getActionsClient();
       const { params } = req.body;
       const { id } = req.params;
-      const body: ActionTypeExecutorResult = await actionExecutor.execute({
-        params,
-        request: req,
-        actionId: id,
-      });
-      return body
-        ? res.ok({
-            body,
-          })
-        : res.noContent();
+      try {
+        const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
+          params,
+          actionId: id,
+        });
+        return body
+          ? res.ok({
+              body,
+            })
+          : res.noContent();
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

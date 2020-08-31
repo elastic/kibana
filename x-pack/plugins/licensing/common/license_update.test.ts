@@ -11,7 +11,7 @@ import { ILicense } from './types';
 import { createLicenseUpdate } from './license_update';
 import { licenseMock } from './licensing.mock';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const stop$ = new Subject();
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
@@ -94,7 +94,7 @@ describe('licensing update', () => {
     let firstCall = true;
     const fetcher = jest.fn().mockImplementation(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           if (firstCall) {
             firstCall = false;
             setTimeout(() => resolve(licenseMock.createLicense()), delayMs);
@@ -106,7 +106,7 @@ describe('licensing update', () => {
     const trigger$ = new Subject();
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     const values: ILicense[] = [];
-    license$.subscribe(license => values.push(license));
+    license$.subscribe((license) => values.push(license));
 
     trigger$.next();
     trigger$.next();
@@ -136,7 +136,7 @@ describe('licensing update', () => {
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     const values: ILicense[] = [];
-    license$.subscribe(license => values.push(license));
+    license$.subscribe((license) => values.push(license));
 
     stop$.next();
     trigger$.next();
@@ -162,7 +162,7 @@ describe('licensing update', () => {
 
     const { license$, refreshManually } = createLicenseUpdate(trigger$, stop$, fetcher);
     let fromObservable;
-    license$.subscribe(license => (fromObservable = license));
+    license$.subscribe((license) => (fromObservable = license));
 
     const licenseResult = await refreshManually();
     expect(licenseResult.uid).toBe('first');

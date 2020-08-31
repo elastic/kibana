@@ -5,108 +5,34 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SAMLLoginStep } from '../../authentication';
-import { createCustomResourceResponse } from '.';
+import { SAMLLogin } from '../../authentication';
+import { SAMLAuthenticationProvider } from '../../authentication/providers';
 import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
-  router.get(
-    {
-      path: '/api/security/saml/capture-url-fragment',
-      validate: false,
-      options: { authRequired: false },
-    },
-    (context, request, response) => {
-      // We're also preventing `favicon.ico` request since it can cause new SAML handshake.
-      return response.custom(
-        createCustomResourceResponse(
-          `
-          <!DOCTYPE html>
-          <title>Kibana SAML Login</title>
-          <link rel="icon" href="data:,">
-          <script src="${basePath.serverBasePath}/api/security/saml/capture-url-fragment.js"></script>
-        `,
-          'text/html',
-          csp.header
-        )
-      );
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/security/saml/capture-url-fragment.js',
-      validate: false,
-      options: { authRequired: false },
-    },
-    (context, request, response) => {
-      return response.custom(
-        createCustomResourceResponse(
-          `
-          window.location.replace(
-            '${basePath.serverBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
-          );
-        `,
-          'text/javascript',
-          csp.header
-        )
-      );
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/security/saml/start',
-      validate: {
-        query: schema.object({ redirectURLFragment: schema.string() }),
-      },
-      options: { authRequired: false },
-    },
-    async (context, request, response) => {
-      try {
-        const authenticationResult = await authc.login(request, {
-          provider: 'saml',
-          value: {
-            step: SAMLLoginStep.RedirectURLFragmentCaptured,
-            redirectURLFragment: request.query.redirectURLFragment,
-          },
-        });
-
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        if (authenticationResult.redirected()) {
-          return response.redirected({ headers: { location: authenticationResult.redirectURL! } });
-        }
-
-        return response.unauthorized();
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
-      }
-    }
-  );
-
+export function defineSAMLRoutes({ router, logger, authc }: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/saml/callback',
       validate: {
-        body: schema.object({
-          SAMLResponse: schema.string(),
-          RelayState: schema.maybe(schema.string()),
-        }),
+        body: schema.object(
+          { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
+          { unknowns: 'ignore' }
+        ),
       },
-      options: { authRequired: false },
+      options: { authRequired: false, xsrfRequired: false },
     },
     async (context, request, response) => {
       try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
+        // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
         const authenticationResult = await authc.login(request, {
-          provider: 'saml',
+          provider: { type: SAMLAuthenticationProvider.type },
           value: {
-            step: SAMLLoginStep.SAMLResponseReceived,
+            type: SAMLLogin.LoginWithSAMLResponse,
             samlResponse: request.body.SAMLResponse,
+            relayState: request.body.RelayState,
           },
         });
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from '../../../../../src/core/server';
+import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -34,7 +34,9 @@ export class Tokens {
    */
   private readonly logger: Logger;
 
-  constructor(private readonly options: Readonly<{ client: IClusterClient; logger: Logger }>) {
+  constructor(
+    private readonly options: Readonly<{ client: ILegacyClusterClient; logger: Logger }>
+  ) {
     this.logger = options.logger;
   }
 
@@ -103,8 +105,15 @@ export class Tokens {
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
-        // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
-        invalidationError = err;
+
+        // When using already deleted refresh token, Elasticsearch responds with 404 and a body that
+        // shows that no tokens were invalidated.
+        if (getErrorStatusCode(err) === 404 && err.body?.invalidated_tokens === 0) {
+          invalidatedTokensCount = err.body.invalidated_tokens;
+        } else {
+          // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
+          invalidationError = err;
+        }
       }
 
       if (invalidatedTokensCount === 0) {
@@ -128,7 +137,14 @@ export class Tokens {
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${err.message}`);
-        invalidationError = err;
+
+        // When using already deleted access token, Elasticsearch responds with 404 and a body that
+        // shows that no tokens were invalidated.
+        if (getErrorStatusCode(err) === 404 && err.body?.invalidated_tokens === 0) {
+          invalidatedTokensCount = err.body.invalidated_tokens;
+        } else {
+          invalidationError = err;
+        }
       }
 
       if (invalidatedTokensCount === 0) {

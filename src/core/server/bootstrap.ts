@@ -55,6 +55,11 @@ export async function bootstrap({
     onRootShutdown('Kibana REPL mode can only be run in development mode.');
   }
 
+  if (cliArgs.optimize) {
+    // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
+    return;
+  }
+
   const env = Env.createDefault({
     configs,
     cliArgs,
@@ -71,7 +76,7 @@ export async function bootstrap({
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', msg => {
+  process.on('message', (msg) => {
     if (!msg || msg.reloadLoggingConfig !== true) {
       return;
     }
@@ -105,12 +110,6 @@ export async function bootstrap({
     await root.start();
   } catch (err) {
     await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
   }
 }
 

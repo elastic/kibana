@@ -18,7 +18,7 @@
  */
 import { changeTimeFilter } from './change_time_filter';
 import { timefilterServiceMock } from '../timefilter_service.mock';
-import { TimeRange, esFilters } from '../../../../common';
+import { TimeRange, RangeFilter } from '../../../../common';
 
 const timefilterMock = timefilterServiceMock.createSetupContract();
 const timefilter = timefilterMock.timefilter;
@@ -41,7 +41,7 @@ describe('changeTimeFilter()', () => {
 
   test('should change the timefilter to match the range gt/lt', () => {
     const filter: any = { range: { '@timestamp': { gt, lt } } };
-    changeTimeFilter(timefilter, filter as esFilters.RangeFilter);
+    changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();
 
@@ -51,7 +51,7 @@ describe('changeTimeFilter()', () => {
 
   test('should change the timefilter to match the range gte/lte', () => {
     const filter: any = { range: { '@timestamp': { gte: gt, lte: lt } } };
-    changeTimeFilter(timefilter, filter as esFilters.RangeFilter);
+    changeTimeFilter(timefilter, filter as RangeFilter);
 
     const { to, from } = timefilter.getTime();
 

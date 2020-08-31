@@ -19,14 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'visEditor', 'visChart']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/22322
-  describe.skip('vertical bar chart with index without time filter', function() {
+  describe('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {
@@ -46,22 +45,23 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.selectField('@timestamp');
       await PageObjects.visEditor.setInterval('3h', { type: 'custom' });
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.visEditor.clickGo();
     };
 
     before(initBarChart);
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function() {
+    it('should show correct chart', async function () {
       const expectedChartValues = [
         37,
         202,
@@ -100,7 +100,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       // this is only the first page of the tabular data.
       const expectedChartData = [
         ['2015-09-20 00:00', '37'],
@@ -129,7 +129,7 @@ export default function({ getService, getPageObjects }) {
       await inspector.expectTableData(expectedChartData);
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
@@ -139,57 +139,25 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -248,10 +216,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with split series', function() {
+    describe('vertical bar with split series', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -268,10 +236,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with multiple splits', function() {
+    describe('vertical bar with multiple splits', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -309,7 +277,7 @@ export default function({ getService, getPageObjects }) {
         expect(legendEntries).to.eql(expectedEntries);
       });
 
-      it('should show correct series when disabling first agg', async function() {
+      it('should show correct series when disabling first agg', async function () {
         await PageObjects.visEditor.toggleDisabledAgg(3);
         await PageObjects.visEditor.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -320,10 +288,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with derivative', function() {
+    describe('vertical bar with derivative', function () {
       before(initBarChart);
 
-      it('should show correct series', async function() {
+      it('should show correct series', async function () {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.toggleOpenEditor(1);
         await PageObjects.visEditor.selectAggregation('Derivative', 'metrics');

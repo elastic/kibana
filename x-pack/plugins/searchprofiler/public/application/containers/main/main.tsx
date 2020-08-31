@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import _ from 'lodash';
 
 import {
   EuiPage,
@@ -34,7 +34,7 @@ import { useProfilerActionContext, useProfilerReadContext } from '../../contexts
 import { hasAggregations, hasSearch } from '../../utils';
 
 export const Main = () => {
-  const { getLicenseStatus } = useAppContext();
+  const { getLicenseStatus, notifications } = useAppContext();
 
   const {
     activeTab,
@@ -43,14 +43,23 @@ export const Main = () => {
     pristine,
     profiling,
   } = useProfilerReadContext();
+
   const dispatch = useProfilerActionContext();
+
+  const handleProfileTreeError = (e: Error) => {
+    notifications.addError(e, {
+      title: i18n.translate('xpack.searchProfiler.profileTreeErrorRenderTitle', {
+        defaultMessage: 'Profile data cannot be parsed.',
+      }),
+    });
+  };
 
   const setActiveTab = useCallback(
     (target: Targets) => dispatch({ type: 'setActiveTab', value: target }),
     [dispatch]
   );
 
-  const onHighlight = useCallback(value => dispatch({ type: 'setHighlightDetails', value }), [
+  const onHighlight = useCallback((value) => dispatch({ type: 'setHighlightDetails', value }), [
     dispatch,
   ]);
 
@@ -71,7 +80,12 @@ export const Main = () => {
     if (activeTab) {
       return (
         <div className="prfDevTool__main__profiletree">
-          <ProfileTree onHighlight={onHighlight} target={activeTab} data={currentResponse} />
+          <ProfileTree
+            onDataInitError={handleProfileTreeError}
+            onHighlight={onHighlight}
+            target={activeTab}
+            data={currentResponse}
+          />
         </div>
       );
     }

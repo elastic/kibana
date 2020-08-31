@@ -56,7 +56,7 @@ export class LoadingCountService implements CoreService<LoadingCountSetup, Loadi
           .pipe(
             distinctUntilChanged(),
 
-            tap(count => {
+            tap((count) => {
               if (count < 0) {
                 throw new Error(
                   'Observables passed to loadingCount.add() must only emit positive numbers'
@@ -73,10 +73,10 @@ export class LoadingCountService implements CoreService<LoadingCountSetup, Loadi
             map(([prev, next]) => next - prev)
           )
           .subscribe({
-            next: delta => {
+            next: (delta) => {
               this.loadingCount$.next(this.loadingCount$.getValue() + delta);
             },
-            error: error => fatalErrors.add(error),
+            error: (error) => fatalErrors.add(error),
           });
       },
     };

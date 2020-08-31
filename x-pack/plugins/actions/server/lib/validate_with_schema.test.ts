@@ -9,12 +9,17 @@ import { schema } from '@kbn/config-schema';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
-const executor: ExecutorType = async options => {
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
 test('should validate when there are no validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    executor,
+  };
   const testValue = { any: ['old', 'thing'] };
 
   const result = validateConfig(actionType, testValue);
@@ -22,7 +27,13 @@ test('should validate when there are no validators', () => {
 });
 
 test('should validate when there are no individual validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor, validate: {} };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    executor,
+    validate: {},
+  };
 
   let result;
   const testValue = { any: ['old', 'thing'] };
@@ -38,10 +49,11 @@ test('should validate when there are no individual validators', () => {
 });
 
 test('should validate when validators return incoming value', () => {
-  const selfValidator = { validate: (value: any) => value };
+  const selfValidator = { validate: (value: Record<string, unknown>) => value };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: selfValidator,
@@ -64,11 +76,12 @@ test('should validate when validators return incoming value', () => {
 });
 
 test('should validate when validators return different values', () => {
-  const returnedValue: any = { something: { shaped: 'differently' } };
-  const selfValidator = { validate: (value: any) => returnedValue };
+  const returnedValue = { something: { shaped: 'differently' } };
+  const selfValidator = { validate: () => returnedValue };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: selfValidator,
@@ -92,13 +105,14 @@ test('should validate when validators return different values', () => {
 
 test('should throw with expected error when validators fail', () => {
   const erroringValidator = {
-    validate: (value: any) => {
+    validate: () => {
       throw new Error('test error');
     },
   };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: erroringValidator,
@@ -127,6 +141,7 @@ test('should work with @kbn/config-schema', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: testSchema,

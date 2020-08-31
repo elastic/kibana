@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from './url';
+import { modifyUrl, isRelativeUrl } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
@@ -32,7 +32,7 @@ describe('modifyUrl()', () => {
 
   test('supports modifying the passed object', () => {
     expect(
-      modifyUrl('http://localhost', parsed => {
+      modifyUrl('http://localhost', (parsed) => {
         parsed.port = '9999';
         parsed.auth = 'foo:bar';
         return parsed;
@@ -42,7 +42,7 @@ describe('modifyUrl()', () => {
 
   test('supports changing pathname', () => {
     expect(
-      modifyUrl('http://localhost/some/path', parsed => {
+      modifyUrl('http://localhost/some/path', (parsed) => {
         parsed.pathname += '/subpath';
         return parsed;
       })
@@ -51,7 +51,7 @@ describe('modifyUrl()', () => {
 
   test('supports changing port', () => {
     expect(
-      modifyUrl('http://localhost:5601', parsed => {
+      modifyUrl('http://localhost:5601', (parsed) => {
         parsed.port = (Number(parsed.port!) + 1).toString();
         return parsed;
       })
@@ -60,12 +60,26 @@ describe('modifyUrl()', () => {
 
   test('supports changing protocol', () => {
     expect(
-      modifyUrl('http://localhost', parsed => {
+      modifyUrl('http://localhost', (parsed) => {
         parsed.protocol = 'mail';
         parsed.slashes = false;
         parsed.pathname = null;
         return parsed;
       })
     ).toEqual('mail:localhost');
+  });
+});
+
+describe('isRelativeUrl()', () => {
+  test('returns "true" for a relative URL', () => {
+    expect(isRelativeUrl('good')).toBe(true);
+    expect(isRelativeUrl('/good')).toBe(true);
+    expect(isRelativeUrl('/good/even/better')).toBe(true);
+  });
+  test('returns "false" for a non-relative URL', () => {
+    expect(isRelativeUrl('http://evil.com')).toBe(false);
+    expect(isRelativeUrl('//evil.com')).toBe(false);
+    expect(isRelativeUrl('///evil.com')).toBe(false);
+    expect(isRelativeUrl(' //evil.com')).toBe(false);
   });
 });

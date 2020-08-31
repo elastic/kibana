@@ -73,7 +73,7 @@ export const getAll = () => [
   },
 ];
 
-export const getAllById = () => _.indexBy(exports.getAll(), 'id');
+export const getAllById = () => _.keyBy(exports.getAll(), 'id');
 
 export const defaults = {
   icon: 'question',

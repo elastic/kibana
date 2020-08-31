@@ -10,7 +10,7 @@ const reservedPrefix = 'reserved_';
 const basePrivilegeNames = ['all', 'read'];
 const globalBasePrivileges = [...basePrivilegeNames];
 const spaceBasePrivileges = basePrivilegeNames.map(
-  privilegeName => `${spacePrefix}${privilegeName}`
+  (privilegeName) => `${spacePrefix}${privilegeName}`
 );
 const deserializeFeaturePrivilegeRegexp = new RegExp(
   `^${featurePrefix}([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_-]+)$`

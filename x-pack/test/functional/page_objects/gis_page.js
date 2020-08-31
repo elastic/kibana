@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -16,6 +17,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const renderable = getService('renderable');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -86,8 +88,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
-      const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
+        const tableOfContents = await testSubjects.find('mapLayerTOC');
         await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
@@ -131,14 +133,29 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openNewMap() {
       log.debug(`Open new Map`);
 
-      await this.gotoMapListingPage();
-      await testSubjects.click('newMapLink');
+      // Navigate directly because we don't need to go through the map listing
+      // page. The listing page is skipped if there are no saved objects
+      await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
+      await renderable.waitForRender();
     }
 
-    async saveMap(name) {
+    async saveMap(name, uncheckReturnToOriginModeSwitch = false) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
+      if (uncheckReturnToOriginModeSwitch) {
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
+        if (!redirectToOriginCheckboxExists) {
+          throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
+        }
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
+      }
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    }
+
+    async clickSaveAndReturnButton() {
+      await testSubjects.click('mapSaveAndReturnButton');
     }
 
     async expectMissingSaveButton() {
@@ -159,7 +176,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage');
+      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
       return exists;
     }
 
@@ -197,7 +214,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -209,8 +226,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
     }
 
     async isSetViewPopoverOpen() {
@@ -451,7 +468,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(`[data-test-subj="${dataTestSubjName}"]`);
+      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
@@ -511,13 +528,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async selectGeoJsonUploadSource() {
       log.debug(`Select upload geojson source`);
-      await testSubjects.click('uploadedGeoJson');
+      await testSubjects.click('uploadGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -609,7 +624,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find(statsRow => {
+      const statsRow = stats.find((statsRow) => {
         return statsRow[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {
@@ -639,6 +654,40 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error('Tooltip is not locked at position');
         }
       });
+    }
+
+    async setStyleByValue(styleName, fieldName) {
+      await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
+      await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
+    }
+
+    async selectCustomColorRamp(styleName) {
+      // open super select menu
+      await testSubjects.click(`colorMapSelect_${styleName}`);
+      // Click option
+      await testSubjects.click(`colorMapSelectOption_CUSTOM_COLOR_MAP`);
+    }
+
+    async getCategorySuggestions() {
+      return await comboBox.getOptionsList(`colorStopInput1`);
+    }
+
+    async enableAutoFitToBounds() {
+      await testSubjects.click('openSettingsButton');
+      const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
+      if (!isEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('autoFitToDataBoundsSwitch');
+          const ensureEnabled = await testSubjects.getAttribute(
+            'autoFitToDataBoundsSwitch',
+            'checked'
+          );
+          if (!ensureEnabled) {
+            throw new Error('autoFitToDataBoundsSwitch is not enabled');
+          }
+        });
+      }
+      await testSubjects.click('mapSettingSubmitButton');
     }
   }
   return new GisPage();

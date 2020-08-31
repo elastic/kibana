@@ -19,16 +19,25 @@
 
 import { createFilterAction } from './apply_filter_action';
 import { expectErrorAsync } from '../../tests/helpers';
+import { defaultTrigger } from '../../../../ui_actions/public/triggers';
 
-test('has APPLY_FILTER_ACTION type and id', () => {
+test('has ACTION_APPLY_FILTER type and id', () => {
   const action = createFilterAction();
-  expect(action.id).toBe('APPLY_FILTER_ACTION');
-  expect(action.type).toBe('APPLY_FILTER_ACTION');
+  expect(action.id).toBe('ACTION_APPLY_FILTER');
+  expect(action.type).toBe('ACTION_APPLY_FILTER');
 });
 
 test('has expected display name', () => {
   const action = createFilterAction();
   expect(action.getDisplayName({} as any)).toMatchInlineSnapshot(`"Apply filter to current view"`);
+});
+
+describe('getIconType()', () => {
+  test('returns "filter" icon', async () => {
+    const action = createFilterAction();
+    const result = action.getIconType({} as any);
+    expect(result).toBe('filter');
+  });
 });
 
 describe('isCompatible()', () => {
@@ -43,6 +52,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
+      trigger: defaultTrigger,
     });
     expect(result).toBe(true);
   });
@@ -58,6 +68,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
+      trigger: defaultTrigger,
     });
     expect(result).toBe(false);
   });
@@ -111,6 +122,7 @@ describe('execute()', () => {
       await action.execute({
         embeddable,
         filters: ['FILTER' as any],
+        trigger: defaultTrigger,
       });
 
       expect(root.updateInput).toHaveBeenCalledTimes(1);

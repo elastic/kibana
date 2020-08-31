@@ -64,7 +64,7 @@ function recursiveApplyChanges<
   TSource extends Record<string, any>
 >(destination: TDestination, source: TSource): TDestination {
   return Object.keys(destination)
-    .map(key => {
+    .map((key) => {
       const orig = destination[key];
       const changed = source[key];
       if (changed == null) {

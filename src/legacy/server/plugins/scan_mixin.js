@@ -19,5 +19,5 @@
 import { Plugin } from './lib';
 
 export async function scanMixin(kbnServer) {
-  kbnServer.plugins = kbnServer.pluginSpecs.map(spec => new Plugin(kbnServer, spec));
+  kbnServer.plugins = kbnServer.pluginSpecs.map((spec) => new Plugin(kbnServer, spec));
 }

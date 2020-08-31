@@ -25,7 +25,7 @@ export const registerSection = (id, name) => ({
   name,
 });
 
-export const unregisterSection = id => ({
+export const unregisterSection = (id) => ({
   type: ActionTypes.UNREGISTER_SECTION,
   id,
 });

@@ -19,9 +19,9 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import { get } from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import { get, toPath } from 'lodash';
 import { Cluster } from '@kbn/es';
+import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';
@@ -38,14 +38,22 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
-    esArgs,
+    esArgs: customEsArgs = [],
+    esEnvVars,
+    clusterName: customClusterName = 'es-test-cluster',
     ssl,
   } = options;
 
-  const randomHash = Math.random()
-    .toString(36)
-    .substring(2);
-  const clusterName = `test-${randomHash}`;
+  const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
+
+  const esArgs = [
+    `cluster.name=${clusterName}`,
+    `http.port=${port}`,
+    'discovery.type=single-node',
+    `transport.port=${esTestConfig.getTransportPort()}`,
+    ...customEsArgs,
+  ];
+
   const config = {
     version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
@@ -55,7 +63,6 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath,
     esArgs,
   };
-  const transportPort = esTestConfig.getTransportPort();
 
   const cluster = new Cluster({ log, ssl });
 
@@ -67,7 +74,7 @@ export function createLegacyEsTestCluster(options = {}) {
       return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = [], esEnvVars) {
+    async start() {
       let installPath;
 
       if (esFrom === 'source') {
@@ -86,13 +93,7 @@ export function createLegacyEsTestCluster(options = {}) {
 
       await cluster.start(installPath, {
         password: config.password,
-        esArgs: [
-          `cluster.name=${clusterName}`,
-          `http.port=${port}`,
-          'discovery.type=single-node',
-          `transport.port=${transportPort}`,
-          ...esArgs,
-        ],
+        esArgs,
         esEnvVars,
       });
     }

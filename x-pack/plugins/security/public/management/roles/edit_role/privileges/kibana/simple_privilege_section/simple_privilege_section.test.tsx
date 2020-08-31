@@ -7,24 +7,53 @@
 import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { Role } from '../../../../../../../common/model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
-  const kibanaPrivileges = new KibanaPrivileges({
-    features: {
-      feature1: {
-        all: ['*'],
-        read: ['read'],
+  const features = [
+    new SecuredFeature({
+      id: 'feature1',
+      name: 'Feature 1',
+      app: ['app'],
+      icon: 'spacesApp',
+      privileges: {
+        all: {
+          app: ['app'],
+          savedObject: {
+            all: ['foo'],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
+        read: {
+          app: ['app'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
       },
+    }),
+  ] as SecuredFeature[];
+
+  const kibanaPrivileges = new KibanaPrivileges(
+    {
+      features: {
+        feature1: {
+          all: ['*'],
+          read: ['read'],
+        },
+      },
+      global: {},
+      space: {},
+      reserved: {},
     },
-    global: {},
-    space: {},
-    reserved: {},
-  });
+    features
+  );
 
   const role = {
     name: '',
@@ -40,34 +69,9 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     kibanaPrivileges,
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(kibanaPrivileges),
-    features: [
-      {
-        id: 'feature1',
-        name: 'Feature 1',
-        app: ['app'],
-        icon: 'spacesApp',
-        privileges: {
-          all: {
-            app: ['app'],
-            savedObject: {
-              all: ['foo'],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-          read: {
-            app: ['app'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-        },
-      },
-    ] as Feature[],
+    features,
     onChange: jest.fn(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
     role,
   };

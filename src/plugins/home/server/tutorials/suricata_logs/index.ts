@@ -37,7 +37,8 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.suricataLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',
     }),
@@ -50,7 +51,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-suricata.html',
       },
     }),
-    // euiIconType: 'logoSuricata',
+    euiIconType: '/plugins/home/assets/logos/suricata.svg',
     artifacts: {
       dashboards: [
         {
@@ -66,7 +67,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/suricata_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

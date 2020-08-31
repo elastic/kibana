@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import { createLegacyAPI, mockRouteContextWithInvalidLicense } from '../__fixtures__';
+import { mockRouteContextWithInvalidLicense } from '../__fixtures__';
 import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
-import { httpServiceMock, httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -17,14 +17,14 @@ describe('GET /internal/spaces/_active_space', () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpServiceMock.createRouter();
 
-    const legacyAPI = createLegacyAPI();
+    const coreStart = coreMock.createStart();
 
-    const service = new SpacesService(null as any, () => legacyAPI);
+    const service = new SpacesService(null as any);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: null,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

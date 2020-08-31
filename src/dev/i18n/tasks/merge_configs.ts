@@ -27,7 +27,7 @@ export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
 
   const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
 
-  return configPaths.map(configPath => ({
+  return configPaths.map((configPath) => ({
     task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
       try {
         context.config = await assignConfigFromPath(context.config, configPath);

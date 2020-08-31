@@ -7,7 +7,7 @@
 import { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
 
 describe('#canUserChangePassword', () => {
-  ['reserved', 'native'].forEach(realm => {
+  ['reserved', 'native'].forEach((realm) => {
     it(`returns true for users in the ${realm} realm`, () => {
       expect(
         canUserChangePassword({

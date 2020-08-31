@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { cloneDeep, isEqual, isPlainObject, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { cloneDeep, isEqual, isPlainObject } from 'lodash';
 import { State } from './state';
 
 export const stateMonitorFactory = {
@@ -57,7 +58,7 @@ function stateMonitor<TStateDefault extends { [key: string]: unknown }>(
   }
 
   function removeIgnoredProps(innerState: TStateDefault) {
-    ignoredProps.forEach(path => {
+    ignoredProps.forEach((path) => {
       set(innerState, path, true);
     });
     return innerState;
@@ -79,7 +80,7 @@ function stateMonitor<TStateDefault extends { [key: string]: unknown }>(
     if (!changeHandlers) {
       throw new Error('Change handlers is undefined, this object has been destroyed');
     }
-    changeHandlers.forEach(changeHandler => {
+    changeHandlers.forEach((changeHandler) => {
       changeHandler(status, type, keys);
     });
   }

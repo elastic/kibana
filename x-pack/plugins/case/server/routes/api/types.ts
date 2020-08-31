@@ -4,33 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { IRouter } from 'src/core/server';
 import {
-  CommentSchema,
-  NewCaseSchema,
-  NewCommentSchema,
-  UpdatedCaseSchema,
-  UpdatedCommentSchema,
-  UserSchema,
-} from './schema';
+  CaseConfigureServiceSetup,
+  CaseServiceSetup,
+  CaseUserActionServiceSetup,
+} from '../../services';
 
-export type NewCaseType = TypeOf<typeof NewCaseSchema>;
-export type NewCommentFormatted = TypeOf<typeof CommentSchema>;
-export type NewCommentType = TypeOf<typeof NewCommentSchema>;
-export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
-export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
-export type UserType = TypeOf<typeof UserSchema>;
-
-export interface NewCaseFormatted extends NewCaseType {
-  created_at: number;
-  created_by: UserType;
+export interface RouteDeps {
+  caseConfigureService: CaseConfigureServiceSetup;
+  caseService: CaseServiceSetup;
+  userActionService: CaseUserActionServiceSetup;
+  router: IRouter;
 }
 
-export interface UpdatedCaseType {
-  assignees?: UpdatedCaseTyped['assignees'];
-  description?: UpdatedCaseTyped['description'];
-  title?: UpdatedCaseTyped['title'];
-  state?: UpdatedCaseTyped['state'];
-  tags?: UpdatedCaseTyped['tags'];
-  case_type?: UpdatedCaseTyped['case_type'];
+export enum SortFieldCase {
+  closedAt = 'closed_at',
+  createdAt = 'created_at',
+  status = 'status',
+}
+
+export interface TotalCommentByCase {
+  caseId: string;
+  totalComments: number;
 }

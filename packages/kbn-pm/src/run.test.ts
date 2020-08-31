@@ -18,9 +18,13 @@
  */
 
 import { resolve } from 'path';
+
 import { ICommand, ICommandConfig } from './commands';
 import { runCommand } from './run';
 import { Project } from './utils/project';
+import { log } from './utils/log';
+
+log.setLogLevel('silent');
 
 const rootPath = resolve(`${__dirname}/utils/__fixtures__/kibana`);
 
@@ -51,11 +55,6 @@ beforeEach(() => {
     options: {},
     rootPath,
   };
-
-  // Reduce the noise that comes from the run command.
-  jest.spyOn(console, 'log').mockImplementation(() => {
-    // noop
-  });
 });
 
 test('passes all found projects to the command if no filter is specified', async () => {

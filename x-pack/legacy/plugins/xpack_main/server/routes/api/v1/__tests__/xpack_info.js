@@ -58,7 +58,6 @@ describe('XPackInfo routes', () => {
           showLinks: false,
           allowRoleDocumentLevelSecurity: false,
           allowRoleFieldLevelSecurity: false,
-          linksMessage: 'Message',
         },
       },
     });
@@ -79,7 +78,6 @@ describe('XPackInfo routes', () => {
           show_links: false,
           allow_role_document_level_security: false,
           allow_role_field_level_security: false,
-          links_message: 'Message',
         },
       },
     });

@@ -17,23 +17,23 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { overwrite } from '../../helpers';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
 
 export function splitByTerms(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const direction = series.terms_direction || 'desc';
-      const metric = series.metrics.find(item => item.id === series.terms_order_by);
-      set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
-      set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
+      const metric = series.metrics.find((item) => item.id === series.terms_order_by);
+      overwrite(doc, `aggs.${series.id}.terms.field`, series.terms_field);
+      overwrite(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       if (series.terms_include) {
-        set(doc, `aggs.${series.id}.terms.include`, series.terms_include);
+        overwrite(doc, `aggs.${series.id}.terms.include`, series.terms_include);
       }
       if (series.terms_exclude) {
-        set(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
+        overwrite(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
       }
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${series.terms_order_by}-SORT`;
@@ -42,12 +42,12 @@ export function splitByTerms(req, panel, series) {
           series.terms_order_by,
           sortAggKey
         );
-        set(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: direction });
-        set(doc, `aggs.${series.id}.aggs`, { [sortAggKey]: fn(metric) });
+        overwrite(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: direction });
+        overwrite(doc, `aggs.${series.id}.aggs`, { [sortAggKey]: fn(metric) });
       } else if (['_key', '_count'].includes(series.terms_order_by)) {
-        set(doc, `aggs.${series.id}.terms.order`, { [series.terms_order_by]: direction });
+        overwrite(doc, `aggs.${series.id}.terms.order`, { [series.terms_order_by]: direction });
       } else {
-        set(doc, `aggs.${series.id}.terms.order`, { _count: direction });
+        overwrite(doc, `aggs.${series.id}.terms.order`, { _count: direction });
       }
     }
     return next(doc);
