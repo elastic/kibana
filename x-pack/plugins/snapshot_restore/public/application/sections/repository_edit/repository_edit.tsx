@@ -69,7 +69,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/${section}/${name}`);
+      history.push(
+        encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+      );
     }
   };
 

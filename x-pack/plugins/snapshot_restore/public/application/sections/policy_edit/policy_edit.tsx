@@ -82,12 +82,12 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/policies/${name}`);
+      history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
     }
   };
 
   const onCancel = () => {
-    history.push(`${BASE_PATH}/policies/${name}`);
+    history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
   };
 
   const renderLoading = () => {
