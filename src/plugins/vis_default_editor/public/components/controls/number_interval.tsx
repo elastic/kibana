@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import {
   EuiFieldNumber,
@@ -57,7 +57,7 @@ const label = (
 );
 
 const autoInterval = 'auto';
-const isAutoInterval = (value: unknown) => Boolean(value === autoInterval);
+const isAutoInterval = (value: unknown) => value === autoInterval;
 
 const selectIntervalPlaceholder = i18n.translate(
   'visDefaultEditor.controls.numberInterval.selectIntervalPlaceholder',
@@ -84,7 +84,7 @@ function NumberIntervalParamEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<string | undefined>) {
-  const [autoChecked, setAutoChecked] = useState(isAutoInterval(value));
+  const isAutoChecked = isAutoInterval(value);
   const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
   const isValid =
@@ -103,10 +103,9 @@ function NumberIntervalParamEditor({
     (e) => {
       const isAutoSwitchChecked = e.target.checked;
 
-      setAutoChecked(isAutoSwitchChecked);
       setValue(isAutoSwitchChecked ? autoInterval : '');
     },
-    [setAutoChecked, setValue]
+    [setValue]
   );
 
   return (
@@ -122,24 +121,24 @@ function NumberIntervalParamEditor({
           <EuiSwitch
             label={useAutoIntervalLabel}
             onChange={onAutoSwitchChange}
-            checked={autoChecked}
+            checked={isAutoChecked}
             compressed
             data-test-subj={`visEditorIntervalSwitch${agg.id}`}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldNumber
-            value={value}
+            value={!isAutoChecked ? value : ''}
             min={min}
             step={base || 'any'}
             data-test-subj={`visEditorInterval${agg.id}`}
             isInvalid={showValidation && !isValid}
             onChange={onChange}
             onBlur={setTouched}
-            disabled={autoChecked}
+            disabled={isAutoChecked}
             fullWidth
             compressed
-            placeholder={autoChecked ? autoIntervalIsUsedPlaceholder : selectIntervalPlaceholder}
+            placeholder={isAutoChecked ? autoIntervalIsUsedPlaceholder : selectIntervalPlaceholder}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
