@@ -50,6 +50,16 @@ export interface ResolverUIState {
    * `nodeID` of the selected node
    */
   readonly selectedNode: string | null;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   */
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -198,7 +208,12 @@ export interface DataState {
    * The id used for the pending request, if there is one.
    */
   readonly pendingRequestDatabaseDocumentID?: string;
-  readonly resolverComponentInstanceID: string | undefined;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
+   */
+  readonly resolverComponentInstanceID?: string;
 
   /**
    * The parameters and response from the last successful request.
@@ -510,8 +525,9 @@ export interface ResolverProps {
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+
   /**
-   * A string literal describing where in the application resolver is located.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
