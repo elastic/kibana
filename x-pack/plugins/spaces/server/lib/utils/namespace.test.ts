@@ -4,29 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockNamespaceIdToString, mockNamespaceStringToId } from './__mocks__';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from './namespace';
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('#spaceIdToNamespace', () => {
-  it('returns result of namespaceStringToId', () => {
-    mockNamespaceStringToId.mockReturnValue('bar');
+  it('converts the default space to undefined', () => {
+    expect(spaceIdToNamespace(DEFAULT_SPACE_ID)).toBeUndefined();
+  });
 
-    const result = spaceIdToNamespace('foo');
-    expect(mockNamespaceStringToId).toHaveBeenCalledWith('foo');
-    expect(result).toEqual('bar');
+  it('returns non-default spaces as-is', () => {
+    expect(spaceIdToNamespace('foo')).toEqual('foo');
+  });
+
+  it('throws an error when a spaceId is not provided', () => {
+    // @ts-ignore ts knows this isn't right
+    expect(() => spaceIdToNamespace()).toThrowErrorMatchingInlineSnapshot(`"spaceId is required"`);
+
+    // @ts-ignore ts knows this isn't right
+    expect(() => spaceIdToNamespace(null)).toThrowErrorMatchingInlineSnapshot(
+      `"spaceId is required"`
+    );
+
+    expect(() => spaceIdToNamespace('')).toThrowErrorMatchingInlineSnapshot(
+      `"spaceId is required"`
+    );
   });
 });
 
 describe('#namespaceToSpaceId', () => {
-  it('returns result of namespaceIdToString', () => {
-    mockNamespaceIdToString.mockReturnValue('bar');
+  it('returns the default space id for undefined namespaces', () => {
+    expect(namespaceToSpaceId(undefined)).toEqual(DEFAULT_SPACE_ID);
+  });
 
-    const result = namespaceToSpaceId('foo');
-    expect(mockNamespaceIdToString).toHaveBeenCalledWith('foo');
-    expect(result).toEqual('bar');
+  it('returns all other namespaces as-is', () => {
+    expect(namespaceToSpaceId('foo')).toEqual('foo');
+  });
+
+  it('throws an error when an empty string is provided', () => {
+    expect(() => namespaceToSpaceId('')).toThrowErrorMatchingInlineSnapshot(
+      `"namespace cannot be an empty string"`
+    );
   });
 });

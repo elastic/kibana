@@ -30,5 +30,3 @@ export {
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';
-
-export { namespaceIdToString, namespaceStringToId } from './namespace';

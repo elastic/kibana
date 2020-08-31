@@ -20,7 +20,6 @@ import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_
 
 jest.mock('../../../../../../src/core/server', () => {
   return {
-    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
     exportSavedObjectsToStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
   };
