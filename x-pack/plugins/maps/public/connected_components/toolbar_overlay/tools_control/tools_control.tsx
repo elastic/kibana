@@ -14,10 +14,14 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+// @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
+import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+import { DrawState } from '../../../../common/descriptor_types';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',
@@ -46,8 +50,21 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
   }
 );
 
-export class ToolsControl extends Component {
-  state = {
+interface Props {
+  cancelDraw: () => void;
+  geoFields: GeoFieldWithIndex[];
+  initiateDraw: (drawState: DrawState) => void;
+  isDrawingFilter: boolean;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class ToolsControl extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
   };
 
@@ -61,7 +78,14 @@ export class ToolsControl extends Component {
     this.setState({ isPopoverOpen: false });
   };
 
-  _initiateShapeDraw = (options) => {
+  _initiateShapeDraw = (options: {
+    actionId: string;
+    geometryLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+    geoFieldType: ES_GEO_FIELD_TYPE;
+    relation: ES_SPATIAL_RELATIONS;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.POLYGON,
       ...options,
@@ -69,7 +93,14 @@ export class ToolsControl extends Component {
     this._closePopover();
   };
 
-  _initiateBoundsDraw = (options) => {
+  _initiateBoundsDraw = (options: {
+    actionId: string;
+    geometryLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+    geoFieldType: ES_GEO_FIELD_TYPE;
+    relation: ES_SPATIAL_RELATIONS;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.BOUNDS,
       ...options,
@@ -77,7 +108,12 @@ export class ToolsControl extends Component {
     this._closePopover();
   };
 
-  _initiateDistanceDraw = (options) => {
+  _initiateDistanceDraw = (options: {
+    actionId: string;
+    filterLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.DISTANCE,
       ...options,
@@ -194,7 +230,7 @@ export class ToolsControl extends Component {
   render() {
     const toolsPopoverButton = (
       <EuiPopover
-        id="contextMenu"
+        id="toolsControlPopover"
         button={this._renderToolsButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}

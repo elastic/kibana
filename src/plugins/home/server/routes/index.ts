@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { SendRequestConfig, SendRequestResponse, sendRequest } from './send_request';
-export { UseRequestConfig, UseRequestResponse, useRequest } from './use_request';
+import { IRouter } from 'src/core/server';
+import { registerHitsStatusRoute } from './fetch_es_hits_status';
+
+export const registerRoutes = (router: IRouter) => {
+  registerHitsStatusRoute(router);
+};
