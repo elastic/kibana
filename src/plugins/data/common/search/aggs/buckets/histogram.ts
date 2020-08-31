@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { isAutoInterval, KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -28,7 +28,7 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { ExtendedBounds } from './lib/extended_bounds';
-import { autoInterval } from './_interval_options';
+import { isAutoInterval, autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
 export interface AutoBounds {
