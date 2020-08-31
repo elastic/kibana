@@ -25,7 +25,8 @@ Pull requests are made into the `master` branch and then backported when it is s
 * Breaking changes do not get backported and only go into `master`.
 * All non-breaking changes can be backported to the `<major>.x` branch.
 * Features should not be backported to a `<major>.<minor>` branch.
-* Bugs backported to a `<major>.<minor>` branch must be justified based on the severity of the bug, and the confidence of the change, and the reasoning should be included in the pull request description.
+* Bugs backported to a `<major>.<minor>` branch must be justified based on the bug's severity, the confidence of the change, and the reasoning should be included in the pull request description.
+* Documentation changes can be backported to any branch at any time.
 
 [discrete]
 === Commits and Merging
