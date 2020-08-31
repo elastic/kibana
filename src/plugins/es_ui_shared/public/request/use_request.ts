@@ -85,8 +85,7 @@ export const useRequest = <D = any, E = Error>(
     // data, to avoid doubled-up requests.
     clearPollInterval();
 
-    // Pull off request ID and increment request count.
-    const requestId = requestCountRef.current++;
+    const requestId = ++requestCountRef.current;
 
     // We don't clear error or data, so it's up to the consumer to decide whether to display the
     // "old" error/data or loading state when a new request is in-flight.
@@ -95,7 +94,7 @@ export const useRequest = <D = any, E = Error>(
     const response = await sendStatelessRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
-    const isOutdatedRequest = requestId !== requestCountRef.current - 1;
+    const isOutdatedRequest = requestId !== requestCountRef.current;
     const isUnmounted = isMounted.current === false;
 
     // Ignore outdated or irrelevant data.
@@ -121,7 +120,6 @@ export const useRequest = <D = any, E = Error>(
     // If there's a scheduled poll request, this new one will supersede it.
     clearPollInterval();
 
-    // Schedule next poll request.
     if (pollIntervalMs) {
       pollIntervalIdRef.current = setTimeout(sendRequest, pollIntervalMs);
     }
@@ -135,7 +133,8 @@ export const useRequest = <D = any, E = Error>(
   // Schedule the next poll request when the previous one completes.
   useEffect(() => {
     // When a request completes, attempt to schedule the next one. Note that we aren't re-scheduling
-    // a request whenever sendRequest's dependencies change.
+    // a request whenever sendRequest's dependencies change. isLoading isn't set to false until the
+    // initial request has completed, so we won't schedule a request on mount.
     if (!isLoading) {
       scheduleRequest();
     }
