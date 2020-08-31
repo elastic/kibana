@@ -5,9 +5,10 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getFieldsByIssueType } from './api';
+import * as i18n from './translations';
 
 interface Fields {
   [key: string]: {
@@ -18,6 +19,10 @@ interface Fields {
 
 interface Props {
   http: HttpSetup;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
   actionConnector: ActionConnector;
   issueType: string;
 }
@@ -29,6 +34,7 @@ export interface UseCreateIssueMetadata {
 
 export const useGetFieldsByIssueType = ({
   http,
+  toastNotifications,
   actionConnector,
   issueType,
 }: Props): UseCreateIssueMetadata => {
@@ -46,16 +52,31 @@ export const useGetFieldsByIssueType = ({
 
       abortCtrl.current = new AbortController();
       setIsLoading(true);
-      const res = await getFieldsByIssueType({
-        http,
-        signal: abortCtrl.current.signal,
-        connectorId: actionConnector.id,
-        id: issueType,
-      });
+      try {
+        const res = await getFieldsByIssueType({
+          http,
+          signal: abortCtrl.current.signal,
+          connectorId: actionConnector.id,
+          id: issueType,
+        });
 
-      if (!didCancel) {
-        setIsLoading(false);
-        setFields(res.data);
+        if (!didCancel) {
+          setIsLoading(false);
+          setFields(res.data ?? {});
+          if (res.status && res.status === 'error') {
+            toastNotifications.addDanger({
+              title: i18n.FIELDS_API_ERROR,
+              text: `${res.serviceMessage ?? res.message}`,
+            });
+          }
+        }
+      } catch (error) {
+        if (!didCancel) {
+          toastNotifications.addDanger({
+            title: i18n.FIELDS_API_ERROR,
+            text: error.message,
+          });
+        }
       }
     };
 
@@ -67,7 +88,7 @@ export const useGetFieldsByIssueType = ({
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [http, actionConnector, issueType]);
+  }, [http, actionConnector, issueType, toastNotifications]);
 
   return {
     isLoading,

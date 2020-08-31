@@ -117,3 +117,17 @@ export const MAPPING_FIELD_COMMENTS = i18n.translate(
     defaultMessage: 'Comments',
   }
 );
+
+export const ISSUE_TYPES_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetIssueTypesMessage',
+  {
+    defaultMessage: 'Unable to get issue types',
+  }
+);
+
+export const FIELDS_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetFieldsMessage',
+  {
+    defaultMessage: 'Unable to get fields',
+  }
+);

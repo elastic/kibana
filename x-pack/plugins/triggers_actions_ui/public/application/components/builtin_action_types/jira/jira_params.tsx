@@ -35,13 +35,15 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
-  const { http } = useAppDependencies();
+  const { http, toastNotifications } = useAppDependencies();
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
+    toastNotifications,
     actionConnector,
   });
   const { isLoading: isLoadingFields, fields } = useGetFieldsByIssueType({
     http,
+    toastNotifications,
     actionConnector,
     issueType,
   });
