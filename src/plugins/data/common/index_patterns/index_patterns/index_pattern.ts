@@ -258,6 +258,9 @@ export class IndexPattern implements IIndexPattern {
     if (!this.title && this.id) {
       this.title = this.id;
     }
+    if (response.attributes) {
+      this.attributes = response.attributes;
+    }
     this.version = response.version;
 
     return this.indexFields(forceFieldRefresh, response.fields);
