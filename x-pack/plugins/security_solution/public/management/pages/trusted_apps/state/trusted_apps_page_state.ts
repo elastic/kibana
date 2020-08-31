@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppLocation, Immutable } from '../../../../common/endpoint/types';
+import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
+import { ListViewState } from './list_view_state';
 
-export interface UserChangedUrl {
-  readonly type: 'userChangedUrl';
-  readonly payload: Immutable<AppLocation>;
+export interface TrustedAppsPageState {
+  list: ListViewState<TrustedApp>;
+  active: boolean;
 }
-
-export type RoutingAction = UserChangedUrl;
