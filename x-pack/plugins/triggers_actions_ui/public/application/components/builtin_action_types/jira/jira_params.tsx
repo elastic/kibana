@@ -80,7 +80,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     }
   }, [fields, issueType]);
 
-  const labelOptions = labels ? labels.map((label: string) => ({ label })) : [];
+  const labelOptions = useMemo(() => (labels ? labels.map((label: string) => ({ label })) : []), [
+    labels,
+  ]);
 
   const editSubActionProperty = (key: string, value: any) => {
     const newProps = { ...actionParams.subActionParams, [key]: value };

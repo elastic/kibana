@@ -29,8 +29,6 @@ import { ProxySettings } from '../../types';
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
 const CAPABILITIES_URL = `rest/capabilities`;
-const INCIDENT_URL = `issue`;
-const COMMENT_URL = `comment`;
 
 const VIEW_INCIDENT_URL = `browse`;
 
@@ -48,9 +46,9 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/${INCIDENT_URL}`;
+  const incidentUrl = `${url}/${BASE_URL}/issue`;
   const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
-  const commentUrl = `${incidentUrl}/{issueId}/${COMMENT_URL}`;
+  const commentUrl = `${incidentUrl}/{issueId}/comment`;
   const getIssueTypesOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
   const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
   const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;

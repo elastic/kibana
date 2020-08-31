@@ -27,7 +27,7 @@ interface Props {
   issueType: string;
 }
 
-export interface UseCreateIssueMetadata {
+export interface UseGetFieldsByIssueType {
   fields: Fields;
   isLoading: boolean;
 }
@@ -37,7 +37,7 @@ export const useGetFieldsByIssueType = ({
   toastNotifications,
   actionConnector,
   issueType,
-}: Props): UseCreateIssueMetadata => {
+}: Props): UseGetFieldsByIssueType => {
   const [isLoading, setIsLoading] = useState(true);
   const [fields, setFields] = useState<Fields>({});
   const abortCtrl = useRef(new AbortController());

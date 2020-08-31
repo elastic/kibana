@@ -21,7 +21,7 @@ interface Props {
   actionConnector: ActionConnector;
 }
 
-export interface UseCreateIssueMetadata {
+export interface UseGetIssueTypes {
   issueTypes: IssueTypes;
   isLoading: boolean;
 }
@@ -30,7 +30,7 @@ export const useGetIssueTypes = ({
   http,
   actionConnector,
   toastNotifications,
-}: Props): UseCreateIssueMetadata => {
+}: Props): UseGetIssueTypes => {
   const [isLoading, setIsLoading] = useState(true);
   const [issueTypes, setIssueTypes] = useState<IssueTypes>([]);
   const abortCtrl = useRef(new AbortController());
