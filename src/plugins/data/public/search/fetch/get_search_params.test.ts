@@ -25,18 +25,6 @@ function getConfigStub(config: any = {}): GetConfigFn {
 }
 
 describe('getSearchParams', () => {
-  test('includes rest_total_hits_as_int', () => {
-    const config = getConfigStub();
-    const searchParams = getSearchParams(config);
-    expect(searchParams.rest_total_hits_as_int).toBe(true);
-  });
-
-  test('includes ignore_unavailable', () => {
-    const config = getConfigStub();
-    const searchParams = getSearchParams(config);
-    expect(searchParams.ignore_unavailable).toBe(true);
-  });
-
   test('includes ignore_throttled according to search:includeFrozen', () => {
     let config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true });
     let searchParams = getSearchParams(config);

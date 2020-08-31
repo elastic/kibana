@@ -19,9 +19,13 @@
 
 import { SharedGlobalConfig } from '../../../../../core/server';
 
+export function getShardTimeout(config: SharedGlobalConfig) {
+  return `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`;
+}
+
 export function getDefaultSearchParams(config: SharedGlobalConfig) {
   return {
-    timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
+    timeout: getShardTimeout(config),
     ignoreUnavailable: true, // Don't fail if the index/indices don't exist
     restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
   };

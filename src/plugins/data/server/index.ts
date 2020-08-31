@@ -212,6 +212,7 @@ export {
   ISearchSetup,
   ISearchStart,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
   usageProvider,
   SearchUsage,

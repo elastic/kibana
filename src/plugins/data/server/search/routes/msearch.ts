@@ -23,7 +23,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { UI_SETTINGS } from '../../../common';
 import { SearchRouteDependencies } from '../search_service';
-import { getDefaultSearchParams } from '..';
+import { getShardTimeout } from '..';
 
 interface MsearchHeaders {
   index: string;
@@ -96,7 +96,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
 
       // get shardTimeout
       const config = await deps.globalConfig$.pipe(first()).toPromise();
-      const { timeout } = getDefaultSearchParams(config);
+      const timeout = getShardTimeout(config);
 
       const body = convertRequestBody(request.body, { timeout });
 
