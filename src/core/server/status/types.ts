@@ -117,17 +117,17 @@ export interface CoreStatus {
 
 /**
  * API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.
- * 
+ *
  * @remarks
  * By default, a plugin inherits it's current status from the most severe status level of any Core services and any
  * plugins that it depends on. This default status is available on the
  * {@link ServiceStatusSetup.derivedStatus$ | core.status.derviedStatus$} API.
- * 
+ *
  * Plugins may customize their status calculation by calling the {@link ServiceStatusSetup.set | core.status.set} API
  * with an Observable. Within this Observable, a plugin may choose to only depend on the status of some of its
  * dependencies, to ignore severe status levels of particular Core services they are not concerned with, or to make its
  * status dependent on other external services.
- * 
+ *
  * @example
  * Customize a plugin's status to only depend on the status of SavedObjects:
  * ```ts
@@ -139,7 +139,7 @@ export interface CoreStatus {
  *   );
  * );
  * ```
- * 
+ *
  * @example
  * Customize a plugin's status to include an external service:
  * ```ts
@@ -157,7 +157,7 @@ export interface CoreStatus {
  *     of({ level: ServiceStatusLevels.unavailable, summary: `External Service is down`, meta: { error }})
  *   })
  * );
- * 
+ *
  * core.status.set(
  *   combineLatest([core.status.derivedStatus$, externalStatus$]).pipe(
  *     map(([derivedStatus, externalStatus]) => {
@@ -170,7 +170,7 @@ export interface CoreStatus {
  *   )
  * );
  * ```
- * 
+ *
  * @public
  */
 export interface StatusServiceSetup {
