@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const csvToArray = (indices?: string | string[]): string[] | undefined => {
-  return indices && Array.isArray(indices)
-    ? indices
-    : typeof indices === 'string'
-    ? indices.split(',')
-    : undefined;
-};
+export { useDecodedParams } from './use_decoded_params';
