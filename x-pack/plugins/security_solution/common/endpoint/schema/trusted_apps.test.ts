@@ -168,17 +168,80 @@ describe('When invoking Trusted Apps Schema', () => {
     });
 
     describe('when `entries` are defined', () => {
-      it.todo('should validate `entry.field` is required');
+      const getTrustedAppItemEntryItem = () => getCreateTrustedAppItem().entries[0];
 
-      it.todo('should validate `entry.field` is limited to known values');
+      it('should validate `entry.field` is required', () => {
+        const { field, ...entry } = getTrustedAppItemEntryItem();
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [entry],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.field` is limited to known values', () => {
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: '',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
+
+        const bodyMsg2 = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: 'invalid value',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg2)).toThrow();
+
+        ['hash', 'path'].forEach((field) => {
+          const bodyMsg3 = {
+            ...getCreateTrustedAppItem(),
+            entries: [
+              {
+                ...getTrustedAppItemEntryItem(),
+                field,
+              },
+            ],
+          };
+
+          expect(() => body.validate(bodyMsg3)).not.toThrow();
+        });
+      });
 
       it.todo('should validate `entry.type` is limited to known values');
 
       it.todo('should validate `entry.operator` is limited to known values');
 
-      it.todo('should validate `entry.value` required');
+      it('should validate `entry.value` required', () => {
+        const { value, ...entry } = getTrustedAppItemEntryItem();
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [entry],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
 
-      it.todo('should validate `entry.value` is non-empty');
+      it('should validate `entry.value` is non-empty', () => {
+        const bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              value: '',
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
     });
   });
 });
