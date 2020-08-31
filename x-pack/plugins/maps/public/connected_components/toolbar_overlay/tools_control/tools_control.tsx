@@ -79,6 +79,7 @@ export class ToolsControl extends Component<Props, State> {
   };
 
   _initiateShapeDraw = (options: {
+    actionId: string;
     geometryLabel: string;
     indexPatternId: string;
     geoFieldName: string;
@@ -93,6 +94,7 @@ export class ToolsControl extends Component<Props, State> {
   };
 
   _initiateBoundsDraw = (options: {
+    actionId: string;
     geometryLabel: string;
     indexPatternId: string;
     geoFieldName: string;
@@ -107,6 +109,7 @@ export class ToolsControl extends Component<Props, State> {
   };
 
   _initiateDistanceDraw = (options: {
+    actionId: string;
     filterLabel: string;
     indexPatternId: string;
     geoFieldName: string;
