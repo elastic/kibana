@@ -20,6 +20,7 @@ import { SearchSource } from '../../../../../../../src/plugins/data/public/searc
 
 export class MockSearchSource {
   setField = jest.fn();
+  setParent() {}
 }
 
 describe('ESGeoGridSource', () => {
@@ -103,6 +104,9 @@ describe('ESGeoGridSource', () => {
       const mockSearchService = {
         searchSource: {
           async create() {
+            return mockSearchSource as SearchSource;
+          },
+          createEmpty() {
             return mockSearchSource as SearchSource;
           },
         },
