@@ -30,6 +30,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import styled from 'styled-components';
+import { ApplicationStart } from 'src/core/public';
 import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
@@ -122,7 +123,7 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const history = useHistory();
   const location = useLocation();
