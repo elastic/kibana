@@ -34,7 +34,7 @@ export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkHttpStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.count.value', response.rawResponse);
+    const totalCount = getOr(0, 'aggregations.http_count.value', response.rawResponse);
     const networkHttpEdges: NetworkHttpEdges[] = getHttpEdges(response);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkHttpEdges.splice(cursorStart, querySize - cursorStart);
