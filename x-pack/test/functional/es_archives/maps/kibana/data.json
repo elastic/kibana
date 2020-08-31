@@ -1048,7 +1048,7 @@
         "title" : "dash for tooltip filter action test",
         "hits" : 0,
         "description" : "Zoomed in so entire screen is covered by filter so click to open tooltip can not miss.",
-        "panelsJSON" : "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"version\":\"8.0.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"]},\"panelRefName\":\"panel_0\"}]",
+        "panelsJSON" : "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"669a3521-1215-4228-9ced-77e2edf5ad17\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"drilldown1\",\"config\":{\"dashboardId\":\"19906970-2e40-11e9-85cb-6965aae20f13\",\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_0\"}]",
         "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
         "version" : 1,
         "timeRestore" : true,
@@ -1071,9 +1071,9 @@
         }
       ],
       "migrationVersion" : {
-        "dashboard" : "7.0.0"
+        "dashboard" : "7.3.0"
       },
-      "updated_at" : "2019-06-14T14:09:25.039Z"
+      "updated_at" : "2020-08-26T14:32:27.854Z"
     }
   }
 }
