@@ -93,6 +93,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary container is not present', () => {
+    // @ts-expect-error According to the code, the property is optional
     delete summary.state.summaryPings;
     expect(getLoggingContainerHref(summary, '')).toBeUndefined();
   });
@@ -103,6 +104,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary pod is not present', () => {
+    // @ts-expect-error According to the code, the property is optional
     delete summary.state.summaryPings;
     expect(getLoggingKubernetesHref(summary, '')).toBeUndefined();
   });
@@ -113,6 +115,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined ip href if ip is not present', () => {
+    // @ts-expect-error According to the code, the property is optional
     delete summary.state.summaryPings;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
