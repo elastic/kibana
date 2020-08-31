@@ -29,7 +29,6 @@ import { PanelConfig } from './panel_config';
 import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
-import { esKuery, UI_SETTINGS } from '../../../../../plugins/data/public';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
@@ -85,20 +84,6 @@ export class VisEditor extends Component {
       isDirty: false,
     });
   }, VIS_STATE_DEBOUNCE_DELAY);
-
-  isValidKueryQuery = (filterQuery) => {
-    if (filterQuery && filterQuery.language === 'kuery') {
-      try {
-        const queryOptions = this.coreContext.uiSettings.get(
-          UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS
-        );
-        esKuery.fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
-      } catch (error) {
-        return false;
-      }
-    }
-    return true;
-  };
 
   handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
