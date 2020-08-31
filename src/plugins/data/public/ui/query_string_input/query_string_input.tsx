@@ -42,7 +42,8 @@ import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../k
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
-import { StyledSuggestionsComponent } from '..';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { SuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -60,7 +61,7 @@ interface Props {
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
-  className?: string;
+  size?: SuggestionsListSize;
 }
 
 interface State {
@@ -651,7 +652,7 @@ export class QueryStringInputUI extends Component<Props, State> {
               </EuiTextArea>
             </div>
             <EuiPortal>
-              <StyledSuggestionsComponent
+              <SuggestionsComponent
                 show={this.state.isSuggestionsVisible}
                 suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
                 index={this.state.index}
@@ -659,7 +660,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onMouseEnter={this.onMouseEnterSuggestion}
                 loadMore={this.increaseLimit}
                 queryBarRect={this.state.queryBarRect}
-                className={this.props.className}
+                size={this.props.size}
               />
             </EuiPortal>
           </div>

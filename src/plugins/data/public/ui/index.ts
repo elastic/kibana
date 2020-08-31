@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { StyledSuggestionsComponent } from './typeahead';
+export { SuggestionsComponent } from './typeahead';
 export { IndexPatternSelect } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
 export { QueryStringInput } from './query_string_input/query_string_input';

@@ -10,14 +10,24 @@ $kbnTypeaheadTypes: (
   max-height: 20vh;
 }
 
+.kbnTypeahead__popover--top {
+  box-shadow:
+    0 -2px 4px -1px transparentize($euiShadowColor, .8),
+    0 0 2px 0 transparentize($euiShadowColor, .8);
+}
+
+.kbnTypeahead__popover--bottom {
+  @include euiBottomShadow($adjustBorders: true);
+  border-bottom-left-radius: $euiBorderRadius;
+  border-bottom-right-radius: $euiBorderRadius;
+}
+
 .kbnTypeahead {
-  position: absolute;
   max-height: 60vh;
 
   .kbnTypeahead__popover {
     max-height: inherit;
     @include euiScrollBar;
-    @include euiBottomShadow($adjustBorders: true);
     border: 1px solid;
     border-color: $euiBorderColor;
     color: $euiTextColor;
@@ -25,8 +35,6 @@ $kbnTypeaheadTypes: (
     position: relative;
     z-index: $euiZContentMenu;
     width: 100%;
-    border-bottom-left-radius: $euiBorderRadius;
-    border-bottom-right-radius: $euiBorderRadius;
     overflow-y: auto;
 
     .kbnTypeahead__item {

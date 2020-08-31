@@ -37,15 +37,17 @@ interface Props {
   suggestions: QuerySuggestion[];
   loadMore: () => void;
   queryBarRect?: DOMRect;
-  className?: string;
+  size?: SuggestionsListSize;
 }
+
+export type SuggestionsListSize = 's' | 'l';
 
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
   public render() {
-    if (!this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.queryBarRect || !this.props.show || isEmpty(this.props.suggestions)) {
       return null;
     }
 
@@ -67,19 +69,44 @@ export class SuggestionsComponent extends Component<Props> {
       );
     });
 
+    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
+    const { queryBarRect } = this.props;
+
+    // reflects if the suggestions list has enough space below to be opened down
+    const isSuggestionsListFittable =
+      documentHeight - (queryBarRect.top + queryBarRect.height) >
+      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
+    const verticalListPosition = isSuggestionsListFittable
+      ? `top: ${window.scrollY + queryBarRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
+      : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
+
     return (
-      <div className={classNames('kbnTypeahead', this.props.className)}>
-        <div className="kbnTypeahead__popover">
+      <StyledSuggestionsListDiv
+        queryBarRect={queryBarRect}
+        verticalListPosition={verticalListPosition}
+      >
+        <div
+          className={classNames('kbnTypeahead', this.props.size === 's' && 'kbnTypeahead--small')}
+        >
           <div
-            id="kbnTypeahead__items"
-            role="listbox"
-            ref={(node) => (this.parentNode = node)}
-            onScroll={this.handleScroll}
+            className={classNames(
+              'kbnTypeahead__popover',
+              isSuggestionsListFittable
+                ? 'kbnTypeahead__popover--bottom'
+                : 'kbnTypeahead__popover--top'
+            )}
           >
-            {suggestions}
+            <div
+              id="kbnTypeahead__items"
+              role="listbox"
+              ref={(node) => (this.parentNode = node)}
+              onScroll={this.handleScroll}
+            >
+              {suggestions}
+            </div>
           </div>
         </div>
-      </div>
+      </StyledSuggestionsListDiv>
     );
   }
 
@@ -127,26 +154,10 @@ export class SuggestionsComponent extends Component<Props> {
   };
 }
 
-export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
-  ${(props) => {
-    const { queryBarRect } = props;
-
-    if (!queryBarRect) {
-      return '';
-    }
-
-    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
-
-    // reflects if the suggestions list has enough space below to be opened down
-    const isSuggestionsListFittable =
-      documentHeight - (queryBarRect.top + queryBarRect.height) >
-      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
-    const verticalListPosition = isSuggestionsListFittable
-      ? `top: ${window.scrollY + queryBarRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
-      : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
-
-    return `left: ${queryBarRect.left}px;
-      width: ${queryBarRect.width}px;
-      ${verticalListPosition}`;
-  }}
+const StyledSuggestionsListDiv = styled.div`
+  ${(props: { queryBarRect: DOMRect; verticalListPosition: string }) => `
+      position: absolute;
+      left: ${props.queryBarRect.left}px;
+      width: ${props.queryBarRect.width}px;
+      ${props.verticalListPosition}`}
 `;
