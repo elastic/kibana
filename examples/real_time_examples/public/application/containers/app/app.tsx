@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { RealTimePlugin } from './plugin';
-import { PluginInitializerContext } from '../../../../src/core/public';
+import React from 'react';
+import { Page } from '../../components';
+import { RealTimeDocumentExample } from '../real_time_document_example';
 
-export const plugin = (initContext: PluginInitializerContext) => new RealTimePlugin(initContext);
+// eslint-disable-next-line
+export interface Props {}
 
-export { RealTimePluginSetup, RealTimePluginStart as RealTimesPluginStart } from './plugin';
+export const App: React.FC<Props> = () => {
+  return (
+    <Page title={'Real-time plugin examples'}>
+      <RealTimeDocumentExample />
+    </Page>
+  );
+};

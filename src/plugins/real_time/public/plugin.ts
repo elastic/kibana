@@ -32,14 +32,14 @@ export interface RealTimePluginStartDependencies {}
 
 export interface RealTimePluginSetup {}
 
-export interface RealTimesPluginStart {}
+export interface RealTimePluginStart {}
 /* eslint-enable @typescript-eslint/no-empty-interface */
 
 export class RealTimePlugin
   implements
     Plugin<
       RealTimePluginSetup,
-      RealTimesPluginStart,
+      RealTimePluginStart,
       RealTimePluginSetupDependencies,
       RealTimePluginStartDependencies
     > {
@@ -52,7 +52,7 @@ export class RealTimePlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: RealTimePluginStartDependencies): RealTimesPluginStart {
+  public start(core: CoreStart, plugins: RealTimePluginStartDependencies): RealTimePluginStart {
     core.http
       .post(`${REAL_TIME_API_PATH}/_rpc`, {
         body: JSON.stringify([

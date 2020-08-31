@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { RealTimePlugin } from './plugin';
-import { PluginInitializerContext } from '../../../../src/core/public';
+import * as React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { CoreSetup, AppMountParameters } from 'kibana/public';
+import { StartDependencies } from './plugin';
+import { App } from './application/containers/app/lazy';
 
-export const plugin = (initContext: PluginInitializerContext) => new RealTimePlugin(initContext);
-
-export { RealTimePluginSetup, RealTimePluginStart as RealTimesPluginStart } from './plugin';
+export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
+  element,
+}: AppMountParameters) => {
+  const [, plugins] = await coreSetup.getStartServices();
+  const reactElement = <App />;
+  render(reactElement, element);
+  return () => unmountComponentAtNode(element);
+};

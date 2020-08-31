@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { RealTimePlugin } from './plugin';
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { RealTimeExamplesPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) => new RealTimePlugin(initContext);
-
-export { RealTimePluginSetup, RealTimePluginStart as RealTimesPluginStart } from './plugin';
+export const plugin = () => new RealTimeExamplesPlugin();

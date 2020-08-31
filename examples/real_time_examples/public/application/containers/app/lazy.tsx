@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { RealTimePlugin } from './plugin';
-import { PluginInitializerContext } from '../../../../src/core/public';
+import React, { lazy, Suspense } from 'react';
+import { Props } from './app';
 
-export const plugin = (initContext: PluginInitializerContext) => new RealTimePlugin(initContext);
+const AppLazy = lazy(() =>
+  import('./app').then((module) => ({
+    default: module.App,
+  }))
+);
 
-export { RealTimePluginSetup, RealTimePluginStart as RealTimesPluginStart } from './plugin';
+export const App: React.FC<Props> = (props) => (
+  <Suspense fallback={<></>}>
+    <AppLazy {...props} />
+  </Suspense>
+);
