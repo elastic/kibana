@@ -26,7 +26,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
-  EuiLink,
   EuiPortal,
   EuiTitle,
   EuiButtonEmpty,
