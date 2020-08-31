@@ -149,7 +149,7 @@ export class DeleteJobModal extends Component {
                     id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
                     defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
                     {jobsCount, plural, one {It} other {They}} will be deleted in the background
-                    and may not disappear from the jobs list instantly"
+                    and may not disappear from the jobs list instantly."
                     values={{
                       jobsCount: this.state.jobs.length,
                     }}
