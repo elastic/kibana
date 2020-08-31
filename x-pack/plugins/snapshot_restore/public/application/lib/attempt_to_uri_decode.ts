@@ -10,8 +10,12 @@ export const attemptToURIDecode = (value: string) => {
   try {
     result = decodeURI(value);
     result = decodeURIComponent(result);
-  } catch (e) {
-    result = decodeURIComponent(value);
+  } catch (e1) {
+    try {
+      result = decodeURIComponent(value);
+    } catch (e2) {
+      result = value;
+    }
   }
 
   return result;
