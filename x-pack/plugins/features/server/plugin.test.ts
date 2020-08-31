@@ -88,4 +88,12 @@ describe('Features Plugin', () => {
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);
   });
+
+  it('registers a capabilities provider', async () => {
+    const plugin = new Plugin(initContext);
+    await plugin.setup(coreSetup, {});
+
+    expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);
+    expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

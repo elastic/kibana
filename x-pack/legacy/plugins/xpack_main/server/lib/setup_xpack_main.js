@@ -22,9 +22,6 @@ export function setupXPackMain(server) {
 
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
-  const { getFeatures } = server.newPlatform.setup.plugins.features;
-  server.expose('getFeatures', getFeatures);
-
   const setPluginStatus = () => {
     if (info.isAvailable()) {
       server.plugins.xpack_main.status.green('Ready');
