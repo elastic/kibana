@@ -135,7 +135,7 @@ export class VisEditor extends Component {
   };
 
   updateModel = () => {
-    const { params } = { ...this.props.vis.clone() };
+    const { params } = this.props.vis.clone();
 
     this.setState({
       model: params,

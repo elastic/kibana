@@ -68,7 +68,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const chartTypeBtn = await testSubjects.find(`${chartType}TsvbTypeBtn`);
       const isSelected = await chartTypeBtn.getAttribute('aria-selected');
 
-      if (!isSelected) {
+      if (isSelected !== 'true') {
         throw new Error(`TSVB ${chartType} tab is not selected`);
       }
     }
