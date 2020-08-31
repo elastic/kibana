@@ -25,6 +25,7 @@ export const painlessContextOptions = [
   {
     value: 'painless_test',
     inputDisplay: defaultLabel,
+    'data-test-subj': 'basicButtonDropdown',
     dropdownDisplay: (
       <>
         <strong>{defaultLabel}</strong>
@@ -41,6 +42,7 @@ export const painlessContextOptions = [
   {
     value: 'filter',
     inputDisplay: filterLabel,
+    'data-test-subj': 'filterButtonDropdown',
     dropdownDisplay: (
       <>
         <strong>{filterLabel}</strong>
@@ -57,6 +59,7 @@ export const painlessContextOptions = [
   {
     value: 'score',
     inputDisplay: scoreLabel,
+    'data-test-subj': 'scoreButtonDropdown',
     dropdownDisplay: (
       <>
         <strong>{scoreLabel}</strong>
