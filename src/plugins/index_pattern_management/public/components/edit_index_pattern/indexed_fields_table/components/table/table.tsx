@@ -197,7 +197,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             />
           </span>
         ) : null}
-        {field.customLabel !== field.name && (
+        {field.customLabel && field.customLabel !== field.name ? (
           <div>
             <EuiToolTip content={customLabelDescription}>
               <EuiBadge iconType="flag" iconSide="left">
@@ -205,7 +205,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
               </EuiBadge>
             </EuiToolTip>
           </div>
-        )}
+        ) : null}
       </span>
     );
   }
