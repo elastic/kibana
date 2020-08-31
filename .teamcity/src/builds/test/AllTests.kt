@@ -1,11 +1,8 @@
 package builds.test
 
-import Junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.BuildTypeSettings
 import jetbrains.buildServer.configs.kotlin.v2019_2.FailureAction
 import jetbrains.buildServer.configs.kotlin.v2019_2.ReuseBuilds
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 object AllTests : BuildType({
 

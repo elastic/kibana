@@ -17,10 +17,11 @@ object DefaultVisualRegression : BuildType({
   steps {
     script {
       name = "Default Visual Regression"
-      scriptContent = """
+      scriptContent =
+        """
               #!/bin/bash
               ./.ci/teamcity/default/visual_regression.sh
-          """.trimIndent()
+        """.trimIndent()
     }
   }
 

@@ -18,10 +18,11 @@ object OssBuild : BuildType({
   steps {
     script {
       name = "Build OSS Distribution"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 ./.ci/teamcity/oss/build.sh
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 })

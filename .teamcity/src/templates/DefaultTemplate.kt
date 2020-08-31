@@ -69,53 +69,59 @@ object DefaultTemplate : Template({
   steps {
     script {
       name = "Setup Environment"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 ./.ci/teamcity/setup_env.sh
-          """.trimIndent()
+        """.trimIndent()
     }
 
     script {
       name = "Setup Node and Yarn"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 ./.ci/teamcity/setup_node.sh
-          """.trimIndent()
+        """.trimIndent()
     }
 
     script {
       name = "Setup CI Stats"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 node .ci/teamcity/setup_ci_stats.js
-          """.trimIndent()
+        """.trimIndent()
     }
 
     script {
       name = "Bootstrap"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 ./.ci/teamcity/bootstrap.sh
-          """.trimIndent()
+        """.trimIndent()
     }
 
     placeholder {}
 
     script {
       name = "Set Build Status Success"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 echo "##teamcity[setParameter name='env.BUILD_STATUS' value='SUCCESS']"
-          """.trimIndent()
+        """.trimIndent()
       executionMode = BuildStep.ExecutionMode.RUN_ON_SUCCESS
     }
 
     script {
       name = "CI Stats Complete"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 node .ci/teamcity/ci_stats_complete.js
-          """.trimIndent()
+        """.trimIndent()
       executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
     }
   }

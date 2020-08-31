@@ -16,11 +16,12 @@ object XPackJest : BuildType({
   steps {
     script {
       name = "X-Pack Jest Unit"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 cd x-pack
                 node --max-old-space-size=6144 scripts/jest --ci --verbose
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 

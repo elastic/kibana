@@ -1,15 +1,15 @@
 package settings
 
+import DefaultRoot
 import builds.*
 import builds.default.*
 import builds.oss.*
 import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import templates.DefaultTemplate
-import DefaultRoot
 import kibanaAgent
+import templates.DefaultTemplate
 
-object Kibana : Project ({
+object Kibana : Project({
   params {
     param("teamcity.ui.settings.readOnly", "true")
   }
@@ -25,7 +25,6 @@ object Kibana : Project ({
 //            }
 //        }
 //    }
-
 
   features {
     val sizes = listOf("2", "4", "8", "16")

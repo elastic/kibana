@@ -12,10 +12,11 @@ object JestIntegration : BuildType({
   steps {
     script {
       name = "Jest Integration"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 yarn run grunt run:test_jest_integration
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 

@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object DefaultRoot : GitVcsRoot({
 //  id(DslContext.projectName)
-    id("brianseeders_kibana")
+  id("brianseeders_kibana")
 
 //  name = "${DslContext.parentProjectId} (${DslContext.projectName})"
 //  url = "https://github.com/brianseeders/${DslContext.parentProjectId.toString().toLowerCase()}.git"

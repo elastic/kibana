@@ -18,10 +18,11 @@ object DefaultBuild : BuildType({
   steps {
     script {
       name = "Build Default Distribution"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 ./.ci/teamcity/default/build.sh
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 })

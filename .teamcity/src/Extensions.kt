@@ -35,9 +35,9 @@ fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
 
 fun ProjectFeatures.kibanaAgent(size: String, init: ProjectFeature.() -> Unit = {}) {
   kibanaAgent {
-    id = "KIBANA_BRIANSEEDERS_STANDARD_${size}"
-    param("source-id", "kibana-standard-${size}-")
-    param("machineType", "n2-standard-${size}")
+    id = "KIBANA_BRIANSEEDERS_STANDARD_$size"
+    param("source-id", "kibana-standard-$size-")
+    param("machineType", "n2-standard-$size")
     init()
   }
 }

@@ -12,10 +12,11 @@ object ApiIntegration : BuildType({
   steps {
     script {
       name = "API Integration"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 yarn run grunt run:apiIntegrationTests
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 

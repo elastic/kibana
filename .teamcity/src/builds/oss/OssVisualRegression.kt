@@ -17,10 +17,11 @@ object OssVisualRegression : BuildType({
   steps {
     script {
       name = "OSS Visual Regression"
-      scriptContent = """
+      scriptContent =
+        """
               #!/bin/bash
               ./.ci/teamcity/oss/visual_regression.sh
-          """.trimIndent()
+        """.trimIndent()
     }
   }
 

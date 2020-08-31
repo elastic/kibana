@@ -16,10 +16,11 @@ object Jest : BuildType({
   steps {
     script {
       name = "Jest Unit"
-      scriptContent = """
+      scriptContent =
+        """
                 #!/bin/bash
                 yarn run grunt run:test_jest
-            """.trimIndent()
+        """.trimIndent()
     }
   }
 
