@@ -4,9 +4,6 @@
     "tsBuildInfoFile": "../../build/tsbuildinfo/packages/elastic-safer-lodash-set"
   },
   "include": [
-    "**/*",
+    "test/**/*",
   ],
-  "exclude": [
-    "**/*.test-d.ts"
-  ]
 }
