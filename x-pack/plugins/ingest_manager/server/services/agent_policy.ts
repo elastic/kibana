@@ -266,6 +266,7 @@ class AgentPolicyService {
   ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
+      fields: ['revision'],
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
       const attributes = policy.attributes;
