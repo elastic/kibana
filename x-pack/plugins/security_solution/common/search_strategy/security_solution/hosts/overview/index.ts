@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { HostItem } from './common';
-import { Inspect, Maybe, RequestOptionsPaginated, TimerangeInput } from '..';
+import { HostItem } from '../common';
+import { Inspect, Maybe, RequestOptionsPaginated, TimerangeInput } from '../..';
 
 export interface HostOverviewStrategyResponse extends IEsSearchResponse {
   hostOverview: HostItem;

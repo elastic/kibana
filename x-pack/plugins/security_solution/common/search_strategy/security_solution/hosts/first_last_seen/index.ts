@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe, RequestOptionsPaginated } from '..';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { Inspect, Maybe, RequestOptionsPaginated } from '../..';
 
 export interface HostFirstLastSeenRequestOptions extends Partial<RequestOptionsPaginated> {
   hostName: string;

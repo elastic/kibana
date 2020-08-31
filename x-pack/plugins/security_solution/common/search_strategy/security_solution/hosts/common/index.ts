@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CloudEcs } from '../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../ecs/host';
-import { Maybe, SearchHit, TotalValue } from '..';
+import { CloudEcs } from '../../../../ecs/cloud';
+import { HostEcs, OsEcs } from '../../../../ecs/host';
+import { Maybe, SearchHit, TotalValue } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',

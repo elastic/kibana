@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { HostItem } from './common';
+import { HostItem } from '../common';
 import {
   CursorType,
   Inspect,
@@ -14,7 +14,7 @@ import {
   PageInfoPaginated,
   RequestOptionsPaginated,
   SortField,
-} from '..';
+} from '../..';
 
 export interface HostsEdges {
   node: HostItem;
