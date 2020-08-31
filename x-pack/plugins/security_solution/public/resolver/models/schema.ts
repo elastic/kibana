@@ -59,6 +59,19 @@ export function array<V extends Validator<unknown>>(elementValidator: V) {
   };
 }
 
+// Returns the keys of an object if `undefined` is assignable to the value of that key.
+type KeysWithOptionalValues<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: undefined extends T[K] ? K : never;
+}[keyof T];
+
+// Returns a version of the object that marks keys optional if `undefined` could be assigned to that key
+type OptionalKeyWhenValueAcceptsUndefined<T extends { [key: string]: unknown }> = {
+  [K in Exclude<keyof T, KeysWithOptionalValues<T>>]: T[K];
+} &
+  {
+    [K in KeysWithOptionalValues<T>]?: Exclude<T[K], undefined>;
+  };
+
 /**
  * Validate that `value` is an object with string keys. The value at each key is tested against its own validator.
  *
@@ -77,7 +90,11 @@ export function object<
 >(validatorDictionary: ValidatorDictionary) {
   return function (
     value: unknown
-  ): value is { [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]> } {
+  ): value is /** If a key can point to `undefined`, then instead make the key optional and exclude `undefined` from the value type. */ OptionalKeyWhenValueAcceptsUndefined<
+    {
+      [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]>;
+    }
+  > {
     // This only validates non-null objects
     if (typeof value !== 'object' || value === null) {
       return false;
@@ -130,6 +147,23 @@ function anyString(): (value: unknown) => value is string {
 }
 
 /**
- * Export `anyString` as `string`. We can't define a function named `string`.
+ * Validate that `value` is a number.
+ * NB: this just checks if `typeof value === 'number'`. It will return `true` for `NaN`.
+ * NB: this is used as `number` externally via named export.
+ * Usage:
+ * ```
+ * import * as schema from './schema';
+ * const isNumber: (value: unknown) => value is number = schema.number();
+ * ```
  */
-export { anyString as string };
+function anyNumber(): (value: unknown) => value is number {
+  return function (value: unknown): value is number {
+    return typeof value === 'number';
+  };
+}
+
+/**
+ * Export `anyString` as `string`. We can't define a function named `string`.
+ * Export `anyNumber` as `number`. We can't define a function named `number`.
+ */
+export { anyString as string, anyNumber as number };

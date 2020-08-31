@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { decode } from 'rison-node';
+
 import { createSelector } from 'reselect';
-import { ResolverUIState } from '../../types';
-import * as locationSearchModel from '../../models/location_search';
-import { defaultParameters } from '../../models/location_search';
+import { PanelViewAndParameters, ResolverUIState } from '../../types';
+import { isPanelViewAndParameters } from '../../models/location_search';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -32,10 +33,10 @@ export const selectedNode = createSelector(
 );
 
 /**
- * The legacy `crumbEvent` and `crumbId` parameters.
- * @deprecated
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
  */
-export const breadcrumbParameters = createSelector(
+export const panelViewAndParameters = createSelector(
   (state: ResolverUIState) => state.locationSearch,
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
@@ -43,12 +44,33 @@ export const breadcrumbParameters = createSelector(
       // Equivalent to `null`
       return defaultParameters();
     }
-    return locationSearchModel.breadcrumbParameters(locationSearch, resolverComponentInstanceID);
+    const urlSearchParams = new URLSearchParams(locationSearch);
+    const value = urlSearchParams.get(parameterName(resolverComponentInstanceID));
+    if (value === null) {
+      // Equivalent to `null`
+      return defaultParameters();
+    }
+    const decodedValue = decode(value);
+    if (isPanelViewAndParameters(decodedValue)) {
+      return decodedValue;
+    }
+    return defaultParameters();
   }
 );
 
 /**
- * Which view should show in the panel, as well as what parameters should be used.
- * Calculated using the query string
+ * The parameter name that we use to read/write state to the query string
  */
-export const panelViewAndParameters = createSelector();
+function parameterName(resolverComponentInstanceID: string): string {
+  return `resolver-${resolverComponentInstanceID}`;
+}
+/**
+ * The default parameters to use when no (valid) location search is available.
+ */
+export function defaultParameters(): PanelViewAndParameters {
+  // Note, this really should be a selector. it needs to know about the state of the app so it can select
+  // the origin event.
+  return {
+    panelView: 'nodes',
+  };
+}

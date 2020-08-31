@@ -6,47 +6,40 @@
 import * as schema from './schema';
 
 interface SortDefinition {
-  // page?: number;
-  sort: Array<{ field: 'name' | 'ip' | 'date'; direction: 'asc' | 'desc' }>;
+  page?: number;
+  sort?: Array<{ field: 'name' | 'ip' | 'date'; direction: 'asc' | 'desc' }>;
 }
 describe(`a validator made using the 'schema' module which validates that a value has the type:
 {
-    sort: Array<{
-        field: 'name' | 'ip' | 'date';
-        direction: 'asc' | 'desc';
-    }>;
+  page?: number;
+  sort?: Array<{ field: 'name' | 'ip' | 'date'; direction: 'asc' | 'desc' }>;
 }`, () => {
   let validator: (value: unknown) => value is SortDefinition;
   beforeEach(() => {
     validator = schema.object({
-      sort: schema.array(
-        schema.object({
-          field: schema.oneOf([
-            schema.literal('name' as const),
-            schema.literal('ip' as const),
-            schema.literal('date' as const),
-          ]),
-          direction: schema.oneOf([
-            schema.literal('asc' as const),
-            schema.literal('desc' as const),
-          ]),
-        })
-      ),
+      page: schema.oneOf([schema.literal(undefined), schema.number()]),
+      sort: schema.oneOf([
+        schema.array(
+          schema.object({
+            field: schema.oneOf([
+              schema.literal('name' as const),
+              schema.literal('ip' as const),
+              schema.literal('date' as const),
+            ]),
+            direction: schema.oneOf([
+              schema.literal('asc' as const),
+              schema.literal('desc' as const),
+            ]),
+          })
+        ),
+        schema.literal(undefined),
+      ]),
     });
   });
-  /*
-  describe(`when the value to be validated is ${JSON.stringify(validValue())}`, () => {
-    beforeEach(() => {
-      value = validValue();
-    });
-    it('should return `true`', () => {
-      expect(validator(value)).toBe(true);
-    });
-  });
-  */
   describe.each([
     [
       {
+        page: 1,
         sort: [
           {
             field: 'name',
@@ -62,6 +55,24 @@ describe(`a validator made using the 'schema' module which validates that a valu
     ],
     [
       {
+        // page has the wrong type
+        page: '1',
+        sort: [
+          {
+            field: 'name',
+            direction: 'asc',
+          },
+          {
+            field: 'date',
+            direction: 'desc',
+          },
+        ],
+      },
+      false,
+    ],
+
+    [
+      {
         sort: [
           {
             // missing direction
@@ -75,6 +86,7 @@ describe(`a validator made using the 'schema' module which validates that a valu
       {
         sort: [
           {
+            field: 'name',
             // invalid direction
             direction: 'invalid',
           },
@@ -98,7 +110,8 @@ describe(`a validator made using the 'schema' module which validates that a valu
         sort: [
           {
             // invalid field
-            direction: 'invalid',
+            field: 'invalid',
+            direction: 'desc',
           },
         ],
       },
@@ -106,6 +119,10 @@ describe(`a validator made using the 'schema' module which validates that a valu
     ],
     // nothing in the array
     [{ sort: [] }, true],
+    // page only
+    [{ page: 1 }, true],
+    // empty object (valid because all keys are optional.)
+    [{}, true],
     // entirely invalid types
     [null, false],
     [true, false],
@@ -116,29 +133,3 @@ describe(`a validator made using the 'schema' module which validates that a valu
     });
   });
 });
-
-/*
-// one
-type SortDefinition = Array<{ field: 'name' | 'ip' | 'date'; sort: 'asc' | 'desc' }>;
-
-// two
-const sortDef: SortDefinition = [
-  {
-    field: 'name',
-    sort: 'asc',
-  },
-  {
-    field: 'date',
-    sort: 'desc',
-  },
-];
-
-// three
-import { encode } from 'rison-node';
-const urlSearchParams = new URLSearchParams();
-urlSearchParams.set('sort', encode(sortDef));
-const newQueryString = urlSearchParams.toString();
-
-// four
-import { decode } from 'rison-node';
-*/

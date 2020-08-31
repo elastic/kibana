@@ -301,15 +301,6 @@ export const ariaFlowtoNodeID: (
   }
 );
 
-/**
- * The legacy `crumbEvent` and `crumbId` parameters.
- * @deprecated
- */
-export const breadcrumbParameters = composeSelectors(
-  uiStateSelector,
-  uiSelectors.breadcrumbParameters
-);
-
 export const panelViewAndParameters = composeSelectors(
   uiStateSelector,
   uiSelectors.panelViewAndParameters
