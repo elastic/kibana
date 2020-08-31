@@ -4,36 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAccordion,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiSpacer,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import groupBy from 'lodash/groupBy';
 import React, { Fragment, useState } from 'react';
 import type {
   CategoryQualityWarningReason,
-  QualityWarning,
+  CategoryQualityWarning,
 } from '../../../containers/logs/log_analysis/log_analysis_module_types';
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const CategoryQualityWarnings: React.FC<{
   hasSetupCapabilities: boolean;
   onRecreateMlJob: () => void;
-  qualityWarnings: QualityWarning[];
+  qualityWarnings: CategoryQualityWarning[];
 }> = ({ hasSetupCapabilities, onRecreateMlJob, qualityWarnings }) => {
   const [detailAccordionId] = useState(htmlIdGenerator()());
 
+  const categoryQualityWarningsByJob = groupBy(qualityWarnings, 'jobId');
+
   return (
     <>
-      {qualityWarnings.map((qualityWarning, qualityWarningIndex) => (
+      {Object.entries(categoryQualityWarningsByJob).map(([jobId, qualityWarningsForJob]) => (
         <RecreateJobCallout
           hasSetupCapabilities={hasSetupCapabilities}
-          key={`${qualityWarningIndex}`}
+          key={`quality-warnings-callout-${jobId}`}
           onRecreateMlJob={onRecreateMlJob}
           title={categoryQualityWarningCalloutTitle}
         >
@@ -52,25 +48,27 @@ export const CategoryQualityWarnings: React.FC<{
             }
             paddingSize="s"
           >
-            <EuiDescriptionList compressed>
-              {qualityWarning.reasons.map((reason) => (
-                <Fragment key={`title-${reason.type}-${qualityWarning.dataset}`}>
-                  <EuiDescriptionListTitle
-                    data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
-                  >
-                    {qualityWarning.dataset}
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription
-                    data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
-                  >
-                    <CategoryQualityWarningReasonDescription
-                      dataset={qualityWarning.dataset}
-                      reason={reason}
-                    />
-                  </EuiDescriptionListDescription>
-                </Fragment>
-              ))}
-            </EuiDescriptionList>
+            <ul>
+              {qualityWarningsForJob.flatMap((qualityWarning) =>
+                qualityWarning.reasons.map((reason) => (
+                  <div key={`title-${reason.type}-${qualityWarning.dataset}`}>
+                    <WarningReasonListTitle
+                      data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
+                    >
+                      {qualityWarning.dataset}
+                    </WarningReasonListTitle>
+                    <WarningReasonListDescription
+                      data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
+                    >
+                      <CategoryQualityWarningReasonDescription
+                        dataset={qualityWarning.dataset}
+                        reason={reason}
+                      />
+                    </WarningReasonListDescription>
+                  </div>
+                ))
+              )}
+            </ul>
           </EuiAccordion>
           <EuiSpacer size="l" />
         </RecreateJobCallout>
@@ -78,6 +76,8 @@ export const CategoryQualityWarnings: React.FC<{
     </>
   );
 };
+
+// const
 
 const categoryQualityWarningCalloutTitle = i18n.translate(
   'xpack.infra.logs.logEntryCategories.categoryQUalityWarningCalloutTitle',
