@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiDroppable,
   EuiDragDropContext,
+  euiDragDropReorder,
   EuiDraggable,
   EuiPanel,
   EuiIcon,
@@ -249,6 +250,19 @@ const AdvancedRangeEditor = ({
     label: '',
   };
 
+  const onDragEnd = ({
+    source,
+    destination,
+  }: {
+    source?: DraggableLocation;
+    destination?: DraggableLocation;
+  }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(ranges, source.index, destination.index);
+      setRanges(items);
+    }
+  };
+
   return (
     <EuiFormRow
       label="Intervals"
@@ -266,7 +280,7 @@ const AdvancedRangeEditor = ({
       }
     >
       <>
-        <EuiDragDropContext onDragEnd={() => {}}>
+        <EuiDragDropContext onDragEnd={onDragEnd}>
           <EuiDroppable droppableId="RANGES_DROPPABLE_AREA" spacing="s">
             {ranges.map((range: RangeType, idx: number) => {
               const { from, to, label } = range;
