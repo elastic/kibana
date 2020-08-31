@@ -763,6 +763,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced: AdvancedFields;
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -778,6 +779,7 @@ export interface PolicyConfig {
     };
   };
   mac: {
+    advanced: AdvancedFields;
     events: {
       file: boolean;
       process: boolean;
@@ -789,6 +791,7 @@ export interface PolicyConfig {
     };
   };
   linux: {
+    advanced: AdvancedFields;
     events: {
       file: boolean;
       process: boolean;
@@ -800,6 +803,14 @@ export interface PolicyConfig {
   };
 }
 
+export interface AdvancedFields {
+  elasticsearch: {
+    tls: {
+      verify_hostname: string;
+      verify_peer: string;
+    };
+  };
+}
 /**
  * The set of Policy configuration settings that are show/edited via the UI
  */
