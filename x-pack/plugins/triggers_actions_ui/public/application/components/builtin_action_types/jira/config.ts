@@ -14,7 +14,7 @@ export const connectorConfiguration = {
   enabled: true,
   enabledInConfig: true,
   enabledInLicense: true,
-  minimumLicenseRequired: 'platinum',
+  minimumLicenseRequired: 'gold',
   fields: {
     summary: {
       label: i18n.MAPPING_FIELD_SUMMARY,
