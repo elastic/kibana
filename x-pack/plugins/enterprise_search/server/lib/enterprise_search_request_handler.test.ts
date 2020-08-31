@@ -111,6 +111,30 @@ describe('EnterpriseSearchRequestHandler', () => {
     // from Enterprise Search, e.g. the x-read-only mode header
   });
 
+  describe('path forwarding', () => {
+    it('should forward the requested path to a new base path specified in the pathForward parameter', async () => {
+      const responseBody = { deleted: true };
+      EnterpriseSearchAPI.mockReturn(responseBody);
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({
+        pathForward: { from: '/api/app_search/', to: '/as/' },
+      });
+
+      await makeAPICall(requestHandler, {
+        route: { method: 'DELETE', path: '/api/app_search/credentials/12345' },
+      });
+
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/as/credentials/12345', {
+        method: 'DELETE',
+      });
+
+      expect(responseMock.custom).toHaveBeenCalledWith({
+        body: responseBody,
+        statusCode: 200,
+      });
+    });
+  });
+
   describe('error handling', () => {
     afterEach(() => {
       expect(mockLogger.error).toHaveBeenCalledWith(

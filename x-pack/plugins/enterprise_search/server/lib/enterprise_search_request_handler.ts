@@ -19,11 +19,23 @@ interface IConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface IRequestParams<ResponseBody> {
+interface IRequestParamsWithPath<ResponseBody> {
   path: string;
+  pathForward: never;
   params?: object;
   hasValidData?: (body?: ResponseBody) => boolean;
 }
+
+interface IRequestParamsWithPathForward<ResponseBody> {
+  path: never;
+  pathForward: {
+    from: string;
+    to: string;
+  };
+  params?: object;
+  hasValidData?: (body?: ResponseBody) => boolean;
+}
+
 export interface IEnterpriseSearchRequestHandler {
   createRequest(requestParams?: object): RequestHandler<unknown, Readonly<{}>, unknown>;
 }
@@ -47,21 +59,26 @@ export class EnterpriseSearchRequestHandler {
 
   createRequest<ResponseBody>({
     path,
+    pathForward,
     params = {},
     hasValidData = () => true,
-  }: IRequestParams<ResponseBody>) {
+  }: IRequestParamsWithPath<ResponseBody> | IRequestParamsWithPathForward<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, Readonly<{}>, unknown>,
       response: KibanaResponseFactory
     ) => {
       try {
+        const { path: requestedPath } = request.route;
         // Set up API URL
         const queryParams = { ...request.query, ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
+
+        const resolvedPath = path ?? requestedPath.replace(pathForward.from, pathForward.to);
+
+        const url = encodeURI(this.enterpriseSearchUrl + resolvedPath + queryString);
 
         // Set up API options
         const { method } = request.route;

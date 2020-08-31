@@ -7,24 +7,11 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
+import { IApiToken, IMeta, ICredentialsDetails } from '../../../common/types/app_search';
 
-interface ICredential {
-  id: string;
-  key: string;
-  name: string;
-  type: string;
-  access_all_engines: boolean;
-}
 interface ICredentialsResponse {
-  results: ICredential[];
-  meta?: {
-    page?: {
-      current: number;
-      total_results: number;
-      total_pages: number;
-      size: number;
-    };
-  };
+  results: IApiToken[];
+  meta: IMeta;
 }
 
 export function registerCredentialsRoutes({
@@ -45,6 +32,31 @@ export function registerCredentialsRoutes({
       hasValidData: (body?: ICredentialsResponse) => {
         return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
       },
+    })
+  );
+  router.get(
+    {
+      path: '/api/app_search/credentials/details',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/credentials/details',
+      hasValidData: (body?: ICredentialsDetails) => {
+        return !!body?.apiUrl;
+      },
+    })
+  );
+  router.delete(
+    {
+      path: '/api/app_search/credentials/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      pathForward: { from: '/api/app_search/', to: '/as/' },
     })
   );
 }
