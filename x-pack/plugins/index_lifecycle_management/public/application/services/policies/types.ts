@@ -22,7 +22,7 @@ export interface PolicyFromES {
   name: string;
   policy: SerializedPolicy;
   version: number;
-  linkedIndices?: any[];
+  linkedIndices?: string[];
 }
 
 export interface SerializedPhase {
