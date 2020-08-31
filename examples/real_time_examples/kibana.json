@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["real_time_examples"],
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["realTime", "developerExamples"],
   "optionalPlugins": []

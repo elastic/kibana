@@ -17,22 +17,20 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
-import { App } from './application/containers/app/lazy';
-import { context } from './application/context';
+import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
+import { SavedObject } from '../../../../../../src/core/public';
 
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  element,
-}: AppMountParameters) => {
-  const [start, plugins] = await coreSetup.getStartServices();
-  const reactElement = (
-    <context.Provider value={{ start }}>
-      <App />
-    </context.Provider>
+export interface Props {
+  so: SavedObject;
+}
+
+export const SavedObjectEditor: React.FC<Props> = ({ so }) => {
+  return (
+    <div>
+      <EuiCodeBlock style={{ maxHeight: 300 }}>
+        {JSON.stringify(so.attributes, null, 4)}
+      </EuiCodeBlock>
+    </div>
   );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
 };

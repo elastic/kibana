@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
-import { App } from './application/containers/app/lazy';
-import { context } from './application/context';
+import { SavedObjectsType } from 'src/core/server';
 
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  element,
-}: AppMountParameters) => {
-  const [start, plugins] = await coreSetup.getStartServices();
-  const reactElement = (
-    <context.Provider value={{ start }}>
-      <App />
-    </context.Provider>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
+export const realTimeExampleSavedObjectType: SavedObjectsType = {
+  name: 'real_time_example',
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+    icon: 'tokenObject',
+    getTitle: (savedObject) => savedObject.attributes.title,
+    defaultSearchField: 'title',
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: {
+        type: 'text',
+      },
+    },
+  },
 };

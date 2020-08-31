@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
-import { App } from './application/containers/app/lazy';
-import { context } from './application/context';
-
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  element,
-}: AppMountParameters) => {
-  const [start, plugins] = await coreSetup.getStartServices();
-  const reactElement = (
-    <context.Provider value={{ start }}>
-      <App />
-    </context.Provider>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
-};
+export * from './context';

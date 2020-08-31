@@ -18,7 +18,66 @@
  */
 
 import React from 'react';
+import {
+  EuiFieldText,
+  EuiButton,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
+import { useRealTimeExamples } from '../../context';
+import { SavedObject } from '../../../../../../src/core/public';
+import { SavedObjectEditor } from './saved_object_editor';
 
 export const RealTimeDocumentExample: React.FC = () => {
-  return <div>real-time document</div>;
+  const { start } = useRealTimeExamples();
+  const [type, setType] = React.useState('canvas-workpad');
+  const [id, setId] = React.useState('');
+  const [so, setSo] = React.useState<null | SavedObject>(null);
+  const isMounted = useMountedState();
+
+  const loadSavedObject = async () => {
+    setSo(null);
+    const savedObject = await start.savedObjects.client.get(type, id);
+    if (!isMounted()) return;
+    setSo(savedObject);
+  };
+
+  return (
+    <div>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow label="Saved object type">
+            <EuiFieldText
+              placeholder="Saved object type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Saved object ID">
+            <EuiFieldText
+              placeholder="Saved object ID"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton onClick={loadSavedObject}>Load saved object</EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiSpacer />
+
+      {!!so && <SavedObjectEditor so={so} />}
+    </div>
+  );
 };
