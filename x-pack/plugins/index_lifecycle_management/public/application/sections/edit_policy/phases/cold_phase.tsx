@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { ColdPhase as ColdPhaseInterface, Phases } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
   LearnMoreLink,
@@ -36,9 +36,8 @@ const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeInd
   defaultMessage: 'Freeze index',
 });
 
-const coldProperty = propertyof<Phases>('cold');
-const phaseProperty = (propertyName: keyof ColdPhaseInterface) =>
-  propertyof<ColdPhaseInterface>(propertyName);
+const coldProperty: keyof Phases = 'cold';
+const phaseProperty = (propertyName: keyof ColdPhaseInterface) => propertyName;
 
 interface Props {
   setPhaseData: (key: keyof ColdPhaseInterface & string, value: string | boolean) => void;
