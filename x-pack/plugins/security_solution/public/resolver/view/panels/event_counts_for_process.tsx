@@ -12,7 +12,7 @@ import { StyledBreadcrumbs } from './panel_content_utilities';
 
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
-import { CrumbInfo } from '../../types';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 /**
  * This view gives counts for all the related events of a process grouped by related event type.
@@ -27,11 +27,9 @@ import { CrumbInfo } from '../../types';
  */
 export const EventCountsForProcess = memo(function EventCountsForProcess({
   processEvent,
-  pushToQueryParams,
   relatedStats,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
   relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {
@@ -62,6 +60,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
       defaultMessage: 'Events',
     }
   );
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
   const crumbs = useMemo(() => {
     return [
       {
