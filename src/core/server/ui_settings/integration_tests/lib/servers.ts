@@ -73,9 +73,9 @@ export function getServices() {
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
-    savedObjectsClient,
-  });
+  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    savedObjectsClient
+  );
 
   services = {
     kbnServer,
