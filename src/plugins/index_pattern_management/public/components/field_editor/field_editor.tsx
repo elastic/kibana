@@ -424,8 +424,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return (
       <EuiFormRow
         label={i18n.translate('indexPatternManagement.customLabelLabel', {
-          defaultMessage: 'Custom Label',
+          defaultMessage: 'Custom label',
         })}
+        helpText={
+          <FormattedMessage
+            id="indexPatternManagement.customLabelHelpText"
+            defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          />
+        }
       >
         <EuiFieldText
           value={customLabel || ''}

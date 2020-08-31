@@ -51,7 +51,14 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      helpText={
+        <FormattedMessage
+          defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          id="indexPatternManagement.customLabelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
     >
       <eui-field-text
         data-test-subj="editorFieldCustomLabel"
@@ -283,7 +290,14 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
-      label="Custom Label"
+      helpText={
+        <FormattedMessage
+          defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          id="indexPatternManagement.customLabelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
     >
       <eui-field-text
         data-test-subj="editorFieldCustomLabel"
@@ -567,7 +581,14 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      helpText={
+        <FormattedMessage
+          defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          id="indexPatternManagement.customLabelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
     >
       <eui-field-text
         data-test-subj="editorFieldCustomLabel"
@@ -800,7 +821,14 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
-      label="Custom Label"
+      helpText={
+        <FormattedMessage
+          defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          id="indexPatternManagement.customLabelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
     >
       <eui-field-text
         data-test-subj="editorFieldCustomLabel"
@@ -1165,7 +1193,14 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      helpText={
+        <FormattedMessage
+          defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+          id="indexPatternManagement.customLabelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
     >
       <eui-field-text
         data-test-subj="editorFieldCustomLabel"
