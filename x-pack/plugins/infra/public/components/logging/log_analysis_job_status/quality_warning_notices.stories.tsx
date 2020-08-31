@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { QualityWarning } from '../../../containers/logs/log_analysis';
+import { QualityWarning } from '../../../../common/log_analysis';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
 storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)

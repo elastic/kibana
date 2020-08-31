@@ -6,17 +6,16 @@
 
 import { useMemo, useState } from 'react';
 import { useDeepCompareEffect } from 'react-use';
+import {
+  CategoryQualityWarningReason,
+  QualityWarning,
+} from '../../../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   callGetLatestCategoriesDatasetsStatsAPI,
   LogEntryCategoriesDatasetStats,
 } from '../../api/get_latest_categories_datasets_stats';
-import {
-  CategoryQualityWarningReason,
-  JobModelSizeStats,
-  JobSummary,
-  QualityWarning,
-} from '../../log_analysis_module_types';
+import { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
   const [lastestWarnedDatasetsStats, setLatestWarnedDatasetsStats] = useState<
@@ -56,8 +55,8 @@ export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: J
       fetchLatestWarnedDatasetsStats(
         jobSummariesWithPartitionedCategoryWarnings.map((jobSummary) => ({
           jobId: jobSummary.id,
-          startTime: 0, // jobSummary.fullJob?.create_time ?? 0,
-          endTime: Date.now(), // jobSummary.fullJob?.model_size_stats?.log_time ?? Date.now(),
+          startTime: jobSummary.fullJob?.create_time ?? 0,
+          endTime: jobSummary.fullJob?.model_size_stats?.log_time ?? Date.now(),
         }))
       );
     }

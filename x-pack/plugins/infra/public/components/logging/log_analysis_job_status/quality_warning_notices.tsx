@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import groupBy from 'lodash/groupBy';
 import React, { useState } from 'react';
 import { euiStyled } from '../../../../../observability/public';
-import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
-import type {
+import {
   CategoryQualityWarning,
   CategoryQualityWarningReason,
-} from '../../../containers/logs/log_analysis/log_analysis_module_types';
+  getFriendlyNameForPartitionId,
+} from '../../../../common/log_analysis';
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const CategoryQualityWarnings: React.FC<{
