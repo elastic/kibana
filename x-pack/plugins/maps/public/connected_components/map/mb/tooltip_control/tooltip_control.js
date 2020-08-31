@@ -195,6 +195,8 @@ export class TooltipControl extends React.Component {
           mbMap={this.props.mbMap}
           layerList={this.props.layerList}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           renderTooltipContent={this.props.renderTooltipContent}
           geoFields={this.props.geoFields}
           features={features}
