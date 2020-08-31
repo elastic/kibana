@@ -59,8 +59,6 @@ export const useNetworkTls = ({
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getTlsSelector = networkSelectors.tlsSelector();
   const { activePage, limit, sort } = useSelector(
     (state: State) => getTlsSelector(state, type, flowTarget),
@@ -77,7 +75,6 @@ export const useNetworkTls = ({
     factoryQueryType: NetworkQueries.tls,
     filterQuery: createFilter(filterQuery),
     flowTarget,
-    // inspect: isInspected,
     ip,
     pagination: generateTablePaginationOptions(activePage, limit),
     sort,
@@ -90,12 +87,10 @@ export const useNetworkTls = ({
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setHostRequest((prevRequest) => ({
+        ...prevRequest,
+        pagination: generateTablePaginationOptions(newActivePage, limit),
+      }));
     },
     [limit]
   );
@@ -173,10 +168,6 @@ export const useNetworkTls = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
@@ -190,7 +181,7 @@ export const useNetworkTls = ({
         },
         sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

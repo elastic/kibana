@@ -21,7 +21,8 @@ import {
   NetworkQueries,
   NetworkHttpRequestOptions,
   NetworkHttpStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  SortField,
+} from '../../../../common/search_strategy/security_solution';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 
@@ -58,8 +59,6 @@ export const useNetworkHttp = ({
   startDate,
   type,
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getHttpSelector = networkSelectors.httpSelector();
   const { activePage, limit, sort } = useSelector(
     (state: State) => getHttpSelector(state, type),
@@ -75,10 +74,9 @@ export const useNetworkHttp = ({
     defaultIndex,
     factoryQueryType: NetworkQueries.http,
     filterQuery: createFilter(filterQuery),
-    // inspect: isInspected,
     ip,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkHttpSort: sort,
+    sort: sort as SortField,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -174,24 +172,20 @@ export const useNetworkHttp = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
+        sort: sort as SortField,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        networkHttpSort: sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

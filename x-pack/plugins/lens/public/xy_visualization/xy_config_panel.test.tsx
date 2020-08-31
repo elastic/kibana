@@ -107,7 +107,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
     });
 
-    it('should disable the select if there is no unstacked area or line series', () => {
+    it('should disable the select if there is no area or line series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -115,10 +115,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [
-              { ...state.layers[0], seriesType: 'bar' },
-              { ...state.layers[0], seriesType: 'area_stacked' },
-            ],
+            layers: [{ ...state.layers[0], seriesType: 'bar' }],
             fittingFunction: 'Carry',
           }}
         />
