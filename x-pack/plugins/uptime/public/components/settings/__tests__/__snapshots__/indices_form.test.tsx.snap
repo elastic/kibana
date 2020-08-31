@@ -91,6 +91,7 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
         Object {
           "certAgeThreshold": 36,
           "certExpirationThreshold": 7,
+          "defaultConnectors": Array [],
           "heartbeatIndices": "heartbeat-8*",
         }
       }

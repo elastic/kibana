@@ -384,7 +384,7 @@ export class DashboardPlugin
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }

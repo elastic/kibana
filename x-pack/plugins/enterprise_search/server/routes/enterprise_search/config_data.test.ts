@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { MockRouter, mockDependencies } from '../__mocks__';
+import { MockRouter, mockDependencies } from '../../__mocks__';
 
 jest.mock('../../lib/enterprise_search_config_api', () => ({
   callEnterpriseSearchConfigAPI: jest.fn(),

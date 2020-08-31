@@ -22,7 +22,10 @@ describe('legacy service', () => {
   describe('http server', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(() => {
-      root = kbnTestServer.createRoot({ migrations: { skip: true } });
+      root = kbnTestServer.createRoot({
+        migrations: { skip: true },
+        plugins: { initialize: false },
+      });
     }, 30000);
 
     afterEach(async () => await root.shutdown());

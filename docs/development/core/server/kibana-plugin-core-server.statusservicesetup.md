@@ -17,4 +17,5 @@ export interface StatusServiceSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | <code>Observable&lt;CoreStatus&gt;</code> | Current status for all Core services. |
+|  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | Overall system status for all of Kibana. |
 

@@ -6,6 +6,7 @@
   "false_positives": [
     "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
