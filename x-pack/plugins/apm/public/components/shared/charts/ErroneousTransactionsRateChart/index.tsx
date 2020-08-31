@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { asPercent } from '../../../../../common/utils/formatters';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { asPercent } from '../../../../utils/formatters';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 

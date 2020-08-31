@@ -5,6 +5,7 @@
  */
 
 import { flatten, orderBy, last } from 'lodash';
+import { asPercent } from '../../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
@@ -221,7 +222,7 @@ export async function getTransactionBreakdown({
     type: 'areaStacked',
     data: timeseriesPerSubtype[kpi.name],
     hideLegend: false,
-    legendValue: kpi.percentage,
+    legendValue: asPercent(kpi.percentage, 1),
   }));
 
   return { timeseries };

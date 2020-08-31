@@ -5,12 +5,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { isEmpty } from 'lodash';
+import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { asPercent } from '../../../utils/formatters';
 
 function TransactionBreakdown() {
   const { data, status } = useTransactionBreakdown();
@@ -30,13 +29,7 @@ function TransactionBreakdown() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TransactionBreakdownGraph
-            timeseries={timeseries.map((serie) => ({
-              ...serie,
-              legendValue: asPercent(serie.legendValue, 1),
-            }))}
-            noHits={noHits}
-          />
+          <TransactionBreakdownGraph timeseries={timeseries} noHits={noHits} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

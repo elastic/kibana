@@ -6,12 +6,12 @@
 
 import { throttle } from 'lodash';
 import React, { useMemo } from 'react';
+import { asPercent } from '../../../../../common/utils/formatters';
 import { useUiTracker } from '../../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Maybe } from '../../../../../typings/common';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { asPercent } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { getEmptySeries } from '../../charts/CustomPlot/getEmptySeries';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
