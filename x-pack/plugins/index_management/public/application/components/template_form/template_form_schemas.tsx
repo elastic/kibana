@@ -213,13 +213,11 @@ export const schemas: Record<string, FormSchema> = {
         }
       },
     },
-    __int__: {
-      addMeta: {
-        type: FIELD_TYPES.TOGGLE,
-        label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
-          defaultMessage: 'Add metadata',
-        }),
-      },
+    addMeta: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
+        defaultMessage: 'Add metadata',
+      }),
     },
   },
 };

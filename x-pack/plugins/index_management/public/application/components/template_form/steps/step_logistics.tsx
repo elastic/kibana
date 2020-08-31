@@ -118,9 +118,7 @@ interface LogisticsForm {
 }
 
 interface LogisticsFormInternal extends LogisticsForm {
-  __int__: {
-    addMeta: boolean;
-  };
+  addMeta: boolean;
 }
 
 interface Props {
@@ -133,14 +131,12 @@ interface Props {
 function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
   return {
     ...formData,
-    __int__: {
-      addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
-    },
+    addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
   };
 }
 
 function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  const { __int__, ...rest } = formData;
+  const { addMeta, ...rest } = formData;
   return rest;
 }
 
@@ -153,11 +149,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       serializer: formSerializer,
       deserializer: formDeserializer,
     });
-    const { subscribe, submit, isSubmitted, isValid: isFormValid, getErrors: getFormErrors } = form;
+    const {
+      subscribe,
+      submit,
+      isSubmitted,
+      isValid: isFormValid,
+      getErrors: getFormErrors,
+      getFormData,
+    } = form;
 
-    const [{ '__int__.addMeta': addMeta }] = useFormData({
+    const [{ addMeta }] = useFormData({
       form,
-      watch: '__int__.addMeta',
+      watch: 'addMeta',
     });
 
     /**
@@ -169,15 +172,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     }, [submit]);
 
     useEffect(() => {
-      const subscription = subscribe(({ data, isValid }) => {
-        onChange({
-          isValid,
-          validate,
-          getData: data.format,
-        });
+      onChange({
+        isValid: isFormValid,
+        getData: getFormData,
+        validate,
       });
-      return subscription.unsubscribe;
-    }, [onChange, validate, subscribe]);
+    }, [onChange, isFormValid, validate, getFormData]);
 
     const { name, indexPatterns, dataStream, order, priority, version } = getFieldsMeta(
       documentationService.getEsDocsBase()
@@ -301,7 +301,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                     defaultMessage="Use the _meta field to store any metadata you want."
                   />
                   <EuiSpacer size="m" />
-                  <UseField path="__int__.addMeta" data-test-subj="metaToggle" />
+                  <UseField path="addMeta" data-test-subj="metaToggle" />
                 </>
               }
             >
