@@ -81,7 +81,9 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.maps.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}>
+            <EuiLink
+              href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
+            >
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="create an index pattern"
@@ -97,7 +99,9 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.maps.noIndexPattern.hintDescription"
               defaultMessage="Don't have any geospatial data sets? "
             />
-            <EuiLink href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}>
+            <EuiLink
+              href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}
+            >
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.getStartedLinkText"
                 defaultMessage="Get started with some sample data sets."

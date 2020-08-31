@@ -19,37 +19,33 @@ import { AlertTypeParamsExpressionProps } from '../../../../../../types';
 import { GeoThresholdAlertParams } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
 
-export const BoundaryConditionExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({ errors }) => {
+export const ExpressionWithPopover: ({
+  popoverContent,
+  expressionDescription,
+  defaultValue,
+  value,
+}: {
+  popoverContent: any;
+  expressionDescription: any;
+  defaultValue?: any;
+  value?: any;
+}) => JSX.Element = ({
+  popoverContent,
+  expressionDescription,
+  defaultValue = '',
+  value = defaultValue,
+}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const indexPopover = (
-    <EuiFormRow
-      id="someSelect"
-      fullWidth
-      isInvalid={false /* TODO: Determine error conditions */}
-      error={errors.index}
-    >
-      <div>Some select</div>
-    </EuiFormRow>
-  );
 
   return (
     <EuiPopover
-      id="somePopover"
+      id="popoverForExpression"
       button={
         <EuiExpression
           display="columns"
           data-test-subj="selectIndexExpression"
-          description={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
-            {
-              defaultMessage: 'when entity',
-            }
-          )}
-          value={'someValue'}
+          description={expressionDescription}
+          value={value}
           isActive={popoverOpen}
           onClick={() => setPopoverOpen(true)}
           isInvalid={false /* TODO: set valid criteria */}
@@ -66,21 +62,14 @@ export const BoundaryConditionExpression: React.FunctionComponent<AlertTypeParam
       <div style={{ width: '450px' }}>
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
-                {
-                  defaultMessage: 'when entity',
-                }
-              )}
-            </EuiFlexItem>
+            <EuiFlexItem>{expressionDescription}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 data-test-subj="closePopover"
                 iconType="cross"
                 color="danger"
                 aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel',
+                  'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.closePopoverLabel',
                   {
                     defaultMessage: 'Close',
                   }
@@ -90,7 +79,7 @@ export const BoundaryConditionExpression: React.FunctionComponent<AlertTypeParam
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        {indexPopover}
+        {popoverContent}
       </div>
     </EuiPopover>
   );

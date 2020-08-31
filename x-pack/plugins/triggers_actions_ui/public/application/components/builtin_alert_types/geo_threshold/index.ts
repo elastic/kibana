@@ -15,7 +15,7 @@ export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsCo
     id: '.geo-threshold',
     name: 'Tracking threshold',
     iconClass: 'globe',
-    alertParamsExpression: lazy(() => import('./expression/expression')),
+    alertParamsExpression: lazy(() => import('./query_builder')),
     // validate: validateExpression,
     validate: (alertParams: string) => {
       return {

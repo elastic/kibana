@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { AlertTypeParamsExpressionProps } from '../../../../../../types';
 import { GeoThresholdAlertParams } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
-import { SingleFieldSelect } from '../single_field_select';
-import { ExpressionWithPopover } from '../expression_with_popover';
+import { SingleFieldSelect } from '../util_components/single_field_select';
+import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 
 export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
   AlertsContextValue
 >> = ({ errors, entity, setAlertParamsEntity, indexFields }) => {
-
   const indexPopover = (
     <EuiFormRow
       id="someSelect"

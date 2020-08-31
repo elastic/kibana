@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
-import { FieldIcon } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(
   fields?: IFieldType[],
@@ -96,9 +96,7 @@ export function SingleFieldSelect({
 
   const selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>> = [];
   if (value && fields) {
-    const selectedField = fields.find((field: IFieldType) => {
-      return field.name === value;
-    });
+    const selectedField = fields.find((field: IFieldType) => field.name === value);
     if (selectedField) {
       selectedOptions.push({ value: selectedField, label: value });
     }

@@ -12,9 +12,9 @@ import { AlertTypeParamsExpressionProps } from '../../../../../../types';
 import { GeoThresholdAlertParams, TrackingEvent, ES_GEO_FIELD_TYPES } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
 import { firstFieldOption } from '../../../../../../common/index_controls';
-import { GeoIndexPatternSelect } from '../geo_index_pattern_select';
-import { SingleFieldSelect } from '../single_field_select';
-import { ExpressionWithPopover } from '../expression_with_popover';
+import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
+import { SingleFieldSelect } from '../util_components/single_field_select';
+import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: TrackingEvent.entered,
@@ -111,7 +111,10 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
           })}
           value={timeField}
           onChange={(_timeField: string | undefined) => setAlertParamsDate(_timeField)}
-          fields={indexPattern.fields.filter((field) => field.spec.type === 'date')}
+          fields={
+            indexPattern.fields.length &&
+            indexPattern.fields.filter((field) => field.spec.type === 'date')
+          }
         />
       </EuiFormRow>
       <EuiFormRow
@@ -127,9 +130,10 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
           })}
           value={geoField}
           onChange={(_geoField: string | undefined) => setAlertParamsGeoField(_geoField)}
-          fields={indexPattern.fields.filter((field) =>
-            ES_GEO_FIELD_TYPES.includes(field.spec.type)
-          )}
+          fields={
+            indexPattern.fields.length &&
+            indexPattern.fields.filter((field) => ES_GEO_FIELD_TYPES.includes(field.spec.type))
+          }
         />
       </EuiFormRow>
     </Fragment>

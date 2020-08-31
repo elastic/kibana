@@ -26,9 +26,6 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
-import { alertType as peopleInSpaceAlert } from './alert_types/astros';
-import { alertType as geoThresholdAlert } from './alert_types/geo_threshold';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 
 interface SetupDeps {
@@ -36,7 +33,6 @@ interface SetupDeps {
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  alerts: AlertingSetup;
   mapsLegacy: MapsLegacyPluginSetup;
 }
 
@@ -135,7 +131,7 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { alerts, usageCollection, home, licensing, features, mapsLegacy } = plugins;
+    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
     const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
@@ -201,8 +197,6 @@ export class MapsPlugin implements Plugin {
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
-    alerts.registerType(peopleInSpaceAlert);
-    alerts.registerType(geoThresholdAlert);
 
     return {
       config: config$,
