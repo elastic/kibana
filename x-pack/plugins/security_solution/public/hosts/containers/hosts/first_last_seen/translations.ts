@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ERROR_FIRST_LAST_SEEN_HOST = i18n.translate(
-  'xpack.securitySolution.overviewHost.errorSearchDescription',
+  'xpack.securitySolution.firstLastSeenHost.errorSearchDescription',
   {
     defaultMessage: `An error has occurred on first last seen host search`,
   }
 );
 
 export const FAIL_FIRST_LAST_SEEN_HOST = i18n.translate(
-  'xpack.securitySolution.overviewHost.failSearchDescription',
+  'xpack.securitySolution.firstLastSeenHost.failSearchDescription',
   {
     defaultMessage: `Failed to run search on first last seen host`,
   }
