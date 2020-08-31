@@ -91,7 +91,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
-                hostname={data.host.name[0]}
+                hostName={data.host.name[0]}
                 type={FirstLastSeenHostType.FIRST_SEEN}
               />
             ) : (
@@ -103,7 +103,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
-                hostname={data.host.name[0]}
+                hostName={data.host.name[0]}
                 type={FirstLastSeenHostType.LAST_SEEN}
               />
             ) : (
