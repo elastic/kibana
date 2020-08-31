@@ -57,7 +57,7 @@
 
   <build>
     <testSourceDirectory>tests</testSourceDirectory>
-    <sourceDirectory>components</sourceDirectory>
+    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
