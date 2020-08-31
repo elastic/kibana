@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '..';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
 
 export interface TlsBuckets {
   key: string;
@@ -50,20 +50,9 @@ export interface TlsEdges {
   cursor: CursorType;
 }
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
-
-export interface TlsSortField {
-  field: TlsFields;
-  direction: Direction;
-}
-
-export interface NetworkTlsRequestOptions extends RequestOptionsPaginated {
+export interface NetworkTlsRequestOptions extends RequestOptionsPaginated<TlsFields> {
   ip: string;
   flowTarget: FlowTargetSourceDest;
-  sort: TlsSortField;
   defaultIndex: string[];
 }
 

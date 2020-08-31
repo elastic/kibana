@@ -14,7 +14,6 @@ import {
   Maybe,
   PageInfoPaginated,
   RequestOptionsPaginated,
-  SortField,
   TimerangeInput,
 } from '..';
 
@@ -27,6 +26,11 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+}
+
+export enum HostsFields {
+  lastSeen = 'lastSeen',
+  hostName = 'hostName',
 }
 
 export interface EndpointFields {
@@ -69,12 +73,12 @@ export interface HostOverviewStrategyResponse extends IEsSearchResponse, HostIte
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostsRequestOptions extends RequestOptionsPaginated {
-  sort: SortField;
+export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
   defaultIndex: string[];
 }
 
-export interface HostLastFirstSeenRequestOptions extends Partial<RequestOptionsPaginated> {
+export interface HostLastFirstSeenRequestOptions
+  extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
 }
 

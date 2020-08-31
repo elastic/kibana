@@ -7,10 +7,14 @@
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import { NetworkTlsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
-import { TlsSortField, Direction, TlsFields } from '../../../../../graphql/types';
+import {
+  NetworkTlsRequestOptions,
+  SortField,
+  Direction,
+  TlsFields,
+} from '../../../../../../common/search_strategy/security_solution';
 
-const getAggs = (querySize: number, sort: TlsSortField) => ({
+const getAggs = (querySize: number, sort: SortField<TlsFields>) => ({
   count: {
     cardinality: {
       field: 'tls.server.hash.sha1',
@@ -94,7 +98,7 @@ interface QueryOrder {
   _key: Direction;
 }
 
-const getQueryOrder = (sort: TlsSortField): QueryOrder => {
+const getQueryOrder = (sort: SortField<TlsFields>): QueryOrder => {
   switch (sort.field) {
     case TlsFields._id:
       return { _key: sort.direction };

@@ -168,10 +168,6 @@ export const useNetworkTls = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
@@ -185,7 +181,7 @@ export const useNetworkTls = ({
         },
         sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

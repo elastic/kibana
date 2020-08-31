@@ -16,6 +16,7 @@ import {
 import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
 
 export * from './hosts';
+export * from './network';
 export type Maybe<T> = T | null;
 
 export type FactoryQueryTypes = HostsQueries | NetworkQueries;
@@ -41,8 +42,8 @@ export enum Direction {
   desc = 'desc',
 }
 
-export interface SortField {
-  field: 'lastSeen' | 'hostName';
+export interface SortField<Field = string> {
+  field: Field;
   direction: Direction;
 }
 
@@ -88,14 +89,14 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
 }
 
-export interface RequestOptions extends RequestBasicOptions {
+export interface RequestOptions<Field = string> extends RequestBasicOptions {
   pagination: PaginationInput;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
-export interface RequestOptionsPaginated extends RequestBasicOptions {
+export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
