@@ -21,6 +21,7 @@ import { createHash } from 'crypto';
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import { KibanaRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 
@@ -79,7 +80,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         auth: authEnabled ? { mode: 'try' } : false,
       },
       async handler(request, h) {
-        const uiSettings = request.getUiSettingsService();
+        const soClient = kbnServer.newPlatform.start.core.savedObjects.getScopedClient(
+          KibanaRequest.from(request)
+        );
+        const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
         const darkMode =
           !authEnabled || request.auth.isAuthenticated
