@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
@@ -110,10 +111,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(() => {
-    refetch();
-    closeAddExceptionModal();
-  }, [refetch, closeAddExceptionModal]);
+  const onAddExceptionConfirm = useCallback(
+    (didCloseAlert: boolean, didBulkCloseAlert) => {
+      closeAddExceptionModal();
+      if (didCloseAlert) {
+        setAlertStatus('closed');
+      }
+      if (timelineId !== TimelineId.active || didBulkCloseAlert) {
+        refetch();
+      }
+    },
+    [closeAddExceptionModal, timelineId, refetch]
+  );
 
   const onAlertStatusUpdateSuccess = useCallback(
     (count: number, newStatus: Status) => {
