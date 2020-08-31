@@ -384,6 +384,7 @@ class AgentPolicyService {
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     let agentPolicy;
+    const standalone = options?.standalone;
 
     try {
       agentPolicy = await this.get(soClient, id);
@@ -402,15 +403,9 @@ class AgentPolicyService {
       throw new Error('Default output is not setup');
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
-    const settings = await getSettings(soClient);
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
-      fleet: {
-        kibana: {
-          hosts: settings.kibana_url || [],
-        },
-      },
       outputs: {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
@@ -454,6 +449,21 @@ class AgentPolicyService {
             },
           }),
     };
+
+    // only add settings if not in standalone
+    if (!standalone) {
+      let settings;
+      try {
+        settings = await getSettings(soClient);
+      } catch (error) {
+        throw new Error('Default settings is not setup');
+      }
+      fullAgentPolicy.fleet = {
+        kibana: {
+          hosts: settings.kibana_url || [],
+        },
+      };
+    }
 
     return fullAgentPolicy;
   }
