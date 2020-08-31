@@ -9,14 +9,14 @@ import { HostOverviewRequestOptions } from '../../../../../../common/search_stra
 import { cloudFieldsMap, hostFieldsMap } from '../../../../../lib/ecs_fields';
 import { buildFieldsTermAggregation } from '../../../../../lib/hosts/helpers';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
+import { HOST_FIELDS } from './helpers';
 
 export const buildHostOverviewQuery = ({
-  fields,
   hostName,
   defaultIndex,
   timerange: { from, to },
 }: HostOverviewRequestOptions): ISearchRequestParams => {
-  const esFields = reduceFields(fields, { ...hostFieldsMap, ...cloudFieldsMap });
+  const esFields = reduceFields(HOST_FIELDS, { ...hostFieldsMap, ...cloudFieldsMap });
 
   const filter = [
     { term: { 'host.name': hostName } },
