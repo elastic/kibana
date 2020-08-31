@@ -5,50 +5,123 @@
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
-import { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import {
+  ProcessedImportResponse,
+  FailedImport,
+  SavedObjectsManagementRecord,
+} from 'src/plugins/saved_objects_management/public';
 
-const createSavedObjectsManagementRecord = () => ({
-  type: 'dashboard',
-  id: 'foo',
-  meta: { icon: 'foo-icon', title: 'my-dashboard' },
-  references: [
-    {
-      type: 'visualization',
-      id: 'foo-viz',
-      name: 'Foo Viz',
-    },
-    {
-      type: 'visualization',
-      id: 'bar-viz',
-      name: 'Bar Viz',
-    },
-  ],
-});
+// Sample data references:
+//
+//             /-> Visualization bar -> Index pattern foo
+// My dashboard
+//             \-> Visualization baz -> Index pattern bar
+//
+// Dashboard has references to visualizations, and transitive references to index patterns
+
+const OBJECTS = {
+  MY_DASHBOARD: {
+    type: 'dashboard',
+    id: 'foo',
+    meta: { title: 'my-dashboard-title', icon: 'dashboardApp', namespaceType: 'single' },
+    references: [
+      { type: 'visualization', id: 'foo', name: 'Visualization foo' },
+      { type: 'visualization', id: 'bar', name: 'Visualization bar' },
+    ],
+  } as SavedObjectsManagementRecord,
+  VISUALIZATION_FOO: {
+    type: 'visualization',
+    id: 'bar',
+    meta: { title: 'visualization-foo-title', icon: 'visualizeApp', namespaceType: 'single' },
+    references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
+  } as SavedObjectsManagementRecord,
+  VISUALIZATION_BAR: {
+    type: 'visualization',
+    id: 'baz',
+    meta: { title: 'visualization-bar-title', icon: 'visualizeApp', namespaceType: 'single' },
+    references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
+  } as SavedObjectsManagementRecord,
+  INDEX_PATTERN_FOO: {
+    type: 'index-pattern',
+    id: 'foo',
+    meta: { title: 'index-pattern-foo-title', icon: 'indexPatternApp', namespaceType: 'single' },
+    references: [],
+  } as SavedObjectsManagementRecord,
+  INDEX_PATTERN_BAR: {
+    type: 'index-pattern',
+    id: 'bar',
+    meta: { title: 'index-pattern-bar-title', icon: 'indexPatternApp', namespaceType: 'single' },
+    references: [],
+  } as SavedObjectsManagementRecord,
+};
+
+interface ObjectProperties {
+  type: string;
+  id: string;
+  meta: { title?: string; icon?: string };
+}
+const createSuccessResult = ({ type, id, meta }: ObjectProperties) => {
+  return { type, id, meta };
+};
+const createFailureConflict = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return { obj: { type, id, meta }, error: { type: 'conflict' } };
+};
+const createFailureMissingReferences = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return {
+    obj: { type, id, meta },
+    error: { type: 'missing_references', references: [] },
+  };
+};
+const createFailureUnresolvable = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return {
+    obj: { type, id, meta },
+    // currently, unresolvable errors are 'unsupported_type' and 'unknown'; either would work for this test case
+    error: { type: 'unknown', message: 'some error message', statusCode: 400 },
+  };
+};
 
 const createCopyResult = (
-  opts: { withConflicts?: boolean; withUnresolvableError?: boolean } = {}
+  opts: {
+    withConflicts?: boolean;
+    withMissingReferencesError?: boolean;
+    withUnresolvableError?: boolean;
+    overwrite?: boolean;
+  } = {}
 ) => {
-  const failedImports: ProcessedImportResponse['failedImports'] = [];
+  let successfulImports: ProcessedImportResponse['successfulImports'] = [
+    createSuccessResult(OBJECTS.MY_DASHBOARD),
+  ];
+  let failedImports: ProcessedImportResponse['failedImports'] = [];
   if (opts.withConflicts) {
-    failedImports.push(
-      {
-        obj: { type: 'visualization', id: 'foo-viz' },
-        error: { type: 'conflict' },
-      },
-      {
-        obj: { type: 'index-pattern', id: 'transient-index-pattern-conflict' },
-        error: { type: 'conflict' },
-      }
-    );
+    failedImports.push(createFailureConflict(OBJECTS.VISUALIZATION_FOO));
+  } else {
+    successfulImports.push(createSuccessResult(OBJECTS.VISUALIZATION_FOO));
   }
   if (opts.withUnresolvableError) {
-    failedImports.push({
-      obj: { type: 'visualization', id: 'bar-viz' },
-      error: { type: 'missing_references', blocking: [], references: [] },
-    });
+    failedImports.push(createFailureUnresolvable(OBJECTS.INDEX_PATTERN_FOO));
+  } else {
+    successfulImports.push(createSuccessResult(OBJECTS.INDEX_PATTERN_FOO));
+  }
+  if (opts.withMissingReferencesError) {
+    failedImports.push(createFailureMissingReferences(OBJECTS.VISUALIZATION_BAR));
+    // INDEX_PATTERN_BAR is not present in the source space, therefore VISUALIZATION_BAR resulted in a missing_references error
+  } else {
+    successfulImports.push(
+      createSuccessResult(OBJECTS.VISUALIZATION_BAR),
+      createSuccessResult(OBJECTS.INDEX_PATTERN_BAR)
+    );
+  }
+
+  if (opts.overwrite) {
+    failedImports = failedImports.map(({ obj, error }) => ({
+      obj: { ...obj, overwrite: true },
+      error,
+    }));
+    successfulImports = successfulImports.map((obj) => ({ ...obj, overwrite: true }));
   }
 
   const copyResult: ProcessedImportResponse = {
+    successfulImports,
     failedImports,
   } as ProcessedImportResponse;
 
@@ -57,39 +130,21 @@ const createCopyResult = (
 
 describe('summarizeCopyResult', () => {
   it('indicates the result is processing when not provided', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = undefined;
-    const includeRelated = true;
-
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
-          },
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
           },
         ],
         "processing": true,
@@ -97,68 +152,135 @@ describe('summarizeCopyResult', () => {
     `);
   });
 
-  it('processes failedImports to extract conflicts, including transient conflicts', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
+  it('processes failedImports to extract conflicts, including transitive conflicts', () => {
     const copyResult = createCopyResult({ withConflicts: true });
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": true,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [
-              Object {
-                "error": Object {
-                  "type": "conflict",
-                },
-                "obj": Object {
-                  "id": "foo-viz",
-                  "type": "visualization",
-                },
+            "conflict": Object {
+              "error": Object {
+                "type": "conflict",
               },
-            ],
+              "obj": Object {
+                "id": "bar",
+                "meta": Object {
+                  "icon": "visualizeApp",
+                  "namespaceType": "single",
+                  "title": "visualization-foo-title",
+                },
+                "type": "visualization",
+              },
+            },
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflicts": Array [
-              Object {
-                "error": Object {
-                  "type": "conflict",
-                },
-                "obj": Object {
-                  "id": "transient-index-pattern-conflict",
-                  "type": "index-pattern",
-                },
-              },
-            ],
-            "hasUnresolvableErrors": false,
-            "id": "transient-index-pattern-conflict",
-            "name": "transient-index-pattern-conflict",
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "overwrite": false,
             "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "bar",
+            "name": "index-pattern-bar-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "overwrite": false,
+            "type": "visualization",
+          },
+        ],
+        "processing": false,
+        "successful": false,
+      }
+    `);
+  });
+
+  it('processes failedImports to extract missing references errors', () => {
+    const copyResult = createCopyResult({ withMissingReferencesError: true });
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+
+    expect(summarizedResult).toMatchInlineSnapshot(`
+      Object {
+        "hasConflicts": false,
+        "hasMissingReferences": true,
+        "hasUnresolvableErrors": false,
+        "objects": Array [
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
+            "id": "foo",
+            "name": "my-dashboard-title",
+            "overwrite": false,
+            "type": "dashboard",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": true,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "overwrite": false,
+            "type": "visualization",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "overwrite": false,
+            "type": "visualization",
           },
         ],
         "processing": false,
@@ -168,39 +290,63 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes failedImports to extract unresolvable errors', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withUnresolvableError: true });
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": true,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": true,
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
+            "icon": "indexPatternApp",
+            "id": "bar",
+            "name": "index-pattern-bar-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": true,
-            "id": "bar-viz",
-            "name": "Bar Viz",
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -211,39 +357,63 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes a result without errors', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult();
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "bar",
+            "name": "index-pattern-bar-title",
+            "overwrite": false,
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -253,32 +423,13 @@ describe('summarizeCopyResult', () => {
     `);
   });
 
-  it('does not include references unless requested', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
-    const copyResult = createCopyResult();
-    const includeRelated = false;
+  it('indicates when successes and failures have been overwritten', () => {
+    const copyResult = createCopyResult({ withMissingReferencesError: true, overwrite: true });
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
-    expect(summarizedResult).toMatchInlineSnapshot(`
-      Object {
-        "hasConflicts": false,
-        "hasUnresolvableErrors": false,
-        "objects": Array [
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "foo",
-            "name": "my-dashboard",
-            "type": "dashboard",
-          },
-        ],
-        "processing": false,
-        "successful": true,
-      }
-    `);
+    expect(summarizedResult.objects).toHaveLength(4);
+    for (const obj of summarizedResult.objects) {
+      expect(obj.overwrite).toBe(true);
+    }
   });
 });

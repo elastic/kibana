@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

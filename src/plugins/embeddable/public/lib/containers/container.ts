@@ -35,10 +35,11 @@ import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embedd
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export abstract class Container<
-  TChildInput extends Partial<EmbeddableInput> = {},
-  TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
-  TContainerOutput extends ContainerOutput = ContainerOutput
-> extends Embeddable<TContainerInput, TContainerOutput>
+    TChildInput extends Partial<EmbeddableInput> = {},
+    TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
+    TContainerOutput extends ContainerOutput = ContainerOutput
+  >
+  extends Embeddable<TContainerInput, TContainerOutput>
   implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
   protected readonly children: {
