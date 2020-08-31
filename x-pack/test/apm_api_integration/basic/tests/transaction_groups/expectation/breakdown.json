@@ -43,7 +43,7 @@
            }
         ],
         "hideLegend":false,
-        "legendValue": 0.16700861715223636
+        "legendValue": "17%"
      },
      {
         "title":"http",
@@ -88,7 +88,7 @@
            }
         ],
         "hideLegend":false,
-        "legendValue": 0.7702092736971686
+        "legendValue": "77%"
      },
      {
         "title":"postgresql",
@@ -133,7 +133,7 @@
            }
         ],
         "hideLegend":false,
-        "legendValue": 0.0508822322527698
+        "legendValue": "5.1%"
      },
      {
         "title":"redis",
@@ -178,7 +178,7 @@
            }
         ],
         "hideLegend":false,
-        "legendValue": 0.011899876897825195
+        "legendValue": "1.2%"
      }
   ]
 }
