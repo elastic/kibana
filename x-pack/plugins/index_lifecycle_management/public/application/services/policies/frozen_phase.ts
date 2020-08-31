@@ -13,6 +13,7 @@ import {
   PhaseValidationErrors,
   positiveNumberRequiredMessage,
 } from './policy_validation';
+import { determineDataTierAllocationType } from './determine_data_tier_allocation_type';
 
 const frozenPhaseInitialization: FrozenPhase = {
   phaseEnabled: false,
@@ -22,6 +23,7 @@ const frozenPhaseInitialization: FrozenPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const frozenPhaseFromES = (phaseSerialized?: SerializedFrozenPhase): FrozenPhase => {
@@ -31,6 +33,12 @@ export const frozenPhaseFromES = (phaseSerialized?: SerializedFrozenPhase): Froz
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(phaseSerialized.min_age);

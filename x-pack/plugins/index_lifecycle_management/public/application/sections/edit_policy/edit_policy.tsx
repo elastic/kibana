@@ -120,13 +120,13 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const setPhaseData = useCallback(
     (phase: keyof Phases, key: string, value: any) => {
-      setPolicy({
-        ...policy,
+      setPolicy((nextPolicy) => ({
+        ...nextPolicy,
         phases: {
-          ...policy.phases,
-          [phase]: { ...policy.phases[phase], [key]: value },
+          ...nextPolicy.phases,
+          [phase]: { ...nextPolicy.phases[phase], [key]: value },
         },
-      });
+      }));
     },
     [setPolicy]
   );

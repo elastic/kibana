@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -14,6 +15,13 @@ import { AdvancedSectionLayout } from '../advanced_section_layout';
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
+const i18nTexts = {
+  useDataTierAllocation: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.useDataTierSwitchLabel',
+    { defaultMessage: 'Use data tier allocation' }
+  ),
+};
+
 export const DataTierAllocation = <T extends any>(
   props: React.PropsWithChildren<SharedProps<WarmPhase>>
 ) => {
@@ -22,7 +30,7 @@ export const DataTierAllocation = <T extends any>(
   // useEffect(
   //   () => {
   //     if (!isLoading && restProps.phaseData.allocationType === undefined) {
-  //       setPhaseData('allocationType', hasNodeAttributes ? 'custom-allocation' : 'none');
+  //       setPhaseData('allocationType', hasNodeAttributes ? 'custom' : 'none');
   //     }
   //   },
   //   // Do this once only when mounting this component
@@ -69,19 +77,19 @@ export const DataTierAllocation = <T extends any>(
   }
 
   const isUsingDataTierAllocation =
-    props.phaseData.allocationType === 'custom-allocation' ||
-    props.phaseData.allocationType === undefined;
+    props.phaseData.dataTierAllocationType === 'custom' ||
+    props.phaseData.dataTierAllocationType === 'default';
 
   return (
     <>
       <EuiSwitch
-        label="Use data tier allocation."
+        label={i18nTexts.useDataTierAllocation}
         checked={isUsingDataTierAllocation}
         onChange={(e) => {
           if (!e.target.checked) {
-            props.setPhaseData('allocationType', 'none');
+            props.setPhaseData('dataTierAllocationType', 'none');
           } else {
-            props.setPhaseData('allocationType', undefined);
+            props.setPhaseData('dataTierAllocationType', 'default');
           }
         }}
       />
@@ -91,17 +99,17 @@ export const DataTierAllocation = <T extends any>(
           <div style={{ paddingLeft: 24 }}>
             <EuiSwitch
               label="Use custom data tier allocation."
-              checked={props.phaseData.allocationType === 'custom-allocation'}
+              checked={props.phaseData.dataTierAllocationType === 'custom'}
               onChange={(e) => {
                 if (e.target.checked) {
-                  props.setPhaseData('allocationType', 'custom-allocation');
+                  props.setPhaseData('dataTierAllocationType', 'custom');
                 } else {
-                  props.setPhaseData('allocationType', undefined);
+                  props.setPhaseData('dataTierAllocationType', 'default');
                 }
               }}
             />
             <EuiSpacer size="m" />
-            {props.phaseData.allocationType === 'custom-allocation' ? (
+            {props.phaseData.dataTierAllocationType === 'custom' ? (
               <NodeAllocation nodes={data!.nodesByAttributes} {...props} />
             ) : null}
           </div>

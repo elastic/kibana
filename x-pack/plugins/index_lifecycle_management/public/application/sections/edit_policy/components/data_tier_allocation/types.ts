@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Phase, Phases } from '../../../../services/policies/types';
+import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
-export interface SharedProps<T extends Phase> {
+export interface SharedProps<T extends PhaseWithAllocationAction> {
   phase: keyof Phases & string;
   errors?: PhaseValidationErrors<T>;
   phaseData: T;

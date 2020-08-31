@@ -16,6 +16,8 @@ import {
   positiveNumbersAboveZeroErrorMessage,
 } from './policy_validation';
 
+import { determineDataTierAllocationType } from './determine_data_tier_allocation_type';
+
 const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
   warmPhaseOnRollover: false,
@@ -28,6 +30,7 @@ const warmPhaseInitialization: WarmPhase = {
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhase => {
@@ -38,6 +41,12 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     if (phaseSerialized.min_age === '0ms') {
@@ -59,11 +68,6 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
         if (allocate.number_of_replicas) {
           phase.selectedReplicaCount = allocate.number_of_replicas.toString();
         }
-      }
-      if (actions.migrate?.enabled === false) {
-        phase.allocationType = 'none';
-      } else if (phase.selectedNodeAttrs) {
-        phase.allocationType = 'custom-allocation';
       }
     }
 
@@ -107,13 +111,13 @@ export const warmPhaseToES = (
 
   esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
 
-  if (phase.allocationType === 'custom-allocation' && phase.selectedNodeAttrs) {
+  if (phase.dataTierAllocationType === 'custom' && phase.selectedNodeAttrs) {
     const [name, value] = phase.selectedNodeAttrs.split(':');
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
     esPhase.actions.allocate.require = {
       [name]: value,
     };
-  } else if (phase.allocationType === 'none') {
+  } else if (phase.dataTierAllocationType === 'none') {
     esPhase.actions.migrate = { enabled: false };
   } else {
     if (esPhase.actions.allocate) {

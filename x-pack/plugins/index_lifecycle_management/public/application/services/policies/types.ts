@@ -98,6 +98,9 @@ export interface AllocateAction {
   require: {
     [attribute: string]: string;
   };
+  migrate?: {
+    enabled: false;
+  };
 }
 
 export interface Policy {
@@ -120,7 +123,14 @@ export interface PhaseWithMinAge {
   selectedMinimumAgeUnits: string;
 }
 
-export type AllocationType = 'custom-allocation' | 'none';
+/**
+ * Different types of allocation markers we use in deserialized policies.
+ *
+ * default - use data tier based data allocation based on node roles -- this is ES best practice mode.
+ * custom - use node_attrs to allocate data to specific nodes
+ * none - do not move data anywhere when entering a phase
+ */
+export type DataTierAllocationType = 'default' | 'custom' | 'none';
 
 export interface PhaseWithAllocationAction {
   selectedNodeAttrs: string;
@@ -129,7 +139,7 @@ export interface PhaseWithAllocationAction {
    * A string value indicating allocation type. If unspecified we assume the user
    * wants to use default allocation.
    */
-  allocationType?: AllocationType;
+  dataTierAllocationType: DataTierAllocationType;
 }
 
 export interface PhaseWithIndexPriority {

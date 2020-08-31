@@ -13,6 +13,7 @@ import {
   PhaseValidationErrors,
   positiveNumberRequiredMessage,
 } from './policy_validation';
+import { determineDataTierAllocationType } from './determine_data_tier_allocation_type';
 
 const coldPhaseInitialization: ColdPhase = {
   phaseEnabled: false,
@@ -22,6 +23,7 @@ const coldPhaseInitialization: ColdPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhase => {
@@ -31,6 +33,12 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(phaseSerialized.min_age);
