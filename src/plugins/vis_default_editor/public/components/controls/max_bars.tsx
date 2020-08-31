@@ -18,7 +18,6 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { isUndefined } from 'lodash';
 import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -90,11 +89,11 @@ function MaxBarsParamEditor({
       compressed
     >
       <EuiFieldNumber
-        value={isUndefined(value) ? '' : value}
-        step={1}
+        value={value || ''}
         placeholder={autoPlaceholder}
         onChange={onChange}
-        fullWidth={true}
+        min={1}
+        fullWidth
         compressed
         max={uiSettingMaxBars}
         isInvalid={showValidation ? !isValid : false}

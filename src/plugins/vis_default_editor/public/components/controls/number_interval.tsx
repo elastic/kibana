@@ -120,7 +120,6 @@ function NumberIntervalParamEditor({
       <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
         <EuiFlexItem>
           <EuiSwitch
-            className={'eui-alignMiddle'}
             label={useAutoIntervalLabel}
             onChange={onAutoSwitchChange}
             checked={autoChecked}
@@ -138,7 +137,7 @@ function NumberIntervalParamEditor({
             onChange={onChange}
             onBlur={setTouched}
             disabled={autoChecked}
-            fullWidth={true}
+            fullWidth
             compressed
             placeholder={autoChecked ? autoIntervalIsUsedPlaceholder : selectIntervalPlaceholder}
           />
