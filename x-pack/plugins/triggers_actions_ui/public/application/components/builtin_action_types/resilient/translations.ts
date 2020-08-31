@@ -117,3 +117,17 @@ export const TITLE_REQUIRED = i18n.translate(
     defaultMessage: 'Title is required.',
   }
 );
+
+export const INCIDENT_TYPES_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.unableToGetIncidentTypesMessage',
+  {
+    defaultMessage: 'Unable to get incident types',
+  }
+);
+
+export const SEVERITY_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.unableToGetSeverityMessage',
+  {
+    defaultMessage: 'Unable to get severity',
+  }
+);

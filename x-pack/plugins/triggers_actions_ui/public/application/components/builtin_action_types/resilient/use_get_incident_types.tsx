@@ -5,14 +5,19 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getIncidentTypes } from './api';
+import * as i18n from './translations';
 
 type IncidentTypes = Array<{ id: string; name: string }>;
 
 interface Props {
   http: HttpSetup;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
   actionConnector: ActionConnector;
 }
 
@@ -21,7 +26,11 @@ export interface UseGetIncidentTypes {
   isLoading: boolean;
 }
 
-export const useGetIncidentTypes = ({ http, actionConnector }: Props): UseGetIncidentTypes => {
+export const useGetIncidentTypes = ({
+  http,
+  toastNotifications,
+  actionConnector,
+}: Props): UseGetIncidentTypes => {
   const [isLoading, setIsLoading] = useState(true);
   const [incidentTypes, setIncidentTypes] = useState<IncidentTypes>([]);
   const abortCtrl = useRef(new AbortController());
@@ -32,15 +41,30 @@ export const useGetIncidentTypes = ({ http, actionConnector }: Props): UseGetInc
       abortCtrl.current = new AbortController();
       setIsLoading(true);
 
-      const res = await getIncidentTypes({
-        http,
-        signal: abortCtrl.current.signal,
-        connectorId: actionConnector.id,
-      });
+      try {
+        const res = await getIncidentTypes({
+          http,
+          signal: abortCtrl.current.signal,
+          connectorId: actionConnector.id,
+        });
 
-      if (!didCancel) {
-        setIsLoading(false);
-        setIncidentTypes(res.data ?? []);
+        if (!didCancel) {
+          setIsLoading(false);
+          setIncidentTypes(res.data ?? []);
+          if (res.status && res.status === 'error') {
+            toastNotifications.addDanger({
+              title: i18n.INCIDENT_TYPES_API_ERROR,
+              text: `${res.serviceMessage ?? res.message}`,
+            });
+          }
+        }
+      } catch (error) {
+        if (!didCancel) {
+          toastNotifications.addDanger({
+            title: i18n.INCIDENT_TYPES_API_ERROR,
+            text: error.message,
+          });
+        }
       }
     };
 
@@ -52,7 +76,7 @@ export const useGetIncidentTypes = ({ http, actionConnector }: Props): UseGetInc
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [http, actionConnector]);
+  }, [http, actionConnector, toastNotifications]);
 
   return {
     incidentTypes,

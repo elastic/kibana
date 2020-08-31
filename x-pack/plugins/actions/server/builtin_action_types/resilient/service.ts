@@ -271,7 +271,7 @@ export const createExternalService = (
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}`)
       );
     }
   };

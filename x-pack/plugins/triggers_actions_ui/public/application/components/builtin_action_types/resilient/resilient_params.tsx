@@ -32,7 +32,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   messageVariables,
   actionConnector,
 }) => {
-  const { http } = useAppDependencies();
+  const { http, toastNotifications } = useAppDependencies();
   const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
     actionParams.subActionParams || {};
 
@@ -51,11 +51,13 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     incidentTypes: allIncidentTypes,
   } = useGetIncidentTypes({
     http,
+    toastNotifications,
     actionConnector,
   });
 
   const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
     http,
+    toastNotifications,
     actionConnector,
   });
 
