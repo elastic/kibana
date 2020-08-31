@@ -41,8 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('PKI authentication', () => {
+  describe('PKI authentication', () => {
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/first_client_pki')
@@ -125,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
         authentication_provider: 'pki',
+        authentication_type: 'token',
       });
 
       // Cookie should be accepted.
@@ -169,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: 'pki',
+          authentication_type: 'token',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);

@@ -5,22 +5,13 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  Coordinate,
-  RectCoordinate,
-} from '../../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../../typings/timeseries';
 import { useChartsSync } from '../../../../../hooks/useChartsSync';
 // @ts-ignore
 import CustomPlot from '../../CustomPlot';
 
 interface Props {
-  series: Array<{
-    color: string;
-    title: React.ReactNode;
-    titleShort?: React.ReactNode;
-    data: Array<Coordinate | RectCoordinate>;
-    type: string;
-  }>;
+  series: TimeSeries[];
   truncateLegends?: boolean;
   tickFormatY: (y: number) => React.ReactNode;
   formatTooltipValue: (c: Coordinate) => React.ReactNode;
@@ -28,6 +19,7 @@ interface Props {
   height?: number;
   stacked?: boolean;
   onHover?: () => void;
+  onToggleLegend?: (disabledSeriesState: boolean[]) => void;
 }
 
 function TransactionLineChart(props: Props) {
@@ -40,6 +32,7 @@ function TransactionLineChart(props: Props) {
     truncateLegends,
     stacked = false,
     onHover,
+    onToggleLegend,
   } = props;
 
   const syncedChartsProps = useChartsSync();
@@ -66,6 +59,7 @@ function TransactionLineChart(props: Props) {
       height={height}
       truncateLegends={truncateLegends}
       {...(stacked ? { stackBy: 'y' } : {})}
+      onToggleLegend={onToggleLegend}
     />
   );
 }

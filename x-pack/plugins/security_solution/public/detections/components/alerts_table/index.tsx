@@ -228,7 +228,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       exceptionListType,
       alertData,
     }: AddExceptionModalBaseProps) => {
-      if (alertData !== null && alertData !== undefined) {
+      if (alertData != null) {
         setShouldShowAddExceptionModal(true);
         setAddExceptionModalState({
           ruleName,
@@ -441,9 +441,43 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
-    closeAddExceptionModal,
-  ]);
+  const onAddExceptionConfirm = useCallback(
+    (refetch: inputsModel.Refetch) => (): void => {
+      refetch();
+      closeAddExceptionModal();
+    },
+    [closeAddExceptionModal]
+  );
+
+  // Callback for creating the AddExceptionModal and allowing it
+  // access to the refetchQuery to update the page
+  const exceptionModalCallback = useCallback(
+    (refetchQuery: inputsModel.Refetch) => {
+      if (shouldShowAddExceptionModal) {
+        return (
+          <AddExceptionModal
+            ruleName={addExceptionModalState.ruleName}
+            ruleId={addExceptionModalState.ruleId}
+            ruleIndices={addExceptionModalState.ruleIndices}
+            exceptionListType={addExceptionModalState.exceptionListType}
+            alertData={addExceptionModalState.alertData}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm(refetchQuery)}
+            alertStatus={filterGroup}
+          />
+        );
+      } else {
+        return <></>;
+      }
+    },
+    [
+      addExceptionModalState,
+      filterGroup,
+      onAddExceptionCancel,
+      onAddExceptionConfirm,
+      shouldShowAddExceptionModal,
+    ]
+  );
 
   if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
@@ -465,19 +499,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}
+        exceptionsModal={exceptionModalCallback}
       />
-      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
-        <AddExceptionModal
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={filterGroup}
-        />
-      )}
     </>
   );
 };
