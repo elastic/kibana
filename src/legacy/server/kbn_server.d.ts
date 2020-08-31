@@ -45,7 +45,6 @@ import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/serve
 import { UiPlugins } from '../../core/server/plugins';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
 // lot of legacy code was assuming this type only had these two methods
@@ -78,7 +77,6 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
-    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
   }

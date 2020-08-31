@@ -11,8 +11,8 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaContext, IKibanaContext } from '../index';
-import { HttpLogic, IHttpLogicValues } from '../shared/http';
-import { AppLogic, IAppLogicActions, IAppLogicValues } from './app_logic';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
@@ -48,9 +48,9 @@ export const AppSearchUnconfigured: React.FC = () => (
 );
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic) as IAppLogicValues;
-  const { initializeAppData } = useActions(AppLogic) as IAppLogicActions;
-  const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
