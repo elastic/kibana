@@ -19,5 +19,5 @@
 
 export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
 export { esSearchStrategyProvider } from './es_search_strategy';
-export { getDefaultSearchParams } from './get_default_search_params';
+export { getDefaultSearchParams, getShardTimeout } from './get_default_search_params';
 export { getTotalLoaded } from './get_total_loaded';

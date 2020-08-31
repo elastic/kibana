@@ -24,8 +24,6 @@ const sessionId = Date.now();
 
 export function getSearchParams(getConfig: GetConfigFn) {
   return {
-    rest_total_hits_as_int: true,
-    ignore_unavailable: true,
     ignore_throttled: getIgnoreThrottled(getConfig),
     max_concurrent_shard_requests: getMaxConcurrentShardRequests(getConfig),
     preference: getPreference(getConfig),

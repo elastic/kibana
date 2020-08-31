@@ -15,11 +15,11 @@ import {
   Logger,
 } from '../../../../../src/core/server';
 import {
-  getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
   ISearchOptions,
+  getDefaultSearchParams,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
@@ -39,18 +39,16 @@ export const enhancedEsSearchStrategyProvider = (
     request: IEnhancedEsSearchRequest,
     options?: ISearchOptions
   ) => {
-    logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-    const config = await config$.pipe(first()).toPromise();
     const client = context.core.elasticsearch.client.asCurrentUser;
-    const defaultParams = getDefaultSearchParams(config);
-    const params = { ...defaultParams, ...request.params };
+
+    logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
 
     const isAsync = request.indexType !== 'rollup';
 
     try {
       const response = isAsync
-        ? await asyncSearch(client, { ...request, params }, options)
-        : await rollupSearch(client, { ...request, params }, options);
+        ? await asyncSearch(client, request)
+        : await rollupSearch(client, request, config$);
 
       if (
         usage &&
@@ -82,14 +80,9 @@ export const enhancedEsSearchStrategyProvider = (
 
 async function asyncSearch(
   client: ElasticsearchClient,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
+  request: IEnhancedEsSearchRequest
 ): Promise<IEsSearchResponse> {
-  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    ...request.params,
-  };
-
-  params.trackTotalHits = true; // Get the exact count of hits
+  const { params = {} } = request;
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
@@ -97,17 +90,16 @@ async function asyncSearch(
   const method = request.id ? 'GET' : 'POST';
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
-  const batchedReduceSize = request.id ? undefined : 64;
-
-  const asyncOptions = {
+  const querystring = toSnakeCase({
     waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
     keepAlive: '1m', // Extend the TTL for this search request by one minute
-  };
-
-  const querystring = toSnakeCase({
-    ...asyncOptions,
-    ...(batchedReduceSize && { batchedReduceSize }),
+    ...(request.id
+      ? {}
+      : {
+          trackTotalHits: true,
+          ignoreUnavailable: true,
+          batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+        }),
     ...queryParams,
   });
 
@@ -132,12 +124,16 @@ async function asyncSearch(
 async function rollupSearch(
   client: ElasticsearchClient,
   request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
+  config$: Observable<SharedGlobalConfig>
 ): Promise<IEsSearchResponse> {
+  const config = await config$.pipe(first()).toPromise();
   const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
-  const querystring = toSnakeCase(params);
+  const querystring = toSnakeCase({
+    ...getDefaultSearchParams(config),
+    ...params,
+  });
 
   const esResponse = await client.transport.request({
     method,

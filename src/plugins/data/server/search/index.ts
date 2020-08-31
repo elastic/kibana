@@ -25,7 +25,7 @@ export {
   SearchEnhancements,
 } from './types';
 
-export { getDefaultSearchParams, getTotalLoaded } from './es_search';
+export { getDefaultSearchParams, getTotalLoaded, getShardTimeout } from './es_search';
 
 export { usageProvider, SearchUsage } from './collectors';
 

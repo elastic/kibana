@@ -5,8 +5,8 @@
  */
 
 import { RequestHandlerContext } from '../../../../../src/core/server';
-import { pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+import { BehaviorSubject } from 'rxjs';
 
 const mockAsyncResponse = {
   body: {
@@ -43,7 +43,15 @@ describe('ES search strategy', () => {
       elasticsearch: { client: { asCurrentUser: { transport: { request: mockApiCaller } } } },
     },
   };
-  const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
+  const mockConfig$ = new BehaviorSubject<any>({
+    elasticsearch: {
+      shardTimeout: {
+        asMilliseconds: () => {
+          return 100;
+        },
+      },
+    },
+  });
 
   beforeEach(() => {
     mockApiCaller.mockClear();
@@ -64,10 +72,17 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    const { method, path, body } = mockApiCaller.mock.calls[0][0];
+
+    const { method, path, body, querystring } = mockApiCaller.mock.calls[0][0];
+
     expect(method).toBe('POST');
     expect(path).toBe('/logstash-*/_async_search');
     expect(body).toEqual({ query: {} });
+    expect(querystring).toHaveProperty('wait_for_completion_timeout');
+    expect(querystring).toHaveProperty('track_total_hits');
+    expect(querystring).toHaveProperty('ignore_unavailable');
+    expect(querystring).toHaveProperty('keep_alive');
+    expect(querystring).toHaveProperty('batched_reduce_size');
   });
 
   it('makes a GET request to async search with ID when ID is provided', async () => {
@@ -79,10 +94,13 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
 
     expect(mockApiCaller).toBeCalled();
-    const { method, path, body } = mockApiCaller.mock.calls[0][0];
+    const { method, path, body, querystring } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('GET');
     expect(path).toBe('/_async_search/foo');
     expect(body).toEqual(undefined);
+    expect(querystring).not.toHaveProperty('batched_reduce_size');
+    expect(querystring).not.toHaveProperty('batched_reduce_size');
+    expect(querystring).not.toHaveProperty('batched_reduce_size');
   });
 
   it('encodes special characters in the path', async () => {
