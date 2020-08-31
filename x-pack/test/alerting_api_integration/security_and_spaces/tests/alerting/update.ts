@@ -219,21 +219,15 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.name).to.eql(' leading and trailing whitespace ');
               break;
