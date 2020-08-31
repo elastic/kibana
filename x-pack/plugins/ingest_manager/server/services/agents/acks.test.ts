@@ -74,7 +74,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action2',
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: actionAttributes,
@@ -95,7 +95,7 @@ describe('test agent acks services', () => {
           type: 'ACTION_RESULT',
           subtype: 'CONFIG',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
-          action_id: 'action1',
+          action_id: 'action2',
           agent_id: 'id',
         } as AgentEvent,
       ]
@@ -123,7 +123,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action3',
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
@@ -152,7 +152,7 @@ describe('test agent acks services', () => {
           type: 'ACTION_RESULT',
           subtype: 'CONFIG',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
-          action_id: 'action1',
+          action_id: 'action3',
           agent_id: 'id',
         } as AgentEvent,
       ]
@@ -167,7 +167,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action4',
             error: {
               message: 'Not found',
               statusCode: 404,
@@ -189,7 +189,7 @@ describe('test agent acks services', () => {
             type: 'ACTION_RESULT',
             subtype: 'CONFIG',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
-            action_id: 'action2',
+            action_id: 'action4',
             agent_id: 'id',
           } as unknown) as AgentEvent,
         ]
@@ -207,7 +207,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action5',
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
@@ -234,7 +234,7 @@ describe('test agent acks services', () => {
             type: 'ACTION',
             subtype: 'FAILED',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
-            action_id: 'action1',
+            action_id: 'action5',
             agent_id: 'id',
           } as unknown) as AgentEvent,
         ]

@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
-import { unenrollForAgentPolicyId, createAgentPolicyAction } from './agents';
+import { unenrollForAgentPolicyId } from './agents';
 import { outputService } from './output';
 import { agentPolicyService } from './agent_policy';
 
@@ -25,29 +25,11 @@ export async function agentPolicyUpdateEventHandler(
     await generateEnrollmentAPIKey(soClient, {
       agentPolicyId,
     });
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy || !policy.revision) {
-      return;
-    }
-    const packages = policy.inputs.reduce<string[]>((acc, input) => {
-      const packageName = input.meta?.package?.name;
-      if (packageName && acc.indexOf(packageName) < 0) {
-        return [packageName, ...acc];
-      }
-      return acc;
-    }, []);
-
-    await createAgentPolicyAction(soClient, {
-      type: 'CONFIG_CHANGE',
-      data: { config: policy } as any,
-      ack_data: { packages },
-      created_at: new Date().toISOString(),
-      policy_id: policy.id,
-      policy_revision: policy.revision,
-    });
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicyId);
   }
 
   if (action === 'deleted') {
