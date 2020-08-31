@@ -145,7 +145,7 @@ image::images/tutorial-visualize-map-2.png[Map]
 
 . Add the map to your dashboard.
 
-.. Oopen the menu, go to *Dashboard*, then click *Add*. 
+.. Open the menu, go to *Dashboard*, then click *Add*. 
 
 .. On the *Add panels* flyout, click *Map Example*.
 
@@ -185,4 +185,3 @@ Now that you have the basics, you're ready to start exploring your own system da
 * To learn about the visualization types {kib} has to offer, refer to <<types-of-panels, Types of panels>>.
 * To learn about configuring {kib} and managing your saved objects, refer to {kibana-ref}/management.html[Management].
 * To learn about the interactive console you can use to submit REST requests to {es}, refer to {kibana-ref}/console-kibana.html[Console].
-
