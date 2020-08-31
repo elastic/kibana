@@ -31,6 +31,7 @@ import { ResolverState } from '../../types';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
 
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -129,6 +130,11 @@ const ProcessDetails = memo(function ProcessDetails({
     selectors.relativeHref(state)({ panelView: 'nodes' })
   );
 
+  const eventLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: eventsHref!,
+  });
+
   const crumbs = useMemo(() => {
     return [
       {
@@ -139,7 +145,7 @@ const ProcessDetails = memo(function ProcessDetails({
           }
         ),
         'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
-        href: eventsHref ?? undefined,
+        ...eventLinkNavProps,
       },
       {
         text: (
@@ -154,7 +160,7 @@ const ProcessDetails = memo(function ProcessDetails({
         onClick: () => {},
       },
     ];
-  }, [eventsHref, processName]);
+  }, [processName, eventLinkNavProps]);
   const { cubeAssetsForNode } = useResolverTheme();
   const { descriptionText } = useMemo(() => {
     if (!processEvent) {

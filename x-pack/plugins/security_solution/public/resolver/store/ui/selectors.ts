@@ -71,7 +71,7 @@ export const relativeHref: (
       const urlSearchParams = new URLSearchParams(locationSearch);
       const value = encode(params);
       urlSearchParams.set(parameterName(resolverComponentInstanceID), value);
-      return urlSearchParams.toString();
+      return `?${urlSearchParams.toString()}`;
     };
   }
 );
