@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import moment from 'moment-timezone';
-import { merge } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment-timezone';
+import { merge } from '../../utils';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
