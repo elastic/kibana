@@ -6,13 +6,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { HostLastFirstSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-export const buildLastFirstSeenHostQuery = ({
+export const buildFirstLastSeenHostQuery = ({
   hostName,
   defaultIndex,
   docValueFields,
-}: HostLastFirstSeenRequestOptions): ISearchRequestParams => {
+}: HostFirstLastSeenRequestOptions): ISearchRequestParams => {
   const filter = [{ term: { 'host.name': hostName } }];
 
   const dslQuery = {
