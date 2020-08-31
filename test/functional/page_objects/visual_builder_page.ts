@@ -594,6 +594,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
       );
       await comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
+      await PageObjects.common.sleep(1000);
       const byField = await testSubjects.find('groupByField');
       await comboBox.setElement(byField, field, { clickWithMouse: true });
     }
