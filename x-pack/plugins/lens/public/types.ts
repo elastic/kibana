@@ -7,6 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
+import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -30,7 +31,6 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
-  dateRange: DateRange;
 }
 
 export interface EditorFrameProps {
@@ -44,8 +44,9 @@ export interface EditorFrameProps {
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
   // This should be replaced with a top-down state
   onChange: (newState: {
-    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    filterableIndexPatterns: string[];
     doc: Document;
+    isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -57,9 +58,7 @@ export interface EditorFrameInstance {
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
-  registerVisualization: <T, P>(
-    visualization: Visualization<T, P> | Promise<Visualization<T, P>>
-  ) => void;
+  registerVisualization: <T>(visualization: Visualization<T> | Promise<Visualization<T>>) => void;
 }
 
 export interface EditorFrameStart {
@@ -131,10 +130,6 @@ export interface DatasourceSuggestion<T = unknown> {
   keptLayerIds: string[];
 }
 
-export interface DatasourceMetaData {
-  filterableIndexPatterns: Array<{ id: string; title: string }>;
-}
-
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
 /**
@@ -146,10 +141,10 @@ export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
-  initialize: (state?: P) => Promise<T>;
+  initialize: (state?: P, savedObjectReferences?: SavedObjectReference[]) => Promise<T>;
 
   // Given the current state, which parts should be saved?
-  getPersistableState: (state: T) => P;
+  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
@@ -165,8 +160,6 @@ export interface Datasource<T = unknown, P = unknown> {
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
-
-  getMetaData: (state: T) => DatasourceMetaData;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
@@ -266,6 +259,11 @@ export interface OperationMetadata {
   // A bucketed operation is grouped by duplicate values, otherwise each row is
   // treated as unique
   isBucketed: boolean;
+  /**
+   * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
+   * interval: Histogram data, like date or number histograms
+   * ratio: Most number data is rendered as a ratio that includes 0
+   */
   scale?: 'ordinal' | 'interval' | 'ratio';
   // Extra meta-information like cardinality, color
   // TODO currently it's not possible to differentiate between a field from a raw
@@ -408,7 +406,7 @@ export interface VisualizationType {
   label: string;
 }
 
-export interface Visualization<T = unknown, P = unknown> {
+export interface Visualization<T = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -418,11 +416,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: P) => T;
-  /**
-   * Can remove any state that should not be persisted to saved object, such as UI state
-   */
-  getPersistableState: (state: T) => P;
+  initialize: (frame: FramePublicAPI, state?: T) => T;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,
@@ -504,12 +498,18 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 
-  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  toExpression: (
+    state: T,
+    datasourceLayers: Record<string, DatasourcePublicAPI>
+  ) => Ast | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
    */
-  toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  toPreviewExpression?: (
+    state: T,
+    datasourceLayers: Record<string, DatasourcePublicAPI>
+  ) => Ast | string | null;
 }
 
 export interface LensFilterEvent {

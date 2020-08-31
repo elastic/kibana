@@ -10,12 +10,14 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { getPackageConfigCreateCallback } from './ingest_integration';
+import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
+import { ExceptionListClient } from '../../../lists/server';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<IngestManagerStartContract, 'agentService'>
 > & {
+  exceptionsListService: ExceptionListClient;
   logger: Logger;
   manifestManager?: ManifestManager;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
@@ -30,16 +32,18 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
+  private exceptionsListService: ExceptionListClient | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    this.exceptionsListService = dependencies.exceptionsListService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
-        'packageConfigCreate',
-        getPackageConfigCreateCallback(dependencies.logger, this.manifestManager)
+        'packagePolicyCreate',
+        getPackagePolicyCreateCallback(dependencies.logger, this.manifestManager)
       );
     }
   }
@@ -48,6 +52,13 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
+  }
+
+  public getExceptionsList() {
+    if (!this.exceptionsListService) {
+      throw new Error('exceptionsListService not set');
+    }
+    return this.exceptionsListService;
   }
 
   public getManifestManager(): ManifestManager | undefined {

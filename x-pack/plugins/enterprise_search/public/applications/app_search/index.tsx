@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
+import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../index';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
+import { IInitialAppData } from '../../../common/types';
+
+import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
 import {
@@ -23,23 +28,33 @@ import {
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
 
-export const AppSearch: React.FC = () => {
+export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
+  return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
+};
 
-  if (!config.host)
-    return (
-      <Switch>
-        <Route exact path={SETUP_GUIDE_PATH}>
-          <SetupGuide />
-        </Route>
-        <Route>
-          <Redirect to={SETUP_GUIDE_PATH} />
-          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
-        </Route>
-      </Switch>
-    );
+export const AppSearchUnconfigured: React.FC = () => (
+  <Switch>
+    <Route exact path={SETUP_GUIDE_PATH}>
+      <SetupGuide />
+    </Route>
+    <Route>
+      <Redirect to={SETUP_GUIDE_PATH} />
+    </Route>
+  </Switch>
+);
+
+export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { errorConnecting } = useValues(HttpLogic);
+
+  useEffect(() => {
+    if (!hasInitialized) initializeAppData(props);
+  }, [hasInitialized]);
 
   return (
     <Switch>
@@ -48,15 +63,18 @@ export const AppSearch: React.FC = () => {
       </Route>
       <Route>
         <Layout navigation={<AppSearchNav />}>
-          <Switch>
-            <Route exact path={ROOT_PATH}>
-              {/* For some reason a Redirect to /engines just doesn't work here - it shows a blank page */}
-              <EngineOverview />
-            </Route>
-            <Route exact path={ENGINES_PATH}>
-              <EngineOverview />
-            </Route>
-          </Switch>
+          {errorConnecting ? (
+            <ErrorConnecting />
+          ) : (
+            <Switch>
+              <Route exact path={ROOT_PATH}>
+                <Redirect to={ENGINES_PATH} />
+              </Route>
+              <Route exact path={ENGINES_PATH}>
+                <EngineOverview />
+              </Route>
+            </Switch>
+          )}
         </Layout>
       </Route>
     </Switch>

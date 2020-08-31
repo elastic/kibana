@@ -7,7 +7,7 @@
 import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
@@ -218,13 +218,6 @@ export class Simulator {
    */
   public debugWrapper() {
     return this.wrapper.debug();
-  }
-
-  /**
-   * Lines that connect the nodes in the graph
-   */
-  public edgeLines(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:edgeline"]');
   }
 
   /**

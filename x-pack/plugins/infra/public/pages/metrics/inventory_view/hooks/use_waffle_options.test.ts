@@ -20,6 +20,7 @@ jest.mock('react-router-dom', () => ({
 // reassign them, so we can't make these both part of the same object
 let PREFILL_NODETYPE: WaffleOptionsState['nodeType'] | undefined;
 let PREFILL_METRIC: WaffleOptionsState['metric'] | undefined;
+let PREFILL_CUSTOM_METRICS: WaffleOptionsState['customMetrics'] | undefined;
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     inventoryPrefill: {
@@ -28,6 +29,9 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
       },
       setMetric(metric: WaffleOptionsState['metric']) {
         PREFILL_METRIC = metric;
+      },
+      setCustomMetrics(customMetrics: WaffleOptionsState['customMetrics']) {
+        PREFILL_CUSTOM_METRICS = customMetrics;
       },
     },
   }),
@@ -39,6 +43,7 @@ describe('useWaffleOptions', () => {
   beforeEach(() => {
     PREFILL_NODETYPE = undefined;
     PREFILL_METRIC = undefined;
+    PREFILL_CUSTOM_METRICS = undefined;
   });
 
   it('should sync the options to the inventory alert preview context', () => {
@@ -47,6 +52,15 @@ describe('useWaffleOptions', () => {
     const newOptions = {
       nodeType: 'pod',
       metric: { type: 'memory' },
+      customMetrics: [
+        {
+          type: 'custom',
+          id:
+            "i don't want to bother to copy and paste an actual uuid so instead i'm going to smash my keyboard skjdghsjodkyjheurvjnsgn",
+          aggregation: 'avg',
+          field: 'hey.system.are.you.good',
+        },
+      ],
     } as WaffleOptionsState;
     act(() => {
       result.current.changeNodeType(newOptions.nodeType);
@@ -58,5 +72,10 @@ describe('useWaffleOptions', () => {
     });
     rerender();
     expect(PREFILL_METRIC).toEqual(newOptions.metric);
+    act(() => {
+      result.current.changeCustomMetrics(newOptions.customMetrics);
+    });
+    rerender();
+    expect(PREFILL_CUSTOM_METRICS).toEqual(newOptions.customMetrics);
   });
 });

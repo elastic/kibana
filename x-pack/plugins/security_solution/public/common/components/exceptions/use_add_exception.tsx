@@ -42,7 +42,7 @@ export type ReturnUseAddOrUpdateException = [
 
 export interface UseAddOrUpdateExceptionProps {
   http: HttpStart;
-  onError: (arg: Error) => void;
+  onError: (arg: Error, code: number | null, message: string | null) => void;
   onSuccess: (updated: number, conficts: number) => void;
 }
 
@@ -162,7 +162,11 @@ export const useAddOrUpdateException = ({
       } catch (error) {
         if (isSubscribed) {
           setIsLoading(false);
-          onError(error);
+          if (error.body != null) {
+            onError(error, error.body.status_code, error.body.message);
+          } else {
+            onError(error, null, null);
+          }
         }
       }
     };

@@ -20,7 +20,7 @@
 import { first, skip, toArray } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
-import { ExpressionAstExpression, parseExpression, IInterpreterRenderHandlers } from '../common';
+import { parseExpression, IInterpreterRenderHandlers } from '../common';
 
 // eslint-disable-next-line
 const { __getLastExecution } = require('./services');
@@ -42,13 +42,6 @@ jest.mock('./services', () => {
   const moduleMock = {
     __execution: undefined,
     __getLastExecution: () => moduleMock.__execution,
-    getInterpreter: () => {
-      return {
-        interpretAst: async (expression: ExpressionAstExpression) => {
-          return { type: 'render', as: 'test' };
-        },
-      };
-    },
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
     }),

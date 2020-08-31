@@ -24,7 +24,8 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
-  describe('route', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75440
+  describe.skip('route', function () {
     describe('timeouts', function () {
       const writeBodyCharAtATime = (request: Test, body: string, interval: number) => {
         return new Promise((resolve, reject) => {

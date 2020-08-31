@@ -43,13 +43,6 @@ export interface Props {
   updateField: UpdateFieldFunc;
 }
 
-export const defaultFlyoutProps = {
-  'data-test-subj': 'mappingsEditorFieldEdit',
-  'aria-labelledby': 'mappingsEditorFieldEditTitle',
-  className: 'mappingsEditor__editField',
-  maxWidth: 720,
-};
-
 // The default FormWrapper is the <EuiForm />, which wrapps the form with
 // a <div>. We can't have a div as first child of the Flyout as it breaks
 // the height calculaction and does not render the footer position correctly.
@@ -170,7 +163,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        {form.isSubmitted && !form.isValid && (
+        {form.isSubmitted && form.isValid === false && (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -200,7 +193,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
               fill
               onClick={submitForm}
               type="submit"
-              disabled={form.isSubmitted && !form.isValid}
+              disabled={form.isSubmitted && form.isValid === false}
               data-test-subj="editFieldUpdateButton"
             >
               {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {
