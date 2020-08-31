@@ -79,7 +79,8 @@ export interface LensEmbeddableDeps {
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
 }
 
-export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
+export class Embeddable
+  extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
   type = DOC_TYPE;
 
