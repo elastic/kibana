@@ -6,7 +6,7 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { HostItem } from '../common';
+import { HostItem, HostsFields } from '../common';
 import { Inspect, Maybe, RequestOptionsPaginated, TimerangeInput } from '../..';
 
 export interface HostOverviewStrategyResponse extends IEsSearchResponse {
@@ -14,7 +14,7 @@ export interface HostOverviewStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostOverviewRequestOptions extends Partial<RequestOptionsPaginated> {
+export interface HostOverviewRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
   skip?: boolean;
   timerange: TimerangeInput;
