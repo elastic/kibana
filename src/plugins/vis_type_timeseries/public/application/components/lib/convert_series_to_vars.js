@@ -56,11 +56,15 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
         set(variables, `${_.snakeCase(row.label)}.label`, row.label);
 
         if (row.labelFormatted) {
-          set(
-            variables,
-            `${_.snakeCase(row.label)}.formatted`,
-            moment(row.labelFormatted).format(dateFormat)
-          );
+          let val;
+
+          if (row.labelFormatted === 'true' || row.labelFormatted === 'false') {
+            val = row.labelFormatted;
+          } else {
+            val = moment(row.label).format(dateFormat);
+          }
+
+          set(variables, `${_.snakeCase(row.label)}.formatted`, val);
         }
       });
   });
