@@ -26,9 +26,14 @@ import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
 
+  const fakeFormat = {
+    toJSON: jest.fn().mockReturnValue({ id: 'string' }),
+  };
+
   const createAggConfigs = (aggs: IAggConfig[] = []) => {
     const field = {
       name: '@timestamp',
+      format: fakeFormat,
     };
 
     const indexPattern = ({
@@ -59,7 +64,10 @@ describe('tabifyAggResponse Integration', () => {
     expect(resp.columns).toHaveLength(1);
 
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
-    expect(resp.columns[0]).toHaveProperty('aggConfig', aggConfigs.aggs[0]);
+    expect(resp.columns[0]).toHaveProperty('aggConfig', {
+      ...aggConfigs.aggs[0].serialize(),
+      meta: {},
+    });
   });
 
   describe('transforms a complex response', () => {
@@ -89,7 +97,10 @@ describe('tabifyAggResponse Integration', () => {
       expect(table.columns).toHaveLength(aggs.length);
 
       aggs.forEach((agg, i) => {
-        expect(table.columns[i]).toHaveProperty('aggConfig', agg);
+        expect(table.columns[i]).toHaveProperty('aggConfig', {
+          ...agg.serialize(),
+          meta: {},
+        });
       });
     }
 

@@ -19,7 +19,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { FormattedData } from '../../../../../plugins/inspector/public';
-import { TabbedTable } from '../../../common';
+import { TabbedTable, AggConfigs, IAggConfig } from '../../../common';
 import { FormatFactory } from '../../../common/field_formats/utils';
 import { createFilter } from './create_filter';
 
@@ -42,18 +42,20 @@ export async function buildTabularInspectorData(
   {
     queryFilter,
     deserializeFieldFormat,
+    aggs,
   }: {
     queryFilter: { addFilters: (filter: any) => void };
     deserializeFieldFormat: FormatFactory;
+    aggs: AggConfigs;
   }
 ) {
-  const aggConfigs = table.columns.map((column) => column.aggConfig);
+  const aggConfigs = table.columns.map((column) => aggs.byId(column.aggConfig.id as string));
   const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
       const value = row[cur.id];
 
-      let format = cur.aggConfig.toSerializedFieldFormat();
-      if (Object.keys(format).length < 1) {
+      let format = cur.formatHint;
+      if (!format || Object.keys(format).length < 1) {
         // If no format exists, fall back to string as a default
         format = { id: 'string' };
       }
@@ -68,8 +70,9 @@ export async function buildTabularInspectorData(
   });
 
   const columns = table.columns.map((col, colIndex) => {
-    const field = col.aggConfig.getField();
-    const isCellContentFilterable = col.aggConfig.isFilterable() && (!field || field.filterable);
+    const aggConfig = aggs.byId(col.aggConfig.id!);
+    const field = aggConfig?.getField();
+    const isCellContentFilterable = aggConfig?.isFilterable() && (!field || field.filterable);
     return {
       name: col.name,
       field: `col-${colIndex}-${col.aggConfig.id}`,
@@ -79,7 +82,13 @@ export async function buildTabularInspectorData(
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
-          const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
+          const filter = createFilter(
+            aggConfigs as IAggConfig[],
+            table,
+            colIndex,
+            rowIndex,
+            value.raw
+          );
 
           if (filter) {
             queryFilter.addFilters(filter);
@@ -91,7 +100,13 @@ export async function buildTabularInspectorData(
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
-          const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
+          const filter = createFilter(
+            aggConfigs as IAggConfig[],
+            table,
+            colIndex,
+            rowIndex,
+            value.raw
+          );
 
           if (filter) {
             const notOther = value.raw !== '__other__';

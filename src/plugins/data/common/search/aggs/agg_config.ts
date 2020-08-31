@@ -245,6 +245,14 @@ export class AggConfig {
     const configDsl = {} as any;
     configDsl[this.type.dslName || this.type.name] = output.params;
 
+    // Send aggregation metadata in Elasticsearch to be read in the response
+    if (this.type.dslMeta) {
+      const meta = this.type.dslMeta(this);
+      if (meta) {
+        configDsl.meta = meta;
+      }
+    }
+
     // if the config requires subAggs, write them to the dsl as well
     if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
     if (output.subAggs) {

@@ -46,7 +46,7 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter((col) => get(col.aggConfig.toSerializedFieldFormat(), 'id') === 'number')
+        .filter((col) => get(col.aggConfigInstance.toSerializedFieldFormat(), 'id') === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs]

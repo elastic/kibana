@@ -47,7 +47,7 @@ export function tabifyAggResponse(
     const column = write.columns.shift();
 
     if (column) {
-      const agg = column.aggConfig;
+      const agg = column.aggConfigInstance;
       const aggInfo = agg.write(aggs);
       aggScale *= aggInfo.metricScale || 1;
 
@@ -55,6 +55,11 @@ export function tabifyAggResponse(
         case AggGroupNames.Buckets:
           const aggBucket = get(bucket, agg.id);
           const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+
+          const aggMeta = get(aggBucket, 'meta');
+          if (aggMeta) {
+            column.aggMeta = aggMeta;
+          }
 
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {
@@ -130,7 +135,7 @@ export function tabifyAggResponse(
     const column = write.columns.shift();
 
     if (column) {
-      const agg = column.aggConfig;
+      const agg = column.aggConfigInstance;
 
       switch (agg.type.type) {
         case AggGroupNames.Metrics:

@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -285,14 +284,9 @@ export function XYChart({
 
     // add minInterval only for single point in domain
     if (data.dateRange && isSingleTimestampInXDomain()) {
-      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
-        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
-
-      const { fromDate, toDate } = data.dateRange;
-      const duration = moment(toDate).diff(moment(fromDate));
-      const targetMs = duration / histogramBarTarget;
-      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+      return parseInterval(xAxisColumn?.meta?.aggConfigParams?.meta?.interval)?.asMilliseconds();
     }
+
     return undefined;
   }
 

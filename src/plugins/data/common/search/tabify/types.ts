@@ -19,7 +19,7 @@
 
 import { Moment } from 'moment';
 import { RangeFilterParams } from '../../../common';
-import { IAggConfig } from '../aggs';
+import { IAggConfig, AggConfigSerialized } from '../aggs';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {
@@ -49,7 +49,19 @@ export interface AggResponseBucket {
 
 /** @public **/
 export interface TabbedAggColumn {
-  aggConfig: IAggConfig;
+  aggConfig: AggConfigSerialized & {
+    meta?: Record<string, unknown>;
+  };
+  id: string;
+  name: string;
+  formatHint?: Record<string, unknown>;
+  indexPatternId?: string;
+}
+
+/** @internal **/
+export interface TabbedAggColumnInternal {
+  aggConfigInstance: IAggConfig;
+  aggMeta?: Record<string, unknown>;
   id: string;
   name: string;
 }

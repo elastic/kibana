@@ -140,6 +140,16 @@ export const getDateHistogramBucketAgg = ({
         },
       };
     },
+    dslMeta(agg) {
+      if (agg.params.interval !== 'auto') {
+        return;
+      }
+      const { useNormalizedEsInterval } = agg.params;
+      const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+      return {
+        interval: interval.expression,
+      };
+    },
     params: [
       {
         name: 'field',

@@ -991,9 +991,15 @@ export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: stri
 // @public (undocumented)
 export interface TabbedAggColumn {
     // (undocumented)
-    aggConfig: IAggConfig;
+    aggConfig: AggConfigSerialized & {
+        meta?: Record<string, unknown>;
+    };
+    // (undocumented)
+    formatHint?: Record<string, unknown>;
     // (undocumented)
     id: string;
+    // (undocumented)
+    indexPatternId?: string;
     // (undocumented)
     name: string;
 }

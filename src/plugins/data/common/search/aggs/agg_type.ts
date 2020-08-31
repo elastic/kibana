@@ -43,6 +43,7 @@ export interface AggTypeConfig<
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
+  dslMeta?: (aggConfig: TAggConfig) => Record<string, unknown> | undefined;
   params?: Array<Partial<TParam>>;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
@@ -210,6 +211,13 @@ export class AggType<
   };
 
   /**
+   * Pass metadata from the request to the response, to be added to the aggConfig information
+   * in the table
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/agg-metadata.html
+   */
+  dslMeta?: (agg: TAggConfig) => Record<string, unknown> | undefined;
+
+  /**
    * Generic AggType Constructor
    *
    * Used to create the values exposed by the agg_types module.
@@ -227,6 +235,7 @@ export class AggType<
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;
+    this.dslMeta = config.dslMeta;
 
     if (config.createFilter) {
       this.createFilter = config.createFilter;

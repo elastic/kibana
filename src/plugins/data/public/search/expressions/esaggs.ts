@@ -226,6 +226,7 @@ const handleCourierRequest = async ({
       buildTabularInspectorData((searchSource as any).tabifiedResponse, {
         queryFilter: filterManager,
         deserializeFieldFormat: getFieldFormats().deserialize,
+        aggs,
       }),
     { returnsFormattedValues: true }
   );
@@ -255,6 +256,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       default: false,
       help: '',
     },
+    // Deprecated
     includeFormatHints: {
       types: ['boolean'],
       default: false,
@@ -309,11 +311,9 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
-          meta: serializeAggConfig(column.aggConfig),
+          meta: serializeAggConfig(column),
+          formatHint: column.formatHint,
         };
-        if (args.includeFormatHints) {
-          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
-        }
         return cleanedColumn;
       }),
     };

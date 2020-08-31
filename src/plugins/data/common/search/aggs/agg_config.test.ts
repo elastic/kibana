@@ -150,6 +150,24 @@ describe('AggConfig', () => {
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
       expect(dsl.aggs[avgConfig.id].avg).toBe(football);
     });
+
+    it('uses #dslMeta()', () => {
+      const mockDslMeta = jest.fn().mockReturnValue({ custom: true });
+      typesRegistry.get('date_histogram').dslMeta = mockDslMeta;
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const configStates = {
+        enabled: true,
+        type: 'date_histogram',
+        schema: 'segment',
+        params: {
+          field: '@timestamp',
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const dsl = aggConfig.toDsl();
+      expect(mockDslMeta).toHaveBeenCalledTimes(1);
+      expect(dsl.meta).toEqual({ custom: true });
+    });
   });
 
   describe('::ensureIds', () => {

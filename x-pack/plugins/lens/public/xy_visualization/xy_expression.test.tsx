@@ -193,7 +193,10 @@ const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatata
       id: 'c',
       name: 'c',
       formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
+      meta: {
+        type: 'date-histogram',
+        aggConfigParams: { interval: 'auto', meta: { interval: '30m' } },
+      },
     },
     { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
   ],
@@ -494,12 +497,12 @@ describe('xy_expression', () => {
           />
         );
 
-        // real auto interval is 30mins = 1800000
+        // real auto interval is passed in metadata, 30mins = 1800000
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
           Object {
             "max": 1546491600000,
             "min": 1546405200000,
-            "minInterval": 1728000,
+            "minInterval": 1800000,
           }
         `);
       });
