@@ -15,6 +15,6 @@ export const featureCatalogueEntry = {
   }),
   icon: 'canvasApp',
   path: '/app/canvas',
-  showOnHomePage: true,
+  showOnHomePage: false,
   category: FeatureCatalogueCategory.DATA,
 };

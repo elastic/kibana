@@ -21,7 +21,7 @@ import { DevToolsSetup } from '../../../dev_tools/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 export interface AppSetupUIPluginDependencies {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   devTools: DevToolsSetup;
   usageCollection?: UsageCollectionSetup;
 }

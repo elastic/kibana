@@ -16,10 +16,11 @@ export interface SavedObjectsResolveImportErrorsOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [createNewCopies](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.createnewcopies.md) | <code>boolean</code> | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
 |  [namespace](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.namespace.md) | <code>string</code> | if specified, will import in given namespace |
 |  [objectLimit](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.objectlimit.md) | <code>number</code> | The maximum number of object to import |
 |  [readStream](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from |
 |  [retries](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.retries.md) | <code>SavedObjectsImportRetry[]</code> | saved object import references to retry |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | client to use to perform the import operation |
-|  [supportedTypes](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.supportedtypes.md) | <code>string[]</code> | the list of allowed types to import |
+|  [typeRegistry](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> | The registry of all known saved object types |
 
