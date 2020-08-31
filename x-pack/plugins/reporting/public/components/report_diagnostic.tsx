@@ -55,7 +55,7 @@ const initialState: State = {
   success: true,
 };
 
-export const ReportHelper = ({ apiClient }: Props) => {
+export const ReportDiagnostic = ({ apiClient }: Props) => {
   const [state, setStateBase] = useState(initialState);
   const setState = (s: Partial<typeof state>) =>
     setStateBase({

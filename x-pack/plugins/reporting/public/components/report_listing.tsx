@@ -33,7 +33,7 @@ import {
   ReportErrorButton,
   ReportInfoButton,
 } from './buttons';
-import { ReportHelper } from './report_helper';
+import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Job {
   id: string;
@@ -156,7 +156,7 @@ class ReportListingUi extends Component<Props, State> {
                 />
               </p>
             </EuiText>
-            <ReportHelper apiClient={this.props.apiClient} />
+            <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
