@@ -1,12 +1,12 @@
-package builds
+package builds.test
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
-object Jest : BuildType({
-  name = "Jest Unit"
+object XPackJest : BuildType({
+  name = "X-Pack Jest Unit"
   paused = true
-  description = "Executes Jest Unit Tests"
+  description = "Executes X-Pack Jest Unit Tests"
 
   requirements {
     startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
@@ -14,10 +14,11 @@ object Jest : BuildType({
 
   steps {
     script {
-      name = "Jest Unit"
+      name = "X-Pack Jest Unit"
       scriptContent = """
                 #!/bin/bash
-                yarn run grunt run:test_jest
+                cd x-pack
+                node --max-old-space-size=6144 scripts/jest --ci --verbose
             """.trimIndent()
     }
   }

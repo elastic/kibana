@@ -1,19 +1,23 @@
-package builds
+package builds.test
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
-object ApiIntegration : BuildType({
-  name = "API Integration"
+object Jest : BuildType({
+  name = "Jest Unit"
   paused = true
-  description = "Executes API Integration Tests"
+  description = "Executes Jest Unit Tests"
+
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
+  }
 
   steps {
     script {
-      name = "API Integration"
+      name = "Jest Unit"
       scriptContent = """
                 #!/bin/bash
-                yarn run grunt run:apiIntegrationTests
+                yarn run grunt run:test_jest
             """.trimIndent()
     }
   }
