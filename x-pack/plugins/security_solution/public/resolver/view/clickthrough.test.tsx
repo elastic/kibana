@@ -242,6 +242,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         );
         if (button) {
           button.simulate('click');
+          button.simulate('click'); // The first click opened the menu, this second click closes it
         }
       });
       it('should close the submenu', async () => {
