@@ -53,7 +53,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <>
+    <div data-test-subj="outputTabContent">
       <EuiText>
         <p>
           <FormattedMessage
@@ -75,6 +75,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               />
             }
             checked={isVerboseEnabled}
+            data-test-subj="verboseOutputToggle"
             onChange={async (e) => {
               const isVerbose = e.target.checked;
               setIsVerboseEnabled(isVerbose);
@@ -93,6 +94,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               )
             }
             iconType="refresh"
+            data-test-subj="refreshOutputButton"
           >
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
@@ -105,6 +107,6 @@ export const OutputTab: React.FunctionComponent<Props> = ({
       <EuiSpacer size="m" />
 
       {content}
-    </>
+    </div>
   );
 };

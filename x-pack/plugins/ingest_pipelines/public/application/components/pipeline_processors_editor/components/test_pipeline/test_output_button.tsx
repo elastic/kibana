@@ -23,7 +23,7 @@ interface Props {
 
 export const TestOutputButton: FunctionComponent<Props> = ({ openFlyout }) => {
   return (
-    <EuiButton size="s" onClick={() => openFlyout('output')} data-test-subj="outputButton">
+    <EuiButton size="s" onClick={() => openFlyout('output')} data-test-subj="viewOutputButton">
       {i18nTexts.buttonLabel}
     </EuiButton>
   );

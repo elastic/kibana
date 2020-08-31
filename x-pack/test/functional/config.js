@@ -128,6 +128,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/dev_tools',
         hash: '/searchprofiler',
       },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
+      },
       spaceSelector: {
         pathname: '/',
       },
@@ -219,6 +223,17 @@ export default async function ({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         global_discover_read: {

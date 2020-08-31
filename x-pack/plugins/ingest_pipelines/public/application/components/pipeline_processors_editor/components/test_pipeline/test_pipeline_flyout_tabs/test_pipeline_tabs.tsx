@@ -44,7 +44,7 @@ export const Tabs: React.FunctionComponent<Props> = ({ onTabChange, selectedTab 
           onClick={() => onTabChange(tab.id)}
           isSelected={tab.id === selectedTab}
           key={tab.id}
-          data-test-subj={tab.id.toLowerCase() + '_tab'}
+          data-test-subj={tab.id.toLowerCase() + 'Tab'}
         >
           {tab.name}
         </EuiTab>
