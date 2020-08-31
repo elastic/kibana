@@ -24,8 +24,9 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
+import { buildRefs } from './build_refs';
 
-export function runTypeCheckCli() {
+export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
   const opts = getopts(process.argv.slice(2), {
     boolean: ['skip-lib-check', 'help'],
@@ -78,6 +79,8 @@ export function runTypeCheckCli() {
     process.stdout.write('\n');
     process.exit();
   }
+
+  await buildRefs(log);
 
   const tscArgs = [
     // composite project cannot be used with --noEmit
