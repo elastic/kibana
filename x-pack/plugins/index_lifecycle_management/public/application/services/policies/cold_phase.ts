@@ -13,7 +13,7 @@ import {
   PhaseValidationErrors,
   positiveNumberRequiredMessage,
 } from './policy_validation';
-import { determineDataTierAllocationType } from './determine_data_tier_allocation_type';
+import { determineDataTierAllocationType } from '../../lib';
 
 const coldPhaseInitialization: ColdPhase = {
   phaseEnabled: false,

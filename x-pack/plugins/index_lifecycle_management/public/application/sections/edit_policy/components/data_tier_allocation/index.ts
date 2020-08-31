@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { NodesDataProvider } from './node_data_provider';
 export { NodeAllocation } from './node_allocation';
 export { NodeAttrsDetails } from './node_attrs_details';
 export { DataTierAllocation } from './data_tier_allocation';
+export { DefaultAllocationWarning } from './default_allocation_warning';

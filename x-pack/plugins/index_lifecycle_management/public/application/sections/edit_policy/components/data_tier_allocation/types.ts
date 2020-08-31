@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ListNodesRouteResponse } from '../../../../../../common/types';
 import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
@@ -13,4 +14,5 @@ export interface SharedProps<T extends PhaseWithAllocationAction> {
   phaseData: T;
   setPhaseData: (dataKey: keyof T & string, value: string | undefined) => void;
   isShowingErrors: boolean;
+  nodes: ListNodesRouteResponse['nodesByAttributes'];
 }

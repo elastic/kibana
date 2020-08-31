@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataTierAllocationType, AllocateAction } from './types';
+import { DataTierAllocationType, AllocateAction } from '../../services/policies/types';
 
+/**
+ * Determine what deserialized state the policy config represents.
+ *
+ * See {@DataTierAllocationType} for more information.
+ */
 export const determineDataTierAllocationType = (
   allocateAction?: AllocateAction
 ): DataTierAllocationType => {
