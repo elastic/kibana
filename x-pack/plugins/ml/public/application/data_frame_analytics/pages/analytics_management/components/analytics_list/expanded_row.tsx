@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
 import {
@@ -171,23 +171,25 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   }
   delete stateValues.progress;
 
+  const stateItems = Object.entries(stateValues)
+    .map(([stateKey, stateValue]) => {
+      const title = stateKey.toString();
+      if (title === 'state') {
+        return {
+          title,
+          description: getTaskStateBadge(getItemDescription(stateValue)),
+        };
+      } else if (title !== 'analysis_stats') {
+        return { title, description: getItemDescription(stateValue) };
+      }
+    })
+    .filter((stateItem) => stateItem !== undefined);
+
   const state: SectionConfig = {
     title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
       defaultMessage: 'State',
     }),
-    items: Object.entries(stateValues)
-      .map(([stateKey, stateValue]) => {
-        const title = stateKey.toString();
-        if (title === 'state') {
-          return {
-            title,
-            description: getTaskStateBadge(getItemDescription(stateValue)),
-          };
-        } else if (title !== 'analysis_stats') {
-          return { title, description: getItemDescription(stateValue) };
-        }
-      })
-      .filter((stateItem) => stateItem !== undefined),
+    items: stateItems as SectionItem[],
     position: 'left',
   };
 
@@ -233,7 +235,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'right',
   };
 
-  const analysisStats: SectionConfig = analysisStatsValues
+  const analysisStats: SectionConfig | undefined = analysisStatsValues
     ? {
         title: i18n.translate(
           'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.analysisStats',
@@ -261,7 +263,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         ],
         position: 'right',
       }
-    : {};
+    : undefined;
 
   if (jobIsCompleted && isRegressionJob) {
     stats.items.push(
@@ -348,13 +350,19 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     );
   }
 
+  const sections: SectionConfig[] = [state, progress, stats];
+
+  if (analysisStats !== undefined) {
+    sections.push(analysisStats);
+  }
+
   const tabs = [
     {
       id: 'ml-analytics-job-details',
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={[state, progress, stats, analysisStats]} />,
+      content: <ExpandedRowDetailsPane sections={sections} />,
     },
     {
       id: 'ml-analytics-job-json',
