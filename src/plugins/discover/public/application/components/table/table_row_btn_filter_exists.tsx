@@ -61,7 +61,7 @@ export function DocViewTableRowBtnFilterExists({
         className="kbnDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
         disabled={disabled}
-        iconType={'indexOpen'}
+        iconType={'filter'}
         iconSize={'s'}
       />
     </EuiToolTip>

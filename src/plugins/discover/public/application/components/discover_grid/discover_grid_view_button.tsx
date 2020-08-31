@@ -32,7 +32,7 @@ export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
       onClick={() => setViewed(rowIndex)}
       className="dscTable__buttonToggle"
     >
-      <EuiIcon size="s" type={viewed === rowIndex ? 'eyeClosed' : 'eye'} />
+      <EuiIcon size="s" type={viewed === rowIndex ? 'expandMini' : 'expand'} />
     </button>
   );
 };
