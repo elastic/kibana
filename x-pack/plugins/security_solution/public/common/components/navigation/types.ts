@@ -10,6 +10,7 @@ import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS, UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
+import { SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export interface SiemNavigationProps {
   display?: 'default' | 'condensed';
@@ -24,6 +25,7 @@ export interface SiemNavigationComponentProps {
     [CONSTANTS.appQuery]?: Query;
     [CONSTANTS.filters]?: Filter[];
     [CONSTANTS.savedQuery]?: string;
+    [CONSTANTS.sourcerer]: SourcererScopePatterns;
     [CONSTANTS.timerange]: UrlInputsModel;
     [CONSTANTS.timeline]: TimelineUrl;
   };

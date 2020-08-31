@@ -66,7 +66,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     initTelemetry(plugins.usageCollection, APP_ID);
 
     plugins.home.featureCatalogue.register({
@@ -319,7 +319,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {};
+    return {
+      resolver: async () => {
+        const { resolverPluginSetup } = await import('./resolver');
+        return resolverPluginSetup();
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {

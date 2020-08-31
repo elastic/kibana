@@ -5,24 +5,18 @@
  */
 
 import { resetContext } from 'kea';
-import { act } from 'react-dom/test-utils';
 
-import { mockKibanaContext } from '../../../__mocks__';
+jest.mock('../../../shared/http', () => ({ HttpLogic: { values: { http: { get: jest.fn() } } } }));
+import { HttpLogic } from '../../../shared/http';
 
 import { mockLogicValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
-  let unmount: any;
-
   beforeEach(() => {
-    resetContext({});
-    unmount = OverviewLogic.mount() as any;
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    unmount();
+    resetContext({});
+    OverviewLogic.mount();
   });
 
   it('has expected default values', () => {
@@ -91,48 +85,14 @@ describe('OverviewLogic', () => {
     });
   });
 
-  describe('setHasErrorConnecting', () => {
-    it('will set `hasErrorConnecting`', () => {
-      OverviewLogic.actions.setHasErrorConnecting(true);
-
-      expect(OverviewLogic.values.hasErrorConnecting).toEqual(true);
-      expect(OverviewLogic.values.dataLoading).toEqual(false);
-    });
-  });
-
   describe('initializeOverview', () => {
     it('calls API and sets values', async () => {
-      const mockHttp = mockKibanaContext.http;
-      const mockApi = jest.fn(() => mockLogicValues as any);
       const setServerDataSpy = jest.spyOn(OverviewLogic.actions, 'setServerData');
 
-      await act(async () =>
-        OverviewLogic.actions.initializeOverview({
-          http: {
-            ...mockHttp,
-            get: mockApi,
-          },
-        })
-      );
+      await OverviewLogic.actions.initializeOverview();
 
-      expect(mockApi).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
-    });
-
-    it('handles error state', async () => {
-      const mockHttp = mockKibanaContext.http;
-      const setHasErrorConnectingSpy = jest.spyOn(OverviewLogic.actions, 'setHasErrorConnecting');
-
-      await act(async () =>
-        OverviewLogic.actions.initializeOverview({
-          http: {
-            ...mockHttp,
-            get: () => Promise.reject(),
-          },
-        })
-      );
-
-      expect(setHasErrorConnectingSpy).toHaveBeenCalled();
     });
   });
 });

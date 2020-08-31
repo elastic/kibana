@@ -474,7 +474,8 @@ export class DashboardAppController {
                     : undefined;
                 container.addOrUpdateEmbeddable<EmbeddableInput>(
                   incomingEmbeddable.type,
-                  explicitInput,
+                  // This ugly solution is temporary - https://github.com/elastic/kibana/pull/70272 fixes this whole section
+                  (explicitInput as unknown) as EmbeddableInput,
                   embeddableId
                 );
               }

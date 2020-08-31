@@ -19,13 +19,13 @@ export enum SourcererScopeName {
   network = 'network',
 }
 
-export type SourceGroupsType = keyof typeof SourcererScopeName;
+// export type SourcererScopesType = keyof typeof SourcererScopeName;
 
-export interface ManageSource {
+export interface ManageScope {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   errorMessage: string | null;
-  id: SourceGroupsType;
+  id: SourcererScopeName;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
@@ -33,31 +33,36 @@ export interface ManageSource {
   selectedPatterns: string[];
 }
 
-export interface ManageSourceInit extends Partial<ManageSource> {
-  id: SourceGroupsType;
+export interface ManageScopeInit extends Partial<ManageScope> {
+  id: SourcererScopeName;
   selectedPatterns: string[];
 }
 
-export type ManageSourceGroupById = {
-  [id in SourceGroupsType]?: ManageSource;
+export type SourcererScopeById = {
+  [id in SourcererScopeName]?: ManageScope;
 };
 
 // ManageSourcerer
 export interface SourcererModel {
-  activeSourceGroupId: SourceGroupsType;
+  activeSourcererScopeId: SourcererScopeName;
   kibanaIndexPatterns: string[];
   isIndexPatternsLoading: boolean;
-  sourceGroups: ManageSourceGroupById;
+  sourcererScopes: SourcererScopeById;
 }
 
 export const initialSourcererState: SourcererState = {
-  activeSourceGroupId: SourcererScopeName.default,
+  activeSourcererScopeId: SourcererScopeName.default,
   kibanaIndexPatterns: [],
   isIndexPatternsLoading: true,
-  sourceGroups: {},
+  sourcererScopes: {},
 };
 
-export const sourceGroupSettings = {
+export type FSourcererScopePatterns = {
+  [id in SourcererScopeName]: string[];
+};
+export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;
+
+export const sourcererScopePatterns: FSourcererScopePatterns = {
   [SourcererScopeName.default]: DEFAULT_INDEX_PATTERN,
   [SourcererScopeName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   [SourcererScopeName.detections]: [DEFAULT_SIGNALS_INDEX],

@@ -14,6 +14,7 @@ import { HomePage } from './home';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { AppAction } from '../common/store/actions';
+import { SourcererProvider } from '../common/containers/sourcerer';
 
 interface RouterProps {
   children: React.ReactNode;
@@ -36,16 +37,18 @@ const PageRouterComponent: FC<RouterProps> = ({ history, children }) => {
   return (
     <ManageRoutesSpy>
       <Router history={history}>
-        <RouteCapture>
-          <Switch>
-            <Route path="/">
-              <HomePage>{children}</HomePage>
-            </Route>
-            <Route>
-              <NotFoundPage />
-            </Route>
-          </Switch>
-        </RouteCapture>
+        <SourcererProvider>
+          <RouteCapture>
+            <Switch>
+              <Route path="/">
+                <HomePage>{children}</HomePage>
+              </Route>
+              <Route>
+                <NotFoundPage />
+              </Route>
+            </Switch>
+          </RouteCapture>
+        </SourcererProvider>
       </Router>
     </ManageRoutesSpy>
   );

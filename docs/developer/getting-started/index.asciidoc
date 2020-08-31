@@ -99,7 +99,7 @@ preserving data inbetween runs, running remote cluster, etc.
 [discrete]
 === Run {kib}
 
-In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.
+In another terminal window, start up {kib}. Include {kib-repo}tree/{branch}/examples[developer examples] by adding an optional `--run-examples` flag.
 
 [source,bash]
 ----

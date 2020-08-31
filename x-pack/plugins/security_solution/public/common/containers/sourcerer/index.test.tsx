@@ -10,8 +10,8 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 
-import { getSourceDefaults, useSourceManager, UseSourceManager } from '.';
-import { mockSourceGroup, mockSourceGroups, mockPatterns, mockSource } from './mocks';
+import { getSourceDefaults, useSourcerer, UseSourcerer } from '.';
+import { mockSourcererScope, mockSourcererScopes, mockPatterns, mockSource } from './mocks';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -81,28 +81,27 @@ describe('Sourcerer Hooks', () => {
   describe('Initialization', () => {
     it('initializes loading default index patterns', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
         );
         await waitForNextUpdate();
         expect(result.current).toEqual({
-          activeSourceGroupId: 'default',
+          activeSourcererScopeId: 'default',
           kibanaIndexPatterns: [],
           isIndexPatternsLoading: true,
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndices: result.current.updateSourceGroupIndices,
+          getSourcererScopeById: result.current.getSourcererScopeById,
+          setActiveSourcererScopeId: result.current.setActiveSourcererScopeId,
+          updateSourcererScopeIndices: result.current.updateSourcererScopeIndices,
         });
       });
     });
     it('initializes loading default source group', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
@@ -110,20 +109,19 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(result.current).toEqual({
-          activeSourceGroupId: 'default',
+          activeSourcererScopeId: 'default',
           kibanaIndexPatterns: mockPatterns,
           isIndexPatternsLoading: false,
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndices: result.current.updateSourceGroupIndices,
+          getSourcererScopeById: result.current.getSourcererScopeById,
+          setActiveSourcererScopeId: result.current.setActiveSourcererScopeId,
+          updateSourcererScopeIndices: result.current.updateSourcererScopeIndices,
         });
       });
     });
     it('initialize completes with formatted source group data', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
@@ -132,22 +130,21 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(result.current).toEqual({
-          activeSourceGroupId: testId,
+          activeSourcererScopeId: testId,
           kibanaIndexPatterns: mockPatterns,
           isIndexPatternsLoading: false,
-          getManageSourceGroupById: result.current.getManageSourceGroupById,
-          initializeSourceGroup: result.current.initializeSourceGroup,
-          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
-          updateSourceGroupIndices: result.current.updateSourceGroupIndices,
+          getSourcererScopeById: result.current.getSourcererScopeById,
+          setActiveSourcererScopeId: result.current.setActiveSourcererScopeId,
+          updateSourcererScopeIndices: result.current.updateSourcererScopeIndices,
         });
       });
     });
   });
   describe('Methods', () => {
-    it('getManageSourceGroupById: initialized source group returns defaults', async () => {
+    it('getSourcererScopeById: initialized source group returns defaults', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
@@ -155,14 +152,14 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        const initializedSourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(initializedSourceGroup).toEqual(mockSourceGroup(testId));
+        const initializedSourcererScope = result.current.getSourcererScopeById(testId);
+        expect(initializedSourcererScope).toEqual(mockSourcererScope(testId));
       });
     });
-    it('getManageSourceGroupById: uninitialized source group returns defaults', async () => {
+    it('getSourcererScopeById: uninitialized source group returns defaults', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
@@ -170,52 +167,56 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        const uninitializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
-        expect(uninitializedSourceGroup).toEqual(getSourceDefaults(uninitializedId, mockPatterns));
+        const uninitializedSourcererScope = result.current.getSourcererScopeById(uninitializedId);
+        expect(uninitializedSourcererScope).toEqual(
+          getSourceDefaults(uninitializedId, mockPatterns)
+        );
       });
     });
-    it('initializeSourceGroup: initializes source group', async () => {
+    // it('initializeSourcererScope: initializes source group', async () => {
+    //   await act(async () => {
+    //     const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+    //       () => useSourcerer(),
+    //       {
+    //         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    //       }
+    //     );
+    //     await waitForNextUpdate();
+    //     await waitForNextUpdate();
+    //     await waitForNextUpdate();
+    //     result.current.initializeSourcererScope(
+    //       uninitializedId,
+    //       mockSourcererScopes[uninitializedId],
+    //       true
+    //     );
+    //     await waitForNextUpdate();
+    //     const initializedSourcererScope = result.current.getSourcererScopeById(uninitializedId);
+    //     expect(initializedSourcererScope.selectedPatterns).toEqual(
+    //       mockSourcererScopes[uninitializedId]
+    //     );
+    //   });
+    // });
+    it('setActiveSourcererScopeId: active source group id gets set only if it gets initialized first', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
         );
         await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        result.current.initializeSourceGroup(
-          uninitializedId,
-          mockSourceGroups[uninitializedId],
-          true
-        );
-        await waitForNextUpdate();
-        const initializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
-        expect(initializedSourceGroup.selectedPatterns).toEqual(mockSourceGroups[uninitializedId]);
+        expect(result.current.activeSourcererScopeId).toEqual(testId);
+        result.current.setActiveSourcererScopeId(uninitializedId);
+        expect(result.current.activeSourcererScopeId).toEqual(testId);
+        // result.current.initializeSourcererScope(uninitializedId);
+        result.current.setActiveSourcererScopeId(uninitializedId);
+        expect(result.current.activeSourcererScopeId).toEqual(uninitializedId);
       });
     });
-    it('setActiveSourceGroupId: active source group id gets set only if it gets initialized first', async () => {
+    it('updateSourcererScopeIndices: updates source group indices', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
-          {
-            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.activeSourceGroupId).toEqual(testId);
-        result.current.setActiveSourceGroupId(uninitializedId);
-        expect(result.current.activeSourceGroupId).toEqual(testId);
-        result.current.initializeSourceGroup(uninitializedId);
-        result.current.setActiveSourceGroupId(uninitializedId);
-        expect(result.current.activeSourceGroupId).toEqual(uninitializedId);
-      });
-    });
-    it('updateSourceGroupIndices: updates source group indices', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(
-          () => useSourceManager(),
+        const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
+          () => useSourcerer(),
           {
             wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
           }
@@ -223,13 +224,16 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        let sourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(sourceGroup.selectedPatterns).toEqual(mockSourceGroups[testId]);
-        expect(sourceGroup.scopePatterns).toEqual(mockSourceGroups[testId]);
-        result.current.updateSourceGroupIndices(testId, ['endgame-*', 'filebeat-*']);
+        let sourceGroup = result.current.getSourcererScopeById(testId);
+        expect(sourceGroup.selectedPatterns).toEqual(mockSourcererScopes[testId]);
+        expect(sourceGroup.scopePatterns).toEqual(mockSourcererScopes[testId]);
+        result.current.updateSourcererScopeIndices({
+          id: testId,
+          selectedPatterns: ['endgame-*', 'filebeat-*'],
+        });
         await waitForNextUpdate();
-        sourceGroup = result.current.getManageSourceGroupById(testId);
-        expect(sourceGroup.scopePatterns).toEqual(mockSourceGroups[testId]);
+        sourceGroup = result.current.getSourcererScopeById(testId);
+        expect(sourceGroup.scopePatterns).toEqual(mockSourcererScopes[testId]);
         expect(sourceGroup.selectedPatterns).toEqual(['endgame-*', 'filebeat-*']);
       });
     });

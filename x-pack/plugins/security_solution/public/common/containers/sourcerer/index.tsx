@@ -5,7 +5,7 @@
  */
 
 import { get, noop, isEmpty } from 'lodash/fp';
-import React, { createContext, useCallback, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { NO_ALERT_INDEX, SecurityPageName } from '../../../../common/constants';
@@ -26,44 +26,45 @@ import {
 } from './format';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 
-export interface UseSourceManager extends Omit<sourcererModel.SourcererModel, 'sourceGroups'> {
-  getManageSourceGroupById: (id: sourcererModel.SourceGroupsType) => sourcererModel.ManageSource;
-  initializeSourceGroup: (
-    id: sourcererModel.SourceGroupsType,
-    indexToAdd?: string[] | null,
-    onlyCheckIndexToAdd?: boolean
-  ) => void;
-  setActiveSourceGroupId: (id: sourcererModel.SourceGroupsType) => void;
-  updateSourceGroupIndices: (
-    id: sourcererModel.SourceGroupsType,
-    updatedIndicies: string[]
-  ) => void;
+export interface UseSourcerer extends Omit<sourcererModel.SourcererModel, 'sourcererScopes'> {
+  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => sourcererModel.ManageScope;
+  setActiveSourcererScopeId: (id: sourcererModel.SourcererScopeName) => void;
+  updateSourcererScopeIndices: ({
+    id,
+    selectedPatterns,
+  }: {
+    id: sourcererModel.SourcererScopeName;
+    selectedPatterns: string[];
+  }) => void;
 }
 
 // DEFAULTS/INIT
-export const getSourceDefaults = (id: sourcererModel.SourceGroupsType, defaultIndex: string[]) => ({
+export const getSourceDefaults = (
+  id: sourcererModel.SourcererScopeName,
+  defaultIndex: string[]
+): ManageScope => ({
   browserFields: EMPTY_BROWSER_FIELDS,
-  scopePatterns: defaultIndex,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
   id,
   indexPattern: getIndexFields(defaultIndex.join(), []),
-  selectedPatterns: defaultIndex,
   indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
   loading: true,
+  scopePatterns: defaultIndex,
+  selectedPatterns: defaultIndex,
 });
-const { sourceGroups: foo, ...rest } = sourcererModel.initialSourcererState;
-const initialSourcererManager: UseSourceManager = {
+const { sourcererScopes: foo, ...rest } = sourcererModel.initialSourcererState;
+const initialUseSourcerer: UseSourcerer = {
   ...rest,
-  getManageSourceGroupById: (id: sourcererModel.SourceGroupsType) => getSourceDefaults(id, []),
-  initializeSourceGroup: () => noop,
-  setActiveSourceGroupId: () => noop,
-  updateSourceGroupIndices: () => noop,
+  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => getSourceDefaults(id, []),
+  setActiveSourcererScopeId: () => noop,
+  updateSourcererScopeIndices: () => noop,
 };
 
 // HOOKS
-export const useSourceManager = (): UseSourceManager => {
+export const useSourcerer = (): UseSourcerer => {
   const {
     services: {
       data: { indexPatterns: indexPatternsService },
@@ -72,10 +73,10 @@ export const useSourceManager = (): UseSourceManager => {
   const apolloClient = useApolloClient();
   const dispatch = useDispatch();
   const [routeProps] = useRouteSpy();
-  const activeSourceGroupId = useSelector(sourcererSelectors.activeSourceGroupIdSelector);
+  const activeSourcererScopeId = useSelector(sourcererSelectors.activeSourcererScopeIdSelector);
   const kibanaIndexPatterns = useSelector(sourcererSelectors.kibanaIndexPatternsSelector);
   const isIndexPatternsLoading = useSelector(sourcererSelectors.isIndexPatternsLoadingSelector);
-  const sourceGroups = useSelector(sourcererSelectors.sourceGroupsSelector);
+  const sourcererScopes = useSelector(sourcererSelectors.sourcererScopesSelector);
   // Kibana Index Patterns
   const setIsIndexPatternsLoading = useCallback(
     (loading: boolean) => {
@@ -135,48 +136,44 @@ export const useSourceManager = (): UseSourceManager => {
 
   // Security Solution Source Groups
 
-  const doesSourceGroupExist = useCallback(
-    (id: sourcererModel.SourceGroupsType) => {
-      const sourceById = sourceGroups[id];
-      if (sourceById != null) {
+  const doesSourcererScopeExist = useCallback(
+    (id: sourcererModel.SourcererScopeName) => {
+      const scopeById = sourcererScopes[id];
+      if (scopeById != null) {
         return true;
       }
       return false;
     },
-    [sourceGroups]
+    [sourcererScopes]
   );
-  const setActiveSourceGroupId = useCallback(
-    (sourceGroupId: sourcererModel.SourceGroupsType) => {
-      if (doesSourceGroupExist(sourceGroupId)) {
+  const setActiveSourcererScopeId = useCallback(
+    (sourceGroupId: sourcererModel.SourcererScopeName) => {
+      if (doesSourcererScopeExist(sourceGroupId)) {
         dispatch(
-          sourcererActions.setActiveSourceGroupId({
+          sourcererActions.setActiveSourcererScopeId({
             payload: sourceGroupId,
           })
         );
       }
     },
-    [doesSourceGroupExist, dispatch]
+    [doesSourcererScopeExist, dispatch]
   );
-  const setIsSourceLoading = useCallback(
-    ({ id, loading }: { id: sourcererModel.SourceGroupsType; loading: boolean }) => {
-      dispatch(
-        sourcererActions.setIsSourceLoading({
-          id,
-          payload: loading,
-        })
-      );
-    },
-    [dispatch]
-  );
+
   const enrichSource = useCallback(
-    (
-      id: sourcererModel.SourceGroupsType,
-      indexToAdd?: string[] | null,
-      onlyCheckIndexToAdd?: boolean
-    ) => {
+    ({
+      id,
+      scopePatterns,
+      selectedPatterns: indexToAdd,
+      onlyCheckIndexToAdd,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      scopePatterns?: string[];
+      selectedPatterns: string[];
+      onlyCheckIndexToAdd?: boolean;
+    }) => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
-      if (onlyCheckIndexToAdd && isEmpty(indexToAdd) && indexToAdd != null) {
+      if (onlyCheckIndexToAdd && isEmpty(indexToAdd)) {
         return dispatch(
           sourcererActions.setSource({
             id,
@@ -186,38 +183,52 @@ export const useSourceManager = (): UseSourceManager => {
               errorMessage: null,
               id,
               indexPattern: getIndexFields('', []),
-              selectedPatterns: [],
               indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
               loading: false,
+              selectedPatterns: [],
             },
           })
         );
       }
       const selectedPatterns = getDefaultIndex(indexToAdd, onlyCheckIndexToAdd);
-      if (!doesSourceGroupExist(id)) {
-        dispatch(
-          sourcererActions.setSource({
-            id,
-            payload: { scopePatterns: selectedPatterns, selectedPatterns, id },
-          })
-        );
-      }
 
       async function fetchSource() {
         if (!apolloClient) return;
-        setIsSourceLoading({ id, loading: true });
+        let patternsPayload: {
+          scopePatterns?: string[];
+          selectedPatterns: string[];
+        } = {
+          selectedPatterns,
+        };
+        if (scopePatterns != null) {
+          patternsPayload = {
+            selectedPatterns,
+            scopePatterns,
+          };
+        }
+
+        dispatch(
+          sourcererActions.setSource({
+            id,
+            payload: {
+              id,
+              loading: true,
+              ...patternsPayload,
+            },
+          })
+        );
         try {
           const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
-            query: sourceQuery,
-            fetchPolicy: 'network-only',
-            variables: {
-              sourceId: 'default', // always
-              defaultIndex: selectedPatterns,
-            },
             context: {
               fetchOptions: {
                 signal: abortCtrl.signal,
               },
+            },
+            fetchPolicy: 'network-only',
+            query: sourceQuery,
+            variables: {
+              sourceId: 'default', // always
+              defaultIndex: selectedPatterns,
             },
           });
           if (isSubscribed) {
@@ -239,11 +250,11 @@ export const useSourceManager = (): UseSourceManager => {
                     selectedPatterns.join(),
                     get('data.source.status.indexFields', result)
                   ),
-                  selectedPatterns,
                   indicesExist: indicesExistOrDataTemporarilyUnavailable(
                     get('data.source.status.indicesExist', result)
                   ),
                   loading: false,
+                  ...patternsPayload,
                 },
               })
             );
@@ -257,7 +268,7 @@ export const useSourceManager = (): UseSourceManager => {
                   errorMessage: error.message,
                   id,
                   loading: false,
-                  selectedPatterns,
+                  ...patternsPayload,
                 },
               })
             );
@@ -265,77 +276,102 @@ export const useSourceManager = (): UseSourceManager => {
         }
       }
 
-      fetchSource();
+      fetchSource().then(() =>
+        id !== SourcererScopeName.timeline && activeSourcererScopeId !== id
+          ? setActiveSourcererScopeId(id)
+          : null
+      );
 
       return () => {
         isSubscribed = false;
         return abortCtrl.abort();
       };
     },
-    [apolloClient, dispatch, doesSourceGroupExist, getDefaultIndex, setIsSourceLoading]
+    [activeSourcererScopeId, apolloClient, dispatch, getDefaultIndex, setActiveSourcererScopeId]
   );
 
-  const initializeSourceGroup = useCallback(
-    (
-      id: sourcererModel.SourceGroupsType,
-      indexToAdd?: string[] | null,
-      onlyCheckIndexToAdd?: boolean
-    ) => enrichSource(id, indexToAdd, onlyCheckIndexToAdd),
+  const initializeSourcererScope = useCallback(
+    ({
+      id,
+      scopePatterns,
+      selectedPatterns,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      scopePatterns: string[];
+      selectedPatterns: string[];
+    }) => enrichSource({ id, scopePatterns, selectedPatterns, onlyCheckIndexToAdd: true }),
     [enrichSource]
   );
 
-  const updateSourceGroupIndices = useCallback(
-    (id: sourcererModel.SourceGroupsType, updatedIndicies: string[]) => {
-      enrichSource(id, updatedIndicies, true);
+  const updateSourcererScopeIndices = useCallback(
+    ({
+      id,
+      selectedPatterns,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      selectedPatterns: string[];
+    }) => {
+      enrichSource({ id, selectedPatterns, onlyCheckIndexToAdd: true });
     },
     [enrichSource]
   );
-  const getManageSourceGroupById = useCallback(
-    (id: sourcererModel.SourceGroupsType) => {
-      const sourceById = sourceGroups[id];
-      if (sourceById != null) {
-        return sourceById;
+
+  const activeScopeByPage: sourcererModel.SourcererScopeName = useMemo(() => {
+    switch (routeProps.pageName) {
+      case SecurityPageName.detections:
+        return sourcererModel.SourcererScopeName.detections;
+      case SecurityPageName.overview:
+        return sourcererModel.SourcererScopeName.default;
+      case SecurityPageName.hosts:
+        return sourcererModel.SourcererScopeName.host;
+      case SecurityPageName.network:
+        return sourcererModel.SourcererScopeName.network;
+      case SecurityPageName.timelines:
+      case SecurityPageName.case:
+      case SecurityPageName.administration:
+      default:
+        return sourcererModel.SourcererScopeName.default;
+    }
+  }, [routeProps.pageName]);
+  const initializeScope = useCallback(
+    (scopeToInit: SourcererScopeName) => {
+      if (!doesSourcererScopeExist(scopeToInit)) {
+        console.log('initialize from scope', scopeToInit);
+        initializeSourcererScope({
+          id: scopeToInit,
+          scopePatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+          selectedPatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+        });
+      } else {
+        // may exist if initialized by URL state
+        console.log('initialize from url', scopeToInit);
+        initializeSourcererScope({
+          id: scopeToInit,
+          scopePatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+          selectedPatterns: sourcererScopes[scopeToInit]?.selectedPatterns ?? [],
+        });
+      }
+    },
+    [doesSourcererScopeExist, initializeSourcererScope, sourcererScopes]
+  );
+  const getSourcererScopeById = useCallback(
+    (id: sourcererModel.SourcererScopeName): ManageScope => {
+      const sourcererById = sourcererScopes[id];
+      if (sourcererById != null) {
+        return sourcererById;
       }
       return getSourceDefaults(id, getDefaultIndex());
     },
-    [getDefaultIndex, sourceGroups]
+    [getDefaultIndex, sourcererScopes]
   );
 
   useEffect(() => {
     if (!isIndexPatternsLoading) {
-      let activeScope: sourcererModel.SourcererScopeName;
-      switch (routeProps.pageName) {
-        case SecurityPageName.detections:
-          activeScope = sourcererModel.SourcererScopeName.detections;
-          break;
-        case SecurityPageName.overview:
-          activeScope = sourcererModel.SourcererScopeName.default;
-          break;
-        case SecurityPageName.hosts:
-          activeScope = sourcererModel.SourcererScopeName.host;
-          break;
-        case SecurityPageName.network:
-          activeScope = sourcererModel.SourcererScopeName.network;
-          break;
-        case SecurityPageName.timelines:
-        case SecurityPageName.case:
-        case SecurityPageName.administration:
-        default:
-          activeScope = sourcererModel.SourcererScopeName.default;
-          break;
-      }
-      if (!doesSourceGroupExist(activeScope)) {
-        initializeSourceGroup(activeScope, sourcererModel.sourceGroupSettings[activeScope], true);
-      }
-      setActiveSourceGroupId(activeScope);
+      initializeScope(activeScopeByPage);
+      initializeScope(sourcererModel.SourcererScopeName.timeline);
     }
-  }, [
-    doesSourceGroupExist,
-    initializeSourceGroup,
-    isIndexPatternsLoading,
-    routeProps,
-    setActiveSourceGroupId,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScopeByPage, isIndexPatternsLoading]);
 
   // load initial default index
   useEffect(() => {
@@ -344,32 +380,27 @@ export const useSourceManager = (): UseSourceManager => {
   }, []);
 
   return {
-    activeSourceGroupId,
-    getManageSourceGroupById,
-    initializeSourceGroup,
+    activeSourcererScopeId,
+    getSourcererScopeById,
     isIndexPatternsLoading,
     kibanaIndexPatterns,
-    setActiveSourceGroupId,
-    updateSourceGroupIndices,
+    setActiveSourcererScopeId,
+    updateSourcererScopeIndices,
   };
 };
 
-const ManageSourceContext = createContext<UseSourceManager>(initialSourcererManager);
+const SourcererContext = createContext<UseSourcerer>(initialUseSourcerer);
 
-export const useManageSource = () => useContext(ManageSourceContext);
+export const useSourcererContext = () => useContext(SourcererContext);
 
-interface ManageSourceProps {
+interface SourcererProviderProps {
   children: React.ReactNode;
 }
 
-export const MaybeManageSource = ({ children }: ManageSourceProps) => {
-  const indexPatternManager = useSourceManager();
-  return (
-    <ManageSourceContext.Provider value={indexPatternManager}>
-      {children}
-    </ManageSourceContext.Provider>
-  );
+export const MaybeSourcererProvider = ({ children }: SourcererProviderProps) => {
+  const sourcerer = useSourcerer();
+  return <SourcererContext.Provider value={sourcerer}>{children}</SourcererContext.Provider>;
 };
-export const ManageSource = SOURCERER_FEATURE_FLAG_ON
-  ? MaybeManageSource
-  : ({ children }: ManageSourceProps) => <>{children}</>;
+export const SourcererProvider = SOURCERER_FEATURE_FLAG_ON
+  ? MaybeSourcererProvider
+  : ({ children }: SourcererProviderProps) => <>{children}</>;
