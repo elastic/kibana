@@ -125,17 +125,17 @@ control the capturing process.
 |===
 | `xpack.reporting.capture.timeouts.openUrl`
   | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for the "Loading..." screen
-  to dismiss and find the initial data for the page. If the time is exceeded, a page screenshot is captured showing the current
-  state, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+  to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current
+  page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 | `xpack.reporting.capture.timeouts.waitForElements`
   |  Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualization panels
-  to load on the page. If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows
+  to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows
   a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 | `xpack.reporting.capture.timeouts.renderComplete`
   | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for all visualizations to
-  fetch and render the data. If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a
+  fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a
   warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 |===
