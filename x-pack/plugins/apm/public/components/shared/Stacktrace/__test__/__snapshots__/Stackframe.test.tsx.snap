@@ -162,6 +162,8 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
     }
     id="test"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <div
