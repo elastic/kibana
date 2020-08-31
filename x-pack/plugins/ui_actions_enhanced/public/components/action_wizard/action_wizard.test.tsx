@@ -68,6 +68,7 @@ test('If not enough license, button is disabled', () => {
     {
       ...urlDrilldownActionFactory,
       minimalLicense: 'gold',
+      licenseFeatureName: 'Url Drilldown',
     },
     {
       getLicense: () => licensingMock.createLicense(),
