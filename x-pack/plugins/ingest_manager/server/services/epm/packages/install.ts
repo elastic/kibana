@@ -34,6 +34,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
+import { installTransformForDataset } from '../elasticsearch/transform/install';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -203,13 +204,24 @@ export async function installPackage({
     type: ElasticsearchAssetType.indexTemplate,
   }));
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
+  const installedTransforms = await installTransformForDataset(
+    registryPackageInfo,
+    paths,
+    callCluster,
+    savedObjectsClient
+  );
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_version: pkgVersion,
     install_status: 'installed',
   });
-  return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];
+  return [
+    ...installedKibanaAssetsRefs,
+    ...installedPipelines,
+    ...installedTemplateRefs,
+    ...installedTransforms,
+  ];
 }
 
 const updateVersion = async (

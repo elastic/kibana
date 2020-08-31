@@ -11,16 +11,11 @@ import {
   deleteMetadataCurrentStream,
   deleteMetadataStream,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import {
-  deleteTransform,
-  putTransform,
-} from '../../../security_solution_endpoint_api_int/apis/transform_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const transformId = 'endpoint_metadata_transform';
 
   const expectedData = [
     [
@@ -75,6 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await deleteMetadataStream(getService);
+        await deleteMetadataCurrentStream(getService);
       });
 
       it('finds no data in list and prompts onboarding to add policy', async () => {
@@ -92,12 +88,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await putTransform(getService, transformId);
+        await sleep(120000);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
-        await deleteTransform(getService, transformId);
-
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
       });
@@ -218,7 +212,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe.skip('when there is no data,', () => {
       before(async () => {
-        await deleteTransform(getService, transformId);
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);

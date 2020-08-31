@@ -6,7 +6,6 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataCurrentStream, deleteMetadataStream } from './data_stream_helper';
-import { deleteTransform, putTransform } from './transform_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -16,11 +15,10 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const transformId = 'endpoint_metadata_transform';
+
   describe('test metadata api', () => {
     describe.skip('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
-        await deleteTransform(getService, transformId);
         // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
         // to do it manually
         await deleteMetadataStream(getService);
@@ -40,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('POST /api/endpoint/metadata when index is not empty', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await putTransform(getService, transformId);
+        // wait for transform
+        await new Promise((r) => setTimeout(r, 120000));
       });
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
       after(async () => {
-        await deleteTransform(getService, transformId);
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
       });
