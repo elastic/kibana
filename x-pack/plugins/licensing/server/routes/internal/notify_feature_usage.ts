@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from 'src/core/server';
-import { LicensingPluginStart } from '../../types';
+import { IRouter } from 'src/core/server';
 
-export function registerNotifyFeatureUsageRoute(
-  router: IRouter,
-  getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
-) {
+export function registerNotifyFeatureUsageRoute(router: IRouter) {
   router.post(
     {
       path: '/internal/licensing/feature_usage/notify',
@@ -22,10 +18,9 @@ export function registerNotifyFeatureUsageRoute(
       },
     },
     async (context, request, response) => {
-      const [, , { featureUsage }] = await getStartServices();
       const { featureName, lastUsed } = request.body;
 
-      featureUsage.notifyUsage(featureName, lastUsed);
+      context.licensing.featureUsage.notifyUsage(featureName, lastUsed);
 
       return response.ok({
         body: {

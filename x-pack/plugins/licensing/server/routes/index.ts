@@ -19,5 +19,5 @@ export function registerRoutes(
   registerInfoRoute(router);
   registerFeatureUsageRoute(router, getStartServices);
   registerRegisterFeatureRoute(router, featureUsageSetup);
-  registerNotifyFeatureUsageRoute(router, getStartServices);
+  registerNotifyFeatureUsageRoute(router);
 }
