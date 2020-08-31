@@ -4,32 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { HttpSetup } from 'src/core/public';
 
-import { IKeaLogic, IKeaParams, TKeaReducers } from '../../shared/types';
-
-export interface IHttpLogicValues {
+export interface IHttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
 }
-export interface IHttpLogicActions {
-  initializeHttp({ http, errorConnecting }: { http: HttpSetup; errorConnecting?: boolean }): void;
+export interface IHttpActions {
+  initializeHttp({
+    http,
+    errorConnecting,
+  }: {
+    http: HttpSetup;
+    errorConnecting?: boolean;
+  }): { http: HttpSetup; errorConnecting?: boolean };
   initializeHttpInterceptors(): void;
-  setHttpInterceptors(httpInterceptors: Function[]): void;
-  setErrorConnecting(errorConnecting: boolean): void;
+  setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
+  setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
 }
 
-export const HttpLogic = kea({
-  actions: (): IHttpLogicActions => ({
+export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
+  actions: {
     initializeHttp: ({ http, errorConnecting }) => ({ http, errorConnecting }),
     initializeHttpInterceptors: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
-  }),
-  reducers: (): TKeaReducers<IHttpLogicValues, IHttpLogicActions> => ({
+  },
+  reducers: {
     http: [
       (null as unknown) as HttpSetup,
       {
@@ -49,7 +53,7 @@ export const HttpLogic = kea({
         setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
       },
     ],
-  }),
+  },
   listeners: ({ values, actions }) => ({
     initializeHttpInterceptors: () => {
       const httpInterceptors = [];
@@ -80,7 +84,4 @@ export const HttpLogic = kea({
       });
     },
   }),
-} as IKeaParams<IHttpLogicValues, IHttpLogicActions>) as IKeaLogic<
-  IHttpLogicValues,
-  IHttpLogicActions
->;
+});

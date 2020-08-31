@@ -14,7 +14,7 @@ import { useActions, useValues } from 'kea';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_logic';
+import { OverviewLogic } from './overview_logic';
 
 import { Loading } from '../../components/shared/loading';
 import { ProductButton } from '../../components/shared/product_button';
@@ -44,7 +44,7 @@ const HEADER_DESCRIPTION = i18n.translate(
 );
 
 export const Overview: React.FC = () => {
-  const { initializeOverview } = useActions(OverviewLogic) as IOverviewActions;
+  const { initializeOverview } = useActions(OverviewLogic);
 
   const {
     dataLoading,
@@ -52,7 +52,7 @@ export const Overview: React.FC = () => {
     hasOrgSources,
     isOldAccount,
     organization: { name: orgName, defaultOrgName },
-  } = useValues(OverviewLogic) as IOverviewValues;
+  } = useValues(OverviewLogic);
 
   useEffect(() => {
     initializeOverview();
