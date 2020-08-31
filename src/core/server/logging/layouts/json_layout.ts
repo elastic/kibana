@@ -19,7 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment-timezone';
-import { merge } from '../../utils';
+import { merge } from '../../../utils';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
