@@ -124,7 +124,7 @@ describe('Rollup Search Strategy', () => {
       expect(
         request.requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps
       ).toHaveBeenCalledWith({
-        indexPattern,
+        index: indexPattern,
       });
       expect(rollupData).toBe('data');
     });
