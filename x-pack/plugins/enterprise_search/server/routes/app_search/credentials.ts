@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
-import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
 interface ICredential {
   id: string;
@@ -28,7 +27,10 @@ interface ICredentialsResponse {
   };
 }
 
-export function registerCredentialsRoutes({ router, config, log }: IRouteDependencies) {
+export function registerCredentialsRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+}: IRouteDependencies) {
   router.get(
     {
       path: '/api/app_search/credentials',
@@ -38,9 +40,7 @@ export function registerCredentialsRoutes({ router, config, log }: IRouteDepende
         }),
       },
     },
-    createEnterpriseSearchRequestHandler<ICredentialsResponse>({
-      config,
-      log,
+    enterpriseSearchRequestHandler.createRequest({
       path: '/as/credentials/collection',
       hasValidData: (body?: ICredentialsResponse) => {
         return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
