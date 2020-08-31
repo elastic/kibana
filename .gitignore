@@ -63,3 +63,7 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
+
+# Docusaurus
+.docusaurus
+.cache-loader
