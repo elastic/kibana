@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostOverviewStrategyResponse,
   HostOverviewRequestOptions,
+  HostFirstLastSeenStrategyResponse,
+  HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -20,6 +22,13 @@ export * from './network';
 export type Maybe<T> = T | null;
 
 export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+
+export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
+
+export interface TotalValue {
+  value: number;
+  relation: string;
+}
 
 export interface Inspect {
   dsl: string[];
@@ -103,6 +112,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
   : never;
@@ -111,6 +122,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
   : never;
