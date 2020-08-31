@@ -24,7 +24,6 @@ import {
   ILegacyClusterClient,
   IClusterClient,
   ElasticsearchClient,
-  ScopeableRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
@@ -75,7 +74,7 @@ export interface StatsCollectionConfig {
   callCluster: LegacyAPICaller;
   start: string | number;
   end: string | number;
-  esClient?: ElasticsearchClient;
+  esClient: ElasticsearchClient;
 }
 
 export interface BasicStatsPayload {
@@ -132,6 +131,8 @@ export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
   context: StatsCollectionContext & CustomContext
 ) => Promise<{ [clusterUuid: string]: ESLicense | undefined }>;
 
+// Note that CollectionConfig is different to Collection!: CollectionConfig ~= Collection & priority.
+// This is daft!
 export interface CollectionConfig<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload

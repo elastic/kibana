@@ -118,6 +118,7 @@ export class CollectorSet {
   };
 
   // all collections eventually pass through bulkFetch.
+  // teh shape of the reponse is different when using the new ES client as is the error handling.
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
@@ -129,7 +130,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient),
+            result: await collector.fetch(callCluster, esClient), // note that the response shape is different between hte legacy and new clients. Each `fetch` method will need to ensure it handles reshaping the data correctly.
           };
         } catch (err) {
           this.logger.warn(err);
@@ -151,9 +152,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
+  public bulkFetchUsage = async (callCluster: LegacyAPICaller, esClient: ElasticsearchClient) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors.collectors);
+    return await this.bulkFetch(callCluster, esClient, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 
 // This can be removed when the ES client improves the types
 export interface ESClusterInfo {
@@ -42,7 +42,11 @@ export interface ESClusterInfo {
  * This is the equivalent to GET /
  *
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ * @param {function} esClient The asInternalUser handler (exposed for testing)
+ *
+ * TODO: needs work on using the new client
  */
-export function getClusterInfo(callCluster: LegacyAPICaller) {
-  return callCluster<ESClusterInfo>('info');
+export function getClusterInfo(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
+  const useLegacy = true;
+  return useLegacy ? callCluster<ESClusterInfo>('info') : esClient.info;
 }

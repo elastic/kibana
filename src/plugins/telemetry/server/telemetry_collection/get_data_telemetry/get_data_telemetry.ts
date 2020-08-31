@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
   DataPatternName,
@@ -187,6 +187,19 @@ interface IndexStats {
   };
 }
 
+interface IndexStatistics {
+  [indexName: string]: {
+    total: {
+      docs: {
+        count: number;
+        deleted: number;
+      };
+      store: {
+        size_in_bytes: number;
+      };
+    };
+  };
+}
 interface IndexMappings {
   [indexName: string]: {
     mappings: {
@@ -223,13 +236,68 @@ interface IndexMappings {
     };
   };
 }
+interface GetMappingsResponse {
+  body: IndexMappings;
+  statusCode: number | null;
+  headers: Record<string, any> | null;
+  warnings: string[] | null;
+  meta: object;
+}
+interface IndexStatsResponse {
+  body: IndexStatistics;
+  statusCode: number | null;
+  headers: Record<string, any> | null;
+  warnings: string[] | null;
+  meta: object;
+}
 
-export async function getDataTelemetry(callCluster: LegacyAPICaller) {
+export async function getDataTelemetry(
+  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient
+) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
+    // check which client we need to use for now, evetually replace the legacy client with the new one. Hard-coding use of the legacy client for now
+    const useLegacy = true;
+    if (!useLegacy) {
+      const [getMappingsResponse, indexStatsResponse]: [
+        GetMappingsResponse,
+        IndexStatsResponse
+      ] = await Promise.all([
+        // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
+        esClient.indices.getMapping({
+          index: '*',
+          filter_path: [
+            // _meta.beat tells the shipper
+            '*.mappings._meta.beat',
+            // _meta.package.name tells the Ingest Manager's package
+            '*.mappings._meta.package.name',
+            // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
+            '*.mappings._meta.managed_by',
+            // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
+            '*.mappings.properties.ecs.properties.version.type',
+
+            // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
+            '*.mappings.properties.data_stream.properties.type.value',
+            // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
+            '*.mappings.properties.data_stream.properties.dataset.value',
+          ],
+        }),
+        // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
+        esClient.indices.stats({
+          index,
+          level: 'indices',
+          metric: ['docs', 'store'],
+          filter_path: ['indices.*.total'],
+        }),
+      ]);
+      const indexMappings: IndexMappings = getMappingsResponse.body;
+      const indexStats: IndexStats = indexStatsResponse.body;
+    }
+
     const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
       // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
       callCluster('indices.getMapping', {

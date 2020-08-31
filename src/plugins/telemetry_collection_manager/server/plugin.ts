@@ -202,9 +202,11 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    // call the esClientGetter and check if it returns undefined.
+    // This is right before we loop through the collectors to call their fetch methods.
+    // before looping through each collector and calling its fetch method, we ensure that the esClientGetter returns something, if it doesn't, we skip the collection set (local, xpack_local, monitoring).
 
     for (const collection of this.collections) {
+      // looping through each of the three collections options we have (grouping of usage collection)
       if (collection.esClientGetter() !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
@@ -236,15 +238,15 @@ export class TelemetryCollectionManagerPlugin
   }
 
   private async getUsageForCollection(
-    collection: Collection,
-    statsCollectionConfig: StatsCollectionConfig
+    collection: Collection, // contains the esClientGetter method
+    statsCollectionConfig: StatsCollectionConfig // contains the already-scoped esClient
   ): Promise<UsageStatsPayload[]> {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
       ...collection.customContext,
     };
-
+    // added call to use new esClient
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
 
     if (clustersDetails.length === 0) {
@@ -253,8 +255,8 @@ export class TelemetryCollectionManagerPlugin
     }
 
     const [stats, licenses] = await Promise.all([
-      collection.statsGetter(clustersDetails, statsCollectionConfig, context),
-      collection.licenseGetter(clustersDetails, statsCollectionConfig, context),
+      collection.statsGetter(clustersDetails, statsCollectionConfig, context), // todo: use new esClient
+      collection.licenseGetter(clustersDetails, statsCollectionConfig, context), // todo: use new ESClient
     ]);
 
     return stats.map((stat) => {

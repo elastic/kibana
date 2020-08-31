@@ -47,6 +47,7 @@ export function registerCollection(
   esCluster: ILegacyClusterClient,
   esClientGetter: () => IClusterClient | undefined
 ) {
+  // use the new ES client internally for clusterDetailsGetter, licenceGetter and, potentially, statsGetter.
   telemetryCollectionManager.setCollection({
     esCluster,
     esClientGetter,
