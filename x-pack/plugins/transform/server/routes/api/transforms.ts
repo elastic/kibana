@@ -72,6 +72,16 @@ interface StopOptions {
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license } = routeDependencies;
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms Get transforms
+   * @apiName GetTransforms
+   * @apiDescription Returns transforms
+   *
+   * @apiSchema (params) jobAuditMessagesJobIdSchema
+   * @apiSchema (query) jobAuditMessagesQuerySchema
+   */
   router.get(
     { path: addBasePath('transforms'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -87,6 +97,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/:transformId Get transform
+   * @apiName GetTransform
+   * @apiDescription Returns a single transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
   router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}'),
@@ -106,6 +126,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/_stats Get transforms stats
+   * @apiName GetTransformsStats
+   * @apiDescription Returns transforms stats
+   */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -121,6 +149,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/:transformId/_stats Get transform stats
+   * @apiName GetTransformStats
+   * @apiDescription Returns stats for a single transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
   router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}/_stats'),
@@ -143,6 +181,17 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     })
   );
   registerTransformsAuditMessagesRoutes(routeDependencies);
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {put} /api/transform/transforms/:transformId Put transform
+   * @apiName PutTransform
+   * @apiDescription Creates a transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   * @apiSchema (body) putTransformsRequestSchema
+   */
   router.put<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}'),
@@ -175,6 +224,17 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       return res.ok({ body: response });
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/transforms/:transformId/_update Post transform update
+   * @apiName PostTransformUpdate
+   * @apiDescription Updates a transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   * @apiSchema (body) postTransformsUpdateRequestSchema
+   */
   router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}/_update'),
@@ -198,6 +258,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/delete_transforms Post delete transforms
+   * @apiName DeleteTransforms
+   * @apiDescription Deletes transforms
+   *
+   * @apiSchema (body) deleteTransformsRequestSchema
+   */
   router.post(
     {
       path: addBasePath('delete_transforms'),
@@ -226,6 +296,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/transforms/_preview Preview transform
+   * @apiName PreviewTransform
+   * @apiDescription Previews transform
+   *
+   * @apiSchema (body) postTransformsPreviewRequestSchema
+   */
   router.post<undefined, undefined, PostTransformsPreviewRequestSchema>(
     {
       path: addBasePath('transforms/_preview'),
@@ -235,6 +315,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(previewTransformHandler)
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/start_transforms Start transforms
+   * @apiName PostStartTransforms
+   * @apiDescription Starts transform
+   *
+   * @apiSchema (body) startTransformsRequestSchema
+   */
   router.post(
     {
       path: addBasePath('start_transforms'),
@@ -244,6 +334,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(startTransformsHandler)
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/stop_transforms Stop transforms
+   * @apiName PostStopTransforms
+   * @apiDescription Stops transform
+   *
+   * @apiSchema (body) stopTransformsRequestSchema
+   */
   router.post(
     {
       path: addBasePath('stop_transforms'),
@@ -253,6 +353,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(stopTransformsHandler)
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/es_search Transform ES Search Proxy
+   * @apiName PostTransformEsSearchProxy
+   * @apiDescription ES Search Proxy
+   *
+   * @apiSchema (body) any
+   */
   router.post(
     {
       path: addBasePath('es_search'),

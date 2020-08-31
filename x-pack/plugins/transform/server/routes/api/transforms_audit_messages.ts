@@ -22,6 +22,15 @@ interface BoolQuery {
 }
 
 export function registerTransformsAuditMessagesRoutes({ router, license }: RouteDependencies) {
+  /**
+   * @apiGroup Transforms Audit Messages
+   *
+   * @api {get} /api/transform/transforms/:transformId/messages Transforms Messages
+   * @apiName GetTransformsMessages
+   * @apiDescription Get transforms audit messages
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
   router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}/messages'),
