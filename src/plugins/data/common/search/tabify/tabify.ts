@@ -56,6 +56,13 @@ export function tabifyAggResponse(
           const aggBucket = get(bucket, agg.id);
           const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
 
+          // bucketInterval is attached to the date histogram response, and lets us replace 'auto'
+          // with a specific interval. There are other properties on the bucketInterval, defined
+          // in time_buckets
+          if (aggInfo && aggInfo.bucketInterval && column.aggConfig.params.interval === 'auto') {
+            column.aggConfig.params.interval = aggInfo.bucketInterval.expression;
+          }
+
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {
               // if the bucket doesn't have value don't add it to the row

@@ -19,9 +19,9 @@
 
 import { tabifyAggResponse } from './tabify';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
+import { AggConfigs, IAggConfig, IAggConfigs, BucketAggType } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
+import { metricOnly, threeTermBuckets, oneHistogramBucket } from 'fixtures/fake_hierarchical_data';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -157,6 +157,32 @@ describe('tabifyAggResponse Integration', () => {
           expectAvgBytes,
         ]);
       });
+    });
+
+    test('rewrites the auto date histogram', () => {
+      const dateHistogram = typesRegistry.get('date_histogram') as BucketAggType;
+      const writeMock = jest.fn((agg, output) => {
+        output.bucketInterval = {
+          expression: 'my expression',
+        };
+      });
+      dateHistogram.params.find((p) => p.name === 'interval')!.write = writeMock;
+
+      const autoConfigs = createAggConfigs([
+        mockAggConfig({
+          type: 'date_histogram',
+          params: { field: '@timestamp', interval: 'auto' },
+        }),
+        mockAggConfig({
+          type: 'date_histogram',
+          params: { field: '@timestamp', interval: '12h' },
+        }),
+        mockAggConfig({ type: 'count' }),
+      ]);
+      const tabbed = tabifyAggResponse(autoConfigs, oneHistogramBucket, {});
+      expect(writeMock).toHaveBeenCalled();
+      expect(tabbed.columns[0].aggConfig.params.interval).toEqual('my expression');
+      expect(tabbed.columns[1].aggConfig.params.interval).toEqual('12h');
     });
   });
 });
