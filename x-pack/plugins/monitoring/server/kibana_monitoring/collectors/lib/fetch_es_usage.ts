@@ -6,7 +6,6 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { MonitoringConfig } from '../../../config';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { StackProductUsage } from '../types';
 
 interface ESResponse {
@@ -130,7 +129,6 @@ export async function fetchESUsage(
   }, 0);
 
   return {
-    productName: ELASTICSEARCH_SYSTEM_ID,
     count,
     versions: [hit.version],
     mbCount,
