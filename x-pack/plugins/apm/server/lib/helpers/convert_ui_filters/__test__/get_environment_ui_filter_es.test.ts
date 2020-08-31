@@ -21,7 +21,7 @@ describe('getEnvironmentUiFilterES', () => {
   });
 
   it('should create a filter for missing service environments', () => {
-    const uiFilterES = getEnvironmentUiFilterES(ENVIRONMENT_NOT_DEFINED);
+    const uiFilterES = getEnvironmentUiFilterES(ENVIRONMENT_NOT_DEFINED.value);
     expect(uiFilterES).toHaveLength(1);
     expect(uiFilterES[0]).toHaveProperty(
       ['bool', 'must_not', 'exists', 'field'],

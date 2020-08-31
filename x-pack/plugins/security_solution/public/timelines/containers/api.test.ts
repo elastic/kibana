@@ -220,6 +220,109 @@ describe('persistTimeline', () => {
     });
   });
 
+  describe('create draft timeline in read-only permission', () => {
+    const timelineId = null;
+    const initialDraftTimeline = {
+      columns: [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+        },
+      ],
+      dataProviders: [],
+      description: 'x',
+      eventType: 'all',
+      filters: [],
+      kqlMode: 'filter',
+      kqlQuery: {
+        filterQuery: null,
+      },
+      title: '',
+      timelineType: TimelineType.default,
+      templateTimelineVersion: null,
+      templateTimelineId: null,
+      dateRange: {
+        start: 1590998565409,
+        end: 1591084965409,
+      },
+      savedQueryId: null,
+      sort: {
+        columnId: '@timestamp',
+        sortDirection: 'desc',
+      },
+      status: TimelineStatus.draft,
+    };
+
+    const version = null;
+    const fetchMock = jest.fn();
+    const postMock = jest.fn();
+    const patchMock = jest.fn();
+
+    beforeAll(() => {
+      jest.resetAllMocks();
+      jest.resetModules();
+
+      (KibanaServices.get as jest.Mock).mockReturnValue({
+        http: {
+          fetch: fetchMock.mockRejectedValue({
+            body: { status_code: 403, message: 'you do not have the permission' },
+          }),
+          post: postMock.mockRejectedValue({
+            body: { status_code: 403, message: 'you do not have the permission' },
+          }),
+          patch: patchMock.mockRejectedValue({
+            body: { status_code: 403, message: 'you do not have the permission' },
+          }),
+        },
+      });
+    });
+
+    test('it should return your request timeline with code and message', async () => {
+      const persist = await api.persistTimeline({
+        timelineId,
+        timeline: initialDraftTimeline,
+        version,
+      });
+      expect(persist).toEqual({
+        data: {
+          persistTimeline: {
+            code: 403,
+            message: 'you do not have the permission',
+            timeline: { ...initialDraftTimeline, savedObjectId: '', version: '' },
+          },
+        },
+      });
+    });
+  });
+
   describe('create active timeline (import)', () => {
     const timelineId = null;
     const importTimeline = {
