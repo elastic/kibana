@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+import dateMath from '@elastic/datemath';
+
 import { EntriesArray } from '../shared_imports';
 import { RuleType } from './types';
 
@@ -18,3 +21,15 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
 };
 
 export const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
+
+export const parseScheduleDates = (time: string): moment.Moment | null => {
+  const isValidDateString = !isNaN(Date.parse(time));
+  const isValidInput = isValidDateString || time.trim().startsWith('now');
+  const formattedDate = isValidDateString
+    ? moment(time)
+    : isValidInput
+    ? dateMath.parse(time)
+    : null;
+
+  return formattedDate ?? null;
+};
