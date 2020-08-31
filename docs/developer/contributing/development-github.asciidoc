@@ -12,7 +12,7 @@ repo, which we'll refer to in later code snippets.
 [discrete]
 === Branching
 
-At Elastic, all projects in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
+At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
 
 * `master` is the next major version.
 * `<major>.x` is the next minor version.
