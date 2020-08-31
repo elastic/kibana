@@ -5,33 +5,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import { Service } from '../../types';
 import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
-
-// import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
 import { getGeoThresholdExecutor } from './geo_threshold';
-// const ActionGroupId = 'threshold met';
-// const ComparatorFns = getComparatorFns();
-// export const ComparatorFnNames = new Set(ComparatorFns.keys());
+import { AlertServices } from '../../../../alerts/server';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
+export type TrackingEvent = 'entered' | 'exited';
+export type BoundaryType = 'entireIndex'; // Will expand to cover more, i.e. - providedShapes, etc.
 
 export function getAlertType(
   service: Service
 ): {
   defaultActionGroupId: string;
-  actionVariables: any[];
-  actionGroups: Array<{ name: string; id: string }>;
   executor: ({
     previousStartedAt: currIntervalStartTime,
     startedAt: currIntervalEndTime,
     services,
     params,
   }: {
-    previousStartedAt: any;
-    startedAt: any;
-    services: any;
-    params: any;
+    previousStartedAt: Date | null;
+    startedAt: Date;
+    services: AlertServices;
+    params: {
+      index: string;
+      geoField: string;
+      entity: string;
+      dateField: string;
+      trackingEvent: TrackingEvent;
+      boundaryType: BoundaryType;
+      boundaryIndex: string;
+      boundaryGeoField: string;
+    };
   }) => Promise<void>;
   name: string;
   producer: string;
@@ -49,65 +55,6 @@ export function getAlertType(
     }
   );
 
-  const actionVariableContextGroupLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel',
-    {
-      defaultMessage: 'The group that exceeded the threshold.',
-    }
-  );
-
-  const actionVariableContextDateLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
-    {
-      defaultMessage: 'The date the alert exceeded the threshold.',
-    }
-  );
-
-  const actionVariableContextValueLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextValueLabel',
-    {
-      defaultMessage: 'The value that exceeded the threshold.',
-    }
-  );
-
-  const actionVariableContextMessageLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextMessageLabel',
-    {
-      defaultMessage: 'A pre-constructed message for the alert.',
-    }
-  );
-
-  const actionVariableContextTitleLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextTitleLabel',
-    {
-      defaultMessage: 'A pre-constructed title for the alert.',
-    }
-  );
-
-  const actionVariableContextThresholdLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
-    {
-      defaultMessage:
-        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
-    }
-  );
-
-  const actionVariableContextThresholdComparatorLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdComparatorLabel',
-    {
-      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
-    }
-  );
-
-  // const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
-  //   (propKey: string) => {
-  //     return {
-  //       name: propKey,
-  //       description: propKey,
-  //     };
-  //   }
-  // );
-
   return {
     id: GEO_THRESHOLD_ID,
     name: alertTypeName,
@@ -116,22 +63,17 @@ export function getAlertType(
     actionVariables: [],
     executor: getGeoThresholdExecutor(service),
     producer: BUILT_IN_ALERTS_FEATURE_ID,
+    validate: {
+      params: schema.object({
+        index: schema.string({ minLength: 1 }),
+        geoField: schema.string({ minLength: 1 }),
+        entity: schema.string({ minLength: 1 }),
+        dateField: schema.string({ minLength: 1 }),
+        trackingEvent: schema.string({ minLength: 1 }),
+        boundaryType: schema.string({ minLength: 1 }),
+        boundaryIndex: schema.string({ minLength: 1 }),
+        boundaryGeoField: schema.string({ minLength: 1 }),
+      }),
+    },
   };
-  // validate: {
-  //   params: ParamsSchema,
-  // },
-  // actionVariables: {
-  //   context: [
-  //     { name: 'message', description: actionVariableContextMessageLabel },
-  //     { name: 'title', description: actionVariableContextTitleLabel },
-  //     { name: 'group', description: actionVariableContextGroupLabel },
-  //     { name: 'date', description: actionVariableContextDateLabel },
-  //     { name: 'value', description: actionVariableContextValueLabel },
-  //   ],
-  //   params: [
-  //     { name: 'threshold', description: actionVariableContextThresholdLabel },
-  //     { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-  //     ...alertParamsVariables,
-  //   ],
-  // },
 }
