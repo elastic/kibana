@@ -18,7 +18,7 @@
  */
 
 import { RequestHandlerContext } from '../../../../core/server';
-import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { IKibanaSearchResponse } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';

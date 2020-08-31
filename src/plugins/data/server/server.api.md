@@ -709,7 +709,7 @@ export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = I
     // Warning: (ae-forgotten-export) The symbol "RequestHandlerContext" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    search: (context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) => Promise<IKibanaSearchResponse>;
+    search: (context: RequestHandlerContext, request: IEsSearchRequest, options: ISearchOptions) => Promise<IKibanaSearchResponse>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
