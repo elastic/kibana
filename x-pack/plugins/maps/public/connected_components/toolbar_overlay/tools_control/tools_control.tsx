@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
@@ -54,6 +55,8 @@ interface Props {
   geoFields: GeoFieldWithIndex[];
   initiateDraw: (drawState: DrawState) => void;
   isDrawingFilter: boolean;
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
 }
 
 interface State {

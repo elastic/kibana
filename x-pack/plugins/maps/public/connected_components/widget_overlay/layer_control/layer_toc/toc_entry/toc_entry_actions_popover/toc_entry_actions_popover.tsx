@@ -220,7 +220,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   render() {
     return (
       <EuiPopover
-        id={this.props.escapedDisplayName}
+        id={this.props.layer.getId()}
         className="mapLayTocActions"
         button={this._renderPopoverToggleButton()}
         isOpen={this.state.isPopoverOpen}
