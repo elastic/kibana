@@ -47,12 +47,11 @@ describe('MlUrlGenerator', () => {
             time: {
               from: 'now-30m',
               to: 'now',
-              mode: 'quick',
             },
           },
         });
         expect(url).toBe(
-          '/app/ml/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,mode:quick,to:now))'
+          '/app/ml/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))'
         );
       });
     });
@@ -64,7 +63,6 @@ describe('MlUrlGenerator', () => {
           jobIds: ['fq_single_1'],
           mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
           refreshInterval: {
-            display: 'Off',
             pause: false,
             value: 0,
           },
@@ -79,7 +77,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*'))"
+          "/app/ml/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*'))"
         );
       });
       it('should generate valid URL for the Anomaly Explorer page for multiple jobIds', async () => {
@@ -104,7 +102,6 @@ describe('MlUrlGenerator', () => {
           page: ML_PAGES.SINGLE_METRIC_VIEWER,
           jobIds: ['logs_categorization_1'],
           refreshInterval: {
-            display: 'Off',
             pause: false,
             value: 0,
           },
@@ -119,7 +116,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))"
         );
       });
 
@@ -130,7 +127,6 @@ describe('MlUrlGenerator', () => {
           detectorIndex: 0,
           entities: { mlcategory: '2' },
           refreshInterval: {
-            display: 'Off',
             pause: false,
             value: 0,
           },
@@ -149,7 +145,7 @@ describe('MlUrlGenerator', () => {
           },
         });
         expect(url).toBe(
-          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2')),query:(query_string:(analyze_wildcard:!t,query:'*')),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z'))"
+          "/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2')),query:(query_string:(analyze_wildcard:!t,query:'*')),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z'))"
         );
       });
     });
@@ -224,12 +220,11 @@ describe('MlUrlGenerator', () => {
           time: {
             from: 'now-30m',
             to: 'now',
-            mode: 'quick',
           },
         },
       });
       expect(url).toBe(
-        '/app/ml/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,mode:quick,to:now))'
+        '/app/ml/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))'
       );
     });
   });

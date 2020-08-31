@@ -20,7 +20,6 @@
 import { Moment } from 'moment';
 
 export interface RefreshInterval {
-  display?: string;
   pause: boolean;
   value: number;
 }
@@ -28,7 +27,7 @@ export interface RefreshInterval {
 export interface TimeRange {
   from: string;
   to: string;
-  mode?: 'absolute' | 'relative' | 'quick';
+  mode?: 'absolute' | 'relative';
 }
 
 export interface TimeRangeBounds {
