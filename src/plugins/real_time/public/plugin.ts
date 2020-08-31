@@ -23,17 +23,22 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
-import { REAL_TIME_API_PATH } from '../common';
+import { IRealTimeRpcClient, toPromise } from '../common';
+import { RpcClient } from './rpc';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface RealTimePluginSetupDependencies {}
 
 export interface RealTimePluginStartDependencies {}
-
-export interface RealTimePluginSetup {}
-
-export interface RealTimePluginStart {}
 /* eslint-enable @typescript-eslint/no-empty-interface */
+
+export interface RealTimePluginSetup {
+  rpc: IRealTimeRpcClient;
+}
+
+export interface RealTimePluginStart {
+  rpc: IRealTimeRpcClient;
+}
 
 export class RealTimePlugin
   implements
@@ -43,33 +48,27 @@ export class RealTimePlugin
       RealTimePluginSetupDependencies,
       RealTimePluginStartDependencies
     > {
+  private rpc?: RpcClient;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<RealTimePluginStartDependencies, unknown>,
+    { http }: CoreSetup<RealTimePluginStartDependencies, unknown>,
     plugins: RealTimePluginSetupDependencies
   ): RealTimePluginSetup {
-    return {};
+    const rpc = (this.rpc = new RpcClient({ http }));
+
+    return { rpc };
   }
 
   public start(core: CoreStart, plugins: RealTimePluginStartDependencies): RealTimePluginStart {
-    core.http
-      .post(`${REAL_TIME_API_PATH}/_rpc`, {
-        body: JSON.stringify([
-          1,
-          'patch',
-          {
-            type: 'dashboard',
-            id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-            patch: [{ op: 'replace', path: '/title', value: 'foo bar 2' }],
-          },
-        ]),
-      })
-      .then((response) => {
-        // eslint-disable-next-line
-        console.log('real-time', response);
-      });
+    const { rpc } = this;
 
-    return {};
+    toPromise(this.rpc!.ping(null)).then((value) => {
+      // eslint-disable-next-line
+      console.log(value);
+    });
+
+    return { rpc: rpc! };
   }
 }

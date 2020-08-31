@@ -17,32 +17,4 @@
  * under the License.
  */
 
-/**
- * Types for JSON-Rx messages, see: https://onp4.com/@vadim/p/gv9z33hjuo
- */
-
-/** Must be positive integer. */
-export type RpcId = number;
-
-/** Must be non-empty string, no longer than 128 characters. */
-export type RpcMethod = string;
-
-export type RpcMessageSubscribe = [RpcId, RpcMethod, unknown];
-
-export type RpcMessageComplete = [0, RpcId, unknown];
-
-export type RpcMessageError = [-1, RpcId, unknown];
-
-export type RpcMessageNotification = RpcMethod | [RpcMethod, unknown];
-
-export type RpcMessageData = [-2, RpcId, unknown];
-
-export type RpcMessageUnsubscribe = [-3, RpcId];
-
-export type RpcMessage =
-  | RpcMessageSubscribe
-  | RpcMessageUnsubscribe
-  | RpcMessageData
-  | RpcMessageUnsubscribe
-  | RpcMessageError
-  | RpcMessageNotification;
+export * from './rpc';

@@ -18,11 +18,10 @@
  */
 
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { RealTimeJsonClient } from '../json';
-import { RpcMessageSubscribe, RpcMessageComplete, RpcMessageError } from './types';
 import { RpcClient } from './rpc_client';
+import { RpcMessageSubscribe, RpcMessageComplete, RpcMessageError, toPromise } from '../../common';
 
 export interface RealTimeRpcParams {
   logger: Logger;
@@ -33,9 +32,6 @@ export interface RealTimeRpcParams {
 export type Future<T> = Promise<T> | Observable<T>;
 export type Method = (payload: unknown) => Future<unknown>;
 export type Methods = Record<string, undefined | Method>;
-
-const isPromise = (x: unknown): x is Promise<unknown> =>
-  !!x && typeof x === 'object' && typeof (x as Promise<unknown>).then === 'function';
 
 export const isSubscribeMessage = (x: unknown): x is RpcMessageSubscribe => {
   if (!Array.isArray(x) || (x.length !== 3 && x.length !== 2)) return false;
@@ -75,7 +71,7 @@ export class RealTimeRpc {
 
       const method = this.methods[name];
       const future = method!(payload);
-      const promise = isPromise(future) ? future : future.pipe(take(1)).toPromise();
+      const promise = toPromise(future);
       const result = await promise;
 
       return [0, id, result];

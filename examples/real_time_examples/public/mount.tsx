@@ -20,16 +20,16 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
+import { SetupDependencies, StartDependencies } from './plugin';
 import { App } from './application/containers/app/lazy';
 import { context } from './application/context';
 
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
+export const mount = (setup: SetupDependencies, coreSetup: CoreSetup<StartDependencies>) => async ({
   element,
 }: AppMountParameters) => {
   const [start, plugins] = await coreSetup.getStartServices();
   const reactElement = (
-    <context.Provider value={{ start }}>
+    <context.Provider value={{ start, rpc: setup.realTime.rpc }}>
       <App />
     </context.Provider>
   );

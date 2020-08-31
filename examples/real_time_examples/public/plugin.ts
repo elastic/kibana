@@ -33,15 +33,14 @@ export interface StartDependencies {
 
 export class RealTimeExamplesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
-  public setup(
-    core: CoreSetup<StartDependencies>,
-    { realTime, developerExamples }: SetupDependencies
-  ) {
+  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
+    const { developerExamples } = plugins;
+
     core.application.register({
       id: 'realTimeExamples',
       title: 'Real-time plugin examples',
       navLinkStatus: AppNavLinkStatus.hidden,
-      mount: mount(core),
+      mount: mount(plugins, core),
     });
 
     developerExamples.register({

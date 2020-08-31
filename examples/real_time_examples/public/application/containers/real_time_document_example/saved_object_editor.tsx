@@ -19,14 +19,28 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiCodeEditor, EuiSpacer, EuiButton } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
 import { SavedObject } from '../../../../../../src/core/public';
+import { useRealTimeExamples } from '../../context';
 
 export interface Props {
   so: SavedObject;
 }
 
 export const SavedObjectEditor: React.FC<Props> = ({ so }) => {
+  const { rpc } = useRealTimeExamples();
   const [value, setValue] = React.useState('{"op": "add", "path": "/title", "value": "foo"}\n');
+  const isMounted = useMountedState();
+
+  const onSend = async () => {
+    const op = JSON.parse(value);
+    await rpc.patch({
+      type: so.type,
+      id: so.id,
+      patch: [op],
+    });
+    if (!isMounted()) return;
+  };
 
   return (
     <div>
@@ -48,7 +62,7 @@ export const SavedObjectEditor: React.FC<Props> = ({ so }) => {
 
       <EuiSpacer />
 
-      <EuiButton onClick={() => {}}>Send</EuiButton>
+      <EuiButton onClick={onSend}>Send</EuiButton>
     </div>
   );
 };

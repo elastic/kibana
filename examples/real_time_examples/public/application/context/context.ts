@@ -19,9 +19,11 @@
 
 import { createContext, useContext } from 'react';
 import { CoreStart } from '../../../../../src/core/public';
+import { IRealTimeRpcClient } from '../../../../../src/plugins/real_time/common';
 
 export interface RealTimeExamplesAppContextValue {
   start: CoreStart;
+  rpc: IRealTimeRpcClient;
 }
 
 export const context = createContext<RealTimeExamplesAppContextValue | null>(null);
