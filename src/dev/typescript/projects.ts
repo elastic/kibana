@@ -38,6 +38,17 @@ export const PROJECTS = [
     name: 'apm/scripts',
     disableTypeCheck: true,
   }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/ml/server/routes/apidocs_scripts/tsconfig.json'), {
+    name: 'ml/api_docs',
+    disableTypeCheck: true,
+  }),
+  new Project(
+    resolve(REPO_ROOT, 'x-pack/plugins/transform/server/routes/apidocs_scripts/tsconfig.json'),
+    {
+      name: 'transform/api_docs',
+      disableTypeCheck: true,
+    }
+  ),
 
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
