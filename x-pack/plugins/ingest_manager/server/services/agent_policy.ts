@@ -262,15 +262,20 @@ class AgentPolicyService {
     return this._update(soClient, id, {}, options?.user);
   }
   public async bumpAllAgentPolicies(
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    options?: { user?: AuthenticatedUser }
   ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       fields: ['revision'],
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
-      const attributes = policy.attributes;
-      attributes.revision = attributes.revision + 1;
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
       return policy;
     });
     return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
