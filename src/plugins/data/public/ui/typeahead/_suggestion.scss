@@ -11,9 +11,9 @@ $kbnTypeaheadTypes: (
 }
 
 .kbnTypeahead__popover--top {
-  box-shadow:
-    0 -2px 4px -1px transparentize($euiShadowColor, .8),
-    0 0 2px 0 transparentize($euiShadowColor, .8);
+  @include euiBottomShadowFlat;
+  border-top-left-radius: $euiBorderRadius;
+  border-top-right-radius: $euiBorderRadius;
 }
 
 .kbnTypeahead__popover--bottom {
