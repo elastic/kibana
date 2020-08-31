@@ -42,6 +42,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     alertOnNoData,
   } = params as InventoryMetricThresholdParams;
 
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   const source = await libs.sources.getSourceConfiguration(
     services.savedObjectsClient,
     sourceId || 'default'
@@ -53,7 +55,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     )
   );
 
-  const inventoryItems = Object.keys(first(results) as any);
+  const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
     const alertInstance = services.alertInstanceFactory(`${item}`);
     // AND logic; all criteria must be across the threshold
