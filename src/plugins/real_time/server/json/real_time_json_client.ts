@@ -28,5 +28,8 @@ export interface RealTimeJsonClientParams {
 export class RealTimeJsonClient implements IRealTimeJsonClient {
   constructor(private readonly params: RealTimeJsonClientParams) {}
 
-  public async create() {}
+  public async create() {
+    Number(this.params);
+    throw new Error('not_implemented');
+  }
 }
