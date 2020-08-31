@@ -115,6 +115,7 @@ export class FeatureDirectory extends React.Component {
         return (
           <EuiFlexItem key={directory.id}>
             <Synopsis
+              id={directory.id}
               onClick={createAppNavigationHandler(directory.path)}
               description={directory.description}
               iconType={directory.icon}
@@ -157,6 +158,7 @@ FeatureDirectory.propTypes = {
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
+      order: PropTypes.number,
     })
   ),
 };

@@ -40,6 +40,8 @@ export const previewInventoryMetricThresholdAlert = async ({
 }: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
 
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   const { timeSize, timeUnit } = criteria[0];
   const bucketInterval = `${timeSize}${timeUnit}`;
   const bucketIntervalInSeconds = getIntervalInSeconds(bucketInterval);
@@ -57,7 +59,7 @@ export const previewInventoryMetricThresholdAlert = async ({
       )
     );
 
-    const inventoryItems = Object.keys(first(results) as any);
+    const inventoryItems = Object.keys(first(results)!);
     const previewResults = inventoryItems.map((item) => {
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);

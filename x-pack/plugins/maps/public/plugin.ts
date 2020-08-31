@@ -51,7 +51,7 @@ import { StartContract as FileUploadStartContract } from '../../file_upload/publ
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: MapsLegacyConfigType };
@@ -108,7 +108,9 @@ export class MapsPlugin
     );
 
     plugins.inspector.registerView(MapView);
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
     plugins.visualizations.registerAlias(
       getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
     );
