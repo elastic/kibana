@@ -815,7 +815,7 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
-      const result = await getMonitorAvailability({
+      await getMonitorAvailability({
         callES,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
