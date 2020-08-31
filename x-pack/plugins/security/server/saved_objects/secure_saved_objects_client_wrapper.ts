@@ -16,7 +16,6 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
-  namespaceIdToString,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -203,7 +202,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const objectNamespaces = objects
       .filter(({ namespace }) => namespace !== undefined)
       .map(({ namespace }) => namespace!);
-    const namespaces = uniq([namespaceIdToString(options?.namespace), ...objectNamespaces]);
+    const namespaces = [options?.namespace, ...objectNamespaces];
     await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
       objects,
       options,
@@ -215,7 +214,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async checkPrivileges(
     actions: string | string[],
-    namespaceOrNamespaces?: string | string[]
+    namespaceOrNamespaces?: string | Array<undefined | string>
   ) {
     try {
       return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespaceOrNamespaces);
@@ -227,7 +226,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async ensureAuthorized(
     typeOrTypes: string | string[],
     action: string,
-    namespaceOrNamespaces?: string | string[],
+    namespaceOrNamespaces?: string | Array<undefined | string>,
     args?: Record<string, unknown>,
     auditAction: string = action,
     requiresAll = true

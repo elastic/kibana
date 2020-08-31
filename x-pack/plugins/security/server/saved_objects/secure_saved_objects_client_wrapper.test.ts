@@ -120,7 +120,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>, action?: s
 const expectPrivilegeCheck = async (
   fn: Function,
   args: Record<string, any>,
-  namespacesOverride?: string[]
+  namespacesOverride?: Array<undefined | string>
 ) => {
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
@@ -496,7 +496,7 @@ describe('#bulkUpdate', () => {
       { ...obj1, namespace: 'foo-ns' },
       { ...obj2, namespace: 'bar-ns' },
     ];
-    const namespacesOverride = ['default', 'foo-ns', 'bar-ns'];
+    const namespacesOverride = [undefined, 'foo-ns', 'bar-ns'];
     // use the default namespace for the options
     await expectPrivilegeCheck(client.bulkUpdate, { objects, options: {} }, namespacesOverride);
   });
