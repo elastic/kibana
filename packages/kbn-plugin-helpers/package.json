@@ -23,10 +23,10 @@
     "vinyl-fs": "^3.0.3"
   },
   "devDependencies": {
-    "@types/decompress": "^4.2.3",
+    "@types/extract-zip": "^1.6.2",
     "@types/gulp-zip": "^4.0.1",
     "@types/inquirer": "^6.5.0",
-    "decompress": "^4.2.1",
+    "extract-zip": "^2.0.1",
     "typescript": "4.0.2"
   }
 }
