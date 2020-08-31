@@ -64,7 +64,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
 
-require('@kbn/plugin-helpers').babelRegister();
+require('../../src/setup_node_env');
 require('@kbn/test').runTestsCli([
   ...alwaysImportedTests,
   ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
