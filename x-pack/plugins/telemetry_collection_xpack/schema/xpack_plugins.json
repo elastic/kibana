@@ -139,6 +139,112 @@
         }
       }
     },
+    "monitoring": {
+      "properties": {
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "properties": {
+            "license": {
+              "type": "keyword"
+            },
+            "clusterUuid": {
+              "type": "keyword"
+            },
+            "stackProductCount": {
+              "type": "long"
+            },
+            "stackProductMbCount": {
+              "type": "long"
+            },
+            "stackProductMbRatio": {
+              "type": "float"
+            },
+            "elasticsearch": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "mbCount": {
+                  "type": "long"
+                },
+                "mbPercentage": {
+                  "type": "float"
+                },
+                "versions": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "kibana": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "mbCount": {
+                  "type": "long"
+                },
+                "mbPercentage": {
+                  "type": "float"
+                },
+                "versions": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "logstash": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "mbCount": {
+                  "type": "long"
+                },
+                "mbPercentage": {
+                  "type": "float"
+                },
+                "versions": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "beats": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "mbCount": {
+                  "type": "long"
+                },
+                "mbPercentage": {
+                  "type": "float"
+                },
+                "versions": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "apm": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "mbCount": {
+                  "type": "long"
+                },
+                "mbPercentage": {
+                  "type": "float"
+                },
+                "versions": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "rollups": {
       "properties": {
         "index_patterns": {
