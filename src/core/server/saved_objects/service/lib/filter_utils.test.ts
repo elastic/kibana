@@ -83,6 +83,9 @@ const mockMappings = {
 
 describe('Filter Utils', () => {
   describe('#validateConvertFilterToKueryNode', () => {
+    test('Empty string filters are ignored', () => {
+      expect(validateConvertFilterToKueryNode(['foo'], '', mockMappings)).toBeUndefined();
+    });
     test('Validate a simple KQL KueryNode filter', () => {
       expect(
         validateConvertFilterToKueryNode(
