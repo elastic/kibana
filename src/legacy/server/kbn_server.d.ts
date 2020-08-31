@@ -78,7 +78,6 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
-    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
   }
