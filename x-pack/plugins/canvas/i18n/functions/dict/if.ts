@@ -12,7 +12,7 @@ import { BOOLEAN_TRUE, BOOLEAN_FALSE, CONTEXT } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof ifFn>> = {
   help: i18n.translate('xpack.canvas.functions.ifHelpText', {
-    defaultMessage: 'Perform conditional logic',
+    defaultMessage: 'Performs conditional logic.',
   }),
   args: {
     condition: i18n.translate('xpack.canvas.functions.if.args.conditionHelpText', {

@@ -72,6 +72,11 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     echTooltip__rowHighlighted: isHighlighted,
                   });
+
+                  const renderValue = Array.isArray(value)
+                    ? value.map((v) => <div key={v}>{v}</div>)
+                    : value;
+
                   return (
                     <div
                       key={`${seriesIdentifier.key}__${valueAccessor}`}
@@ -88,7 +93,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
                           {label}
                         </EuiFlexItem>
                         <EuiFlexItem className="eui-textBreakAll mlChartTooltip__value">
-                          {value}
+                          {renderValue}
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </div>
