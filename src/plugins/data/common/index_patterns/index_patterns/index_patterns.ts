@@ -33,9 +33,11 @@ import {
   IIndexPatternsApiClient,
   GetFieldsOptions,
   IndexPatternSpec,
+  IndexPatternAttributes,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
+import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -172,14 +174,54 @@ export class IndexPatternsService {
   };
 
   get = async (id: string): Promise<IndexPattern> => {
+    const savedObjectType = 'index-pattern';
+
     const cache = indexPatternCache.get(id);
     if (cache) {
       return cache;
     }
 
-    const indexPattern = await this.make(id);
+    //
+    // const indexPattern = await this.make(id);
+    // get saved object, convert to spec, create new IndexPattern instance
+    //
+    //  progress - no longer calls `make`, no longer calls `init`
+    const {
+      version,
+      attributes: {
+        title,
+        timeFieldName,
+        intervalName,
+        fields,
+        sourceFilters,
+        fieldFormatMap,
+        typeMeta,
+        type,
+      },
+    } = await this.savedObjectsClient.get<IndexPatternAttributes>(savedObjectType, id);
 
-    return indexPatternCache.set(id, indexPattern);
+    if (!version) {
+      throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
+    }
+
+    const spec = {
+      id,
+      version,
+      title,
+      timeFieldName,
+      intervalName,
+      // fields,
+      fields: fields ? JSON.parse(fields) : undefined,
+      sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
+      fieldFormatMap: fieldFormatMap ? JSON.parse(fieldFormatMap) : undefined,
+      typeMeta: typeMeta ? JSON.parse(typeMeta) : undefined,
+      type,
+    };
+
+    // return indexPatternCache.set(id, indexPattern);
+    const indexPattern = await this.specToIndexPattern(spec);
+    indexPatternCache.set(id, indexPattern);
+    return indexPattern;
   };
 
   async specToIndexPattern(spec: IndexPatternSpec) {
@@ -187,7 +229,7 @@ export class IndexPatternsService {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
     const indexPattern = new IndexPattern({
-      spec: { id: spec.id },
+      spec,
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,

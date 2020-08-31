@@ -147,7 +147,8 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    // this.fields.replaceAll(spec.fields || []);
+    this.indexFields(false, spec.fields);
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
