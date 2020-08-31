@@ -56,7 +56,8 @@ describe('getTile', () => {
     }
 
     const expectedPath = path.resolve(__dirname, './__tests__/pbf/0_0_0.pbf');
-    const expectedTile = new Buffer(fs.readFileSync(expectedPath, 'binary'), 'binary');
+    const expectedBin = fs.readFileSync(expectedPath, 'binary');
+    const expectedTile = Buffer.from(expectedBin, 'binary');
     expect(expectedTile.equals(tile)).toBe(true);
   });
 });

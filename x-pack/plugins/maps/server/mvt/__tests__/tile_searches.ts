@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const search000json = require('./json/0_0_0_search.json'); // Prefer require() over setting the compiler options, which affect production modules as well
+import * as path from 'path';
+import * as fs from 'fs';
+
+const search000path = path.resolve(__dirname, './json/0_0_0_search.json');
+const search000raw = fs.readFileSync(search000path);
+const search000json = JSON.parse(search000raw); // Prefer require() over setting the compiler options, which affect production modules as well
 
 export const TILE_SEARCHES = {
   '0.0.0': {
