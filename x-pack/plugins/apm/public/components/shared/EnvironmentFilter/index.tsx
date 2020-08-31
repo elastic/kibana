@@ -13,10 +13,10 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
+import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { useEnvironments } from '../../../hooks/useEnvironments';
 
 function updateEnvironmentUrl(
   history: History,
