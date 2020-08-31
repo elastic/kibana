@@ -19,4 +19,18 @@ export const contentSources = [
     allowsReauth: true,
     boost: 1,
   },
+  {
+    id: '123',
+    serviceType: 'jira',
+    searchable: true,
+    supportedByLicense: true,
+    status: 'synced',
+    statusMessage: 'all green',
+    name: 'Jira',
+    documentCount: '34234',
+    isFederatedSource: false,
+    errorReason: 0,
+    allowsReauth: true,
+    boost: 0.5,
+  },
 ];
