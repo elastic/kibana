@@ -3,20 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import {
-  htmlIdGenerator,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiTextColor,
-  EuiDescriptionList,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
@@ -33,22 +29,25 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
 import { ResolverState } from '../../types';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import { PanelLoading } from './panel_loading';
+import { StyledPanel } from '../styles';
 
-const StyledDescriptionList = styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 10em;
-  }
-`;
-
-const StyledTitle = styled('h4')`
-  overflow-wrap: break-word;
-`;
+export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  return (
+    <StyledPanel>
+      {processEvent === null ? <PanelLoading /> : <ProcessDetails processEvent={processEvent} />}
+    </StyledPanel>
+  );
+});
 
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-export const ProcessDetails = memo(function ProcessDetails({
+const ProcessDetails = memo(function ProcessDetails({
   processEvent,
 }: {
   processEvent: ResolverEvent;
@@ -126,7 +125,9 @@ export const ProcessDetails = memo(function ProcessDetails({
     return processDescriptionListData;
   }, [processEvent]);
 
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
+  const eventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
 
   const crumbs = useMemo(() => {
     return [
@@ -138,9 +139,7 @@ export const ProcessDetails = memo(function ProcessDetails({
           }
         ),
         'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        href: eventsHref ?? undefined,
       },
       {
         text: (
@@ -155,7 +154,7 @@ export const ProcessDetails = memo(function ProcessDetails({
         onClick: () => {},
       },
     ];
-  }, [processName, pushToQueryParams]);
+  }, [eventsHref, processName]);
   const { cubeAssetsForNode } = useResolverTheme();
   const { descriptionText } = useMemo(() => {
     if (!processEvent) {

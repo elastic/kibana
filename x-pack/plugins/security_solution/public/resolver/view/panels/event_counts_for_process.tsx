@@ -8,11 +8,30 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { StyledBreadcrumbs } from './panel_content_utilities';
 
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import * as selectors from '../../store/selectors';
+import { ResolverState } from '../../types';
+import { StyledPanel } from '../styles';
+
+export function NodeEvents({ nodeID }: { nodeID: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+  // TODO, loading and error states. remove the !
+  return (
+    <StyledPanel>
+      <EventCountsForProcess processEvent={processEvent!} relatedStats={relatedEventsStats!} />
+    </StyledPanel>
+  );
+}
 
 /**
  * This view gives counts for all the related events of a process grouped by related event type.
@@ -25,7 +44,7 @@ import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parame
  * | 2                      | Network                    |
  *
  */
-export const EventCountsForProcess = memo(function EventCountsForProcess({
+const EventCountsForProcess = memo(function EventCountsForProcess({
   processEvent,
   relatedStats,
 }: {

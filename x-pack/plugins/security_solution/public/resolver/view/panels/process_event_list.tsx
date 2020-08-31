@@ -10,6 +10,7 @@ import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from 
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
+import { StyledPanel } from '../styles';
 import { formatDate, StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
@@ -17,6 +18,7 @@ import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import { ResolverState } from '../../types';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -125,7 +127,26 @@ const DisplayList = memo(function DisplayList({
   );
 });
 
-export const ProcessEventList = memo(function ProcessEventList({
+export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventType: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+  // TODO, loading and error dialogs. don't use !
+  return (
+    <StyledPanel>
+      <ProcessEventList
+        processEvent={processEvent!}
+        eventType={eventType}
+        relatedStats={relatedEventsStats!}
+      />
+    </StyledPanel>
+  );
+}
+
+const ProcessEventList = memo(function ProcessEventList({
   processEvent,
   eventType,
   relatedStats,

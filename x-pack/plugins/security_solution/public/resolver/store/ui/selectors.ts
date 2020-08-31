@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decode } from 'rison-node';
+import { decode, encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
@@ -55,6 +55,24 @@ export const panelViewAndParameters = createSelector(
       return decodedValue;
     }
     return defaultParameters();
+  }
+);
+
+export const relativeHref: (
+  state: ResolverUIState
+) => (params: PanelViewAndParameters) => string | null = createSelector(
+  (state: ResolverUIState) => state.locationSearch,
+  (state: ResolverUIState) => state.resolverComponentInstanceID,
+  (locationSearch, resolverComponentInstanceID) => {
+    return (params: PanelViewAndParameters) => {
+      if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
+        return null;
+      }
+      const urlSearchParams = new URLSearchParams(locationSearch);
+      const value = encode(params);
+      urlSearchParams.set(parameterName(resolverComponentInstanceID), value);
+      return urlSearchParams.toString();
+    };
   }
 );
 

@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { StyledPanel } from '../styles';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { formatter, StyledBreadcrumbs } from './panel_content_utilities';
@@ -179,7 +180,7 @@ export const ProcessListWithCounts = memo(() => {
   const showWarning = children === true || ancestors === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
-    <>
+    <StyledPanel>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
@@ -190,6 +191,6 @@ export const ProcessListWithCounts = memo(() => {
         columns={columns}
         sorting
       />
-    </>
+    </StyledPanel>
   );
 });

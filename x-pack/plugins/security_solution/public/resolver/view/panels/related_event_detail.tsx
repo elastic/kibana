@@ -10,6 +10,7 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import { StyledPanel } from '../styles';
 import { StyledBreadcrumbs, BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
@@ -73,11 +74,42 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
   });
 }
 
+export function EventDetail({
+  nodeID,
+  eventType,
+  eventID,
+}: {
+  nodeID: string;
+  eventType: string;
+  eventID: string;
+}) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+  const parentCount: number = Object.values(relatedEventsStats?.events.byCategory || {}).reduce(
+    (sum, val) => sum + val,
+    0
+  );
+  // TODO, error, loading, removed the 'parentCount' stuff. fix it all up.
+  return (
+    <StyledPanel>
+      <RelatedEventDetail
+        relatedEventId={eventID}
+        parentEvent={processEvent!}
+        countForParent={parentCount}
+      />
+    </StyledPanel>
+  );
+}
+
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
-export const RelatedEventDetail = memo(function ({
+const RelatedEventDetail = memo(function ({
   relatedEventId,
   parentEvent,
   countForParent,

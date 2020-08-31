@@ -9,11 +9,11 @@
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
-import { ProcessEventList } from './process_event_list';
-import { EventCountsForProcess } from './event_counts_for_process';
-import { ProcessDetails } from './process_details';
+import { NodeEventsOfType } from './process_event_list';
+import { NodeEvents } from './event_counts_for_process';
+import { NodeDetail } from './process_details';
 import { ProcessListWithCounts } from './process_list_with_counts';
-import { RelatedEventDetail } from './related_event_detail';
+import { EventDetail } from './related_event_detail';
 import { PanelViewAndParameters } from '../../types';
 
 /**
@@ -35,19 +35,19 @@ export const PanelRouter = memo(function () {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
 
   if (params.panelView === 'nodeDetail') {
-    return <ProcessDetails nodeID={params.panelParameters.nodeID} />;
+    return <NodeDetail nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEvents') {
-    return <EventCountsForProcess nodeID={params.panelParameters.nodeID} />;
+    return <NodeEvents nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEventsOfType') {
     return (
-      <ProcessEventList
+      <NodeEventsOfType
         nodeID={params.panelParameters.nodeID}
         eventType={params.panelParameters.eventType}
       />
     );
   } else if (params.panelView === 'eventDetail') {
     return (
-      <RelatedEventDetail
+      <EventDetail
         nodeID={params.panelParameters.nodeID}
         eventType={params.panelParameters.eventType}
         eventID={params.panelParameters.eventID}
