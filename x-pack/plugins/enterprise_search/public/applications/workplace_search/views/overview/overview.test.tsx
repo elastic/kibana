@@ -6,7 +6,7 @@
 
 import '../../../__mocks__/react_router_history.mock';
 import './__mocks__/overview_logic.mock';
-import { mockLogicActions, setMockValues } from './__mocks__';
+import { mockActions, setMockValues } from './__mocks__';
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
@@ -32,7 +32,7 @@ describe('Overview', () => {
     it('calls initialize function', async () => {
       mount(<Overview />);
 
-      expect(mockLogicActions.initializeOverview).toHaveBeenCalled();
+      expect(mockActions.initializeOverview).toHaveBeenCalled();
     });
 
     it('renders onboarding state', () => {
