@@ -6,11 +6,11 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import * as rulesApi from '../../../detections/containers/detection_engine/rules/api';
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { ExceptionListType } from '../../../lists_plugin_deps';
 import { ListArray } from '../../../../common/detection_engine/schemas/types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
@@ -20,7 +20,7 @@ import {
   ReturnUseFetchOrCreateRuleExceptionList,
 } from './use_fetch_or_create_rule_exception_list';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('../../../detections/containers/detection_engine/rules/api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
@@ -379,7 +379,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(onError).toHaveBeenCalledTimes(1);
-        expect(onError).toHaveBeenCalledWith(error);
+        expect(onError).toHaveBeenCalledWith(error, null, null);
       });
     });
 

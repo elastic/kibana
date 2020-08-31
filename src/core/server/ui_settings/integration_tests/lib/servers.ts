@@ -39,7 +39,6 @@ interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
-  deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 
 let services: AllServices;
@@ -60,20 +59,6 @@ export async function startServers() {
   esServer = await servers.startES();
   kbn = await servers.startKibana();
   kbnServer = kbn.kbnServer;
-}
-
-async function deleteKibanaIndex(callCluster: LegacyAPICaller) {
-  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map((x: any) => x.index);
-  if (!indexNames.length) {
-    return;
-  }
-  await callCluster('indices.putSettings', {
-    index: indexNames,
-    body: { index: { blocks: { read_only: false } } },
-  });
-  await callCluster('indices.delete', { index: indexNames });
-  return indexNames;
 }
 
 export function getServices() {
@@ -97,7 +82,6 @@ export function getServices() {
     callCluster,
     savedObjectsClient,
     uiSettings,
-    deleteKibanaIndex,
   };
 
   return services;

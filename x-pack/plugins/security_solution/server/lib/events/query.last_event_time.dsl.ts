@@ -6,9 +6,9 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../common/utility_types';
 import { LastEventTimeRequestOptions } from './types';
 import { LastEventIndexKey } from '../../graphql/types';
-import { assertUnreachable } from '../../utils/build_query';
 
 interface EventIndices {
   [key: string]: string[];

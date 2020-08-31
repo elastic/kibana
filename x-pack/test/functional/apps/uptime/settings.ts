@@ -63,6 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         heartbeatIndices: 'new*',
         certAgeThreshold: 365,
         certExpirationThreshold: 30,
+        defaultConnectors: [],
       };
       await settings.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
       await settings.apply();

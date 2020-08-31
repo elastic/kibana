@@ -11,7 +11,7 @@ import { searchConfigurations } from './search_configurations';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../../public/utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { findExactConfiguration } from './find_exact_configuration';
 
 describe('agent configuration queries', () => {

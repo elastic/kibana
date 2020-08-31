@@ -73,8 +73,8 @@ settings].
 [discrete]
 === Potential Optimization Pitfalls
 
-* Webpack is trying to include a file in the bundle that I deleted and
-is now complaining about it is missing
+* Webpack is trying to include a file in the bundle that was deleted and
+is now complaining about it being missing
 * A module id that used to resolve to a single file now resolves to a
 directory, but webpack isn’t adapting
 * (if you discover other scenarios, please send a PR!)
