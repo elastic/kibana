@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 
 export interface GetMonitorStatusParams {
-  filters?: string;
+  filters?: any;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
@@ -38,7 +38,7 @@ const formatBuckets = async (
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
-      ...locations.map(location => ({
+      ...locations.map((location) => ({
         term: {
           'observer.geo.name': location,
         },
