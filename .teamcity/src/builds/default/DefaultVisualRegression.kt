@@ -1,5 +1,6 @@
 package builds.default
 
+import Junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -24,21 +25,10 @@ object DefaultVisualRegression : BuildType({
   }
 
   features {
-    feature {
-      type = "xml-report-plugin"
-      param("xmlReportParsing.reportType", "junit")
-      param("xmlReportParsing.reportDirs", "target/**/TEST-*.xml")
-    }
+    Junit()
   }
 
   dependencies {
-    dependency(DefaultBuild) {
-      snapshot {
-      }
-
-      artifacts {
-        artifactRules = "+:kibana-default.tar.gz!** => build/kibana-build-default"
-      }
-    }
+    DefaultBuild()
   }
 })

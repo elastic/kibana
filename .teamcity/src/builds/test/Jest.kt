@@ -1,5 +1,6 @@
 package builds.test
 
+import Junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -23,10 +24,6 @@ object Jest : BuildType({
   }
 
   features {
-    feature {
-      type = "xml-report-plugin"
-      param("xmlReportParsing.reportType", "junit")
-      param("xmlReportParsing.reportDirs", "target/**/TEST-*.xml")
-    }
+    Junit()
   }
 })

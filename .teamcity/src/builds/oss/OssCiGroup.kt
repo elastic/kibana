@@ -2,6 +2,7 @@ package builds.oss
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import Junit
 
 class OssCiGroup(val ciGroup: Int) : BuildType({
   id("OssCiGroup_${ciGroup}")
@@ -23,21 +24,10 @@ class OssCiGroup(val ciGroup: Int) : BuildType({
   }
 
   features {
-    feature {
-      type = "xml-report-plugin"
-      param("xmlReportParsing.reportType", "junit")
-      param("xmlReportParsing.reportDirs", "target/**/TEST-*.xml")
-    }
+    Junit()
   }
 
   dependencies {
-    dependency(OssBuild) {
-      snapshot {
-      }
-
-      artifacts {
-        artifactRules = "+:kibana-oss.tar.gz!** => build/kibana-build-oss"
-      }
-    }
+    OssBuild()
   }
 })
