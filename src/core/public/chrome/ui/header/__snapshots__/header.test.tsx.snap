@@ -2283,10 +2283,12 @@ exports[`Header renders 2`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}
@@ -6494,10 +6496,12 @@ exports[`Header renders 3`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}
@@ -9261,6 +9265,8 @@ exports[`Header renders 3`] = `
                   data-test-subj="collapsibleNavGroup-recentlyViewed"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -11306,10 +11312,12 @@ exports[`Header renders 4`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}

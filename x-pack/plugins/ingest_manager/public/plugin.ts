@@ -13,9 +13,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  HomePublicPluginSetup,
+  FeatureCatalogueCategory,
+} from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
@@ -95,6 +99,21 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+
+      deps.home.featureCatalogue.register({
+        id: 'ingestManager',
+        title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
+          defaultMessage: 'Add Elastic Agent',
+        }),
+        description: i18n.translate('xpack.ingestManager.featureCatalogueDescription', {
+          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
+        }),
+        icon: 'indexManagementApp',
+        showOnHomePage: true,
+        path: BASE_PATH,
+        category: FeatureCatalogueCategory.DATA,
+        order: 510,
+      });
     }
 
     return {};

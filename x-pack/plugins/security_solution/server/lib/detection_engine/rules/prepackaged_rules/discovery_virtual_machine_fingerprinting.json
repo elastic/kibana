@@ -6,6 +6,7 @@
   "false_positives": [
     "Certain tools or automated software may enumerate hardware information. These tools can be exempted via user name or process arguments to eliminate potential noise."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

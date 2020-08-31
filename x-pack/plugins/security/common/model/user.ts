@@ -18,8 +18,8 @@ export interface User {
 }
 
 export interface EditUser extends User {
-  password: string;
-  confirmPassword: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
 export function getUserDisplayName(user: User) {

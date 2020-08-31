@@ -125,7 +125,7 @@ export function Header({
     <>
       <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
-        <EuiHeader position="fixed">
+        <EuiHeader position="fixed" id="headerGlobalNav">
           <EuiHeaderSection grow={false}>
             {navType === 'modern' ? (
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">

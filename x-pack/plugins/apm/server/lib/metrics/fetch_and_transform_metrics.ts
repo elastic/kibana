@@ -65,7 +65,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
     setup,
@@ -83,7 +83,11 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs,
         },
         ...aggs,

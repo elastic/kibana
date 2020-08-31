@@ -105,7 +105,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   updateTimelineIsLoading,
 }) => {
   const dispatch = useDispatch();
-  const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
@@ -120,6 +119,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
+  const {
+    initializeTimeline,
+    setSelectAll,
+    setTimelineRowActions,
+    setIndexToAdd,
+  } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -141,8 +146,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       }
       return null;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
   );
 
   // Callback for creating a new timeline -- utilized by row/batch actions
@@ -224,7 +228,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       exceptionListType,
       alertData,
     }: AddExceptionModalBaseProps) => {
-      if (alertData !== null && alertData !== undefined) {
+      if (alertData != null) {
         setShouldShowAddExceptionModal(true);
         setAddExceptionModalState({
           ruleName,
@@ -240,12 +244,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
-    if (!isSelectAllChecked) {
-      setShowClearSelectionAction(false);
+    if (isSelectAllChecked) {
+      setSelectAll({
+        id: timelineId,
+        selectAll: false,
+      });
     } else {
-      setSelectAll(false);
+      setShowClearSelectionAction(false);
     }
-  }, [isSelectAllChecked]);
+  }, [isSelectAllChecked, setSelectAll, timelineId]);
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
@@ -261,17 +268,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
     clearSelected!({ id: timelineId });
-    setSelectAll(false);
+    setSelectAll({
+      id: timelineId,
+      selectAll: false,
+    });
     setShowClearSelectionAction(false);
   }, [clearSelected, setSelectAll, setShowClearSelectionAction, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
   // as scope of response data required to actually set selectedEvents
-  const selectAllCallback = useCallback(() => {
-    setSelectAll(true);
+  const selectAllOnAllPagesCallback = useCallback(() => {
+    setSelectAll({
+      id: timelineId,
+      selectAll: true,
+    });
     setShowClearSelectionAction(true);
-  }, [setSelectAll, setShowClearSelectionAction]);
+  }, [setSelectAll, setShowClearSelectionAction, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
     async (
@@ -314,7 +327,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
           currentFilter={filterGroup}
-          selectAll={selectAllCallback}
+          selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
           onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
@@ -332,7 +345,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showBuildingBlockAlerts,
       onShowBuildingBlockAlertsChanged,
       loadingEventIds.length,
-      selectAllCallback,
+      selectAllOnAllPagesCallback,
       selectedEventIds,
       showClearSelectionAction,
       updateAlertsStatusCallback,
@@ -384,7 +397,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, filterGroup]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline, setTimelineRowActions, setIndexToAdd } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
@@ -395,7 +407,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       id: timelineId,
       indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
-      selectAll: canUserCRUD ? selectAll : false,
+      selectAll: false,
       timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
       title: '',
     });
@@ -429,9 +441,43 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
-    closeAddExceptionModal,
-  ]);
+  const onAddExceptionConfirm = useCallback(
+    (refetch: inputsModel.Refetch) => (): void => {
+      refetch();
+      closeAddExceptionModal();
+    },
+    [closeAddExceptionModal]
+  );
+
+  // Callback for creating the AddExceptionModal and allowing it
+  // access to the refetchQuery to update the page
+  const exceptionModalCallback = useCallback(
+    (refetchQuery: inputsModel.Refetch) => {
+      if (shouldShowAddExceptionModal) {
+        return (
+          <AddExceptionModal
+            ruleName={addExceptionModalState.ruleName}
+            ruleId={addExceptionModalState.ruleId}
+            ruleIndices={addExceptionModalState.ruleIndices}
+            exceptionListType={addExceptionModalState.exceptionListType}
+            alertData={addExceptionModalState.alertData}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm(refetchQuery)}
+            alertStatus={filterGroup}
+          />
+        );
+      } else {
+        return <></>;
+      }
+    },
+    [
+      addExceptionModalState,
+      filterGroup,
+      onAddExceptionCancel,
+      onAddExceptionConfirm,
+      shouldShowAddExceptionModal,
+    ]
+  );
 
   if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
@@ -453,19 +499,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}
+        exceptionsModal={exceptionModalCallback}
       />
-      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
-        <AddExceptionModal
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={filterGroup}
-        />
-      )}
     </>
   );
 };
