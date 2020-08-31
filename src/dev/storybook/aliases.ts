@@ -18,13 +18,14 @@
  */
 
 export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/storybook',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
-  dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
-  security_solution: 'x-pack/plugins/security_solution/.storybook',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
-  observability: 'x-pack/plugins/observability/.storybook',
+  apm: { configDir: 'x-pack/plugins/apm/.storybook' },
+  canvas: { configDir: 'x-pack/plugins/canvas/storybook' },
+  codeeditor: { configDir: 'src/plugins/kibana_react/public/code_editor/.storybook' },
+  composite: { configDir: 'packages/kbn-storybook/composite/.storybook' },
+  dashboard_enhanced: { configDir: 'x-pack/plugins/dashboard_enhanced/.storybook' },
+  embeddable: { configDir: 'src/plugins/embeddable/.storybook' },
+  infra: { configDir: 'x-pack/plugins/infra/.storybook' },
+  security_solution: { configDir: 'x-pack/plugins/security_solution/.storybook' },
+  ui_actions_enhanced: { configDir: 'x-pack/plugins/ui_actions_enhanced/.storybook' },
+  observability: { configDir: 'x-pack/plugins/observability/.storybook' },
 };

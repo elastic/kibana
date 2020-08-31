@@ -46,7 +46,7 @@ run(
       throw createFlagError(`Unknown alias [${alias}]`);
     }
 
-    const configDir = (storybookAliases as any)[alias];
+    const configDir = (storybookAliases as any)[alias].configDir;
 
     log.verbose('Loading Storybook:', configDir);
 

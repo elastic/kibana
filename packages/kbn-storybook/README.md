@@ -5,6 +5,7 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 - [Kibana Storybook](#kibana-storybook)
   - [Setup Instructions](#setup-instructions)
   - [Customizing configuration](#customizing-configuration)
+  - [Composite Storybook](#composite-storybook)
 
 ## Setup Instructions
 
@@ -39,3 +40,9 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 
 The `defaultConfig` object provided by the @kbn/storybook package should be all you need to get running, but you can
 override this in your .storybook/main.js. Using [Storybook's configuration options](https://storybook.js.org/docs/react/configure/overview).
+
+## Composite Storybook
+
+The [composite directory](./composite) contains a Storybook configuration that is used to build a Storybook using [Storybook Composition](https://storybook.js.org/docs/react/workflows/storybook-composition). This can be ran and built with `yarn storybook composite` (with `--site` to build the static site.)
+
+The URLs of the composite site are in [/src/dev/aliases.ts](/src/dev/aliases.ts),
