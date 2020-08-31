@@ -48,8 +48,6 @@ export { ValidationTelemetryServiceSetup } from './validation_telemetry';
 // @ts-ignore
 export { AbstractSearchStrategy } from './lib/search_strategies/strategies/abstract_search_strategy';
 // @ts-ignore
-export { AbstractSearchRequest } from './lib/search_strategies/search_requests/abstract_request';
-// @ts-ignore
 export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
 
 export function plugin(initializerContext: PluginInitializerContext) {
