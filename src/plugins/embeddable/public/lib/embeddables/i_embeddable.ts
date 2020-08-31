@@ -70,8 +70,6 @@ export interface EmbeddableInput {
    * Visualization filters used to narrow down results.
    */
   filters?: Filter[];
-
-  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {

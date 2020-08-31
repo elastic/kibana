@@ -87,7 +87,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.grokForm.traceMatchFieldHelpText',
       {
-        defaultMessage: 'Add metadata about the matching expression to the document',
+        defaultMessage: 'Add metadata about the matching expression to the document.',
       }
     ),
   },
@@ -99,7 +99,7 @@ export const Grok: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.grokForm.fieldNameHelpText',
-          { defaultMessage: 'Field to search for matches' }
+          { defaultMessage: 'Field to search for matches.' }
         )}
       />
 

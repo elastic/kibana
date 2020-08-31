@@ -14,7 +14,7 @@ export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   help: i18n.translate('xpack.canvas.functions.switchHelpText', {
     defaultMessage:
       'Performs conditional logic with multiple conditions. ' +
-      'See also {caseFn} which builds a {case} to pass to the {switchFn} function.',
+      'See also {caseFn}, which builds a {case} to pass to the {switchFn} function.',
     values: {
       case: '`case`',
       caseFn: '`case`',
@@ -23,7 +23,7 @@ export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   }),
   args: {
     case: i18n.translate('xpack.canvas.functions.switch.args.caseHelpText', {
-      defaultMessage: 'The conditions to check',
+      defaultMessage: 'The conditions to check.',
     }),
     default: i18n.translate('xpack.canvas.functions.switch.args.defaultHelpText', {
       defaultMessage:

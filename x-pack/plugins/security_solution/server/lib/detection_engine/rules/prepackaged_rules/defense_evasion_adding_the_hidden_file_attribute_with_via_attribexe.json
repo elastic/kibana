@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -51,5 +52,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
