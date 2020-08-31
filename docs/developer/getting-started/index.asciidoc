@@ -30,7 +30,7 @@ you can switch to the correct version when using nvm by running:
 nvm use
 ----
 
-Install the latest version of https://yarnpkg.com[yarn].
+Install the latest version of https://classic.yarnpkg.com/en/docs/install[yarn v1].
 
 Bootstrap {kib} and install all the dependencies:
 

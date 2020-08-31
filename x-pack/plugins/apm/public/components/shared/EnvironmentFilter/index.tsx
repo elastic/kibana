@@ -6,23 +6,25 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { History } from 'history';
 import React from 'react';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useHistory } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
+import { useEnvironments } from '../../../hooks/useEnvironments';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
+  history: History,
   location: ReturnType<typeof useLocation>,
   environment?: string
 ) {
   const nextEnvironmentQueryParam =
-    environment !== ENVIRONMENT_ALL ? environment : undefined;
+    environment !== ENVIRONMENT_ALL.value ? environment : undefined;
   history.push({
     ...location,
     search: fromQuery({
@@ -31,13 +33,6 @@ function updateEnvironmentUrl(
     }),
   });
 }
-
-const NOT_DEFINED_OPTION = {
-  value: ENVIRONMENT_NOT_DEFINED,
-  text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-    defaultMessage: 'Not defined',
-  }),
-};
 
 const SEPARATOR_OPTION = {
   text: `- ${i18n.translate(
@@ -49,16 +44,16 @@ const SEPARATOR_OPTION = {
 
 function getOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
     .map((environment) => ({
       value: environment,
       text: environment,
     }));
 
   return [
-    ALL_OPTION,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED)
-      ? [NOT_DEFINED_OPTION]
+    ENVIRONMENT_ALL,
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
+      ? [ENVIRONMENT_NOT_DEFINED]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions,
@@ -66,6 +61,7 @@ function getOptions(environments: string[]) {
 }
 
 export function EnvironmentFilter() {
+  const history = useHistory();
   const location = useLocation();
   const { uiFilters, urlParams } = useUrlParams();
 
@@ -83,9 +79,9 @@ export function EnvironmentFilter() {
         defaultMessage: 'environment',
       })}
       options={getOptions(environments)}
-      value={environment || ENVIRONMENT_ALL}
+      value={environment || ENVIRONMENT_ALL.value}
       onChange={(event) => {
-        updateEnvironmentUrl(location, event.target.value);
+        updateEnvironmentUrl(history, location, event.target.value);
       }}
       isLoading={status === 'loading'}
     />

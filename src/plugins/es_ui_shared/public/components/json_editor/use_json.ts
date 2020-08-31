@@ -84,6 +84,8 @@ export const useJson = <T extends object = { [key: string]: any }>({
     } else {
       didMount.current = true;
     }
+    // https://github.com/elastic/kibana/issues/73971
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [content]);
 
   return {
