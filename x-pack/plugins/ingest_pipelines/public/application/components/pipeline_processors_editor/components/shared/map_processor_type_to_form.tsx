@@ -54,7 +54,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.append', {
       defaultMessage:
-        'Appends one or more values to an existing array. Converts a scalar to an array and appends one or more values. Creates an array containing the provided values if the field does not exist.',
+        "Appends values to an existing array, converts a scalar to an array and appends values, or creates an array containing the provided values if the field doesn't exist.",
     }),
   },
   bytes: {
@@ -130,7 +130,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.dissect', {
       defaultMessage:
-        'Matches a single text field against a defined pattern to extract structured fields out of a single text field within a document.',
+        'Matches a single text field against a defined pattern to extract structured fields within a document.',
     }),
   },
   dot_expander: {

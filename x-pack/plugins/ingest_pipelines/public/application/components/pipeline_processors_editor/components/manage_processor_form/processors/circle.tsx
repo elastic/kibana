@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -34,12 +35,14 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage: 'Error distance',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText',
-      {
-        defaultMessage:
-          'Difference between the side of the inscribed shape to the encompassing circle. Measured in meters for geo_shape, but uses no units for shape.',
-      }
+    helpText: () => (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText"
+        defaultMessage="Difference between the side of the inscribed shape to the encompassing circle. Measured in meters for {geo_shape}, but uses no units for shape."
+        values={{
+          geo_shape: <EuiCode>{JSON.stringify({ arbitrary_data: 'geo_shape' })}</EuiCode>,
+        }}
+      />
     ),
     validations: [
       {
