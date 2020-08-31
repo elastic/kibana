@@ -9,7 +9,6 @@ import { createAction } from 'redux-actions';
 
 import { showApiError } from '../../services/api_errors';
 import { loadPolicies } from '../../services/api';
-import { SET_PHASE_DATA } from '../../constants';
 
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
 export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');
@@ -41,9 +40,3 @@ export const fetchPolicies = (withIndices, callback) => async (dispatch) => {
   callback && callback();
   return policies;
 };
-
-export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({
-  phase,
-  key,
-  value,
-}));

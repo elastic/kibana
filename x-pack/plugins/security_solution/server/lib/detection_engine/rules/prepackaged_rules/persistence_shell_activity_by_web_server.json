@@ -6,6 +6,7 @@
   "false_positives": [
     "Network monitoring or management products may have a web server component that runs shell commands as part of normal behavior."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -42,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

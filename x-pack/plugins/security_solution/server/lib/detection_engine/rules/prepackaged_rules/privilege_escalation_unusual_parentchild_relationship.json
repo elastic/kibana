@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies Windows programs run from unexpected parent processes. This could indicate masquerading or other strange activity on a system.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

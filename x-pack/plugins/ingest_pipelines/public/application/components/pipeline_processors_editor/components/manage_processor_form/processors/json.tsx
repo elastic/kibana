@@ -61,7 +61,7 @@ export const Json: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.jsonForm.fieldNameHelpText',
-          { defaultMessage: 'Field to be parsed' }
+          { defaultMessage: 'Field to parse.' }
         )}
       />
 

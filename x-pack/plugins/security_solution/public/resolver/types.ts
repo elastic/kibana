@@ -9,6 +9,7 @@
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
+import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
   ResolverRelatedEvents,
@@ -49,6 +50,16 @@ export interface ResolverUIState {
    * `nodeID` of the selected node
    */
   readonly selectedNode: string | null;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   */
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -160,6 +171,22 @@ export interface IndexedProcessNode extends BBox {
 }
 
 /**
+ * A type describing the shape of section titles and entries for description lists
+ */
+export type SectionData = Array<{
+  sectionTitle: string;
+  entries: Array<{ title: string; description: string }>;
+}>;
+
+/**
+ * The two query parameters we read/write on to control which view the table presents:
+ */
+export interface CrumbInfo {
+  crumbId: string;
+  crumbEvent: string;
+}
+
+/**
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
@@ -181,7 +208,12 @@ export interface DataState {
    * The id used for the pending request, if there is one.
    */
   readonly pendingRequestDatabaseDocumentID?: string;
-  readonly resolverComponentInstanceID: string | undefined;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
+   */
+  readonly resolverComponentInstanceID?: string;
 
   /**
    * The parameters and response from the last successful request.
@@ -410,7 +442,7 @@ export interface SideEffectSimulator {
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**
@@ -493,8 +525,9 @@ export interface ResolverProps {
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+
   /**
-   * A string literal describing where in the application resolver is located.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
@@ -531,4 +564,43 @@ export interface SpyMiddleware {
    * Call the returned function to stop debugging.
    */
   debugActions: () => () => void;
+}
+
+/**
+ * values of this type are exposed by the Security Solution plugin's setup phase.
+ */
+export interface ResolverPluginSetup {
+  /**
+   * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
+   */
+  Provider: typeof Provider;
+  /**
+   * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
+   * All data acess (e.g. HTTP requests) are done through the store.
+   */
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+
+  /**
+   * The Resolver component without the required Providers.
+   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * and the `Provider` component provided by this object.
+   */
+  ResolverWithoutProviders: React.MemoExoticComponent<
+    React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
+  >;
+
+  /**
+   * A collection of mock objects that can be used in examples or in testing.
+   */
+  mocks: {
+    /**
+     * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
+     */
+    dataAccessLayer: {
+      /**
+       * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       */
+      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+    };
+  };
 }
