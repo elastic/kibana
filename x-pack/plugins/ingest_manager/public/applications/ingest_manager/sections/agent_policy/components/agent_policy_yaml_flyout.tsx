@@ -41,7 +41,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithName"
+            id="xpack.ingestManager.policyDetails.ErrorGettingFullAgentPolicy"
             defaultMessage="Error loading agent policy"
           />
         }
