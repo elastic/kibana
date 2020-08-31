@@ -150,7 +150,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       deserializer: formDeserializer,
     });
     const {
-      subscribe,
       submit,
       isSubmitted,
       isValid: isFormValid,
