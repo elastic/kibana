@@ -12,7 +12,7 @@ import { DATATABLE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof head>> = {
   help: i18n.translate('xpack.canvas.functions.headHelpText', {
-    defaultMessage: 'Retrieves the first {n} rows from the {DATATABLE}. See also {tailFn}',
+    defaultMessage: 'Retrieves the first {n} rows from the {DATATABLE}. See also {tailFn}.',
     values: {
       n: 'N',
       DATATABLE,

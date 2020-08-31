@@ -12,7 +12,7 @@ import { DATATABLE, TYPE_BOOLEAN, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../../cons
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {
-    defaultMessage: 'Filter rows in a {DATATABLE} based on the return value of a sub-expression.',
+    defaultMessage: 'Filters rows in a {DATATABLE} based on the return value of a sub-expression.',
     values: {
       DATATABLE,
     },

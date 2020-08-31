@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IFlashMessagesProps {
-  info?: string[];
-  warning?: string[];
-  error?: string[];
-  success?: string[];
-  isWrapped?: boolean;
-  children?: React.ReactNode;
-}
+export { IFlashMessage } from './flash_messages';
 
 export interface IKeaLogic<IKeaValues, IKeaActions> {
-  mount(): void;
+  mount(): Function;
   values: IKeaValues;
   actions: IKeaActions;
 }
@@ -33,6 +26,7 @@ export interface IKeaLogic<IKeaValues, IKeaActions> {
 export interface IKeaParams<IKeaValues, IKeaActions> {
   selectors?(params: { selectors: IKeaValues }): void;
   listeners?(params: { actions: IKeaActions; values: IKeaValues }): void;
+  events?(params: { actions: IKeaActions; values: IKeaValues }): void;
 }
 
 /**
@@ -47,7 +41,10 @@ export type TKeaReducers<IKeaValues, IKeaActions> = {
   [Value in keyof IKeaValues]?: [
     IKeaValues[Value],
     {
-      [Action in keyof IKeaActions]?: (state: IKeaValues, payload: IKeaValues) => IKeaValues[Value];
+      [Action in keyof IKeaActions]?: (
+        state: IKeaValues[Value],
+        payload: IKeaValues
+      ) => IKeaValues[Value];
     }
   ];
 };
