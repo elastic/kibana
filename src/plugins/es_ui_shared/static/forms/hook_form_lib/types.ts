@@ -38,7 +38,7 @@ export interface FormHook<T extends FormData = FormData> {
   getFieldDefaultValue: (fieldName: string) => unknown;
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
-  reset: (options?: { resetValues?: boolean; defaultValue?: FormData }) => void;
+  reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
   __addField: (field: FieldHook) => void;
@@ -102,7 +102,6 @@ export interface FieldHook<T = unknown> {
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
-  readonly form: FormHook<any>;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
     errorCode?: string;
@@ -117,7 +116,7 @@ export interface FieldHook<T = unknown> {
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  __serializeOutput: (rawValue?: unknown) => unknown;
+  __serializeValue: (rawValue?: unknown) => unknown;
 }
 
 export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
@@ -154,7 +153,10 @@ export interface ValidationError<T = string> {
 export interface ValidationFuncArg<T extends FormData, V = unknown> {
   path: string;
   value: V;
-  form: FormHook<T>;
+  form: {
+    getFormData: FormHook<T>['getFormData'];
+    getFields: FormHook<T>['getFields'];
+  };
   formData: T;
   errors: readonly ValidationError[];
 }

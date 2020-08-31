@@ -50,4 +50,8 @@ export class SavedObjectsManagement {
     const getInAppUrl = this.registry.getType(savedObject.type)?.management?.getInAppUrl;
     return getInAppUrl ? getInAppUrl(savedObject) : undefined;
   }
+
+  public getNamespaceType(savedObject: SavedObject) {
+    return this.registry.getType(savedObject.type)?.namespaceType;
+  }
 }
