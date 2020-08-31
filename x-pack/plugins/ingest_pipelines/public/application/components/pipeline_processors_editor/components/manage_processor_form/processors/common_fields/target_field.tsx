@@ -22,7 +22,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldHelpText',
       {
         defaultMessage:
-          'The field to assign the joined value to. If empty, the field is updated in-place.',
+          'Field to assign the joined value to. If empty, the field is updated in place.',
       }
     ),
   },

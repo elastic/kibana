@@ -65,7 +65,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldHelpText',
-      { defaultMessage: 'Prefix to add before the printed date for the index name.' }
+      { defaultMessage: 'Prefix to add to the index name before the printed date.' }
     ),
   },
   index_name_format: {
@@ -117,7 +117,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneHelpText"
-        defaultMessage="Timezone used when parsing the date and constructing the index name expression.. Defaults to {timezone}."
+        defaultMessage="Timezone used when parsing the date and constructing the index name expression. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
     ),

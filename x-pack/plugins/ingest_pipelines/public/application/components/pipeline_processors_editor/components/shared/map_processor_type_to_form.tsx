@@ -141,7 +141,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.dotExpander', {
       defaultMessage:
-        'Expands a field containing dot notation into an object field and makes these fields accessible by other processors in the pipeline.',
+        'Expands a field containing dot notation into an object field, and makes these fields accessible by other processors in the pipeline.',
     }),
   },
   drop: {

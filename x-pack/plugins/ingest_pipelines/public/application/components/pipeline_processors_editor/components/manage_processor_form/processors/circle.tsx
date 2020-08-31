@@ -39,9 +39,10 @@ const fieldsConfig: FieldsConfig = {
     helpText: () => (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText"
-        defaultMessage="Difference between the side of the inscribed shape to the encompassing circle. Measured in meters for {geo_shape}, but uses no units for shape."
+        defaultMessage="Difference between the side of the inscribed shape to the encompassing circle. Measured in meters for {geo_shape}, but uses no units for {shape}."
         values={{
           geo_shape: <EuiCode>{'geo_shape'}</EuiCode>,
+          shape: <EuiCode>{'shape'}</EuiCode>,
         }}
       />
     ),
