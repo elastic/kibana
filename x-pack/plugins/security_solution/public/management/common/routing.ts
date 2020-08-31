@@ -10,6 +10,8 @@ import { generatePath } from 'react-router-dom';
 import querystring from 'querystring';
 
 import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
@@ -86,8 +88,26 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-export const getTrustedAppsListPath = (search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+interface TrustedAppsListParams {
+  page_index?: number;
+  page_size?: number;
+}
+
+const normalizeTrustedAppsListParams = (params?: TrustedAppsListParams) => {
+  if (params) {
+    return {
+      ...(params.page_index === MANAGEMENT_DEFAULT_PAGE ? {} : { page_index: params.page_index }),
+      ...(params.page_size === MANAGEMENT_DEFAULT_PAGE_SIZE ? {} : { page_size: params.page_size }),
+    };
+  } else {
+    return {};
+  }
+};
+
+export const getTrustedAppsListPath = (params?: TrustedAppsListParams) => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
-  })}${appendSearch(search)}`;
+  });
+
+  return `${path}${appendSearch(querystring.stringify(normalizeTrustedAppsListParams(params)))}`;
 };

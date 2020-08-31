@@ -5,7 +5,10 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getListViewState } from '../store/selectors';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { TrustedAppsList } from './trusted_apps_list';
+import { useTrustedAppsSelector } from './hooks';
 
 export function TrustedAppsPage() {
   return (
@@ -23,6 +26,8 @@ export function TrustedAppsPage() {
           defaultMessage="View and configure trusted applications"
         />
       }
-    />
+    >
+      <TrustedAppsList state={useTrustedAppsSelector(getListViewState)} />
+    </AdministrationListPage>
   );
 }
