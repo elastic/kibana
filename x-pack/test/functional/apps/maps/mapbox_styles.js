@@ -16,7 +16,7 @@ export const MAPBOX_STYLES = {
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
       [
         'all',
-        ['==', ['get', '__kbn_too_many_features__'], false],
+        ['!=', ['get', '__kbn_too_many_features__'], true],
         ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
       ],
     ],
@@ -90,7 +90,7 @@ export const MAPBOX_STYLES = {
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
       [
         'all',
-        ['==', ['get', '__kbn_too_many_features__'], false],
+        ['!=', ['get', '__kbn_too_many_features__'], true],
         ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
       ],
     ],
@@ -160,7 +160,7 @@ export const MAPBOX_STYLES = {
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
       [
         'all',
-        ['==', ['get', '__kbn_too_many_features__'], false],
+        ['!=', ['get', '__kbn_too_many_features__'], true],
         [
           'any',
           ['==', ['geometry-type'], 'Polygon'],
