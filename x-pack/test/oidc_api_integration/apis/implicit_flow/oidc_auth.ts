@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('OpenID Connect Implicit Flow authentication', () => {
+  describe('OpenID Connect Implicit Flow authentication', () => {
     describe('finishing handshake', () => {
       let stateAndNonce: ReturnType<typeof getStateAndNonce>;
       let handshakeCookie: Cookie;
@@ -152,9 +151,13 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
   });
