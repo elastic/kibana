@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { EuiThemeProvider } from '../../../../../observability/public';
 import { QualityWarning } from '../../../containers/logs/log_analysis';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
 storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
+  .addDecorator((renderStory) => <EuiThemeProvider>{renderStory()}</EuiThemeProvider>)
   .add('Partitioned warnings', () => {
     return (
       <CategoryQualityWarnings
         hasSetupCapabilities={true}
-        onRecreateMlJob={() => {}}
+        onRecreateMlJob={action('on-recreate-ml-job')}
         qualityWarnings={partitionedQualityWarnings}
       />
     );
@@ -23,7 +26,7 @@ storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
     return (
       <CategoryQualityWarnings
         hasSetupCapabilities={true}
-        onRecreateMlJob={() => {}}
+        onRecreateMlJob={action('on-recreate-ml-job')}
         qualityWarnings={unpartitionedQualityWarnings}
       />
     );

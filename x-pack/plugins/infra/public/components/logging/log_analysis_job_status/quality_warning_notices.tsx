@@ -8,10 +8,12 @@ import { EuiAccordion, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import groupBy from 'lodash/groupBy';
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
+import { euiStyled } from '../../../../../observability/public';
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 import type {
-  CategoryQualityWarningReason,
   CategoryQualityWarning,
+  CategoryQualityWarningReason,
 } from '../../../containers/logs/log_analysis/log_analysis_module_types';
 import { RecreateJobCallout } from './recreate_job_callout';
 
@@ -51,21 +53,18 @@ export const CategoryQualityWarnings: React.FC<{
             <ul>
               {qualityWarningsForJob.flatMap((qualityWarning) =>
                 qualityWarning.reasons.map((reason) => (
-                  <div key={`title-${reason.type}-${qualityWarning.dataset}`}>
+                  <li key={`title-${reason.type}-${qualityWarning.dataset}`}>
                     <WarningReasonListTitle
                       data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
                     >
-                      {qualityWarning.dataset}
+                      {getFriendlyNameForPartitionId(qualityWarning.dataset)}
                     </WarningReasonListTitle>
                     <WarningReasonListDescription
                       data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
                     >
-                      <CategoryQualityWarningReasonDescription
-                        dataset={qualityWarning.dataset}
-                        reason={reason}
-                      />
+                      <CategoryQualityWarningReasonDescription reason={reason} />
                     </WarningReasonListDescription>
-                  </div>
+                  </li>
                 ))
               )}
             </ul>
@@ -77,7 +76,15 @@ export const CategoryQualityWarnings: React.FC<{
   );
 };
 
-// const
+const WarningReasonListTitle = euiStyled.div`
+  display: inline-block;
+  font-weight: bold;
+  padding-right: ${(props) => props.theme.eui.paddingSizes.m}
+`;
+
+const WarningReasonListDescription = euiStyled.div`
+  display: inline-block;
+`;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(
   'xpack.infra.logs.logEntryCategories.categoryQUalityWarningCalloutTitle',
@@ -87,7 +94,6 @@ const categoryQualityWarningCalloutTitle = i18n.translate(
 );
 
 const CategoryQualityWarningReasonDescription: React.FC<{
-  dataset: string;
   reason: CategoryQualityWarningReason;
 }> = ({ reason }) => {
   switch (reason.type) {
