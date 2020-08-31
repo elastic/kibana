@@ -24,9 +24,17 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 
+import { ApplicationStart } from 'kibana/public';
 import { getPolicyPath } from '../../application/services/navigation';
 
-const getHeaders = () => {
+interface Headers {
+  policy: string;
+  phase: string;
+  action: string;
+  action_time_millis: string;
+  failed_step: string;
+}
+const getHeaders = (): Headers => {
   return {
     policy: i18n.translate(
       'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader',
@@ -60,8 +68,18 @@ const getHeaders = () => {
     ),
   };
 };
-export class IndexLifecycleSummary extends Component {
-  constructor(props) {
+
+interface Props {
+  index: any;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+}
+interface State {
+  showStackPopover: boolean;
+  showPhaseExecutionPopover: boolean;
+}
+
+export class IndexLifecycleSummary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       showStackPopover: false,
@@ -80,7 +98,7 @@ export class IndexLifecycleSummary extends Component {
   closePhaseExecutionPopover = () => {
     this.setState({ showPhaseExecutionPopover: false });
   };
-  renderStackPopoverButton(ilm) {
+  renderStackPopoverButton(ilm: any) {
     if (!ilm.stack_trace) {
       return null;
     }
@@ -105,10 +123,7 @@ export class IndexLifecycleSummary extends Component {
       </EuiPopover>
     );
   }
-  renderPhaseExecutionPopoverButton(ilm) {
-    if (!ilm.phase_execution) {
-      return null;
-    }
+  renderPhaseExecutionPopoverButton(ilm: any) {
     const button = (
       <EuiLink onClick={this.togglePhaseExecutionPopover}>
         <FormattedMessage
@@ -153,11 +168,14 @@ export class IndexLifecycleSummary extends Component {
       index: { ilm = {} },
     } = this.props;
     const headers = getHeaders();
-    const rows = {
+    const rows: {
+      left: JSX.Element[];
+      right: JSX.Element[];
+    } = {
       left: [],
       right: [],
     };
-    Object.keys(headers).forEach((fieldName, arrayIndex) => {
+    Object.entries(headers).forEach(([fieldName, label], arrayIndex) => {
       const value = ilm[fieldName];
       let content;
       if (fieldName === 'action_time_millis') {
@@ -176,21 +194,25 @@ export class IndexLifecycleSummary extends Component {
         content = value;
       }
       content = content || '-';
-      const cell = [
-        <EuiDescriptionListTitle key={fieldName}>
-          <strong>{headers[fieldName]}</strong>
-        </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key={fieldName + '_desc'}>
-          {content}
-        </EuiDescriptionListDescription>,
-      ];
+      const cell = (
+        <Fragment>
+          <EuiDescriptionListTitle key={fieldName}>
+            <strong>{label}</strong>
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription key={fieldName + '_desc'}>
+            {content}
+          </EuiDescriptionListDescription>
+        </Fragment>
+      );
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);
       } else {
         rows.right.push(cell);
       }
     });
-    rows.right.push(this.renderPhaseExecutionPopoverButton(ilm));
+    if (ilm.phase_execution) {
+      rows.right.push(this.renderPhaseExecutionPopoverButton(ilm));
+    }
     return rows;
   }
 
