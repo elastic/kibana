@@ -55,7 +55,11 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.groups.get(field.type)!.set(field.name, field);
   };
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], onNotification = () => {}) {
+  constructor(
+    indexPattern: IndexPattern,
+    specs: FieldSpec[] = [],
+    onNotification: OnNotification = () => undefined
+  ) {
     super();
     this.indexPattern = indexPattern;
     this.onNotification = onNotification;

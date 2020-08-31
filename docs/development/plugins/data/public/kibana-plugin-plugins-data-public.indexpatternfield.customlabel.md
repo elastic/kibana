@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-get; customLabel();: string | undefined;
+get customLabel(): string | undefined;
 
-set; customLabel(label;: string | undefined;)
+set customLabel(label: string | undefined);
 ```

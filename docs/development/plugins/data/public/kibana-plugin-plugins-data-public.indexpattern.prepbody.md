@@ -8,12 +8,32 @@
 
 ```typescript
 prepBody(): {
-        [key: string]: any;
+        attributes: {
+            fields: any;
+        } | undefined;
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
     };
 ```
 <b>Returns:</b>
 
 `{
-        [key: string]: any;
+        attributes: {
+            fields: any;
+        } | undefined;
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
     }`
 
