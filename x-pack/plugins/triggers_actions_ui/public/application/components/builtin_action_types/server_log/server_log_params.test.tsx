@@ -10,6 +10,14 @@ import ServerLogParamsFields from './server_log_params';
 import { DocLinksStart } from 'kibana/public';
 
 describe('ServerLogParamsFields renders', () => {
+  const connector = {
+    secrets: {},
+    config: {},
+    id: 'test',
+    actionTypeId: '.test',
+    name: 'Test',
+    isPreconfigured: false,
+  };
   test('all params fields is rendered', () => {
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
@@ -23,6 +31,7 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
         defaultMessage={'test default message'}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
@@ -44,6 +53,7 @@ describe('ServerLogParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();

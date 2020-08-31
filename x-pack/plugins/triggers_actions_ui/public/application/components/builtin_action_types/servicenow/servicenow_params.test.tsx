@@ -23,6 +23,16 @@ describe('ServiceNowParamsFields renders', () => {
         externalId: null,
       },
     };
+
+    const connector = {
+      secrets: {},
+      config: {},
+      id: 'test',
+      actionTypeId: '.test',
+      name: 'Test',
+      isPreconfigured: false,
+    };
+
     const wrapper = mountWithIntl(
       <ServiceNowParamsFields
         actionParams={actionParams}
@@ -31,6 +41,7 @@ describe('ServiceNowParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="urgencySelect"]').length > 0).toBeTruthy();
