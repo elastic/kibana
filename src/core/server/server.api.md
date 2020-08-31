@@ -2853,6 +2853,9 @@ export type SharedGlobalConfig = RecursiveReadonly<{
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+//
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
