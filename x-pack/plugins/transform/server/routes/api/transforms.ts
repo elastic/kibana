@@ -37,6 +37,11 @@ import {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import {
+  postTransformsUpdateRequestSchema,
+  PostTransformsUpdateRequestSchema,
+  PostTransformsUpdateResponseSchema,
+} from '../../../common/api_schemas/update_transforms';
+import {
   GetTransformsResponseSchema,
   postTransformsPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -170,12 +175,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       return res.ok({ body: response });
     })
   );
-  router.post(
+  router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}/_update'),
       validate: {
         params: transformIdParamSchema,
-        body: schema.maybe(schema.any()),
+        body: postTransformsUpdateRequestSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -183,10 +188,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
       try {
         return res.ok({
-          body: await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
+          body: (await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
             body: req.body,
             transformId,
-          }),
+          })) as PostTransformsUpdateResponseSchema,
         });
       } catch (e) {
         return res.customError(wrapError(e));

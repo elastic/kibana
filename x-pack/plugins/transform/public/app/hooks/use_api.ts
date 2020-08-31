@@ -22,7 +22,6 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
-import { TransformIdParamSchema } from '../../../common/api_schemas/common';
 import type {
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
@@ -30,6 +29,10 @@ import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
 } from '../../../common/api_schemas/transforms';
+import type {
+  PostTransformsUpdateRequestSchema,
+  PostTransformsUpdateResponseSchema,
+} from '../../../common/api_schemas/update_transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -52,9 +55,9 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      getTransform({
-        transformId,
-      }: TransformIdParamSchema): Promise<GetTransformsResponseSchema | HttpFetchError> {
+      getTransform(
+        transformId: TransformId
+      ): Promise<GetTransformsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms/${transformId}`);
       },
       getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
@@ -76,7 +79,10 @@ export const useApi = () => {
           body: JSON.stringify(transformConfig),
         });
       },
-      updateTransform(transformId: TransformId, transformConfig: any): Promise<any> {
+      updateTransform(
+        transformId: TransformId,
+        transformConfig: PostTransformsUpdateRequestSchema
+      ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
         return http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
           body: JSON.stringify(transformConfig),
         });

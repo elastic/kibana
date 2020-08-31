@@ -65,7 +65,7 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
 
   const fetchTransformConfig = async () => {
     try {
-      const transformConfigs = await api.getTransform({ transformId });
+      const transformConfigs = await api.getTransform(transformId);
       if (isHttpFetchError(transformConfigs)) {
         setTransformConfig(undefined);
         setErrorMessage(transformConfigs.message);

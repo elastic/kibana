@@ -30,39 +30,40 @@ export interface GetTransformsResponseSchema {
   transforms: TransformPivotConfig[];
 }
 
-// schemas shared by parts of the preview and create endpoint
-const pivotSchema = schema.object({
+// schemas shared by parts of the preview, create and update endpoint
+export const destSchema = schema.object({
+  index: schema.string(),
+  pipeline: schema.maybe(schema.string()),
+});
+export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
 });
-const sourceSchema = schema.object({
+export const settingsSchema = schema.object({
+  max_page_search_size: schema.maybe(schema.number()),
+  // The default value is null, which disables throttling.
+  docs_per_second: schema.maybe(schema.nullable(schema.number())),
+});
+export const sourceSchema = schema.object({
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+export const syncSchema = schema.object({
+  time: schema.object({
+    delay: schema.maybe(schema.string()),
+    field: schema.string(),
+  }),
 });
 
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object({
   description: schema.maybe(schema.string()),
-  dest: schema.object({
-    index: schema.string(),
-  }),
+  dest: destSchema,
   frequency: schema.maybe(schema.string()),
   pivot: pivotSchema,
-  settings: schema.maybe(
-    schema.object({
-      max_page_search_size: schema.maybe(schema.number()),
-      docs_per_second: schema.maybe(schema.number()),
-    })
-  ),
+  settings: schema.maybe(settingsSchema),
   source: sourceSchema,
-  sync: schema.maybe(
-    schema.object({
-      time: schema.object({
-        delay: schema.maybe(schema.string()),
-        field: schema.string(),
-      }),
-    })
-  ),
+  sync: schema.maybe(syncSchema),
 });
 
 export interface PutTransformsRequestSchema extends TypeOf<typeof putTransformsRequestSchema> {

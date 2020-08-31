@@ -26,12 +26,13 @@ import type {
   PutTransformsResponseSchema,
 } from '../../../../common/api_schemas/transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
-import { TransformIdParamSchema } from '../../../../common/api_schemas/common';
+import type {
+  PostTransformsUpdateRequestSchema,
+  PostTransformsUpdateResponseSchema,
+} from '../../../../common/api_schemas/update_transforms';
 
 const apiFactory = () => ({
-  getTransform(
-    params: TransformIdParamSchema
-  ): Promise<GetTransformsResponseSchema | HttpFetchError> {
+  getTransform(transformId: TransformId): Promise<GetTransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ count: 0, transforms: [] });
     });
@@ -59,6 +60,27 @@ const apiFactory = () => ({
   ): Promise<PutTransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ transformsCreated: [], errors: [] });
+    });
+  },
+  updateTransform(
+    transformId: TransformId,
+    transformConfig: PostTransformsUpdateRequestSchema
+  ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
+    return new Promise((resolve, reject) => {
+      resolve({
+        id: 'the-test-id',
+        source: { index: ['the-index-name'], query: { match_all: {} } },
+        dest: { index: 'user-the-destination-index-name' },
+        frequency: '10m',
+        pivot: {
+          group_by: { the_group: { terms: { field: 'the-group-by-field' } } },
+          aggregations: { the_agg: { value_count: { field: 'the-agg-field' } } },
+        },
+        description: 'the-description',
+        settings: { docs_per_second: null },
+        version: '8.0.0',
+        create_time: 1598860879097,
+      });
     });
   },
   deleteTransforms(
