@@ -46,6 +46,7 @@ export const PanelRouter = memo(function () {
       />
     );
   } else if (params.panelView === 'eventDetail') {
+    // TODO, rename all the component file names
     return (
       <EventDetail
         nodeID={params.panelParameters.nodeID}

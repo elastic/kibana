@@ -93,7 +93,6 @@ export function EventDetail({
     (sum, val) => sum + val,
     0
   );
-  // TODO, error, loading, removed the 'parentCount' stuff. fix it all up.
   return (
     <StyledPanel>
       <RelatedEventDetail
