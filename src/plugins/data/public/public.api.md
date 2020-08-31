@@ -693,7 +693,6 @@ export const getKbnTypeNames: () => string[];
 //
 // @public (undocumented)
 export function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
-    esShardTimeout: number;
     getConfig: GetConfigFn;
 }): ISearchRequestParams;
 
