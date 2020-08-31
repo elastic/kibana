@@ -80,8 +80,8 @@ const pushToServiceHandler = async ({
       currentIncident,
     });
   } else {
-    const { title, description, issueTypeIds, severityCode } = params;
-    incident = { name: title, description, issueTypeIds, severityCode };
+    const { title, description, incidentTypes, severityCode } = params;
+    incident = { name: title, description, incidentTypes, severityCode };
   }
 
   if (externalId != null) {

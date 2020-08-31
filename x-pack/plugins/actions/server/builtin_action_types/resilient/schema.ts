@@ -39,7 +39,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   title: schema.string(),
   description: schema.nullable(schema.string()),
   externalId: schema.nullable(schema.string()),
-  issueTypeIds: schema.nullable(schema.arrayOf(schema.string())),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.string()),
   // TODO: remove later  - need for support Case push multiple comments
   comments: schema.maybe(schema.arrayOf(CommentSchema)),

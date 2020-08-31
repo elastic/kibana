@@ -76,7 +76,7 @@ export const createExternalService = (
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const orgUrl = `${urlWithoutTrailingSlash}/rest/orgs/${orgId}`;
-  const incidentUrl = `${orgUrl}/incident`;
+  const incidentUrl = `${orgUrl}/incidents`;
   const commentUrl = `${incidentUrl}/{inc_id}/comments`;
   const incidentFieldsUrl = `${orgUrl}/types/incident/fields`;
   const incidentTypesUrl = `${incidentFieldsUrl}/incident_type_ids`;
@@ -133,10 +133,10 @@ export const createExternalService = (
       };
     }
 
-    if (incident.issueTypeIds) {
+    if (incident.incidentTypes) {
       data = {
         ...data,
-        incident_type_ids: incident.issueTypeIds.map((id) => ({ id })),
+        incident_type_ids: incident.incidentTypes.map((id) => ({ id })),
       };
     }
 
@@ -150,7 +150,7 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}`,
+        url: `${incidentUrl}?text_content_output_format=objects_convert`,
         method: 'post',
         logger,
         data,

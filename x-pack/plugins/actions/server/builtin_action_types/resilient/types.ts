@@ -63,7 +63,7 @@ export type ExternalServiceParams = Record<string, unknown>;
 
 export type Incident = Pick<
   ExecutorSubActionPushParams,
-  'description' | 'issueTypeIds' | 'severityCode'
+  'description' | 'incidentTypes' | 'severityCode'
 > & {
   name: string;
 };
@@ -179,6 +179,6 @@ export interface CreateIncidentData {
   name: string;
   discovered_date: number;
   description?: { format: string; content: string };
-  incident_type_ids?: Array<{ id: string }>;
+  incident_type_ids?: Array<{ id: number }>;
   severity_code?: { name: string };
 }
