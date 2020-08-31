@@ -12413,7 +12413,6 @@
     "xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel": "キャンセル",
     "xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel": "削除",
     "xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel": "削除",
-    "xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage": "{selectedFilterListsLength, plural, one {このフィルダー} other {これらのフィルター}}を削除してよろしいですか？",
     "xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle": "{selectedFilterListsLength, plural, one {{selectedFilterId}} other {# フィルターリスト}}の削除",
     "xpack.ml.settings.filterLists.deleteFilterLists.deletingErrorMessage": "フィルターリスト {filterListId} の削除中にエラーが発生しました。{respMessage}",
     "xpack.ml.settings.filterLists.deleteFilterLists.deletingNotificationMessage": "{filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# フィルターリスト}}を削除しています",
