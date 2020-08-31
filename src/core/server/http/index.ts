@@ -24,6 +24,7 @@ export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage'
 export {
   CustomHttpResponseOptions,
   IKibanaSocket,
+  isKibanaRequest,
   isRealRequest,
   Headers,
   HttpResponseOptions,

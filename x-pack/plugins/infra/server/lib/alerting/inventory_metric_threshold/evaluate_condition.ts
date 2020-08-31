@@ -5,6 +5,7 @@
  */
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -37,7 +38,7 @@ export const evaluateCondition = async (
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, metric } = condition;
+  const { comparator, metric, customMetric } = condition;
   let { threshold } = condition;
 
   const timerange = {
@@ -55,7 +56,8 @@ export const evaluateCondition = async (
     metric,
     timerange,
     sourceConfiguration,
-    filterQuery
+    filterQuery,
+    customMetric
   );
 
   threshold = threshold.map((n) => convertMetricValue(metric, n));
@@ -93,19 +95,24 @@ const getData = async (
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
   sourceConfiguration: InfraSourceConfiguration,
-  filterQuery?: string
+  filterQuery?: string,
+  customMetric?: SnapshotCustomMetricInput
 ) => {
   const snapshot = new InfraSnapshot();
   const esClient = <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
 
+  const metrics = [
+    metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },
+  ];
+
   const options = {
     filterQuery: parseFilterQuery(filterQuery),
     nodeType,
     groupBy: [],
     sourceConfiguration,
-    metrics: [{ type: metric }],
+    metrics,
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
@@ -115,14 +122,14 @@ const getData = async (
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 
     return nodes.reduce((acc, n) => {
-      const nodePathItem = last(n.path) as any;
+      const { name: nodeName } = n;
       const m = first(n.metrics);
       if (m && m.value && m.timeseries) {
         const { timeseries } = m;
         const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
-        acc[nodePathItem.label] = values;
+        acc[nodeName] = values;
       } else {
-        acc[nodePathItem.label] = m && m.value;
+        acc[nodeName] = m && m.value;
       }
       return acc;
     }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);

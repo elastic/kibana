@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Observable } from 'rxjs';
-import { SearchSource } from './search_source';
+import { GetConfigFn } from 'src/plugins/data/common';
+import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { fetchSoon } from '../legacy';
-import { IUiSettingsClient } from '../../../../../core/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { coreMock } from '../../../../../core/public/mocks';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -51,10 +51,9 @@ const indexPattern2 = ({
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
-  let searchSourceDependencies: any;
+  let searchSourceDependencies: SearchSourceDependencies;
 
   beforeEach(() => {
-    const core = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
 
     mockSearchMethod = jest.fn(() => {
@@ -69,10 +68,10 @@ describe('SearchSource', () => {
     });
 
     searchSourceDependencies = {
+      getConfig: jest.fn(),
       search: mockSearchMethod,
       legacySearch: data.search.__LEGACY,
-      injectedMetadata: core.injectedMetadata,
-      uiSettings: core.uiSettings,
+      esShardTimeout: 30000,
     };
   });
 
@@ -184,16 +183,11 @@ describe('SearchSource', () => {
 
   describe('#legacy fetch()', () => {
     beforeEach(() => {
-      const core = coreMock.createStart();
-
       searchSourceDependencies = {
         ...searchSourceDependencies,
-        uiSettings: {
-          ...core.uiSettings,
-          get: jest.fn(() => {
-            return true; // batchSearches = true
-          }),
-        } as IUiSettingsClient,
+        getConfig: jest.fn(() => {
+          return true; // batchSearches = true
+        }) as GetConfigFn,
       };
     });
 

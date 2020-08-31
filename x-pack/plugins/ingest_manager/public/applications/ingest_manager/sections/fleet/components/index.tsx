@@ -5,7 +5,7 @@
  */
 
 export * from './loading';
-export * from './agent_reassign_config_flyout';
+export * from './agent_reassign_policy_flyout';
 export * from './agent_enrollment_flyout';
 export * from './agent_health';
 export * from './agent_unenroll_provider';

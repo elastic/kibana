@@ -10,26 +10,14 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-import { stopAnalytics } from '../../services/analytics_service';
+import { useCloneAction } from '../action_clone';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
+import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
+import { useStartAction, StartActionModal } from '../action_start';
+import { useStopAction, StopActionModal } from '../action_stop';
+import { useViewAction } from '../action_view';
 
-import { useNavigateToWizardWithClonedJob, CloneButton } from '../action_clone';
-import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
-import {
-  isEditActionFlyoutVisible,
-  useEditAction,
-  EditButton,
-  EditButtonFlyout,
-} from '../action_edit';
-import { useStartAction, StartButton, StartButtonModal } from '../action_start';
-import { StopButton, useForceStopAction, StopButtonModal } from '../action_stop';
-import { getViewAction } from '../action_view';
-
-import {
-  isCompletedAnalyticsJob,
-  isDataFrameAnalyticsRunning,
-  isDataFrameAnalyticsFailed,
-  DataFrameAnalyticsListRow,
-} from './common';
+import { DataFrameAnalyticsListRow } from './common';
 
 export const useActions = (
   isManagementTable: boolean
@@ -41,126 +29,38 @@ export const useActions = (
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
+  const viewAction = useViewAction();
+  const cloneAction = useCloneAction(canCreateDataFrameAnalytics);
+  const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
+  const editAction = useEditAction(canStartStopDataFrameAnalytics);
+  const startAction = useStartAction(canStartStopDataFrameAnalytics);
+  const stopAction = useStopAction(canStartStopDataFrameAnalytics);
+
   let modals: JSX.Element | null = null;
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
-    getViewAction(),
+    viewAction.action,
   ];
 
   // isManagementTable will be the same for the lifecycle of the component
   // Disabling lint error to fix console error in management list due to action hooks using deps not initialized in management
   if (isManagementTable === false) {
-    /* eslint-disable react-hooks/rules-of-hooks */
-    const deleteAction = useDeleteAction();
-    const editAction = useEditAction();
-    const startAction = useStartAction();
-    const stopAction = useForceStopAction();
-    /* eslint-disable react-hooks/rules-of-hooks */
-
     modals = (
       <>
-        {startAction.isModalVisible && <StartButtonModal {...startAction} />}
-        {stopAction.isModalVisible && <StopButtonModal {...stopAction} />}
-        {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
-        {isEditActionFlyoutVisible(editAction) && <EditButtonFlyout {...editAction} />}
+        {startAction.isModalVisible && <StartActionModal {...startAction} />}
+        {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
+        {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
+        {isEditActionFlyoutVisible(editAction) && <EditActionFlyout {...editAction} />}
       </>
     );
 
-    const startButtonEnabled = (item: DataFrameAnalyticsListRow) => {
-      if (!isDataFrameAnalyticsRunning(item.stats.state)) {
-        // Disable start for analytics jobs which have completed.
-        const completeAnalytics = isCompletedAnalyticsJob(item.stats);
-        return canStartStopDataFrameAnalytics && !completeAnalytics;
-      }
-      return canStartStopDataFrameAnalytics;
-    };
-
-    const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
-
     actions.push(
       ...[
-        {
-          render: (item: DataFrameAnalyticsListRow) => {
-            if (
-              !isDataFrameAnalyticsRunning(item.stats.state) &&
-              !isDataFrameAnalyticsFailed(item.stats.state)
-            ) {
-              return (
-                <StartButton
-                  canStartStopDataFrameAnalytics={canStartStopDataFrameAnalytics}
-                  isDisabled={!startButtonEnabled(item)}
-                  item={item}
-                  onClick={() => {
-                    if (startButtonEnabled(item)) {
-                      startAction.openModal(item);
-                    }
-                  }}
-                />
-              );
-            }
-
-            return (
-              <StopButton
-                isDisabled={!canStartStopDataFrameAnalytics}
-                item={item}
-                onClick={() => {
-                  if (canStartStopDataFrameAnalytics) {
-                    if (isDataFrameAnalyticsFailed(item.stats.state)) {
-                      stopAction.openModal(item);
-                    } else {
-                      stopAnalytics(item);
-                    }
-                  }
-                }}
-              />
-            );
-          },
-        },
-        {
-          render: (item: DataFrameAnalyticsListRow) => {
-            return (
-              <EditButton
-                isDisabled={!canStartStopDataFrameAnalytics}
-                onClick={() => {
-                  if (canStartStopDataFrameAnalytics) {
-                    editAction.openFlyout(item);
-                  }
-                }}
-              />
-            );
-          },
-        },
-        {
-          render: (item: DataFrameAnalyticsListRow) => {
-            return (
-              <DeleteButton
-                isDisabled={
-                  isDataFrameAnalyticsRunning(item.stats.state) || !canDeleteDataFrameAnalytics
-                }
-                item={item}
-                onClick={() => {
-                  if (canStartStopDataFrameAnalytics) {
-                    deleteAction.openModal(item);
-                  }
-                }}
-              />
-            );
-          },
-        },
-        {
-          render: (item: DataFrameAnalyticsListRow) => {
-            return (
-              <CloneButton
-                isDisabled={!canCreateDataFrameAnalytics}
-                onClick={() => {
-                  if (canCreateDataFrameAnalytics) {
-                    navigateToWizardWithClonedJob(item);
-                  }
-                }}
-              />
-            );
-          },
-        },
+        startAction.action,
+        stopAction.action,
+        editAction.action,
+        cloneAction.action,
+        deleteAction.action,
       ]
     );
   }

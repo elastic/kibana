@@ -8,6 +8,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 
+import { Provider } from 'react-redux';
+import { Store } from 'redux';
+import { getContext, resetContext } from 'kea';
+
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContext } from '../';
 import { mockKibanaContext } from './kibana_context.mock';
@@ -21,14 +25,17 @@ import { mockLicenseContext } from './license_context.mock';
  *
  * Example usage:
  *
- * const wrapper = mountWithContext(<Component />, { enterpriseSearchUrl: 'someOverride', license: {} });
+ * const wrapper = mountWithContext(<Component />, { config: { host: 'someOverride' } });
  */
 export const mountWithContext = (children: React.ReactNode, context?: object) => {
+  resetContext({ createStore: true });
+  const store = getContext().store as Store;
+
   return mount(
     <I18nProvider>
       <KibanaContext.Provider value={{ ...mockKibanaContext, ...context }}>
         <LicenseContext.Provider value={{ ...mockLicenseContext, ...context }}>
-          {children}
+          <Provider store={store}>{children}</Provider>
         </LicenseContext.Provider>
       </KibanaContext.Provider>
     </I18nProvider>

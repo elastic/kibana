@@ -27,7 +27,9 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
           parse: false,
         },
         tags: ['access:lists-all'],
-        timeout: config.importTimeout.asMilliseconds(),
+        timeout: {
+          payload: config.importTimeout.asMilliseconds(),
+        },
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {

@@ -122,7 +122,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -156,7 +156,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -180,7 +180,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -209,7 +209,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreWithAlerts }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -238,7 +238,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreWithAlerts }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -272,7 +272,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -311,7 +311,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreWithAlerts }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -350,7 +350,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreWithNewsFeed }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -389,7 +389,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -437,7 +437,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreAlertsThrowsError }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -484,7 +484,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreWithAlerts }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))
@@ -534,7 +534,7 @@ storiesOf('app/Overview', module)
   .addDecorator((storyFn) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core }}>
-        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+        <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
       </PluginContext.Provider>
     </MemoryRouter>
   ))

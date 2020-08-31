@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useCallback, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -119,11 +119,16 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     }
   }, [selectedIdFromUrlInitialized, analytics]);
 
+  const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
+
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: () => getAnalytics(true),
-  });
+  useRefreshAnalyticsList(
+    {
+      isLoading: setIsLoading,
+      onRefresh: getAnalyticsCallback,
+    },
+    isManagementTable
+  );
 
   const { columns, modals } = useColumns(
     expandedRowItemIds,
@@ -271,6 +276,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <>
       {modals}
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {analyticsStats && (

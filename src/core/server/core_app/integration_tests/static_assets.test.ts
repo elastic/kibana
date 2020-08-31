@@ -23,7 +23,7 @@ describe('Platform assets', function () {
   let root: Root;
 
   beforeAll(async function () {
-    root = kbnTestServer.createRoot();
+    root = kbnTestServer.createRoot({ plugins: { initialize: false } });
 
     await root.setup();
     await root.start();

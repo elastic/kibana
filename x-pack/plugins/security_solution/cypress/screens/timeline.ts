@@ -11,6 +11,8 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
+export const HEADER = '[data-test-subj="header"]';
+
 export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
@@ -23,8 +25,7 @@ export const PIN_EVENT = '[data-test-subj="pin"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
-export const REMOVE_COLUMN =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="remove-column"]';
+export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
@@ -37,6 +38,8 @@ export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count
 export const TIMELINE = (id: string) => {
   return `[data-test-subj="title-${id}"]`;
 };
+
+export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 

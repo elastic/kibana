@@ -22,3 +22,4 @@ export { registerManagementUsageCollector } from './management';
 export { registerApplicationUsageCollector } from './application_usage';
 export { registerKibanaUsageCollector } from './kibana';
 export { registerOpsStatsCollector } from './ops_stats';
+export { registerCspCollector } from './csp';

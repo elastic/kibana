@@ -15,7 +15,7 @@ import {
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../elasticsearch_geo_utils';
+} from '../../../../../common/elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 
 const DRAW_RECTANGLE = 'draw_rectangle';
@@ -62,11 +62,12 @@ export class DrawControl extends React.Component {
     }
   }, 0);
 
-  _onDraw = (e) => {
+  _onDraw = async (e) => {
     if (!e.features.length) {
       return;
     }
 
+    let filter;
     if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
       const circle = e.features[0];
       const distanceKm = _.round(
@@ -82,7 +83,7 @@ export class DrawControl extends React.Component {
       } else if (distanceKm <= 100) {
         precision = 3;
       }
-      const filter = createDistanceFilterWithMeta({
+      filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel,
         distanceKm,
         geoFieldName: this.props.drawState.geoFieldName,
@@ -92,17 +93,12 @@ export class DrawControl extends React.Component {
           _.round(circle.properties.center[1], precision),
         ],
       });
-      this.props.addFilters([filter]);
-      this.props.disableDrawState();
-      return;
-    }
+    } else {
+      const geometry = e.features[0].geometry;
+      // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
+      roundCoordinates(geometry.coordinates);
 
-    const geometry = e.features[0].geometry;
-    // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
-    roundCoordinates(geometry.coordinates);
-
-    try {
-      const filter = createSpatialFilterWithGeometry({
+      filter = createSpatialFilterWithGeometry({
         geometry:
           this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
@@ -113,7 +109,10 @@ export class DrawControl extends React.Component {
         geometryLabel: this.props.drawState.geometryLabel,
         relation: this.props.drawState.relation,
       });
-      this.props.addFilters([filter]);
+    }
+
+    try {
+      await this.props.addFilters([filter], this.props.drawState.actionId);
     } catch (error) {
       // TODO notify user why filter was not created
       console.error(error);

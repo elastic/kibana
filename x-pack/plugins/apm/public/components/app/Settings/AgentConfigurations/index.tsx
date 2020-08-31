@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiButton,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { AgentConfigurationList } from './List';
+import React from 'react';
 import { useTrackPageview } from '../../../../../../observability/public';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useFetcher } from '../../../../hooks/useFetcher';
+import { useLocation } from '../../../../hooks/useLocation';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
+import { AgentConfigurationList } from './List';
 
 export function AgentConfigurations() {
   const { refetch, data = [], status } = useFetcher(
@@ -60,7 +62,10 @@ export function AgentConfigurations() {
 }
 
 function CreateConfigurationButton() {
-  const href = createAgentConfigurationHref();
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const { search } = useLocation();
+  const href = createAgentConfigurationHref(search, basePath);
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

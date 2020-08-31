@@ -8,12 +8,12 @@ import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { fitToDataBounds } from '../../../actions';
-import { getFittableLayers } from '../../../selectors/map_selectors';
+import { getLayerList } from '../../../selectors/map_selectors';
 import { FitToData } from './fit_to_data';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    layerList: getFittableLayers(state),
+    layerList: getLayerList(state),
   };
 }
 
