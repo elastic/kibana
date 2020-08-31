@@ -77,6 +77,7 @@ describe('Body', () => {
     onUnPinEvent: jest.fn(),
     onUpdateColumns: jest.fn(),
     pinnedEventIds: {},
+    refetch: jest.fn(),
     rowRenderers,
     selectedEventIds: {},
     show: true,

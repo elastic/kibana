@@ -49,6 +49,7 @@ describe('EventColumnView', () => {
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onUnPinEvent: jest.fn(),
+    refetch: jest.fn(),
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
