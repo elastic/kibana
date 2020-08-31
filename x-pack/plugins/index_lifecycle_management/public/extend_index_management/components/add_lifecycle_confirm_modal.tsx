@@ -8,6 +8,8 @@ import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart } from 'kibana/public';
+
 import {
   EuiLink,
   EuiSelect,
@@ -26,9 +28,25 @@ import {
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
+import { PolicyFromES } from '../../application/services/policies/types';
 
-export class AddLifecyclePolicyConfirmModal extends Component {
-  constructor(props) {
+interface Props {
+  indexName: string;
+  closeModal: () => void;
+  index: any;
+  reloadIndices: () => void;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+}
+
+interface State {
+  selectedPolicyName: string;
+  selectedAlias: string;
+  policies: PolicyFromES[];
+  policyError?: string;
+}
+
+export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       policies: [],
@@ -81,7 +99,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
       );
     }
   };
-  renderAliasFormElement = (selectedPolicy) => {
+  renderAliasFormElement = (selectedPolicy?: PolicyFromES) => {
     const { selectedAlias } = this.state;
     const { index } = this.props;
     const showAliasSelect =
@@ -109,7 +127,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
               defaultMessage="Policy {policyName} is configured for rollover,
                 but index {indexName} does not have an alias, which is required for rollover."
               values={{
-                policyName: selectedPolicy.name,
+                policyName: selectedPolicy?.name,
                 indexName: index.name,
               }}
             />
@@ -117,7 +135,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         </Fragment>
       );
     }
-    const aliasOptions = aliases.map((alias) => {
+    const aliasOptions = aliases.map((alias: string) => {
       return {
         text: alias,
         value: alias,
@@ -155,7 +173,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const { policies, selectedPolicyName, policyError } = this.state;
     const selectedPolicy = selectedPolicyName
       ? policies.find((policy) => policy.name === selectedPolicyName)
-      : null;
+      : undefined;
 
     const options = policies.map(({ name }) => {
       return {
@@ -188,7 +206,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
             options={options}
             value={selectedPolicyName}
             onChange={(e) => {
-              this.setState({ policyError: null, selectedPolicyName: e.target.value });
+              this.setState({ policyError: undefined, selectedPolicyName: e.target.value });
             }}
           />
         </EuiFormRow>
@@ -198,7 +216,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
   }
   async componentDidMount() {
     try {
-      const policies = await loadPolicies(false, this.props.httpClient);
+      const policies = await loadPolicies(false);
       this.setState({ policies });
     } catch (err) {
       showApiError(
