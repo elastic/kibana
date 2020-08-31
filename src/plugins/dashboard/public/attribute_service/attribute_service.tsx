@@ -124,17 +124,19 @@ export class AttributeService<
     } else {
       try {
         const originalInput = input ? input : {};
-        if (savedObjectId) {
-          if (this.options?.customSaveMethod) {
-            await this.options.customSaveMethod(this.type, newAttributes, savedObjectId);
-          } else {
-            await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-          }
+
+        if (this.options?.customSaveMethod) {
+          const savedItem = await this.options.customSaveMethod(
+            this.type,
+            newAttributes,
+            savedObjectId
+          );
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        } else if (savedObjectId) {
+          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
           return { ...originalInput, savedObjectId } as RefType;
         } else {
-          const savedItem = this.options?.customSaveMethod
-            ? await this.options.customSaveMethod(this.type, newAttributes)
-            : await this.savedObjectsClient.create(this.type, newAttributes);
+          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
           return { ...originalInput, savedObjectId: savedItem.id } as RefType;
         }
       } catch (error) {
