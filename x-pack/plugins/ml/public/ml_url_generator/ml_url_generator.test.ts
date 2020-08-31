@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlUrlGenerator } from './url_generator';
-import { ML_PAGES } from '../common/constants/ml_url_generator';
-import { ANALYSIS_CONFIG_TYPE } from './application/data_frame_analytics/common';
+import { MlUrlGenerator } from './ml_url_generator';
+import { ML_PAGES } from '../../common/constants/ml_url_generator';
+import { ANALYSIS_CONFIG_TYPE } from '../application/data_frame_analytics/common';
 
 describe('MlUrlGenerator', () => {
   const urlGenerator = new MlUrlGenerator({
