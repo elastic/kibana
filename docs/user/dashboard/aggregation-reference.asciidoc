@@ -12,77 +12,78 @@ story about the trends, patterns, and outliers in your data.
 
 For information about Elasticsearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
+[options="header"]
 |===
 
-| Type 
+| Type | Visualizations | Data table | Markdown | Lens | TSVB
+
 | Histogram
+| X
+| X
+| X
+| 
+| 
+
 | Date histogram
+| X
+| X
+| X
+| X
+| X
+
 | Date range
+| X
+| X
+| X
+| 
+| 
+
 | Filter
+| X
+| X
+| X
+| 
+| X
+
 | Filters
+| X
+| X
+| X
+| 
+| X
+
 | GeoHash grid
+| X
+| X
+| X
+| 
+| 
+
 | IP range
+| X
+| X
+| X
+| 
+| 
+
 | Range
+| X
+| X
+| X
+| 
+| 
+
 | Terms
+| X
+| X
+| X
+| X
+| X
+
 | Significant terms
-
-| Visualizations
 | X
 | X
 | X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-
-| Data table
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-
-| Markdown
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-| X
-
-| Lens
-| 
-| X
-| 
-| 
-| 
-| 
-| 
-| 
-| X
-| X
-
-| TSVB
-| 
-| X
-| 
-| X
-| X
-| 
-| 
-| 
 | X
 | X
 
@@ -94,60 +95,59 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 
 For information about Elasticsearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
+[options="header"]
 |===
 
-| Type 
+| Type | Visualizations | Data table | Markdown | Lens | TSVB
+
 | Average and Sum 
+| X
+| X
+| X
+| X
+| X
+
 | Cardinality
-| Max and Min 
-| Percentiles 
+| X
+| X
+| X
+| X
+| X
+
+| Max and Min
+| X
+| X
+| X
+| X
+| X
+
+| Percentiles
+| X
+| X
+| X
+| 
+| X
+
 | Percentiles Rank
+| X
+| X
+| X
+| 
+| X
+
 | Top hits 
-| Value count
-
-| Visualizations
 | X
 | X
 | X
-| X
-| X
-| X
-| 
-
-| Data table
-| X
-| X
-| X
-| X
-| X
-| X
-
-| Markdown
-| X 
-| X
-| X
-| X
-| X
-| X
-| 
-
-| Lens
-| X
-| X
-| 
-| 
-| 
 | 
 | X
 
-| TSVB
-| X
-| X
-|  
-| X
-| X
-| X
+| Value count 
 | 
+| 
+| 
+| 
+| X
 
 |===
 
@@ -157,66 +157,65 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 
 For information about Elasticsearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 
+[options="header"]
 |===
 
-| Type 
-| Avg bucket
-| Derivative 
-| Max and min bucket 
-| Sum bucket
-| Moving average
-| Cumulative sum
-| Bucket script
-| Serial differencing
+| Type | Visualizations | Data table | Markdown | Lens | TSVB
 
-| Visualizations
-| X
-| X
-| X
+| Avg bucket  
 | X
 | X
 | X
 | 
 | X
 
-| Data table
-| X
-| X
-| X
-| X
-| X
-| X
-| 
-| X
-
-| Markdown 
-| X
-| X
-| X
+| Derivative  
 | X
 | X
 | X
 | 
 | X
 
-| Lens
-| 
-| 
-|  
-| 
-| 
+| Max and min bucket   
+| X
+| X
 | X
 | 
-| 
+| X
 
-| TSVB 
+| Sum bucket  
+| X
+| X
+| X
+| 
+| X
+ 
+| Moving average  
+| X
+| X
+| X
+| 
+| X
+
+| Cumulative sum 
 | X
 | X
 | X
 | X
 | X
+
+| Bucket script 
+| 
+| 
+| 
+| 
+| X
+
+| Serial differencing 
 | X
 | X
+| X
+| 
 | X
 
 |===
