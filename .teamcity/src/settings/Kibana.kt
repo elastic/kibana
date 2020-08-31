@@ -82,6 +82,9 @@ object Kibana : Project ({
 
   buildType(Lint)
 
+  val ossCiGroups = (1..12).map { OssCiGroup(it) }
+  val defaultCiGroups = (1..10).map { DefaultCiGroup(it) }
+
   subProject {
     id("Test")
     name = "Test"
@@ -96,25 +99,7 @@ object Kibana : Project ({
     }
 
     buildType(ApiIntegration)
-
-    buildType {
-      id("Test_All")
-      name = "All Tests"
-      type = BuildTypeSettings.Type.COMPOSITE
-
-      dependencies {
-        val builds = listOf(Jest, XPackJest, JestIntegration, ApiIntegration)
-
-        for (build in builds) {
-          snapshot(build) {
-            reuseBuilds = ReuseBuilds.SUCCESSFUL
-            onDependencyCancel = FailureAction.CANCEL
-            onDependencyFailure = FailureAction.CANCEL
-            synchronizeRevisions = true
-          }
-        }
-      }
-    }
+    buildType(AllTests)
   }
 
   subProject {
@@ -127,15 +112,13 @@ object Kibana : Project ({
       id("OSS_Functional")
       name = "Functional"
 
-      val ciGroups = (1..12).map { OssCiGroup(it) }
-
       buildType {
         id("CIGroups_Composite")
         name = "CI Groups"
         type = BuildTypeSettings.Type.COMPOSITE
 
         dependencies {
-          for (ciGroup in ciGroups) {
+          for (ciGroup in ossCiGroups) {
             snapshot(ciGroup) {
               reuseBuilds = ReuseBuilds.SUCCESSFUL
               onDependencyCancel = FailureAction.CANCEL
@@ -152,7 +135,7 @@ object Kibana : Project ({
         id("CIGroups")
         name = "CI Groups"
 
-        for (ciGroup in ciGroups) buildType(ciGroup)
+        for (ciGroup in ossCiGroups) buildType(ciGroup)
       }
     }
   }
@@ -167,15 +150,13 @@ object Kibana : Project ({
       id("Default_Functional")
       name = "Functional"
 
-      val ciGroups = (1..10).map { DefaultCiGroup(it) }
-
       buildType {
         id("Default_CIGroups_Composite")
         name = "CI Groups"
         type = BuildTypeSettings.Type.COMPOSITE
 
         dependencies {
-          for (ciGroup in ciGroups) {
+          for (ciGroup in defaultCiGroups) {
             snapshot(ciGroup) {
               reuseBuilds = ReuseBuilds.SUCCESSFUL
               onDependencyCancel = FailureAction.CANCEL
@@ -192,7 +173,34 @@ object Kibana : Project ({
         id("Default_CIGroups")
         name = "CI Groups"
 
-        for (ciGroup in ciGroups) buildType(ciGroup)
+        for (ciGroup in defaultCiGroups) buildType(ciGroup)
+      }
+    }
+  }
+
+  // This job is temporary
+  buildType {
+    id("Kitchen_Sink")
+    name = "Kitchen Sink"
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    dependencies {
+      val builds = listOf(
+        AllTests,
+        OssVisualRegression,
+        DefaultVisualRegression,
+        Lint,
+        ossCiGroups[0],
+        defaultCiGroups[0]
+      )
+
+      for (build in builds) {
+        snapshot(build) {
+          reuseBuilds = ReuseBuilds.SUCCESSFUL
+          onDependencyCancel = FailureAction.CANCEL
+          onDependencyFailure = FailureAction.CANCEL
+          synchronizeRevisions = true
+        }
       }
     }
   }
