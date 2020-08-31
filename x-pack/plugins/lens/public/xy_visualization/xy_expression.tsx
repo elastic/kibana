@@ -285,13 +285,9 @@ export function XYChart({
 
     // add minInterval only for single point in domain
     if (data.dateRange && isSingleTimestampInXDomain()) {
-      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
-        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
-
-      const { fromDate, toDate } = data.dateRange;
-      const duration = moment(toDate).diff(moment(fromDate));
-      const targetMs = duration / histogramBarTarget;
-      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+      return parseInterval(
+        xAxisColumn?.meta?.aggConfigParams?.decoration?.auto_interval
+      )?.asMilliseconds();
     }
     return undefined;
   }

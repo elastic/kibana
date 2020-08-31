@@ -19,9 +19,9 @@
 
 import { groupBy } from 'lodash';
 import { IAggConfig } from '../aggs';
-import { TabbedAggColumn } from './types';
+import { TabbedAggColumn, TabbedAggColumnInternal } from './types';
 
-const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
+const getColumn = (agg: IAggConfig, i: number): TabbedAggColumnInternal => {
   let name = '';
   try {
     name = agg.makeLabel();
@@ -30,7 +30,7 @@ const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
   }
 
   return {
-    aggConfig: agg,
+    aggConfigInstance: agg,
     id: `col-${i}-${agg.id}`,
     name,
   };
@@ -42,14 +42,17 @@ const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
  */
-export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean): TabbedAggColumn[] {
+export function tabifyGetColumns(
+  aggs: IAggConfig[],
+  minimalColumns: boolean
+): TabbedAggColumnInternal[] {
   // pick the columns
   if (minimalColumns) {
     return aggs.map((agg, i) => getColumn(agg, i));
   }
 
   // supposed to be bucket,...metrics,bucket,...metrics
-  const columns: TabbedAggColumn[] = [];
+  const columns: TabbedAggColumnInternal[] = [];
 
   // separate the metrics
   const grouped = groupBy(aggs, (agg) => {
@@ -71,4 +74,18 @@ export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean): T
   });
 
   return columns;
+}
+
+export function tabifyInternalToPublic(columns: TabbedAggColumnInternal[]): TabbedAggColumn[] {
+  return columns.map((column) => {
+    return {
+      id: column.id,
+      name: column.name,
+      aggConfig: {
+        ...column.aggConfigInstance.serialize(),
+        decoration: { ...column.aggConfigInstance.decorateTabify() },
+      },
+      formatHint: column.aggConfigInstance.toSerializedFieldFormat(),
+    };
+  });
 }

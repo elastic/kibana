@@ -47,7 +47,7 @@ export function tabifyAggResponse(
     const column = write.columns.shift();
 
     if (column) {
-      const agg = column.aggConfig;
+      const agg = column.aggConfigInstance;
       const aggInfo = agg.write(aggs);
       aggScale *= aggInfo.metricScale || 1;
 
@@ -130,7 +130,7 @@ export function tabifyAggResponse(
     const column = write.columns.shift();
 
     if (column) {
-      const agg = column.aggConfig;
+      const agg = column.aggConfigInstance;
 
       switch (agg.type.type) {
         case AggGroupNames.Metrics:

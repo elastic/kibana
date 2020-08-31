@@ -53,13 +53,19 @@ describe('TabbedAggResponseWriter class', () => {
     { type: 'count' },
   ];
 
+  const fakeFormat = {
+    toJSON: jest.fn().mockReturnValue({ id: 'string' }),
+  };
+
   const createResponseWritter = (aggs: any[] = [], opts?: Partial<TabbedResponseWriterOptions>) => {
     const fields = [
       {
         name: 'geo.src',
+        format: fakeFormat,
       },
       {
         name: 'machine.os.raw',
+        format: fakeFormat,
       },
     ];
 
@@ -86,6 +92,9 @@ describe('TabbedAggResponseWriter class', () => {
 
     test('generates columns', () => {
       expect(responseWriter.columns.length).toEqual(3);
+      expect(responseWriter.columns[0]).toHaveProperty('aggConfigInstance');
+      expect(responseWriter.columns[1]).toHaveProperty('aggConfigInstance');
+      expect(responseWriter.columns[2]).toHaveProperty('aggConfigInstance');
     });
 
     test('correctly generates columns with metricsAtAllLevels set to true', () => {
@@ -154,6 +163,7 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
         expect(response.columns[0]).toHaveProperty('aggConfig');
+        expect(response.columns[0]).toHaveProperty('aggConfig.enabled');
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
         expect(response.columns[1]).toHaveProperty('aggConfig');
@@ -169,6 +179,7 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
         expect(response.columns[0]).toHaveProperty('aggConfig');
+        expect(response.columns[0]).toHaveProperty('aggConfig.enabled');
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
         expect(response.columns[1]).toHaveProperty('aggConfig');

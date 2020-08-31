@@ -17,21 +17,26 @@
  * under the License.
  */
 
-import { tabifyGetColumns } from './get_columns';
-import { TabbedAggColumn } from './types';
-import { AggConfigs } from '../aggs';
+import { tabifyGetColumns, tabifyInternalToPublic } from './get_columns';
+import { TabbedAggColumnInternal } from './types';
+import { AggConfigs, MetricAggType } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('get columns', () => {
   const typesRegistry = mockAggTypesRegistry();
 
+  const fakeFormat = {
+    toJSON: jest.fn().mockReturnValue({ id: 'string' }),
+  };
   const createAggConfigs = (aggs: any[] = []) => {
     const fields = [
       {
         name: '@timestamp',
+        format: fakeFormat,
       },
       {
         name: 'bytes',
+        format: fakeFormat,
       },
     ];
 
@@ -80,8 +85,11 @@ describe('get columns', () => {
     expect(columns).toHaveLength(8);
 
     columns.forEach((column, i) => {
-      expect(column).toHaveProperty('aggConfig');
-      expect(column.aggConfig.type).toHaveProperty('name', i % 2 ? 'count' : 'date_histogram');
+      expect(column).toHaveProperty('aggConfigInstance');
+      expect(column.aggConfigInstance.type).toHaveProperty(
+        'name',
+        i % 2 ? 'count' : 'date_histogram'
+      );
     });
   });
 
@@ -114,18 +122,18 @@ describe('get columns', () => {
       false
     );
 
-    function checkColumns(column: TabbedAggColumn, i: number) {
-      expect(column).toHaveProperty('aggConfig');
+    function checkColumns(column: TabbedAggColumnInternal, i: number) {
+      expect(column).toHaveProperty('aggConfigInstance');
 
       switch (i) {
         case 0:
-          expect(column.aggConfig.type).toHaveProperty('name', 'date_histogram');
+          expect(column.aggConfigInstance.type).toHaveProperty('name', 'date_histogram');
           break;
         case 1:
-          expect(column.aggConfig.type).toHaveProperty('name', 'avg');
+          expect(column.aggConfigInstance.type).toHaveProperty('name', 'avg');
           break;
         case 2:
-          expect(column.aggConfig.type).toHaveProperty('name', 'sum');
+          expect(column.aggConfigInstance.type).toHaveProperty('name', 'sum');
           break;
       }
     }
@@ -177,5 +185,24 @@ describe('get columns', () => {
     );
 
     expect(columns.map((c) => c.name)).toEqual(['', 'Sum of @timestamp']);
+  });
+
+  test('should update the metadata for aggconfigs with decorateTabify', () => {
+    const decorator = jest.fn().mockReturnValue({ myData: true });
+    const count = typesRegistry.get('count') as MetricAggType;
+    count.decorateTabify = decorator;
+
+    const columns = tabifyInternalToPublic(
+      tabifyGetColumns(
+        createAggConfigs([
+          {
+            type: 'count',
+          },
+        ]).aggs,
+        false
+      )
+    );
+    expect(decorator).toHaveBeenCalled();
+    expect(columns[0].aggConfig.decoration).toEqual({ myData: true });
   });
 });

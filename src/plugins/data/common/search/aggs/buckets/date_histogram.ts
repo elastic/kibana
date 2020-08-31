@@ -109,6 +109,17 @@ export const getDateHistogramBucketAgg = ({
         },
       });
     },
+    decorateTabify(agg) {
+      let output: Record<string, any> = {};
+
+      if (this.params) {
+        output = writeParams(this.params, agg);
+      }
+      return {
+        auto_interval: output.bucketInterval?.expression,
+        auto_interval_description: output.bucketInterval?.description,
+      };
+    },
     createFilter: createFilterDateHistogram,
     decorateAggConfig() {
       let buckets: any;

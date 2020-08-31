@@ -413,6 +413,12 @@ export class AggConfig {
       : `${this.type.makeLabel(this)}`;
   }
 
+  decorateTabify() {
+    if (!this.type || !this.type.decorateTabify) return {};
+
+    return this.type.decorateTabify(this);
+  }
+
   getIndexPattern() {
     return this.aggConfigs.indexPattern;
   }

@@ -43,6 +43,7 @@ export interface AggTypeConfig<
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
+  decorateTabify?: (aggConfig: TAggConfig) => Record<string, unknown>;
   params?: Array<Partial<TParam>>;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
@@ -210,6 +211,16 @@ export class AggType<
   };
 
   /**
+   * a function that will be called when this aggType is assigned to
+   * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
+   *
+   * @method decorateTabify
+   * @param {AggConfig} aggConfig - an agg config of this type
+   * @returns {object} - label that can be used in the ui to describe the aggConfig
+   */
+  decorateTabify?: (aggConfig: TAggConfig) => Record<string, unknown>;
+
+  /**
    * Generic AggType Constructor
    *
    * Used to create the values exposed by the agg_types module.
@@ -227,6 +238,7 @@ export class AggType<
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;
+    this.decorateTabify = config.decorateTabify;
 
     if (config.createFilter) {
       this.createFilter = config.createFilter;

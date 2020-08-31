@@ -19,9 +19,14 @@
 
 import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs';
-import { tabifyGetColumns } from './get_columns';
+import { tabifyGetColumns, tabifyInternalToPublic } from './get_columns';
 
-import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow, TabbedTable } from './types';
+import {
+  TabbedResponseWriterOptions,
+  TabbedAggColumnInternal,
+  TabbedAggRow,
+  TabbedTable,
+} from './types';
 
 interface BufferColumn {
   id: string;
@@ -33,7 +38,7 @@ interface BufferColumn {
  * produces a table, or a series of tables.
  */
 export class TabbedAggResponseWriter {
-  columns: TabbedAggColumn[];
+  columns: TabbedAggColumnInternal[];
   rows: TabbedAggRow[] = [];
   bucketBuffer: BufferColumn[] = [];
   metricBuffer: BufferColumn[] = [];
@@ -78,7 +83,7 @@ export class TabbedAggResponseWriter {
 
   response(): TabbedTable {
     return {
-      columns: this.columns,
+      columns: tabifyInternalToPublic(this.columns),
       rows: this.rows,
     };
   }
