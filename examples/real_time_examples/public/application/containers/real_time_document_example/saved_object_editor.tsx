@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiCodeEditor, EuiSpacer, EuiButton } from '@elastic/eui';
 import { SavedObject } from '../../../../../../src/core/public';
 
 export interface Props {
@@ -26,11 +26,29 @@ export interface Props {
 }
 
 export const SavedObjectEditor: React.FC<Props> = ({ so }) => {
+  const [value, setValue] = React.useState('{"op": "add", "path": "/title", "value": "foo"}\n');
+
   return (
     <div>
-      <EuiCodeBlock style={{ maxHeight: 300 }}>
+      <EuiCodeBlock style={{ maxHeight: 200 }}>
         {JSON.stringify(so.attributes, null, 4)}
       </EuiCodeBlock>
+
+      <EuiSpacer />
+
+      <EuiCodeEditor
+        mode="javascript"
+        theme="github"
+        width="100%"
+        value={value}
+        onChange={(newValue) => setValue(newValue)}
+        maxLines={5}
+        aria-label="Code Editor"
+      />
+
+      <EuiSpacer />
+
+      <EuiButton onClick={() => {}}>Send</EuiButton>
     </div>
   );
 };
