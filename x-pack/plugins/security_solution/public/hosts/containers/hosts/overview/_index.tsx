@@ -9,10 +9,9 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector, shallowEqual } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   HostItem,
@@ -46,13 +45,10 @@ interface UseHostOverview {
 export const useHostOverview = ({
   endDate,
   hostName,
-  skip,
+  skip = false,
   startDate,
   id = ID,
 }: UseHostOverview): [boolean, HostOverviewArgs] => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // @ts-expect-error
-  const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -62,13 +58,11 @@ export const useHostOverview = ({
     defaultIndex,
     hostName,
     factoryQueryType: HostsQueries.hostOverview,
-    skip,
     timerange: {
       interval: '12h',
       from: startDate,
       to: endDate,
     },
-    // isInspected,
   });
 
   const [hostOverviewResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
@@ -85,10 +79,6 @@ export const useHostOverview = ({
 
   const hostOverviewSearch = useCallback(
     (request: HostOverviewRequestOptions) => {
-      if (request.skip) {
-        return;
-      }
-
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -148,14 +138,13 @@ export const useHostOverview = ({
         ...prevRequest,
         defaultIndex,
         hostName,
-        skip,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
