@@ -459,6 +459,7 @@ When you’ve finished adding the panels, save the dashboard.
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
 --
+include::edit-dashboards.asciidoc[]
 
 include::explore-dashboard-data.asciidoc[]
 
