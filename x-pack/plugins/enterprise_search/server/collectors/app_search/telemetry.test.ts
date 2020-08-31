@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockLogger } from '../../routes/__mocks__';
+import { mockLogger } from '../../__mocks__';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 

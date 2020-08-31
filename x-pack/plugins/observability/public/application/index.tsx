@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { createHashHistory } from 'history';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
@@ -52,10 +51,10 @@ function App() {
   );
 }
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+export const renderApp = (core: CoreStart, { element, history }: AppMountParameters) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
-  const history = createHashHistory();
+
   ReactDOM.render(
     <PluginContext.Provider value={{ core }}>
       <Router history={history}>
