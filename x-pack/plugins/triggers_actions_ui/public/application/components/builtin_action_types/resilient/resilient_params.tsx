@@ -68,7 +68,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
 
   useEffect(() => {
     const options = severity.map((s) => ({
-      value: s.name ?? '',
+      value: s.id ?? '',
       text: s.name ?? '',
     }));
 

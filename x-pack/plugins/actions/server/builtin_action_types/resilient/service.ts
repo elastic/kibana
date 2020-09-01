@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios';
+import { omitBy, isNil } from 'lodash/fp';
 
 import { Logger } from '../../../../../../src/core/server';
 import {
@@ -15,13 +16,10 @@ import {
   UpdateIncidentParams,
   CreateIncidentParams,
   CreateIncidentData,
-} from './types';
-import {
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
   UpdateIncidentRequest,
-  UpdateFieldText,
-  UpdateFieldTextArea,
+  GetValueTextContentResponse,
 } from './types';
 
 import * as i18n from './translations';
@@ -32,19 +30,31 @@ const VIEW_INCIDENT_URL = `#incidents`;
 
 export const getValueTextContent = (
   field: string,
-  value: string
-): UpdateFieldText | UpdateFieldTextArea => {
+  value: string | number | number[]
+): GetValueTextContentResponse => {
   if (field === 'description') {
     return {
       textarea: {
         format: 'html',
-        content: value,
+        content: value as string,
       },
     };
   }
 
+  if (field === 'incidentTypes') {
+    return {
+      ids: value as number[],
+    };
+  }
+
+  if (field === 'severityCode') {
+    return {
+      id: value as number,
+    };
+  }
+
   return {
-    text: value,
+    text: value as string,
   };
 };
 
@@ -53,12 +63,30 @@ export const formatUpdateRequest = ({
   newIncident,
 }: ExternalServiceParams): UpdateIncidentRequest => {
   return {
-    changes: Object.keys(newIncident as Record<string, unknown>).map((key) => ({
-      field: { name: key },
-      // TODO: Fix ugly casting
-      old_value: getValueTextContent(key, (oldIncident as Record<string, unknown>)[key] as string),
-      new_value: getValueTextContent(key, (newIncident as Record<string, unknown>)[key] as string),
-    })),
+    changes: Object.keys(newIncident as Record<string, unknown>).map((key) => {
+      let name = key;
+
+      if (key === 'incidentTypes') {
+        name = 'incident_type_ids';
+      }
+
+      if (key === 'severityCode') {
+        name = 'severity_code';
+      }
+
+      return {
+        field: { name },
+        // TODO: Fix ugly casting
+        old_value: getValueTextContent(
+          key,
+          (oldIncident as Record<string, unknown>)[name] as string
+        ),
+        new_value: getValueTextContent(
+          key,
+          (newIncident as Record<string, unknown>)[key] as string
+        ),
+      };
+    }),
   };
 };
 
@@ -143,7 +171,7 @@ export const createExternalService = (
     if (incident.severityCode) {
       data = {
         ...data,
-        severity_code: { name: incident.severityCode },
+        severity_code: { id: incident.severityCode },
       };
     }
 
@@ -174,7 +202,10 @@ export const createExternalService = (
     try {
       const latestIncident = await getIncident(incidentId);
 
-      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident: incident });
+      // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
+      const newIncident = omitBy(isNil, incident);
+      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident });
+
       const res = await request({
         axios: axiosInstance,
         method: 'patch',

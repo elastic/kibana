@@ -160,6 +160,17 @@ export type ResilientExecutorResultData =
 export interface UpdateFieldText {
   text: string;
 }
+export interface UpdateFieldText {
+  text: string;
+}
+
+export interface UpdateIdsField {
+  ids: number[];
+}
+
+export interface UpdateIdField {
+  id: number;
+}
 
 export interface UpdateFieldTextArea {
   textarea: { format: 'html' | 'text'; content: string };
@@ -167,18 +178,24 @@ export interface UpdateFieldTextArea {
 
 interface UpdateField {
   field: { name: string };
-  old_value: UpdateFieldText | UpdateFieldTextArea;
-  new_value: UpdateFieldText | UpdateFieldTextArea;
+  old_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
+  new_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
 }
 
 export interface UpdateIncidentRequest {
   changes: UpdateField[];
 }
 
+export type GetValueTextContentResponse =
+  | UpdateFieldText
+  | UpdateFieldTextArea
+  | UpdateIdsField
+  | UpdateIdField;
+
 export interface CreateIncidentData {
   name: string;
   discovered_date: number;
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
-  severity_code?: { name: string };
+  severity_code?: { id: number };
 }
