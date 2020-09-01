@@ -4,16 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import _ from 'lodash';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import {
-  getMapsCapabilities,
-  getUiSettings,
-  getToasts,
-  getCoreChrome,
-  getNavigateToApp,
-} from '../../../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -32,9 +24,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Direction } from '@elastic/eui';
+import {
+  Criteria,
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+} from '@elastic/eui/src/components/basic_table/basic_table';
+import { EuiTableSortingType } from '@elastic/eui';
 import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { goToSpecifiedPath } from '../../maps_router';
 import { APP_ID, MAP_PATH } from '../../../../common/constants';
+
+import {
+  getMapsCapabilities,
+  getUiSettings,
+  getToasts,
+  getCoreChrome,
+  getNavigateToApp,
+} from '../../../kibana_services';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 
 export const EMPTY_FILTER = '';
 
@@ -44,9 +52,30 @@ function navigateToNewMap() {
     path: MAP_PATH,
   });
 }
+interface MapsListViewState {
+  sortField?: string | number | symbol;
+  sortDirection?: Direction;
+  hasInitialFetchReturned: boolean;
+  isFetchingItems: boolean;
+  showDeleteModal: boolean;
+  showLimitError: boolean;
+  filter: string;
+  items: [];
+  selectedIds: [];
+  page: number;
+  perPage: number;
+  readOnly: any;
+  listingLimit: any;
+  totalItems?: number;
+}
+
+interface SelectionItem {
+  id: string;
+}
 
 export class MapsListView extends React.Component {
-  state = {
+  _isMounted?: boolean;
+  state: MapsListViewState = {
     hasInitialFetchReturned: false,
     isFetchingItems: false,
     showDeleteModal: false,
@@ -76,9 +105,9 @@ export class MapsListView extends React.Component {
     getCoreChrome().docTitle.change('Maps');
   }
 
-  _find = (search) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);
+  _find = (search: string) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);
 
-  _delete = (ids) => getMapsSavedObjectLoader().delete(ids);
+  _delete = (ids: string | string[]) => getMapsSavedObjectLoader().delete(ids);
 
   debouncedFetch = _.debounce(async (filter) => {
     const response = await this._find(filter);
@@ -135,10 +164,13 @@ export class MapsListView extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  onTableChange = ({ page, sort = {} }) => {
-    const { index: pageIndex, size: pageSize } = page;
+  onTableChange = ({
+    page,
+    sort,
+  }: Criteria<SelectionItem> | CriteriaWithPagination<SelectionItem>) => {
+    const { index: pageIndex, size: pageSize } = page!;
 
-    let { field: sortField, direction: sortDirection } = sort;
+    let { field: sortField, direction: sortDirection } = sort || {};
 
     // 3rd sorting state that is not captured by sort - native order (no sort)
     // when switching from desc to asc for the same field - use native order
@@ -147,8 +179,8 @@ export class MapsListView extends React.Component {
       this.state.sortDirection === 'desc' &&
       sortDirection === 'asc'
     ) {
-      sortField = null;
-      sortDirection = null;
+      sortField = undefined;
+      sortDirection = undefined;
     }
 
     this.setState({
@@ -165,8 +197,8 @@ export class MapsListView extends React.Component {
 
     if (this.state.sortField) {
       itemsCopy.sort((a, b) => {
-        const fieldA = _.get(a, this.state.sortField, '');
-        const fieldB = _.get(b, this.state.sortField, '');
+        const fieldA = _.get(a, this.state.sortField!, '');
+        const fieldB = _.get(b, this.state.sortField!, '');
         let order = 1;
         if (this.state.sortDirection === 'desc') {
           order = -1;
@@ -320,7 +352,7 @@ export class MapsListView extends React.Component {
   }
 
   renderTable() {
-    const tableColumns = [
+    const tableColumns: Array<EuiBasicTableColumn<any>> = [
       {
         field: 'title',
         name: i18n.translate('xpack.maps.mapListing.titleFieldTitle', {
@@ -329,7 +361,7 @@ export class MapsListView extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={(e) => {
+            onClick={(e: MouseEvent) => {
               e.preventDefault();
               goToSpecifiedPath(`/map/${record.id}`);
             }}
@@ -355,12 +387,12 @@ export class MapsListView extends React.Component {
       pageSizeOptions: [10, 20, 50],
     };
 
-    let selection = false;
+    let selection;
     if (!this.state.readOnly) {
       selection = {
-        onSelectionChange: (selection) => {
+        onSelectionChange: (s: SelectionItem[]) => {
           this.setState({
-            selectedIds: selection.map((item) => {
+            selectedIds: s.map((item) => {
               return item.id;
             }),
           });
@@ -368,11 +400,11 @@ export class MapsListView extends React.Component {
       };
     }
 
-    const sorting = {};
+    const sorting: EuiTableSortingType<any> = {};
     if (this.state.sortField) {
       sorting.sort = {
         field: this.state.sortField,
-        direction: this.state.sortDirection,
+        direction: this.state.sortDirection!,
       };
     }
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();

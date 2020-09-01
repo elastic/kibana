@@ -12,6 +12,7 @@ import { MapsListView } from './maps_list_view';
 import { Redirect } from 'react-router-dom';
 
 export class LoadListAndRender extends React.Component {
+  _isMounted?: boolean;
   state = {
     mapsLoaded: false,
     hasSavedMaps: null,

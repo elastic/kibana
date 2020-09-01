@@ -5,15 +5,20 @@
  */
 
 import { Subject } from 'rxjs';
+import { Filter, SavedQuery, Query } from 'src/plugins/data/public';
 
 export class AppStateManager {
-  _query = '';
-  _savedQuery = '';
-  _filters = [];
+  _query: string | { [key: string]: any } = '';
+  _savedQuery: SavedQuery | string = '';
+  _filters: Filter[] = [];
 
   _updated$ = new Subject();
 
-  setQueryAndFilters({ query, savedQuery, filters }) {
+  setQueryAndFilters({ query, savedQuery, filters }: {
+    query?: Query;
+    filters?: Filter[];
+    savedQuery?: SavedQuery | string;
+  }) {
     if (query && this._query !== query) {
       this._query = query;
     }

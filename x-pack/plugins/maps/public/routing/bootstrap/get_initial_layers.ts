@@ -15,15 +15,20 @@ import '../../classes/sources/es_pew_pew_source';
 import '../../classes/sources/kibana_regionmap_source';
 import '../../classes/sources/es_geo_grid_source';
 import '../../classes/sources/xyz_tms_source';
+// @ts-expect-error
 import { KibanaTilemapSource } from '../../classes/sources/kibana_tilemap_source';
+// @ts-expect-error
 import { TileLayer } from '../../classes/layers/tile_layer/tile_layer';
+// @ts-expect-error
 import { EMSTMSSource } from '../../classes/sources/ems_tms_source';
+// @ts-expect-error
 import { VectorTileLayer } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
 import { getIsEmsEnabled, getToasts } from '../../kibana_services';
 import { INITIAL_LAYERS_KEY } from '../../../common/constants';
 import { getKibanaTileMap } from '../../meta';
+import { LayerDescriptor } from 'x-pack/plugins/maps/common/descriptor_types';
 
-export function getInitialLayers(layerListJSON, initialLayers = []) {
+export function getInitialLayers(layerListJSON?: string, initialLayers: LayerDescriptor[] = []) {
   if (layerListJSON) {
     return JSON.parse(layerListJSON);
   }
@@ -58,9 +63,10 @@ export function getInitialLayersFromUrlParam() {
 
   try {
     let mapInitLayers = mapAppParams.get(INITIAL_LAYERS_KEY);
-    if (mapInitLayers[mapInitLayers.length - 1] === '#') {
-      mapInitLayers = mapInitLayers.substr(0, mapInitLayers.length - 1);
+    if (mapInitLayers![mapInitLayers!.length - 1] === '#') {
+      mapInitLayers = mapInitLayers!.substr(0, mapInitLayers!.length - 1);
     }
+    // @ts-ignore
     return rison.decode_array(mapInitLayers);
   } catch (e) {
     getToasts().addWarning({

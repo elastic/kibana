@@ -10,8 +10,18 @@ import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved
 import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { AppMountParameters } from 'kibana/public';
+import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 
-export const LoadMapAndRender = class extends React.Component {
+interface LoadMapAndRenderProps {
+  savedMapId?: Record<string, unknown>;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  stateTransfer: EmbeddableStateTransfer;
+  originatingApp?: string;
+}
+
+export const LoadMapAndRender = class extends React.Component<LoadMapAndRenderProps> {
+  _isMounted!: boolean;
   state = {
     savedMap: null,
     failedToLoad: false,

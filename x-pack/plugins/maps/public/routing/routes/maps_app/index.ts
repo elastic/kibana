@@ -33,8 +33,17 @@ import {
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../../reducers/store';
+import { ThunkDispatch } from 'redux-thunk';
+import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import {
+  MapRefreshConfig,
+  MapCenterAndZoom,
+  LayerDescriptor,
+} from 'x-pack/plugins/maps/common/descriptor_types';
+import { MapSettings } from '../../../reducers/map';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     isFullScreen: getIsFullScreen(state),
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
@@ -50,9 +59,16 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+interface DispatchSetQueryArgs {
+  filters?: Filter[];
+  query?: Query;
+  timeFilters?: TimeRange;
+  forceRefresh?: boolean;
+}
+
+function mapDispatchToProps(dispatch: ThunkDispatch<Promise<string>, MapStoreState, any>) {
   return {
-    dispatchSetQuery: ({ forceRefresh, filters, query, timeFilters }) => {
+    dispatchSetQuery: ({ forceRefresh, filters, query, timeFilters }: DispatchSetQueryArgs) => {
       dispatch(
         setQuery({
           filters,
@@ -62,12 +78,13 @@ function mapDispatchToProps(dispatch) {
         })
       );
     },
-    setRefreshConfig: (refreshConfig) => dispatch(setRefreshConfig(refreshConfig)),
-    replaceLayerList: (layerList) => dispatch(replaceLayerList(layerList)),
-    setGotoWithCenter: (latLonZoom) => dispatch(setGotoWithCenter(latLonZoom)),
-    setMapSettings: (mapSettings) => dispatch(setMapSettings(mapSettings)),
-    setIsLayerTOCOpen: (isLayerTOCOpen) => dispatch(setIsLayerTOCOpen(isLayerTOCOpen)),
-    setOpenTOCDetails: (openTOCDetails) => dispatch(setOpenTOCDetails(openTOCDetails)),
+    setRefreshConfig: (refreshConfig: MapRefreshConfig) =>
+      dispatch(setRefreshConfig(refreshConfig)),
+    replaceLayerList: (layerList: LayerDescriptor[]) => dispatch(replaceLayerList(layerList)),
+    setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => dispatch(setGotoWithCenter(latLonZoom)),
+    setMapSettings: (mapSettings: MapSettings) => dispatch(setMapSettings(mapSettings)),
+    setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => dispatch(setIsLayerTOCOpen(isLayerTOCOpen)),
+    setOpenTOCDetails: (openTOCDetails: string[]) => dispatch(setOpenTOCDetails(openTOCDetails)),
     clearUi: () => {
       dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.NONE));

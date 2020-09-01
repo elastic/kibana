@@ -36,7 +36,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 interface Props {
-  addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  addFilters: ((filters: Filter[]) => void) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   areLayersLoaded: boolean;
