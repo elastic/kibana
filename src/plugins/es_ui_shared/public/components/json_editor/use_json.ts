@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { isJSON } from '../../../static/validators/string';
@@ -45,11 +45,11 @@ export const useJson = <T extends object = { [key: string]: any }>({
   onUpdate,
   isControlled = false,
 }: Parameters<T>) => {
-  const didMount = useRef(false);
+  const isMounted = useRef(false);
   const [content, setContent] = useState<string>(stringifyJson(defaultValue));
   const [error, setError] = useState<string | null>(null);
 
-  const validate = () => {
+  const validate = useCallback(() => {
     // We allow empty string as it will be converted to "{}""
     const isValid = content.trim() === '' ? true : isJSON(content);
     if (!isValid) {
@@ -62,31 +62,38 @@ export const useJson = <T extends object = { [key: string]: any }>({
       setError(null);
     }
     return isValid;
-  };
+  }, [content]);
 
-  const formatContent = () => {
+  const formatContent = useCallback(() => {
     const isValid = validate();
     const data = isValid && content.trim() !== '' ? JSON.parse(content) : {};
     return data as T;
-  };
+  }, [validate, content]);
 
   useEffect(() => {
-    if (didMount.current) {
-      const isValid = isControlled ? undefined : validate();
-      onUpdate({
-        data: {
-          raw: content,
-          format: formatContent,
-        },
-        validate,
-        isValid,
-      });
-    } else {
-      didMount.current = true;
+    if (!isMounted.current) {
+      return;
     }
-    // https://github.com/elastic/kibana/issues/73971
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [content]);
+
+    const isValid = isControlled ? undefined : validate();
+
+    onUpdate({
+      data: {
+        raw: content,
+        format: formatContent,
+      },
+      validate,
+      isValid,
+    });
+  }, [onUpdate, content, isControlled, formatContent, validate]);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return {
     content,
