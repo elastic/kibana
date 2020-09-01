@@ -6,7 +6,6 @@
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
-jest.mock('ui/new_platform');
 jest.mock('./load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
