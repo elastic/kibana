@@ -36,7 +36,7 @@ const isStringLengthOne: ValidationFunc = ({ value }) => {
         message: i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.convertForm.separatorLengthError',
           {
-            defaultMessage: 'A separator value must be a single character.',
+            defaultMessage: 'Must be a single character.',
           }
         ),
       }
@@ -138,7 +138,7 @@ export const CSV: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.fieldNameHelpText', {
-          defaultMessage: 'Field to extract CSV data from.',
+          defaultMessage: 'Field containing CSV data.',
         })}
       />
 

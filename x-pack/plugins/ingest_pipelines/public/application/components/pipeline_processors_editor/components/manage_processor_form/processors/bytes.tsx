@@ -19,7 +19,7 @@ export const Bytes: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.bytesForm.fieldNameHelpText',
           {
             defaultMessage:
-              'Field to convert from a human-readable format to its value in bytes. For example, 1KB becomes 1024 bytes.',
+              'Field to convert. If the field contains an array, each array value is converted.,
           }
         )}
       />

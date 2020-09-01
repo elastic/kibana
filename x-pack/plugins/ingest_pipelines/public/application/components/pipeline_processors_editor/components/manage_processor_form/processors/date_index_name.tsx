@@ -100,7 +100,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsHelpText"
-        defaultMessage="Array of expected date formats for parsing dates and timestamps. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats. Defaults to {value}."
+        defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats. Defaults to {value}."
         values={{ value: <EuiCode inline>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
       />
     ),
@@ -150,7 +150,7 @@ export const DateIndexName: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.fieldNameHelpText',
-          { defaultMessage: 'Field to retrieve the date or timestamp from.' }
+          { defaultMessage: 'Field containing the date or timestamp.' }
         )}
       />
 

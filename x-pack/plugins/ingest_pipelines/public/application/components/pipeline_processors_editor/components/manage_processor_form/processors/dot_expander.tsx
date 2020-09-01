@@ -30,7 +30,7 @@ export const DotExpander: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameHelpText',
-          { defaultMessage: 'Field containing dot notation to expand into an object field.' }
+          { defaultMessage: 'Field containing dot notation.' }
         )}
         additionalValidations={[
           {

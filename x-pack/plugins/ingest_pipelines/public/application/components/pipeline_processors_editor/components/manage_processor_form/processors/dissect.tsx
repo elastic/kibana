@@ -72,7 +72,7 @@ export const Dissect: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dissectForm.fieldNameHelpText',
-          { defaultMessage: 'Field to dissect based on the defined pattern.' }
+          { defaultMessage: 'Field to dissect.' }
         )}
       />
 

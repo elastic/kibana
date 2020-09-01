@@ -59,7 +59,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText"
-        defaultMessage="Timezone to use when parsing the date. Defaults to {timezone}."
+        defaultMessage="Timezone for the date. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
     ),
@@ -73,7 +73,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
-        defaultMessage="Locale to use when parsing the date. Useful when parsing month or day names. Defaults to {timezone}."
+        defaultMessage="Locale for the date. Useful when parsing month or day names. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),
@@ -89,7 +89,7 @@ export const DateProcessor: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dateForm.fieldNameHelpText',
-          { defaultMessage: 'Field to retrieve the date from.' }
+          { defaultMessage: 'Field to convert.' }
         )}
       />
 

@@ -108,7 +108,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.date', {
       defaultMessage:
-        'Parses dates from fields and uses the date or timestamp as the timestamp for the document.',
+        'Converts a date to a document timestamp.',
     }),
   },
   date_index_name: {
