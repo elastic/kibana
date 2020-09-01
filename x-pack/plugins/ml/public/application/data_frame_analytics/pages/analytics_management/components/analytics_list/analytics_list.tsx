@@ -159,7 +159,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   if (analytics.length === 0) {
     return (
-      <>
+      <div data-test-subj="mlAnalyticsJobList">
         <EuiEmptyPrompt
           iconType="createAdvancedJob"
           title={
@@ -192,7 +192,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
-      </>
+      </div>
     );
   }
 
@@ -274,7 +274,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <>
+    <div data-test-subj="mlAnalyticsJobList">
       {modals}
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -326,6 +326,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       {isSourceIndexModalVisible === true && (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
-    </>
+    </div>
   );
 };

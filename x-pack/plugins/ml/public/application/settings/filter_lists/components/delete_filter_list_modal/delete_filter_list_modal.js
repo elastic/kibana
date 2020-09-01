@@ -103,6 +103,7 @@ export class DeleteFilterListModal extends Component {
             selectedFilterLists.length === 0 ||
             canDeleteFilter === false
           }
+          data-test-subj="mlFilterListsButtonDelete"
         >
           <FormattedMessage
             id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
