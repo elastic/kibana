@@ -121,4 +121,55 @@ const apiParams: PushToServiceApiParams = {
   externalCase: { name: 'Incident title', description: 'Incident description' },
 };
 
-export { externalServiceMock, mapping, executorParams, apiParams };
+const incidentTypes = [
+  {
+    value: 17,
+    label: 'Communication error (fax; email)',
+    enabled: true,
+    properties: null,
+    uuid: '4a8d22f7-d89e-4403-85c7-2bafe3b7f2ae',
+    hidden: false,
+    default: false,
+  },
+  {
+    value: 1001,
+    label: 'Custom type',
+    enabled: true,
+    properties: null,
+    uuid: '3b51c8c2-9758-48f8-b013-bd141f1d2ec9',
+    hidden: false,
+    default: false,
+  },
+];
+
+const severity = [
+  {
+    value: 4,
+    label: 'Low',
+    enabled: true,
+    properties: null,
+    uuid: '97cae239-963d-4e36-be34-07e47ef2cc86',
+    hidden: false,
+    default: true,
+  },
+  {
+    value: 5,
+    label: 'Medium',
+    enabled: true,
+    properties: null,
+    uuid: 'c2c354c9-6d1e-4a48-82e5-bd5dc5068339',
+    hidden: false,
+    default: false,
+  },
+  {
+    value: 6,
+    label: 'High',
+    enabled: true,
+    properties: null,
+    uuid: '93e5c99c-563b-48b9-80a3-9572307622d8',
+    hidden: false,
+    default: false,
+  },
+];
+
+export { externalServiceMock, mapping, executorParams, apiParams, incidentTypes, severity };

@@ -140,7 +140,7 @@ export const createExternalService = (
       return { ...res.data, description: res.data.description?.content ?? '' };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
       );
     }
   };
@@ -193,7 +193,7 @@ export const createExternalService = (
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}.`)
       );
     }
   };
@@ -257,7 +257,7 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
+          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
     }
@@ -280,7 +280,7 @@ export const createExternalService = (
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
       );
     }
   };
@@ -302,7 +302,7 @@ export const createExternalService = (
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
       );
     }
   };
