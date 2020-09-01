@@ -28,12 +28,7 @@ export const deleteTransforms = async (
   for (const transformId of transformIds) {
     // eslint-disable-next-line no-console
     console.log(`Deleting\n ${transformId}`);
-    await callCluster('transport.request', {
-      method: 'POST',
-      path: `/_transform/${transformId}/_stop`,
-      query: 'force=true',
-      ignore: [404],
-    });
+    await stopTransforms([transformId], callCluster);
     await callCluster('transport.request', {
       method: 'DELETE',
       query: 'force=true',

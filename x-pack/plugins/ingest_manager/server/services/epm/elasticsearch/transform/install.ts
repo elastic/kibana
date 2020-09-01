@@ -83,7 +83,7 @@ export const installTransformForDataset = async (
       []
     );
 
-    // get and save pipeline refs before installing pipelines
+    // get and save transform refs before installing pipelines
     // eslint-disable-next-line no-console
     console.log(`transform: ${JSON.stringify(transformRefs)}`);
     await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);

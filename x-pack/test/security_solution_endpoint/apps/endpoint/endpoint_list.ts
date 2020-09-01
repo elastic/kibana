@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(80000);
+        await sleep(120000);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
