@@ -11,7 +11,7 @@ import { TransformPivotConfig } from '../../../../plugins/transform/common/types
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_2_${date}`,
+    id: `ec_cloning_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
