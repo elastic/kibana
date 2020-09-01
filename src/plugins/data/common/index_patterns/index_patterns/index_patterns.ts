@@ -187,6 +187,7 @@ export class IndexPatternsService {
     // get saved object, convert to spec, create new IndexPattern instance
     //
     //  progress - no longer calls `make`, no longer calls `init`
+    // todo - create index pattern isn't  showing field list
     const {
       version,
       attributes: {
@@ -205,8 +206,8 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const parsedFields = fields ? JSON.parse(fields) : undefined;
-    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : undefined;
+    const parsedFields = fields ? JSON.parse(fields) : [];
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
 
     Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
       const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
