@@ -43,6 +43,18 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         value={formFields.destinationIndex.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDestinationPipelineInput"
+        errorMessages={formFields.destinationPipeline.errorMessages}
+        label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel',
+          {
+            defaultMessage: 'Pipeline',
+          }
+        )}
+        onChange={(value) => dispatch({ field: 'destinationPipeline', value })}
+        value={formFields.destinationPipeline.value}
+      />
+      <EditTransformFlyoutFormTextInput
         dataTestSubj="transformEditFlyoutDocsPerSecondInput"
         errorMessages={formFields.docsPerSecond.errorMessages}
         helpText={i18n.translate(
@@ -61,7 +73,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       <EditTransformFlyoutFormTextInput
         dataTestSubj="transformEditFlyoutFrequencyInput"
         errorMessages={formFields.frequency.errorMessages}
-        helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelptext', {
+        helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
           defaultMessage:
             'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
         })}
@@ -69,7 +81,13 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           defaultMessage: 'Frequency',
         })}
         onChange={(value) => dispatch({ field: 'frequency', value })}
-        placeholder="1m"
+        placeholder={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormFrequencyPlaceholderText',
+          {
+            defaultMessage: 'Default: {defaultFrequencyValue}',
+            values: { defaultFrequencyValue: formFields.frequency.defaultValue },
+          }
+        )}
         value={formFields.frequency.value}
       />
     </EuiForm>

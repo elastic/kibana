@@ -47,31 +47,48 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
 });
 
 const getDescriptionFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
+  defaultValue: '',
   errorMessages: [],
+  isOptional: true,
   validator: 'string',
+  value,
+  valueParser: (v) => v,
 });
 
 const getDestinationIndexFieldMock = (value = ''): FormField => ({
-  isOptional: false,
-  value,
+  defaultValue: '',
   errorMessages: [],
+  isOptional: false,
   validator: 'string',
+  value,
+  valueParser: (v) => v,
+});
+
+const getDestinationPipelineFieldMock = (value = ''): FormField => ({
+  defaultValue: '',
+  errorMessages: [],
+  isOptional: false,
+  validator: 'string',
+  value,
+  valueParser: (v) => v,
 });
 
 const getDocsPerSecondFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
+  defaultValue: '',
   errorMessages: [],
+  isOptional: true,
   validator: 'numberAboveZero',
+  value,
+  valueParser: (v) => parseInt(v, 10),
 });
 
 const getFrequencyFieldMock = (value = ''): FormField => ({
-  isOptional: true,
-  value,
+  defaultValue: '1m',
   errorMessages: [],
+  isOptional: true,
   validator: 'frequency',
+  value,
+  valueParser: (v) => v,
 });
 
 describe('Transform: applyFormFieldsToTransformConfig()', () => {
@@ -81,6 +98,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock(transformConfigMock.description),
       destinationIndex: getDestinationIndexFieldMock(transformConfigMock.dest.index),
+      destinationPipeline: getDestinationPipelineFieldMock(),
       docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });
@@ -102,15 +120,16 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-new-description'),
       destinationIndex: getDestinationIndexFieldMock('the-new-destination-index'),
+      destinationPipeline: getDestinationPipelineFieldMock(),
       docsPerSecond: getDocsPerSecondFieldMock('10'),
-      frequency: getFrequencyFieldMock('1m'),
+      frequency: getFrequencyFieldMock('10m'),
     });
 
     expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
     expect(updateConfig.dest?.index).toBe('the-new-destination-index');
     expect(updateConfig.settings?.docs_per_second).toBe(10);
-    expect(updateConfig.frequency).toBe('1m');
+    expect(updateConfig.frequency).toBe('10m');
   });
 
   test('should only include changed form fields', () => {
@@ -118,6 +137,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-updated-description'),
       destinationIndex: getDestinationIndexFieldMock('the-updated-destination-index'),
+      destinationPipeline: getDestinationPipelineFieldMock(),
       docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });

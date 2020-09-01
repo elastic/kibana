@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, merge } from 'lodash';
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import { Dictionary } from '../../../../../../common/types/common';
 import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.
@@ -99,17 +101,21 @@ const validate: Validate = {
 };
 
 export interface FormField {
+  defaultValue: string;
   errorMessages: string[];
   isOptional: boolean;
   validator: keyof Validate;
   value: string;
+  valueParser: (value: string) => any;
 }
 
 const defaultField: FormField = {
+  defaultValue: '',
   errorMessages: [],
   isOptional: true,
   validator: 'string',
   value: '',
+  valueParser: (v) => v,
 };
 
 interface EditTransformFlyoutFieldsState {
@@ -119,6 +125,14 @@ interface EditTransformFlyoutFieldsState {
   frequency: FormField;
   docsPerSecond: FormField;
 }
+
+const fieldMapping: Dictionary<string> = {
+  description: 'description',
+  destinationIndex: 'dest.index',
+  destinationPipeline: 'dest.pipeline',
+  frequency: 'frequency',
+  docsPerSecond: 'settings.docs_per_second',
+};
 
 export interface EditTransformFlyoutState {
   formFields: EditTransformFlyoutFieldsState;
@@ -133,47 +147,34 @@ interface Action {
   value: string;
 }
 
+// For form values where the attribute directly maps from the form's state to the transform
+const getUpdateValue = <T>(
+  attribute: keyof EditTransformFlyoutFieldsState,
+  config: T,
+  formState: EditTransformFlyoutFieldsState,
+  nullable: boolean = false
+) => {
+  const formStateAttribute = formState[attribute];
+  const fallbackValue = nullable ? null : formStateAttribute.defaultValue;
+  const formValue =
+    formStateAttribute.value !== ''
+      ? formStateAttribute.valueParser(formStateAttribute.value)
+      : fallbackValue;
+  const configValue = getNestedProperty(config, fieldMapping[attribute], fallbackValue);
+  return formValue !== configValue ? setNestedProperty({}, fieldMapping[attribute], formValue) : {};
+};
+
 // Takes in the form configuration and returns a
 // request object suitable to be sent to the
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
-  { description, destinationIndex, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
+  formState: EditTransformFlyoutFieldsState
 ): PostTransformsUpdateRequestSchema => {
-  // if the input field was left empty,
-  // fall back to the default value of `null`
-  // which will disable throttling.
-  const docsPerSecondFormValue =
-    docsPerSecond.value !== '' ? parseInt(docsPerSecond.value, 10) : null;
-  const docsPerSecondConfigValue = config.settings?.docs_per_second ?? null;
-
-  return {
-    // set the values only if they changed from the default
-    // and actually differ from the previous value.
-
-    // frequency
-    ...(!(config.frequency === undefined && frequency.value === '') &&
-    config.frequency !== frequency.value
-      ? { frequency: frequency.value }
-      : {}),
-
-    // description
-    ...(!(config.description === undefined && description.value === '') &&
-    config.description !== description.value
-      ? { description: description.value }
-      : {}),
-
-    // destination index
-    ...(!(config.dest.index === undefined && destinationIndex.value === '') &&
-    config.dest.index !== destinationIndex.value
-      ? { dest: { index: destinationIndex.value } }
-      : {}),
-
-    // docs_per_second
-    ...(docsPerSecondFormValue !== docsPerSecondConfigValue
-      ? { settings: { docs_per_second: docsPerSecondFormValue } }
-      : {}),
-  };
+  return Object.keys(formState).reduce(
+    (updateConfig, field) => merge(updateConfig, getUpdateValue(field, config, formState)),
+    {}
+  );
 };
 
 // Takes in a transform configuration and returns
@@ -182,11 +183,18 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
   formFields: {
     description: { ...defaultField, value: config?.description ?? '' },
     destinationIndex: { ...defaultField, value: config?.dest?.index ?? '', isOptional: false },
-    frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
+    destinationPipeline: { ...defaultField, value: config?.dest?.pipeline ?? '' },
+    frequency: {
+      ...defaultField,
+      defaultValue: '1m',
+      validator: 'frequency',
+      value: config?.frequency ?? '',
+    },
     docsPerSecond: {
       ...defaultField,
       value: config?.settings?.docs_per_second?.toString() ?? '',
       validator: 'numberAboveZero',
+      valueParser: (v) => parseInt(v, 10),
     },
   },
   isFormTouched: false,
@@ -227,7 +235,10 @@ export const formReducerFactory = (config: TransformPivotConfig) => {
     return {
       ...state,
       formFields,
-      isFormTouched: !isEqual(defaultState.formFields, formFields),
+      isFormTouched: !isEqual(
+        Object.values(defaultState.formFields).map((f) => f.value),
+        Object.values(formFields).map((f) => f.value)
+      ),
       isFormValid: isFormValid(formFields),
     };
   };

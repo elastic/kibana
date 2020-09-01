@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Dictionary } from '../types/common';
+
 // This is similar to lodash's get() except that it's TypeScript aware and is able to infer return types.
 // It splits the attribute key string and uses reduce with an idx check to access nested attributes.
-export const getNestedProperty = (
-  obj: Record<string, any>,
+export const getNestedProperty = <T extends Dictionary<any>>(
+  obj: T,
   accessor: string,
   defaultValue?: any
 ) => {
@@ -16,4 +18,21 @@ export const getNestedProperty = (
   if (value === undefined) return defaultValue;
 
   return value;
+};
+
+export const setNestedProperty = (obj: Dictionary<any>, accessor: string, value: any) => {
+  let ref = obj;
+  const accessors = accessor.split('.');
+  const len = accessors.length;
+  for (let i = 0; i < len - 1; i++) {
+    const elem = accessors[i];
+    if (getNestedProperty(ref, elem) === undefined) {
+      ref[elem as string] = {} as Dictionary<any>;
+    }
+    ref = ref[elem];
+  }
+
+  ref[accessors[len - 1]] = value;
+
+  return obj;
 };
