@@ -62,7 +62,6 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
-  childIndexPatternsUpdateSubscription$: Subscription;
   isVisible: boolean;
 }
 
