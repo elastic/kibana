@@ -102,6 +102,7 @@ const defaultField: FormField = {
 interface EditTransformFlyoutFieldsState {
   [key: string]: FormField;
   description: FormField;
+  destinationIndex: FormField;
   frequency: FormField;
   docsPerSecond: FormField;
 }
@@ -124,7 +125,7 @@ interface Action {
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
-  { description, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
+  { description, destinationIndex, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
 ): PostTransformsUpdateRequestSchema => {
   // if the input field was left empty,
   // fall back to the default value of `null`
@@ -136,14 +137,26 @@ export const applyFormFieldsToTransformConfig = (
   return {
     // set the values only if they changed from the default
     // and actually differ from the previous value.
+
+    // frequency
     ...(!(config.frequency === undefined && frequency.value === '') &&
     config.frequency !== frequency.value
       ? { frequency: frequency.value }
       : {}),
+
+    // description
     ...(!(config.description === undefined && description.value === '') &&
     config.description !== description.value
       ? { description: description.value }
       : {}),
+
+    // destination index
+    ...(!(config.dest.index === undefined && destinationIndex.value === '') &&
+    config.dest.index !== destinationIndex.value
+      ? { dest: { index: destinationIndex.value } }
+      : {}),
+
+    // docs_per_second
     ...(docsPerSecondFormValue !== docsPerSecondConfigValue
       ? { settings: { docs_per_second: docsPerSecondFormValue } }
       : {}),
@@ -155,6 +168,7 @@ export const applyFormFieldsToTransformConfig = (
 export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
   formFields: {
     description: { ...defaultField, value: config?.description ?? '' },
+    destinationIndex: { ...defaultField, value: config?.dest?.index ?? '' },
     frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
     docsPerSecond: {
       ...defaultField,

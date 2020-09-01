@@ -34,6 +34,15 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         value={formFields.description.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDestinationIndexInput"
+        errorMessages={formFields.destinationIndex.errorMessages}
+        label={i18n.translate('xpack.transform.transformList.editFlyoutFormDestinationIndexLabel', {
+          defaultMessage: 'Destination index',
+        })}
+        onChange={(value) => dispatch({ field: 'destinationIndex', value })}
+        value={formFields.destinationIndex.value}
+      />
+      <EditTransformFlyoutFormTextInput
         dataTestSubj="transformEditFlyoutDocsPerSecondInput"
         errorMessages={formFields.docsPerSecond.errorMessages}
         helpText={i18n.translate(
