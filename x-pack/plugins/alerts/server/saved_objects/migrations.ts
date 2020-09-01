@@ -8,7 +8,6 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-  Logger,
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
