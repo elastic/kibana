@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
@@ -47,9 +47,17 @@ export const IndexSetupRow: React.FC<{
     [index, previousQualityWarnings]
   );
 
-  const hasWarnings = useMemo(() => datasets.some(({ warnings }) => warnings.length > 0), [
-    datasets,
-  ]);
+  const datasetIndependentQualityWarnings = useMemo(
+    () => previousQualityWarnings.filter(({ dataset }) => dataset === ''),
+    [previousQualityWarnings]
+  );
+
+  const hasWarnings = useMemo(
+    () =>
+      datasetIndependentQualityWarnings.length > 0 ||
+      datasets.some(({ warnings }) => warnings.length > 0),
+    [datasetIndependentQualityWarnings, datasets]
+  );
 
   const isSelected = index.validity === 'valid' && index.isSelected;
 
@@ -62,7 +70,18 @@ export const IndexSetupRow: React.FC<{
           label={
             <>
               <EuiCode>{index.name}</EuiCode>{' '}
-              {hasWarnings ? <EuiIcon type="alert" color="warning" /> : null}
+              {index.validity === 'valid' && hasWarnings ? (
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.infra.logs.analsysisSetup.indexQualityWarningTooltipMessage"
+                      defaultMessage="While analyzing the log messages from these indices we've detected some problems which might indicate a reduced quality of the results. Consider excluding these indices or problematic datasets from the analysis."
+                    />
+                  }
+                  type="alert"
+                  color="warning"
+                />
+              ) : null}
             </>
           }
           onChange={changeIsSelected}
@@ -72,9 +91,7 @@ export const IndexSetupRow: React.FC<{
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {index.validity === 'invalid' ? (
-          <EuiToolTip content={formatValidationError(index.errors)}>
-            <EuiIcon type="alert" color="danger" />
-          </EuiToolTip>
+          <EuiIconTip content={formatValidationError(index.errors)} type="alert" color="danger" />
         ) : index.validity === 'valid' ? (
           <IndexSetupDatasetFilter
             availableDatasets={datasets}
