@@ -11,7 +11,6 @@ import { UIProcessorEvent } from '../../../common/processor_event';
 export type IUrlParams = {
   detailTab?: string;
   end?: string;
-  errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
   environment?: string;

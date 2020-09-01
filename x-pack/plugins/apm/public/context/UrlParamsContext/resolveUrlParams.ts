@@ -30,7 +30,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     serviceNodeName,
-    errorGroupId,
     traceId: traceIdLink,
   } = getPathParams(location.pathname);
 
@@ -89,7 +88,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     traceIdLink,
-    errorGroupId,
     serviceNodeName: serviceNodeName
       ? decodeURIComponent(serviceNodeName)
       : serviceNodeName,

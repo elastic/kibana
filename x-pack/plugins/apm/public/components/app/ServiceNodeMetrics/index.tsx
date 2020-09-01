@@ -41,9 +41,11 @@ const Truncate = styled.span`
   ${truncate(px(unit * 12))}
 `;
 
-export function ServiceNodeMetrics() {
+type ServiceNodeMetricsProps = RouteComponentProps<{ serviceName: string, serviceNodeName: string }>
+
+export function ServiceNodeMetrics({ serviceName, serviceNodeName }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, serviceNodeName } = urlParams;
+  const  = urlParams;
 
   const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(urlParams, agentName);
