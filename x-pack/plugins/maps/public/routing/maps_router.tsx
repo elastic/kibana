@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   getCoreChrome,
@@ -18,16 +18,18 @@ import {
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
+  IKbnUrlStateStorage,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
 import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
+import { AppMountContext, AppMountParameters } from 'kibana/public';
 
-export let goToSpecifiedPath;
-export let kbnUrlStateStorage;
+export let goToSpecifiedPath: (path: string) => void;
+export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
-export async function renderApp(context, { appBasePath, element, history, onAppLeave }) {
+export async function renderApp(context: AppMountContext, { appBasePath, element, history, onAppLeave }: AppMountParameters) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -42,11 +44,17 @@ export async function renderApp(context, { appBasePath, element, history, onAppL
   };
 }
 
-const App = ({ history, appBasePath, onAppLeave }) => {
+interface AppProps {
+  history: AppMountParameters['history'] | RouteComponentProps['history'];
+  appBasePath: AppMountParameters['appBasePath'];
+  onAppLeave: AppMountParameters['onAppLeave'];
+}
+
+const App: React.FC<AppProps> = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
-  const stateTransfer = getEmbeddableService()?.getStateTransfer(history);
+  const stateTransfer = getEmbeddableService()?.getStateTransfer(history as AppMountParameters['history']);
 
   const { originatingApp } =
     stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
@@ -66,7 +74,7 @@ const App = ({ history, appBasePath, onAppLeave }) => {
   return (
     <I18nContext>
       <Provider store={store}>
-        <Router basename={appBasePath} history={history}>
+        <Router history={history}>
           <Switch>
             <Route
               path={`/map/:savedMapId`}
