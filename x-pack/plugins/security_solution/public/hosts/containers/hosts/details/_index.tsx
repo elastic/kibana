@@ -57,7 +57,7 @@ export const useHostOverview = ({
   const [hostOverviewRequest, setHostOverviewRequest] = useState<HostOverviewRequestOptions>({
     defaultIndex,
     hostName,
-    factoryQueryType: HostsQueries.hostOverview,
+    factoryQueryType: HostsQueries.details,
     timerange: {
       interval: '12h',
       from: startDate,

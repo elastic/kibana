@@ -9,11 +9,13 @@ import { HostsQueries } from '../../../../../common/search_strategy/security_sol
 
 import { SecuritySolutionFactory } from '../types';
 import { allHosts } from './all';
-import { overviewHost } from './overview';
+import { hostDetails } from './details';
+import { hostOverview } from './overview';
 import { firstLastSeenHost } from './last_first_seen';
 
 export const hostsFactory: Record<HostsQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
+  [HostsQueries.details]: hostDetails,
   [HostsQueries.hosts]: allHosts,
-  [HostsQueries.hostOverview]: overviewHost,
+  [HostsQueries.overview]: hostOverview,
   [HostsQueries.firstLastSeen]: firstLastSeenHost,
 };

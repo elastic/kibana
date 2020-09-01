@@ -110,7 +110,7 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
-  : T extends HostsQueries.hostOverview
+  : T extends HostsQueries.overview
   ? HostOverviewStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
@@ -120,7 +120,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.hostOverview
+  : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions

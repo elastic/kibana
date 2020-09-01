@@ -6,11 +6,13 @@
 
 export * from './all';
 export * from './common';
+export * from './details';
 export * from './overview';
 export * from './first_last_seen';
 
 export enum HostsQueries {
+  details = 'details',
   hosts = 'hosts',
-  hostOverview = 'hostOverview',
+  overview = 'overview',
   firstLastSeen = 'firstLastSeen',
 }
