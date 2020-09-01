@@ -5,30 +5,31 @@
  */
 
 import {
+  EuiCallOut,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiHorizontalRule,
-  EuiFlexGrid,
   EuiPanel,
   EuiSpacer,
   EuiStat,
+  EuiTitle,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useAgentName } from '../../../hooks/useAgentName';
-import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useAgentName } from '../../../hooks/useAgentName';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { px, truncate, unit } from '../../../style/variables';
+import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { truncate, px, unit } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
@@ -41,11 +42,16 @@ const Truncate = styled.span`
   ${truncate(px(unit * 12))}
 `;
 
-type ServiceNodeMetricsProps = RouteComponentProps<{ serviceName: string, serviceNodeName: string }>
+type ServiceNodeMetricsProps = RouteComponentProps<{
+  serviceName: string;
+  serviceNodeName: string;
+}>;
 
-export function ServiceNodeMetrics({ serviceName, serviceNodeName }: ServiceNodeMetricsProps) {
+export function ServiceNodeMetrics({
+  serviceName,
+  serviceNodeName,
+}: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
-  const  = urlParams;
 
   const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(urlParams, agentName);
