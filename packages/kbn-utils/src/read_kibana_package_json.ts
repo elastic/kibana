@@ -21,6 +21,16 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { REPO_ROOT } from './repo_root';
 
+const { version, build } = readKibanaPackageJSON();
+
 export function readKibanaPackageJSON() {
   return JSON.parse(readFileSync(resolve(REPO_ROOT, './package.json')).toString());
+}
+
+export function isKibanaDistributable(): boolean {
+  return Boolean(build && build.distributable === true);
+}
+
+export function getVersion(): string {
+  return version;
 }

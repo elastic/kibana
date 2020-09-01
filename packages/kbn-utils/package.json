@@ -9,7 +9,10 @@
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@kbn/config-schema": "1.0.0",
+    "elastic-apm-node": "^3.7.0"
+  },
   "devDependencies": {
     "typescript": "3.9.5"
   }

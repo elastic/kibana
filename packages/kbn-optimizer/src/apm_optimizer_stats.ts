@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Agent } from '@kbn/apm';
+import { apm } from '@kbn/utils';
 import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';
@@ -37,10 +37,10 @@ export function apmOptimizerStats(config: OptimizerConfig) {
           if (!loggedInit) {
             loggedInit = true;
 
-            trans = Agent.startTransaction('@kbn/optimizer', 'cli');
+            trans = apm.Agent.startTransaction('@kbn/optimizer', 'cli');
 
             const bundlesCount = state.onlineBundles.length + state.offlineBundles.length;
-            Agent.addLabels({
+            apm.Agent.addLabels({
               optimizer_bundle_count: bundlesCount,
               optimizer_bundle_cache_count: state.offlineBundles.length,
               optimizer_bundle_cache_pct: Math.round(
@@ -61,7 +61,7 @@ export function apmOptimizerStats(config: OptimizerConfig) {
         if (state.phase === 'issue') {
           for (const b of state.compilerStates) {
             if (b.type === 'compiler issue') {
-              Agent.captureError(b.failure, {
+              apm.Agent.captureError(b.failure, {
                 custom: {
                   optimizer_bundle_id: b.bundleId,
                 },

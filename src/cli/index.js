@@ -17,6 +17,6 @@
  * under the License.
  */
 
-require('@kbn/apm').start();
+require('@kbn/utils').apm.start();
 require('../setup_node_env');
 require('./cli');

@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export * from './repo_root';
+export * as apm from './apm';
 export * from './read_kibana_package_json';
+export * from './repo_root';

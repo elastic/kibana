@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { config as apmConfig, active } from '@kbn/apm';
+import { apm } from '@kbn/utils';
 import agent from 'elastic-apm-node';
 
 const apmEnabled = true;
@@ -35,10 +35,9 @@ export function getApmConfig(requestPath) {
     return null;
   }
   const config = {
-    ...apmConfig,
+    ...apm.config,
     ...{
       serviceName: 'kibana-frontend',
-      active: active(),
       pageLoadTransactionName: requestPath,
     },
   };

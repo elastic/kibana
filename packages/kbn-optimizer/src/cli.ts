@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import apm from '@kbn/apm';
+import { apm } from '@kbn/utils';
 
 apm.start({
   metricsInterval: 1,

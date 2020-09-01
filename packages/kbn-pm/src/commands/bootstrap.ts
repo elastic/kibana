@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import apm from '@kbn/apm';
+import { apm } from '@kbn/utils';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
