@@ -221,13 +221,13 @@ export class SavedObjectsRepository {
     const {
       id,
       migrationVersion,
-      namespace,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
       originId,
       version,
     } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -294,7 +294,8 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { namespace, overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const namespace = normalizeNamespace(options.namespace);
     const time = this._getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
@@ -469,7 +470,7 @@ export class SavedObjectsRepository {
       return { errors: [] };
     }
 
-    const { namespace } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
     const expectedBulkGetResults: Either[] = objects.map((object) => {
@@ -552,7 +553,8 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -659,7 +661,7 @@ export class SavedObjectsRepository {
               }
             `,
             lang: 'painless',
-            params: { namespace: namespaceIdToString(namespace) },
+            params: { namespace },
           },
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
@@ -815,7 +817,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { namespace } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -921,7 +923,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { namespace } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
       {
@@ -979,7 +981,8 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
     if (this._registry.isMultiNamespace(type)) {
@@ -1061,6 +1064,7 @@ export class SavedObjectsRepository {
     }
 
     const { version, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
+    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
@@ -1123,6 +1127,7 @@ export class SavedObjectsRepository {
     }
 
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
+    // we do not need to normalize the namespace to its ID format, since it will be converted to a namespace string before being used
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
@@ -1209,7 +1214,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
-    const { namespace } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
     const expectedBulkGetResults: Either[] = objects.map((object) => {
@@ -1422,7 +1427,8 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
     let savedObjectNamespace;
@@ -1661,6 +1667,13 @@ function getSavedObjectNamespaces(
   }
   return [namespaceIdToString(namespace)];
 }
+
+/**
+ * Ensure that a namespace is always in its namespace ID representation.
+ * This allows `'default'` to be used interchangeably with `undefined`.
+ */
+const normalizeNamespace = (namespace?: string) =>
+  namespace === undefined ? namespace : namespaceStringToId(namespace);
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.

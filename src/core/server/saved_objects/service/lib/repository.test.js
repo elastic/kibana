@@ -597,6 +597,16 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { namespace: 'default' });
+        const expected = expect.not.objectContaining({ namespace: 'default' });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
       it(`doesn't add namespace to request body for any types that are not single-namespace`, async () => {
         const objects = [
           { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
@@ -994,6 +1004,12 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await bulkGetSuccess([obj1, obj2], { namespace: 'default' });
+        _expectClientCallArgs([obj1, obj2], { getId });
+      });
+
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
         let objects = [obj1, obj2].map((obj) => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
@@ -1368,6 +1384,12 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await bulkUpdateSuccess([obj1, obj2], { namespace: 'default' });
+        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+      });
+
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
         const overrides = {
@@ -1631,6 +1653,12 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await checkConflictsSuccess([obj1, obj2], { namespace: 'default' });
+        _expectClientCallArgs([obj1, obj2], { getId });
+      });
+
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
         // obj3 is multi-namespace, and obj6 is namespace-agnostic
@@ -1855,6 +1883,16 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await createSuccess(type, attributes, { id, namespace: 'default' });
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${type}:${id}`,
+          }),
+          expect.anything()
+        );
+      });
+
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id, namespace });
         expect(client.create).toHaveBeenCalledWith(
@@ -2064,6 +2102,14 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         await deleteSuccess(type, id);
+        expect(client.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ id: `${type}:${id}` }),
+          expect.anything()
+        );
+      });
+
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await deleteSuccess(type, id, { namespace: 'default' });
         expect(client.delete).toHaveBeenCalledWith(
           expect.objectContaining({ id: `${type}:${id}` }),
           expect.anything()
@@ -2698,6 +2744,16 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await getSuccess(type, id, { namespace: 'default' });
+        expect(client.get).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${type}:${id}`,
+          }),
+          expect.anything()
+        );
+      });
+
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         await getSuccess(NAMESPACE_AGNOSTIC_TYPE, id, { namespace });
         expect(client.get).toHaveBeenCalledWith(
@@ -2871,6 +2927,16 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         await incrementCounterSuccess(type, id, field);
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${type}:${id}`,
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await incrementCounterSuccess(type, id, field, { namespace: 'default' });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -3238,7 +3304,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).not.toHaveBeenCalled();
       });
 
-      it(`throws when type is not namespace-agnostic`, async () => {
+      it(`throws when type is not multi-namespace`, async () => {
         const test = async (type) => {
           const message = `${type} doesn't support multiple namespaces`;
           await expectBadRequestError(type, id, [namespace1, namespace2], message);
@@ -3505,6 +3571,14 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         await updateSuccess(type, id, attributes, { references });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.anything()
+        );
+      });
+
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        await updateSuccess(type, id, attributes, { references, namespace: 'default' });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
