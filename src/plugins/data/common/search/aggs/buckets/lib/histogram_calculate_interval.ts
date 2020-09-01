@@ -62,6 +62,21 @@ const calculateForGivenInterval = (
   return interval;
 };
 
+/**
+ * Algorithm for determining auto-interval
+
+   1. Define maxBars as Math.min(<user input>, <max buckets setting>)
+   2. Find the min and max values in the data
+   3. Subtract the min from max to get diff
+   4. Set exactInterval to diff / maxBars
+   5. Based on exactInterval, find the power of 10 that's lower and higher
+   6. Find the number of expected buckets that lowerPower would create: diff / lowerPower
+   7. Find the number of expected buckets that higherPower would create: diff / higherPower
+   8. There are three possible final intervals, pick the one that's closest to maxBars:
+     - The lower power of 10
+     - The higher power of 10, divided by 5
+     - The higher power of 10, divided by 2
+ **/
 const calculateAutoInterval = (
   diff: number,
   maxBucketsUiSettings: CalculateHistogramIntervalParams['maxBucketsUiSettings'],
