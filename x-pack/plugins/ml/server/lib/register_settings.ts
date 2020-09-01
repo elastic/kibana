@@ -36,14 +36,15 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
     },
     [ANOMALY_DETECTION_ENABLE_TIME_RANGE]: {
       name: i18n.translate('xpack.ml.advancedSettings.enableAnomalyDetectionDefaultTimeRangeName', {
-        defaultMessage: 'Enable default time range for anomaly detection jobs',
+        defaultMessage: 'Enable time filter defaults for anomaly detection jobs',
       }),
       value: false,
       schema: schema.boolean(),
       description: i18n.translate(
         'xpack.ml.advancedSettings.enableAnomalyDetectionDefaultTimeRangeDesc',
         {
-          defaultMessage: 'Use a default time filter to view anomaly detection jobs.',
+          defaultMessage:
+            'Use the default time filter in the Single Metric Viewer and Anomaly Explorer.',
         }
       ),
       category: ['Machine Learning'],
@@ -60,7 +61,8 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
       description: i18n.translate(
         'xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeDesc',
         {
-          defaultMessage: 'The default time filter to view anomaly detection jobs.',
+          defaultMessage:
+            'The time filter selection to use when viewing anomaly detection job results.',
         }
       ),
       schema: schema.object({
