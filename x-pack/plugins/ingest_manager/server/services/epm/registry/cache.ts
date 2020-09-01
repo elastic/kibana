@@ -9,6 +9,8 @@ const cache: Map<string, Buffer> = new Map();
 export const cacheGet = (key: string) => cache.get(key);
 export const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
 export const cacheHas = (key: string) => cache.has(key);
+export const cacheClear = () => cache.clear();
+export const cacheDelete = (key: string) => cache.delete(key);
 
 const archiveLocationCache: Map<string, string> = new Map();
 export const getArchiveLocation = (name: string, version: string) =>

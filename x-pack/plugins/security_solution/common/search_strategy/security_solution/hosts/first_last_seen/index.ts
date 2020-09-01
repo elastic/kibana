@@ -6,8 +6,10 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe, RequestOptionsPaginated } from '../..';
+import { HostsFields } from '../common';
 
-export interface HostFirstLastSeenRequestOptions extends Partial<RequestOptionsPaginated> {
+export interface HostFirstLastSeenRequestOptions
+  extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
 }
 export interface HostFirstLastSeenStrategyResponse extends IEsSearchResponse {
