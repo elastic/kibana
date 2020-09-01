@@ -19,7 +19,7 @@
 
 export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-export { getDefaultSearchParams, getTotalLoaded, getShardTimeout } from './es_search';
+export * from './es_search';
 
 export { usageProvider, SearchUsage } from './collectors';
 

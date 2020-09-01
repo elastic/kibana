@@ -20,10 +20,12 @@
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 
+import { SearchResponse } from 'elasticsearch';
 import { IRouter } from 'src/core/server';
 import { UI_SETTINGS } from '../../../common';
 import { SearchRouteDependencies } from '../search_service';
-import { getShardTimeout } from '..';
+import { shimHitsTotal } from './shim_hits_total';
+import { getShardTimeout, getDefaultSearchParams, toSnakeCase } from '..';
 
 interface MsearchHeaders {
   index: string;
@@ -98,28 +100,29 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
       const config = await deps.globalConfig$.pipe(first()).toPromise();
       const timeout = getShardTimeout(config);
 
-      const body = convertRequestBody(request.body, { timeout });
+      const body = convertRequestBody(request.body, timeout);
+
+      // trackTotalHits is not supported by msearch
+      const { trackTotalHits, ...params } = await getDefaultSearchParams(
+        context.core.uiSettings.client
+      );
 
       try {
-        const ignoreThrottled = !(await context.core.uiSettings.client.get(
-          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
-        ));
-        const maxConcurrentShardRequests = await context.core.uiSettings.client.get(
-          UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
-        );
-        const response = await client.transport.request({
+        const response: Array<SearchResponse<any>> = await client.transport.request({
           method: 'GET',
           path: '/_msearch',
           body,
-          querystring: {
-            rest_total_hits_as_int: true,
-            ignore_throttled: ignoreThrottled,
-            max_concurrent_shard_requests:
-              maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
-          },
+          querystring: toSnakeCase(params),
         });
 
-        return res.ok({ body: response });
+        return res.ok({
+          body: {
+            ...response,
+            body: {
+              responses: response.body.responses.map((r) => shimHitsTotal(r)),
+            },
+          },
+        });
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,

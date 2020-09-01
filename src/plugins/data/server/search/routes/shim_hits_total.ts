@@ -17,7 +17,17 @@
  * under the License.
  */
 
-export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
-export { esSearchStrategyProvider } from './es_search_strategy';
-export * from './get_default_search_params';
-export { getTotalLoaded } from './get_total_loaded';
+import { SearchResponse } from 'elasticsearch';
+
+/**
+ * Temporary workaround until https://github.com/elastic/kibana/issues/26356 is addressed.
+ * Since we are setting `track_total_hits` in the request, `hits.total` will be an object
+ * containing the `value`.
+ *
+ * @internal
+ */
+export function shimHitsTotal(response: SearchResponse<any>) {
+  const total = (response.hits?.total as any)?.value ?? response.hits?.total;
+  const hits = { ...response.hits, total };
+  return { ...response, hits };
+}
