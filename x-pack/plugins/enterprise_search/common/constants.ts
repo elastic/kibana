@@ -11,6 +11,23 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
   NAME: i18n.translate('xpack.enterpriseSearch.productName', {
     defaultMessage: 'Enterprise Search',
   }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.navTitle', {
+    defaultMessage: 'Overview',
+  }),
+  SUBTITLE: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
+    defaultMessage: 'Search everything',
+  }),
+  DESCRIPTIONS: [
+    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
+      defaultMessage: 'Build a powerful search experience.',
+    }),
+    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription2', {
+      defaultMessage: 'Connect your users to relevant data.',
+    }),
+    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription3', {
+      defaultMessage: 'Unify your team content.',
+    }),
+  ],
   URL: '/app/enterprise_search',
 };
 
