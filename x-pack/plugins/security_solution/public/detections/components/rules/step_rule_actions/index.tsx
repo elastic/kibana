@@ -92,7 +92,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields } = form;
+  const { getFields, submit } = form;
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -106,9 +106,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.ruleActions, form);
+      setForm(RuleStep.ruleActions, submit);
     }
-  }, [form, setForm]);
+  }, [setForm, submit]);
 
   const throttleOptions = useMemo(() => {
     return getThrottleOptions(throttle);

@@ -121,7 +121,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset } = form;
+  const { getFields, reset, submit } = form;
   const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
 
   const handleSubmit = useCallback(() => {
@@ -132,9 +132,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.defineRule, form);
+      setForm(RuleStep.defineRule, submit);
     }
-  }, [form, setForm]);
+  }, [setForm, submit]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = getFields().index;

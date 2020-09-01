@@ -86,7 +86,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields } = form;
+  const { getFields, submit } = form;
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -96,9 +96,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.aboutRule, form);
+      setForm(RuleStep.aboutRule, submit);
     }
-  }, [setForm, form]);
+  }, [setForm, submit]);
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>

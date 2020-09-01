@@ -33,6 +33,8 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 
+const formHookNoop = async (): Promise<undefined> => undefined;
+
 const stepsRuleOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,
@@ -96,15 +98,15 @@ const CreateRulePageComponent: React.FC = () => {
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
-  const stepsForm = useRef<RuleStepsFormHooks>({
-    [RuleStep.defineRule]: null,
-    [RuleStep.aboutRule]: null,
-    [RuleStep.scheduleRule]: null,
-    [RuleStep.ruleActions]: null,
+  const formHooks = useRef<RuleStepsFormHooks>({
+    [RuleStep.defineRule]: formHookNoop,
+    [RuleStep.aboutRule]: formHookNoop,
+    [RuleStep.scheduleRule]: formHookNoop,
+    [RuleStep.ruleActions]: formHookNoop,
   });
-  const setStepForm = useCallback(
-    <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => {
-      stepsForm.current[step] = form;
+  const setFormHook = useCallback(
+    <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
+      formHooks.current[step] = hook;
     },
     []
   );
@@ -167,11 +169,10 @@ const CreateRulePageComponent: React.FC = () => {
 
   const editStep = useCallback(
     async (step: RuleStep) => {
-      const activeForm = stepsForm.current[activeStep];
-      const activeData = await activeForm?.submit();
+      const activeStepData = await formHooks.current[activeStep]();
 
-      if (activeData?.isValid) {
-        setStepData(activeStep, activeData);
+      if (activeStepData?.isValid) {
+        setStepData(activeStep, activeStepData);
         goToStep(step);
       }
     },
@@ -179,11 +180,10 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const submitStep = useCallback(
     async (step: RuleStep) => {
-      const stepForm = stepsForm.current[step];
-      const formData = await stepForm?.submit();
+      const stepData = await formHooks.current[step]();
 
-      if (formData?.isValid) {
-        setStepData(step, formData);
+      if (stepData?.isValid) {
+        setStepData(step, stepData);
         const nextStep = getNextStep(step);
 
         if (nextStep != null) {
@@ -312,7 +312,7 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={stepsData.current[RuleStep.defineRule].data}
               isReadOnlyView={activeStep !== RuleStep.defineRule}
               isLoading={isLoading || loading}
-              setForm={setStepForm}
+              setForm={setFormHook}
               onSubmit={() => submitStep(RuleStep.defineRule)}
               descriptionColumns="singleSplit"
             />
@@ -348,7 +348,7 @@ const CreateRulePageComponent: React.FC = () => {
               descriptionColumns="singleSplit"
               isReadOnlyView={activeStep !== RuleStep.aboutRule}
               isLoading={isLoading || loading}
-              setForm={setStepForm}
+              setForm={setFormHook}
               onSubmit={() => submitStep(RuleStep.aboutRule)}
             />
           </EuiAccordion>
@@ -381,7 +381,7 @@ const CreateRulePageComponent: React.FC = () => {
               descriptionColumns="singleSplit"
               isReadOnlyView={activeStep !== RuleStep.scheduleRule}
               isLoading={isLoading || loading}
-              setForm={setStepForm}
+              setForm={setFormHook}
               onSubmit={() => submitStep(RuleStep.scheduleRule)}
             />
           </EuiAccordion>
@@ -413,7 +413,7 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={stepsData.current[RuleStep.ruleActions].data}
               isReadOnlyView={activeStep !== RuleStep.ruleActions}
               isLoading={isLoading || loading}
-              setForm={setStepForm}
+              setForm={setFormHook}
               onSubmit={() => submitStep(RuleStep.ruleActions)}
               actionMessageParams={actionMessageParams}
             />

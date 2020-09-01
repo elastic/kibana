@@ -45,6 +45,8 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     schema,
   });
 
+  const { submit } = form;
+
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
       onSubmit();
@@ -53,9 +55,9 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.scheduleRule, form);
+      setForm(RuleStep.scheduleRule, submit);
     }
-  }, [form, setForm]);
+  }, [setForm, submit]);
 
   return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>

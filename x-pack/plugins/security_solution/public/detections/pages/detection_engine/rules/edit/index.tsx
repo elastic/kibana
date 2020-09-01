@@ -52,6 +52,8 @@ import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 
+const formHookNoop = async (): Promise<undefined> => undefined;
+
 const EditRulePageComponent: FC = () => {
   const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
@@ -71,11 +73,11 @@ const EditRulePageComponent: FC = () => {
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
   const [initForm, setInitForm] = useState(false);
-  const stepsForm = useRef<RuleStepsFormHooks>({
-    [RuleStep.defineRule]: null,
-    [RuleStep.aboutRule]: null,
-    [RuleStep.scheduleRule]: null,
-    [RuleStep.ruleActions]: null,
+  const formHooks = useRef<RuleStepsFormHooks>({
+    [RuleStep.defineRule]: formHookNoop,
+    [RuleStep.aboutRule]: formHookNoop,
+    [RuleStep.scheduleRule]: formHookNoop,
+    [RuleStep.ruleActions]: formHookNoop,
   });
   const stepsData = useRef<RuleStepsFormData>({
     [RuleStep.defineRule]: { isValid: false, data: undefined },
@@ -91,12 +93,12 @@ const EditRulePageComponent: FC = () => {
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
-  const setStepsForm = useCallback(
-    <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => {
-      stepsForm.current[step] = form;
-      if (initForm && step === activeStep && form?.isSubmitted === false) {
+  const setFormHook = useCallback(
+    <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
+      formHooks.current[step] = hook;
+      if (initForm && step === activeStep) {
         setInitForm(false);
-        form.submit();
+        hook();
       }
     },
     [initForm, activeStep]
@@ -124,7 +126,7 @@ const EditRulePageComponent: FC = () => {
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={defineStep.data}
-                  setForm={setStepsForm}
+                  setForm={setFormHook}
                 />
               )}
               <EuiSpacer />
@@ -147,7 +149,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={aboutStep.data}
                   defineRuleData={defineStep.data}
-                  setForm={setStepsForm}
+                  setForm={setFormHook}
                 />
               )}
               <EuiSpacer />
@@ -169,7 +171,7 @@ const EditRulePageComponent: FC = () => {
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={scheduleStep.data}
-                  setForm={setStepsForm}
+                  setForm={setFormHook}
                 />
               )}
               <EuiSpacer />
@@ -190,7 +192,7 @@ const EditRulePageComponent: FC = () => {
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={actionsStep.data}
-                  setForm={setStepsForm}
+                  setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
                 />
               )}
@@ -205,7 +207,7 @@ const EditRulePageComponent: FC = () => {
       loading,
       defineStep.data,
       isLoading,
-      setStepsForm,
+      setFormHook,
       aboutStep.data,
       scheduleStep.data,
       actionsStep.data,
@@ -214,7 +216,7 @@ const EditRulePageComponent: FC = () => {
   );
 
   const onSubmit = useCallback(async () => {
-    const activeStepData = await stepsForm.current[activeStep]?.submit();
+    const activeStepData = await formHooks.current[activeStep]();
     if (activeStepData?.isValid) {
       const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
       const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
@@ -254,9 +256,9 @@ const EditRulePageComponent: FC = () => {
   const onTabClick = useCallback(
     async (tab: EuiTabbedContentTab) => {
       const targetStep = tab.id as RuleStep;
-      const activeStepData = await stepsForm.current[activeStep]?.submit();
+      const activeStepData = await formHooks.current[activeStep]();
 
-      if (activeStepData?.isValid) {
+      if (activeStepData?.isValid && activeStepData.data != null) {
         setStepData(activeStep, activeStepData.data, true);
         setInitForm(true);
         setTabHasError([]);

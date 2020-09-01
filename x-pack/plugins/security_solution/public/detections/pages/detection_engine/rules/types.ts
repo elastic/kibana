@@ -58,7 +58,7 @@ export type RuleStepsFormData = {
 };
 
 export type RuleStepsFormHooks = {
-  [K in keyof RuleStepsData]: FormHook<RuleStepsData[K]> | null;
+  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
 };
 
 export interface RuleStepProps {
@@ -69,7 +69,7 @@ export interface RuleStepProps {
   isLoading: boolean;
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => void;
+  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
 }
 
 export interface AboutStepRule {
