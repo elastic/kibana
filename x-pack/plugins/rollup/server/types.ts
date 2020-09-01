@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, LegacyAPICaller, KibanaRequest } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
