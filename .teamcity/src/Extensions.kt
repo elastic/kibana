@@ -1,6 +1,6 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 
-fun BuildFeatures.Junit(dirs: String = "target/**/TEST-*.xml") {
+fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   feature {
     type = "xml-report-plugin"
     param("xmlReportParsing.reportType", "junit")
@@ -40,4 +40,14 @@ fun ProjectFeatures.kibanaAgent(size: String, init: ProjectFeature.() -> Unit = 
     param("machineType", "n2-standard-$size")
     init()
   }
+}
+
+fun BuildType.kibanaAgent(size: String) {
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-$size-", "RQ_AGENT_NAME")
+  }
+}
+
+fun BuildType.kibanaAgent(size: Int) {
+  kibanaAgent(size.toString())
 }

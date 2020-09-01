@@ -5,7 +5,6 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.FailureAction
 import jetbrains.buildServer.configs.kotlin.v2019_2.ReuseBuilds
 
 object AllTests : BuildType({
-
   name = "All Tests"
   paused = true
   description = "All Non-Functional Tests"

@@ -1,6 +1,6 @@
 package builds.default
 
-import Junit
+import junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -25,10 +25,10 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   }
 
   features {
-    Junit()
+    junit()
   }
 
   dependencies {
-    DefaultBuild()
+    defaultBuild()
   }
 })

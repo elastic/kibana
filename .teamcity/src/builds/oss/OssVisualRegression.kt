@@ -1,6 +1,6 @@
 package builds.oss
 
-import Junit
+import junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -26,10 +26,10 @@ object OssVisualRegression : BuildType({
   }
 
   features {
-    Junit()
+    junit()
   }
 
   dependencies {
-    OssBuild()
+    ossBuild()
   }
 })

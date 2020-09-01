@@ -3,6 +3,7 @@ package builds.oss
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.Dependencies
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import kibanaAgent
 
 object OssBuild : BuildType({
   name = "Build"
@@ -11,9 +12,7 @@ object OssBuild : BuildType({
 
   artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
 
-  requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-16-", "RQ_AGENT_NAME")
-  }
+  kibanaAgent(16)
 
   steps {
     script {
@@ -27,7 +26,7 @@ object OssBuild : BuildType({
   }
 })
 
-fun Dependencies.OssBuild(rules: String = "+:kibana-oss.tar.gz!** => build/kibana-build-oss") {
+fun Dependencies.ossBuild(rules: String = "+:kibana-oss.tar.gz!** => build/kibana-build-oss") {
   dependency(OssBuild) {
     snapshot {
     }

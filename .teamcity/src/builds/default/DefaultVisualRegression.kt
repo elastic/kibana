@@ -1,6 +1,6 @@
 package builds.default
 
-import Junit
+import junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -26,10 +26,10 @@ object DefaultVisualRegression : BuildType({
   }
 
   features {
-    Junit()
+    junit()
   }
 
   dependencies {
-    DefaultBuild()
+    defaultBuild()
   }
 })

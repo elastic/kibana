@@ -1,6 +1,6 @@
 package builds.test
 
-import Junit
+import junit
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -21,6 +21,6 @@ object ApiIntegration : BuildType({
   }
 
   features {
-    Junit()
+    junit()
   }
 })
