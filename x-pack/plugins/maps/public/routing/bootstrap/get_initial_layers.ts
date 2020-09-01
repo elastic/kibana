@@ -17,7 +17,6 @@ import '../../classes/sources/es_geo_grid_source';
 import '../../classes/sources/xyz_tms_source';
 // @ts-expect-error
 import { KibanaTilemapSource } from '../../classes/sources/kibana_tilemap_source';
-// @ts-expect-error
 import { TileLayer } from '../../classes/layers/tile_layer/tile_layer';
 // @ts-expect-error
 import { EMSTMSSource } from '../../classes/sources/ems_tms_source';
