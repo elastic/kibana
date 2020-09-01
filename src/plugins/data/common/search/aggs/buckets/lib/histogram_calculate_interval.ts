@@ -74,8 +74,8 @@ const calculateForGivenInterval = (
    7. Find the number of expected buckets that higherPower would create: diff / higherPower
    8. There are three possible final intervals, pick the one that's closest to maxBars:
      - The lower power of 10
-     - The higher power of 10, divided by 5
-     - The higher power of 10, divided by 2
+     - The lower power of 10, times 2
+     - The lower power of 10, times 5
  **/
 const calculateAutoInterval = (
   diff: number,
