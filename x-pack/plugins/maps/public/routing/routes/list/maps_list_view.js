@@ -12,7 +12,7 @@ import {
   getUiSettings,
   getToasts,
   getCoreChrome,
-  getHttp,
+  getNavigateToApp,
 } from '../../../kibana_services';
 import {
   EuiTitle,
@@ -34,9 +34,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { goToSpecifiedPath } from '../../maps_router';
-import { getNewMapPath } from '../../../../common/constants';
+import { APP_ID, MAP_PATH } from '../../../../common/constants';
 
 export const EMPTY_FILTER = '';
+
+function navigateToNewMap() {
+  const navigateToApp = getNavigateToApp();
+  navigateToApp(APP_ID, {
+    path: MAP_PATH,
+  });
+}
 
 export class MapsListView extends React.Component {
   state = {
@@ -388,9 +395,8 @@ export class MapsListView extends React.Component {
   renderListing() {
     let createButton;
     if (!this.state.readOnly) {
-      const newMap = getHttp().basePath.prepend(getNewMapPath());
       createButton = (
-        <EuiButton data-test-subj="newMapLink" fill href={newMap}>
+        <EuiButton data-test-subj="newMapLink" onClick={navigateToNewMap}>
           <FormattedMessage
             id="xpack.maps.mapListing.createMapButtonLabel"
             defaultMessage="Create map"
