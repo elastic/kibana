@@ -65,6 +65,7 @@ export interface ActionTypeModel<ActionConnector = any, ActionParams = any> {
   id: string;
   iconClass: string;
   selectMessage: string;
+  consumerSelectedMessage?: string;
   actionTypeTitle?: string;
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
