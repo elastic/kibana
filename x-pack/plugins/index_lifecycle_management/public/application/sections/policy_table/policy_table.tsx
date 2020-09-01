@@ -42,7 +42,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 }) => {
   const [confirmModal, setConfirmModal] = useState<ReactNode | null>();
   const [filter, setFilter] = useState<string>();
-  const [selectedPolicies] = useState<PolicyFromES[]>([]);
 
   const createPolicyButton = (
     <EuiButton
@@ -89,17 +88,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     content = (
       <Fragment>
         <EuiFlexGroup gutterSize="l" alignItems="center">
-          {selectedPolicies.length > 0 ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="deletePolicyButton" color="danger" onClick={() => {}}>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyTable.deletedPoliciesText"
-                  defaultMessage="Deleted {numSelected} {numSelected, plural, one {policy} other {policies}}"
-                  values={{ numSelected: selectedPolicies.length }}
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth

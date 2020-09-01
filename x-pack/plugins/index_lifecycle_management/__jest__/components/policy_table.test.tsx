@@ -5,23 +5,29 @@
  */
 import moment from 'moment-timezone';
 import React, { ReactElement } from 'react';
-// axios has a $http like interface so using it to simulate $http
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
-import { scopedHistoryMock } from '../../../../../src/core/public/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import {
+  fatalErrorsServiceMock,
+  injectedMetadataServiceMock,
+  scopedHistoryMock,
+} from '../../../../../src/core/public/mocks';
+import { HttpService } from '../../../../../src/core/public/http';
+import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+
 import { PolicyTable } from '../../public/application/sections/policy_table/policy_table';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
-import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 import { PolicyFromES } from '../../public/application/services/policies/types';
-import { ReactWrapper } from 'enzyme';
 
-// This expects HttpSetup but we're giving it AxiosInstance.
-// @ts-ignore
-initHttp(axios.create({ adapter: axiosXhrAdapter }));
+initHttp(
+  new HttpService().setup({
+    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+  })
+);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
 const policies: PolicyFromES[] = [];

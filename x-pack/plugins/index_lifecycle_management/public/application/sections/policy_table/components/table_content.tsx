@@ -47,7 +47,7 @@ type PolicyProperty = Extract<
   keyof PolicyFromES,
   'version' | 'name' | 'linkedIndices' | 'modified_date'
 >;
-const COLUMNS = new Map<PolicyProperty, { label: string; width: number }>([
+const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
   [
     'name',
     {
@@ -84,7 +84,8 @@ const COLUMNS = new Map<PolicyProperty, { label: string; width: number }>([
       width: 200,
     },
   ],
-]);
+];
+
 interface Props {
   policies: PolicyFromES[];
   totalNumber: number;
@@ -115,17 +116,15 @@ export const TableContent: React.FunctionComponent<Props> = ({
   sortedPolicies = sortedPolicies.slice(firstItemIndex, lastItemIndex + 1);
 
   const isPolicyPopoverOpen = (policyName: string): boolean => popoverPolicy === policyName;
-  const closePolicyPopover = (policyName: string): void => {
-    if (isPolicyPopoverOpen(policyName)) {
-      setPopoverPolicy('');
-    }
+  const closePolicyPopover = (): void => {
+    setPopoverPolicy('');
   };
   const openPolicyPopover = (policyName: string): void => {
     setPopoverPolicy(policyName);
   };
   const togglePolicyPopover = (policyName: string): void => {
     if (isPolicyPopoverOpen(policyName)) {
-      closePolicyPopover(policyName);
+      closePolicyPopover();
     } else {
       openPolicyPopover(policyName);
     }
@@ -137,7 +136,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   };
 
   const headers = [];
-  COLUMNS.forEach(({ label, width }, fieldName) => {
+  COLUMNS.forEach(([fieldName, { label, width }]) => {
     const isSorted = sort.sortField === fieldName;
     headers.push(
       <EuiTableHeaderCell
@@ -225,12 +224,12 @@ export const TableContent: React.FunctionComponent<Props> = ({
     return [panelTree];
   };
 
-  const renderRowCell = (fieldName: string, value: any): ReactNode => {
+  const renderRowCell = (fieldName: string, value: string | number | string[]): ReactNode => {
     if (fieldName === 'name') {
       return (
         <EuiLink
           data-test-subj="policyTablePolicyNameLink"
-          {...reactRouterNavigate(history, getPolicyPath(value), () =>
+          {...reactRouterNavigate(history, getPolicyPath(value as string), () =>
             trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
           )}
         >
@@ -240,7 +239,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
     } else if (fieldName === 'linkedIndices') {
       return (
         <EuiText>
-          <b>{value ? value.length : '0'}</b>
+          <b>{value ? (value as string[]).length : '0'}</b>
         </EuiText>
       );
     } else if (fieldName === 'modified_date' && value) {
@@ -252,7 +251,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   const renderRowCells = (policy: PolicyFromES): ReactElement[] => {
     const { name } = policy;
     const cells = [];
-    COLUMNS.forEach(({ width }, fieldName) => {
+    COLUMNS.forEach(([fieldName, { width }]) => {
       const value: any = policy[fieldName];
 
       if (fieldName === 'name') {
@@ -305,7 +304,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
           id="contextMenuPolicy"
           button={button}
           isOpen={isPolicyPopoverOpen(policy.name)}
-          closePopover={() => closePolicyPopover(policy.name)}
+          closePopover={closePolicyPopover}
           panelPaddingSize="none"
           withTitle
           anchorPosition="rightUp"

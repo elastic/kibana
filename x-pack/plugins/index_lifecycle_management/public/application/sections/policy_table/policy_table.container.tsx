@@ -22,49 +22,48 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
 }) => {
   const { data: policies, isLoading, error, sendRequest } = useLoadPoliciesList(true);
 
-  if (!policies) {
-    if (isLoading) {
-      return (
-        <EuiEmptyPrompt
-          title={<EuiLoadingSpinner size="xl" />}
-          body={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
-              defaultMessage="Loading policies..."
-            />
-          }
-        />
-      );
-    }
-    if (error) {
-      const { statusCode, message } = error ? error : { statusCode: '', message: '' };
-      return (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
-                defaultMessage="Unable to load existing lifecycle policies"
-              />
-            </h2>
-          }
-          body={
-            <p>
-              {message} ({statusCode})
-            </p>
-          }
-          actions={
-            <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
-                defaultMessage="Try again"
-              />
-            </EuiButton>
-          }
-        />
-      );
-    }
+  if (isLoading) {
+    return (
+      <EuiEmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
+            defaultMessage="Loading policies..."
+          />
+        }
+      />
+    );
   }
+  if (error) {
+    const { statusCode, message } = error ? error : { statusCode: '', message: '' };
+    return (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
+              defaultMessage="Unable to load existing lifecycle policies"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actions={
+          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
+    );
+  }
+
   return (
     <PresentationComponent
       policies={policies || []}
