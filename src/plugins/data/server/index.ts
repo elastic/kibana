@@ -200,6 +200,7 @@ export {
   // search
   IEsSearchRequest,
   IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,

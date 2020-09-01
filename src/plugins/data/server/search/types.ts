@@ -18,7 +18,6 @@
  */
 
 import { RequestHandlerContext } from '../../../../core/server';
-import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
@@ -74,9 +73,9 @@ export interface ISearchStart<
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
-    request: IKibanaSearchRequest,
+    request: IEsSearchRequest,
     options: ISearchOptions
-  ) => Promise<IKibanaSearchResponse>;
+  ) => Promise<IEsSearchResponse>;
 }
 
 /**

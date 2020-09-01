@@ -89,8 +89,8 @@ export class Plugin {
     };
 
     functionsRoute(router, deps);
-    validateEsRoute(router);
     runRoute(router, deps);
+    validateEsRoute(router, core);
 
     core.uiSettings.register({
       'timelion:es.timefield': {

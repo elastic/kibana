@@ -26,7 +26,6 @@ import chainRunnerFn from '../handlers/chain_runner.js';
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
 import getTlConfig from '../handlers/lib/tl_config';
-import { TimelionPluginStartDeps } from '../plugin';
 import { TimelionFunctionInterface } from '../types';
 import { ConfigManager } from '../lib/config_manager';
 
@@ -82,17 +81,16 @@ export function runRoute(
     router.handleLegacyErrors(async (context, request, response) => {
       try {
         const uiSettings = await context.core.uiSettings.client.getAll();
-        const deps = (await core.getStartServices())[1] as TimelionPluginStartDeps;
 
         const tlConfig = getTlConfig({
           context,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
+          getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: deps.data.search.search,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
