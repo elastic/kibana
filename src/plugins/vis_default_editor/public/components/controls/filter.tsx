@@ -115,6 +115,7 @@ function FilterRow({
           dataTestSubj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
+          size="s"
         />
       </EuiFormRow>
       {showCustomLabel ? (
