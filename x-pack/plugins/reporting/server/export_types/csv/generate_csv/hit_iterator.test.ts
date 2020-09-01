@@ -7,17 +7,13 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CancellationToken } from '../../../../common';
-import { LevelLogger } from '../../../lib';
+import { createMockLevelLogger } from '../../../test_helpers/create_mock_levellogger';
 import { ScrollConfig } from '../../../types';
 import { createHitIterator } from './hit_iterator';
 
-const mockLogger = {
-  error: new Function(),
-  debug: new Function(),
-  warning: new Function(),
-} as LevelLogger;
+const mockLogger = createMockLevelLogger();
 const debugLogStub = sinon.stub(mockLogger, 'debug');
-const warnLogStub = sinon.stub(mockLogger, 'warning');
+const warnLogStub = sinon.stub(mockLogger, 'warn');
 const errorLogStub = sinon.stub(mockLogger, 'error');
 const mockCallEndpoint = sinon.stub();
 const mockSearchRequest = {};
@@ -133,5 +129,31 @@ describe('hitIterator', function () {
     expect(warnLogStub.callCount).to.be(0);
     expect(errorLogStub.callCount).to.be(1);
     expect(errorThrown).to.be(true);
+  });
+
+  it('handles scroll id could not be cleared', async () => {
+    // Setup
+    mockCallEndpoint.withArgs('clearScroll').rejects({ status: 404 });
+
+    // Begin
+    const hitIterator = createHitIterator(mockLogger);
+    const iterator = hitIterator(
+      mockConfig,
+      mockCallEndpoint,
+      mockSearchRequest,
+      realCancellationToken
+    );
+
+    while (true) {
+      const { done: iterationDone, value: hit } = await iterator.next();
+      if (iterationDone) {
+        break;
+      }
+      expect(hit).to.be('you found me');
+    }
+
+    expect(mockCallEndpoint.callCount).to.be(13);
+    expect(warnLogStub.callCount).to.be(1);
+    expect(errorLogStub.callCount).to.be(1);
   });
 });
