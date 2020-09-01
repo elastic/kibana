@@ -68,10 +68,8 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
     /**
      * Gets a array of not parsed styles and returns the Array of parsed styles.
      * @returns Promise<string[][]>
-     * @param dataTestSubj
-     * @param element
      */
-    async parseStyles(dataTestSubj: string, element: string) {
+    async parseStyles() {
       const tableData = await this.getEndpointEventResolverNodeData('resolver:node', 'style');
       const $ = [];
       for (let i = 1; i < tableData.length; i++) {
