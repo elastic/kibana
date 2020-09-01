@@ -52,9 +52,7 @@ export class SuggestionsComponent extends Component<Props> {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const isDescriptionFittable = Boolean(
-        this.props.queryBarRect && this.props.queryBarRect.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH
-      );
+      const isDescriptionFittable = this.props.queryBarRect!.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
       return (
         <SuggestionComponent
           innerRef={(node) => (this.childNodes[index] = node)}
