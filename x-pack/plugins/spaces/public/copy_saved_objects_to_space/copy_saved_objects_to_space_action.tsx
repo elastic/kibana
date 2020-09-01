@@ -21,10 +21,13 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       defaultMessage: 'Copy to space',
     }),
     description: i18n.translate('xpack.spaces.management.copyToSpace.actionDescription', {
-      defaultMessage: 'Copy this saved object to one or more spaces',
+      defaultMessage: 'Make a copy of this saved object in one or more spaces',
     }),
-    icon: 'spacesApp',
+    icon: 'copy',
     type: 'icon',
+    available: (object: SavedObjectsManagementRecord) => {
+      return object.meta.namespaceType !== 'agnostic';
+    },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.start(object);
     },
