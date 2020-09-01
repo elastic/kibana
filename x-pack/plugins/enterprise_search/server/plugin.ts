@@ -31,8 +31,10 @@ import {
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
+import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -129,6 +131,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
+    savedObjects.registerType(enterpriseSearchTelemetryType);
     savedObjects.registerType(appSearchTelemetryType);
     savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
@@ -137,6 +140,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
+        registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }

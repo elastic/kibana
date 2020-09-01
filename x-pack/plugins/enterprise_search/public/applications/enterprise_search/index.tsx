@@ -7,11 +7,13 @@
 import React from 'react';
 
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
+import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../shared/telemetry';
 
 export const EnterpriseSearch: React.FC = () => {
   return (
     <>
       <SetPageChrome isRoot />
+      <SendTelemetry action="viewed" metric="overview" />
       Hello world
     </>
   );
