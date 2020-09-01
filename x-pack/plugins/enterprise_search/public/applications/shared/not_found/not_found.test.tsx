@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import '../../__mocks__/shallow_usecontext.mock';
+
+import React, { useContext } from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiButton as EuiButtonExternal, EuiEmptyPrompt } from '@elastic/eui';
@@ -16,6 +18,13 @@ import { WorkplaceSearchLogo } from './assets/workplace_search_logo';
 import { NotFound } from './';
 
 describe('NotFound', () => {
+  const basicLicense = { isActive: true, type: 'basic' };
+  const goldLicense = { isActive: true, type: 'gold' };
+
+  beforeEach(() => {
+    (useContext as jest.Mock).mockImplementation(() => ({ license: basicLicense }));
+  });
+
   it('renders an App Search 404 view', () => {
     const wrapper = shallow(<NotFound product={APP_SEARCH_PLUGIN} />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive().shallow();
@@ -40,8 +49,16 @@ describe('NotFound', () => {
     expect(logo.type()).toEqual('svg');
   });
 
+  it('changes the support URL if the user has a gold+ license', () => {
+    (useContext as jest.Mock).mockImplementation(() => ({ license: goldLicense }));
+    const wrapper = shallow(<NotFound product={APP_SEARCH_PLUGIN} />);
+    const prompt = wrapper.find(EuiEmptyPrompt).dive().shallow();
+
+    expect(prompt.find(EuiButtonExternal).prop('href')).toEqual('https://support.elastic.co');
+  });
+
   it('does not render anything without a valid product', () => {
-    const wrapper = shallow(<NotFound product={{} as any} />);
+    const wrapper = shallow(<NotFound product={undefined as any} />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });

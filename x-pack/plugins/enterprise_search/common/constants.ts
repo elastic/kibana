@@ -40,6 +40,8 @@ export const WORKPLACE_SEARCH_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 
+export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
+
 export const JSON_HEADER = { 'Content-Type': 'application/json' }; // This needs specific casing or Chrome throws a 415 error
 
 export const ENGINES_PAGE_SIZE = 10;

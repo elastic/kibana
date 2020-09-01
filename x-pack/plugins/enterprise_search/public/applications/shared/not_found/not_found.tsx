@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPageContent,
@@ -15,11 +15,16 @@ import {
   EuiButton as EuiButtonExternal,
 } from '@elastic/eui';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../common/constants';
+import {
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+  LICENSED_SUPPORT_URL,
+} from '../../../../common/constants';
 
 import { EuiButton } from '../react_router_helpers';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
 import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
+import { LicenseContext, ILicenseContext, hasGoldLicense } from '../licensing';
 
 import { AppSearchLogo } from './assets/app_search_logo';
 import { WorkplaceSearchLogo } from './assets/workplace_search_logo';
@@ -34,6 +39,9 @@ interface NotFoundProps {
 }
 
 export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
+  const { license } = useContext(LicenseContext) as ILicenseContext;
+  const supportUrl = hasGoldLicense(license) ? LICENSED_SUPPORT_URL : product.SUPPORT_URL;
+
   let Logo;
   let SetPageChrome;
   let SendTelemetry;
@@ -87,7 +95,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonExternal href={product.SUPPORT_URL} target="_blank">
+                <EuiButtonExternal href={supportUrl} target="_blank">
                   {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                     defaultMessage: 'Contact support',
                   })}
