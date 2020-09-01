@@ -64,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    describe('when initially navigating to page', () => {
+    describe.skip('when initially navigating to page', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(120000);
+        await sleep(80000);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
