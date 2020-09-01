@@ -396,7 +396,7 @@ export class MapsListView extends React.Component {
     let createButton;
     if (!this.state.readOnly) {
       createButton = (
-        <EuiButton data-test-subj="newMapLink" onClick={navigateToNewMap}>
+        <EuiButton data-test-subj="newMapLink" fill onClick={navigateToNewMap}>
           <FormattedMessage
             id="xpack.maps.mapListing.createMapButtonLabel"
             defaultMessage="Create map"
