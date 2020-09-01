@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/kibana",
+    "tsBuildInfoFile": "./build/tsbuildinfo/kibana",
   },
   "include": [
     "kibana.d.ts",
