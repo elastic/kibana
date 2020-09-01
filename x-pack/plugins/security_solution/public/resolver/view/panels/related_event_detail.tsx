@@ -57,49 +57,6 @@ const TitleHr = memo(() => {
 });
 TitleHr.displayName = 'TitleHR';
 
-const GeneratedText = React.memo(function ({ children }) {
-  return <>{processedValue()}</>;
-
-  function processedValue() {
-    return React.Children.map(children, (child) => {
-      if (typeof child === 'string') {
-        const valueSplitByWordBoundaries = child.split(/\b/);
-
-        if (valueSplitByWordBoundaries.length < 2) {
-          return valueSplitByWordBoundaries[0];
-        }
-
-        return [
-          valueSplitByWordBoundaries[0],
-          ...valueSplitByWordBoundaries
-            .splice(1)
-            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value, index) {
-              return [...generatedTextMemo, value, <wbr />];
-            }, []),
-        ];
-      } else {
-        return child;
-      }
-    });
-  }
-});
-GeneratedText.displayName = 'GeneratedText';
-
-/**
- * Take description list entries and prepare them for display by
- * seeding with `<wbr />` tags.
- *
- * @param entries {title: string, description: string}[]
- */
-function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
-  return entries.map((entry) => {
-    return {
-      description: <GeneratedText>{entry.description}</GeneratedText>,
-      title: <GeneratedText>{entry.title}</GeneratedText>,
-    };
-  });
-}
-
 /**
  * Take description list entries and prepare them for display by
  * seeding with `<wbr />` tags.
