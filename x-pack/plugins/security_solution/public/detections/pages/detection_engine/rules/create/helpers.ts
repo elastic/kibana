@@ -14,7 +14,7 @@ import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
+import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
 import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
 
 import {
@@ -35,8 +35,8 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     unit: '',
     value: 0,
   };
-  const filterTimeVal = (time as string).match(/\d+/g);
-  const filterTimeType = (time as string).match(/[a-zA-Z]+/g);
+  const filterTimeVal = time.match(/\d+/g);
+  const filterTimeType = time.match(/[a-zA-Z]+/g);
   if (!isEmpty(filterTimeVal) && filterTimeVal != null && !isNaN(Number(filterTimeVal[0]))) {
     timeObj.value = Number(filterTimeVal[0]);
   }
@@ -202,11 +202,11 @@ export const formatAboutStepData = (
             {
               id: ENDPOINT_LIST_ID,
               list_id: ENDPOINT_LIST_ID,
-              namespace_type: 'agnostic',
-              type: 'endpoint',
+              namespace_type: 'agnostic' as NamespaceType,
+              type: 'endpoint' as ExceptionListType,
             },
             ...detectionExceptionLists,
-          ] as AboutStepRuleJson['exceptions_list'],
+          ],
         }
       : exceptionsList != null
       ? {

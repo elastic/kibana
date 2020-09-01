@@ -23,6 +23,7 @@ import {
   IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
+  SeverityValue,
 } from './types';
 import { SeverityMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
@@ -147,7 +148,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     note: note!,
     references,
     severity: {
-      value: severity,
+      value: severity as SeverityValue,
       mapping: fillEmptySeverityMappings(severityMapping),
       isMappingChecked: severityMapping.length > 0,
     },
