@@ -21,7 +21,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
-import { ExprVis } from '../../../visualizations/public';
 
 jest.mock('../services', () => ({
   getFormatService: () => ({
@@ -41,29 +40,30 @@ const baseVisData = {
 } as any;
 
 describe('MetricVisComponent', function () {
-  const vis: ExprVis = {
-    params: {
-      metric: {
-        colorSchema: 'Green to Red',
-        colorsRange: [{ from: 0, to: 1000 }],
-        style: {},
-        labels: {
-          show: true,
-        },
-      },
-      dimensions: {
-        metrics: [{ accessor: 0 }],
-        bucket: null,
+  const visParams = {
+    type: 'metric',
+    addTooltip: false,
+    addLegend: false,
+    metric: {
+      colorSchema: 'Green to Red',
+      colorsRange: [{ from: 0, to: 1000 }],
+      style: {},
+      labels: {
+        show: true,
       },
     },
-  } as any;
+    dimensions: {
+      metrics: [{ accessor: 0 } as any],
+      bucket: undefined,
+    },
+  };
 
   const getComponent = (propOverrides: Partial<Props> = {} as Partial<Props>) => {
     const props: Props = {
-      vis,
-      visParams: vis.params as any,
+      visParams: visParams as any,
       visData: baseVisData,
       renderComplete: jest.fn(),
+      fireEvent: jest.fn(),
       ...propOverrides,
     };
 
@@ -88,9 +88,9 @@ describe('MetricVisComponent', function () {
         rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
       },
       visParams: {
-        ...vis.params,
+        ...visParams,
         dimensions: {
-          ...vis.params.dimensions,
+          ...visParams.dimensions,
           metrics: [{ accessor: 0 }, { accessor: 1 }],
         },
       },

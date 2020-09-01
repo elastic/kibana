@@ -32,7 +32,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
       <EuiText>
         <p>
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`}
             target="_blank"
           >
             <FormattedMessage

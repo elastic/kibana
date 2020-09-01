@@ -25,12 +25,14 @@ import cheerio from 'cheerio';
 
 import { REPO_ROOT } from '../repo_root';
 import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
+import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
   id: string;
   relativeDir?: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
+  readmeAsciidocAnchor?: string;
 }
 
 export type Plugins = Plugin[];
@@ -38,14 +40,29 @@ export type Plugins = Plugin[];
 const getReadmeName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.md');
 
+const getReadmeAsciidocName = (directory: string) =>
+  Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
+
 export const discoverPlugins = (pluginsRootDir: string): Plugins =>
   simpleKibanaPlatformPluginDiscovery([pluginsRootDir], []).map(
     ({ directory, manifest: { id } }): Plugin => {
       const readmeName = getReadmeName(directory);
+      const readmeAsciidocName = getReadmeAsciidocName(directory);
 
       let relativeReadmePath: string | undefined;
       let readmeSnippet: string | undefined;
-      if (readmeName) {
+      let readmeAsciidocAnchor: string | undefined;
+
+      if (readmeAsciidocName) {
+        const readmePath = Path.resolve(directory, readmeAsciidocName);
+        relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
+
+        const readmeText = Fs.readFileSync(relativeReadmePath).toString();
+
+        const { firstParagraph, anchor } = extractAsciidocInfo(readmeText);
+        readmeSnippet = firstParagraph;
+        readmeAsciidocAnchor = anchor;
+      } else if (readmeName) {
         const readmePath = Path.resolve(directory, readmeName);
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
 
@@ -64,6 +81,7 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         relativeReadmePath,
         relativeDir: relativeReadmePath || Path.relative(REPO_ROOT, directory),
         readmeSnippet,
+        readmeAsciidocAnchor,
       };
     }
   );

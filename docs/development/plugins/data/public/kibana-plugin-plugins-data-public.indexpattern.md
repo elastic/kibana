@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern, uiSettingsValues, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -29,8 +29,10 @@ export declare class IndexPattern implements IIndexPattern
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined &#124; null</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
+|  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
+|  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
 |  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
 
 ## Methods
@@ -44,11 +46,12 @@ export declare class IndexPattern implements IIndexPattern
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  |  |
+|  [getIndex()](./kibana-plugin-plugins-data-public.indexpattern.getindex.md) |  |  |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
-|  [init(forceFieldRefresh)](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
+|  [init()](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
 |  [initFromSpec(spec)](./kibana-plugin-plugins-data-public.indexpattern.initfromspec.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |

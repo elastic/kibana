@@ -9,7 +9,11 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../plugins/case/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
-import { getServiceNowConnector, getJiraConnector } from '../../../common/lib/utils';
+import {
+  getServiceNowConnector,
+  getJiraConnector,
+  getResilientConnector,
+} from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -61,9 +65,16 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getJiraConnector())
         .expect(200);
 
+      const { body: connectorFour } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getResilientConnector())
+        .expect(200);
+
       actionsRemover.add('default', connectorOne.id, 'action', 'actions');
       actionsRemover.add('default', connectorTwo.id, 'action', 'actions');
       actionsRemover.add('default', connectorThree.id, 'action', 'actions');
+      actionsRemover.add('default', connectorFour.id, 'action', 'actions');
 
       const { body: connectors } = await supertest
         .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
@@ -71,13 +82,16 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(200);
 
-      expect(connectors.length).to.equal(2);
+      expect(connectors.length).to.equal(3);
       expect(
         connectors.some((c: { actionTypeId: string }) => c.actionTypeId === '.servicenow')
       ).to.equal(true);
       expect(connectors.some((c: { actionTypeId: string }) => c.actionTypeId === '.jira')).to.equal(
         true
       );
+      expect(
+        connectors.some((c: { actionTypeId: string }) => c.actionTypeId === '.resilient')
+      ).to.equal(true);
     });
   });
 };

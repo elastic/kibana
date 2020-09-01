@@ -9,6 +9,7 @@
   ],
   "requiredBundles": [
     "savedObjects",
-    "kibanaReact"
+    "kibanaReact",
+    "kibanaUtils"
   ]
 }

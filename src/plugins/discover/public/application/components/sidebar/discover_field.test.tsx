@@ -104,9 +104,4 @@ describe('discover sidebar field', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger onShowDetails', function () {
-    const { comp, props } = getComponent();
-    findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.onShowDetails).toHaveBeenCalledWith(true, props.field);
-  });
 });

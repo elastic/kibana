@@ -15,6 +15,13 @@ export class Plugin {
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
+      management: {
+        icon: 'beaker',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+      },
       mappings: {
         properties: {
           title: { type: 'text' },

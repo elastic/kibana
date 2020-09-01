@@ -23,7 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  FieldFormatNotFoundError,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
@@ -33,7 +38,6 @@ import { flattenHitWrapper } from './flatten_hit';
 import {
   OnNotification,
   OnError,
-  UiSettingsCommon,
   IIndexPatternsApiClient,
   IndexPatternAttributes,
   OnUnsupportedTimePattern,
@@ -46,14 +50,8 @@ import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
-interface IUiSettingsValues {
-  [key: string]: any;
-  shortDotsEnable: any;
-  metaFields: any;
-}
 
 interface IndexPatternDeps {
-  getConfig: UiSettingsCommon['get'];
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
@@ -61,12 +59,11 @@ interface IndexPatternDeps {
   onNotification: OnNotification;
   onError: OnError;
   onUnsupportedTimePattern: OnUnsupportedTimePattern;
-  uiSettingsValues: IUiSettingsValues;
+  shortDotsEnable: boolean;
+  metaFields: string[];
 }
 
 export class IndexPattern implements IIndexPattern {
-  [key: string]: any;
-
   public id?: string;
   public title: string = '';
   public fieldFormatMap: any;
@@ -74,6 +71,7 @@ export class IndexPattern implements IIndexPattern {
   public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
   public intervalName: string | undefined | null;
+  public type: string | undefined;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
@@ -82,8 +80,7 @@ export class IndexPattern implements IIndexPattern {
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
-  private getConfig: UiSettingsCommon['get'];
-  private sourceFilters?: SourceFilter[];
+  public sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -92,7 +89,6 @@ export class IndexPattern implements IIndexPattern {
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   private apiClient: IIndexPatternsApiClient;
-  private uiSettingsValues: IUiSettingsValues;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -119,7 +115,6 @@ export class IndexPattern implements IIndexPattern {
   constructor(
     id: string | undefined,
     {
-      getConfig,
       savedObjectsClient,
       apiClient,
       patternCache,
@@ -127,29 +122,25 @@ export class IndexPattern implements IIndexPattern {
       onNotification,
       onError,
       onUnsupportedTimePattern,
-      uiSettingsValues,
+      shortDotsEnable = false,
+      metaFields = [],
     }: IndexPatternDeps
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
-    // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
-    // which cause problems when being consumed from angular
-    this.getConfig = getConfig;
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
     this.onUnsupportedTimePattern = onUnsupportedTimePattern;
-    this.uiSettingsValues = uiSettingsValues;
+    this.shortDotsEnable = shortDotsEnable;
+    this.metaFields = metaFields;
 
-    this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
-    this.metaFields = uiSettingsValues.metaFields;
-
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onNotification);
 
     this.apiClient = apiClient;
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
-    this.flattenHit = flattenHitWrapper(this, uiSettingsValues.metaFields);
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
+    this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -164,15 +155,15 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormatter = this.fieldFormats.getType(mapping.id);
-
-    return (
-      FieldFormatter &&
-      new FieldFormatter(
-        mapping.params,
-        (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
-      )
-    );
+    try {
+      return this.fieldFormats.getInstance(mapping.id, mapping.params);
+    } catch (err) {
+      if (err instanceof FieldFormatNotFoundError) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
   }
 
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
@@ -191,12 +182,12 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
-  private async indexFields(forceFieldRefresh: boolean = false, specs?: FieldSpec[]) {
+  private async indexFields(specs?: FieldSpec[]) {
     if (!this.id) {
       return;
     }
 
-    if (forceFieldRefresh || this.isFieldRefreshRequired(specs)) {
+    if (this.isFieldRefreshRequired(specs)) {
       await this.refreshFields();
     } else {
       if (specs) {
@@ -232,7 +223,7 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  private async updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+  private async updateFromElasticSearch(response: any) {
     if (!response.found) {
       throw new SavedObjectNotFound(savedObjectType, this.id, 'management/kibana/indexPatterns');
     }
@@ -245,10 +236,13 @@ export class IndexPattern implements IIndexPattern {
       response[name] = fieldMapping._deserialize(response[name]);
     });
 
-    // give index pattern all of the values
-    const fieldList = this.fields;
-    _.assign(this, response);
-    this.fields = fieldList;
+    this.title = response.title;
+    this.timeFieldName = response.timeFieldName;
+    this.intervalName = response.intervalName;
+    this.sourceFilters = response.sourceFilters;
+    this.fieldFormatMap = response.fieldFormatMap;
+    this.type = response.type;
+    this.typeMeta = response.typeMeta;
 
     if (!this.title && this.id) {
       this.title = this.id;
@@ -263,7 +257,7 @@ export class IndexPattern implements IIndexPattern {
       });
     }
 
-    return this.indexFields(forceFieldRefresh, response.fields);
+    return this.indexFields(response.fields);
   }
 
   getComputedFields() {
@@ -307,7 +301,7 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  async init(forceFieldRefresh = false) {
+  async init() {
     if (!this.id) {
       return this; // no id === no elasticsearch document
     }
@@ -331,7 +325,7 @@ export class IndexPattern implements IIndexPattern {
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
-    await this.updateFromElasticSearch(response, forceFieldRefresh);
+    await this.updateFromElasticSearch(response);
     // Do it after to ensure we have the most up to date information
     this.originalBody = this.prepBody();
 
@@ -500,18 +494,16 @@ export class IndexPattern implements IIndexPattern {
   }
 
   prepBody() {
-    const body: { [key: string]: any } = {};
-
-    // serialize json fields
-    _.forOwn(this.mapping, (fieldMapping, fieldName) => {
-      if (!fieldName || this[fieldName] == null) return;
-
-      body[fieldName] = fieldMapping._serialize
-        ? fieldMapping._serialize(this[fieldName])
-        : this[fieldName];
-    });
-
-    return body;
+    return {
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      intervalName: this.intervalName,
+      sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters),
+      fields: this.mapping.fields._serialize!(this.fields),
+      fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
+      type: this.type,
+      typeMeta: this.mapping.typeMeta._serialize!(this.mapping),
+    };
   }
 
   getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
@@ -555,10 +547,14 @@ export class IndexPattern implements IIndexPattern {
   async save(saveAttempts: number = 0): Promise<void | Error> {
     if (!this.id) return;
     const body = this.prepBody();
-    // What keys changed since they last pulled the index pattern
-    const originalChangedKeys = Object.keys(body).filter(
-      (key) => body[key] !== this.originalBody[key]
-    );
+
+    const originalChangedKeys: string[] = [];
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== this.originalBody[key]) {
+        originalChangedKeys.push(key);
+      }
+    });
+
     return this.savedObjectsClient
       .update(savedObjectType, this.id, body, { version: this.version })
       .then((resp) => {
@@ -571,7 +567,6 @@ export class IndexPattern implements IIndexPattern {
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
           const samePattern = new IndexPattern(this.id, {
-            getConfig: this.getConfig,
             savedObjectsClient: this.savedObjectsClient,
             apiClient: this.apiClient,
             patternCache: this.patternCache,
@@ -579,10 +574,8 @@ export class IndexPattern implements IIndexPattern {
             onNotification: this.onNotification,
             onError: this.onError,
             onUnsupportedTimePattern: this.onUnsupportedTimePattern,
-            uiSettingsValues: {
-              shortDotsEnable: this.shortDotsEnable,
-              metaFields: this.metaFields,
-            },
+            shortDotsEnable: this.shortDotsEnable,
+            metaFields: this.metaFields,
           });
 
           return samePattern.init().then(() => {
@@ -593,8 +586,12 @@ export class IndexPattern implements IIndexPattern {
             // and ensure we ignore the key if the server response
             // is the same as the original response (since that is expected
             // if we made a change in that key)
-            const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
-              return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
+
+            const serverChangedKeys: string[] = [];
+            Object.entries(updatedBody).forEach(([key, value]) => {
+              if (value !== (body as any)[key] && value !== this.originalBody[key]) {
+                serverChangedKeys.push(key);
+              }
             });
 
             let unresolvedCollision = false;
@@ -619,7 +616,7 @@ export class IndexPattern implements IIndexPattern {
 
             // Set the updated response on this object
             serverChangedKeys.forEach((key) => {
-              this[key] = samePattern[key];
+              (this as any)[key] = (samePattern as any)[key];
             });
             this.version = samePattern.version;
 

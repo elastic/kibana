@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // failing test due to backend issue, see #75095
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -57,108 +56,96 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
-        it('loads the data frame analytics page', async () => {
+        it('loads the data frame analytics wizard', async () => {
+          await ml.testExecution.logTestStep('loads the data frame analytics page');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
-        });
 
-        it('loads the source selection modal', async () => {
+          await ml.testExecution.logTestStep('loads the source selection modal');
           await ml.dataFrameAnalytics.startAnalyticsCreation();
-        });
 
-        it('selects the source data and loads the job wizard page', async () => {
+          await ml.testExecution.logTestStep(
+            'selects the source data and loads the job wizard page'
+          );
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
-        it('selects the job type', async () => {
+        it('navigates through the wizard and sets all needed fields', async () => {
+          await ml.testExecution.logTestStep('selects the job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
-        });
 
-        it('inputs the dependent variable', async () => {
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
-        });
 
-        it('inputs the training percent', async () => {
+          await ml.testExecution.logTestStep('inputs the training percent');
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
           await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
-        });
 
-        it('displays the source data preview', async () => {
+          await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-        });
 
-        it('displays the include fields selection', async () => {
+          await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
-        });
 
-        it('continues to the additional options step', async () => {
+          await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
-        });
 
-        it('accepts the suggested model memory limit', async () => {
+          await ml.testExecution.logTestStep('accepts the suggested model memory limit');
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputPopulated();
-        });
 
-        it('continues to the details step', async () => {
+          await ml.testExecution.logTestStep('continues to the details step');
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
-        });
 
-        it('inputs the job id', async () => {
+          await ml.testExecution.logTestStep('inputs the job id');
           await ml.dataFrameAnalyticsCreation.assertJobIdInputExists();
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
-        });
 
-        it('inputs the job description', async () => {
+          await ml.testExecution.logTestStep('inputs the job description');
           await ml.dataFrameAnalyticsCreation.assertJobDescriptionInputExists();
           await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
-        });
 
-        it('should default the set destination index to job id switch to true', async () => {
+          await ml.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
           await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
           await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdCheckState(true);
-        });
 
-        it('should input the destination index', async () => {
+          await ml.testExecution.logTestStep('should input the destination index');
           await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
-        });
 
-        it('sets the create index pattern switch', async () => {
+          await ml.testExecution.logTestStep('sets the create index pattern switch');
           await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
           );
-        });
 
-        it('continues to the create step', async () => {
+          await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
 
-        it('creates and starts the analytics job', async () => {
+        it('runs the analytics job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep('creates and starts the analytics job');
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
           await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
-        });
 
-        it('finishes analytics processing', async () => {
+          await ml.testExecution.logTestStep('finishes analytics processing');
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(testData.jobId);
-        });
 
-        it('displays the analytics table', async () => {
+          await ml.testExecution.logTestStep('displays the analytics table');
           await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalytics.assertAnalyticsTableExists();
-        });
 
-        it('displays the stats bar', async () => {
+          await ml.testExecution.logTestStep('displays the stats bar');
           await ml.dataFrameAnalytics.assertAnalyticsStatsBarExists();
-        });
 
-        it('displays the created job in the analytics table', async () => {
+          await ml.testExecution.logTestStep('displays the created job in the analytics table');
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
@@ -167,9 +154,10 @@ export default function ({ getService }: FtrProviderContext) {
             1,
             `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`
           );
-        });
 
-        it('displays details for the created job in the analytics table', async () => {
+          await ml.testExecution.logTestStep(
+            'displays details for the created job in the analytics table'
+          );
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
@@ -181,25 +169,28 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        it('should open the edit form for the created job in the analytics table', async () => {
+        it('edits the analytics job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'should open the edit form for the created job in the analytics table'
+          );
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
-        });
 
-        it('should input the description in the edit form', async () => {
+          await ml.testExecution.logTestStep('should input the description in the edit form');
           await ml.dataFrameAnalyticsEdit.assertJobDescriptionEditInputExists();
           await ml.dataFrameAnalyticsEdit.setJobDescriptionEdit(editedDescription);
-        });
 
-        it('should input the model memory limit in the edit form', async () => {
+          await ml.testExecution.logTestStep(
+            'should input the model memory limit in the edit form'
+          );
           await ml.dataFrameAnalyticsEdit.assertJobMmlEditInputExists();
           await ml.dataFrameAnalyticsEdit.setJobMmlEdit('21mb');
-        });
 
-        it('should submit the edit job form', async () => {
+          await ml.testExecution.logTestStep('should submit the edit job form');
           await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
-        });
 
-        it('displays details for the edited job in the analytics table', async () => {
+          await ml.testExecution.logTestStep(
+            'displays details for the edited job in the analytics table'
+          );
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: editedDescription,
@@ -209,14 +200,14 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
-        });
 
-        it('creates the destination index and writes results to it', async () => {
+          await ml.testExecution.logTestStep(
+            'creates the destination index and writes results to it'
+          );
           await ml.api.assertIndicesExist(testData.destinationIndex);
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
-        });
 
-        it('displays the results view for created job', async () => {
+          await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView();
           await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
           await ml.dataFrameAnalytics.assertClassificationTablePanelExists();

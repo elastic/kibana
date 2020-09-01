@@ -49,9 +49,7 @@ import {
 } from './index_patterns';
 import {
   setFieldFormats,
-  setHttp,
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
@@ -165,11 +163,9 @@ export class DataPublicPlugin
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
-    setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -182,7 +178,7 @@ export class DataPublicPlugin
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
-      onError: notifications.toasts.addError,
+      onError: notifications.toasts.addError.bind(notifications.toasts),
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
         application.navigateToApp,

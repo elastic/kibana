@@ -17,7 +17,6 @@ A few notable services are called out below.
 * <<development-security>>
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
-* <<code-exploration>>
 
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
@@ -25,4 +24,3 @@ include::development-visualize-index.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
 
-include::code-exploration.asciidoc[leveloffset=+1]

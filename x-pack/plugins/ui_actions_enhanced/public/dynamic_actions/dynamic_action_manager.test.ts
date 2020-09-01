@@ -24,6 +24,9 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
@@ -36,6 +39,9 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const event1: SerializedEvent = {
@@ -416,6 +422,21 @@ describe('DynamicActionManager', () => {
         await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
 
         expect(actions.size).toBe(0);
+      });
+
+      test('throws when trigger is unknown', async () => {
+        const { manager, uiActions } = setup([]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects;
       });
     });
   });

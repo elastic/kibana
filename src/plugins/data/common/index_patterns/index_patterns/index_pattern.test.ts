@@ -32,7 +32,7 @@ import { fieldFormatsMock } from '../../field_formats/mocks';
 
 class MockFieldFormatter {}
 
-fieldFormatsMock.getType = jest.fn().mockImplementation(() => MockFieldFormatter);
+fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -43,7 +43,20 @@ jest.mock('../../field_mapping', () => {
       id: true,
       title: true,
       fieldFormatMap: {
+        _serialize: jest.fn().mockImplementation(() => {}),
         _deserialize: jest.fn().mockImplementation(() => []),
+      },
+      fields: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation((fields) => fields),
+      },
+      sourceFilters: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation(() => undefined),
+      },
+      typeMeta: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation(() => undefined),
       },
     })),
   };
@@ -89,10 +102,6 @@ const patternCache = {
   clearAll: jest.fn(),
 };
 
-const config = {
-  get: jest.fn(),
-};
-
 const apiClient = {
   _getUrl: jest.fn(),
   getFieldsForTimePattern: jest.fn(),
@@ -102,7 +111,6 @@ const apiClient = {
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(id, {
-    getConfig: (cfg: any) => config.get(cfg),
     savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
@@ -110,7 +118,8 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     onNotification: () => {},
     onError: () => {},
     onUnsupportedTimePattern: () => {},
-    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+    shortDotsEnable: false,
+    metaFields: [],
   });
 
   setDocsourcePayload(id, payload);
@@ -392,7 +401,6 @@ describe('IndexPattern', () => {
     });
     // Create a normal index pattern
     const pattern = new IndexPattern('foo', {
-      getConfig: (cfg: any) => config.get(cfg),
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
@@ -400,7 +408,8 @@ describe('IndexPattern', () => {
       onNotification: () => {},
       onError: () => {},
       onUnsupportedTimePattern: () => {},
-      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+      shortDotsEnable: false,
+      metaFields: [],
     });
     await pattern.init();
 
@@ -408,7 +417,6 @@ describe('IndexPattern', () => {
 
     // Create the same one - we're going to handle concurrency
     const samePattern = new IndexPattern('foo', {
-      getConfig: (cfg: any) => config.get(cfg),
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
@@ -416,7 +424,8 @@ describe('IndexPattern', () => {
       onNotification: () => {},
       onError: () => {},
       onUnsupportedTimePattern: () => {},
-      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+      shortDotsEnable: false,
+      metaFields: [],
     });
     await samePattern.init();
 
