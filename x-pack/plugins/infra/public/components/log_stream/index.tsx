@@ -44,7 +44,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
     isLoadingSourceConfiguration,
   } = useLogSource({
     sourceId,
-    fetch: services.http.fetch,
+    fetch: services?.http?.fetch!,
   });
 
   // Internal state

@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
