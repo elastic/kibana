@@ -50,14 +50,6 @@ export interface AnomalyDetectionQueryState {
   jobId?: JobId;
   groupIds?: string[];
 }
-//
-// export interface AnomalyDetectionUrlState {
-//   page: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
-//   pageState: {
-//     jobId?: JobId;
-//     groupIds?: string[];
-//   };
-// }
 
 export type AnomalyDetectionUrlState = MLPageState<
   typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
