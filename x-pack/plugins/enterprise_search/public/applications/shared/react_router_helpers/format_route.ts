@@ -29,7 +29,7 @@ const reTokens = /<(.*?)>/g;
 export const formatRoute = (routePath: string, params: ParamsObject) => {
   const tokens = {} as { [key: string]: string };
 
-  Object.entries(params).map(([paramName, paramValue]) => {
+  Object.entries(params).forEach(([paramName, paramValue]) => {
     const paramRegex = new RegExp('(/|\\(|\\)|^):' + paramName + '(/|\\)|\\(|$)');
     routePath = routePath.replace(paramRegex, (_, g1, g2) => {
       tokens[paramName] = encodeURIComponent(paramValue);
