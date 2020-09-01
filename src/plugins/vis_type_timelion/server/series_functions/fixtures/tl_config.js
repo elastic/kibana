@@ -30,11 +30,7 @@ export default function () {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
-    esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function () {
-        return Promise.resolve(esResponse);
-      },
-    }),
+    esDataClient: sinon.stub().returns(Promise.resolve({ rawResponse: esResponse })),
     esShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
   });
