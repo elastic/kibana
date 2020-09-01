@@ -125,6 +125,7 @@ export const schemas: Record<string, FormSchema> = {
         {
           validator: indexPatternField(i18n),
           type: VALIDATION_TYPES.ARRAY_ITEM,
+          isBlocking: false,
         },
       ],
     },
