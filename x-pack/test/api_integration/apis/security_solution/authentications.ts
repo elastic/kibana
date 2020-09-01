@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { authenticationsQuery } from '../../../../plugins/security_solution/public/hosts/containers/authentications/index.gql_query';
+import { authenticationsQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/authentications/index.gql_query';
 import { GetAuthenticationsQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
