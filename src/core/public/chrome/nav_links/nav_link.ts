@@ -80,38 +80,21 @@ export interface ChromeNavLink {
    */
   readonly href?: string;
 
+  /**
+   * Disables a link from being clickable.
+   *
+   * @internalRemarks
+   * This is only used by the ML and Graph plugins currently. They use this field
+   * to disable the nav link when the license is expired.
+   */
+  readonly disabled?: boolean;
+
+  /**
+   * Hides a link from the navigation.
+   */
+  readonly hidden?: boolean;
+
   /** LEGACY FIELDS */
-
-  /**
-   * A url base that legacy apps can set to match deep URLs to an application.
-   *
-   * @internalRemarks
-   * This should be removed once legacy apps are gone.
-   *
-   * @deprecated
-   */
-  readonly subUrlBase?: string;
-
-  /**
-   * A flag that tells legacy chrome to ignore the link when
-   * tracking sub-urls
-   *
-   * @internalRemarks
-   * This should be removed once legacy apps are gone.
-   *
-   * @deprecated
-   */
-  readonly disableSubUrlTracking?: boolean;
-
-  /**
-   * Whether or not the subUrl feature should be enabled.
-   *
-   * @internalRemarks
-   * Only read by legacy platform.
-   *
-   * @deprecated
-   */
-  readonly linkToLastSubUrl?: boolean;
 
   /**
    * Indicates whether or not this app is currently on the screen.
@@ -122,31 +105,11 @@ export interface ChromeNavLink {
    * @deprecated
    */
   readonly active?: boolean;
-
-  /**
-   * Disables a link from being clickable.
-   *
-   * @internalRemarks
-   * This is only used by the ML and Graph plugins currently. They use this field
-   * to disable the nav link when the license is expired.
-   *
-   * @deprecated
-   */
-  readonly disabled?: boolean;
-
-  /**
-   * Hides a link from the navigation.
-   *
-   * @internalRemarks
-   * Remove this when ApplicationService is implemented. Instead, plugins should only
-   * register an Application if needed.
-   */
-  readonly hidden?: boolean;
 }
 
 /** @public */
 export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>
+  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -164,7 +127,7 @@ export class NavLinkWrapper {
 
   public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase', 'href']);
+    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

@@ -107,7 +107,7 @@ export function createRecentNavLink(
 ) {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
-  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
+  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 
   if (navLink) {
