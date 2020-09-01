@@ -16,7 +16,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import isEmpty from 'lodash/isEmpty';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -264,7 +263,7 @@ const EditRulePageComponent: FC = () => {
     async (tab: EuiTabbedContentTab) => {
       const activeStepData = await stepsForm.current[activeStep]?.submit();
 
-      if (activeStepData != null && !isEmpty(activeStepData.data)) {
+      if (activeStepData?.isValid) {
         setStepData(activeStep, activeStepData.data, activeStepData.isValid);
       }
       setInitForm(true);

@@ -170,7 +170,7 @@ const CreateRulePageComponent: React.FC = () => {
       const activeForm = stepsForm.current[activeStep];
       const activeData = await activeForm?.submit();
 
-      if (activeData && activeData.isValid) {
+      if (activeData?.isValid) {
         setStepData(activeStep, activeData);
         goToStep(step);
       }
@@ -182,7 +182,7 @@ const CreateRulePageComponent: React.FC = () => {
       const stepForm = stepsForm.current[step];
       const formData = await stepForm?.submit();
 
-      if (formData && formData.isValid) {
+      if (formData?.isValid) {
         setStepData(step, formData);
         const nextStep = getNextStep(step);
 
