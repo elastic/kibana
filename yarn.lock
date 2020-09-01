@@ -8687,7 +8687,7 @@ catbox@10.x.x:
     hoek "5.x.x"
     joi "13.x.x"
 
-ccount@^1.0.0:
+ccount@^1.0.0, ccount@^1.0.3:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/ccount/-/ccount-1.0.5.tgz#ac82a944905a65ce204eb03023157edf29425c17"
   integrity sha512-MOli1W+nfbPLlKEhInaxhRdp7KVLFxLN5ykwzHgLsLI3H3gs5jjFAK4Eoj3OzzcxCtumDaI8onoVDeQyWaNTkw==
