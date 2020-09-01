@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { mapKeys, snakeCase } from 'lodash';
 import { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/server';
 import { UI_SETTINGS } from '../..';
 

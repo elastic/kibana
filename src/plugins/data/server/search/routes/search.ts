@@ -19,10 +19,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { isEsResponse } from 'src/plugins/data/common';
 import { getRequestAbortedSignal } from '../../lib';
 import { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
+import { isEsResponse } from '../../../common';
 
 export function registerSearchRoute(
   router: IRouter,
