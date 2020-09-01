@@ -17,6 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { SectionLoading } from '../../../../../shared_imports';
 import { ProcessorResult, Document } from '../../types';
 import { DocumentsDropdown } from '../documents_dropdown';
 
@@ -25,6 +26,7 @@ export interface Props {
   documents: Document[];
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
+  isExecuting?: boolean;
 }
 
 const i18nTexts = {
@@ -74,6 +76,9 @@ const i18nTexts = {
       defaultMessage: 'Test:',
     }
   ),
+  loadingMessage: i18n.translate('xpack.ingestPipelines.processorOutput.loadingMessage', {
+    defaultMessage: 'Loading processor output…',
+  }),
 };
 
 export const ProcessorOutput: React.FunctionComponent<Props> = ({
@@ -81,9 +86,12 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
+  isExecuting,
 }) => {
-  // This code should not be reached,
-  // but if for some reason the output is undefined, we render a callout message
+  if (isExecuting) {
+    return <SectionLoading inline>{i18nTexts.loadingMessage}</SectionLoading>;
+  }
+
   if (!processorOutput) {
     return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="alert" />;
   }
@@ -156,7 +164,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
           <EuiSpacer />
 
           <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-            {/* If there is no processorInput defined (e.g., it's the first processor), we provide the sample document */}
+            {/* If there is no processorInput defined (i.e., it's the first processor), we provide the sample document */}
             {JSON.stringify(
               processorInput ? processorInput : documents[selectedDocumentIndex],
               null,

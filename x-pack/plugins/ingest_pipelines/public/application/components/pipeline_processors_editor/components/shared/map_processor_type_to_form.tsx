@@ -28,7 +28,7 @@ import {
   Inference,
   Join,
   Json,
-} from '../manage_processor_form/processors';
+} from '../processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';

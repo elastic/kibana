@@ -17,6 +17,7 @@ import {
 const { emptyField, isJsonField } = fieldValidators;
 
 import { XJsonEditor } from '../field_components';
+import { Fields } from '../processor_form.container';
 
 const customConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
@@ -59,7 +60,7 @@ const customConfig: FieldConfig = {
 };
 
 interface Props {
-  defaultOptions?: any;
+  defaultOptions?: Fields['fields'];
 }
 
 /**
@@ -74,7 +75,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
       path="customOptions"
       component={XJsonEditor}
       config={customConfig}
-      defaultValue={defaultOptions.fields}
+      defaultValue={defaultOptions}
       componentProps={{
         editorProps: {
           'data-test-subj': 'processorOptionsEditor',

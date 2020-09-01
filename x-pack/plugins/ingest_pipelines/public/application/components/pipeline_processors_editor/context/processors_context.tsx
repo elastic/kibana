@@ -38,7 +38,7 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ManageProcessorForm,
+  ProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
@@ -109,7 +109,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   // We need to keep track of the processor form state if the user
   // has made config changes, navigated between tabs (Configuration vs. Output)
   // and has not yet submitted the form
-  const [tempProcessorFormData, setTempProcessorFormData] = useState<
+  const [unsavedProcessorFormData, setUnsavedProcessorFormData] = useState<
     Omit<ProcessorInternal, 'id'> | undefined
   >(undefined);
 
@@ -156,7 +156,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           });
           break;
         case 'managingProcessor':
-          setTempProcessorFormData(processorTypeAndOptions);
+          setUnsavedProcessorFormData(processorTypeAndOptions);
 
           processorsDispatch({
             type: 'updateProcessor',
@@ -179,7 +179,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   const onCloseSettingsForm = useCallback(() => {
     setMode({ id: 'idle' });
     setFormState({ validate: () => Promise.resolve(true) });
-    setTempProcessorFormData(undefined);
+    setUnsavedProcessorFormData(undefined);
   }, [setFormState, setMode]);
 
   const onTreeAction = useCallback<OnActionHandler>(
@@ -243,14 +243,14 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       )}
 
       {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ManageProcessorForm
+        <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
           onClose={onCloseSettingsForm}
-          formData={tempProcessorFormData}
+          unsavedFormData={unsavedProcessorFormData}
         />
       ) : undefined}
       {mode.id === 'removingProcessor' && (

@@ -78,7 +78,7 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   },
   dropped: {
     icon: 'indexClose',
-    iconColor: 'warning',
+    iconColor: 'subdued',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.droppedStatusAriaLabel', {
       defaultMessage: 'Dropped',
     }),

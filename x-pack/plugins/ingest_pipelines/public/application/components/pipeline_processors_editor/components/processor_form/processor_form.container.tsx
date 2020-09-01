@@ -9,13 +9,18 @@ import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
-import { ManageProcessorForm as ViewComponent } from './manage_processor_form';
+import { EditProcessorForm } from './edit_processor_form';
+import { AddProcessorForm } from './add_processor_form';
 
-export type ManageProcessorFormOnSubmitArg = Omit<ProcessorInternal, 'id'>;
+export type ProcessorFormOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
-export type OnSubmitHandler = (processor: ManageProcessorFormOnSubmitArg) => void;
+export type OnSubmitHandler = (processor: ProcessorFormOnSubmitArg) => void;
 
 export type OnFormUpdateHandler = (form: OnFormUpdateArg<any>) => void;
+
+export interface Fields {
+  fields: { [key: string]: any };
+}
 
 interface Props {
   onFormUpdate: OnFormUpdateHandler;
@@ -24,24 +29,24 @@ interface Props {
   onOpen: () => void;
   onClose: () => void;
   processor?: ProcessorInternal;
-  formData?: Omit<ProcessorInternal, 'id'>;
+  unsavedFormData?: Omit<ProcessorInternal, 'id'>;
 }
 
-export const ManageProcessorForm: FunctionComponent<Props> = ({
+export const ProcessorFormContainer: FunctionComponent<Props> = ({
   processor,
   onFormUpdate,
   onSubmit,
-  formData,
+  unsavedFormData,
   onClose,
   ...rest
 }) => {
   const { services } = useKibana();
 
-  const getDefaultProcessorOptions = () => {
+  const getDefaultProcessorOptions = (): Fields => {
     let defaultFields;
 
-    if (formData) {
-      const { options } = formData;
+    if (unsavedFormData) {
+      const { options } = unsavedFormData;
       defaultFields = { fields: options };
     } else {
       defaultFields = { fields: processor?.options ?? {} };
@@ -89,6 +94,8 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
     // infinite update loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFormUpdate]);
+
+  const ViewComponent = processor ? EditProcessorForm : AddProcessorForm;
 
   return (
     <ViewComponent

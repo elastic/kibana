@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ManageProcessorForm,
-  ManageProcessorFormOnSubmitArg,
-  OnSubmitHandler,
-} from './manage_processor_form';
+export { ProcessorForm, ProcessorFormOnSubmitArg, OnSubmitHandler } from './processor_form';
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 

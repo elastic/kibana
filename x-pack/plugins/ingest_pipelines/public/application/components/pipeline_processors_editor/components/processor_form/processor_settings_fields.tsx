@@ -13,10 +13,11 @@ import { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
+import { Fields } from './processor_form.container';
 
 export interface Props {
   processor?: ProcessorInternal;
-  getDefaultProcessorOptions: () => void;
+  getDefaultProcessorOptions: () => Fields;
 }
 
 export const ProcessorSettingsFields: FunctionComponent<Props> = ({
@@ -32,6 +33,7 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({
       <FormDataProvider pathsToWatch="type">
         {(arg: any) => {
           const { type } = arg;
+          const { fields: defaultOptions } = getDefaultProcessorOptions();
 
           if (type?.length) {
             const formDescriptor = getProcessorDescriptor(type as any);
@@ -45,7 +47,7 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({
                 </>
               );
             }
-            return <Custom defaultOptions={getDefaultProcessorOptions()} />;
+            return <Custom defaultOptions={defaultOptions} />;
           }
 
           // If the user has not yet defined a type, we do not show any settings fields

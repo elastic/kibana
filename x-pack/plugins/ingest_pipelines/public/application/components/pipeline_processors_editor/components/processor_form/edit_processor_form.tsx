@@ -30,13 +30,11 @@ import { getProcessorDescriptor } from '../shared';
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
 import { ProcessorOutput } from './processor_output';
+import { Fields } from './processor_form.container';
 
-interface Fields {
-  fields: { [key: string]: any };
-}
 export interface Props {
   isOnFailure: boolean;
-  processor?: ProcessorInternal;
+  processor: ProcessorInternal;
   form: FormHook<Fields>;
   onOpen: () => void;
   esDocsBasePath: string;
@@ -49,11 +47,6 @@ export interface Props {
 const updateButtonLabel = i18n.translate(
   'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
   { defaultMessage: 'Update' }
-);
-
-const addButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.addButtonLabel',
-  { defaultMessage: 'Add' }
 );
 
 const cancelButtonLabel = i18n.translate(
@@ -86,35 +79,21 @@ const tabs: Tab[] = [
   },
 ];
 
-const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
-  if (isExistingProcessor) {
-    return isOnFailure ? (
-      <FormattedMessage
-        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.manageOnFailureTitle"
-        defaultMessage="Manage on-failure processor"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.manageTitle"
-        defaultMessage="Manage processor"
-      />
-    );
-  }
-
+const getFlyoutTitle = (isOnFailure: boolean) => {
   return isOnFailure ? (
     <FormattedMessage
-      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureOnFailureTitle"
-      defaultMessage="Configure on-failure processor"
+      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.manageOnFailureTitle"
+      defaultMessage="Manage on-failure processor"
     />
   ) : (
     <FormattedMessage
-      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
-      defaultMessage="Configure processor"
+      id="xpack.ingestPipelines.settingsFormOnFailureFlyout.manageTitle"
+      defaultMessage="Manage processor"
     />
   );
 };
 
-export const ManageProcessorForm: FunctionComponent<Props> = ({
+export const EditProcessorForm: FunctionComponent<Props> = ({
   processor,
   form,
   isOnFailure,
@@ -129,6 +108,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
   const {
     testOutputPerProcessor,
     config: { selectedDocumentIndex, documents },
+    isExecutingPipeline,
   } = testPipelineData;
 
   const processorOutput =
@@ -165,6 +145,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
         documents={documents!}
         selectedDocumentIndex={selectedDocumentIndex}
         updateSelectedDocument={updateSelectedDocument}
+        isExecuting={isExecutingPipeline}
       />
     );
   } else {
@@ -191,7 +172,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
             <EuiFlexItem>
               <div>
                 <EuiTitle size="m">
-                  <h2>{getFlyoutTitle(isOnFailure, Boolean(processor))}</h2>
+                  <h2>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>
             </EuiFlexItem>
@@ -215,34 +196,31 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {processor ? (
-            <>
-              <EuiTabs>
-                {tabs.map((tab) => (
-                  <EuiTab
-                    onClick={async () => {
-                      if (tab.id === 'output') {
-                        await handleSubmit(false);
-                      } else {
-                        form.reset({ defaultValue: getDefaultProcessorOptions() });
-                      }
-                      setActiveTab(tab.id);
-                    }}
-                    isSelected={tab.id === activeTab}
-                    key={tab.id}
-                    data-test-subj={`${tab.id}Tab`}
-                    disabled={
-                      (tab.id === 'output' && Boolean(testOutputPerProcessor) === false) ||
-                      Boolean(processorOutput) === false
-                    }
-                  >
-                    {tab.name}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
-              <EuiSpacer />
-            </>
-          ) : undefined}
+          <EuiTabs>
+            {tabs.map((tab) => (
+              <EuiTab
+                onClick={async () => {
+                  if (tab.id === 'output') {
+                    await handleSubmit(false);
+                  } else {
+                    form.reset({ defaultValue: getDefaultProcessorOptions() });
+                  }
+                  setActiveTab(tab.id);
+                }}
+                isSelected={tab.id === activeTab}
+                key={tab.id}
+                data-test-subj={`${tab.id}Tab`}
+                disabled={
+                  tab.id === 'output' &&
+                  (Boolean(testOutputPerProcessor) === false || Boolean(processorOutput) === false)
+                }
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+
+          <EuiSpacer />
 
           {flyoutContent}
         </EuiFlyoutBody>
@@ -269,7 +247,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
                   await handleSubmit();
                 }}
               >
-                {processor ? updateButtonLabel : addButtonLabel}
+                {updateButtonLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
