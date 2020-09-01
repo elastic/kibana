@@ -16,11 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import * as React from 'react';
 import { DiscoverGrid } from './discover_grid';
 
+interface Props<P> {
+  [key: string]: any;
+}
+
+/**
+ * TODO remove when development is finished, helper component to detect property changes
+ * TODO when this is removed there is a problem with the reactDirective that has to be solved
+ * @param WrappedComponent
+ */
+export function withPropsChecker<P>(
+  WrappedComponent: React.ComponentType<P>
+): React.ComponentClass<Props<P>> {
+  // eslint-disable-next-line react/prefer-stateless-function
+  return class PropsChecker extends React.Component<Props<P>> {
+    /**
+     componentWillReceiveProps(nextProps: Props<P>) {
+      Object.keys(nextProps)
+        .filter((key) => nextProps[key] !== this.props[key])
+        .map((key) => {
+          console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
+        });
+    }
+     **/
+
+    render() {
+      // @ts-ignore
+      return <DiscoverGrid {...this.props} />;
+    }
+  };
+}
+
 export function createDiscoverGridDirective(reactDirective: any) {
-  return reactDirective(DiscoverGrid, [
+  return reactDirective(withPropsChecker(DiscoverGrid), [
     ['columns', { watchDepth: 'collection' }],
     ['rows', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],

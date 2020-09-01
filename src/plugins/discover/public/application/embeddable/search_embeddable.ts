@@ -246,7 +246,9 @@ export class SearchEmbeddable
       this.updateInput({ columns });
     };
 
-    searchScope.grid = this.savedSearch.grid ? this.savedSearch.grid : {};
+    if (this.savedSearch.grid) {
+      searchScope.grid = this.savedSearch.grid;
+    }
 
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
