@@ -446,7 +446,7 @@ When a panel contains a stored query, both queries are applied.
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
 To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu. 
-The changes you make appear in every dashboard that uses the panel.
+The changes you make appear in every dashboard that uses the panel, except if you edit the panel title. Changes to the panel title appear only on the dashboard where you made the change.
 
 [float]
 [[save-dashboards]]
