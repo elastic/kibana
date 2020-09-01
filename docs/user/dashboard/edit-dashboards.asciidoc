@@ -65,16 +65,16 @@ image::images/markdown_example_4.png[]
 
 [float]
 [[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
 === Arrange panels
 
 To make your dashboard panels look exactly how you want, you can move, resize, customize, and delete them.
 
 Put the dashboard in *Edit* mode, then use the following options:
 
-[[moving-containers]]
 * To move, click and hold the panel header, then drag to the new location.
 
-[[resizing-containers]]
 * To resize, click the resize control, then drag to the new dimensions.
 
 * To delete, open the panel menu, then select Delete from dashboard. When you delete a panel from the dashboard, the 
@@ -87,7 +87,9 @@ visualization or saved search from the panel is still available in Kibana.
 To duplicate a panel and its configured functionality, clone the panel. Panels support all of the original functionality, 
 including renaming, editing, and cloning. 
 
-To clone a panel, put the dashboard in *Edit* mode, open the menu for the panel you want to clone, then select *Clone panel*. 
+. Put the dashboard in *Edit* mode. 
+
+. For the panel you want to clone, open the panel menu, then select *Clone panel*. 
 
 Cloned panels appear beside the original, and move other panels down to make room when necessary. 
 All cloned visualization panels appear in the visualization list.

@@ -4,9 +4,8 @@
 [partintro]
 --
 
-A _dashboard_ is a collection of panels that provide you with an overview of your data that you can 
-present and share. On a dashboard, you can add a variety of panels that you can rearrange to build a 
-dashboard that tells a story about your data. Panels contain everythng you need, including visualizations, 
+A _dashboard_ is a collection of panels that you use to analyze your data. On a dashboard, you can add a variety of panels that 
+you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations, 
 interactive controls, Markdown, and more.  
 
 With *Dashboard*, you can:
@@ -43,7 +42,7 @@ image::images/dashboard-read-only-badge.png[Example of Dashboard read only acces
 [[types-of-panels]]
 == Types of panels
 
-Panels contain everythng you need to tell a story about you data, including visualizations, 
+Panels contain everything you need to tell a story about you data, including visualizations, 
 interactive controls, Markdown, and more.
 
 [cols="50, 50"]
@@ -446,7 +445,7 @@ When a panel contains a stored query, both queries are applied.
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-To make changes to the panel, put the dashboard in *Edit* mode, then select *Edit visualization* or *Edit panel title* from the panel menu. 
+To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu. 
 The changes you make appear in every dashboard that uses the panel.
 
 [float]

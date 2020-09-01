@@ -1,23 +1,10 @@
 [[tutorials]]
 == Tutorials
 
-Learn how to use *Lens*, *Vega*, and *Timelion* by going through one of the step-by-step tutorials:
+Learn how to use *Lens*, *Vega*, and *Timelion* by going through one of the step-by-step tutorials.
 
-* <<lens-tutorial,Lens tutorial: Compare sales over time>>
-
-* <<vega-lite-tutorial-create-your-first-visualizations,Vega-lite tutorial: Create your first visualization>>
-
-* <<vega-tutorial-update-kibana-filters-from-vega,Vega tutorial: Update {kib} filters from Vega>>
-
-* <<timelion-tutorial-create-time-series-visualizations,Timelion tutorial: Create time series visualizations>>
-
-* <<timelion-tutorial-create-visualizations-with-mathematical-functions,Timelion tutorial: Create visualizations with mathematical functions>>
-
-* <<timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends,Timelion tutorial: Create visualizations with conditional logic and tracking trends>>
-
-[float]
 [[lens-tutorial]]
-=== Lens tutorial: Compare sales over time
+=== Compare sales over time with Lens
 
 Ready to create your own visualization with Lens? Use the following tutorial to create a visualization that lets you compare sales over time.
 
@@ -83,9 +70,8 @@ image::images/lens_tutorial_3.png[Lens tutorial]
 
 Now that you've created your visualization, you can add it to a <<dashboard,dashboard>> or <<canvas,Canvas workpad>>.
 
-[float]
 [[vega-lite-tutorial-create-your-first-visualizations]]
-=== Vega-lite tutorial: Create your first visualization
+=== Create your first visualization with Vega-Lite
 
 experimental[]
 
@@ -691,9 +677,8 @@ The final result of this tutorial is this spec:
 
 ====
 
-[float]
 [[vega-tutorial-update-kibana-filters-from-vega]]
-=== Vega tutorial: Update {kib} filters from Vega
+=== Update {kib} filters from Vega
 
 experimental[]
 
@@ -1286,9 +1271,8 @@ The final Vega spec for this tutorial is here:
 ----
 ====
 
-[float]
 [[timelion-tutorial-create-time-series-visualizations]]
-=== Timelion tutorial: Create time series visualizations
+=== Create time series visualizations with Timelion
 
 To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
 
@@ -1466,7 +1450,6 @@ Change the position and style of the legend:
 image::images/timelion-customize04.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
 === Timelion tutorial: Create visualizations with mathematical functions
 
@@ -1596,9 +1579,8 @@ Customize and format the visualization using functions:
 image::images/timelion-math05.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
-=== Timelion tutorial: Create visualizations with conditional logic and tracking trends
+=== Create visualizations with conditional logic and tracking trends using Timelion
 
 To easily detect outliers and discover patterns over time, modify time series data with conditional logic and create a trend with a moving average.
 
