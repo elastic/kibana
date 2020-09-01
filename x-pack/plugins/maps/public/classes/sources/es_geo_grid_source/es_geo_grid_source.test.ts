@@ -6,7 +6,6 @@
 import { MapExtent, MapFilters } from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services');
-jest.mock('ui/new_platform');
 
 import { getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';

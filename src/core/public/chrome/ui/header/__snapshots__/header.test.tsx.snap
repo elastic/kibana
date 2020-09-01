@@ -9265,6 +9265,8 @@ exports[`Header renders 3`] = `
                   data-test-subj="collapsibleNavGroup-recentlyViewed"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
