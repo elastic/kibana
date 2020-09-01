@@ -54,7 +54,6 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/upgrade_assistant_integration/config'),
   require.resolve('../test/licensing_plugin/config'),
   require.resolve('../test/licensing_plugin/config.public'),
-  require.resolve('../test/licensing_plugin/config.legacy'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/functional_embedded/config.ts'),
   require.resolve('../test/reporting_api_integration/reporting_and_security.config.ts'),
