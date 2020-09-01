@@ -145,6 +145,14 @@ export class Explorer extends React.Component {
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
 
+  componentDidMount() {
+    const { invalidTimeRangeError } = this.props;
+    if (invalidTimeRangeError) {
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addWarning(invalidTimeRangeError);
+    }
+  }
+
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
@@ -298,7 +306,6 @@ export class Explorer extends React.Component {
 
           <div className={mainColumnClasses}>
             <EuiSpacer size="m" />
-
             {stoppedPartitions && (
               <EuiCallOut
                 size={'s'}

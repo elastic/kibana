@@ -21,7 +21,6 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
-import { validateTimeRange } from '../util/date_utils';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -939,7 +938,7 @@ function createResultsUrlForJobs(jobsList, resultsPage, userTimeRange) {
   const jobIds = jobsList.map((j) => j.id);
 
   // if user input is a valid time range object
-  if (validateTimeRange(userTimeRange)) {
+  if (userTimeRange) {
     from = userTimeRange.from;
     to = userTimeRange.to;
     const fromFieldAValidDate = moment(userTimeRange.from).isValid();

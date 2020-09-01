@@ -33,7 +33,7 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
-
+import { validateTimeRange } from '../../util/date_utils';
 export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
@@ -72,7 +72,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
-
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<string | undefined>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -98,10 +98,23 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   // `timefilter.getBounds()` to update `bounds` in this component's state.
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
+      if (!validateTimeRange(globalState.time)) {
+        setInValidTimeRangeError(
+          i18n.translate('invalidTimeRangeInUrlCallout', {
+            defaultMessage:
+              "The time filter changed to the full range for this job due to invalid default time filter '{from}' - '{to}'. Please check the advanced settings.",
+            values: {
+              from: globalState.time.from,
+              to: globalState.time.to,
+            },
+          })
+        );
+      } else {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
 
       const timefilterBounds = timefilter.getBounds();
       // Only if both min/max bounds are valid moment times set the bounds.
@@ -235,6 +248,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           showCharts,
           severity: tableSeverity.val,
           stoppedPartitions,
+          invalidTimeRangeError,
         }}
       />
     </div>
