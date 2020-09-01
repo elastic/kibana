@@ -15,7 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { stringMatch } from '../../../../../util/string_utils';
 import {
-  Clause,
   TermClause,
   FieldClause,
   Value,
@@ -105,21 +104,17 @@ function getError(errorMessage: string | null) {
 interface Props {
   filters: EuiSearchBarProps['filters'];
   searchQueryText: string;
-  setQueryClauses: Dispatch<SetStateAction<any[]>>;
+  setSearchQueryText: Dispatch<SetStateAction<string>>;
 }
 
-export const AnalyticsSearchBar: FC<Props> = ({ filters, searchQueryText, setQueryClauses }) => {
+export const AnalyticsSearchBar: FC<Props> = ({ filters, searchQueryText, setSearchQueryText }) => {
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
     if (error) {
       setErrorMessage(error.message);
-    } else {
-      let clauses: Clause[] = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      setQueryClauses(clauses);
+    } else if (query !== null && query.text !== undefined) {
+      setSearchQueryText(query.text);
       setErrorMessage(null);
     }
   };

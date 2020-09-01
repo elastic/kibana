@@ -138,6 +138,20 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     }
   };
 
+  const filterList = () => {
+    if (searchQueryText !== '' && selectedIdFromUrlInitialized === true) {
+      // trigger table filtering with query for job id to trigger table filter
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      setQueryClauses(clauses);
+    } else {
+      setQueryClauses([]);
+    }
+  };
+
   useEffect(() => {
     if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
       const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
@@ -151,19 +165,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
       setSelectedIdFromUrlInitialized(true);
       setSearchQueryText(queryText);
+    } else {
+      filterList();
     }
   }, [selectedIdFromUrlInitialized, analytics]);
 
   useEffect(() => {
-    if (searchQueryText !== '' && selectedIdFromUrlInitialized === true) {
-      // trigger table filtering with query for job id to trigger table filter
-      const query = EuiSearchBar.Query.parse(searchQueryText);
-      let clauses: any = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      setQueryClauses(clauses);
-    }
+    filterList();
   }, [selectedIdFromUrlInitialized, searchQueryText]);
 
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
@@ -267,7 +275,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <AnalyticsSearchBar
           filters={filters}
           searchQueryText={searchQueryText}
-          setQueryClauses={setQueryClauses}
+          setSearchQueryText={setSearchQueryText}
         />
         <EuiSpacer size="l" />
         <EuiBasicTable<DataFrameAnalyticsListRow>
