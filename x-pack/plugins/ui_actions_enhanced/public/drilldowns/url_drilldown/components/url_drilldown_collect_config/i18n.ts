@@ -16,6 +16,13 @@ export const txtUrlTemplatePlaceholder = i18n.translate(
   }
 );
 
+export const txtUrlPreviewHelpText = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewHelpText',
+  {
+    defaultMessage: 'Please note that \\{\\{event.*\\}\\} variables replaced by dummy values.',
+  }
+);
+
 export const txtAddVariableButtonTitle = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
   {

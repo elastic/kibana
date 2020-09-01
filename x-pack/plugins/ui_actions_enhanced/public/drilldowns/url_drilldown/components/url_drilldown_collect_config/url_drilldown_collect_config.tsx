@@ -23,6 +23,7 @@ import { buildScopeSuggestions } from '../../url_drilldown_scope';
 import './index.scss';
 import {
   txtAddVariableButtonTitle,
+  txtUrlPreviewHelpText,
   txtUrlTemplateHelpLinkText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
@@ -126,6 +127,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
             </EuiLink>
           </EuiText>
         }
+        helpText={txtUrlPreviewHelpText}
       >
         <EuiTextArea
           fullWidth
