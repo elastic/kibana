@@ -42,7 +42,7 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
 import { getEndpointListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
+import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -170,7 +170,7 @@ const PolicyResponseFlyoutPanel = memo<{
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
-          <PreferenceFormattedDate value={responseTimestamp} />
+          <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />
         </EuiText>
         <EuiSpacer size="s" />
         {error && (
