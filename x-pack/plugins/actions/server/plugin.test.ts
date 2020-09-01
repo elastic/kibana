@@ -32,9 +32,10 @@ describe('Actions Plugin', () => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {},
-        rejectUnauthorizedCertificates: true,
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -186,7 +187,7 @@ describe('Actions Plugin', () => {
       const context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {
           preconfiguredServerLog: {
             actionTypeId: '.server-log',
@@ -195,7 +196,8 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
-        rejectUnauthorizedCertificates: true,
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

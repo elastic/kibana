@@ -5,37 +5,37 @@
  */
 
 import {
+  EuiBottomBar,
   EuiButton,
-  EuiForm,
-  EuiTitle,
-  EuiSpacer,
-  EuiPanel,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStat,
-  EuiBottomBar,
-  EuiText,
+  EuiForm,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiStat,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { FETCH_STATUS } from '../../../../../../hooks/useFetcher';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
-import { history } from '../../../../../../utils/history';
+import React, { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useUiTracker } from '../../../../../../../../observability/public';
+import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import { saveConfig } from './saveConfig';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
-import { useUiTracker } from '../../../../../../../../observability/public';
+import { FETCH_STATUS } from '../../../../../../hooks/useFetcher';
+import { saveConfig } from './saveConfig';
 import { SettingFormRow } from './SettingFormRow';
-import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
@@ -60,6 +60,7 @@ export function SettingsPage({
   isEditMode: boolean;
   onClickEdit: () => void;
 }) {
+  const history = useHistory();
   // get a telemetry UI event tracker
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;

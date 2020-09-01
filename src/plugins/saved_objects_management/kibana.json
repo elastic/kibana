@@ -3,8 +3,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home", "management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations", "discover"],
+  "requiredPlugins": ["management", "data"],
+  "optionalPlugins": ["dashboard", "visualizations", "discover", "home"],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["kibanaReact", "home"]
 }

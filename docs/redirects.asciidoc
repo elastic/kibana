@@ -90,3 +90,8 @@ Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,
 To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
 
 More information on this new feature is available in <<apm-alerts>>.
+
+[role="exclude",id="development-security-rbac"]
+== Role-based access control
+
+This content has moved to the <<development-rbac, Security>> page.
