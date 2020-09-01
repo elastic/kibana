@@ -334,7 +334,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               <EuiButtonGroup
                 isFullWidth
                 legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-                  defaultMessage: 'Legend display',
+                  defaultMessage: 'Display',
                 })}
                 name="legendDisplay"
                 buttonSize="compressed"
@@ -368,7 +368,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               })}
             >
               <EuiButtonGroup
-                legend="Position"
+                legend={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+                  defaultMessage: 'Position',
+                })}
                 name="legendPosition"
                 buttonSize="compressed"
                 options={toggleButtonsIcons}
@@ -421,7 +423,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <EuiFieldText
               data-test-subj="lnsYLeftAxisTitle"
               compressed
-              placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+              placeholder={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
                 defaultMessage: 'Overwrite Left Y-axis title',
               })}
               value={yLeftAxisTitle || ''}
@@ -556,7 +558,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               <EuiFieldText
                 data-test-subj="lnsYRightAxisTitle"
                 compressed
-                placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+                placeholder={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
                   defaultMessage: 'Overwrite Right Y-axis title',
                 })}
                 value={yRightAxisTitle || ''}
