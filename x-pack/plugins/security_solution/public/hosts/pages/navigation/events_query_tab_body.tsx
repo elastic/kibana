@@ -14,14 +14,13 @@ import { hostsModel } from '../../store';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -42,7 +41,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'event.action';
 
-export const histogramConfigs: MatrixHisrogramConfigs = {
+export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
@@ -52,14 +51,14 @@ export const histogramConfigs: MatrixHisrogramConfigs = {
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const EventsQueryTabBody = ({
+const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
   setQuery,
   startDate,
-}: HostsComponentsQueryProps) => {
+}) => {
   const { initializeTimeline } = useManageTimeline();
   const dispatch = useDispatch();
   const { globalFullScreen } = useFullScreen();
@@ -67,9 +66,6 @@ export const EventsQueryTabBody = ({
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
-      timelineRowActions: () => [
-        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
-      ],
     });
   }, [dispatch, initializeTimeline]);
 
@@ -105,5 +101,9 @@ export const EventsQueryTabBody = ({
     </>
   );
 };
+
+EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
+
+export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';
