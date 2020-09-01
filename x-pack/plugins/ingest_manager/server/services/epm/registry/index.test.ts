@@ -93,7 +93,7 @@ describe('splitPkgKey tests', () => {
 
 describe('getBufferExtractor', () => {
   it('throws if the archive has not been downloaded/cached yet', () => {
-    expect(() => getBufferExtractor('missing', '1.2.3')).toThrow('no archive key');
+    expect(() => getBufferExtractor('missing', '1.2.3')).toThrow('no archive location');
   });
 
   it('returns unzipBuffer if the archive key ends in .zip', () => {

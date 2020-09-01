@@ -177,7 +177,7 @@ export function pathParts(path: string): AssetParts {
 
 export function getBufferExtractor(pkgName: string, pkgVersion: string) {
   const archiveLocation = getArchiveLocation(pkgName, pkgVersion);
-  if (!archiveLocation) throw new Error('no archive key');
+  if (!archiveLocation) throw new Error(`no archive location for ${pkgName} ${pkgVersion}`);
   const isZip = archiveLocation.endsWith('.zip');
   const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
 
