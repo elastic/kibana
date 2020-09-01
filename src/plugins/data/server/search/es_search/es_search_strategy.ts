@@ -22,7 +22,7 @@ import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
+import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -33,7 +33,7 @@ export const esSearchStrategyProvider = (
     search: async (context, request, options) => {
       logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
-      const defaultParams = getDefaultSearchParams(config);
+      const uiSettingsClient = await context.core.uiSettings.client;
 
       // Only default index pattern type is supported here.
       // See data_enhanced for other type support.
@@ -42,7 +42,8 @@ export const esSearchStrategyProvider = (
       }
 
       const params = {
-        ...defaultParams,
+        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...getShardTimeout(config),
         ...request.params,
       };
 

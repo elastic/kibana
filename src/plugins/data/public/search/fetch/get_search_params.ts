@@ -24,19 +24,8 @@ const sessionId = Date.now();
 
 export function getSearchParams(getConfig: GetConfigFn) {
   return {
-    ignore_throttled: getIgnoreThrottled(getConfig),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(getConfig),
     preference: getPreference(getConfig),
   };
-}
-
-export function getIgnoreThrottled(getConfig: GetConfigFn) {
-  return !getConfig(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-}
-
-export function getMaxConcurrentShardRequests(getConfig: GetConfigFn) {
-  const maxConcurrentShardRequests = getConfig(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS);
-  return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
 
 export function getPreference(getConfig: GetConfigFn) {

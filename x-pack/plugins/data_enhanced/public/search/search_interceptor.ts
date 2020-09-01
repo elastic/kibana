@@ -80,11 +80,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    request.params = {
-      ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-      ...request.params,
-    };
-
     const { combinedSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.signal,
       timeout: this.searchTimeout,

@@ -81,6 +81,8 @@ describe('ES search strategy', () => {
     expect(querystring).toHaveProperty('wait_for_completion_timeout');
     expect(querystring).toHaveProperty('track_total_hits');
     expect(querystring).toHaveProperty('ignore_unavailable');
+    expect(querystring).toHaveProperty('ignore_throttled');
+    expect(querystring).toHaveProperty('ignore_unavailable');
     expect(querystring).toHaveProperty('keep_alive');
     expect(querystring).toHaveProperty('batched_reduce_size');
   });
