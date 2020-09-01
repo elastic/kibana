@@ -7,6 +7,7 @@
 import { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
 
 import { hostsFactory } from './hosts';
+import { networkFactory } from './network';
 import { SecuritySolutionFactory } from './types';
 import { authenticationFactory } from './authentications';
 
@@ -16,4 +17,5 @@ export const securitySolutionFactory: Record<
 > = {
   ...hostsFactory,
   ...authenticationFactory,
+  ...networkFactory,
 };

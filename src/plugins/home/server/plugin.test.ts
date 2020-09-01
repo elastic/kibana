@@ -19,10 +19,7 @@
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin } from './plugin';
-import { coreMock } from '../../../core/server/mocks';
-import { CoreSetup } from '../../../core/server';
-
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+import { coreMock, httpServiceMock } from '../../../core/server/mocks';
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
@@ -33,8 +30,16 @@ describe('HomeServerPlugin', () => {
   });
 
   describe('setup', () => {
-    const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
-    const initContext = coreMock.createPluginInitializerContext();
+    let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+    let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
+    let routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+
+    beforeEach(() => {
+      mockCoreSetup = coreMock.createSetup();
+      routerMock = httpServiceMock.createRouter();
+      mockCoreSetup.http.createRouter.mockReturnValue(routerMock);
+      initContext = coreMock.createPluginInitializerContext();
+    });
 
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
       const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
@@ -51,6 +56,18 @@ describe('HomeServerPlugin', () => {
       expect(setup.sampleData).toHaveProperty('addSavedObjectsToSampleDataset');
       expect(setup.sampleData).toHaveProperty('addAppLinksToSampleDataset');
       expect(setup.sampleData).toHaveProperty('replacePanelInSampleDatasetDashboard');
+    });
+
+    test('registers the `/api/home/hits_status` route', () => {
+      new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+
+      expect(routerMock.post).toHaveBeenCalledTimes(1);
+      expect(routerMock.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/api/home/hits_status',
+        }),
+        expect.any(Function)
+      );
     });
   });
 

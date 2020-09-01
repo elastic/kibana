@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getDurationFormatter } from '../../../../utils/formatters';
-import { history } from '../../../../utils/history';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -106,6 +106,7 @@ export function TransactionDistribution(props: Props) {
     isLoading,
     bucketIndex,
   } = props;
+  const history = useHistory();
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYShort = useCallback(getFormatYShort(transactionType), [
