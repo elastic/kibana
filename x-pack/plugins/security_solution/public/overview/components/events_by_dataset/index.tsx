@@ -14,7 +14,7 @@ import { SHOWING, UNIT } from '../../../common/components/events_viewer/translat
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import {
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
 import { eventsStackByOptions } from '../../../hosts/pages/navigation';
@@ -127,7 +127,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [combinedQueries, kibana, indexPattern, query, filters]
   );
 
-  const eventsByDatasetHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       stackByOptions:
