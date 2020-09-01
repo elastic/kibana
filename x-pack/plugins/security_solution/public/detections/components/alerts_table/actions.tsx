@@ -68,7 +68,7 @@ export const getFilterAndRuleBounds = (
 export const updateAlertStatusAction = async ({
   query,
   alertIds,
-  selectedStatus,
+  status,
   setEventsLoading,
   setEventsDeleted,
   onAlertStatusUpdateSuccess,
@@ -79,7 +79,7 @@ export const updateAlertStatusAction = async ({
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
 
-    const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
+    const response = await updateAlertStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
@@ -94,9 +94,9 @@ export const updateAlertStatusAction = async ({
       );
     }
 
-    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, selectedStatus);
+    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, status);
   } catch (error) {
-    onAlertStatusUpdateFailure(selectedStatus, error);
+    onAlertStatusUpdateFailure(status, error);
   } finally {
     setEventsLoading({ eventIds: alertIds, isLoading: false });
   }

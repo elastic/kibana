@@ -297,17 +297,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [setSelectAll, setShowClearSelectionAction, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (
-      refetchQuery: inputsModel.Refetch,
-      { status, selectedStatus }: UpdateAlertsStatusProps
-    ) => {
+    async (refetchQuery: inputsModel.Refetch, { status }: UpdateAlertsStatusProps) => {
       const currentStatusFilter = buildAlertStatusFilter(status);
       await updateAlertStatusAction({
         query: showClearSelectionAction
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
           : undefined,
         alertIds: Object.keys(selectedEventIds),
-        selectedStatus,
+        status,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         onAlertStatusUpdateSuccess,

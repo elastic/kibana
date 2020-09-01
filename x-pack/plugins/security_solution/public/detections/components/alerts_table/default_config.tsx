@@ -218,7 +218,7 @@ interface AlertActionArgs {
   nonEcsRowData: TimelineNonEcsData[];
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
+  onAlertStatusUpdateSuccess: (updated: number, conflicts: number, status: Status) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: Status;
@@ -263,8 +263,7 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status,
-        selectedStatus: FILTER_OPEN,
+        status: FILTER_OPEN,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
@@ -283,8 +282,7 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status,
-        selectedStatus: FILTER_CLOSED,
+        status: FILTER_CLOSED,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
@@ -303,8 +301,7 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status,
-        selectedStatus: FILTER_IN_PROGRESS,
+        status: FILTER_IN_PROGRESS,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };

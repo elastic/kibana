@@ -41,7 +41,7 @@ export type UpdateAlertsStatus = ({
 export interface UpdateAlertStatusActionProps {
   query?: string;
   alertIds: string[];
-  selectedStatus: Status;
+  status: Status;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   onAlertStatusUpdateSuccess: (updated: number, conflicts: number, status: Status) => void;
