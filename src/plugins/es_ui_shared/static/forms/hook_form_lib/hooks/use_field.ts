@@ -143,8 +143,6 @@ export const useField = <T>(
     __updateFormDataAt(path, value);
 
     // Validate field(s) (that will update form.isValid state)
-    // We only validate if the value is different than the initial or default value
-    // to avoid validating after a form.reset() call.
     await __validateFields(fieldsToValidateOnChange ?? [path]);
 
     if (isMounted.current === false) {
