@@ -115,7 +115,6 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 }
 
 export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
-  const core = useCore();
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
   const outputsRequest = useGetOutputs();
@@ -131,9 +130,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   useEffect(() => {
     if (settings) {
-      inputs.kibanaUrls.setValue(
-        settings.kibana_urls || [`${window.location.origin}${core.http.basePath.get()}`]
-      );
+      inputs.kibanaUrls.setValue(settings.kibana_urls);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
