@@ -98,6 +98,9 @@ const pushToServiceHandler = async ({
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
+    if (mapping && mapping.get('comments')?.actionType === 'nothing') {
+      return res;
+    }
     const commentsTransformed = mapping
       ? transformComments(comments, ['informationAdded'])
       : comments;

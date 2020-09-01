@@ -122,7 +122,6 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
-  secrets: Record<string, unknown>;
   logger: Logger;
 }
 

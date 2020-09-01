@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExternalService,
-  PushToServiceApiParams,
-  ExecutorSubActionPushParams,
-  MapRecord,
-} from '../case/types';
+import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+
+import { MapRecord } from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -40,6 +37,25 @@ const createMock = (): jest.Mocked<ExternalService> => {
       })
     ),
     createComment: jest.fn(),
+    findIncidents: jest.fn(),
+    getIncidentTypes: jest.fn().mockImplementation(() => [
+      { id: 17, name: 'Communication error (fax; email)' },
+      { id: 1001, name: 'Custom type' },
+    ]),
+    getSeverity: jest.fn().mockImplementation(() => [
+      {
+        id: 4,
+        name: 'Low',
+      },
+      {
+        id: 5,
+        name: 'Medium',
+      },
+      {
+        id: 6,
+        name: 'High',
+      },
+    ]),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -96,6 +112,8 @@ const executorParams: ExecutorSubActionPushParams = {
   updatedBy: { fullName: 'Elastic User', username: 'elastic' },
   title: 'Incident title',
   description: 'Incident description',
+  incidentTypes: [1001],
+  severityCode: 6,
   comments: [
     {
       commentId: 'case-comment-1',
@@ -118,7 +136,7 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalCase: { name: 'Incident title', description: 'Incident description' },
+  externalObject: { name: 'Incident title', description: 'Incident description' },
 };
 
 const incidentTypes = [
