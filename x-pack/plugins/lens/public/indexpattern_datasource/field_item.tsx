@@ -117,14 +117,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     );
 
   function fetchData() {
-    if (
-      state.isLoading
-      // (field.type !== 'number' &&
-      //   field.type !== 'string' &&
-      //   field.type !== 'date' &&
-      //   field.type !== 'boolean' &&
-      //   field.type !== 'ip')
-    ) {
+    if (state.isLoading) {
       return;
     }
 
@@ -208,7 +201,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
-          label={field.displayName || ''}
+          label={field.displayName}
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
