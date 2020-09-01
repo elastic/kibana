@@ -41,8 +41,8 @@ describe('#toExpression', () => {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
-          tickLabelsVisibilitySettings: { x: false, y: true },
-          gridlinesVisibilitySettings: { x: false, y: true },
+          tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
           layers: [
             {
               layerId: 'first',
@@ -198,7 +198,8 @@ describe('#toExpression', () => {
       (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
     ).toEqual({
       x: [true],
-      y: [true],
+      yLeft: [true],
+      yRight: [true],
     });
   });
 
@@ -223,7 +224,8 @@ describe('#toExpression', () => {
       (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
     ).toEqual({
       x: [true],
-      y: [true],
+      yLeft: [true],
+      yRight: [true],
     });
   });
 });

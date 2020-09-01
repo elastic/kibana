@@ -16,7 +16,10 @@ Object {
                   "x": Array [
                     false,
                   ],
-                  "y": Array [
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
                     true,
                   ],
                 },
@@ -95,7 +98,10 @@ Object {
         "showXAxisTitle": Array [
           true,
         ],
-        "showYAxisTitle": Array [
+        "showYLeftAxisTitle": Array [
+          true,
+        ],
+        "showYRightAxisTitle": Array [
           true,
         ],
         "tickLabelsVisibilitySettings": Array [
@@ -106,7 +112,10 @@ Object {
                   "x": Array [
                     false,
                   ],
-                  "y": Array [
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
                     true,
                   ],
                 },
@@ -120,7 +129,10 @@ Object {
         "xTitle": Array [
           "",
         ],
-        "yTitle": Array [
+        "yLeftTitle": Array [
+          "",
+        ],
+        "yRightTitle": Array [
           "",
         ],
       },

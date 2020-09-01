@@ -487,8 +487,8 @@ describe('xy_suggestions', () => {
       showXAxisTitle: true,
       showYLeftAxisTitle: true,
       showYRightAxisTitle: true,
-      gridlinesVisibilitySettings: { x: true, y: true },
-      tickLabelsVisibilitySettings: { x: true, y: false },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -530,8 +530,8 @@ describe('xy_suggestions', () => {
       showXAxisTitle: true,
       showYLeftAxisTitle: true,
       showYRightAxisTitle: true,
-      gridlinesVisibilitySettings: { x: true, y: true },
-      tickLabelsVisibilitySettings: { x: true, y: false },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -644,8 +644,8 @@ describe('xy_suggestions', () => {
       showXAxisTitle: true,
       showYLeftAxisTitle: true,
       showYRightAxisTitle: true,
-      gridlinesVisibilitySettings: { x: true, y: true },
-      tickLabelsVisibilitySettings: { x: true, y: false },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -688,8 +688,8 @@ describe('xy_suggestions', () => {
       showXAxisTitle: true,
       showYLeftAxisTitle: true,
       showYRightAxisTitle: true,
-      gridlinesVisibilitySettings: { x: true, y: true },
-      tickLabelsVisibilitySettings: { x: true, y: false },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
       layers: [
         {
           accessors: ['price'],
@@ -733,8 +733,8 @@ describe('xy_suggestions', () => {
       showXAxisTitle: true,
       showYLeftAxisTitle: true,
       showYRightAxisTitle: true,
-      gridlinesVisibilitySettings: { x: true, y: true },
-      tickLabelsVisibilitySettings: { x: true, y: false },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
       layers: [
         {
           accessors: ['price', 'quantity'],

@@ -415,11 +415,13 @@ function buildSuggestion({
     showYRightAxisTitle: currentState?.showYRightAxisTitle ?? true,
     tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
       x: true,
-      y: true,
+      yLeft: true,
+      yRight: true,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,
-      y: true,
+      yLeft: true,
+      yRight: true,
     },
     preferredSeriesType: seriesType,
     layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],

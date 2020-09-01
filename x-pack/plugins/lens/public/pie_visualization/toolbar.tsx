@@ -5,13 +5,10 @@
  */
 
 import './toolbar.scss';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSelect,
   EuiFormRow,
   EuiSuperSelect,
   EuiRange,
@@ -24,7 +21,7 @@ import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationToolbarProps } from '../types';
-import { ToolbarButton } from '../toolbar_button';
+import { ToolbarPopover } from '../toolbar_popover';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -117,165 +114,179 @@ const legendOptions: Array<{
   },
 ];
 
+const toggleButtonsIcons = [
+  {
+    id: Position.Bottom,
+    label: 'Bottom',
+    iconType: 'arrowDown',
+  },
+  {
+    id: Position.Left,
+    label: 'Left',
+    iconType: 'arrowLeft',
+  },
+  {
+    id: Position.Right,
+    label: 'Right',
+    iconType: 'arrowRight',
+  },
+  {
+    id: Position.Top,
+    label: 'Top',
+    iconType: 'arrowUp',
+  },
+];
+
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
-  const [open, setOpen] = useState(false);
   const { state, setState } = props;
   const layer = state.layers[0];
   if (!layer) {
     return null;
   }
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          panelClassName="lnsPieToolbar__popover"
-          button={
-            <ToolbarButton
-              fontWeight="normal"
-              onClick={() => {
-                setOpen(!open);
-              }}
-            >
-              {i18n.translate('xpack.lens.pieChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </ToolbarButton>
-          }
-          isOpen={open}
-          closePopover={() => {
-            setOpen(false);
-          }}
-          anchorPosition="downRight"
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+      <ToolbarPopover
+        title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
+          defaultMessage: 'Values',
+        })}
+        icon="visText"
+      >
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
+            defaultMessage: 'Label position',
+          })}
+          fullWidth
+          display="columnCompressed"
         >
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-              defaultMessage: 'Label position',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiSuperSelect
-              compressed
-              valueOfSelected={layer.categoryDisplay}
-              options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
-              onChange={(option) => {
+          <EuiSuperSelect
+            compressed
+            valueOfSelected={layer.categoryDisplay}
+            options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
+            onChange={(option) => {
+              setState({
+                ...state,
+                layers: [{ ...layer, categoryDisplay: option }],
+              });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.pieChart.numberLabels', {
+            defaultMessage: 'Label values',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiSuperSelect
+            compressed
+            disabled={layer.categoryDisplay === 'hide'}
+            valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+            options={numberOptions}
+            onChange={(option) => {
+              setState({
+                ...state,
+                layers: [{ ...layer, numberDisplay: option }],
+              });
+            }}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule margin="s" />
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
+            defaultMessage: 'Decimal places for percent',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiRange
+            data-test-subj="indexPattern-dimension-formatDecimals"
+            value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+            min={0}
+            max={10}
+            showInput
+            compressed
+            onChange={(e) => {
+              setState({
+                ...state,
+                layers: [{ ...layer, percentDecimals: Number(e.currentTarget.value) }],
+              });
+            }}
+          />
+        </EuiFormRow>
+      </ToolbarPopover>
+      <ToolbarPopover
+        title={i18n.translate('xpack.lens.pieChart.legendLabel', {
+          defaultMessage: 'Legend',
+        })}
+      >
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {
+            defaultMessage: 'Display',
+          })}
+          display="columnCompressed"
+        >
+          <div>
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.pieChart.legendDisplayLegend', {
+                defaultMessage: 'Display',
+              })}
+              options={legendOptions}
+              idSelected={legendOptions.find(({ value }) => value === layer.legendDisplay)!.id}
+              onChange={(optionId) => {
                 setState({
                   ...state,
-                  layers: [{ ...layer, categoryDisplay: option }],
+                  layers: [
+                    {
+                      ...layer,
+                      legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
+                    },
+                  ],
                 });
               }}
+              buttonSize="compressed"
+              isFullWidth
             />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-              defaultMessage: 'Label values',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiSuperSelect
-              compressed
-              disabled={layer.categoryDisplay === 'hide'}
-              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
-              options={numberOptions}
-              onChange={(option) => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, numberDisplay: option }],
-                });
-              }}
-            />
-          </EuiFormRow>
-          <EuiHorizontalRule margin="s" />
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
-              defaultMessage: 'Decimal places for percent',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiRange
-              data-test-subj="indexPattern-dimension-formatDecimals"
-              value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-              min={0}
-              max={10}
-              showInput
-              compressed
-              onChange={(e) => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, percentDecimals: Number(e.currentTarget.value) }],
-                });
-              }}
-            />
-          </EuiFormRow>
-          <EuiHorizontalRule margin="s" />
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {
-              defaultMessage: 'Legend display',
-            })}
-            display="columnCompressed"
-          >
-            <div>
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.pieChart.legendDisplayLegend', {
-                  defaultMessage: 'Legend display',
-                })}
-                options={legendOptions}
-                idSelected={legendOptions.find(({ value }) => value === layer.legendDisplay)!.id}
-                onChange={(optionId) => {
-                  setState({
-                    ...state,
-                    layers: [
-                      {
-                        ...layer,
-                        legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
-                      },
-                    ],
-                  });
-                }}
-                buttonSize="compressed"
-                isFullWidth
-              />
 
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                compressed
-                label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-                  defaultMessage: 'Nested legend',
-                })}
-                disabled={layer.legendDisplay === 'hide'}
-                checked={!!layer.nestedLegend}
-                onChange={() => {
-                  setState({ ...state, layers: [{ ...layer, nestedLegend: !layer.nestedLegend }] });
-                }}
-              />
-            </div>
-          </EuiFormRow>
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-              defaultMessage: 'Legend position',
-            })}
-          >
-            <EuiSelect
+            <EuiSpacer size="s" />
+            <EuiSwitch
               compressed
+              label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+                defaultMessage: 'Nested legend',
+              })}
               disabled={layer.legendDisplay === 'hide'}
-              options={[
-                { value: Position.Top, text: 'Top' },
-                { value: Position.Left, text: 'Left' },
-                { value: Position.Right, text: 'Right' },
-                { value: Position.Bottom, text: 'Bottom' },
-              ]}
-              value={layer.legendPosition || Position.Right}
-              onChange={(e) => {
+              checked={!!layer.nestedLegend}
+              onChange={() => {
                 setState({
                   ...state,
-                  layers: [{ ...layer, legendPosition: e.target.value as Position }],
+                  layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
                 });
               }}
             />
-          </EuiFormRow>
-        </EuiPopover>
-      </EuiFlexItem>
+          </div>
+        </EuiFormRow>
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+            defaultMessage: 'Position',
+          })}
+        >
+          <EuiButtonGroup
+            isDisabled={layer.legendDisplay === 'hide'}
+            legend="Position"
+            name="legendPosition"
+            buttonSize="compressed"
+            options={toggleButtonsIcons}
+            idSelected={layer.legendPosition || Position.Right}
+            onChange={(id) => {
+              setState({
+                ...state,
+                layers: [{ ...layer, legendPosition: id as Position }],
+              });
+            }}
+            isIconOnly
+          />
+        </EuiFormRow>
+      </ToolbarPopover>
     </EuiFlexGroup>
   );
 }

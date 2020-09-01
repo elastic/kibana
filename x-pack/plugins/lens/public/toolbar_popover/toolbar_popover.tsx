@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle } from '@elastic/eui';
 import { ToolbarButton } from '../toolbar_button';
 
@@ -12,7 +12,7 @@ export interface ToolbarPopoverProps {
   /**
    * Determines popover title
    */
-  title?: string;
+  title: string;
   /**
    * Determines the button icon
    */
@@ -21,6 +21,10 @@ export interface ToolbarPopoverProps {
    * Determines if the popover is disabled
    */
   isDisabled?: boolean;
+  /**
+   * Is used to pass the popover state to the parent component
+   */
+  handlePopoverState?: (open: boolean) => void;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
@@ -28,12 +32,20 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   title,
   icon = 'beaker',
   isDisabled = false,
+  handlePopoverState,
 }) => {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (handlePopoverState) {
+      handlePopoverState(open);
+    }
+  }, [open, handlePopoverState]);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        panelClassName="lnsXyToolbar_left__popover"
+        panelClassName="lnsXyToolbar__popover"
         ownFocus
         button={
           <ToolbarButton

@@ -77,7 +77,8 @@ export const legendConfig: ExpressionFunctionDefinition<
 
 export interface AxesSettingsConfig {
   x: boolean;
-  y: boolean;
+  yLeft: boolean;
+  yRight: boolean;
 }
 
 type TickLabelsConfigResult = AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
@@ -100,10 +101,16 @@ export const tickLabelsConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the tick labels of the x-axis are visible.',
       }),
     },
-    y: {
+    yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yAxisTickLabels.help', {
-        defaultMessage: 'Specifies whether or not the tick labels of the y-axis are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the left y-axis are visible.',
+      }),
+    },
+    yRight: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the right y-axis are visible.',
       }),
     },
   },
@@ -135,10 +142,16 @@ export const gridlinesConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the gridlines of the x-axis are visible.',
       }),
     },
-    y: {
+    yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yAxisgridlines.help', {
-        defaultMessage: 'Specifies whether or not the gridlines of the y-axis are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisgridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the left y-axis are visible.',
+      }),
+    },
+    yRight: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisgridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the right y-axis are visible.',
       }),
     },
   },

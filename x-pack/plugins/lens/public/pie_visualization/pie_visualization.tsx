@@ -214,6 +214,4 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       domElement
     );
   },
-
-  toolbarPosition: 'right',
 };

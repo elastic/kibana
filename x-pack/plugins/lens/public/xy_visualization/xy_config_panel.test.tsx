@@ -8,6 +8,7 @@ import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar } from './xy_config_panel';
+import { ToolbarPopover } from '../toolbar_popover';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
@@ -107,7 +108,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
     });
 
-    it('should disable the select if there is no area or line series', () => {
+    it('should disable the popover if there is no area or line series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -121,7 +122,14 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(EuiSuperSelect).prop('disabled')).toEqual(true);
+      expect(component.find(ToolbarPopover).at(0).prop('isDisabled')).toEqual(true);
+    });
+
+    it('should disable the popover if there is no right axis', () => {
+      const state = testState();
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      expect(component.find(ToolbarPopover).at(4).prop('isDisabled')).toEqual(true);
     });
 
     it('should show the values of the X and Y axes titles on the corresponding input text', () => {
@@ -170,32 +178,32 @@ describe('XY Config panels', () => {
       expect(component.find('[data-test-subj="lnsYRightAxisTitle"]').prop('disabled')).toBe(true);
     });
 
-    it('has the tick labels buttons enabled', () => {
+    it('has the tick labels switches enabled', () => {
       const state = testState();
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
 
-      const options = component
-        .find('[data-test-subj="lnsTickLabelsSettings"]')
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ label }) => label)).toEqual(['X-axis', 'Y-axis']);
-
-      const selections = component
-        .find('[data-test-subj="lnsTickLabelsSettings"]')
-        .prop('idToSelectedMap');
-
-      expect(selections!).toEqual({ x: true, y: true });
+      expect(component.find('[data-test-subj="lnsshowYLeftAxisTickLabels"]').prop('checked')).toBe(
+        true
+      );
+      expect(component.find('[data-test-subj="lnsshowYRightAxisTickLabels"]').prop('checked')).toBe(
+        true
+      );
+      expect(component.find('[data-test-subj="lnsshowXAxisTickLabels"]').prop('checked')).toBe(
+        true
+      );
     });
 
-    it('has the gridlines buttons enabled', () => {
+    it('has the gridlines switches enabled', () => {
       const state = testState();
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
 
-      const selections = component
-        .find('[data-test-subj="lnsGridlinesSettings"]')
-        .prop('idToSelectedMap');
-
-      expect(selections!).toEqual({ x: true, y: true });
+      expect(component.find('[data-test-subj="lnsshowYLeftAxisGridlines"]').prop('checked')).toBe(
+        true
+      );
+      expect(component.find('[data-test-subj="lnsshowYRightAxisGridlines"]').prop('checked')).toBe(
+        true
+      );
+      expect(component.find('[data-test-subj="lnsshowXAxisGridlines"]').prop('checked')).toBe(true);
     });
   });
 });

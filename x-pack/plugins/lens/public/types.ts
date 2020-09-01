@@ -462,10 +462,6 @@ export interface Visualization<T = unknown> {
    */
   renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
   /**
-   * Toolbar position. Left means that the toolbar will rendered next to the chart switch.
-   */
-  toolbarPosition?: 'left' | 'right';
-  /**
    * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
    * settings for the visualization. This toolbar is placed next to the Chart Switch
    */

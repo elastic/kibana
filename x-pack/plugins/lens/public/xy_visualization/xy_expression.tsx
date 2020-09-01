@@ -275,7 +275,11 @@ export function XYChart({
   const showXAxisTitle = args.showXAxisTitle ?? true;
   const showYLeftAxisTitle = args.showYLeftAxisTitle ?? true;
   const showYRightAxisTitle = args.showYRightAxisTitle ?? true;
-  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -321,9 +325,6 @@ export function XYChart({
     axisSeries: Array<{ layer: string; accessor: string }>,
     index: number
   ) => {
-    // piece of shit - fix this
-    if (index > 0 && !showYRightAxisTitle) return;
-    if (index === 0 && !showYLeftAxisTitle) return;
     const yTitle = index > 0 ? args.yRightTitle : args.yLeftTitle;
     return (
       yTitle ||
@@ -334,6 +335,19 @@ export function XYChart({
         )
         .filter((name) => Boolean(name))[0]
     );
+  };
+
+  const getYAxesStyle = (index: number) => {
+    const style = {
+      tickLabel: {
+        visible:
+          index > 0 ? tickLabelsVisibilitySettings?.yRight : tickLabelsVisibilitySettings?.yLeft,
+      },
+      axisTitle: {
+        visible: index > 0 ? showYRightAxisTitle : showYLeftAxisTitle,
+      },
+    };
+    return style;
   };
 
   return (
@@ -459,18 +473,12 @@ export function XYChart({
           position={axis.position}
           title={getYAxesTitles(axis.series, index)}
           gridLine={{
-            visible: gridlinesVisibilitySettings?.y,
+            visible:
+              index > 0 ? gridlinesVisibilitySettings?.yRight : gridlinesVisibilitySettings?.yLeft,
           }}
           hide={filteredLayers[0].hide}
           tickFormat={(d) => axis.formatter.convert(d)}
-          style={{
-            tickLabel: {
-              visible: tickLabelsVisibilitySettings?.y,
-            },
-            axisTitle: {
-              visible: showYAxisTitle,
-            },
-          }}
+          style={getYAxesStyle(index)}
         />
       ))}
 

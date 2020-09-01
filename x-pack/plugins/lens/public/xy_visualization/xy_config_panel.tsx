@@ -15,9 +15,7 @@ import {
   EuiFlexItem,
   EuiSuperSelect,
   EuiFormRow,
-  EuiPopover,
   EuiText,
-  EuiSelect,
   htmlIdGenerator,
   EuiForm,
   EuiColorPicker,
@@ -26,8 +24,6 @@ import {
   EuiIcon,
   EuiFieldText,
   EuiSwitch,
-  EuiHorizontalRule,
-  EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import {
@@ -39,7 +35,6 @@ import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } 
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
-import { ToolbarButton } from '../toolbar_button';
 import { ToolbarPopover } from '../toolbar_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -123,29 +118,18 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const axes = [
-    {
-      id: 'x',
-      label: 'X-axis',
-    },
-    {
-      id: 'y',
-      label: 'Y-axis',
-    },
-  ];
-
   const { frame, state, setState } = props;
 
-  const [open, setOpen] = useState(false);
+  const [popoversOpenState, setPopoversOpenState] = useState(false);
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
   const rightAxisLayer = state?.layers.filter((layer) => layer.yConfig && layer.yConfig.length > 0);
 
-  const [xAxisTitle, setXAxisTitle] = useState<string | undefined>('');
-  const [yLeftAxisTitle, setYLeftAxisTitle] = useState<string | undefined>('');
-  const [yRightAxisTitle, setYRightAxisTitle] = useState<string | undefined>('');
+  const [xAxisTitle, setXAxisTitle] = useState<string | undefined>(state?.xTitle);
+  const [yLeftAxisTitle, setYLeftAxisTitle] = useState<string | undefined>(state?.yLeftTitle);
+  const [yRightAxisTitle, setYRightAxisTitle] = useState<string | undefined>(state?.yRightTitle);
 
   const xyTitles = useCallback(() => {
     const defaults = {
@@ -186,7 +170,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
        BUT if the user cleans up the input text, it should remain empty until the user closes and reopens the panel.
        In that case, the default axes legend should appear. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [popoversOpenState]);
 
   useEffect(() => {
     const {
@@ -222,7 +206,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
-    y: state?.tickLabelsVisibilitySettings?.y ?? true,
+    yLeft: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
+    yRight: state?.tickLabelsVisibilitySettings?.yRight ?? true,
   };
 
   const onTickLabelsVisibilitySettingsChange = (optionId: string): void => {
@@ -241,7 +226,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 
   const gridlinesVisibilitySettings = {
     x: state?.gridlinesVisibilitySettings?.x ?? true,
-    y: state?.gridlinesVisibilitySettings?.y ?? true,
+    yLeft: state?.gridlinesVisibilitySettings?.yLeft ?? true,
+    yRight: state?.gridlinesVisibilitySettings?.yRight ?? true,
   };
 
   const onGridlinesVisibilitySettingsChange = (optionId: string): void => {
@@ -258,6 +244,29 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
+  const toggleButtonsIcons = [
+    {
+      id: Position.Bottom,
+      label: 'Bottom',
+      iconType: 'arrowDown',
+    },
+    {
+      id: Position.Left,
+      label: 'Left',
+      iconType: 'arrowLeft',
+    },
+    {
+      id: Position.Right,
+      label: 'Right',
+      iconType: 'arrowRight',
+    },
+    {
+      id: Position.Top,
+      label: 'Top',
+      iconType: 'arrowUp',
+    },
+  ];
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -265,291 +274,323 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       ? 'hide'
       : 'show';
   return (
-    <EuiFlexGroup gutterSize="none">
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-          defaultMessage: 'Fill missing values',
-        })}
-      >
-        <EuiToolTip
-          anchorClassName="eui-displayBlock"
-          content={
-            !hasNonBarSeries &&
-            i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          <EuiToolTip
+            anchorClassName="eui-displayBlock"
+            content={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
               defaultMessage: 'This setting only applies to line and area charts.',
-            })
-          }
-        >
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.fittingDisplayLabel', {
-              defaultMessage: 'Display',
             })}
           >
-            <EuiSuperSelect
-              compressed
-              disabled={!hasNonBarSeries}
-              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                return {
-                  value: id,
-                  dropdownDisplay: (
-                    <>
-                      <strong>{title}</strong>
-                      <EuiText size="xs" color="subdued">
-                        <p>{description}</p>
-                      </EuiText>
-                    </>
-                  ),
-                  inputDisplay: title,
-                };
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+                defaultMessage: 'Fill missing values',
               })}
-              valueOfSelected={state?.fittingFunction || 'None'}
-              onChange={(value) => setState({ ...state, fittingFunction: value })}
-              itemLayoutAlign="top"
-              hasDividers
-            />
-          </EuiFormRow>
-        </EuiToolTip>
-      </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.xyChart.legendLabel', {
-          defaultMessage: 'Legend',
-        })}
-      >
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-            defaultMessage: 'Display',
-          })}
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-              defaultMessage: 'Legend display',
-            })}
-            name="legendDisplay"
-            buttonSize="compressed"
-            options={legendOptions}
-            idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
-            onChange={(optionId) => {
-              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-              if (newMode === 'auto') {
-                setState({
-                  ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
-                });
-              } else if (newMode === 'show') {
-                setState({
-                  ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
-                });
-              } else if (newMode === 'hide') {
-                setState({
-                  ...state,
-                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
-                });
-              }
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-        >
-          <EuiSelect
-            disabled={legendMode === 'hide'}
-            compressed
-            options={[
-              { value: Position.Top, text: 'Top' },
-              { value: Position.Left, text: 'Left' },
-              { value: Position.Right, text: 'Right' },
-              { value: Position.Bottom, text: 'Bottom' },
-            ]}
-            value={state?.legend.position}
-            onChange={(e) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, position: e.target.value as Position },
-              });
-            }}
-          />
-        </EuiFormRow>
-      </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
-          defaultMessage: 'Left Axis',
-        })}
-      >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <h4>Axis Name</h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsShowYLeftAxisTitleSwitch"
-              label={i18n.translate('xpack.lens.xyChart.ShowYLeftAxisTitleLabel', {
-                defaultMessage: 'Show',
-              })}
-              onChange={({ target }) => setState({ ...state, showYLeftAxisTitle: target.checked })}
-              checked={state?.showYLeftAxisTitle ?? true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFieldText
-          data-test-subj="lnsYLeftAxisTitle"
-          compressed
-          placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
-            defaultMessage: 'Overwrite Left Y-axis title',
-          })}
-          value={yLeftAxisTitle || ''}
-          disabled={state && 'showYLeftAxisTitle' in state ? !state.showYLeftAxisTitle : false}
-          onChange={({ target }) => onYLeftTitleChange(target.value)}
-          aria-label={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
-            defaultMessage: 'Overwrite Left Y-axis title',
-          })}
-        />
-      </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
-          defaultMessage: 'Bottom Axis',
-        })}
-      >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <h4>Axis Name</h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsshowXAxisTitleSwitch"
-              label={i18n.translate('xpack.lens.xyChart.showXAxisTitleLabel', {
-                defaultMessage: 'Show',
-              })}
-              onChange={({ target }) => setState({ ...state, showXAxisTitle: target.checked })}
-              checked={state?.showXAxisTitle ?? true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFieldText
-          data-test-subj="lnsXAxisTitle"
-          compressed
-          placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-            defaultMessage: 'Overwrite X-axis title',
-          })}
-          value={xAxisTitle || ''}
-          disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
-          onChange={({ target }) => onXTitleChange(target.value)}
-          aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-            defaultMessage: 'Overwrite X-axis title',
-          })}
-        />
-      </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
-          defaultMessage: 'Right Axis',
-        })}
-        isDisabled={rightAxisLayer.length === 0}
-      >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <h4>Axis Name</h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsShowYRightAxisTitleSwitch"
-              label={i18n.translate('xpack.lens.xyChart.ShowYRightAxisTitleLabel', {
-                defaultMessage: 'Show',
-              })}
-              onChange={({ target }) => setState({ ...state, showYRightAxisTitle: target.checked })}
-              checked={state?.showYRightAxisTitle ?? true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFieldText
-          data-test-subj="lnsYRightAxisTitle"
-          compressed
-          placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
-            defaultMessage: 'Overwrite Right Y-axis title',
-          })}
-          value={yRightAxisTitle || ''}
-          disabled={state && 'showYRightAxisTitle' in state ? !state.showYRightAxisTitle : false}
-          onChange={({ target }) => onYRightTitleChange(target.value)}
-          aria-label={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
-            defaultMessage: 'Overwrite Right Y-axis title',
-          })}
-        />
-      </ToolbarPopover>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          panelClassName="lnsXyToolbar__popover"
-          ownFocus
-          button={
-            <ToolbarButton
-              fontWeight="normal"
-              onClick={() => {
-                setOpen(!open);
-              }}
+              isDisabled={!hasNonBarSeries}
+              icon="visText"
             >
-              {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </ToolbarButton>
-          }
-          isOpen={open}
-          closePopover={() => {
-            setOpen(false);
-          }}
-          anchorPosition="downRight"
-        >
-          <EuiHorizontalRule margin="s" />
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.TickLabels', {
-              defaultMessage: 'Tick Labels',
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.xyChart.fittingDisplayLabel', {
+                  defaultMessage: 'Display',
+                })}
+              >
+                <EuiSuperSelect
+                  compressed
+                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                    return {
+                      value: id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{title}</strong>
+                          <EuiText size="xs" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                      inputDisplay: title,
+                    };
+                  })}
+                  valueOfSelected={state?.fittingFunction || 'None'}
+                  onChange={(value) => setState({ ...state, fittingFunction: value })}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+            </ToolbarPopover>
+          </EuiToolTip>
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.xyChart.legendLabel', {
+              defaultMessage: 'Legend',
             })}
           >
-            <EuiButtonGroup
-              name="lnsTickLabels"
-              data-test-subj="lnsTickLabelsSettings"
-              legend="Group of Tick Labels Visibility Settings"
-              options={axes}
-              idToSelectedMap={tickLabelsVisibilitySettings}
-              onChange={(id) => onTickLabelsVisibilitySettingsChange(id)}
-              buttonSize="compressed"
-              isFullWidth
-              type="multi"
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                defaultMessage: 'Display',
+              })}
+            >
+              <EuiButtonGroup
+                isFullWidth
+                legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                  defaultMessage: 'Legend display',
+                })}
+                name="legendDisplay"
+                buttonSize="compressed"
+                options={legendOptions}
+                idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
+                onChange={(optionId) => {
+                  const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+                  if (newMode === 'auto') {
+                    setState({
+                      ...state,
+                      legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                    });
+                  } else if (newMode === 'show') {
+                    setState({
+                      ...state,
+                      legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                    });
+                  } else if (newMode === 'hide') {
+                    setState({
+                      ...state,
+                      legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                    });
+                  }
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+                defaultMessage: 'Position',
+              })}
+            >
+              <EuiButtonGroup
+                legend="Position"
+                name="legendPosition"
+                buttonSize="compressed"
+                options={toggleButtonsIcons}
+                idSelected={state?.legend.position}
+                onChange={(id) => {
+                  setState({
+                    ...state,
+                    legend: { ...state.legend, position: id as Position },
+                  });
+                }}
+                isIconOnly
+              />
+            </EuiFormRow>
+          </ToolbarPopover>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+              defaultMessage: 'Left Axis',
+            })}
+            handlePopoverState={setPopoversOpenState}
+          >
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <h4>
+                    {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
+                      defaultMessage: 'Axis Name',
+                    })}
+                  </h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  compressed
+                  data-test-subj="lnsShowYLeftAxisTitleSwitch"
+                  label={i18n.translate('xpack.lens.xyChart.ShowYLeftAxisTitleLabel', {
+                    defaultMessage: 'Show',
+                  })}
+                  onChange={({ target }) =>
+                    setState({ ...state, showYLeftAxisTitle: target.checked })
+                  }
+                  checked={state?.showYLeftAxisTitle ?? true}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              data-test-subj="lnsYLeftAxisTitle"
+              compressed
+              placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+                defaultMessage: 'Overwrite Left Y-axis title',
+              })}
+              value={yLeftAxisTitle || ''}
+              disabled={state && 'showYLeftAxisTitle' in state ? !state.showYLeftAxisTitle : false}
+              onChange={({ target }) => onYLeftTitleChange(target.value)}
+              aria-label={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
+                defaultMessage: 'Overwrite Left Y-axis title',
+              })}
             />
-          </EuiFormRow>
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.Gridlines', {
-              defaultMessage: 'Gridlines',
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              compressed
+              data-test-subj="lnsshowYLeftAxisTickLabels"
+              label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+                defaultMessage: 'Tick labels',
+              })}
+              onChange={() => onTickLabelsVisibilitySettingsChange('yLeft')}
+              checked={tickLabelsVisibilitySettings.yLeft}
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              compressed
+              data-test-subj="lnsshowYLeftAxisGridlines"
+              label={i18n.translate('xpack.lens.xyChart.Gridlines', {
+                defaultMessage: 'Gridlines',
+              })}
+              onChange={() => onGridlinesVisibilitySettingsChange('yLeft')}
+              checked={gridlinesVisibilitySettings.yLeft}
+            />
+          </ToolbarPopover>
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+              defaultMessage: 'Bottom Axis',
+            })}
+            handlePopoverState={setPopoversOpenState}
+          >
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <h4>
+                    {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
+                      defaultMessage: 'Axis Name',
+                    })}
+                  </h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  compressed
+                  data-test-subj="lnsshowXAxisTitleSwitch"
+                  label={i18n.translate('xpack.lens.xyChart.showXAxisTitleLabel', {
+                    defaultMessage: 'Show',
+                  })}
+                  onChange={({ target }) => setState({ ...state, showXAxisTitle: target.checked })}
+                  checked={state?.showXAxisTitle ?? true}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              data-test-subj="lnsXAxisTitle"
+              compressed
+              placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
+                defaultMessage: 'Overwrite X-axis title',
+              })}
+              value={xAxisTitle || ''}
+              disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
+              onChange={({ target }) => onXTitleChange(target.value)}
+              aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
+                defaultMessage: 'Overwrite X-axis title',
+              })}
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              compressed
+              data-test-subj="lnsshowXAxisTickLabels"
+              label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+                defaultMessage: 'Tick labels',
+              })}
+              onChange={() => onTickLabelsVisibilitySettingsChange('x')}
+              checked={tickLabelsVisibilitySettings.x}
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              compressed
+              data-test-subj="lnsshowXAxisGridlines"
+              label={i18n.translate('xpack.lens.xyChart.Gridlines', {
+                defaultMessage: 'Gridlines',
+              })}
+              onChange={() => onGridlinesVisibilitySettingsChange('x')}
+              checked={gridlinesVisibilitySettings.x}
+            />
+          </ToolbarPopover>
+          <EuiToolTip
+            anchorClassName="eui-displayBlock"
+            content={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
+              defaultMessage: 'This setting only applies when right axis is enabled.',
             })}
           >
-            <EuiButtonGroup
-              name="lnsGridlines"
-              data-test-subj="lnsGridlinesSettings"
-              legend="Group of Gridlines Visibility Settings"
-              options={axes}
-              idToSelectedMap={gridlinesVisibilitySettings}
-              onChange={(id) => onGridlinesVisibilitySettingsChange(id)}
-              buttonSize="compressed"
-              isFullWidth
-              type="multi"
-            />
-          </EuiFormRow>
-        </EuiPopover>
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
+                defaultMessage: 'Right Axis',
+              })}
+              handlePopoverState={setPopoversOpenState}
+              isDisabled={rightAxisLayer?.length === 0 ?? true}
+            >
+              <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <h4>
+                      {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
+                        defaultMessage: 'Axis Name',
+                      })}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    compressed
+                    data-test-subj="lnsShowYRightAxisTitleSwitch"
+                    label={i18n.translate('xpack.lens.xyChart.ShowYRightAxisTitleLabel', {
+                      defaultMessage: 'Show',
+                    })}
+                    onChange={({ target }) =>
+                      setState({ ...state, showYRightAxisTitle: target.checked })
+                    }
+                    checked={state?.showYRightAxisTitle ?? true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+              <EuiFieldText
+                data-test-subj="lnsYRightAxisTitle"
+                compressed
+                placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+                  defaultMessage: 'Overwrite Right Y-axis title',
+                })}
+                value={yRightAxisTitle || ''}
+                disabled={
+                  state && 'showYRightAxisTitle' in state ? !state.showYRightAxisTitle : false
+                }
+                onChange={({ target }) => onYRightTitleChange(target.value)}
+                aria-label={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
+                  defaultMessage: 'Overwrite Right Y-axis title',
+                })}
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                compressed
+                data-test-subj="lnsshowYRightAxisTickLabels"
+                label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+                  defaultMessage: 'Tick labels',
+                })}
+                onChange={() => onTickLabelsVisibilitySettingsChange('yRight')}
+                checked={tickLabelsVisibilitySettings.yRight}
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                compressed
+                data-test-subj="lnsshowYRightAxisGridlines"
+                label={i18n.translate('xpack.lens.xyChart.Gridlines', {
+                  defaultMessage: 'Gridlines',
+                })}
+                onChange={() => onGridlinesVisibilitySettingsChange('yRight')}
+                checked={gridlinesVisibilitySettings.yRight}
+              />
+            </ToolbarPopover>
+          </EuiToolTip>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
