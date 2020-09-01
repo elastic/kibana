@@ -140,6 +140,13 @@ describe('Resolver Data Middleware', () => {
           expect(notDisplayed(typeCounted)).toBe(0);
         }
       });
+      it('should return an overall correct count for the number of related events', () => {
+        const aggregateTotalByEntityId = selectors.relatedEventAggregateTotalByEntityId(
+          store.getState()
+        );
+        const countForId = aggregateTotalByEntityId(firstChildNodeInTree.id);
+        expect(countForId).toBe(aggregateCategoryTotalForFirstChildNode);
+      });
     });
     describe('when data was received and stats show more related events than the API can provide', () => {
       beforeEach(() => {
@@ -168,15 +175,6 @@ describe('Resolver Data Middleware', () => {
         )!.events;
 
         expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
-      });
-      it('should return an overall correct count for the number of related events', () => {
-        const aggregateTotalByEntityId = selectors.relatedEventAggregateTotalByEntityId(
-          store.getState()
-        );
-        const countForId = aggregateTotalByEntityId(firstChildNodeInTree.id);
-        expect(countForId).toBe(
-          aggregateCategoryTotalForFirstChildNode + 1 /* +1 for the overcounted category*/
-        );
       });
       it('should return related events for the category equal to the number of events of that type provided', () => {
         const relatedEventsByCategory = selectors.relatedEventsByCategory(store.getState());
