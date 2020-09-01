@@ -78,10 +78,10 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   };
 
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
-    return Boolean(
+    return (
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        embeddable.inputIsRefType(embeddable.getInput())
+      isReferenceOrValueEmbeddable(embeddable) &&
+      embeddable.inputIsRefType(embeddable.getInput())
     );
   };
 
