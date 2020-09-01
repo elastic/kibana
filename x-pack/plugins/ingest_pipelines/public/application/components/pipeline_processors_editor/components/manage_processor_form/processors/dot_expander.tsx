@@ -19,7 +19,7 @@ const fieldsConfig: Record<string, FieldConfig> = {
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dotExpanderForm.pathHelpText', {
       defaultMessage:
-        'Field containing the object to expand. Only required if the field to expand is part another object field.',
+        'Output field. Only required if the field to expand is part another object field.',
     }),
   },
 };

@@ -52,7 +52,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Target fields',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.targetFieldsHelpText', {
-      defaultMessage: 'Array of fields to assign extracted values to.',
+      defaultMessage: 'Output fields. Extracted values are mapped to these fields.',
     }),
     validations: [
       {
@@ -83,7 +83,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText"
-        defaultMessage="Single character string used to separate data. Defaults to {value}."
+        defaultMessage="Delimiter used in the CSV data. Defaults to {value}."
         values={{ value: <EuiCode inline>{','}</EuiCode> }}
       />
     ),
@@ -102,7 +102,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.quoteHelpText"
-        defaultMessage="Single character string used to separate data. Defaults to {value}."
+        defaultMessage="Escape character used in the CSV data. Defaults to {value}."
         values={{ value: <EuiCode inline>{'"'}</EuiCode> }}
       />
     ),
@@ -115,7 +115,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Trim',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.trimFieldHelpText', {
-      defaultMessage: 'Trim whitespaces in unquoted fields.',
+      defaultMessage: 'Remove whitespaces in unquoted CSV data.',
     }),
   },
   empty_value: {
@@ -127,7 +127,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.convertForm.emptyValueFieldHelpText',
       {
         defaultMessage:
-          'Value used to fill empty fields. Empty fields are skipped if this value is not provided.',
+          'Used to fill empty fields. If no value is provided, empty fields are skipped.',
       }
     ),
   },

@@ -40,7 +40,7 @@ const ifConfig: FieldConfig = {
     defaultMessage: 'Condition (optional)',
   }),
   helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText', {
-    defaultMessage: 'Conditional statement to run with this processor.',
+    defaultMessage: 'Conditionally run this processor.',
   }),
   type: FIELD_TYPES.TEXT,
 };

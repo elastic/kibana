@@ -79,7 +79,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
-          defaultMessage="Characters used to separate fields when appending two or more results together. Defaults to {value}."
+          defaultMessage="If you specify a key modifier, this character separates the fields when appending results. Defaults to {value}."
           values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
         />
       ),

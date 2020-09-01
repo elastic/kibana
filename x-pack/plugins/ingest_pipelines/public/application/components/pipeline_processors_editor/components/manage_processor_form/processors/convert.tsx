@@ -115,15 +115,7 @@ export const Convert: FunctionComponent = () => {
         path="fields.type"
       />
 
-      <TargetField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
-          {
-            defaultMessage:
-              'Field to assign the converted value to. Defaults to the specified field name.',
-          }
-        )}
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

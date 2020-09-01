@@ -75,8 +75,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Circle',
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.circle', {
-      defaultMessage:
-        'Converts circle definitions of shapes to regular polygons that approximate them. The error distance determines the accuracy of the polygon that represents the circle.',
+      defaultMessage: 'Converts a circle definition into an approximate polygon.',
     }),
   },
   convert: {
@@ -97,7 +96,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'CSV',
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.csv', {
-      defaultMessage: 'Extracts fields from a CSV line in a single text field within a document.',
+      defaultMessage: 'Extracts fields values from CSV data.',
     }),
   },
   date: {
@@ -118,7 +117,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.dateIndexName', {
       defaultMessage:
-        'Points documents to the correct time-based index, based on a date or timestamp field in a document using the date math support in index names.',
+        'Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as my-index-yyyy-MM-dd.',
     }),
   },
   dissect: {
@@ -128,8 +127,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Dissect',
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.dissect', {
-      defaultMessage:
-        'Matches a single text field against a defined pattern to extract structured fields within a document.',
+      defaultMessage: 'Uses dissect patterns to extract matches from a field.',
     }),
   },
   dot_expander: {

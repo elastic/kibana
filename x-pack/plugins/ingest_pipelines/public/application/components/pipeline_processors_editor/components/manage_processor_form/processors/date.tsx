@@ -33,7 +33,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText', {
       defaultMessage:
-        'Array of the expected date formats. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats.',
+        'Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats.',
     }),
     validations: [
       {
@@ -99,7 +99,7 @@ export const DateProcessor: FunctionComponent = () => {
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
-            defaultMessage="Field that will hold the parsed date. Defaults to {defaultField}."
+            defaultMessage="Output field. If empty, the input field is updated in place. Defaults to {defaultField}."
             values={{
               defaultField: <EuiCode inline>{'@timestamp'}</EuiCode>,
             }}
