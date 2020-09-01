@@ -22,11 +22,6 @@ import {
   CalculateHistogramIntervalParams,
 } from './histogram_calculate_interval';
 
-const getLargestPossibleInterval = (params: CalculateHistogramIntervalParams) => {
-  const diff = params.values!.max - params.values!.min;
-  return diff / params.maxBucketsUiSettings;
-};
-
 describe('calculateHistogramInterval', () => {
   describe('auto calculating mode', () => {
     let params: CalculateHistogramIntervalParams;
@@ -86,17 +81,15 @@ describe('calculateHistogramInterval', () => {
 
     describe('maxBucketsUserInput is not defined', () => {
       test('should not set interval which more than largest possible', () => {
-        const p = {
-          ...params,
-          values: {
-            min: 0,
-            max: 100,
-          },
-        };
-        const expectedInterval = getLargestPossibleInterval(p);
-
-        expect(expectedInterval).toBe(1);
-        expect(calculateHistogramInterval(p)).toBe(expectedInterval);
+        expect(
+          calculateHistogramInterval({
+            ...params,
+            values: {
+              min: 0,
+              max: 100,
+            },
+          })
+        ).toEqual(1);
       });
 
       test('should set intervals for integer numbers (diff less than maxBucketsUiSettings)', () => {
@@ -108,11 +101,11 @@ describe('calculateHistogramInterval', () => {
               max: 10,
             },
           })
-        ).toBe(1);
+        ).toEqual(0.1);
       });
 
       test('should set intervals for integer numbers (diff more than maxBucketsUiSettings)', () => {
-        // diff === 44445; interval === 2000; buckets === 22
+        // diff === 44445; interval === 500; buckets === 89
         expect(
           calculateHistogramInterval({
             ...params,
@@ -121,11 +114,12 @@ describe('calculateHistogramInterval', () => {
               max: 90123,
             },
           })
-        ).toBe(2000);
+        ).toEqual(500);
       });
 
-      test('should set intervals for float numbers (small numbers)', () => {
-        // diff === 1.655; interval === 0.03; buckets === 55
+      test('should set intervals the same for the same interval', () => {
+        // both diffs are the same
+        // diff === 1.655; interval === 0.02; buckets === 82
         expect(
           calculateHistogramInterval({
             ...params,
@@ -134,11 +128,7 @@ describe('calculateHistogramInterval', () => {
               max: 2.9,
             },
           })
-        ).toBe(0.03);
-      });
-
-      test('should set intervals for float numbers (small numbers #2)', () => {
-        // diff === 1.655; interval === 0.02; buckets === 82
+        ).toEqual(0.02);
         expect(
           calculateHistogramInterval({
             ...params,
@@ -147,7 +137,7 @@ describe('calculateHistogramInterval', () => {
               max: 2.3,
             },
           })
-        ).toBe(0.02);
+        ).toEqual(0.02);
       });
     });
   });

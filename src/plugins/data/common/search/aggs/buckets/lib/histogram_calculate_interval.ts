@@ -64,41 +64,27 @@ const calculateForGivenInterval = (
 
 const calculateAutoInterval = (
   diff: number,
-  values: IntervalValuesRange,
   maxBucketsUiSettings: CalculateHistogramIntervalParams['maxBucketsUiSettings'],
   maxBucketsUserInput: CalculateHistogramIntervalParams['maxBucketsUserInput']
 ) => {
-  const getMaxFractionalPart = (...numbers: number[]) => {
-    return numbers.reduce((acc, n) => {
-      const [, value] = n.toString().split('.');
-      return value && value.length > acc ? value.length : acc;
-    }, 0);
-  };
+  const maxBars = Math.min(maxBucketsUiSettings, maxBucketsUserInput ?? maxBucketsUiSettings);
+  const exactInterval = diff / maxBars;
 
-  let autoBuckets: number = 0;
+  const lowerPower = Math.pow(10, Math.floor(Math.log10(exactInterval)));
 
-  if (!maxBucketsUserInput) {
-    const fractalFactor = Math.pow(10, getMaxFractionalPart(values.min, values.max));
+  const autoBuckets = diff / lowerPower;
 
-    autoBuckets = diff * fractalFactor;
-
-    if (autoBuckets > maxBucketsUiSettings) {
-      autoBuckets =
-        (Math.log10(maxBucketsUiSettings) / Math.log10(autoBuckets)) * maxBucketsUiSettings;
-    }
-
-    // For float numbers we can try to increase interval
-    if (fractalFactor > 1 && autoBuckets < maxBucketsUiSettings / 2) {
-      autoBuckets = autoBuckets * 5;
-      if (autoBuckets > maxBucketsUiSettings) {
-        autoBuckets = autoBuckets * 2;
-      }
+  if (autoBuckets > maxBars) {
+    if (autoBuckets / 2 <= maxBars) {
+      return lowerPower * 2;
+    } else if (autoBuckets / 5 <= maxBars) {
+      return lowerPower * 5;
+    } else {
+      return lowerPower * 10;
     }
   }
 
-  const bars = Math.min(maxBucketsUiSettings, maxBucketsUserInput || autoBuckets || 1);
-
-  return roundInterval(diff / bars);
+  return lowerPower;
 };
 
 export const calculateHistogramInterval = ({
@@ -121,7 +107,7 @@ export const calculateHistogramInterval = ({
 
     if (diff) {
       calculatedInterval = isAuto
-        ? calculateAutoInterval(diff, values, maxBucketsUiSettings, maxBucketsUserInput)
+        ? calculateAutoInterval(diff, maxBucketsUiSettings, maxBucketsUserInput)
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }
   }
