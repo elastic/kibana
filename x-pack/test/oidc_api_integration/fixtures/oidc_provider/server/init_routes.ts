@@ -4,11 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../src/core/server';
 import { createTokens } from '../../oidc_tools';
 
 export function initRoutes(router: IRouter) {
   let nonce = '';
+  router.get(
+    {
+      path: '/oidc_provider/authorize',
+      validate: {
+        query: schema.object(
+          { redirect_uri: schema.string(), state: schema.string(), nonce: schema.string() },
+          { unknowns: 'ignore' }
+        ),
+      },
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      nonce = request.query.nonce;
+
+      return response.redirected({
+        headers: {
+          location: `${request.query.redirect_uri}?code=code1&state=${request.query.state}`,
+        },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/oidc_provider/endsession',
+      validate: {
+        query: schema.object({ post_logout_redirect_uri: schema.string() }, { unknowns: 'ignore' }),
+      },
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.redirected({
+        headers: { location: request.query.post_logout_redirect_uri || '/' },
+      });
+    }
+  );
 
   router.post(
     {

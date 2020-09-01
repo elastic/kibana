@@ -19,9 +19,15 @@ import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 export function Settings(props: { children: ReactNode }) {
-  const plugin = useApmPluginContext();
-  const canAccessML = !!plugin.core.application.capabilities.ml?.canAccessML;
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = useLocation();
+
+  function getSettingsHref(path: string) {
+    return getAPMHref({ basePath, path: `/settings${path}`, search });
+  }
+
   return (
     <>
       <HomeLink>
@@ -46,7 +52,7 @@ export function Settings(props: { children: ReactNode }) {
                       defaultMessage: 'Agent Configuration',
                     }),
                     id: '1',
-                    href: getAPMHref('/settings/agent-configuration', search),
+                    href: getSettingsHref('/agent-configuration'),
                     isSelected: pathname.startsWith(
                       '/settings/agent-configuration'
                     ),
@@ -61,10 +67,7 @@ export function Settings(props: { children: ReactNode }) {
                             }
                           ),
                           id: '4',
-                          href: getAPMHref(
-                            '/settings/anomaly-detection',
-                            search
-                          ),
+                          href: getSettingsHref('/anomaly-detection'),
                           isSelected:
                             pathname === '/settings/anomaly-detection',
                         },
@@ -75,7 +78,7 @@ export function Settings(props: { children: ReactNode }) {
                       defaultMessage: 'Customize app',
                     }),
                     id: '3',
-                    href: getAPMHref('/settings/customize-ui', search),
+                    href: getSettingsHref('/customize-ui'),
                     isSelected: pathname === '/settings/customize-ui',
                   },
                   {
@@ -83,7 +86,7 @@ export function Settings(props: { children: ReactNode }) {
                       defaultMessage: 'Indices',
                     }),
                     id: '2',
-                    href: getAPMHref('/settings/apm-indices', search),
+                    href: getSettingsHref('/apm-indices'),
                     isSelected: pathname === '/settings/apm-indices',
                   },
                 ],

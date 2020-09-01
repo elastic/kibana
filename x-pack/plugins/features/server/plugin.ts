@@ -74,6 +74,11 @@ export class Plugin {
       featureRegistry: this.featureRegistry,
     });
 
+    const getFeaturesUICapabilities = () =>
+      uiCapabilitiesForFeatures(this.featureRegistry.getAll());
+
+    core.capabilities.registerProvider(getFeaturesUICapabilities);
+
     return deepFreeze({
       registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
       registerElasticsearchFeature: this.featureRegistry.registerElasticsearchFeature.bind(
@@ -83,11 +88,7 @@ export class Plugin {
       getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
         this.featureRegistry
       ),
-      getFeaturesUICapabilities: () =>
-        uiCapabilitiesForFeatures(
-          this.featureRegistry.getAllKibanaFeatures(),
-          this.featureRegistry.getAllElasticsearchFeatures()
-        ),
+      getFeaturesUICapabilities,
     });
   }
 

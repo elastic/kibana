@@ -12,7 +12,8 @@ import { CONTEXT } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof toFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.toHelpText', {
-    defaultMessage: 'Explicitly casts the type of the {CONTEXT} to the specified type.',
+    defaultMessage:
+      'Explicitly casts the type of the {CONTEXT} from one type to the specified type.',
     values: {
       CONTEXT,
     },

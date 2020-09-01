@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScheduledTaskParams } from '../../types';
+import { CreateJobBaseParams, ScheduledTaskParams } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -28,10 +28,8 @@ export interface IndexPatternSavedObject {
   };
 }
 
-export interface JobParamsDiscoverCsv {
-  browserTimezone: string;
+export interface JobParamsDiscoverCsv extends CreateJobBaseParams {
   indexPatternId: string;
-  objectType: string;
   title: string;
   searchRequest: SearchRequest;
   fields: string[];

@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    async function createAndAddLens(title) {
+    async function createAndAddLens(title, saveAsNew = false, redirectToOrigin = true) {
       log.debug(`createAndAddLens(${title})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }) {
         operation: 'terms',
         field: 'ip',
       });
-      await PageObjects.lens.save(title, false, true);
+      await PageObjects.lens.save(title, saveAsNew, redirectToOrigin);
     }
 
     it('adds Lens visualization to empty dashboard', async () => {
@@ -100,11 +100,25 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
+      await PageObjects.dashboard.saveDashboard('empty dashboard test');
+      await PageObjects.dashboard.switchToEditMode();
       const newTitle = 'wowee, my title just got cooler again';
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.lens.save(newTitle, true, false);
+      await PageObjects.lens.notLinkedToOriginatingApp();
+      await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
+      const title = 'non-dashboard Test Lens';
+      await PageObjects.dashboard.loadSavedDashboard('empty dashboard test');
+      await PageObjects.dashboard.switchToEditMode();
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
+      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
+      await createAndAddLens(title, false, false);
       await PageObjects.lens.notLinkedToOriginatingApp();
       await PageObjects.common.navigateToApp('dashboard');
     });

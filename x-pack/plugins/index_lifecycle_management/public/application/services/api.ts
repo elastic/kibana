@@ -12,22 +12,30 @@ import {
   UIM_POLICY_ATTACH_INDEX_TEMPLATE,
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
-} from '../constants';
+} from '../constants/ui_metric';
 
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
+import { PolicyFromES, SerializedPolicy } from './policies/types';
 
 interface GenericObject {
   [key: string]: any;
 }
 
-export async function loadNodes() {
-  return await sendGet(`nodes/list`);
-}
+export const useLoadNodes = () => {
+  return useRequest({
+    path: `nodes/list`,
+    method: 'get',
+    initialData: [],
+  });
+};
 
-export async function loadNodeDetails(selectedNodeAttrs: string) {
-  return await sendGet(`nodes/${selectedNodeAttrs}/details`);
-}
+export const useLoadNodeDetails = (selectedNodeAttrs: string) => {
+  return useRequest({
+    path: `nodes/${selectedNodeAttrs}/details`,
+    method: 'get',
+  });
+};
 
 export async function loadIndexTemplates() {
   return await sendGet(`templates`);
@@ -37,7 +45,15 @@ export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
 }
 
-export async function savePolicy(policy: GenericObject) {
+export const useLoadPoliciesList = (withIndices: boolean) => {
+  return useRequest<PolicyFromES[]>({
+    path: `policies`,
+    method: 'get',
+    query: { withIndices },
+  });
+};
+
+export async function savePolicy(policy: SerializedPolicy) {
   return await sendPost(`policies`, policy);
 }
 

@@ -5,8 +5,8 @@
  */
 
 import { omit } from 'lodash';
-import { CMBeat } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
-import { ReturnTypeBulkAction } from '../../../../../../legacy/plugins/beats_management/common/return_types';
+import { CMBeat } from '../../../../common/domain_types';
+import { ReturnTypeBulkAction } from '../../../../common/return_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {

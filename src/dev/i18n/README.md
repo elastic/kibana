@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, pug}` files in provided plugins directories to a JSON file.
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html }` files in provided plugins directories to a JSON file.
 
 It uses Babel to parse code and build an AST for each file or a single JS expression if whole file parsing is impossible. The tool is able to validate, extract and match IDs, default messages and descriptions only if they are defined statically and together, otherwise it will fail with detailed explanation. That means one can't define ID in one place and default message in another, or use function call to dynamically create default message etc.
 
@@ -115,18 +115,6 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
   ```
 
   * Expression can be parsed only if it is located in syntactically valid JS/TS code. Do not use type assertions in TypeScript for `defaultMessage` or `description` properties, id argument or the second argument of `i18n*` call expression. It is never needed for i18n engine use cases.
-
-* **Pug (.pug)**
-
-  ```
-  #{i18n('pluginNamespace.messageId', {
-    defaultMessage: 'Default message string literal, {key}',
-    values: { key: 'value' },
-    description: 'Message context or description',
-  })}
-  ```
-
-  * Expression in `#{...}` is parsed as a JS expression.
 
 ### Usage
 

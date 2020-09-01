@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineLatest, BehaviorSubject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
-import { UICapabilities } from 'ui/capabilities';
+import { Subscription, Observable } from 'rxjs';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import {
   LoggerFactory,
   KibanaRequest,
   ILegacyClusterClient,
-  ServiceStatusLevels,
   Logger,
-  StatusServiceSetup,
   HttpServiceSetup,
   CapabilitiesSetup,
 } from '../../../../../src/core/server';
@@ -45,6 +42,7 @@ import { registerPrivilegesWithCluster } from './register_privileges_with_cluste
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
 import { CheckPrivilegesWithRequest } from './types';
+import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
@@ -54,7 +52,6 @@ export { featurePrivilegeIterator } from './privileges';
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
   http: HttpServiceSetup;
-  status: StatusServiceSetup;
   capabilities: CapabilitiesSetup;
   clusterClient: ILegacyClusterClient;
   license: SecurityLicense;
@@ -68,6 +65,7 @@ interface AuthorizationServiceSetupParams {
 interface AuthorizationServiceStartParams {
   features: FeaturesPluginStart;
   clusterClient: ILegacyClusterClient;
+  online$: Observable<OnlineStatusRetryScheduler>;
 }
 
 export interface AuthorizationServiceSetup {
@@ -82,8 +80,6 @@ export interface AuthorizationServiceSetup {
 
 export class AuthorizationService {
   private logger!: Logger;
-  private license!: SecurityLicense;
-  private status!: StatusServiceSetup;
   private applicationName!: string;
   private privileges!: PrivilegesService;
 
@@ -92,7 +88,6 @@ export class AuthorizationService {
   setup({
     http,
     capabilities,
-    status,
     packageVersion,
     clusterClient,
     license,
@@ -103,8 +98,6 @@ export class AuthorizationService {
     getCurrentUser,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
     this.logger = loggers.get('authorization');
-    this.license = license;
-    this.status = status;
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
@@ -164,12 +157,23 @@ export class AuthorizationService {
     return authz;
   }
 
-  start({ clusterClient, features }: AuthorizationServiceStartParams) {
+  start({ clusterClient, features, online$ }: AuthorizationServiceStartParams) {
     const allFeatures = features.getKibanaFeatures();
     validateFeaturePrivileges(allFeatures);
     validateReservedPrivileges(allFeatures);
 
-    this.registerPrivileges(clusterClient);
+    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
+      try {
+        await registerPrivilegesWithCluster(
+          this.logger,
+          this.privileges,
+          this.applicationName,
+          clusterClient
+        );
+      } catch (err) {
+        scheduleRetry();
+      }
+    });
   }
 
   stop() {
@@ -177,51 +181,5 @@ export class AuthorizationService {
       this.statusSubscription.unsubscribe();
       this.statusSubscription = undefined;
     }
-  }
-
-  private registerPrivileges(clusterClient: ILegacyClusterClient) {
-    const RETRY_SCALE_DURATION = 100;
-    const RETRY_TIMEOUT_MAX = 10000;
-    const retries$ = new BehaviorSubject(0);
-    let retryTimeout: NodeJS.Timeout;
-
-    // Register cluster privileges once Elasticsearch is available and Security plugin is enabled.
-    this.statusSubscription = combineLatest([
-      this.status.core$,
-      this.license.features$,
-      retries$.asObservable().pipe(
-        // We shouldn't emit new value if retry counter is reset. This comparator isn't called for
-        // the initial value.
-        distinctUntilChanged((prev, curr) => prev === curr || curr === 0)
-      ),
-    ])
-      .pipe(
-        filter(
-          ([status]) =>
-            this.license.isEnabled() && status.elasticsearch.level === ServiceStatusLevels.available
-        )
-      )
-      .subscribe(async () => {
-        // If status or license change occurred before retry timeout we should cancel it.
-        if (retryTimeout) {
-          clearTimeout(retryTimeout);
-        }
-
-        try {
-          await registerPrivilegesWithCluster(
-            this.logger,
-            this.privileges,
-            this.applicationName,
-            clusterClient
-          );
-          retries$.next(0);
-        } catch (err) {
-          const retriesElapsed = retries$.getValue() + 1;
-          retryTimeout = setTimeout(
-            () => retries$.next(retriesElapsed),
-            Math.min(retriesElapsed * RETRY_SCALE_DURATION, RETRY_TIMEOUT_MAX)
-          );
-        }
-      });
   }
 }

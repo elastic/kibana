@@ -124,6 +124,7 @@ function FieldParamEditor({
         onChange={onChange}
         onBlur={setTouched}
         onSearchChange={onSearchChange}
+        sortMatchesBy="startsWith"
         data-test-subj="visDefaultEditorField"
         fullWidth={true}
       />

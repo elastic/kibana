@@ -8,7 +8,7 @@ import { uniq } from 'lodash';
 import { InfraSnapshotRequestOptions } from './types';
 import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
-import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
+import { MetricsUIAggregation, ESBasicMetricAggRT } from '../../../common/inventory_models/types';
 import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
 import { InfraTimerangeInput } from '../../../common/http_api/snapshot_api';
 import { ESSearchClient } from '.';
@@ -59,12 +59,12 @@ export const createTimeRangeWithInterval = async (
 
 const aggregationsToModules = async (
   client: ESSearchClient,
-  aggregations: SnapshotModel,
+  aggregations: MetricsUIAggregation,
   options: InfraSnapshotRequestOptions
 ): Promise<string[]> => {
   const uniqueFields = Object.values(aggregations)
     .reduce<Array<string | undefined>>((fields, agg) => {
-      if (SnapshotModelMetricAggRT.is(agg)) {
+      if (ESBasicMetricAggRT.is(agg)) {
         return uniq(fields.concat(Object.values(agg).map((a) => a?.field)));
       }
       return fields;

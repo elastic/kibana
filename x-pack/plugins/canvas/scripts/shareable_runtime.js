@@ -30,12 +30,6 @@ run(
       buffer: false,
     };
 
-    log.info('pre-req: Ensuring Kibana SCSS is built.');
-    // Ensure SASS has been built completely before building the runtime.
-    execa.sync(process.execPath, ['scripts/build_sass'], {
-      ...options,
-    });
-
     const webpackConfig = path.resolve(SHAREABLE_RUNTIME_SRC, 'webpack.config.js');
 
     const clean = () => {

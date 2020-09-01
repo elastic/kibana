@@ -43,6 +43,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               (enabled, catalogueId) =>
                 catalogueId !== 'ml' &&
                 catalogueId !== 'monitoring' &&
+                catalogueId !== 'ml_file_data_visualizer' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -52,10 +53,12 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_read': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml, monitoring, enterprise search, and es features are enabled
+            // everything except ml and monitoring and enterprise search is enabled
             const exceptions = [
               'ml',
+              'ml_file_data_visualizer',
               'monitoring',
+              'enterpriseSearch',
               'appSearch',
               'workplaceSearch',
               ...esFeatureExceptions,

@@ -25,7 +25,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
     <EuiFilterGroup>
       <GroupsFilterPopover
         onSelectedGroupsChanged={[Function]}
-        siemJobs={
+        securityJobs={
           Array [
             Object {
               "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",

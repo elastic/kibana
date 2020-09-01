@@ -14,7 +14,7 @@ import { KibanaContext, IKibanaContext } from '../../index';
 import './error_state_prompt.scss';
 
 export const ErrorStatePrompt: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useContext(KibanaContext) as IKibanaContext;
 
   return (
     <EuiEmptyPrompt
@@ -36,7 +36,7 @@ export const ErrorStatePrompt: React.FC = () => {
               id="xpack.enterpriseSearch.errorConnectingState.description1"
               defaultMessage="We can’t establish a connection to Enterprise Search at the host URL: {enterpriseSearchUrl}"
               values={{
-                enterpriseSearchUrl: <EuiCode>{enterpriseSearchUrl}</EuiCode>,
+                enterpriseSearchUrl: <EuiCode>{config.host}</EuiCode>,
               }}
             />
           </p>

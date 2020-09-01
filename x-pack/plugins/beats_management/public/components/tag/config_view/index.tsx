@@ -22,9 +22,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { configBlockSchemas } from '../../../../../../legacy/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from '../../../../../../legacy/plugins/beats_management/common/config_schemas_translations_map';
-import { ConfigurationBlock } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { configBlockSchemas } from '../../../../common/config_schemas';
+import { translateConfigSchema } from '../../../../common/config_schemas_translations_map';
+import { ConfigurationBlock } from '../../../../common/domain_types';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {

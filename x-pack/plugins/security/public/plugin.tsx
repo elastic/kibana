@@ -84,6 +84,7 @@ export class SecurityPlugin
 
     this.authc = this.authenticationService.setup({
       application: core.application,
+      fatalErrors: core.fatalErrors,
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,
@@ -115,16 +116,16 @@ export class SecurityPlugin
       home.featureCatalogue.register({
         id: 'security',
         title: i18n.translate('xpack.security.registerFeature.securitySettingsTitle', {
-          defaultMessage: 'Security Settings',
+          defaultMessage: 'Manage permissions',
         }),
         description: i18n.translate('xpack.security.registerFeature.securitySettingsDescription', {
-          defaultMessage:
-            'Protect your data and easily manage who has access to what with users and roles.',
+          defaultMessage: 'Control who has access and what tasks they can perform.',
         }),
         icon: 'securityApp',
-        path: '/app/management/security/users',
+        path: '/app/management/security/roles',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
+        order: 600,
       });
     }
 

@@ -9,6 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -75,6 +76,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
+  }
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    const types = this.getUniqueObjectTypes(objects);
+    const args = { objects, options };
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
+
+    const response = await this.baseClient.checkConflicts(objects, options);
+    return response;
   }
 
   public async bulkCreate<T = unknown>(
@@ -164,7 +177,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // result in a 404 error.
     await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
 
-    return await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async deleteFromNamespaces(
@@ -177,7 +191,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
     await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
 
-    return await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async bulkUpdate<T = unknown>(

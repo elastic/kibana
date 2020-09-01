@@ -6,7 +6,7 @@
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getEntryNestedMock } from '../../../../../../lists/common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';

@@ -23,6 +23,7 @@ import { MonitorIDLabel, OverallAvailability } from '../translations';
 import { URL_LABEL } from '../../../common/translations';
 import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
+import { MonitorRedirects } from './monitor_redirects';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
@@ -76,6 +77,7 @@ export const MonitorStatusBar: React.FC = () => {
         <MonListTitle>{MonitorIDLabel}</MonListTitle>
         <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
+        <MonitorRedirects monitorStatus={monitorStatus} />
       </EuiDescriptionList>
     </>
   );

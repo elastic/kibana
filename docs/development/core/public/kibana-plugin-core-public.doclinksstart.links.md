@@ -81,6 +81,7 @@ readonly links: {
             readonly loadingData: string;
             readonly introduction: string;
         };
+        readonly addData: string;
         readonly kibana: string;
         readonly siem: {
             readonly guide: string;
@@ -95,5 +96,6 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly visualize: Record<string, string>;
     };
 ```

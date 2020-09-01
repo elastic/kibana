@@ -12,7 +12,7 @@ import * as selectors from './selectors';
 import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
-} from './mocks/resolver_tree';
+} from '../mocks/resolver_tree';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 describe('resolver selectors', () => {

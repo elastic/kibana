@@ -104,7 +104,7 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
             <EuiToolTip position="top" content={textViewButton}>
               <EuiButtonEmpty
                 iconSide="right"
-                iconType="stats"
+                iconType="visLine"
                 size="xs"
                 onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
               >

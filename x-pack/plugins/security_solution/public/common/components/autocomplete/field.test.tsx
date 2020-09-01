@@ -12,7 +12,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { FieldComponent } from './field';
 
 describe('FieldComponent', () => {
