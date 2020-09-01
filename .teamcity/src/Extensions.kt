@@ -1,4 +1,5 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
 
 fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   feature {
@@ -69,4 +70,26 @@ fun BuildType.addTestArtifacts() {
     x-pack/test/functional/failure_debug/html/*.html
     x-pack/test/functional/apps/reporting/reports/session/*.pdf
   """.trimIndent()
+}
+
+fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
+  features {
+    notifications {
+      notifierSettings = slackNotifier {
+        connection = "KIBANA_SLACK"
+        sendTo = to
+        messageFormat = verboseMessageFormat {
+          addBranch = true
+          addChanges = true
+          addStatusText = true
+          maximumNumberOfChanges = 5
+        }
+      }
+      buildFailedToStart = true
+      buildFailed = true
+      buildFinishedSuccessfully = true
+      firstBuildErrorOccurs = true
+      buildProbablyHanging = true
+    }
+  }
 }

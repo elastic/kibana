@@ -1,5 +1,6 @@
 package builds.test
 
+import addSlackNotifications
 import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
@@ -29,4 +30,5 @@ object Jest : BuildType({
   }
 
   addTestArtifacts()
+  addSlackNotifications()
 })

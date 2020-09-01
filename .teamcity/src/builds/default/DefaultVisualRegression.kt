@@ -1,5 +1,6 @@
 package builds.default
 
+import addSlackNotifications
 import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
@@ -35,4 +36,5 @@ object DefaultVisualRegression : BuildType({
   }
 
   addTestArtifacts()
+  addSlackNotifications()
 })

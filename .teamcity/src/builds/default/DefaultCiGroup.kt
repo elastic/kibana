@@ -1,7 +1,9 @@
 package builds.default
 
+import addSlackNotifications
 import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
 
@@ -34,4 +36,5 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   }
 
   addTestArtifacts()
+  addSlackNotifications()
 })

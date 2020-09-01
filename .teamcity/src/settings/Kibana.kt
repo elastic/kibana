@@ -6,6 +6,7 @@ import builds.default.*
 import builds.oss.*
 import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import kibanaAgent
 import templates.DefaultTemplate
 
@@ -48,6 +49,14 @@ object Kibana : Project({
       param("terminate-idle-time", "30")
       param("enabled", "true")
       param("secure:accessKey", "credentialsJSON:447fdd4d-7129-46b7-9822-2e57658c7422")
+    }
+
+    slackConnection {
+      id = "KIBANA_SLACK"
+      displayName = "Kibana Slack"
+      botToken = "credentialsJSON:39eafcfc-97a6-4877-82c1-115f1f10d14b"
+      clientId = "12985172978.1291178427153"
+      clientSecret = "credentialsJSON:8b5901fb-fd2c-4e45-8aff-fdd86dc68f67"
     }
   }
 
