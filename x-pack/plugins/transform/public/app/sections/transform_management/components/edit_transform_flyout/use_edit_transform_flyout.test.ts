@@ -12,6 +12,7 @@ import {
   frequencyValidator,
   getDefaultState,
   numberAboveZeroValidator,
+  stringValidator,
   FormField,
 } from './use_edit_transform_flyout';
 
@@ -52,6 +53,13 @@ const getDescriptionFieldMock = (value = ''): FormField => ({
   validator: 'string',
 });
 
+const getDestinationIndexFieldMock = (value = ''): FormField => ({
+  isOptional: false,
+  value,
+  errorMessages: [],
+  validator: 'string',
+});
+
 const getDocsPerSecondFieldMock = (value = ''): FormField => ({
   isOptional: true,
   value,
@@ -72,6 +80,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock(transformConfigMock.description),
+      destinationIndex: getDestinationIndexFieldMock(transformConfigMock.dest.index),
       docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });
@@ -80,6 +89,8 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     // because the Update-Button will be disabled when no form field was changed.
     expect(Object.keys(updateConfig)).toHaveLength(0);
     expect(updateConfig.description).toBe(undefined);
+    // Destination index `index` attribute is nested under `dest` so we're just checking against that.
+    expect(updateConfig.dest).toBe(undefined);
     // `docs_per_second` is nested under `settings` so we're just checking against that.
     expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
@@ -90,12 +101,14 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-new-description'),
+      destinationIndex: getDestinationIndexFieldMock('the-new-destination-index'),
       docsPerSecond: getDocsPerSecondFieldMock('10'),
       frequency: getFrequencyFieldMock('1m'),
     });
 
-    expect(Object.keys(updateConfig)).toHaveLength(3);
+    expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
+    expect(updateConfig.dest?.index).toBe('the-new-destination-index');
     expect(updateConfig.settings?.docs_per_second).toBe(10);
     expect(updateConfig.frequency).toBe('1m');
   });
@@ -104,12 +117,14 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     const transformConfigMock = getTransformConfigMock();
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-updated-description'),
+      destinationIndex: getDestinationIndexFieldMock('the-updated-destination-index'),
       docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });
 
-    expect(Object.keys(updateConfig)).toHaveLength(1);
+    expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
+    expect(updateConfig.dest?.index).toBe('the-updated-destination-index');
     // `docs_per_second` is nested under `settings` so we're just checking against that.
     expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
@@ -147,6 +162,16 @@ describe('Transform: formReducerFactory()', () => {
     expect(state3.formFields.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
+  });
+});
+
+describe('Transfom: stringValidator()', () => {
+  test('it should allow an empty string for optional fields', () => {
+    expect(stringValidator('')).toHaveLength(0);
+  });
+
+  test('it should not allow an empty string for required fields', () => {
+    expect(stringValidator('', false)).toHaveLength(1);
   });
 });
 

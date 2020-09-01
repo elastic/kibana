@@ -14,7 +14,7 @@ import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.
-type Validator = (arg: any) => string[];
+type Validator = (value: any, isOptional?: boolean) => string[];
 
 // Note on the form validation and input components used:
 // All inputs use `EuiFieldText` which means all form values will be treated as strings.
@@ -28,19 +28,32 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
     defaultMessage: 'Value needs to be a number above zero.',
   }
 );
-export const numberAboveZeroValidator: Validator = (arg) =>
-  !isNaN(arg) && parseInt(arg, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
+export const numberAboveZeroValidator: Validator = (value) =>
+  !isNaN(value) && parseInt(value, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
 
-// The way the current form is set up, this validator is just a sanity check,
-// it should never trigger an error, because `EuiFieldText` always returns a string.
+const requiredErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormRequiredErrorMessage',
+  {
+    defaultMessage: 'Required field.',
+  }
+);
 const stringNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormStringNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be of type string.',
   }
 );
-const stringValidator: Validator = (arg) =>
-  typeof arg === 'string' ? [] : [stringNotValidErrorMessage];
+export const stringValidator: Validator = (value, isOptional = true) => {
+  if (typeof value !== 'string') {
+    return [stringNotValidErrorMessage];
+  }
+
+  if (value.length === 0 && !isOptional) {
+    return [requiredErrorMessage];
+  }
+
+  return [];
+};
 
 // Only allow frequencies in the form of 1s/1h etc.
 const frequencyNotValidErrorMessage = i18n.translate(
@@ -168,7 +181,7 @@ export const applyFormFieldsToTransformConfig = (
 export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
   formFields: {
     description: { ...defaultField, value: config?.description ?? '' },
-    destinationIndex: { ...defaultField, value: config?.dest?.index ?? '' },
+    destinationIndex: { ...defaultField, value: config?.dest?.index ?? '', isOptional: false },
     frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
     docsPerSecond: {
       ...defaultField,
@@ -194,7 +207,7 @@ const formFieldReducer = (state: FormField, value: string): FormField => {
     errorMessages:
       state.isOptional && typeof value === 'string' && value.length === 0
         ? []
-        : validate[state.validator](value),
+        : validate[state.validator](value, state.isOptional),
     value,
   };
 };
