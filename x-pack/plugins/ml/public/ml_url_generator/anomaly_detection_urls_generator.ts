@@ -17,18 +17,17 @@ import {
   TimeSeriesExplorerUrlState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { extractParams, createIndexBasedMlUrl } from './common';
+import { createIndexBasedMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
 export function createAnomalyDetectionJobManagementUrl(
   appBasePath: string,
-  mlUrlGeneratorState: AnomalyDetectionUrlState
+  params: AnomalyDetectionUrlState['pageState']
 ): string {
-  const { params } = extractParams<AnomalyDetectionUrlState>(mlUrlGeneratorState);
   let url = `${appBasePath}/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`;
-  if (isEmpty(params)) {
+  if (!params || isEmpty(params)) {
     return url;
   }
   const { jobId, groupIds } = params;
@@ -48,9 +47,13 @@ export function createAnomalyDetectionJobManagementUrl(
 
 export function createAnomalyDetectionCreateJobSelectType(
   appBasePath: string,
-  mlGenericUrlState: MlGenericUrlState
+  pageState: MlGenericUrlState['pageState']
 ): string {
-  return createIndexBasedMlUrl(appBasePath, mlGenericUrlState);
+  return createIndexBasedMlUrl(
+    appBasePath,
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+    pageState
+  );
 }
 
 /**
@@ -58,17 +61,21 @@ export function createAnomalyDetectionCreateJobSelectType(
  */
 export function createExplorerUrl(
   appBasePath: string,
-  {
+  params: ExplorerUrlState['pageState']
+): string {
+  let url = `${appBasePath}/${ML_PAGES.ANOMALY_EXPLORER}`;
+
+  if (!params) {
+    return url;
+  }
+  const {
     refreshInterval,
     timeRange,
     jobIds,
     query,
     mlExplorerSwimlane = {},
     mlExplorerFilter = {},
-  }: ExplorerUrlState
-): string {
-  let url = `${appBasePath}/${ML_PAGES.ANOMALY_EXPLORER}`;
-
+  } = params;
   const appState: Partial<ExplorerAppState> = {
     mlExplorerSwimlane,
     mlExplorerFilter,
@@ -107,17 +114,14 @@ export function createExplorerUrl(
  */
 export function createSingleMetricViewerUrl(
   appBasePath: string,
-  {
-    timeRange,
-    jobIds,
-    refreshInterval,
-    zoom,
-    query,
-    detectorIndex,
-    entities,
-  }: TimeSeriesExplorerUrlState
+  params: TimeSeriesExplorerUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${ML_PAGES.SINGLE_METRIC_VIEWER}`;
+  if (!params) {
+    return url;
+  }
+  const { timeRange, jobIds, refreshInterval, zoom, query, detectorIndex, entities } = params;
+
   const queryState: TimeSeriesExplorerGlobalState = {
     ml: {
       jobIds,

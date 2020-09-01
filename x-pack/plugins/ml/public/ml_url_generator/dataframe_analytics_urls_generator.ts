@@ -7,7 +7,6 @@
 /**
  * Creates URL to the DataFrameAnalytics page
  */
-import isEmpty from 'lodash/isEmpty';
 import {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
@@ -15,18 +14,16 @@ import {
   DataFrameAnalyticsUrlState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { extractParams } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 
 export function createDataframeAnalyticsUrl(
   appBasePath: string,
-  mlUrlGeneratorState: DataFrameAnalyticsUrlState
+  mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
-  const { params } = extractParams<DataFrameAnalyticsUrlState>(mlUrlGeneratorState);
 
-  if (!isEmpty(params)) {
-    const { jobId, groupIds } = params;
+  if (mlUrlGeneratorState) {
+    const { jobId, groupIds } = mlUrlGeneratorState;
     const queryState: Partial<DataFrameAnalyticsQueryState> = {
       jobId,
       groupIds,
@@ -48,13 +45,12 @@ export function createDataframeAnalyticsUrl(
  */
 export function createDataframeAnalyticsExplorationUrl(
   appBasePath: string,
-  mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState
+  mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`;
-  const { params } = extractParams<DataFrameAnalyticsExplorationUrlState>(mlUrlGeneratorState);
 
-  if (!isEmpty(params)) {
-    const { jobId, analysisType } = params;
+  if (mlUrlGeneratorState) {
+    const { jobId, analysisType } = mlUrlGeneratorState;
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,

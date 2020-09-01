@@ -23,8 +23,10 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
   const redirectToAnalyticsExplorationPage = async () => {
     const path = await urlGenerator.createUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-      jobId,
-      analysisType,
+      pageState: {
+        jobId,
+        analysisType,
+      },
     });
     await navigateToPath(path);
   };

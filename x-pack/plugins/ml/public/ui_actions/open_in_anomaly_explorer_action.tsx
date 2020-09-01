@@ -32,19 +32,21 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
 
       return urlGenerator.createUrl({
         page: 'explorer',
-        jobIds,
-        timeRange,
-        mlExplorerSwimlane: {
-          viewByFromPage: fromPage,
-          viewByPerPage: perPage,
-          viewByFieldName: viewBy,
-          ...(data
-            ? {
-                selectedType: data.type,
-                selectedTimes: data.times,
-                selectedLanes: data.lanes,
-              }
-            : {}),
+        pageState: {
+          jobIds,
+          timeRange,
+          mlExplorerSwimlane: {
+            viewByFromPage: fromPage,
+            viewByPerPage: perPage,
+            viewByFieldName: viewBy,
+            ...(data
+              ? {
+                  selectedType: data.type,
+                  selectedTimes: data.times,
+                  selectedLanes: data.lanes,
+                }
+              : {}),
+          },
         },
       });
     },

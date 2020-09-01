@@ -21,9 +21,10 @@ export function extractParams<UrlState>(urlState: UrlState) {
  */
 export function createIndexBasedMlUrl(
   appBasePath: string,
-  mlGenericUrlState: MlGenericUrlState
+  page: MlGenericUrlState['page'],
+  pageState: MlGenericUrlState['pageState']
 ): string {
-  const { globalState, appState, page, index, savedSearchId, ...restParams } = mlGenericUrlState;
+  const { globalState, appState, index, savedSearchId, ...restParams } = pageState;
   let url = `${appBasePath}/${page}`;
 
   if (index !== undefined && savedSearchId === undefined) {

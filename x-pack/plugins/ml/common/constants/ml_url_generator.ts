@@ -30,12 +30,8 @@ export const ML_PAGES = {
    * Page: Data Visualizer
    * Open index data visualizer viewer page
    */
-  get DATA_VISUALIZER_INDEX_VIEWER() {
-    return `jobs/new_job/${this.DATA_VISUALIZER}`;
-  },
-  get ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE() {
-    return `jobs/new_job/step/job_type`;
-  },
+  DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
+  ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: `jobs/new_job/step/job_type`,
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
   FILTER_LISTS_MANAGE: 'settings/filter_lists',

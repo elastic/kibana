@@ -6,7 +6,7 @@
 
 import { MlUrlGenerator } from './ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { ANALYSIS_CONFIG_TYPE } from '../application/data_frame_analytics/common';
+import { ANALYSIS_CONFIG_TYPE } from '../../common/types/ml_url_generator';
 
 describe('MlUrlGenerator', () => {
   const urlGenerator = new MlUrlGenerator({
@@ -26,7 +26,9 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Anomaly Detection job management page for job', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          jobId: 'fq_single_1',
+          pageState: {
+            jobId: 'fq_single_1',
+          },
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(jobId:fq_single_1)');
       });
@@ -34,7 +36,9 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          groupIds: ['farequote', 'categorization'],
+          pageState: {
+            groupIds: ['farequote', 'categorization'],
+          },
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(groupIds:!(farequote,categorization))');
       });
@@ -42,11 +46,13 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the page for selecting the type of anomaly detection job to create', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
-          index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
-          globalState: {
-            time: {
-              from: 'now-30m',
-              to: 'now',
+          pageState: {
+            index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
+            globalState: {
+              time: {
+                from: 'now-30m',
+                to: 'now',
+              },
             },
           },
         });
@@ -60,20 +66,22 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Anomaly Explorer page', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.ANOMALY_EXPLORER,
-          jobIds: ['fq_single_1'],
-          mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
-          refreshInterval: {
-            pause: false,
-            value: 0,
-          },
-          timeRange: {
-            from: '2019-02-07T00:00:00.000Z',
-            to: '2020-08-13T17:15:00.000Z',
-            mode: 'absolute',
-          },
-          query: {
-            analyze_wildcard: true,
-            query: '*',
+          pageState: {
+            jobIds: ['fq_single_1'],
+            mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
+            refreshInterval: {
+              pause: false,
+              value: 0,
+            },
+            timeRange: {
+              from: '2019-02-07T00:00:00.000Z',
+              to: '2020-08-13T17:15:00.000Z',
+              mode: 'absolute',
+            },
+            query: {
+              analyze_wildcard: true,
+              query: '*',
+            },
           },
         });
         expect(url).toBe(
@@ -83,11 +91,13 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Anomaly Explorer page for multiple jobIds', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.ANOMALY_EXPLORER,
-          jobIds: ['fq_single_1', 'logs_categorization_1'],
-          timeRange: {
-            from: '2019-02-07T00:00:00.000Z',
-            to: '2020-08-13T17:15:00.000Z',
-            mode: 'absolute',
+          pageState: {
+            jobIds: ['fq_single_1', 'logs_categorization_1'],
+            timeRange: {
+              from: '2019-02-07T00:00:00.000Z',
+              to: '2020-08-13T17:15:00.000Z',
+              mode: 'absolute',
+            },
           },
         });
         expect(url).toBe(
@@ -100,19 +110,21 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Single Metric Viewer page', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.SINGLE_METRIC_VIEWER,
-          jobIds: ['logs_categorization_1'],
-          refreshInterval: {
-            pause: false,
-            value: 0,
-          },
-          timeRange: {
-            from: '2020-07-12T00:39:02.912Z',
-            to: '2020-07-22T15:52:18.613Z',
-            mode: 'absolute',
-          },
-          query: {
-            analyze_wildcard: true,
-            query: '*',
+          pageState: {
+            jobIds: ['logs_categorization_1'],
+            refreshInterval: {
+              pause: false,
+              value: 0,
+            },
+            timeRange: {
+              from: '2020-07-12T00:39:02.912Z',
+              to: '2020-07-22T15:52:18.613Z',
+              mode: 'absolute',
+            },
+            query: {
+              analyze_wildcard: true,
+              query: '*',
+            },
           },
         });
         expect(url).toBe(
@@ -123,25 +135,27 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Single Metric Viewer page with extra settings', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.SINGLE_METRIC_VIEWER,
-          jobIds: ['logs_categorization_1'],
-          detectorIndex: 0,
-          entities: { mlcategory: '2' },
-          refreshInterval: {
-            pause: false,
-            value: 0,
-          },
-          timeRange: {
-            from: '2020-07-12T00:39:02.912Z',
-            to: '2020-07-22T15:52:18.613Z',
-            mode: 'absolute',
-          },
-          zoom: {
-            from: '2020-07-20T23:58:29.367Z',
-            to: '2020-07-21T11:00:13.173Z',
-          },
-          query: {
-            analyze_wildcard: true,
-            query: '*',
+          pageState: {
+            jobIds: ['logs_categorization_1'],
+            detectorIndex: 0,
+            entities: { mlcategory: '2' },
+            refreshInterval: {
+              pause: false,
+              value: 0,
+            },
+            timeRange: {
+              from: '2020-07-12T00:39:02.912Z',
+              to: '2020-07-22T15:52:18.613Z',
+              mode: 'absolute',
+            },
+            zoom: {
+              from: '2020-07-20T23:58:29.367Z',
+              to: '2020-07-21T11:00:13.173Z',
+            },
+            query: {
+              analyze_wildcard: true,
+              query: '*',
+            },
           },
         });
         expect(url).toBe(
@@ -162,7 +176,9 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Data Frame Analytics job management page with jobId', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-          jobId: 'grid_regression_1',
+          pageState: {
+            jobId: 'grid_regression_1',
+          },
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(jobId:grid_regression_1)');
       });
@@ -170,7 +186,9 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-          groupIds: ['group_1', 'group_2'],
+          pageState: {
+            groupIds: ['group_1', 'group_2'],
+          },
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(groupIds:!(group_1,group_2))');
       });
@@ -180,8 +198,10 @@ describe('MlUrlGenerator', () => {
       it('should generate valid URL for the Data Frame Analytics exploration page for job', async () => {
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-          jobId: 'grid_regression_1',
-          analysisType: ANALYSIS_CONFIG_TYPE.REGRESSION,
+          pageState: {
+            jobId: 'grid_regression_1',
+            analysisType: ANALYSIS_CONFIG_TYPE.REGRESSION,
+          },
         });
         expect(url).toBe(
           '/app/ml/data_frame_analytics/exploration?_g=(ml:(analysisType:regression,jobId:grid_regression_1))'
@@ -215,11 +235,13 @@ describe('MlUrlGenerator', () => {
     it('should generate valid URL for the Index Data Visualizer Viewer page', async () => {
       const url = await urlGenerator.createUrl({
         page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
-        index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
-        globalState: {
-          time: {
-            from: 'now-30m',
-            to: 'now',
+        pageState: {
+          index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+          globalState: {
+            time: {
+              from: 'now-30m',
+              to: 'now',
+            },
           },
         },
       });

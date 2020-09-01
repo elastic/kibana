@@ -9,6 +9,7 @@
  */
 import { DataVisualizerUrlState, MlGenericUrlState } from '../../common/types/ml_url_generator';
 import { createIndexBasedMlUrl } from './common';
+import { ML_PAGES } from '../../common/constants/ml_url_generator';
 
 export function createDataVisualizerUrl(
   appBasePath: string,
@@ -22,7 +23,7 @@ export function createDataVisualizerUrl(
  */
 export function createIndexDataVisualizerUrl(
   appBasePath: string,
-  mlGenericUrlState: MlGenericUrlState
+  pageState: MlGenericUrlState['pageState']
 ): string {
-  return createIndexBasedMlUrl(appBasePath, mlGenericUrlState);
+  return createIndexBasedMlUrl(appBasePath, ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER, pageState);
 }

@@ -12,16 +12,7 @@ import {
 } from '../../../../../src/plugins/share/public';
 import { MlStartDependencies } from '../plugin';
 import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
-import {
-  MlUrlGeneratorState,
-  AnomalyDetectionUrlState,
-  ExplorerUrlState,
-  TimeSeriesExplorerUrlState,
-  DataFrameAnalyticsUrlState,
-  DataFrameAnalyticsExplorationUrlState,
-  DataVisualizerUrlState,
-  MlGenericUrlState,
-} from '../../common/types/ml_url_generator';
+import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,
@@ -57,38 +48,26 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     const appBasePath = this.params.appBasePath;
     switch (mlUrlGeneratorState.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
-        return createAnomalyDetectionJobManagementUrl(
-          appBasePath,
-          mlUrlGeneratorState as AnomalyDetectionUrlState
-        );
+        return createAnomalyDetectionJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_EXPLORER:
-        return createExplorerUrl(appBasePath, mlUrlGeneratorState as ExplorerUrlState);
+        return createExplorerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
         return createAnomalyDetectionCreateJobSelectType(
           appBasePath,
-          mlUrlGeneratorState as MlGenericUrlState
+          mlUrlGeneratorState.pageState
         );
       case ML_PAGES.SINGLE_METRIC_VIEWER:
-        return createSingleMetricViewerUrl(
-          appBasePath,
-          mlUrlGeneratorState as TimeSeriesExplorerUrlState
-        );
+        return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
-        return createDataframeAnalyticsUrl(
-          appBasePath,
-          mlUrlGeneratorState as DataFrameAnalyticsUrlState
-        );
+        return createDataframeAnalyticsUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
-        return createDataframeAnalyticsExplorationUrl(
-          appBasePath,
-          mlUrlGeneratorState as DataFrameAnalyticsExplorationUrlState
-        );
+        return createDataframeAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
-        return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState as DataVisualizerUrlState);
+        return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
-        return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState as MlGenericUrlState);
+        return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState.pageState);
       default:
         throw new Error('Page type is not provided or unknown');
     }

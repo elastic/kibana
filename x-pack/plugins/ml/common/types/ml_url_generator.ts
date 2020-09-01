@@ -8,11 +8,18 @@ import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/comm
 import { JobId } from '../../../reporting/common/types';
 import { ML_PAGES } from '../constants/ml_url_generator';
 
+export interface MLPageState<PageType, PageState> {
+  page: PageType;
+  pageState?: PageState;
+}
+
 export const ANALYSIS_CONFIG_TYPE = {
   OUTLIER_DETECTION: 'outlier_detection',
   REGRESSION: 'regression',
   CLASSIFICATION: 'classification',
 } as const;
+
+type DATAFRAME_ANALYTICS_TYPE = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
@@ -26,26 +33,39 @@ export interface MlIndexBasedSearchState {
   savedSearchId?: string;
 }
 
-export interface MlGenericUrlState extends MlIndexBasedSearchState {
-  page:
-    | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
-    | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE;
+export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   globalState?: MlCommonGlobalState;
   appState?: MlCommonAppState;
   [key: string]: any;
+}
+
+export interface MlGenericUrlState {
+  page:
+    | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
+    | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE;
+  pageState: MlGenericUrlPageState;
 }
 
 export interface AnomalyDetectionQueryState {
   jobId?: JobId;
   groupIds?: string[];
 }
+//
+// export interface AnomalyDetectionUrlState {
+//   page: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+//   pageState: {
+//     jobId?: JobId;
+//     groupIds?: string[];
+//   };
+// }
 
-export interface AnomalyDetectionUrlState {
-  page: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
-  jobId?: JobId;
-  groupIds?: string[];
-}
-
+export type AnomalyDetectionUrlState = MLPageState<
+  typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  {
+    jobId?: JobId;
+    groupIds?: string[];
+  }
+>;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: string;
@@ -70,11 +90,7 @@ export interface ExplorerGlobalState {
   refreshInterval?: RefreshInterval;
 }
 
-export interface ExplorerUrlState {
-  /**
-   * ML App Page
-   */
-  page: typeof ML_PAGES.ANOMALY_EXPLORER;
+export interface ExplorerUrlPageState {
   /**
    * Job IDs
    */
@@ -98,6 +114,8 @@ export interface ExplorerUrlState {
   mlExplorerFilter?: ExplorerAppState['mlExplorerFilter'];
 }
 
+export type ExplorerUrlState = MLPageState<typeof ML_PAGES.ANOMALY_EXPLORER, ExplorerUrlPageState>;
+
 export interface TimeSeriesExplorerGlobalState {
   ml: {
     jobIds: JobId[];
@@ -118,27 +136,29 @@ export interface TimeSeriesExplorerAppState {
   query?: any;
 }
 
-export interface TimeSeriesExplorerUrlState
+export interface TimeSeriesExplorerPageState
   extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
-  /**
-   * ML App Page
-   */
-  page: typeof ML_PAGES.SINGLE_METRIC_VIEWER;
   jobIds: JobId[];
   timeRange?: TimeRange;
   detectorIndex?: number;
   entities?: Record<string, string>;
 }
 
+export type TimeSeriesExplorerUrlState = MLPageState<
+  typeof ML_PAGES.SINGLE_METRIC_VIEWER,
+  TimeSeriesExplorerPageState
+>;
+
 export interface DataFrameAnalyticsQueryState {
   jobId?: JobId | JobId[];
   groupIds?: string[];
 }
 
-export interface DataFrameAnalyticsUrlState extends DataFrameAnalyticsQueryState {
-  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
-}
+export type DataFrameAnalyticsUrlState = MLPageState<
+  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  DataFrameAnalyticsQueryState
+>;
 
 export interface DataVisualizerUrlState {
   page:
@@ -150,15 +170,17 @@ export interface DataVisualizerUrlState {
 export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
-    analysisType: typeof ANALYSIS_CONFIG_TYPE;
+    analysisType: DATAFRAME_ANALYTICS_TYPE;
   };
 }
 
-export interface DataFrameAnalyticsExplorationUrlState {
-  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION;
-  jobId: JobId;
-  analysisType: typeof ANALYSIS_CONFIG_TYPE;
-}
+export type DataFrameAnalyticsExplorationUrlState = MLPageState<
+  typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+  {
+    jobId: JobId;
+    analysisType: DATAFRAME_ANALYTICS_TYPE;
+  }
+>;
 
 /**
  * Union type of ML URL state based on page
