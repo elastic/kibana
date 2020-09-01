@@ -201,14 +201,19 @@ const errorResponseFactory = {
    * @param options - {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   customError: (options: CustomHttpResponseOptions<ResponseError>) => {
+    // Consuming code is already catching errors when it calls customError(). So if more errors are
+    // being thrown here a) something strange is going on and b) we'll need all the info we can
+    // get about the error in order to debug it.
     if (!options || !options.statusCode) {
       throw new Error(
-        `options.statusCode is expected to be set. given options: ${options && options.statusCode}`
+        `options.statusCode is expected to be set. given options: ${JSON.stringify(options)}`
       );
     }
     if (options.statusCode < 400 || options.statusCode >= 600) {
       throw new Error(
-        `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
+        `Unexpected Http status code. Expected from 400 to 599, but given: ${JSON.stringify(
+          options
+        )}`
       );
     }
     return new KibanaResponse(options.statusCode, options.body, options);
