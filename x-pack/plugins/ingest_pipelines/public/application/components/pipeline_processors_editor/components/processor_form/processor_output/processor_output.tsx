@@ -12,14 +12,15 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
+  EuiSelect,
 } from '@elastic/eui';
 
-import { SectionLoading } from '../../../../../shared_imports';
-import { ProcessorResult, Document } from '../../types';
-import { DocumentsDropdown } from '../documents_dropdown';
+import { SectionLoading } from '../../../../../../shared_imports';
+import { ProcessorResult, Document } from '../../../types';
+import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from '../../shared';
+
+import './processor_output.scss';
 
 export interface Props {
   processorOutput?: ProcessorResult;
@@ -49,31 +50,31 @@ const i18nTexts = {
   processorOutputLabel: i18n.translate(
     'xpack.ingestPipelines.processorOutput.processorOutputCodeBlockLabel',
     {
-      defaultMessage: 'Processor output',
+      defaultMessage: 'Data out',
     }
   ),
-  processorErrorLabel: i18n.translate(
+  processorErrorTitle: i18n.translate(
     'xpack.ingestPipelines.processorOutput.processorErrorCodeBlockLabel',
     {
-      defaultMessage: 'Processor error',
+      defaultMessage: 'There was an error',
     }
   ),
   prevProcessorLabel: i18n.translate(
     'xpack.ingestPipelines.processorOutput.processorInputCodeBlockLabel',
     {
-      defaultMessage: 'Processor input',
+      defaultMessage: 'Data in',
     }
   ),
-  processorIgnoredErrorLabel: i18n.translate(
+  processorIgnoredErrorTitle: i18n.translate(
     'xpack.ingestPipelines.processorOutput.ignoredErrorCodeBlockLabel',
     {
-      defaultMessage: 'View ignored error',
+      defaultMessage: 'There was an error that was ignored',
     }
   ),
   documentsDropdownLabel: i18n.translate(
     'xpack.ingestPipelines.processorOutput.documentsDropdownLabel',
     {
-      defaultMessage: 'Test:',
+      defaultMessage: 'Test data:',
     }
   ),
   loadingMessage: i18n.translate('xpack.ingestPipelines.processorOutput.loadingMessage', {
@@ -104,54 +105,78 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
     status,
   } = processorOutput!;
 
+  const getOutputContent = () => {
+    switch (status) {
+      case 'skipped':
+        return <EuiCallOut title={i18nTexts.skippedCalloutTitle} iconType={SkippedIcon} />;
+      case 'dropped':
+        return <EuiCallOut title={i18nTexts.droppedCalloutTitle} iconType="indexClose" />;
+      case 'success':
+        return (
+          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
+            {JSON.stringify(currentResult, null, 2)}
+          </EuiCodeBlock>
+        );
+      case 'error':
+        return (
+          <EuiCallOut iconType={ErrorIcon} title={i18nTexts.processorErrorTitle} color="danger">
+            <EuiCodeBlock transparentBackground language="json" paddingSize="none">
+              {JSON.stringify(error, null, 2)}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        );
+      case 'error_ignored':
+        return (
+          <EuiCallOut
+            iconType={ErrorIgnoredIcon}
+            title={i18nTexts.processorIgnoredErrorTitle}
+            color="warning"
+          >
+            <EuiCodeBlock
+              className="processorOutput__callOutCodeBlock"
+              language="json"
+              paddingSize="none"
+            >
+              {JSON.stringify(ignoredError, null, 2)}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        );
+      default:
+      // TODO
+    }
+  };
+
   return (
-    <div data-test-subj="processorOutputTabContent">
+    <div data-test-subj="processorOutputTabContent" className="processorsOutput">
       <EuiText>
         <p>{i18nTexts.tabDescription}</p>
       </EuiText>
 
-      {/* There is no output for "skipped" status, so we render an info callout */}
-      {status === 'skipped' && (
-        <>
-          <EuiSpacer />
-          <EuiCallOut size="s" title={i18nTexts.skippedCalloutTitle} iconType="pin" />
-        </>
-      )}
+      <EuiSpacer />
 
-      {/* There is no output for "dropped status", so we render a warning callout */}
-      {status === 'dropped' && (
-        <>
-          <EuiSpacer />
-          <EuiCallOut
-            size="s"
-            title={i18nTexts.droppedCalloutTitle}
-            iconType="pin"
-            color="warning"
-          />
-        </>
-      )}
+      {/* Documents dropdown */}
+      <EuiSelect
+        compressed
+        options={documents.map((doc, index) => ({
+          value: index,
+          text: i18n.translate('xpack.ingestPipelines.processorOutput.documentLabel', {
+            defaultMessage: 'Document {number}',
+            values: {
+              number: index + 1,
+            },
+          }),
+        }))}
+        value={selectedDocumentIndex}
+        onChange={(e) => {
+          updateSelectedDocument(Number(e.target.value));
+        }}
+        aria-label={i18nTexts.documentsDropdownLabel}
+        prepend={i18nTexts.documentsDropdownLabel}
+      />
 
       <EuiSpacer />
 
-      <EuiFlexGroup gutterSize="s" alignItems="baseline">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <span>
-              <strong>{i18nTexts.documentsDropdownLabel}</strong>
-            </span>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DocumentsDropdown
-            documents={documents}
-            selectedDocumentIndex={selectedDocumentIndex}
-            updateSelectedDocument={updateSelectedDocument}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-
+      {/* Data-in accordion */}
       <EuiAccordion
         id="processor_input_accordion"
         buttonContent={
@@ -174,69 +199,16 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
         </>
       </EuiAccordion>
 
-      {currentResult && (
-        <>
-          <EuiSpacer />
+      <EuiSpacer />
 
-          <EuiText>
-            <p>{i18nTexts.processorOutputLabel}</p>
-          </EuiText>
+      {/* Data-out content */}
+      <EuiText>
+        <span>{i18nTexts.processorOutputLabel}</span>
+      </EuiText>
 
-          <EuiSpacer size="xs" />
+      <EuiSpacer size="xs" />
 
-          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-            {JSON.stringify(currentResult, null, 2)}
-          </EuiCodeBlock>
-        </>
-      )}
-
-      {error && (
-        <>
-          <EuiSpacer />
-
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
-            <EuiFlexItem>
-              <p>{i18nTexts.processorErrorLabel}</p>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DocumentsDropdown
-                documents={documents}
-                selectedDocumentIndex={selectedDocumentIndex}
-                updateSelectedDocument={updateSelectedDocument}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="xs" />
-
-          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-            {JSON.stringify(error, null, 2)}
-          </EuiCodeBlock>
-        </>
-      )}
-
-      {ignoredError && (
-        <>
-          <EuiSpacer />
-
-          <EuiAccordion
-            id="ignored_error_accordion"
-            buttonContent={
-              <EuiText>
-                <p>{i18nTexts.processorIgnoredErrorLabel}</p>
-              </EuiText>
-            }
-          >
-            <>
-              <EuiSpacer />
-
-              <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-                {JSON.stringify(ignoredError, null, 2)}
-              </EuiCodeBlock>
-            </>
-          </EuiAccordion>
-        </>
-      )}
+      {getOutputContent()}
     </div>
   );
 };

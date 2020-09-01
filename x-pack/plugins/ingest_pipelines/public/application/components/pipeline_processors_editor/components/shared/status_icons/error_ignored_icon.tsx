@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FunctionComponent } from 'react';
+
+export const ErrorIgnoredIcon: FunctionComponent = () => (
+  <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.69297 4.58336L6.89831 8.76292H7.59296L7.80703 4.58336H6.69297ZM6.85273 10.2326C6.95924 10.3391 7.08717 10.3924 7.23653 10.3924C7.37855 10.3924 7.50342 10.3397 7.61115 10.2345C7.71889 10.1292 7.77275 10.0019 7.77275 9.8525C7.77275 9.70069 7.7195 9.57276 7.61299 9.4687C7.50648 9.36464 7.38099 9.31261 7.23653 9.31261C7.08717 9.31261 6.95924 9.36525 6.85273 9.47053C6.74622 9.57582 6.69297 9.70314 6.69297 9.8525C6.69297 9.99941 6.74622 10.1261 6.85273 10.2326ZM1.35585 10.8733C1.04436 11.4443 1.45769 12.1406 2.10818 12.1406H8.38069C8.31594 11.8631 8.2743 11.5767 8.25791 11.2836H2.10818L7.25 1.85697L10.1132 7.10614C10.3362 6.92628 10.5749 6.76519 10.827 6.62525L8.00233 1.44661C7.67752 0.851131 6.82248 0.851131 6.49767 1.44661L1.35585 10.8733Z"
+      fill="#BD271E"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12.25 6C10.0409 6 8.25 7.79086 8.25 10C8.25 12.2091 10.0409 14 12.25 14C14.4591 14 16.25 12.2091 16.25 10C16.25 7.79086 14.4591 6 12.25 6ZM12.632 11.0522L14.5087 9.28831L15.0441 9.8565L12.25 12.4813L9.45584 9.8565L9.99126 9.28831L11.8515 11.0367V7.51871H12.632V11.0522Z"
+      fill="#BD271E"
+    />
+  </svg>
+);

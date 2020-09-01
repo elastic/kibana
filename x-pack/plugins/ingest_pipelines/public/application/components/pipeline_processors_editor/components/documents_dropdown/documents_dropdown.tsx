@@ -4,49 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiSelect, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { FunctionComponent, useState } from 'react';
+import {
+  EuiSelect,
+  EuiButton,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { Document } from '../../types';
 
-import './documents_dropdown.scss';
 import { TestPipelineFlyoutTab } from '../test_pipeline/test_pipeline_flyout_tabs';
 
 const i18nTexts = {
-  ariaLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdownAriaLabel',
-    {
-      defaultMessage: 'Select documents',
-    }
-  ),
   dropdownLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsdropdownLabel',
     {
       defaultMessage: 'Documents:',
     }
   ),
-  buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel', {
-    defaultMessage: 'Add documents',
-  }),
-  iconButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.iconButtonAriaLabel',
+  addDocumentsButtonLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel',
     {
-      defaultMessage: 'Manage documents',
+      defaultMessage: 'Add documents',
     }
   ),
+  popoverTitle: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.popoverTitle', {
+    defaultMessage: 'Test documents',
+  }),
 };
-
-const getDocumentOptions = (documents: Document[]) =>
-  documents.map((doc, index) => ({
-    value: index,
-    text: doc._id,
-  }));
 
 interface Props {
   documents: Document[];
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
-  openFlyout?: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
+  openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
 export const DocumentsDropdown: FunctionComponent<Props> = ({
@@ -55,42 +57,77 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   updateSelectedDocument,
   openFlyout,
 }) => {
-  const shouldAppendActions = typeof openFlyout !== 'undefined';
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const managePipelineButton = (
+    <EuiButtonEmpty
+      data-test-subj="documentsButton"
+      onClick={() => setShowPopover((previousBool) => !previousBool)}
+      iconType="arrowDown"
+      iconSide="right"
+    >
+      {i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.selectedDocumentLabel', {
+        defaultMessage: 'Document {selectedDocument}',
+        values: {
+          selectedDocument: selectedDocumentIndex + 1,
+        },
+      })}
+    </EuiButtonEmpty>
+  );
 
   return (
-    <div className="documentsDropdown">
-      {shouldAppendActions ? (
-        <EuiSelect
-          compressed
-          options={getDocumentOptions(documents)}
-          value={selectedDocumentIndex}
-          onChange={(e) => {
-            updateSelectedDocument(Number(e.target.value));
-          }}
-          aria-label={i18nTexts.ariaLabel}
-          append={
-            <EuiToolTip content={i18nTexts.iconButtonLabel}>
-              <EuiButtonIcon
-                iconType="gear"
-                size="s"
-                aria-label={i18nTexts.iconButtonLabel}
-                onClick={() => openFlyout!('documents')}
-              />
-            </EuiToolTip>
-          }
-        />
-      ) : (
-        <EuiSelect
-          compressed
-          options={getDocumentOptions(documents)}
-          value={selectedDocumentIndex}
-          onChange={(e) => {
-            updateSelectedDocument(Number(e.target.value));
-          }}
-          aria-label={i18nTexts.ariaLabel}
-          data-test-subj="documentsDropdown"
-        />
-      )}
-    </div>
+    <EuiPopover
+      isOpen={showPopover}
+      closePopover={() => setShowPopover(false)}
+      button={managePipelineButton}
+      panelPaddingSize="none"
+      withTitle
+      repositionOnScroll
+    >
+      <EuiSelectable
+        singleSelection
+        options={documents.map((doc, index) => ({
+          index,
+          checked: selectedDocumentIndex === index ? 'on' : undefined,
+          label: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel', {
+            defaultMessage: 'Document {documentNumber}',
+            values: {
+              documentNumber: index + 1,
+            },
+          }),
+        }))}
+        onChange={(newOptions) => {
+          const selectedOption = newOptions.find((option) => option.checked === 'on');
+          updateSelectedDocument(selectedOption.index);
+          setShowPopover(false);
+        }}
+      >
+        {(list, search) => (
+          <div>
+            <EuiPopoverTitle>{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+
+      <EuiHorizontalRule margin="xs" />
+
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            onClick={() => {
+              openFlyout!('documents');
+              setPopoverOpen(false);
+            }}
+            data-test-subj="addDocumentsButton"
+          >
+            {i18nTexts.addDocumentsButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+    </EuiPopover>
   );
 };
