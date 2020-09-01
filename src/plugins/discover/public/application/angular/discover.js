@@ -33,7 +33,6 @@ import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
