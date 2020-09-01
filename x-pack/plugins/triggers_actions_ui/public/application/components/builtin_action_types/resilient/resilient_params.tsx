@@ -75,6 +75,15 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     setSeveritySelectOptions(options);
   }, [actionConnector, severity]);
 
+  // Reset parameters when changing connector
+  useEffect(() => {
+    setIncidentTypesComboBoxOptions([]);
+    setSelectedIncidentTypesComboBoxOptions([]);
+    setSeveritySelectOptions([]);
+    editAction('subActionParams', { savedObjectId }, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
@@ -83,7 +92,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector]);
+  }, [actionConnector, savedObjectId]);
 
   useEffect(() => {
     setIncidentTypesComboBoxOptions(
