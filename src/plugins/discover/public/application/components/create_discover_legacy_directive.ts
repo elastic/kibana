@@ -34,6 +34,7 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['indexPattern', { watchDepth: 'reference' }],
     ['indexPatternList', { watchDepth: 'reference' }],
     ['intervalOptions', { watchDepth: 'reference' }],
+    ['minimumVisibleRows', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onChangeInterval', { watchDepth: 'reference' }],
     ['onRemoveColumn', { watchDepth: 'reference' }],

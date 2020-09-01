@@ -48,6 +48,7 @@ export function DiscoverLegacy({
   indexPattern,
   indexPatternList,
   intervalOptions,
+  minimumVisibleRows,
   onAddFilter,
   onChangeInterval,
   onRemoveColumn,
@@ -208,6 +209,7 @@ export function DiscoverLegacy({
                             ariaLabelledBy="documentsAriaLabel"
                             columns={state.columns}
                             indexPattern={indexPattern}
+                            minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
                             sort={state.sort}
                             sampleSize={opts.sampleSize}

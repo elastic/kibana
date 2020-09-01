@@ -50,10 +50,6 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
       inspectorAdapters: '=?',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
-      $scope.$watch('minimumVisibleRows', (minimumVisibleRows: number) => {
-        $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
-      });
-
       $scope.persist = {
         sorting: $scope.sorting,
         columns: $scope.columns,
@@ -77,7 +73,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         if (!hits) return;
 
         // Reset infinite scroll limit
-        $scope.limit = 50;
+        $scope.limit = $scope.minimumVisibleRows || 50;
 
         if (hits.length === 0) {
           dispatchRenderComplete($el[0]);

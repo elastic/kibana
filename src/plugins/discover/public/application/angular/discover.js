@@ -769,6 +769,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
