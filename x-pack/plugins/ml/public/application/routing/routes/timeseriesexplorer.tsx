@@ -38,6 +38,7 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
+import { validateTimeRange } from '../../..';
 
 export const timeSeriesExplorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/timeseriesexplorer',
@@ -91,6 +92,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<string | undefined>();
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -114,10 +116,23 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
+      if (!validateTimeRange(globalState.time)) {
+        setInValidTimeRangeError(
+          i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+            defaultMessage:
+              "The time filter changed to the full range for this job due to invalid default time filter from '{from}' to '{to}'. Please check the advanced settings.",
+            values: {
+              from: globalState.time.from,
+              to: globalState.time.to,
+            },
+          })
+        );
+      } else {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
 
       const timefilterBounds = timefilter.getBounds();
       // Only if both min/max bounds are valid moment times set the bounds.
@@ -300,6 +315,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         tableSeverity: tableSeverity.val,
         timefilter,
         zoom: zoomProp,
+        invalidTimeRangeError,
       }}
     />
   );

@@ -100,9 +100,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (globalState?.time !== undefined) {
       if (!validateTimeRange(globalState.time)) {
         setInValidTimeRangeError(
-          i18n.translate('invalidTimeRangeInUrlCallout', {
+          i18n.translate('xpack.ml.explorer.invalidTimeRangeInUrlCallout', {
             defaultMessage:
-              "The time filter changed to the full range for this job due to invalid default time filter '{from}' - '{to}'. Please check the advanced settings.",
+              "The time filter changed to the full range for this job due to invalid default time filter from '{from}' to '{to}'. Please check the advanced settings.",
             values: {
               from: globalState.time.from,
               to: globalState.time.to,

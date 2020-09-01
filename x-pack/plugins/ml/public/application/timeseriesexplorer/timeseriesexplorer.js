@@ -833,6 +833,14 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
+    // if timeRange used in the url is incorrect
+    // perhaps due to user's advanced setting using incorrect date-maths
+    const { invalidTimeRangeError } = this.props;
+    if (invalidTimeRangeError) {
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addWarning(invalidTimeRangeError);
+    }
+
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', () => {
