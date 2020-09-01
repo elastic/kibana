@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { PipelinesCreate } from '../../../public/application/sections/pipelines_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
 

@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getPathListSchemaMock } from './patch_list_schema.mock';
 import { PatchListSchema, patchListSchema } from './patch_list_schema';
@@ -25,6 +25,7 @@ describe('patch_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getPathListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = patchListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

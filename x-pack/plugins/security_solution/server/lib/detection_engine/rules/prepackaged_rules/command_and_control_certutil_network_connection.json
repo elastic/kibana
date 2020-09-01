@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Identifies certutil.exe making a network connection. Adversaries could abuse certutil.exe to download a certificate, or malware, from a remote URL.",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -35,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

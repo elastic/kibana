@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../common/constants';
 import { foundExceptionListItemSchema } from '../../common/schemas';
-import { NamespaceType } from '../../common/schemas/types';
-import { validate } from '../../common/siem_common_deps';
+import { NamespaceType, NonEmptyEntriesArray } from '../../common/schemas/types';
+import { nonEmptyEndpointEntriesArray } from '../../common/schemas/types/endpoint';
+import { exactCheck, validate } from '../../common/shared_imports';
+import { formatErrors } from '../siem_server_deps';
 
 export const validateExceptionListSize = async (
   exceptionLists: ExceptionListClient,
@@ -54,3 +60,20 @@ export const validateExceptionListSize = async (
   }
   return null;
 };
+
+export const validateEndpointExceptionItemEntries = (
+  entries: NonEmptyEntriesArray
+): { body: string[]; statusCode: number } | null =>
+  pipe(
+    nonEmptyEndpointEntriesArray.decode(entries),
+    (decoded) => exactCheck(entries, decoded),
+    fold(
+      (errors: t.Errors) => {
+        return {
+          body: formatErrors(errors),
+          statusCode: 400,
+        };
+      },
+      () => null
+    )
+  );

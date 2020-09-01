@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -26,9 +26,17 @@ import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, DimensionPopoverState } from './types';
 import { DimensionPopover } from './dimension_popover';
 
+const initialPopoverState = {
+  isOpen: false,
+  openId: null,
+  addingToGroupId: null,
+  tabId: null,
+};
+
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
+    dataTestSubj: string;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -41,15 +49,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
-    isOpen: false,
-    openId: null,
-    addingToGroupId: null,
-    tabId: null,
-  });
+  const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+
+  useEffect(() => {
+    setPopoverState(initialPopoverState);
+  }, [props.activeVisualizationId]);
+
   if (
     !datasourcePublicAPI ||
     !props.activeVisualizationId ||
@@ -89,7 +97,7 @@ export function LayerPanel(
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel className="lnsLayerPanel" paddingSize="s">
+      <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <LayerSettings
@@ -116,7 +124,6 @@ export function LayerPanel(
                     const nextPublicAPI = layerDatasource.getPublicAPI({
                       state: newState,
                       layerId,
-                      dateRange: props.framePublicAPI.dateRange,
                     });
                     const nextTable = new Set(
                       nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
@@ -243,12 +250,7 @@ export function LayerPanel(
                               suggestedPriority: group.suggestedPriority,
                               togglePopover: () => {
                                 if (popoverState.isOpen) {
-                                  setPopoverState({
-                                    isOpen: false,
-                                    openId: null,
-                                    addingToGroupId: null,
-                                    tabId: null,
-                                  });
+                                  setPopoverState(initialPopoverState);
                                 } else {
                                   setPopoverState({
                                     isOpen: true,
@@ -264,7 +266,7 @@ export function LayerPanel(
                         panel={
                           <EuiTabbedContent
                             tabs={tabs}
-                            initialSelectedTab={tabs.find((t) => t.id === popoverState.tabId)}
+                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
                             size="s"
                             onTabClick={(tab) => {
                               setPopoverState({
@@ -358,12 +360,7 @@ export function LayerPanel(
                             })}
                             onClick={() => {
                               if (popoverState.isOpen) {
-                                setPopoverState({
-                                  isOpen: false,
-                                  openId: null,
-                                  addingToGroupId: null,
-                                  tabId: null,
-                                });
+                                setPopoverState(initialPopoverState);
                               } else {
                                 setPopoverState({
                                   isOpen: true,

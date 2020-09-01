@@ -19,7 +19,6 @@
 
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {

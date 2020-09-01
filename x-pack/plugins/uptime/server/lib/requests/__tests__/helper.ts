@@ -33,6 +33,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 ): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
   const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {
       aggregations: {

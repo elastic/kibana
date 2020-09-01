@@ -9,8 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Coordinates } from '../../../../observability/public';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ProcessorEvent } from '../../../common/processor_event';
 
@@ -21,18 +20,17 @@ export async function getTransactionCoordinates({
   setup: Setup & SetupTimeRange;
   bucketSize: string;
 }): Promise<Coordinates[]> {
-  const { client, indices, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-  const { aggregations } = await client.search({
-    index: indices['apm_oss.transactionIndices'],
+  const { aggregations } = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { range: rangeFilter(start, end) },
-          ],
+          filter: [{ range: rangeFilter(start, end) }],
         },
       },
       aggs: {

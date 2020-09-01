@@ -41,6 +41,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { limitOfSeries } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES } from '../../../../common/panel_types';
 
 export class MetricPanelConfig extends Component {
   constructor(props) {
@@ -75,7 +77,7 @@ export class MetricPanelConfig extends Component {
         <SeriesEditor
           colorPicker={false}
           fields={this.props.fields}
-          limit={2}
+          limit={limitOfSeries[PANEL_TYPES.METRIC]}
           model={this.props.model}
           name={this.props.name}
           onChange={this.props.onChange}

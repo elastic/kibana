@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineFormProvider as PipelineForm } from './pipeline_form_provider';
+export { PipelineForm } from './pipeline_form';

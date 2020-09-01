@@ -76,15 +76,6 @@ const convertFieldsToAssociativeArray = (
       }, {})
     : {};
 
-export const getIndexAlias = (defaultIndex: string[], indexName: string): string => {
-  const found = defaultIndex.find((index) => `\\${indexName}`.match(`\\${index}`) != null);
-  if (found != null) {
-    return found;
-  } else {
-    return 'unknown';
-  }
-};
-
 export const getIndexSchemaDoc = memoize((index: string) => {
   if (index.match('auditbeat') != null) {
     return {

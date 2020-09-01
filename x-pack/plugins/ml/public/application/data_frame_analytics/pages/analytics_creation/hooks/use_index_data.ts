@@ -63,7 +63,6 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   const getIndexData = async function () {
@@ -103,7 +102,6 @@ export const useIndexData = (
   useEffect(() => {
     getIndexData();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
@@ -132,7 +130,6 @@ export const useIndexData = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,

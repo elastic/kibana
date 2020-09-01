@@ -30,6 +30,7 @@ import { LegacyAPICaller, LegacyCallAPIOptions } from './api_types';
  *
  * See {@link LegacyScopedClusterClient}.
  *
+ * @deprecated Use {@link IScopedClusterClient}.
  * @public
  */
 export type ILegacyScopedClusterClient = Pick<
@@ -39,6 +40,7 @@ export type ILegacyScopedClusterClient = Pick<
 
 /**
  * {@inheritDoc IScopedClusterClient}
+ * @deprecated Use {@link IScopedClusterClient | scoped cluster client}.
  * @public
  */
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {

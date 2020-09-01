@@ -22,18 +22,16 @@ export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
   return {
     time: {
-      from: currentQuery.rangeFrom
-        ? encodeURIComponent(currentQuery.rangeFrom)
-        : '',
-      to: currentQuery.rangeTo ? encodeURIComponent(currentQuery.rangeTo) : '',
+      from: currentQuery.rangeFrom || '',
+      to: currentQuery.rangeTo || '',
     },
     refreshInterval: {
       pause: currentQuery.refreshPaused
-        ? String(currentQuery.refreshPaused)
-        : '',
+        ? Boolean(currentQuery.refreshPaused)
+        : true,
       value: currentQuery.refreshInterval
-        ? String(currentQuery.refreshInterval)
-        : '',
+        ? parseInt(currentQuery.refreshInterval, 10)
+        : 0,
     },
   };
 }

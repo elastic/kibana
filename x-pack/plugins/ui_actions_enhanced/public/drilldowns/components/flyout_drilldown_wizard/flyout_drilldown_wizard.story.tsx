@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from './index';
-import {
-  dashboardFactory,
-  urlFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../components/action_wizard/test_data';
+import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
 import { ActionFactory } from '../../../dynamic_actions';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+
+const otherProps = {
+  supportedTriggers: [
+    'VALUE_CLICK_TRIGGER',
+    'SELECT_RANGE_TRIGGER',
+    'FILTER_TRIGGER',
+  ] as TriggerId[],
+  onClose: () => {},
+  getTrigger: (id: TriggerId) => ({ id } as Trigger),
+};
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
     return (
       <FlyoutDrilldownWizard
         drilldownActionFactories={[urlFactory as ActionFactory, dashboardFactory as ActionFactory]}
+        {...otherProps}
       />
     );
   })
@@ -29,11 +35,11 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          onClose={() => {}}
           drilldownActionFactories={[
             urlFactory as ActionFactory,
             dashboardFactory as ActionFactory,
           ]}
+          {...otherProps}
         />
       </EuiFlyout>
     );
@@ -42,7 +48,6 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          onClose={() => {}}
           drilldownActionFactories={[
             urlFactory as ActionFactory,
             dashboardFactory as ActionFactory,
@@ -56,6 +61,7 @@ storiesOf('components/FlyoutDrilldownWizard', module)
             },
           }}
           mode={'edit'}
+          {...otherProps}
         />
       </EuiFlyout>
     );
@@ -64,7 +70,6 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          onClose={() => {}}
           drilldownActionFactories={[dashboardFactory as ActionFactory]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
@@ -75,6 +80,7 @@ storiesOf('components/FlyoutDrilldownWizard', module)
             },
           }}
           mode={'edit'}
+          {...otherProps}
         />
       </EuiFlyout>
     );

@@ -23,6 +23,8 @@ export const getFleetSavedObjectsMetadata = async (savedObjectsClient: ISavedObj
       'last_checkin',
       'local_metadata.agent.id',
       'local_metadata.host.id',
+      'local_metadata.host.name',
+      'local_metadata.host.hostname',
       'local_metadata.elastic.agent.id',
       'local_metadata.os',
     ],

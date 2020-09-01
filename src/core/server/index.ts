@@ -44,6 +44,7 @@ import {
   ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
+  IScopedClusterClient,
 } from './elasticsearch';
 
 import { HttpServiceSetup, HttpServiceStart } from './http';
@@ -59,7 +60,6 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { UuidServiceSetup } from './uuid';
 import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
@@ -110,6 +110,10 @@ export {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  IScopedClusterClient,
   SearchResponse,
   CountResponse,
   ShardsInfo,
@@ -236,6 +240,8 @@ export {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -249,11 +255,13 @@ export {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
@@ -269,7 +277,9 @@ export {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -367,10 +377,13 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
+ *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
+ *    - {@link Auditor | uiSettings.auditor} - AuditTrail client scoped to the incoming request
  *
  * @public
  */
@@ -381,6 +394,7 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
+      client: IScopedClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
       };
@@ -421,8 +435,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
-  /** {@link UuidServiceSetup} */
-  uuid: UuidServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link AuditTrailSetup} */
@@ -472,7 +484,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  UuidServiceSetup,
   AuditTrailStart,
 };
 

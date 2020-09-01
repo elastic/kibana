@@ -23,7 +23,6 @@ import { configSchema, ConfigSchema } from '../config';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     url: true,
-    deprecated: true,
     options: true,
   },
   schema: configSchema,

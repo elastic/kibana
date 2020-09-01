@@ -22,7 +22,6 @@ import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../pa
 
 export const installTemplates = async (
   registryPackage: RegistryPackage,
-  isUpdate: boolean,
   callCluster: CallESAsCurrentUser,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
@@ -41,6 +40,16 @@ export const installTemplates = async (
   );
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
+  if (!datasets) return [];
+  // get template refs to save
+  const installedTemplateRefs = datasets.map((dataset) => ({
+    id: generateTemplateName(dataset),
+    type: ElasticsearchAssetType.indexTemplate,
+  }));
+
+  // add package installation's references to index templates
+  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
+
   if (datasets) {
     const installTemplatePromises = datasets.reduce<Array<Promise<TemplateRef>>>((acc, dataset) => {
       acc.push(
@@ -55,14 +64,6 @@ export const installTemplates = async (
 
     const res = await Promise.all(installTemplatePromises);
     const installedTemplates = res.flat();
-    // get template refs to save
-    const installedTemplateRefs = installedTemplates.map((template) => ({
-      id: template.templateName,
-      type: ElasticsearchAssetType.indexTemplate,
-    }));
-
-    // add package installation's references to index templates
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
 
     return installedTemplates;
   }

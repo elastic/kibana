@@ -42,7 +42,6 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   docValueFields: DocValueFields[];
-  height?: number;
   id: string;
   isEventViewer?: boolean;
   sort: Sort;
@@ -63,7 +62,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     docValueFields,
     eventIdToNoteIds,
     excludedRowRendererIds,
-    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -171,10 +169,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
@@ -199,7 +197,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
-        height={height}
         id={id}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
@@ -234,7 +231,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
-    prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&

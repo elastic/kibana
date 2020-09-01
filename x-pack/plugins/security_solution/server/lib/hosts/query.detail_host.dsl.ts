@@ -26,6 +26,7 @@ export const buildHostOverviewQuery = ({
     {
       range: {
         [timestamp]: {
+          format: 'strict_date_optional_time',
           gte: from,
           lte: to,
         },

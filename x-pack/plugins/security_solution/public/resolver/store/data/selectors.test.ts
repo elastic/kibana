@@ -6,8 +6,8 @@
 
 import * as selectors from './selectors';
 import { DataState } from '../../types';
+import { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
-import { DataAction } from './action';
 import { createStore } from 'redux';
 import {
   mockTreeWithNoAncestorsAnd2Children,
@@ -15,12 +15,12 @@ import {
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
-} from '../mocks/resolver_tree';
+} from '../../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 
 describe('data state', () => {
-  let actions: DataAction[] = [];
+  let actions: ResolverAction[] = [];
 
   /**
    * Get state, given an ordered collection of actions.
@@ -68,7 +68,13 @@ describe('data state', () => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, resolverComponentInstanceID },
+          payload: {
+            databaseDocumentID,
+            resolverComponentInstanceID,
+
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+          },
         },
       ];
     });
@@ -120,7 +126,13 @@ describe('data state', () => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, resolverComponentInstanceID },
+          payload: {
+            databaseDocumentID,
+            resolverComponentInstanceID,
+
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+          },
         },
         {
           type: 'appRequestedResolverData',
@@ -182,6 +194,8 @@ describe('data state', () => {
           payload: {
             databaseDocumentID: firstDatabaseDocumentID,
             resolverComponentInstanceID: resolverComponentInstanceID1,
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
           },
         },
         // this happens when the middleware starts the request
@@ -195,6 +209,8 @@ describe('data state', () => {
           payload: {
             databaseDocumentID: secondDatabaseDocumentID,
             resolverComponentInstanceID: resolverComponentInstanceID2,
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
           },
         },
       ];

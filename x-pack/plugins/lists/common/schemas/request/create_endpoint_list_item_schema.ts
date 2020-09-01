@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
@@ -20,15 +18,16 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { CreateCommentsArray, DefaultCreateCommentsArray, nonEmptyEntriesArray } from '../types';
+import { CreateCommentsArray, DefaultCreateCommentsArray } from '../types';
+import { nonEmptyEndpointEntriesArray } from '../types/endpoint';
 import { EntriesArray } from '../types/entries';
-import { DefaultUuid } from '../../siem_common_deps';
+import { DefaultUuid } from '../../shared_imports';
 
 export const createEndpointListItemSchema = t.intersection([
   t.exact(
     t.type({
       description,
-      entries: nonEmptyEntriesArray,
+      entries: nonEmptyEndpointEntriesArray,
       name,
       type: exceptionListItemType,
     })

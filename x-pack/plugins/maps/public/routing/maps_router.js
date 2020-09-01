@@ -7,8 +7,18 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { getCoreI18n } from '../kibana_services';
-import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
+import { i18n } from '@kbn/i18n';
+import {
+  getCoreChrome,
+  getCoreI18n,
+  getMapsCapabilities,
+  getToasts,
+  getEmbeddableService,
+} from '../kibana_services';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
@@ -19,7 +29,11 @@ export let kbnUrlStateStorage;
 
 export async function renderApp(context, { appBasePath, element, history, onAppLeave }) {
   goToSpecifiedPath = (path) => history.push(path);
-  kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+  kbnUrlStateStorage = createKbnUrlStateStorage({
+    useHash: false,
+    history,
+    ...withNotifyOnErrors(getToasts()),
+  });
 
   render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
 
@@ -32,6 +46,23 @@ const App = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
+  const stateTransfer = getEmbeddableService()?.getStateTransfer(history);
+
+  const { originatingApp } =
+    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+
+  if (!getMapsCapabilities().save) {
+    getCoreChrome().setBadge({
+      text: i18n.translate('xpack.maps.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save maps',
+      }),
+      iconType: 'glasses',
+    });
+  }
+
   return (
     <I18nContext>
       <Provider store={store}>
@@ -43,13 +74,21 @@ const App = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
+                  originatingApp={originatingApp}
                 />
               )}
             />
             <Route
               exact
               path={`/map`}
-              render={() => <LoadMapAndRender onAppLeave={onAppLeave} />}
+              render={() => (
+                <LoadMapAndRender
+                  onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
+                  originatingApp={originatingApp}
+                />
+              )}
             />
             // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route

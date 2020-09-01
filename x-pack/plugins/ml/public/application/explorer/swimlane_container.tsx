@@ -15,12 +15,9 @@ import {
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
-import {
-  ExplorerSwimlane,
-  ExplorerSwimlaneProps,
-} from '../../application/explorer/explorer_swimlane';
+import { ExplorerSwimlane, ExplorerSwimlaneProps } from './explorer_swimlane';
 
-import { MlTooltipComponent } from '../../application/components/chart_tooltip';
+import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimLanePagination } from './swimlane_pagination';
 import { SWIMLANE_TYPE } from './explorer_constants';
 import { ViewBySwimLaneData } from './explorer_utils';

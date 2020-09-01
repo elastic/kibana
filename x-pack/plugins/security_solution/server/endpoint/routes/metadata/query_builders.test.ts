@@ -127,7 +127,7 @@ describe('query builder', () => {
     it('test default query params for all endpoints metadata when body filter is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          filter: 'not host.ip:10.140.73.246',
+          filters: { kql: 'not host.ip:10.140.73.246' },
         },
       });
       const query = await kibanaRequestToMetadataListESQuery(
@@ -201,7 +201,7 @@ describe('query builder', () => {
         const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
         const mockRequest = httpServerMock.createKibanaRequest({
           body: {
-            filter: 'not host.ip:10.140.73.246',
+            filters: { kql: 'not host.ip:10.140.73.246' },
           },
         });
         const query = await kibanaRequestToMetadataListESQuery(

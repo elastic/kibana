@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getUpdateCommentMock, getUpdateCommentsArrayMock } from './update_comment.mock';
 import {
@@ -32,6 +32,7 @@ describe('CommentsUpdate', () => {
 
     test('it should fail validation when supplied an undefined for "comment"', () => {
       const payload = getUpdateCommentMock();
+      // @ts-expect-error
       delete payload.comment;
       const decoded = updateComment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -110,7 +111,6 @@ describe('CommentsUpdate', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -141,7 +141,6 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
         'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});

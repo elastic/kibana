@@ -30,6 +30,7 @@ import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -53,11 +54,13 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
   private spacesService?: SpacesServiceSetup;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
     this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
   }
 
   async setup(core: CoreSetup, { spaces }: PluginSetupDeps): Promise<IEventLogService> {
@@ -82,7 +85,8 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
-      kibanaUUID: core.uuid.getInstanceUuid(),
+      kibanaUUID: this.context.env.instanceUuid,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -119,9 +123,14 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       message: 'eventLog starting',
     });
 
+    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
+      const client = core.savedObjects.getScopedClient(request);
+      return client.get.bind(client);
+    });
+
     this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
-      savedObjectsService: core.savedObjects,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
       spacesService: this.spacesService,
     });
     return this.eventLogClientService;

@@ -17,7 +17,7 @@ export const PRE_BUILT_MSG = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.prePackagedRules.emptyPromptMessage',
   {
     defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met. By default, all prebuilt rules are disabled and you select which rules you want to activate.',
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met. By default, all prebuilt rules except the Elastic Endpoint Security rule are disabled. You can select additional rules you want to activate.',
   }
 );
 

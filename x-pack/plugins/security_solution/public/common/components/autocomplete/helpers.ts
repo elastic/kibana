@@ -69,11 +69,12 @@ export function getGenericComboBoxProps<T>({
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions
+    .map(getLabel)
     .filter((option) => {
-      return options.indexOf(option) !== -1;
+      return newLabels.indexOf(option) !== -1;
     })
     .map((option) => {
-      return newComboOptions[options.indexOf(option)];
+      return newComboOptions[newLabels.indexOf(option)];
     });
 
   return {

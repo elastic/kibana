@@ -29,7 +29,7 @@ import {
   listSchema,
 } from '../../common/schemas';
 import { LIST_INDEX, LIST_ITEM_URL, LIST_PRIVILEGES_URL, LIST_URL } from '../../common/constants';
-import { validateEither } from '../../common/siem_common_deps';
+import { validateEither } from '../../common/shared_imports';
 import { toError, toPromise } from '../common/fp_utils';
 
 import {
@@ -44,6 +44,7 @@ const findLists = async ({
   http,
   cursor,
   page,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
@@ -82,6 +83,7 @@ export { findListsWithValidation as findLists };
 const importList = async ({
   file,
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   type,
   signal,
@@ -154,6 +156,7 @@ export { deleteListWithValidation as deleteList };
 
 const exportList = async ({
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>

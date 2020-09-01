@@ -45,7 +45,7 @@ describe('elasticsearch_adapter', () => {
 
   describe('#getUsers', () => {
     test('will format edges correctly', () => {
-      // @ts-ignore Re-work `DatabaseSearchResponse` types as mock ES Response won't match
+      // @ts-expect-error Re-work `DatabaseSearchResponse` types as mock ES Response won't match
       const edges = getUsersEdges(mockUsersData);
       expect(edges).toEqual(mockFormattedUsersEdges);
     });

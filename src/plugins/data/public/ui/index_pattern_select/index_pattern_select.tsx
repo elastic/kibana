@@ -189,12 +189,12 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
   render() {
     const {
-      fieldTypes, // eslint-disable-line no-unused-vars
-      onChange, // eslint-disable-line no-unused-vars
-      indexPatternId, // eslint-disable-line no-unused-vars
+      fieldTypes,
+      onChange,
+      indexPatternId,
       placeholder,
-      onNoIndexPatterns, // eslint-disable-line no-unused-vars
-      savedObjectsClient, // eslint-disable-line no-unused-vars
+      onNoIndexPatterns,
+      savedObjectsClient,
       ...rest
     } = this.props;
 

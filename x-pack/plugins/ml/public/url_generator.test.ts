@@ -19,7 +19,7 @@ describe('MlUrlGenerator', () => {
       mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
     });
     expect(url).toBe(
-      '/app/ml#/explorer?_g=(ml:(jobIds:!(test-job)))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20))'
+      '/app/ml/explorer#?_g=(ml:(jobIds:!(test-job)))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20))'
     );
   });
 

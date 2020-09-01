@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isNumber } from 'lodash';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -24,23 +24,24 @@ export async function getDerivedServiceAnnotations({
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client, indices } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
     ...getEnvironmentUiFilterES(environment),
   ];
 
   const versions =
     (
-      await client.search({
-        index: indices['apm_oss.transactionIndices'],
+      await apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
         body: {
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({ range: rangeFilter(start, end) }),
+              filter: [...filter, { range: rangeFilter(start, end) }],
             },
           },
           aggs: {
@@ -59,17 +60,15 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await client.search({
-        index: indices['apm_oss.transactionIndices'],
+      const response = await apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
         body: {
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({
-                term: {
-                  [SERVICE_VERSION]: version,
-                },
-              }),
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
           aggs: {

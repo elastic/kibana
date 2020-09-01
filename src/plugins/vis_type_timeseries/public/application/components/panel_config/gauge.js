@@ -46,6 +46,9 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
+import { limitOfSeries } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES } from '../../../../common/panel_types';
+
 class GaugePanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -110,7 +113,7 @@ class GaugePanelConfigUi extends Component {
         <SeriesEditor
           colorPicker={true}
           fields={this.props.fields}
-          limit={1}
+          limit={limitOfSeries[PANEL_TYPES.GAUGE]}
           model={this.props.model}
           name={this.props.name}
           onChange={this.props.onChange}

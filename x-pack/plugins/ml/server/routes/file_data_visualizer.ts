@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { MAX_FILE_SIZE_BYTES } from '../../common/constants/file_datavisualizer';
 import {
   InputOverrides,
@@ -28,13 +28,17 @@ import {
   importFileQuerySchema,
 } from './schemas/file_data_visualizer_schema';
 
-function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient);
+function analyzeFiles(
+  legacyClient: ILegacyScopedClusterClient,
+  data: InputData,
+  overrides: InputOverrides
+) {
+  const { analyzeFile } = fileDataVisualizerProvider(legacyClient);
   return analyzeFile(data, overrides);
 }
 
 function importData(
-  context: RequestHandlerContext,
+  legacyClient: ILegacyScopedClusterClient,
   id: string,
   index: string,
   settings: Settings,
@@ -42,7 +46,7 @@ function importData(
   ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient);
+  const { importData: importDataFunc } = importDataProvider(legacyClient);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
@@ -74,9 +78,9 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const result = await analyzeFiles(context, request.body, request.query);
+        const result = await analyzeFiles(legacyClient, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -109,7 +113,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;
@@ -122,7 +126,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         }
 
         const result = await importData(
-          context,
+          legacyClient,
           id,
           index,
           settings,

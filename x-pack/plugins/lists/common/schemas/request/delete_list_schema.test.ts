@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { DeleteListSchema, deleteListSchema } from './delete_list_schema';
 import { getDeleteListSchemaMock } from './delete_list_schema.mock';
@@ -25,6 +25,7 @@ describe('delete_list_schema', () => {
 
   test('it should NOT accept an undefined for an id', () => {
     const payload = getDeleteListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = deleteListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

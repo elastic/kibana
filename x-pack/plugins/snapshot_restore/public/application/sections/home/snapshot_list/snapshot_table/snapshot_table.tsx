@@ -74,7 +74,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
-        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           {...reactRouterNavigate(
             history,

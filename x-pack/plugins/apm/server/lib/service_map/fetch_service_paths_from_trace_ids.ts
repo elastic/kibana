@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
   ConnectionNode,
   ExternalConnectionNode,
@@ -18,23 +16,17 @@ export async function fetchServicePathsFromTraceIds(
   setup: Setup,
   traceIds: string[]
 ) {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
 
   const serviceMapParams = {
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            {
-              terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction'],
-              },
-            },
             {
               terms: {
                 [TRACE_ID]: traceIds,
@@ -212,7 +204,7 @@ export async function fetchServicePathsFromTraceIds(
     },
   };
 
-  const serviceMapFromTraceIdsScriptResponse = await client.search(
+  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
     serviceMapParams
   );
 

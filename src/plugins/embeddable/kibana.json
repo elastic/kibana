@@ -4,7 +4,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": [
-    "data",
     "inspector",
     "uiActions"
   ],
@@ -13,6 +12,7 @@
   ],
   "requiredBundles": [
     "savedObjects",
-    "kibanaReact"
+    "kibanaReact",
+    "kibanaUtils"
   ]
 }

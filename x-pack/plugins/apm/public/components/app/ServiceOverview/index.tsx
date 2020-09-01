@@ -15,7 +15,7 @@ import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
@@ -88,7 +88,7 @@ export function ServiceOverview() {
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
-      projection: PROJECTION.SERVICES,
+      projection: Projection.services,
     }),
     []
   );

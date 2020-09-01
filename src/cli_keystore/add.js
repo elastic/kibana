@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 import { confirm, question } from '../legacy/server/utils';
 import { createPromiseFromStreams, createConcatStream } from '../legacy/utils';
 

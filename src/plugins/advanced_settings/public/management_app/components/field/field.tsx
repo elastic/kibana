@@ -664,13 +664,16 @@ export class Field extends PureComponent<FieldProps> {
     const isInvalid = unsavedChanges?.isInvalid;
 
     const className = classNames('mgtAdvancedSettings__field', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
     const id = setting.name;
 
     return (
       <EuiDescribedFormGroup
+        id={id}
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}

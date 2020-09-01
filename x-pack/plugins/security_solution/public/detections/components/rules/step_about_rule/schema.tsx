@@ -96,35 +96,18 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
       {
-        defaultMessage: 'Associate rule to Global Endpoint Exception List',
+        defaultMessage: 'Add existing Endpoint exceptions to the rule',
       }
     ),
     labelAppend: OptionalFieldLabel,
   },
   severity: {
-    value: {
-      type: FIELD_TYPES.SUPER_SELECT,
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
-              {
-                defaultMessage: 'A severity is required.',
-              }
-            )
-          ),
-        },
-      ],
-    },
+    value: {},
     mapping: {},
     isMappingChecked: {},
   },
   riskScore: {
-    value: {
-      type: FIELD_TYPES.RANGE,
-      serializer: (input: string) => Number(input),
-    },
+    value: {},
     mapping: {},
     isMappingChecked: {},
   },

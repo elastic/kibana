@@ -25,6 +25,12 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     describe('Settings', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
       loadTestFile(require.resolve('./settings/agent_configuration'));
+
+      describe('Anomaly detection', function () {
+        loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/write_user'));
+      });
     });
 
     describe('Traces', function () {

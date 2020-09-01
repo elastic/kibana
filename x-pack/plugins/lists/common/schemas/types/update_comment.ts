@@ -5,7 +5,7 @@
  */
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../../siem_common_deps';
+import { NonEmptyString } from '../../shared_imports';
 import { id } from '../common/schemas';
 
 export const updateComment = t.intersection([

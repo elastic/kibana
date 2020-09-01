@@ -9,6 +9,7 @@ import {
   getUrlForRecord,
   isValidLabel,
   isValidTimeRange,
+  openCustomUrlWindow,
 } from './custom_url_utils';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
@@ -210,7 +211,6 @@ describe('ML - custom URL utils', () => {
       );
     });
 
-    // eslint-disable-next-line ban/ban
     test('truncates long queries', () => {
       const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
         ...TEST_DOC,
@@ -472,6 +472,51 @@ describe('ML - custom URL utils', () => {
       expect(isValidTimeRange('1hour')).toBe(false);
       expect(isValidTimeRange('uato')).toBe(false);
       expect(isValidTimeRange('AUTO')).toBe(false);
+    });
+  });
+
+  describe('openCustomUrlWindow', () => {
+    const originalOpen = window.open;
+
+    beforeEach(() => {
+      delete (window as any).open;
+      const mockOpen = jest.fn();
+      window.open = mockOpen;
+    });
+
+    afterEach(() => {
+      window.open = originalOpen;
+    });
+
+    it('should add the base path to a relative non-kibana url', () => {
+      openCustomUrlWindow(
+        'the-url',
+        { url_name: 'the-url-name', url_value: 'the-url-value' },
+        'the-base-path'
+      );
+      expect(window.open).toHaveBeenCalledWith('the-base-path/the-url', '_blank');
+    });
+
+    it('should add the base path and `app` prefix to a relative kibana url', () => {
+      openCustomUrlWindow(
+        'discover#/the-url',
+        { url_name: 'the-url-name', url_value: 'discover#/the-url-value' },
+        'the-base-path'
+      );
+      expect(window.open).toHaveBeenCalledWith('the-base-path/app/discover#/the-url', '_blank');
+    });
+
+    it('should use an absolute url with protocol as is', () => {
+      openCustomUrlWindow(
+        'http://example.com',
+        { url_name: 'the-url-name', url_value: 'http://example.com' },
+        'the-base-path'
+      );
+      expect(window.open).toHaveBeenCalledWith(
+        'http://example.com',
+        '_blank',
+        'noopener,noreferrer'
+      );
     });
   });
 });

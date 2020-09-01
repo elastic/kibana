@@ -105,9 +105,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
         if (errPayload.statusCode === 404) {
           throw notFound(errPayload.message);
         }
-        if (err.stack) {
-          logger.error(err.stack);
-        }
+        logger.error(err);
         throw new Error(`Unable to create a job from saved object data! Error: ${err}`);
       });
 

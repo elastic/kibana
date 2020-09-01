@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const RefreshJobsListButton = ({ onRefreshClick, isRefreshing }) => (
   <EuiButtonEmpty
-    data-test-subj="mlRefreshJobListButton"
+    data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}
     isLoading={isRefreshing}
   >

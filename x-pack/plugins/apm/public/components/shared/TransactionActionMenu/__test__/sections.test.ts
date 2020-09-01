@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Location } from 'history';
-import { getSections } from '../sections';
+import { IBasePath } from 'kibana/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
+import { getSections } from '../sections';
 
 describe('Transaction action menu', () => {
   const basePath = ({
     prepend: (url: string) => {
       return `some-basepath${url}`;
     },
-  } as unknown) as AppMountContextBasePath;
+  } as unknown) as IBasePath;
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 
@@ -68,7 +68,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -139,7 +139,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -209,7 +209,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],

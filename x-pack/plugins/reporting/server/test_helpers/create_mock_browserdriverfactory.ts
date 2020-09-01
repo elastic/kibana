@@ -129,6 +129,7 @@ export const createMockBrowserDriverFactory = async (
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
   mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
+  mockBrowserDriver.isPageOpen = () => true;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

@@ -176,7 +176,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                     {currentView
                       ? currentView.name
                       : i18n.translate('xpack.infra.savedView.unknownView', {
-                          defaultMessage: 'No view seleted',
+                          defaultMessage: 'No view selected',
                         })}
                   </EuiDescriptionListDescription>
                 </EuiDescriptionList>

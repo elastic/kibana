@@ -5,16 +5,14 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { ActionType, ActionTypeExecutorOptions } from '../../../../../../../plugins/actions/server';
+import { ActionType } from '../../../../../../../plugins/actions/server';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
   { actions }: Pick<FixtureSetupDeps, 'actions'>
 ) {
-  const clusterClient = core.elasticsearch.legacy.client;
-
   // Action types
   const noopActionType: ActionType = {
     id: 'test.noop',
@@ -32,24 +30,39 @@ export function defineActionTypes(
       throw new Error('this action is intended to fail');
     },
   };
-  const indexRecordActionType: ActionType = {
+  actions.registerType(noopActionType);
+  actions.registerType(throwActionType);
+  actions.registerType(getIndexRecordActionType());
+  actions.registerType(getFailingActionType());
+  actions.registerType(getRateLimitedActionType());
+  actions.registerType(getAuthorizationActionType(core));
+}
+
+function getIndexRecordActionType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    message: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    unencrypted: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.index-record',
     name: 'Test: Index Record',
     minimumLicenseRequired: 'gold',
     validate: {
-      params: schema.object({
-        index: schema.string(),
-        reference: schema.string(),
-        message: schema.string(),
-      }),
-      config: schema.object({
-        unencrypted: schema.string(),
-      }),
-      secrets: schema.object({
-        encrypted: schema.string(),
-      }),
+      params: paramsSchema,
+      config: configSchema,
+      secrets: secretsSchema,
     },
-    async executor({ config, secrets, params, services, actionId }: ActionTypeExecutorOptions) {
+    async executor({ config, secrets, params, services, actionId }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -64,17 +77,23 @@ export function defineActionTypes(
       return { status: 'ok', actionId };
     },
   };
-  const failingActionType: ActionType = {
+  return result;
+}
+
+function getFailingActionType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.failing',
     name: 'Test: Failing',
     minimumLicenseRequired: 'gold',
     validate: {
-      params: schema.object({
-        index: schema.string(),
-        reference: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
+    async executor({ config, secrets, params, services }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -89,19 +108,25 @@ export function defineActionTypes(
       throw new Error(`expected failure for ${params.index} ${params.reference}`);
     },
   };
-  const rateLimitedActionType: ActionType = {
+  return result;
+}
+
+function getRateLimitedActionType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    retryAt: schema.number(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
     maxAttempts: 2,
     validate: {
-      params: schema.object({
-        index: schema.string(),
-        reference: schema.string(),
-        retryAt: schema.number(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ config, params, services }: ActionTypeExecutorOptions) {
+    async executor({ config, params, services }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -119,20 +144,27 @@ export function defineActionTypes(
       };
     },
   };
-  const authorizationActionType: ActionType = {
+  return result;
+}
+
+function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
+  const clusterClient = core.elasticsearch.legacy.client;
+  const paramsSchema = schema.object({
+    callClusterAuthorizationIndex: schema.string(),
+    savedObjectsClientType: schema.string(),
+    savedObjectsClientId: schema.string(),
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     minimumLicenseRequired: 'gold',
     validate: {
-      params: schema.object({
-        callClusterAuthorizationIndex: schema.string(),
-        savedObjectsClientType: schema.string(),
-        savedObjectsClientId: schema.string(),
-        index: schema.string(),
-        reference: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ params, services, actionId }: ActionTypeExecutorOptions) {
+    async executor({ params, services, actionId }) {
       // Call cluster
       let callClusterSuccess = false;
       let callClusterError;
@@ -200,10 +232,5 @@ export function defineActionTypes(
       };
     },
   };
-  actions.registerType(noopActionType);
-  actions.registerType(throwActionType);
-  actions.registerType(indexRecordActionType);
-  actions.registerType(failingActionType);
-  actions.registerType(rateLimitedActionType);
-  actions.registerType(authorizationActionType);
+  return result;
 }

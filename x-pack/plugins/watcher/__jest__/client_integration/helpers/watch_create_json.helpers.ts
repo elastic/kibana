@@ -5,9 +5,7 @@
  */
 import { withAppContext } from './app_context.mock';
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
 

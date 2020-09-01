@@ -17,6 +17,7 @@ import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { CloudSetup } from '../../cloud/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -32,10 +33,6 @@ export interface MonitoringElasticsearchConfig {
   hosts: string[];
 }
 
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
 export interface PluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
@@ -44,6 +41,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetupContract;
   alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -75,7 +73,6 @@ export interface LegacyShimDependencies {
 }
 
 export interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
   getKibanaStats: () => any;
 }
 

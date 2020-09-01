@@ -33,7 +33,7 @@ const TimelinesContainer = styled.div`
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPageComponent: React.FC = () => {
-  const { tabName } = useParams();
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
@@ -64,13 +64,11 @@ export const TimelinesPageComponent: React.FC = () => {
                 </EuiFlexItem>
                 {tabName === TimelineType.default ? (
                   <EuiFlexItem>
-                    {capabilitiesCanUserCRUD && (
-                      <NewTimeline
-                        timelineId="timeline-1"
-                        outline={true}
-                        data-test-subj="create-default-btn"
-                      />
-                    )}
+                    <NewTimeline
+                      timelineId="timeline-1"
+                      outline={true}
+                      data-test-subj="create-default-btn"
+                    />
                   </EuiFlexItem>
                 ) : (
                   <EuiFlexItem>

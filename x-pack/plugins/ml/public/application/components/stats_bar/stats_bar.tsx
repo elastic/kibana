@@ -23,7 +23,11 @@ export interface AnalyticStatsBarStats extends Stats {
   stopped: StatsBarStat;
 }
 
-export type StatsBarStats = JobStatsBarStats | AnalyticStatsBarStats;
+export interface ModelsBarStats {
+  total: StatsBarStat;
+}
+
+export type StatsBarStats = JobStatsBarStats | AnalyticStatsBarStats | ModelsBarStats;
 type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {

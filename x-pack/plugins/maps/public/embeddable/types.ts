@@ -16,6 +16,8 @@ import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types
 
 export interface MapEmbeddableConfig {
   editUrl?: string;
+  editApp?: string;
+  editPath?: string;
   indexPatterns: IIndexPattern[];
   editable: boolean;
   title?: string;

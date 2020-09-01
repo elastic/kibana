@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { updateOldState } from './vis_update_state';
 
 // eslint-disable-next-line camelcase
-import { pre_6_1, since_6_1 } from './__tests__/vis_update_objs/gauge_objs';
+import { pre_6_1, since_6_1 } from './vis_update_state.stub';
 
 function watchForChanges(obj) {
   const originalObject = _.cloneDeep(obj);

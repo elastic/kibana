@@ -58,7 +58,6 @@ const executionDefaultState: ExecutionState = {
   },
 };
 
-// eslint-disable-next-line
 export interface ExecutionPureTransitions<Output = ExpressionValue> {
   start: (state: ExecutionState<Output>) => () => ExecutionState<Output>;
   setResult: (state: ExecutionState<Output>) => (result: Output) => ExecutionState<Output>;

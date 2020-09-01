@@ -18,6 +18,7 @@
  */
 
 export * from './defer';
+export * from './field_wildcard';
 export * from './of';
 export * from './ui';
 export * from './state_containers';

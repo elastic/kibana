@@ -8,19 +8,14 @@ import { ExploreDataChartAction } from './explore_data_chart_action';
 import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
-import {
-  EmbeddableStart,
-  RangeSelectContext,
-  ValueClickContext,
-  ChartActionContext,
-} from '../../../../../../src/plugins/embeddable/public';
+import { ExploreDataChartActionContext } from './explore_data_chart_action';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { Filter, RangeFilter } from '../../../../../../src/plugins/data/public';
 
 const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
 
@@ -34,10 +29,19 @@ afterEach(() => {
   i18nTranslateSpy.mockClear();
 });
 
-const setup = ({
-  useRangeEvent = false,
-  dashboardOnlyMode = false,
-}: { useRangeEvent?: boolean; dashboardOnlyMode?: boolean } = {}) => {
+const setup = (
+  {
+    useRangeEvent = false,
+    timeFieldName,
+    filters = [],
+    dashboardOnlyMode = false,
+  }: {
+    useRangeEvent?: boolean;
+    filters?: Filter[];
+    timeFieldName?: string;
+    dashboardOnlyMode?: boolean;
+  } = { filters: [] }
+) => {
   type UrlGenerator = UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
   const core = coreMock.createStart();
@@ -46,16 +50,9 @@ const setup = ({
     createUrl: jest.fn(() => Promise.resolve('/xyz/app/discover/foo#bar')),
   } as unknown) as UrlGenerator;
 
-  const filtersAndTimeRangeFromContext = jest.fn((async () => ({
-    filters: [],
-  })) as EmbeddableStart['filtersAndTimeRangeFromContext']);
-
   const plugins: PluginDeps = {
     discover: {
       urlGenerator,
-    },
-    embeddable: {
-      filtersAndTimeRangeFromContext,
     },
     kibanaLegacy: {
       dashboardConfig: {
@@ -91,19 +88,13 @@ const setup = ({
     getOutput: () => output,
   } as unknown) as VisualizeEmbeddableContract;
 
-  const data: ChartActionContext<typeof embeddable>['data'] = {
-    ...(useRangeEvent
-      ? ({ range: {} } as RangeSelectContext['data'])
-      : ({ data: [] } as ValueClickContext['data'])),
-    timeFieldName: 'order_date',
-  };
-
   const context = {
+    filters,
+    timeFieldName,
     embeddable,
-    data,
-  } as ChartActionContext<typeof embeddable>;
+  } as ExploreDataChartActionContext;
 
-  return { core, plugins, urlGenerator, params, action, input, output, embeddable, data, context };
+  return { core, plugins, urlGenerator, params, action, input, output, embeddable, context };
 };
 
 describe('"Explore underlying data" panel action', () => {
@@ -165,6 +156,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable does not have index patterns', async () => {
       const { action, output, context } = setup();
+      // @ts-expect-error
       delete output.indexPatterns;
 
       const isCompatible = await action.isCompatible(context);
@@ -236,32 +228,41 @@ describe('"Explore underlying data" panel action', () => {
     });
 
     test('applies chart event filters', async () => {
-      const { action, context, urlGenerator, plugins } = setup();
-
-      ((plugins.embeddable
-        .filtersAndTimeRangeFromContext as unknown) as jest.SpyInstance).mockImplementation(() => {
-        const filters: Filter[] = [
-          {
-            meta: {
-              alias: 'alias',
-              disabled: false,
-              negate: false,
+      const timeFieldName = 'timeField';
+      const from = '2020-07-13T13:40:43.583Z';
+      const to = '2020-07-13T13:44:43.583Z';
+      const filters: Array<Filter | RangeFilter> = [
+        {
+          meta: {
+            alias: 'alias',
+            disabled: false,
+            negate: false,
+          },
+        },
+        {
+          meta: {
+            alias: 'alias',
+            disabled: false,
+            negate: false,
+            field: timeFieldName,
+            params: {
+              gte: from,
+              lte: to,
             },
           },
-        ];
-        const timeRange: TimeRange = {
-          from: 'from',
-          to: 'to',
-        };
-        return { filters, timeRange };
-      });
+          range: {
+            [timeFieldName]: {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ];
 
-      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledTimes(0);
+      const { action, context, urlGenerator } = setup({ filters, timeFieldName });
 
       await action.getHref(context);
 
-      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledTimes(1);
-      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledWith(context);
       expect(urlGenerator.createUrl).toHaveBeenCalledWith({
         filters: [
           {
@@ -274,8 +275,8 @@ describe('"Explore underlying data" panel action', () => {
         ],
         indexPatternId: 'index-ptr-foo',
         timeRange: {
-          from: 'from',
-          to: 'to',
+          from,
+          to,
         },
       });
     });

@@ -8,16 +8,26 @@ import seedrandom from 'seedrandom';
 import {
   AlertEvent,
   EndpointEvent,
+  EndpointStatus,
   Host,
   HostMetadata,
-  OSFields,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
+  OSFields,
   PolicyData,
-  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 import { parentEntityId } from './models/event';
+import {
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+} from '../../../ingest_manager/common/types/rest_spec';
+import {
+  AgentPolicyStatus,
+  EsAssetReference,
+  InstallationStatus,
+  KibanaAssetReference,
+} from '../../../ingest_manager/common/types/models';
 
 export type Event = AlertEvent | EndpointEvent;
 /**
@@ -292,6 +302,12 @@ export interface TreeOptions {
   generations?: number;
   children?: number;
   relatedEvents?: RelatedEventInfo[] | number;
+  /**
+   * If true then the related events will be created with timestamps that preserve the
+   * generation order, meaning the first event will always have a timestamp number less
+   * than the next related event
+   */
+  relatedEventsOrdered?: boolean;
   relatedAlerts?: number;
   percentWithRelated?: number;
   percentTerminated?: number;
@@ -312,6 +328,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     generations: options?.generations ?? 2,
     children: options?.children ?? 2,
     relatedEvents: options?.relatedEvents ?? 5,
+    relatedEventsOrdered: options?.relatedEventsOrdered ?? false,
     relatedAlerts: options?.relatedAlerts ?? 3,
     percentWithRelated: options?.percentWithRelated ?? 30,
     percentTerminated: options?.percentTerminated ?? 100,
@@ -323,6 +340,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
+  sequence: number = 0;
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
@@ -430,6 +448,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
+        sequence: this.sequence++,
       },
       file: {
         owner: 'SYSTEM',
@@ -576,6 +595,7 @@ export class EndpointDocGenerator {
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
+        sequence: this.sequence++,
       },
       host: this.commonInfo.host,
       process: {
@@ -796,7 +816,8 @@ export class EndpointDocGenerator {
       for (const relatedEvent of this.relatedEventsGenerator(
         node,
         opts.relatedEvents,
-        secBeforeEvent
+        secBeforeEvent,
+        opts.relatedEventsOrdered
       )) {
         eventList.push(relatedEvent);
       }
@@ -864,6 +885,8 @@ export class EndpointDocGenerator {
         addRelatedAlerts(ancestor, numAlertsPerNode, processDuration, events);
       }
     }
+    timestamp = timestamp + 1000;
+
     events.push(
       this.generateAlert(
         timestamp,
@@ -948,7 +971,12 @@ export class EndpointDocGenerator {
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator(child, opts.relatedEvents, processDuration);
+        yield* this.relatedEventsGenerator(
+          child,
+          opts.relatedEvents,
+          processDuration,
+          opts.relatedEventsOrdered
+        );
         yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
       }
     }
@@ -960,13 +988,17 @@ export class EndpointDocGenerator {
    * @param relatedEvents - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
    *  or a number which defines the number of related events and will default to random categories
    * @param processDuration - maximum number of seconds after process event that related event timestamp can be
+   * @param ordered - if true the events will have an increasing timestamp, otherwise their timestamp will be random but
+   *  guaranteed to be greater than or equal to the originating event
    */
   public *relatedEventsGenerator(
     node: Event,
     relatedEvents: RelatedEventInfo[] | number = 10,
-    processDuration: number = 6 * 3600
+    processDuration: number = 6 * 3600,
+    ordered: boolean = false
   ) {
     let relatedEventsInfo: RelatedEventInfo[];
+    let ts = node['@timestamp'] + 1;
     if (typeof relatedEvents === 'number') {
       relatedEventsInfo = [{ category: RelatedEventCategory.Random, count: relatedEvents }];
     } else {
@@ -982,7 +1014,12 @@ export class EndpointDocGenerator {
           eventInfo = OTHER_EVENT_CATEGORIES[event.category];
         }
 
-        const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        if (ordered) {
+          ts += this.randomN(processDuration) * 1000;
+        } else {
+          ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        }
+
         yield this.generateEvent({
           timestamp: ts,
           entityID: node.process.entity_id,
@@ -1018,9 +1055,9 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generates an Ingest `package config` that includes the Endpoint Policy data
+   * Generates an Ingest `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackageConfig(): PolicyData {
+  public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
@@ -1030,7 +1067,7 @@ export class EndpointDocGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      config_id: this.seededUUIDv4(),
+      policy_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
       inputs: [
@@ -1059,6 +1096,100 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
+    };
+  }
+
+  /**
+   * Generate an Agent Policy (ingest)
+   */
+  public generateAgentPolicy(): GetAgentPoliciesResponseItem {
+    return {
+      id: this.seededUUIDv4(),
+      name: 'Agent Policy',
+      status: AgentPolicyStatus.Active,
+      description: 'Some description',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      revision: 2,
+      updated_at: '2020-07-22T16:36:49.196Z',
+      updated_by: 'elastic',
+      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
+      agents: 0,
+    };
+  }
+
+  /**
+   * Generate an EPM Package for Endpoint
+   */
+  public generateEpmPackage(): GetPackagesResponse['response'][0] {
+    return {
+      name: 'endpoint',
+      title: 'Elastic Endpoint',
+      version: '0.5.0',
+      description: 'This is the Elastic Endpoint package.',
+      type: 'solution',
+      download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
+      path: '/package/endpoint/0.5.0',
+      icons: [
+        {
+          src: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          size: '16x16',
+          type: 'image/svg+xml',
+        },
+      ],
+      status: 'installed' as InstallationStatus,
+      savedObject: {
+        type: 'epm-packages',
+        id: 'endpoint',
+        attributes: {
+          installed_kibana: [
+            { id: '826759f0-7074-11ea-9bc8-6b38f4d29a16', type: 'dashboard' },
+            { id: '1cfceda0-728b-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '1e525190-7074-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '55387750-729c-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '92b1edc0-706a-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: 'a3a3bd10-706b-11ea-9bc8-6b38f4d29a16', type: 'map' },
+          ] as KibanaAssetReference[],
+          installed_es: [
+            { id: 'logs-endpoint.alerts', type: 'index_template' },
+            { id: 'events-endpoint', type: 'index_template' },
+            { id: 'logs-endpoint.events.file', type: 'index_template' },
+            { id: 'logs-endpoint.events.library', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata_mirror', type: 'index_template' },
+            { id: 'logs-endpoint.events.network', type: 'index_template' },
+            { id: 'metrics-endpoint.policy', type: 'index_template' },
+            { id: 'logs-endpoint.events.process', type: 'index_template' },
+            { id: 'logs-endpoint.events.registry', type: 'index_template' },
+            { id: 'logs-endpoint.events.security', type: 'index_template' },
+            { id: 'metrics-endpoint.telemetry', type: 'index_template' },
+          ] as EsAssetReference[],
+          es_index_patterns: {
+            alerts: 'logs-endpoint.alerts-*',
+            events: 'events-endpoint-*',
+            file: 'logs-endpoint.events.file-*',
+            library: 'logs-endpoint.events.library-*',
+            metadata: 'metrics-endpoint.metadata-*',
+            metadata_mirror: 'metrics-endpoint.metadata_mirror-*',
+            network: 'logs-endpoint.events.network-*',
+            policy: 'metrics-endpoint.policy-*',
+            process: 'logs-endpoint.events.process-*',
+            registry: 'logs-endpoint.events.registry-*',
+            security: 'logs-endpoint.events.security-*',
+            telemetry: 'metrics-endpoint.telemetry-*',
+          },
+          name: 'endpoint',
+          version: '0.5.0',
+          internal: false,
+          removable: false,
+          install_version: '0.5.0',
+          install_status: 'installed',
+          install_started_at: '2020-06-24T14:41:23.098Z',
+        },
+        references: [],
+        updated_at: '2020-06-24T14:41:23.098Z',
+        version: 'Wzc0LDFd',
+      },
     };
   }
 

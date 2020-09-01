@@ -15,10 +15,9 @@ import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 import { ObservabilityPluginSetup } from '../../../observability/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FetchOptions } from '../../public/services/rest/callApi';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
+import { FetchOptions } from '../../common/fetch_options';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -45,7 +44,12 @@ export interface Route<
   method?: TMethod;
   params?: TParams;
   options?: {
-    tags: Array<'access:apm' | 'access:apm_write'>;
+    tags: Array<
+      | 'access:apm'
+      | 'access:apm_write'
+      | 'access:ml:canGetJobs'
+      | 'access:ml:canCreateJob'
+    >;
   };
   handler: (kibanaContext: {
     context: APMRequestHandlerContext<DecodeParams<TParams>>;

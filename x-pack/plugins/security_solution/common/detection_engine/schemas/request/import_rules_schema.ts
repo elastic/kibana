@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   description,
   anomaly_threshold,
@@ -53,7 +52,6 @@ import {
   RiskScoreMapping,
   SeverityMapping,
 } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 import {
   DefaultStringArray,

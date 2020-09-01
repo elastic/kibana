@@ -10,8 +10,8 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getServicesProjection } from '../../../common/projections/services';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getServicesProjection } from '../../projections/services';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
@@ -118,9 +118,9 @@ async function getServicesData(options: IEnvOptions) {
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
@@ -142,11 +142,14 @@ export async function getServiceMap(options: IEnvOptions) {
   const { logger } = options;
   const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
     options
+
+    // always catch error to avoid breaking service maps if there is a problem with ML
   ).catch((error) => {
     logger.warn(`Unable to retrieve anomalies for service maps.`);
     logger.error(error);
     return DEFAULT_ANOMALIES;
   });
+
   const [connectionData, servicesData, anomalies] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),

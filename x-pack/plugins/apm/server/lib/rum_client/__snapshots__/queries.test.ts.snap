@@ -2,6 +2,11 @@
 
 exports[`rum client dashboard queries fetches client metrics 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "backEnd": Object {
@@ -36,11 +41,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "page-load",
             },
           },
@@ -59,12 +59,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`rum client dashboard queries fetches page load distribution 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "durPercentiles": Object {
@@ -103,11 +107,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "page-load",
             },
           },
@@ -126,12 +125,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`rum client dashboard queries fetches page view trends 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
@@ -156,11 +159,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "page-load",
             },
           },
@@ -179,12 +177,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`rum client dashboard queries fetches rum services 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "services": Object {
@@ -208,11 +210,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "page-load",
             },
           },
@@ -231,6 +228,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

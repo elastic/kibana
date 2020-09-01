@@ -102,7 +102,7 @@ export const useTimelineStatus = ({
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   const installPrepackagedTimelines = useCallback(async () => {
-    if (templateTimelineType === TemplateTimelineType.elastic) {
+    if (templateTimelineType !== TemplateTimelineType.custom) {
       await installPrepackedTimelines();
     }
   }, [templateTimelineType]);

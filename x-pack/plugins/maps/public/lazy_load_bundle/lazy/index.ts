@@ -21,3 +21,4 @@ export * from '../../routing/maps_router';
 export * from '../../classes/layers/solution_layers/security';
 export { registerLayerWizard } from '../../classes/layers/layer_wizard_registry';
 export { registerSource } from '../../classes/sources/source_registry';
+export { getIndexPatternsFromIds } from '../../index_pattern_util';

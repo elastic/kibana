@@ -32,19 +32,19 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   const macOsLinuxTarCommand = `./elastic-agent enroll ${enrollArgs}
 ./elastic-agent run`;
 
-  const linuxDebRpmCommand = `./elastic-agent enroll ${enrollArgs}
+  const linuxDebRpmCommand = `elastic-agent enroll ${enrollArgs}
 systemctl enable elastic-agent
 systemctl start elastic-agent`;
 
-  const windowsCommand = `./elastic-agent enroll ${enrollArgs}
-./install-service-elastic-agent.ps1`;
+  const windowsCommand = `.\\elastic-agent enroll ${enrollArgs}
+.\\install-service-elastic-agent.ps1`;
 
   return (
     <>
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine."
+          defaultMessage="From the agent directory, run these commands to enroll and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -83,19 +83,19 @@ systemctl start elastic-agent`;
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <CommandCode>{macOsLinuxTarCommand}</CommandCode>
+      </EuiCodeBlock>
+      <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
-          defaultMessage="You will need to run {command} if the agent’s system reboots."
+          defaultMessage="The {command} command runs the agent in the foreground. If the agent's host reboots, you'll need to run the command again."
           values={{
             command: <EuiCode>./elastic-agent run</EuiCode>,
           }}
         />
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <CommandCode>{macOsLinuxTarCommand}</CommandCode>
-      </EuiCodeBlock>
     </>
   );
 };

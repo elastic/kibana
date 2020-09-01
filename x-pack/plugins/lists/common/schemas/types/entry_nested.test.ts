@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryNestedMock } from './entry_nested.mock';
 import { EntryNested, entriesNested } from './entry_nested';
@@ -16,7 +16,7 @@ import { getEntryExistsMock } from './entry_exists.mock';
 
 describe('entriesNested', () => {
   test('it should validate a nested entry', () => {
-    const payload = { ...getEntryNestedMock() };
+    const payload = getEntryNestedMock();
     const decoded = entriesNested.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -24,7 +24,7 @@ describe('entriesNested', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate when "type" is not "nested"', () => {
+  test('it should FAIL validation when "type" is not "nested"', () => {
     const payload: Omit<EntryNested, 'type'> & { type: 'match' } = {
       ...getEntryNestedMock(),
       type: 'match',
@@ -36,7 +36,7 @@ describe('entriesNested', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate when "field" is empty string', () => {
+  test('it should FAIL validation when "field" is empty string', () => {
     const payload: Omit<EntryNested, 'field'> & {
       field: string;
     } = { ...getEntryNestedMock(), field: '' };
@@ -47,7 +47,7 @@ describe('entriesNested', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate when "field" is not a string', () => {
+  test('it should FAIL validation when "field" is not a string', () => {
     const payload: Omit<EntryNested, 'field'> & {
       field: number;
     } = { ...getEntryNestedMock(), field: 1 };
@@ -58,7 +58,7 @@ describe('entriesNested', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate when "entries" is not a an array', () => {
+  test('it should FAIL validation when "entries" is not a an array', () => {
     const payload: Omit<EntryNested, 'entries'> & {
       entries: string;
     } = { ...getEntryNestedMock(), entries: 'im a string' };
@@ -72,7 +72,7 @@ describe('entriesNested', () => {
   });
 
   test('it should validate when "entries" contains an entry item that is type "match"', () => {
-    const payload = { ...getEntryNestedMock(), entries: [{ ...getEntryMatchAnyMock() }] };
+    const payload = { ...getEntryNestedMock(), entries: [getEntryMatchAnyMock()] };
     const decoded = entriesNested.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -92,7 +92,7 @@ describe('entriesNested', () => {
   });
 
   test('it should validate when "entries" contains an entry item that is type "exists"', () => {
-    const payload = { ...getEntryNestedMock(), entries: [{ ...getEntryExistsMock() }] };
+    const payload = { ...getEntryNestedMock(), entries: [getEntryExistsMock()] };
     const decoded = entriesNested.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -113,12 +113,12 @@ describe('entriesNested', () => {
   test('it should strip out extra keys', () => {
     const payload: EntryNested & {
       extraKey?: string;
-    } = { ...getEntryNestedMock() };
+    } = getEntryNestedMock();
     payload.extraKey = 'some extra key';
     const decoded = entriesNested.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({ ...getEntryNestedMock() });
+    expect(message.schema).toEqual(getEntryNestedMock());
   });
 });

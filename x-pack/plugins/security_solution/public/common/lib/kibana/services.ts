@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CoreStart } from '../../../../../../../src/core/public';
 
 type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings'>;

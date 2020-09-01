@@ -6,7 +6,7 @@
 
 import { LegacyAPICaller, CoreSetup } from '../../../../../src/core/server';
 import { CollectorDependencies } from './types';
-import { DetectionsUsage, fetchDetectionsUsage } from './detections';
+import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
@@ -76,9 +76,14 @@ export const registerCollector: RegisterCollector = ({
     isReady: () => kibanaIndex.length > 0,
     fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
+      const [detections, endpoints] = await Promise.allSettled([
+        fetchDetectionsUsage(kibanaIndex, callCluster, ml),
+        getEndpointTelemetryFromFleet(savedObjectsClient),
+      ]);
+
       return {
-        detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
-        endpoints: await getEndpointTelemetryFromFleet(savedObjectsClient),
+        detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
+        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },
   });

@@ -43,6 +43,8 @@ export interface BundleSpec {
   readonly sourceRoot: string;
   /** Absolute path to the directory where output should be written */
   readonly outputDir: string;
+  /** Banner that should be written to all bundle JS files */
+  readonly banner?: string;
   /** Absolute path to a kibana.json manifest file, if omitted we assume there are not dependenices */
   readonly manifestPath?: string;
 }
@@ -64,6 +66,8 @@ export class Bundle {
   public readonly sourceRoot: BundleSpec['sourceRoot'];
   /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
+  /** Banner that should be written to all bundle JS files */
+  public readonly banner: BundleSpec['banner'];
   /**
    * Absolute path to a manifest file with "requiredBundles" which will be
    * used to allow bundleRefs from this bundle to the exports of another bundle.
@@ -81,6 +85,7 @@ export class Bundle {
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
     this.manifestPath = spec.manifestPath;
+    this.banner = spec.banner;
 
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
@@ -112,6 +117,7 @@ export class Bundle {
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
       manifestPath: this.manifestPath,
+      banner: this.banner,
     };
   }
 
@@ -220,6 +226,13 @@ export function parseBundles(json: string) {
           }
         }
 
+        const { banner } = spec;
+        if (banner !== undefined) {
+          if (!(typeof banner === 'string')) {
+            throw new Error('`bundles[]` must have a string `banner` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
@@ -227,6 +240,7 @@ export function parseBundles(json: string) {
           contextDir,
           sourceRoot,
           outputDir,
+          banner,
           manifestPath,
         });
       }

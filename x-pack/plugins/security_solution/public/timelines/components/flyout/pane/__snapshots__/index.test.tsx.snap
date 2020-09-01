@@ -2,7 +2,6 @@
 
 exports[`Pane renders correctly against snapshot 1`] = `
 <Pane
-  flyoutHeight={980}
   onClose={[MockFunction]}
   timelineId="test"
   width={640}

@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { DefaultNamespace } from './default_namespace';
 
@@ -48,7 +48,7 @@ describe('default_namespace', () => {
     expect(message.schema).toEqual('single');
   });
 
-  test('it should NOT validate if not "single" or "agnostic"', () => {
+  test('it should FAIL validation if not "single" or "agnostic"', () => {
     const payload = 'something else';
     const decoded = DefaultNamespace.decode(payload);
     const message = pipe(decoded, foldLeftRight);

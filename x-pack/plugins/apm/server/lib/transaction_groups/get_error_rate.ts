@@ -5,7 +5,6 @@
  */
 import { mean } from 'lodash';
 import {
-  PROCESSOR_EVENT,
   HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -13,12 +12,12 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getErrorRate({
   serviceName,
@@ -31,7 +30,7 @@ export async function getErrorRate({
   transactionName?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -42,7 +41,6 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
     ...transactionNamefilter,
@@ -51,13 +49,20 @@ export async function getErrorRate({
   ];
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },
       aggs: {
         total_transactions: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: getBucketSize(start, end, 'auto').intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
           aggs: {
             erroneous_transactions: {
               filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
@@ -68,16 +73,20 @@ export async function getErrorRate({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const noHits = resp.hits.total.value === 0;
 
   const erroneousTransactionsRate =
     resp.aggregations?.total_transactions.buckets.map(
-      ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
+      ({
+        key,
+        doc_count: totalTransactions,
+        erroneous_transactions: erroneousTransactions,
+      }) => {
         const errornousTransactionsCount =
-          // @ts-ignore
-          erroneous_transactions.doc_count;
+          // @ts-expect-error
+          erroneousTransactions.doc_count;
         return {
           x: key,
           y: errornousTransactionsCount / totalTransactions,

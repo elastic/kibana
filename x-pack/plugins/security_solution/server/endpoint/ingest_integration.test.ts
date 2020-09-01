@@ -5,13 +5,13 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackageConfigMock } from '../../../ingest_manager/common/mocks';
+import { createNewPackagePolicyMock } from '../../../ingest_manager/common/mocks';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import {
   getManifestManagerMock,
   ManifestManagerMockType,
 } from './services/artifacts/manifest_manager/manifest_manager.mock';
-import { getPackageConfigCreateCallback } from './ingest_integration';
+import { getPackagePolicyCreateCallback } from './ingest_integration';
 
 describe('ingest_integration tests ', () => {
   describe('ingest_integration sanity checks', () => {
@@ -21,8 +21,8 @@ describe('ingest_integration tests ', () => {
         mockType: ManifestManagerMockType.InitialSystemState,
       });
 
-      const callback = getPackageConfigCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackageConfigMock(); // policy config without manifest
+      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig); // policy config WITH manifest
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
@@ -61,8 +61,8 @@ describe('ingest_integration tests ', () => {
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error('error updating')]);
       const lastComputed = await manifestManager.getLastComputedManifest();
 
-      const callback = getPackageConfigCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackageConfigMock();
+      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
@@ -81,8 +81,8 @@ describe('ingest_integration tests ', () => {
       expect(lastComputed).toEqual(null);
 
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error('abcd'));
-      const callback = getPackageConfigCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackageConfigMock();
+      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
@@ -95,8 +95,8 @@ describe('ingest_integration tests ', () => {
       const lastComputed = await manifestManager.getLastComputedManifest();
 
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed); // no diffs
-      const callback = getPackageConfigCreateCallback(logger, manifestManager);
-      const policyConfig = createNewPackageConfigMock();
+      const callback = getPackagePolicyCreateCallback(logger, manifestManager);
+      const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');

@@ -95,6 +95,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         mse,
@@ -129,6 +130,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         mse,

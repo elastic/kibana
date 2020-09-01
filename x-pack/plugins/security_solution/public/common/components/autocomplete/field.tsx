@@ -36,11 +36,11 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   onChange,
 }): JSX.Element => {
   const [touched, setIsTouched] = useState(false);
-  const getLabel = useCallback((field): string => field.name, []);
+  const getLabel = useCallback(({ name }): string => name, []);
   const optionsMemo = useMemo((): IFieldType[] => {
     if (indexPattern != null) {
       if (fieldTypeFilter.length > 0) {
-        return indexPattern.fields.filter((f) => fieldTypeFilter.includes(f.type));
+        return indexPattern.fields.filter(({ type }) => fieldTypeFilter.includes(type));
       } else {
         return indexPattern.fields;
       }
@@ -68,6 +68,10 @@ export const FieldComponent: React.FC<OperatorProps> = ({
     onChange(newValues);
   };
 
+  const handleTouch = useCallback((): void => {
+    setIsTouched(true);
+  }, [setIsTouched]);
+
   return (
     <EuiComboBox
       placeholder={placeholder}
@@ -78,7 +82,7 @@ export const FieldComponent: React.FC<OperatorProps> = ({
       isDisabled={isDisabled}
       isClearable={isClearable}
       isInvalid={isRequired ? touched && selectedField == null : false}
-      onFocus={() => setIsTouched(true)}
+      onFocus={handleTouch}
       singleSelection={{ asPlainText: true }}
       data-test-subj="fieldAutocompleteComboBox"
       style={{ width: `${fieldInputWidth}px` }}

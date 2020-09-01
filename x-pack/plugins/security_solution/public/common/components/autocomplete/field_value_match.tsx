@@ -72,14 +72,13 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   };
 
   const onSearchChange = (searchVal: string): void => {
-    const signal = new AbortController().signal;
-
-    updateSuggestions({
-      fieldSelected: selectedField,
-      value: `${searchVal}`,
-      patterns: indexPattern,
-      signal,
-    });
+    if (updateSuggestions != null) {
+      updateSuggestions({
+        fieldSelected: selectedField,
+        value: searchVal,
+        patterns: indexPattern,
+      });
+    }
   };
 
   const isValid = useMemo(

@@ -110,7 +110,7 @@ const observeCompiler = (
 
       const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
-      let normalModuleCount = 0;
+      let moduleCount = 0;
       let workUnits = stats.compilation.fileDependencies.size;
 
       if (bundle.manifestPath) {
@@ -119,7 +119,7 @@ const observeCompiler = (
 
       for (const module of stats.compilation.modules) {
         if (isNormalModule(module)) {
-          normalModuleCount += 1;
+          moduleCount += 1;
           const path = getModulePath(module);
           const parsedPath = parseFilePath(path);
 
@@ -154,7 +154,12 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
+        if (isConcatenatedModule(module)) {
+          moduleCount += module.modules.length;
+          continue;
+        }
+
+        if (isExternalModule(module) || isIgnoredModule(module)) {
           continue;
         }
 
@@ -180,13 +185,13 @@ const observeCompiler = (
         bundleRefExportIds,
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount: normalModuleCount,
+        moduleCount,
         workUnits,
         files,
       });
 
       return compilerMsgs.compilerSuccess({
-        moduleCount: normalModuleCount,
+        moduleCount,
       });
     })
   );

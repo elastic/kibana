@@ -19,11 +19,11 @@ const breadcrumbs = [
   },
 ];
 
-export const accessDeniedRoute: MlRoute = {
+export const accessDeniedRouteFactory = (): MlRoute => ({
   path: '/access-denied',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
-};
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {});

@@ -9,7 +9,7 @@ import { getData } from '../../kibana_services';
 // @ts-ignore
 import { kbnUrlStateStorage } from '../maps_router';
 
-export function useGlobalStateSyncing() {
+export function startGlobalStateSyncing() {
   const { stop } = syncQueryStateWithUrl(getData().query, kbnUrlStateStorage);
   return stop;
 }

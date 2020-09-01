@@ -15,7 +15,7 @@ export const ComponentStrings = {
       }),
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
   },
   AdvancedFilter: {
@@ -913,6 +913,13 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.toolbar.errorMessage', {
+        defaultMessage: 'TOOLBAR ERROR: {message}',
+        values: {
+          message,
+        },
+      }),
   },
   ToolbarTray: {
     getCloseTrayAriaLabel: () =>
@@ -1301,7 +1308,7 @@ export const ComponentStrings = {
       }),
     getEmbedObjectMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
     getFilterMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {

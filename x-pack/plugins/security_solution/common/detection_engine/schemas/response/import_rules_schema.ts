@@ -6,10 +6,8 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { success, success_count } from '../common/schemas';
 import { errorSchema } from './error_schema';
-/* eslint-enable @typescript-eslint/camelcase */
 
 export const importRulesSchema = t.exact(
   t.type({

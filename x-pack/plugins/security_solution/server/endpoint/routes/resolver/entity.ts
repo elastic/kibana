@@ -87,6 +87,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
     const responseBody: ResolverEntityIndex = [];
     for (const {
       _source: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         process: { entity_id },
       },
     } of queryResponse.hits.hits) {

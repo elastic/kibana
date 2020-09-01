@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
@@ -57,12 +57,12 @@ export async function getPageLoadDistribution({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const {
     aggregations,
     hits: { total },
-  } = await client.search(params);
+  } = await apmEventClient.search(params);
 
   if (total.value === 0) {
     return null;
@@ -130,9 +130,9 @@ const getPercentilesDistribution = async (
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
 
   const pageDist = aggregations?.loadDistribution.values ?? [];
 

@@ -226,6 +226,7 @@ export const filterExceptionItems = (
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchema => {
+  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     created_at,
     created_by,
@@ -233,6 +234,7 @@ export const formatExceptionItemForUpdate = (
     tie_breaker_id,
     updated_at,
     updated_by,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...fieldsToUpdate
   } = exceptionItem;
   return {
@@ -336,6 +338,36 @@ export const enrichExceptionItemsWithOS = (
 };
 
 /**
+ * Returns given exceptionItems with all hash-related entries lowercased
+ */
+export const lowercaseHashValues = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item) => {
+    const newEntries = item.entries.map((itemEntry) => {
+      if (itemEntry.field.includes('.hash')) {
+        if (itemEntry.type === 'match') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.toLowerCase(),
+          };
+        } else if (itemEntry.type === 'match_any') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.map((val) => val.toLowerCase()),
+          };
+        }
+      }
+      return itemEntry;
+    });
+    return {
+      ...item,
+      entries: newEntries,
+    };
+  });
+};
+
+/**
  * Returns the value for the given fieldname within TimelineNonEcsData if it exists
  */
 export const getMappedNonEcsValue = ({
@@ -413,7 +445,7 @@ export const defaultEndpointExceptionItems = (
     data: alertData,
     fieldName: 'file.Ext.code_signature.trusted',
   });
-  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' });
+  const [sha256Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha256' });
   const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
   const namespaceType = 'agnostic';
 
@@ -446,10 +478,10 @@ export const defaultEndpointExceptionItems = (
           value: filePath ?? '',
         },
         {
-          field: 'file.hash.sha1',
+          field: 'file.hash.sha256',
           operator: 'included',
           type: 'match',
-          value: sha1Hash ?? '',
+          value: sha256Hash ?? '',
         },
         {
           field: 'event.code',

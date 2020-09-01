@@ -191,7 +191,7 @@ describe('useCamera on an unpainted element', () => {
         }
         const processes: ResolverEvent[] = [
           ...selectors.layout(store.getState()).processNodePositions.keys(),
-        ];
+        ] as ResolverEvent[];
         process = processes[processes.length - 1];
         if (!process) {
           throw new Error('missing the process to bring into view');

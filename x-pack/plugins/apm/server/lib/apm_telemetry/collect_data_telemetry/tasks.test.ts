@@ -10,10 +10,12 @@ import { tasks } from './tasks';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.errorIndices': 'apm-8.0.0-error',
     'apm_oss.metricsIndices': 'apm-8.0.0-metric',
     'apm_oss.spanIndices': 'apm-8.0.0-span',
     'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
+    /* eslint-enable @typescript-eslint/naming-convention */
   } as ApmIndicesConfig;
 
   describe('aggregated_transactions', () => {

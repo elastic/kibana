@@ -6,6 +6,7 @@
 
 import { Moment } from 'moment';
 
+import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
 
@@ -111,7 +112,7 @@ export declare const loadAnnotationsTableData: (
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
-) => Promise<any[]>;
+) => Promise<AnnotationsTable>;
 
 export declare interface AnomaliesTableData {
   anomalies: any[];

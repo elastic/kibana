@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 export interface PageProps {
   nextStepPath: string;
@@ -25,11 +25,14 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
   const { uiSettings, savedObjects } = useMlKibana().services;
+  const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
-    window.location.href = `${nextStepPath}?${
-      type === 'index-pattern' ? 'index' : 'savedSearchId'
-    }=${encodeURIComponent(id)}`;
+    navigateToPath(
+      `${nextStepPath}?${type === 'index-pattern' ? 'index' : 'savedSearchId'}=${encodeURIComponent(
+        id
+      )}`
+    );
   };
 
   return (
