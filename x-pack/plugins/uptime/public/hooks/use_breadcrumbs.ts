@@ -11,9 +11,9 @@ import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '.';
+import { PLUGIN } from '../../common/constants/plugin';
 
-export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
-  let href = '#/';
+export const makeBaseBreadcrumb = (href: string, params?: UptimeUrlParams): ChromeBreadcrumb => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
     // We don't want to encode this values because they are often set to Date.now(), the relative
@@ -32,10 +32,12 @@ export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb =
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useUrlParams()[0]();
-  const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs;
+  const kibana = useKibana();
+  const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
+  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID);
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([makeBaseBreadcrumb(params)].concat(extraCrumbs));
+      setBreadcrumbs([makeBaseBreadcrumb(appPath, params)].concat(extraCrumbs));
     }
-  }, [extraCrumbs, params, setBreadcrumbs]);
+  }, [appPath, extraCrumbs, params, setBreadcrumbs]);
 };
