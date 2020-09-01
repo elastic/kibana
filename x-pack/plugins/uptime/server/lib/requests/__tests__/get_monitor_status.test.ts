@@ -46,37 +46,37 @@ describe('getMonitorStatus', () => {
       [],
       genBucketItem
     );
-    const exampleFilter = `{
-      "bool": {
-        "should": [
+    const exampleFilter = {
+      bool: {
+        should: [
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "apm-dev"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'apm-dev',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
+              minimum_should_match: 1,
+            },
           },
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "auto-http-0X8D6082B94BBE3B8A"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'auto-http-0X8D6082B94BBE3B8A',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
-          }
+              minimum_should_match: 1,
+            },
+          },
         ],
-        "minimum_should_match": 1
-      }
-    }`;
+        minimum_should_match: 1,
+      },
+    };
     await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -350,18 +350,11 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                  },
-                },
-              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitorId": Object {
+                    "monitor_id": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -456,7 +449,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-7*",
       }
     `);
   });
@@ -495,18 +488,11 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                  },
-                },
-              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitorId": Object {
+                    "monitor_id": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -561,7 +547,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-7*",
       }
     `);
   });
