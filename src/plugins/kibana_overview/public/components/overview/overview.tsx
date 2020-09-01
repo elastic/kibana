@@ -95,6 +95,19 @@ interface Props {
   newsfeed$: Observable<FetchResult | null | void>;
 }
 
+const addSpacersBetweenElementsReducer = (
+  acc: JSX.Element[],
+  element: JSX.Element,
+  index: number,
+  elements: JSX.Element[]
+) => {
+  acc.push(element);
+  if (index < elements.length - 1) {
+    acc.push(<EuiSpacer key={`homeSolutionsPanel__UseCaseSpacer${index}`} size="m" />);
+  }
+  return acc;
+};
+
 export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
@@ -199,7 +212,6 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
       <EuiText size="xs">
         <p>{description}</p>
       </EuiText>
-      <EuiSpacer size="s" />
     </div>
   );
 
@@ -258,7 +270,12 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                   />
                 </h2>
               </EuiTitle>
-              {newsFetchResult ? newsFetchResult.feedItems.slice(0, 3).map(renderFeedItem) : null}
+              {newsFetchResult
+                ? newsFetchResult.feedItems
+                    .slice(0, 3)
+                    .map(renderFeedItem)
+                    .reduce(addSpacersBetweenElementsReducer, [])
+                : null}
             </section>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
