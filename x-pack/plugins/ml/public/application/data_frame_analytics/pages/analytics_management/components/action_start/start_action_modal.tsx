@@ -40,7 +40,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCl
             <p>
               {i18n.translate('xpack.ml.dataframe.analyticsList.startModalBody', {
                 defaultMessage:
-                  'A data frame analytics job increases search and indexing load in your cluster. If excessive load is experienced, stop the job.',
+                  'A data frame analytics job increases search and indexing load in your cluster. If excessive load occurs, stop the job.',
               })}
             </p>
           </EuiConfirmModal>
