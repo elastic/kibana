@@ -8264,7 +8264,6 @@
     "xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title": "インデックステンプレートにポリシー「{name}」 を追加",
     "xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText": "インデックステンプレートにポリシーを追加",
     "xpack.indexLifecycleMgmt.policyTable.captionText": "以下は {total} 列中 {count, plural, one {# 列} other {# 列}} を含むインデックスライフサイクルポリシー表です。",
-    "xpack.indexLifecycleMgmt.policyTable.deletedPoliciesText": "{numSelected} 件の{numSelected, plural, one {ポリシー} other {ポリシー}}が削除されました",
     "xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip": "インデックスが使用中のポリシーは削除できません",
     "xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText": "ポリシーを削除",
     "xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel": "ポリシーを作成",
