@@ -34,8 +34,8 @@ export class XpackLegacyPlugin implements Plugin {
           docLinksKey: 'kibanaGeneralSettings',
         },
         type: 'string',
-        value: null,
-        schema: schema.string(),
+        value: '',
+        schema: schema.maybe(schema.string()),
       },
     });
   }
