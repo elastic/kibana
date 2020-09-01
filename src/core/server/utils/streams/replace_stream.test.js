@@ -23,7 +23,7 @@ import {
   createPromiseFromStreams,
   createListStream,
   createMapStream,
-} from './';
+} from './index';
 
 async function concatToString(streams) {
   return await createPromiseFromStreams([

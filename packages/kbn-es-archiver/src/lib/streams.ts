@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../src/legacy/utils/streams';
+export * from '../../../../src/core/server/utils/streams';

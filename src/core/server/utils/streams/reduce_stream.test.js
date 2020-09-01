@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createReduceStream, createPromiseFromStreams, createListStream } from './';
+import { createReduceStream, createPromiseFromStreams, createListStream } from './index';
 
 const promiseFromEvent = (name, emitter) =>
   new Promise((resolve) => emitter.on(name, () => resolve(name)));

@@ -22,7 +22,7 @@ import {
   createFilterStream,
   createListStream,
   createPromiseFromStreams,
-} from './';
+} from './index';
 
 describe('createFilterStream()', () => {
   test('calls the function with each item in the source stream', async () => {

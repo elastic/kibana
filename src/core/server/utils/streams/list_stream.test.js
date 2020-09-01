@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createListStream } from './';
+import { createListStream } from './index';
 
 describe('listStream', () => {
   test('provides the values in the initial list', async () => {
