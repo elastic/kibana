@@ -14,8 +14,7 @@ import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 export function getMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  logger: Logger
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
   const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
 

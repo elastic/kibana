@@ -12,14 +12,13 @@ import { Logger } from '../../../../../src/core/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  logger: Logger
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
-    migrations: getMigrations(encryptedSavedObjects, logger),
+    migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
   });
 
