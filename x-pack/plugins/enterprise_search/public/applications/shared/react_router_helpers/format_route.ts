@@ -16,6 +16,8 @@
  * formatRoute(ROUTE_PATH, { id: 2 }) // '/foo/bar/2/status'
  */
 
+import _isString from 'lodash/isString';
+
 interface ParamsObject {
   [key: string]: string | number;
 }
@@ -29,16 +31,13 @@ const reTokens = /<(.*?)>/g;
 export const formatRoute = (routePath: string, params: ParamsObject) => {
   const tokens = {} as { [key: string]: string };
 
-  for (const paramName in params) {
-    if (params.hasOwnProperty(paramName)) {
-      const paramValue = params[paramName].toString();
-      const paramRegex = new RegExp('(/|\\(|\\)|^):' + paramName + '(/|\\)|\\(|$)');
-      routePath = routePath.replace(paramRegex, (_, g1, g2) => {
-        tokens[paramName] = encodeURIComponent(paramValue);
-        return `${g1}<${paramName}>${g2}`;
-      });
-    }
-  }
+  Object.entries(params).map(([paramName, paramValue]) => {
+    const paramRegex = new RegExp('(/|\\(|\\)|^):' + paramName + '(/|\\)|\\(|$)');
+    routePath = routePath.replace(paramRegex, (_, g1, g2) => {
+      tokens[paramName] = encodeURIComponent(paramValue);
+      return `${g1}<${paramName}>${g2}`;
+    });
+  });
 
   return (
     routePath
