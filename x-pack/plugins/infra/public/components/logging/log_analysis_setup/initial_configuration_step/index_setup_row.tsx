@@ -6,8 +6,8 @@
 
 import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
-import { DatasetFilter } from '../../../../../common/log_analysis';
+import React, { useCallback, useMemo } from 'react';
+import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
 import { AvailableIndex, ValidationUIError } from './validation';
 
@@ -16,7 +16,14 @@ export const IndexSetupRow: React.FC<{
   isDisabled: boolean;
   onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
   onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
-}> = ({ index, isDisabled, onChangeDatasetFilter, onChangeIsSelected }) => {
+  previousQualityWarnings: QualityWarning[];
+}> = ({
+  index,
+  isDisabled,
+  onChangeDatasetFilter,
+  onChangeIsSelected,
+  previousQualityWarnings,
+}) => {
   const changeIsSelected = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeIsSelected(index.name, event.currentTarget.checked);
@@ -29,6 +36,21 @@ export const IndexSetupRow: React.FC<{
     [index.name, onChangeDatasetFilter]
   );
 
+  const datasets = useMemo(
+    () =>
+      index.validity === 'valid'
+        ? index.availableDatasets.map((availableDataset) => ({
+            dataset: availableDataset,
+            warnings: previousQualityWarnings.filter(({ dataset }) => dataset === availableDataset),
+          }))
+        : [],
+    [index, previousQualityWarnings]
+  );
+
+  const hasWarnings = useMemo(() => datasets.some(({ warnings }) => warnings.length > 0), [
+    datasets,
+  ]);
+
   const isSelected = index.validity === 'valid' && index.isSelected;
 
   return (
@@ -37,7 +59,12 @@ export const IndexSetupRow: React.FC<{
         <EuiCheckbox
           key={index.name}
           id={index.name}
-          label={<EuiCode>{index.name}</EuiCode>}
+          label={
+            <>
+              <EuiCode>{index.name}</EuiCode>{' '}
+              {hasWarnings ? <EuiIcon type="alert" color="warning" /> : null}
+            </>
+          }
           onChange={changeIsSelected}
           checked={isSelected}
           disabled={isDisabled || index.validity === 'invalid'}
@@ -50,7 +77,7 @@ export const IndexSetupRow: React.FC<{
           </EuiToolTip>
         ) : index.validity === 'valid' ? (
           <IndexSetupDatasetFilter
-            availableDatasets={index.availableDatasets}
+            availableDatasets={datasets}
             datasetFilter={index.datasetFilter}
             isDisabled={!isSelected || isDisabled}
             onChangeDatasetFilter={changeDatasetFilter}

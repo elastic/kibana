@@ -93,7 +93,7 @@ const categoryQualityWarningCalloutTitle = i18n.translate(
   }
 );
 
-const CategoryQualityWarningReasonDescription: React.FC<{
+export const CategoryQualityWarningReasonDescription: React.FC<{
   reason: CategoryQualityWarningReason;
 }> = ({ reason }) => {
   switch (reason.type) {
