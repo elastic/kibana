@@ -192,6 +192,35 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should be able to import 9999 rules', async () => {
+        const ruleIds = new Array(9999).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 9999,
+        });
+      });
+
+      it('should NOT be able to import more than 10,000 rules', async () => {
+        const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(500);
+
+        expect(body).to.eql({
+          status_code: 500,
+          message: "Can't import more than 10000 rules",
+        });
+      });
+
       it('should report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
