@@ -86,7 +86,6 @@ export function TransactionDetails() {
             <TransactionCharts
               charts={transactionChartsData}
               urlParams={urlParams}
-              location={location}
             />
           </ChartsSyncContextProvider>
 
