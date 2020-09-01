@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-import { MapsAppView } from '.';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { getCoreChrome, getToasts } from '../../../kibana_services';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
+import { MapsAppView } from '.';
 
 interface LoadMapAndRenderProps {
   savedMapId?: Record<string, unknown>;

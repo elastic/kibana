@@ -8,6 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { Provider } from 'react-redux';
+import { AppMountContext, AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -21,15 +23,16 @@ import {
   IKbnUrlStateStorage,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
-import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
 import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
-export async function renderApp(context: AppMountContext, { appBasePath, element, history, onAppLeave }: AppMountParameters) {
+export async function renderApp(
+  context: AppMountContext,
+  { appBasePath, element, history, onAppLeave }: AppMountParameters
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -54,7 +57,9 @@ const App: React.FC<AppProps> = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
-  const stateTransfer = getEmbeddableService()?.getStateTransfer(history as AppMountParameters['history']);
+  const stateTransfer = getEmbeddableService()?.getStateTransfer(
+    history as AppMountParameters['history']
+  );
 
   const { originatingApp } =
     stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};

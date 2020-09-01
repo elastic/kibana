@@ -14,7 +14,11 @@ export class AppStateManager {
 
   _updated$ = new Subject();
 
-  setQueryAndFilters({ query, savedQuery, filters }: {
+  setQueryAndFilters({
+    query,
+    savedQuery,
+    filters,
+  }: {
     query?: Query;
     filters?: Filter[];
     savedQuery?: SavedQuery | string;

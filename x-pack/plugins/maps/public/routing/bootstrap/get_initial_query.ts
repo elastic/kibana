@@ -6,7 +6,15 @@
 
 import { getData } from '../../kibana_services';
 
-export function getInitialQuery({ mapStateJSON, appState = {} }) {
+export function getInitialQuery({
+  mapStateJSON,
+  appState = {},
+}: {
+  mapStateJSON: any;
+  appState: {
+    query?: string | { [key: string]: any };
+  };
+}) {
   if (appState.query) {
     return appState.query;
   }

@@ -31,10 +31,10 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui';
-import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { goToSpecifiedPath } from '../../maps_router';
+// @ts-expect-error
+import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { APP_ID, MAP_PATH } from '../../../../common/constants';
-
 import {
   getMapsCapabilities,
   getUiSettings,

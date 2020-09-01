@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { Redirect } from 'react-router-dom';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { getToasts } from '../../../kibana_services';
-import { i18n } from '@kbn/i18n';
 import { MapsListView } from './maps_list_view';
-import { Redirect } from 'react-router-dom';
 
 export class LoadListAndRender extends React.Component {
   _isMounted?: boolean;

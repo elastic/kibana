@@ -7,6 +7,9 @@
 import React from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
+import { AppLeaveAction, AppMountParameters } from 'kibana/public';
+import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
+import { Subscription } from 'rxjs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import {
   getData,
@@ -33,26 +36,24 @@ import {
   TimeRange,
   IndexPattern,
   SavedQuery,
+  QueryStateChange,
+  QueryState,
 } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from './top_nav_config';
 import { getBreadcrumbs, unsavedChangesWarning } from './get_breadcrumbs';
-import { AppLeaveAction } from 'kibana/public';
-import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
 import {
   LayerDescriptor,
   MapRefreshConfig,
   MapCenterAndZoom,
-} from 'x-pack/plugins/maps/common/descriptor_types';
+  MapQuery,
+} from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
-import { Subscription } from 'rxjs';
-import { QueryStateChange, QueryState } from 'src/plugins/data/public/query';
-import { AppLeaveActionFactory } from 'src/core/public/application/types';
 
 interface MapsAppViewProps {
   savedMap: any;
-  onAppLeave: (handler: (factory: AppLeaveActionFactory) => AppLeaveAction | undefined) => void;
+  onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   layerListConfigOnly: unknown;
@@ -79,12 +80,12 @@ interface MapsAppViewProps {
   refreshConfig: MapRefreshConfig;
   setRefreshConfig: (refreshConfig: MapRefreshConfig) => any;
   isSaveDisabled: boolean;
-  clearUi: () => {};
+  clearUi: () => void;
   setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => any;
   setMapSettings: (mapSettings: MapSettings) => any;
   setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => any;
   setOpenTOCDetails: (openTOCDetails: string[]) => any;
-  query: Query;
+  query: MapQuery | undefined;
 }
 
 interface MapsAppViewState {
@@ -136,7 +137,7 @@ export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewSt
     this.props.onAppLeave((actions) => {
       if (this._hasUnsavedChanges()) {
         if (!window.confirm(unsavedChangesWarning)) {
-          return;
+          return {} as AppLeaveAction;
         }
       }
       return actions.default() as AppLeaveAction;
@@ -245,7 +246,9 @@ export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewSt
     });
 
     // sync globalState
-    const updatedGlobalState: { filters: Filter[]; time?: TimeRange } = { filters: filterManager.getGlobalFilters() };
+    const updatedGlobalState: { filters: Filter[]; time?: TimeRange } = {
+      filters: filterManager.getGlobalFilters(),
+    };
     if (time) {
       updatedGlobalState.time = time;
     }
@@ -408,7 +411,10 @@ export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewSt
         dateRangeTo={this.props.timeFilters.to}
         isRefreshPaused={this.props.refreshConfig.isPaused}
         refreshInterval={this.props.refreshConfig.interval}
-        onRefreshChange={({ isPaused, refreshInterval }: {
+        onRefreshChange={({
+          isPaused,
+          refreshInterval,
+        }: {
           isPaused: boolean;
           refreshInterval: number;
         }) => {
@@ -438,7 +444,7 @@ export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewSt
     );
   }
 
-  _addFilter = (newFilters: Filter[]) => {
+  _addFilter = async (newFilters: Filter[]) => {
     newFilters.forEach((filter) => {
       filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
     });

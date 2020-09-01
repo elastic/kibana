@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { map } from 'rxjs/operators';
 import { connectToQueryState, esFilters } from '../../../../../../src/plugins/data/public';
 import { syncState, BaseStateContainer } from '../../../../../../src/plugins/kibana_utils/public';
-import { map } from 'rxjs/operators';
 import { getData } from '../../kibana_services';
 import { kbnUrlStateStorage } from '../maps_router';
 import { AppStateManager } from './app_state_manager';

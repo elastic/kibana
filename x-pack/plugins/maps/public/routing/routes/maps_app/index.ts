@@ -5,6 +5,8 @@
  */
 
 import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
@@ -34,13 +36,11 @@ import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../../reducers/store';
-import { ThunkDispatch } from 'redux-thunk';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import {
   MapRefreshConfig,
   MapCenterAndZoom,
   LayerDescriptor,
-} from 'x-pack/plugins/maps/common/descriptor_types';
+} from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 
 function mapStateToProps(state: MapStoreState) {
