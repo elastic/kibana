@@ -54,10 +54,7 @@ describe('calculateHistogramInterval', () => {
             max: 250,
           },
         };
-        const expectedInterval = getLargestPossibleInterval(p);
-
-        expect(expectedInterval).toBe(1);
-        expect(calculateHistogramInterval(p)).toBe(expectedInterval);
+        expect(calculateHistogramInterval(p)).toEqual(1);
       });
 
       test('should correctly work for float numbers (small numbers)', () => {
