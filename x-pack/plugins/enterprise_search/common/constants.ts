@@ -24,6 +24,7 @@ export const APP_SEARCH_PLUGIN = {
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
   }),
   URL: '/app/enterprise_search/app_search',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
 };
 
 export const WORKPLACE_SEARCH_PLUGIN = {
@@ -36,6 +37,7 @@ export const WORKPLACE_SEARCH_PLUGIN = {
       'Search all documents, files, and sources available across your virtual workplace.',
   }),
   URL: '/app/enterprise_search/workplace_search',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 
 export const JSON_HEADER = { 'Content-Type': 'application/json' }; // This needs specific casing or Chrome throws a 415 error
