@@ -25,9 +25,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { IInitialAppData } from '../common/types';
-import AppSearchLogo from './applications/app_search/assets/logo.svg';
 import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
-import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
@@ -118,7 +116,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,
         title: APP_SEARCH_PLUGIN.NAME,
-        icon: AppSearchLogo,
+        icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
         category: FeatureCatalogueCategory.DATA,
@@ -128,7 +126,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         id: WORKPLACE_SEARCH_PLUGIN.ID,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
-        icon: WorkplaceSearchLogo,
+        icon: 'workplaceSearchApp',
         description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
         path: WORKPLACE_SEARCH_PLUGIN.URL,
         category: FeatureCatalogueCategory.DATA,
