@@ -215,7 +215,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         };
       }),
     ],
-    position: 'left',
+    position: 'right',
   };
 
   const stats: SectionConfig = {
@@ -232,7 +232,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       { title: 'model_memory_limit', description: item.config.model_memory_limit },
       { title: 'version', description: item.config.version },
     ],
-    position: 'right',
+    position: 'left',
   };
 
   const analysisStats: SectionConfig | undefined = analysisStatsValues
@@ -350,10 +350,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     );
   }
 
-  const sections: SectionConfig[] = [state, progress, stats];
+  const detailsSections: SectionConfig[] = [state, progress];
+  const statsSections: SectionConfig[] = [stats];
 
   if (analysisStats !== undefined) {
-    sections.push(analysisStats);
+    statsSections.push(analysisStats);
   }
 
   const tabs = [
@@ -362,7 +363,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={sections} />,
+      content: <ExpandedRowDetailsPane sections={detailsSections} />,
+    },
+    {
+      id: 'ml-analytics-job-stats',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel',
+        {
+          defaultMessage: 'Job stats',
+        }
+      ),
+      content: <ExpandedRowDetailsPane sections={statsSections} />,
     },
     {
       id: 'ml-analytics-job-json',
