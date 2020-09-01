@@ -35,7 +35,7 @@ const mapping = [
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const mockServiceNow = {
+  const mockJira = {
     config: {
       apiUrl: 'www.jiraisinkibanaactions.com',
       incidentConfiguration: { mapping: [...mapping] },
@@ -81,10 +81,10 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: 'CK',
-            incidentConfiguration: { ...mockServiceNow.config.incidentConfiguration },
+            incidentConfiguration: { ...mockJira.config.incidentConfiguration },
             isCaseOwned: true,
           },
-          secrets: mockServiceNow.secrets,
+          secrets: mockJira.secrets,
         });
     });
   });

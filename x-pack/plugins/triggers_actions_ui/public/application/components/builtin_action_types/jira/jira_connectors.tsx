@@ -21,7 +21,7 @@ import { JiraActionConnector, CasesConfigurationMapping } from './types';
 import { connectorConfiguration } from './config';
 import { FieldMapping } from './case_mappings/field_mapping';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
+const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
   action,
   editActionSecrets,
   editActionConfig,
@@ -30,7 +30,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionC
   readOnly,
   docLinks,
 }) => {
-  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
+  // TODO: remove incidentConfiguration later, when Case Jira will move their fields to the level of action execution
   const { apiUrl, projectKey, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
 
@@ -185,7 +185,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionC
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+      {consumer === 'case' && ( // TODO: remove this block later, when Case Jira will move their fields to the level of action execution
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
@@ -215,4 +215,4 @@ export const createDefaultMapping = (fields: Record<string, any>): CasesConfigur
   );
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFields as default };
+export { JiraConnectorFields as default };

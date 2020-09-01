@@ -10,7 +10,7 @@ import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '.
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
   projectKey: schema.string(),
-  // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
+  // TODO: to remove - set it optional for the current stage to support Case Jira implementation
   incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
   isCaseOwned: schema.maybe(schema.boolean()),
 };

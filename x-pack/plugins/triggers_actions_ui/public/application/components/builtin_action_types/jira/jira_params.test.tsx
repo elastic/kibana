@@ -80,12 +80,11 @@ describe('JiraParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    // jest.resetAllMocks();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
   });
 
-  test('all params fields is rendered', () => {
+  test('all params fields are rendered', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
@@ -109,7 +108,7 @@ describe('JiraParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
   });
 
-  test('hide issue types and fields when loading issue types', () => {
+  test('it shows loading when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
     const wrapper = mountWithIntl(
       <JiraParamsFields
@@ -122,20 +121,18 @@ describe('JiraParamsFields renders', () => {
         actionConnector={connector}
       />
     );
-    expect(wrapper.find('[data-test-subj="issueTypeSelect"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="titleInput"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeFalsy();
+
+    expect(
+      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('isLoading')
+    ).toBeTruthy();
   });
 
-  test('hide fields when loading fields', () => {
-    useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
+  test('it shows loading when loading fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
     });
+
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
@@ -147,12 +144,64 @@ describe('JiraParamsFields renders', () => {
         actionConnector={connector}
       />
     );
-    expect(wrapper.find('[data-test-subj="issueTypeSelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="titleInput"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeFalsy();
+
+    expect(
+      wrapper.find('[data-test-subj="prioritySelect"]').first().prop('isLoading')
+    ).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isLoading')
+    ).toBeTruthy();
+  });
+
+  test('it disabled the fields when loading issue types', () => {
+    useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
+
+    const wrapper = mountWithIntl(
+      <JiraParamsFields
+        actionParams={actionParams}
+        errors={{ title: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[]}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
+    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isDisabled')
+    ).toBeTruthy();
+  });
+
+  test('it disabled the fields when loading fields', () => {
+    useGetFieldsByIssueTypeMock.mockReturnValue({
+      ...useGetFieldsByIssueTypeResponse,
+      isLoading: true,
+    });
+
+    const wrapper = mountWithIntl(
+      <JiraParamsFields
+        actionParams={actionParams}
+        errors={{ title: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[]}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
+    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="labelsComboBox"]').first().prop('isDisabled')
+    ).toBeTruthy();
   });
 
   test('hide unsupported fields', () => {
