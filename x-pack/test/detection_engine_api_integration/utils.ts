@@ -360,9 +360,12 @@ export const deleteSignalsIndex = async (
  * for testing uploads.
  * @param ruleIds Array of strings of rule_ids
  */
-export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
+export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled?: boolean): Buffer => {
   const stringOfRules = ruleIds.map((ruleId) => {
     const simpleRule = getSimpleRule(ruleId);
+    if (enabled != null) {
+      return JSON.stringify({ enabled, ...simpleRule });
+    }
     return JSON.stringify(simpleRule);
   });
   return Buffer.from(stringOfRules.join('\n'));
