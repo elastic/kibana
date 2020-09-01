@@ -464,13 +464,20 @@ export class DashboardAppController {
                 );
               } else if ('input' in incomingEmbeddable) {
                 const input = incomingEmbeddable.input;
+                // @ts-expect-error
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
                 };
+                const embeddableId =
+                  'embeddableId' in incomingEmbeddable
+                    ? incomingEmbeddable.embeddableId
+                    : undefined;
                 container.addOrUpdateEmbeddable<EmbeddableInput>(
                   incomingEmbeddable.type,
-                  explicitInput
+                  // This ugly solution is temporary - https://github.com/elastic/kibana/pull/70272 fixes this whole section
+                  (explicitInput as unknown) as EmbeddableInput,
+                  embeddableId
                 );
               }
             }

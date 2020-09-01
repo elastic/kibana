@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defineSessionRoutes } from './session';
 import { defineSAMLRoutes } from './saml';
-import { defineBasicRoutes } from './basic';
 import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
 import { RouteDefinitionParams } from '..';
 
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
-  defineSessionRoutes(params);
   defineCommonRoutes(params);
-
-  if (params.authc.isProviderTypeEnabled('basic') || params.authc.isProviderTypeEnabled('token')) {
-    defineBasicRoutes(params);
-  }
 
   if (params.authc.isProviderTypeEnabled('saml')) {
     defineSAMLRoutes(params);

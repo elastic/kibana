@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StopButton } from './stop_button';
-export { StopButtonModal } from './stop_button_modal';
-export { useForceStopAction } from './use_force_stop_action';
+export { useStopAction } from './use_stop_action';
+export { StopActionModal } from './stop_action_modal';

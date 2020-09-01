@@ -14,6 +14,7 @@ import { mockLicenseContext } from './license_context.mock';
 jest.mock('react', () => ({
   ...(jest.requireActual('react') as object),
   useContext: jest.fn(() => ({ ...mockKibanaContext, ...mockLicenseContext })),
+  useEffect: jest.fn((fn) => fn()), // Calls on mount/every update - use mount for more complex behavior
 }));
 
 /**
@@ -35,6 +36,6 @@ jest.mock('react', () => ({
  * // ... etc.
  *
  * it('some test', () => {
- *   useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: 'someOverride' }));
+ *   useContext.mockImplementationOnce(() => ({ config: { host: 'someOverride' } }));
  * });
  */

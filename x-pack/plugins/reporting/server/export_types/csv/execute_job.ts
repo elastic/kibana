@@ -50,6 +50,7 @@ const getRequest = async (headers: string | undefined, crypto: Crypto, logger: L
     path: '/',
     route: { settings: {} },
     url: { href: '/' },
+    app: {},
     raw: { req: { url: '/' } },
   } as Hapi.Request);
 };

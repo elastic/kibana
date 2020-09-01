@@ -121,7 +121,7 @@ export const EditIndexPattern = withRouter(
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
         if (isConfirmed) {
-          await indexPattern.init(true);
+          await indexPattern.refreshFields();
           setFields(indexPattern.getNonScriptedFields());
         }
       });

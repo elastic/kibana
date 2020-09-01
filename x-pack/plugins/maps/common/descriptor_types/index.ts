@@ -5,6 +5,7 @@
  */
 
 export * from './data_request_descriptor_types';
-export * from './sources';
+export * from './source_descriptor_types';
+export * from './layer_descriptor_types';
 export * from './map_descriptor';
 export * from './style_property_descriptor_types';

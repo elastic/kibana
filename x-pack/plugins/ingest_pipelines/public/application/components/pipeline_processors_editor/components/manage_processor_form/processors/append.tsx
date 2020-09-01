@@ -14,15 +14,16 @@ import {
   ComboBoxField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
+import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   value: {
+    defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    deserializer: (v) => (Array.isArray(v) ? v : [String(v)]),
+    deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),

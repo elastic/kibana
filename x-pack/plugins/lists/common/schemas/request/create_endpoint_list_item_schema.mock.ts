@@ -7,7 +7,7 @@
 import {
   COMMENTS,
   DESCRIPTION,
-  ENTRIES,
+  ENDPOINT_ENTRIES,
   ITEM_TYPE,
   META,
   NAME,
@@ -21,7 +21,7 @@ export const getCreateEndpointListItemSchemaMock = (): CreateEndpointListItemSch
   _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
-  entries: ENTRIES,
+  entries: ENDPOINT_ENTRIES,
   item_id: undefined,
   meta: META,
   name: NAME,
