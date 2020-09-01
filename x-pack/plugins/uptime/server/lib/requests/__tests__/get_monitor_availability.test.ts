@@ -792,6 +792,10 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
+                      "_source": Array [
+                        "monitor.name",
+                        "url.full",
+                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -878,7 +882,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*",
+          "index": "heartbeat-7*",
         }
       `);
     });
