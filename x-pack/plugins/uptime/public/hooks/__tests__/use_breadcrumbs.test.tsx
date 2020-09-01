@@ -44,7 +44,9 @@ describe('useBreadcrumbs', () => {
     );
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
-    expect(getBreadcrumbs()).toStrictEqual([makeBaseBreadcrumb(urlParams)].concat(expectedCrumbs));
+    expect(getBreadcrumbs()).toStrictEqual(
+      [makeBaseBreadcrumb('/app/uptime', urlParams)].concat(expectedCrumbs)
+    );
   });
 });
 
@@ -54,6 +56,9 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
     return breadcrumbObj;
   };
   const core = {
+    application: {
+      getUrlForApp: () => '/app/uptime',
+    },
     chrome: {
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbObj = newBreadcrumbs;
