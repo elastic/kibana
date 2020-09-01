@@ -14,8 +14,7 @@ import {
 } from './handlers';
 import { PostFleetSetupRequestSchema } from '../../types';
 
-export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
-  // Ingest manager setup
+export const registerIngestManagerSetupRoute = (router: IRouter) => {
   router.post(
     {
       path: SETUP_API_ROUTE,
@@ -26,22 +25,9 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     },
     ingestManagerSetupHandler
   );
+};
 
-  if (!config.fleet.enabled) {
-    return;
-  }
-
-  // Get Fleet setup
-  router.get(
-    {
-      path: FLEET_SETUP_API_ROUTES.INFO_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    getFleetStatusHandler
-  );
-
-  // Create Fleet setup
+export const registerCreateFleetSetupRoute = (router: IRouter) => {
   router.post(
     {
       path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
@@ -50,4 +36,30 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     },
     createFleetSetupHandler
   );
+};
+
+export const registerGetFleetStatusRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: FLEET_SETUP_API_ROUTES.INFO_PATTERN,
+      validate: false,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getFleetStatusHandler
+  );
+};
+
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
+  // Ingest manager setup
+  registerIngestManagerSetupRoute(router);
+
+  if (!config.fleet.enabled) {
+    return;
+  }
+
+  // Get Fleet setup
+  registerGetFleetStatusRoute(router);
+
+  // Create Fleet setup
+  registerCreateFleetSetupRoute(router);
 };

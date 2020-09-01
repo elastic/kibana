@@ -23,7 +23,11 @@ describe('AuditTrailClient', () => {
 
   beforeEach(() => {
     event$ = new Subject();
-    client = new AuditTrailClient(httpServerMock.createKibanaRequest(), event$, deps);
+    client = new AuditTrailClient(
+      httpServerMock.createKibanaRequest({ kibanaRequestState: { requestId: 'request id alpha' } }),
+      event$,
+      deps
+    );
   });
 
   afterEach(() => {
@@ -35,6 +39,15 @@ describe('AuditTrailClient', () => {
       client.withAuditScope('scope_name');
       event$.subscribe((event) => {
         expect(event.scope).toBe('scope_name');
+        done();
+      });
+      client.add({ message: 'message', type: 'type' });
+    });
+
+    it('populates requestId', (done) => {
+      client.withAuditScope('scope_name');
+      event$.subscribe((event) => {
+        expect(event.requestId).toBe('request id alpha');
         done();
       });
       client.add({ message: 'message', type: 'type' });

@@ -46,6 +46,7 @@ import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
+import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -84,6 +85,18 @@ export class ExceptionListClient {
   public createEndpointList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointList({
+      savedObjectsClient,
+      user,
+      version: 1,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return createEndpointTrustedAppsList({
       savedObjectsClient,
       user,
       version: 1,

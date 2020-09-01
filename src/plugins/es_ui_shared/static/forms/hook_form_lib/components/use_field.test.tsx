@@ -98,7 +98,7 @@ describe('<UseField />', () => {
 
       useEffect(() => {
         onForm(form);
-      }, [form]);
+      }, [onForm, form]);
 
       return (
         <Form form={form}>

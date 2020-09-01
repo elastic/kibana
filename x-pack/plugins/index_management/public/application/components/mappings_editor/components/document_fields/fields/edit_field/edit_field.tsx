@@ -43,13 +43,6 @@ export interface Props {
   updateField: UpdateFieldFunc;
 }
 
-export const defaultFlyoutProps = {
-  'data-test-subj': 'mappingsEditorFieldEdit',
-  'aria-labelledby': 'mappingsEditorFieldEditTitle',
-  className: 'mappingsEditor__editField',
-  maxWidth: 720,
-};
-
 // The default FormWrapper is the <EuiForm />, which wrapps the form with
 // a <div>. We can't have a div as first child of the Flyout as it breaks
 // the height calculaction and does not render the footer position correctly.

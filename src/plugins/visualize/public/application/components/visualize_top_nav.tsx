@@ -75,6 +75,7 @@ const TopNav = ({
     },
     [visInstance.embeddableHandler]
   );
+  const stateTransfer = services.embeddable.getStateTransfer();
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -89,6 +90,7 @@ const TopNav = ({
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
+          stateTransfer,
           embeddableId,
         },
         services
@@ -107,6 +109,7 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
+    stateTransfer,
   ]);
   const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
   const showDatePicker = () => {

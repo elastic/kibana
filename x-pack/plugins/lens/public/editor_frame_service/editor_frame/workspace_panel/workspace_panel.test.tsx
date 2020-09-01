@@ -174,21 +174,6 @@ describe('workspace_panel', () => {
           },
           Object {
             "arguments": Object {
-              "filters": Array [
-                "[]",
-              ],
-              "query": Array [
-                "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-              ],
-              "timeRange": Array [
-                "{\\"from\\":\\"now-7d\\",\\"to\\":\\"now\\"}",
-              ],
-            },
-            "function": "kibana_context",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
               "layerIds": Array [
                 "first",
               ],
@@ -305,10 +290,10 @@ describe('workspace_panel', () => {
     );
 
     expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.layerIds
+      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.layerIds
     ).toEqual(['first', 'second', 'third']);
     expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
+      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.tables
     ).toMatchInlineSnapshot(`
                                     Array [
                                       Object {

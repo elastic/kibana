@@ -20,7 +20,7 @@ interface PageHeaderProps {
   datePicker?: boolean;
 }
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+export const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
 
@@ -42,10 +42,6 @@ const StyledPicker = styled(EuiFlexItem)`
       }
     }
   }
-`;
-
-const H1Text = styled.h1`
-  white-space: nowrap;
 `;
 
 export const PageHeader = React.memo(
@@ -96,10 +92,10 @@ export const PageHeader = React.memo(
         >
           <EuiFlexItem grow={true}>
             <EuiTitle>
-              <H1Text>{headingText}</H1Text>
+              <h1 className="eui-textNoWrap">{headingText}</h1>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>
+          {extraLinks && <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>}
           <DatePickerComponent />
         </EuiFlexGroup>
         <EuiSpacer size="s" />

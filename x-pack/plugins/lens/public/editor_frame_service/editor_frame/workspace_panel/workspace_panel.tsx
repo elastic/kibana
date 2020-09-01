@@ -13,11 +13,11 @@ import {
   EuiIcon,
   EuiImage,
   EuiText,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -129,7 +129,7 @@ export function InnerWorkspacePanel({
           visualizationState,
           datasourceMap,
           datasourceStates,
-          framePublicAPI,
+          datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
         // Most likely an error in the expression provided by a datasource or visualization
@@ -173,6 +173,23 @@ export function InnerWorkspacePanel({
     [plugins.data.query.timefilter.timefilter]
   );
 
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
+  );
+
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
@@ -192,10 +209,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
-    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
-      defaultMessage:
-        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
-    });
     return (
       <div className="eui-textCenter">
         <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
@@ -214,8 +227,7 @@ export function InnerWorkspacePanel({
             <FormattedMessage
               id="xpack.lens.editorFrame.emptyWorkspaceHeading"
               defaultMessage="Lens is a new tool for creating visualizations"
-            />{' '}
-            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+            />
           </p>
           <p>
             <small>
@@ -264,6 +276,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          searchContext={context}
           reload$={autoRefreshFetch$}
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { AbstractESSource } from '../es_source';
 import { getSearchService } from '../../../kibana_services';
-import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
+import { hitsToGeoJson } from '../../../../common/elasticsearch_geo_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,

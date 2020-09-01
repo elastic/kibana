@@ -3,22 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { GlobalFlyout } from '../../shared_imports';
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { deNormalize } from '../../lib';
-import { EditFieldContainer } from './fields';
+import { EditFieldContainer, EditFieldContainerProps, defaultFlyoutProps } from './fields';
 import { DocumentFieldsHeader } from './document_fields_header';
 import { DocumentFieldsJsonEditor } from './fields_json_editor';
 import { DocumentFieldsTreeEditor } from './fields_tree_editor';
 import { SearchResult } from './search_fields';
 
+const { useGlobalFlyout } = GlobalFlyout;
+
 export const DocumentFields = React.memo(() => {
   const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
 
   const { editor: editorType } = documentFields;
+  const isEditing = documentFields.status === 'editingField';
 
   const jsonEditorDefaultValue = useMemo(() => {
     if (editorType === 'json') {
@@ -40,6 +48,38 @@ export const DocumentFields = React.memo(() => {
     [dispatch]
   );
 
+  const exitEdit = useCallback(() => {
+    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isEditing) {
+      // Open the flyout with the <EditField /> content
+      addContentToGlobalFlyout<EditFieldContainerProps>({
+        id: 'mappingsEditField',
+        Component: EditFieldContainer,
+        props: { exitEdit },
+        flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
+        cleanUpFunc: exitEdit,
+      });
+    }
+  }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      removeContentFromGlobalFlyout('mappingsEditField');
+    }
+  }, [isEditing, removeContentFromGlobalFlyout]);
+
+  useEffect(() => {
+    return () => {
+      if (isEditing) {
+        // When the component unmounts, exit edit mode.
+        exitEdit();
+      }
+    };
+  }, [isEditing, exitEdit]);
+
   const searchTerm = search.term.trim();
 
   return (
@@ -51,7 +91,6 @@ export const DocumentFields = React.memo(() => {
       ) : (
         editor
       )}
-      <EditFieldContainer />
     </div>
   );
 });

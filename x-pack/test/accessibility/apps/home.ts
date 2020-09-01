@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Extra clickon logo step here will be removed after preceding test is fixed.
     it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
       await PageObjects.home.clickOnLogo();
-      await PageObjects.home.ClickOnLogsData();
+      await PageObjects.home.clickOnAddData();
       await a11y.testAppSnapshot();
     });
 
@@ -66,6 +66,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on cloud tutorial meets a11y requirements', async () => {
       await PageObjects.home.clickOnCloudTutorial();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on side nav to see all the side nav menu', async () => {
+      await PageObjects.home.clickOnLogo();
+      await PageObjects.home.clickOnToggleNavButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dock the side nav', async () => {
+      await PageObjects.home.dockTheSideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
+      await PageObjects.home.collapseObservabibilitySideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('unDock the side nav', async () => {
+      await PageObjects.home.dockTheSideNav();
       await a11y.testAppSnapshot();
     });
   });

@@ -17,11 +17,17 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { GetConfigFn } from '../../../common';
 import { ISearchStartLegacy } from '../types';
 
-export type SearchRequest = any;
-export type SearchResponse = any;
+/**
+ * @internal
+ *
+ * This type is used when flattenning a SearchSource and passing it down to legacy search.
+ * Once legacy search is removed, this type should become internal to `SearchSource`,
+ * where `ISearchRequestParams` is used externally instead.
+ */
+export type SearchRequest = Record<string, any>;
 
 export interface FetchOptions {
   abortSignal?: AbortSignal;
@@ -30,7 +36,7 @@ export interface FetchOptions {
 
 export interface FetchHandlers {
   legacySearchService: ISearchStartLegacy;
-  config: IUiSettingsClient;
+  config: { get: GetConfigFn };
   esShardTimeout: number;
 }
 

@@ -54,7 +54,7 @@ export const PolicyDetails = React.memo(() => {
     services: {
       application: { navigateToApp },
     },
-  } = useKibana();
+  } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
@@ -298,7 +298,7 @@ const ConfirmUpdate = React.memo<{
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent configuration."
+                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
               />
             </EuiCallOut>
             <EuiSpacer size="xl" />

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { AppLocation } from '../../../../common/endpoint/types';
@@ -17,7 +17,11 @@ import { AppAction } from '../../store/actions';
 export const RouteCapture = memo(({ children }) => {
   const location: AppLocation = useLocation();
   const dispatch: (action: AppAction) => unknown = useDispatch();
-  dispatch({ type: 'userChangedUrl', payload: location });
+
+  useEffect(() => {
+    dispatch({ type: 'userChangedUrl', payload: location });
+  });
+
   return <>{children}</>;
 });
 

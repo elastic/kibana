@@ -37,6 +37,10 @@ export const EditFieldHeaderForm = React.memo(
           {/* Field subType (if any) */}
           <FormDataProvider pathsToWatch="type">
             {({ type }) => {
+              if (type === undefined) {
+                return null;
+              }
+
               const [fieldType] = type;
               return (
                 <SubTypeParameter
@@ -55,6 +59,9 @@ export const EditFieldHeaderForm = React.memo(
         <FieldDescriptionSection isMultiField={isMultiField}>
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
+              if (!type) {
+                return null;
+              }
               const typeDefinition = TYPE_DEFINITION[type[0].value as MainType];
               const hasSubType = typeDefinition.subTypes !== undefined;
 

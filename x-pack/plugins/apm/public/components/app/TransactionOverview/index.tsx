@@ -5,40 +5,36 @@
  */
 
 import {
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiCallOut,
-  EuiCode,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { Location } from 'history';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid } from '@elastic/eui';
-import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { TransactionList } from './List';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { useRedirect } from './useRedirect';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../observability/public';
+import { Projection } from '../../../../common/projections';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { useLocation } from '../../../hooks/useLocation';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
+import { useTransactionList } from '../../../hooks/useTransactionList';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { Projection } from '../../../../common/projections';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { TransactionList } from './List';
+import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({
   urlParams,
@@ -73,7 +69,6 @@ export function TransactionOverview() {
 
   // redirect to first transaction type
   useRedirect(
-    history,
     getRedirectLocation({
       urlParams,
       location,
@@ -121,26 +116,14 @@ export function TransactionOverview() {
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localFiltersConfig}>
             <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
             <EuiHorizontalRule margin="none" />
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionCharts}
-              location={location}
               urlParams={urlParams}
             />
           </ChartsSyncContextProvider>

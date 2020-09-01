@@ -79,4 +79,4 @@ uiRoutes
       }
     },
   })
-  .otherwise({ redirectTo: '/no-data' });
+  .otherwise({ redirectTo: '/loading' });
