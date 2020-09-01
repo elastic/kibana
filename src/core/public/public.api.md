@@ -39,9 +39,7 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): void;
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-//
-// @public
+// @public (undocumented)
 export interface App<HistoryLocationState = unknown> {
     appRoute?: string;
     capabilities?: Partial<Capabilities>;
@@ -221,10 +219,6 @@ export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
-    // @internal (undocumented)
-    __legacy: {
-        setBaseTitle(baseTitle: string): void;
-    };
     change(newTitle: string | string[]): void;
     reset(): void;
 }
@@ -288,20 +282,13 @@ export interface ChromeNavLink {
     readonly active?: boolean;
     readonly baseUrl: string;
     readonly category?: AppCategory;
-    // @deprecated
     readonly disabled?: boolean;
-    // @deprecated
-    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
-    readonly href?: string;
+    readonly href: string;
     readonly icon?: string;
     readonly id: string;
-    // @deprecated
-    readonly linkToLastSubUrl?: boolean;
     readonly order?: number;
-    // @deprecated
-    readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
@@ -324,7 +311,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -886,7 +873,6 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
 //
 // @public
 export interface NavigateToAppOptions {
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
     path?: string;
     replace?: boolean;
     state?: unknown;

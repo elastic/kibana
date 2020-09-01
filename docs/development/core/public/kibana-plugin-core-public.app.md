@@ -4,7 +4,6 @@
 
 ## App interface
 
-Extension of  with the mount function.
 
 <b>Signature:</b>
 

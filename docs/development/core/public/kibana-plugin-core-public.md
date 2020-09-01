@@ -41,7 +41,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
-|  [App](./kibana-plugin-core-public.app.md) | Extension of  with the mount function. |
+|  [App](./kibana-plugin-core-public.app.md) |  |
 |  [AppCategory](./kibana-plugin-core-public.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
