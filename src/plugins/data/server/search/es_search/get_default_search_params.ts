@@ -18,7 +18,7 @@
  */
 
 import { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/server';
-import { UI_SETTINGS } from '../..';
+import { UI_SETTINGS } from '../../../common/constants';
 
 export function getShardTimeout(config: SharedGlobalConfig) {
   return {

@@ -48,7 +48,7 @@ describe('msearch route', () => {
   });
 
   it('handler calls /_msearch with the given request', async () => {
-    const response = { id: 'yay' };
+    const response = { id: 'yay', body: { responses: [{}] } };
     const mockClient = { transport: { request: jest.fn().mockResolvedValue(response) } };
     const mockContext = {
       core: {

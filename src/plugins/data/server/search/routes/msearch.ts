@@ -118,7 +118,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
           body: {
             ...response,
             body: {
-              responses: response.body.responses.map((r: SearchResponse<any>) => shimHitsTotal(r)),
+              responses: response.body.responses?.map((r: SearchResponse<any>) => shimHitsTotal(r)),
             },
           },
         });
