@@ -18,7 +18,11 @@ import { DeleteTrustedAppsRequestSchema } from '../../../../common/endpoint/sche
 
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof DeleteTrustedAppsRequestSchema.params>, undefined, undefined> => {
+): RequestHandler<
+  TypeOf<typeof DeleteTrustedAppsRequestSchema.params>,
+  TypeOf<typeof DeleteTrustedAppsRequestSchema.query>,
+  TypeOf<typeof DeleteTrustedAppsRequestSchema.body>
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
