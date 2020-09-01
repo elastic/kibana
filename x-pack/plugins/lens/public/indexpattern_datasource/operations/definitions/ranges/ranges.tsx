@@ -11,7 +11,7 @@ import { EuiForm } from '@elastic/eui';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { updateColumnParam } from '../../../state_helpers';
+import { updateColumnParam, changeColumn } from '../../../state_helpers';
 
 // TODO update with the AutoInterval PR when ready
 export const autoInterval = 0;
@@ -22,6 +22,8 @@ export const MODES = {
   Histogram: 'histogram',
 } as const;
 
+export type MODES_TYPES = typeof MODES.Range | typeof MODES.Histogram;
+
 export interface RangeType {
   from: number;
   to: number;
@@ -31,7 +33,7 @@ export interface RangeType {
 export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
   params: {
-    type: typeof MODES.Range | typeof MODES.Histogram;
+    type: MODES_TYPES;
     interval: number;
     maxBars: number;
     intervalBase?: number;
@@ -67,12 +69,12 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   buildColumn({ suggestedPriority, field }) {
     return {
       label: field.name,
-      dataType: 'number',
+      dataType: 'number', // string for Range
       operationType: 'range',
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
-      scale: 'interval',
+      scale: 'interval', // ordinal for Range
       params: {
         type: MODES.Histogram,
         interval: autoInterval,
@@ -122,7 +124,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, columnId }) => {
     const isAutoInterval = currentColumn.params.interval === autoInterval;
     const setParam: UpdateParamsFnType = (paramName, value) => {
       setState(
@@ -135,12 +137,32 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
         })
       );
     };
+
+    const onChangeMode = (newMode: MODES_TYPES) => {
+      const scale = newMode === MODES.Range ? 'ordinal' : 'interval';
+      const dataType = newMode === MODES.Range ? 'string' : 'number';
+      setState(
+        changeColumn({
+          state,
+          layerId,
+          columnId,
+          newColumn: {
+            ...currentColumn,
+            scale,
+            dataType,
+            params: { ...currentColumn.params, type: newMode },
+          },
+          keepParams: false,
+        })
+      );
+    };
     return (
       <EuiForm>
         <RangeEditor
           isAutoInterval={isAutoInterval}
           setParam={setParam}
           params={currentColumn.params}
+          onChangeMode={onChangeMode}
         />
       </EuiForm>
     );

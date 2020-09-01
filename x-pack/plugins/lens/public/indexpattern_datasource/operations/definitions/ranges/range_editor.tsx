@@ -8,6 +8,7 @@ import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import {
+  DraggableLocation,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +39,7 @@ import {
   MODES,
   RangeColumnParams,
   UpdateParamsFnType,
+  MODES_TYPES,
 } from './ranges';
 
 // Taken from the Visualize editor
@@ -382,10 +384,12 @@ export const RangeEditor = ({
   isAutoInterval,
   setParam,
   params,
+  onChangeMode,
 }: {
   isAutoInterval: boolean;
   params: RangeColumnParams;
   setParam: UpdateParamsFnType;
+  onChangeMode: (mode: MODES_TYPES) => void;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
 
@@ -397,7 +401,7 @@ export const RangeEditor = ({
           setParam('ranges', ranges);
         }}
         onToggleEditor={() => {
-          setParam('type', MODES.Histogram);
+          onChangeMode(MODES.Histogram);
           toggleAdvancedEditor(false);
         }}
       />
@@ -418,7 +422,7 @@ export const RangeEditor = ({
         setParam('interval', interval);
       }}
       onToggleEditor={() => {
-        setParam('type', MODES.Range);
+        onChangeMode(MODES.Range);
         toggleAdvancedEditor(true);
       }}
     />

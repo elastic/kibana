@@ -459,6 +459,20 @@ export function XYChart({
 
           const table = data.tables[layerId];
 
+          const isPrimitive = (value: unknown): boolean =>
+            value != null && typeof value !== 'object';
+
+          // what if row values are not primitive? That is the case of, for instance, Ranges
+          // remaps them to their serialized version with the formatHint metadata
+          for (const column of table.columns) {
+            for (const row of table.rows) {
+              const record = row[column.id];
+              if (record && !isPrimitive(record)) {
+                row[column.id] = formatFactory(column.formatHint).convert(record);
+              }
+            }
+          }
+
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
