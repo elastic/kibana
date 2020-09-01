@@ -41,7 +41,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   updatePolicies,
 }) => {
   const [confirmModal, setConfirmModal] = useState<ReactNode | null>();
-  const [filter, setFilter] = useState<string>();
+  const [filter, setFilter] = useState<string>('');
 
   const createPolicyButton = (
     <EuiButton
