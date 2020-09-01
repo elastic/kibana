@@ -20,7 +20,6 @@
 export const DEFAULT_NAMESPACE_STRING = 'default';
 
 /**
- * @public
  * Converts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with
  * the exception of the `undefined` namespace ID (which has a namespace string of `'default'`).
  *
@@ -35,7 +34,6 @@ export const namespaceIdToString = (namespace?: string) => {
 };
 
 /**
- * @public
  * Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with
  * the exception of the `'default'` namespace string (which has a namespace ID of `undefined`).
  *
