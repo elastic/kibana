@@ -52,7 +52,8 @@ export class SuggestionsComponent extends Component<Props> {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const isDescriptionFittable = this.props.queryBarRect!.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
+      const isDescriptionFittable =
+        this.props.queryBarRect!.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
       return (
         <SuggestionComponent
           innerRef={(node) => (this.childNodes[index] = node)}
@@ -84,15 +85,13 @@ export class SuggestionsComponent extends Component<Props> {
         verticalListPosition={verticalListPosition}
       >
         <div
-          className={classNames('kbnTypeahead', this.props.size === 's' && 'kbnTypeahead--small')}
+          className={classNames('kbnTypeahead', { 'kbnTypeahead--small': this.props.size === 's' })}
         >
           <div
-            className={classNames(
-              'kbnTypeahead__popover',
-              isSuggestionsListFittable
-                ? 'kbnTypeahead__popover--bottom'
-                : 'kbnTypeahead__popover--top'
-            )}
+            className={classNames('kbnTypeahead__popover', {
+              ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
+              ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
+            })}
           >
             <div
               id="kbnTypeahead__items"
