@@ -27,8 +27,8 @@ import { ServiceSettings } from './map/service_settings';
 import { getPrecision, getZoomPrecision } from './map/precision';
 // @ts-ignore
 import { KibanaMap } from './map/kibana_map';
-import { MapsLegacyConfigType, MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
-import { ConfigSchema } from '../config';
+import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 
@@ -40,7 +40,7 @@ import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
-  config: MapsLegacyConfigType,
+  config: MapsLegacyConfig,
   kibanaVersion: string
 ) => {
   setToasts(core.notifications.toasts);
@@ -55,14 +55,14 @@ export interface MapsLegacySetupDependencies {}
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<MapsLegacyConfig>) {
     this._initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    const config = this._initializerContext.config.get<MapsLegacyConfigType>();
+    const config = this._initializerContext.config.get<MapsLegacyConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
