@@ -22,13 +22,14 @@ import { AddMitreThreat } from '../mitre';
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
   useForm,
+  useFormData,
+  FieldHook,
 } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
+import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema } from './schema';
@@ -74,7 +75,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? [],
-    'step_about_rule'
+    RuleStep.aboutRule
   );
   const canUseExceptions =
     defineRuleData?.ruleType &&
@@ -87,6 +88,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, submit } = form;
+  const [{ severity }] = (useFormData<AboutStepRule>({
+    form,
+    watch: ['severity'],
+  }) as unknown) as [AboutStepRule];
+
+  useEffect(() => {
+    const newRiskScore = defaultRiskScoreBySeverity[severity?.value];
+    if (newRiskScore != null) {
+      const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
+      riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScore });
+    }
+  }, [getFields, severity?.value]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -299,21 +312,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
           </EuiAccordion>
-          <FormDataProvider pathsToWatch="severity">
-            {({ severity }) => {
-              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = getFields().severity;
-              const riskScoreField = getFields().riskScore;
-              if (
-                severityField.value !== severity &&
-                newRiskScore != null &&
-                riskScoreField.value !== newRiskScore
-              ) {
-                riskScoreField.setValue(newRiskScore);
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 

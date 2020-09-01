@@ -8,9 +8,8 @@ import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
+import { SeverityValue } from '../../../pages/detection_engine/rules/types';
 import * as I18n from './translations';
-
-export type SeverityValue = 'low' | 'medium' | 'high' | 'critical';
 
 export interface SeverityOptionItem {
   value: SeverityValue;

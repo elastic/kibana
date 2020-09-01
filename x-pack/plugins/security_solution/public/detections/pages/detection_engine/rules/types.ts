@@ -7,7 +7,6 @@
 import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerts/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
-import { FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -95,8 +94,10 @@ export interface AboutStepRuleDetails {
   description: string;
 }
 
+export type SeverityValue = 'low' | 'medium' | 'high' | 'critical';
+
 export interface AboutStepSeverity {
-  value: string;
+  value: SeverityValue;
   mapping: SeverityMapping;
   isMappingChecked: boolean;
 }
