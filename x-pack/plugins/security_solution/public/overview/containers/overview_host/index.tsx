@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
@@ -15,32 +15,29 @@ import {
   HostOverviewStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsModel, inputsSelectors } from '../../../common/store/inputs';
-import { State } from '../../../common/store';
-import { hostsModel, hostsSelectors } from '../../store';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import { QueryTemplateProps } from '../../../common/containers/query_template';
-import { ESTermQuery } from '../../../../common/typed_json';
+import { inputsModel } from '../../../common/store/inputs';
+import { createFilter } from '../../../common/containers/helpers';
+import { ESQuery } from '../../../../common/typed_json';
 import { useManageSource } from '../../../common/containers/sourcerer';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import * as i18n from './translations';
 
 export const ID = 'overviewHostQuery';
 
 export interface HostOverviewArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  overviewHost: HostOverviewStrategyResponse;
+  isInspected: boolean;
+  overviewHost: HostOverviewStrategyResponse['overviewHost'];
   refetch: inputsModel.Refetch;
 }
 
 interface UseHostOverview {
-  filterQuery?: ESTermQuery | string;
+  filterQuery?: ESQuery | string;
   endDate: string;
   skip?: boolean;
   startDate: string;
-  type: hostsModel.HostOverviewType;
 }
 
 export const useHostOverview = ({
@@ -48,7 +45,6 @@ export const useHostOverview = ({
   endDate,
   skip = false,
   startDate,
-  type,
 }: UseHostOverview): [boolean, HostOverviewArgs] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
@@ -74,8 +70,7 @@ export const useHostOverview = ({
   });
 
   const [overviewHostResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
-    endDate,
-    overviewHost: [],
+    overviewHost: {},
     id: ID,
     inspect: {
       dsl: [],
@@ -83,8 +78,6 @@ export const useHostOverview = ({
     },
     isInspected: false,
     refetch: refetch.current,
-    startDate,
-    totalCount: -1,
   });
 
   const overviewHostSearch = useCallback(
@@ -106,10 +99,9 @@ export const useHostOverview = ({
                   setLoading(false);
                   setHostOverviewResponse((prevResponse) => ({
                     ...prevResponse,
-                    overviewHost: response.edges,
+                    overviewHost: response.overviewHost,
                     inspect: response.inspect ?? prevResponse.inspect,
                     refetch: refetch.current,
-                    totalCount: response.totalCount,
                   }));
                 }
                 searchSubscription$.unsubscribe();
@@ -118,13 +110,16 @@ export const useHostOverview = ({
                   setLoading(false);
                 }
                 // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ALL_HOST);
+                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_HOST, text: msg.message });
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_HOST_OVERVIEW,
+                  text: msg.message,
+                });
               }
             },
           });

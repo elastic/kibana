@@ -10,31 +10,29 @@ import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/c
 import {
   HostAggEsData,
   HostAggEsItem,
-  HostOverviewStrategyResponse,
+  HostDetailsStrategyResponse,
   HostsQueries,
-  HostOverviewRequestOptions,
+  HostDetailsRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { buildHostOverviewQuery } from './query.host_details.dsl';
+import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem } from './helpers';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
-  buildDsl: (options: HostOverviewRequestOptions) => {
-    return buildHostOverviewQuery(options);
-  },
+  buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
   parse: async (
-    options: HostOverviewRequestOptions,
+    options: HostDetailsRequestOptions,
     response: IEsSearchResponse<HostAggEsData>
-  ): Promise<HostOverviewStrategyResponse> => {
+  ): Promise<HostDetailsStrategyResponse> => {
     const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostOverviewQuery(options))],
+      dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
       response: [inspectStringifyObject(response)],
     };
     const formattedHostItem = formatHostItem(aggregations);
 
-    return { ...response, inspect, hostOverview: formattedHostItem };
+    return { ...response, inspect, hostDetails: formattedHostItem };
   },
 };

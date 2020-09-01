@@ -16,25 +16,25 @@ import { useKibana } from '../../../../common/lib/kibana';
 import {
   HostItem,
   HostsQueries,
-  HostOverviewRequestOptions,
-  HostOverviewStrategyResponse,
+  HostDetailsRequestOptions,
+  HostDetailsStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution/hosts';
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../../src/plugins/data/common';
 
-const ID = 'hostOverviewQuery';
+const ID = 'hostDetailsQuery';
 
-export interface HostOverviewArgs {
+export interface HostDetailsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
-  hostOverview: HostItem;
+  hostDetails: HostItem;
   refetch: inputsModel.Refetch;
   startDate: string;
   endDate: string;
 }
 
-interface UseHostOverview {
+interface UseHostDetails {
   id?: string;
   hostName: string;
   endDate: string;
@@ -42,19 +42,19 @@ interface UseHostOverview {
   startDate: string;
 }
 
-export const useHostOverview = ({
+export const useHostDetails = ({
   endDate,
   hostName,
   skip = false,
   startDate,
   id = ID,
-}: UseHostOverview): [boolean, HostOverviewArgs] => {
+}: UseHostDetails): [boolean, HostDetailsArgs] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [hostOverviewRequest, setHostOverviewRequest] = useState<HostOverviewRequestOptions>({
+  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
     defaultIndex,
     hostName,
     factoryQueryType: HostsQueries.details,
@@ -65,9 +65,9 @@ export const useHostOverview = ({
     },
   });
 
-  const [hostOverviewResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
+  const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
-    hostOverview: {},
+    hostDetails: {},
     id: ID,
     inspect: {
       dsl: [],
@@ -77,15 +77,15 @@ export const useHostOverview = ({
     startDate,
   });
 
-  const hostOverviewSearch = useCallback(
-    (request: HostOverviewRequestOptions) => {
+  const hostDetailsSearch = useCallback(
+    (request: HostDetailsRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<HostOverviewRequestOptions, HostOverviewStrategyResponse>(request, {
+          .search<HostDetailsRequestOptions, HostDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             signal: abortCtrl.current.signal,
           })
@@ -94,9 +94,9 @@ export const useHostOverview = ({
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   setLoading(false);
-                  setHostOverviewResponse((prevResponse) => ({
+                  setHostDetailsResponse((prevResponse) => ({
                     ...prevResponse,
-                    hostOverview: response.hostOverview,
+                    hostDetails: response.hostDetails,
                     inspect: response.inspect ?? prevResponse.inspect,
                     refetch: refetch.current,
                   }));
@@ -133,7 +133,7 @@ export const useHostOverview = ({
   );
 
   useEffect(() => {
-    setHostOverviewRequest((prevRequest) => {
+    setHostDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex,
@@ -152,8 +152,8 @@ export const useHostOverview = ({
   }, [defaultIndex, endDate, hostName, startDate, skip]);
 
   useEffect(() => {
-    hostOverviewSearch(hostOverviewRequest);
-  }, [hostOverviewRequest, hostOverviewSearch]);
+    hostDetailsSearch(hostDetailsRequest);
+  }, [hostDetailsRequest, hostDetailsSearch]);
 
-  return [loading, hostOverviewResponse];
+  return [loading, hostDetailsResponse];
 };

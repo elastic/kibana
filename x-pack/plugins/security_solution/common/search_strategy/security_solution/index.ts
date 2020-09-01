@@ -7,6 +7,8 @@
 import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
+  HostDetailsStrategyResponse,
+  HostDetailsRequestOptions,
   HostOverviewStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
@@ -110,6 +112,8 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
+  : T extends HostsQueries.details
+  ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostOverviewStrategyResponse
   : T extends HostsQueries.firstLastSeen
@@ -120,6 +124,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
+  : T extends HostsQueries.details
+  ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.firstLastSeen

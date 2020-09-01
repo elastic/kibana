@@ -1,25 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe, RequestBasicOptions, SearchHit } from '../..';
 
-export interface HostOverviewRequestOptions extends RequestBasicOptions {}
+export type HostOverviewRequestOptions = RequestBasicOptions;
 export interface HostOverviewStrategyResponse extends IEsSearchResponse {
-  auditbeatAuditd?: Maybe<number>;
-  auditbeatFIM?: Maybe<number>;
-  auditbeatLogin?: Maybe<number>;
-  auditbeatPackage?: Maybe<number>;
-  auditbeatProcess?: Maybe<number>;
-  auditbeatUser?: Maybe<number>;
-  endgameDns?: Maybe<number>;
-  endgameFile?: Maybe<number>;
-  endgameImageLoad?: Maybe<number>;
-  endgameNetwork?: Maybe<number>;
-  endgameProcess?: Maybe<number>;
-  endgameRegistry?: Maybe<number>;
-  endgameSecurity?: Maybe<number>;
-  filebeatSystemModule?: Maybe<number>;
-  winlogbeatSecurity?: Maybe<number>;
-  winlogbeatMWSysmonOperational?: Maybe<number>;
   inspect?: Maybe<Inspect>;
+  overviewHost: {
+    auditbeatAuditd?: Maybe<number>;
+    auditbeatFIM?: Maybe<number>;
+    auditbeatLogin?: Maybe<number>;
+    auditbeatPackage?: Maybe<number>;
+    auditbeatProcess?: Maybe<number>;
+    auditbeatUser?: Maybe<number>;
+    endgameDns?: Maybe<number>;
+    endgameFile?: Maybe<number>;
+    endgameImageLoad?: Maybe<number>;
+    endgameNetwork?: Maybe<number>;
+    endgameProcess?: Maybe<number>;
+    endgameRegistry?: Maybe<number>;
+    endgameSecurity?: Maybe<number>;
+    filebeatSystemModule?: Maybe<number>;
+    winlogbeatSecurity?: Maybe<number>;
+    winlogbeatMWSysmonOperational?: Maybe<number>;
+    inspect?: Maybe<Inspect>;
+  };
 }
 
 export interface OverviewHostHit extends SearchHit {

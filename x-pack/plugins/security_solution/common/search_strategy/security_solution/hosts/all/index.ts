@@ -11,7 +11,6 @@ import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated 
 
 export interface HostsEdges {
   node: HostItem;
-
   cursor: CursorType;
 }
 

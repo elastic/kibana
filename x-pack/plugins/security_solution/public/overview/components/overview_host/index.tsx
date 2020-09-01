@@ -12,7 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
-import { ID as OverviewHostQueryId, useOverviewHost } from '../../containers/overview_host';
+import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
 import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
@@ -44,10 +44,10 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const [loading, { overviewHost, id, inspect, refetch }] = useOverviewHost({
-    endDate: endDate,
-    filterQuery: filterQuery,
-    startDate: startDate,
+  const [loading, { overviewHost, id, inspect, refetch }] = useHostOverview({
+    endDate,
+    filterQuery,
+    startDate,
   });
 
   const goToHost = useCallback(
@@ -60,11 +60,18 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     [navigateToApp, urlSearch]
   );
 
-  const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
-    (total, stat) => total + stat.count,
-    0
-  );
-  const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
+  const subtitleValues = useMemo(() => {
+    const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
+      (total, stat) => total + stat.count,
+      0
+    );
+    const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
+
+    return {
+      formattedHostEventsCount,
+      hostEventsCount,
+    };
+  }, [defaultNumberFormat, overviewHost]);
 
   const hostPageButton = useMemo(
     () => (
@@ -77,6 +84,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     ),
     [goToHost, formatUrl]
   );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
@@ -88,10 +96,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                 <FormattedMessage
                   defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
                   id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
-                  values={{
-                    formattedHostEventsCount,
-                    hostEventsCount,
-                  }}
+                  values={subtitleValues}
                 />
               ) : (
                 <>{''}</>
@@ -123,5 +128,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     </EuiFlexItem>
   );
 };
+
+OverviewHostComponent.displayName = 'OverviewHostComponent';
 
 export const OverviewHost = React.memo(OverviewHostComponent);
