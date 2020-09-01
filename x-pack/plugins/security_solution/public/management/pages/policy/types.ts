@@ -8,6 +8,7 @@ import {
   AppLocation,
   Immutable,
   MalwareFields,
+  AdvancedFields,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
@@ -143,6 +144,8 @@ export enum OS {
   mac = 'mac',
   linux = 'linux',
 }
+
+export type AdvancedOSes = KeysByValueCriteria<UIPolicyConfig, { advanced: AdvancedFields }>;
 
 /**
  * Returns the keys of an object whose values meet a criteria.

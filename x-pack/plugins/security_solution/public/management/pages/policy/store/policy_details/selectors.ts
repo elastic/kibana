@@ -15,7 +15,10 @@ import {
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
-import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
+import {
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_POLICY_ADVANCED_PATH,
+} from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
@@ -55,13 +58,23 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   );
 };
 
+/** Returns a boolean of whether the user is on the advanced policy page or not */
+export const isOnPolicyAdvancedPage = (state: Immutable<PolicyDetailsState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICY_ADVANCED_PATH,
+      exact: true,
+    }) !== null
+  );
+};
+
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
   (state) => state.location,
   (location: PolicyDetailsState['location']) => {
     return (
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+        path: [MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, MANAGEMENT_ROUTING_POLICY_ADVANCED_PATH],
         exact: true,
       })?.params?.policyId ?? ''
     );
@@ -103,14 +116,17 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   (windows, mac, linux) => {
     return {
       windows: {
+        advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
       },
       mac: {
+        advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
       },
       linux: {
+        advanced: linux.advanced,
         events: linux.events,
       },
     };
