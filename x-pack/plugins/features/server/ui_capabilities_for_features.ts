@@ -17,10 +17,10 @@ interface FeatureCapabilities {
 }
 
 export function uiCapabilitiesForFeatures(
-  features: KibanaFeature[],
+  kibanaFeatures: KibanaFeature[],
   elasticsearchFeatures: ElasticsearchFeature[]
 ): UICapabilities {
-  const kibanaFeatureCapabilities = features.map(getCapabilitiesFromFeature);
+  const kibanaFeatureCapabilities = kibanaFeatures.map(getCapabilitiesFromFeature);
   const elasticsearchFeatureCapabilities = elasticsearchFeatures.map(getCapabilitiesFromFeature);
 
   return buildCapabilities(...kibanaFeatureCapabilities, ...elasticsearchFeatureCapabilities);

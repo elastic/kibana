@@ -75,7 +75,10 @@ export class Plugin {
     });
 
     const getFeaturesUICapabilities = () =>
-      uiCapabilitiesForFeatures(this.featureRegistry.getAll());
+      uiCapabilitiesForFeatures(
+        this.featureRegistry.getAllKibanaFeatures(),
+        this.featureRegistry.getAllElasticsearchFeatures()
+      );
 
     core.capabilities.registerProvider(getFeaturesUICapabilities);
 

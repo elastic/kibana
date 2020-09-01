@@ -44,7 +44,7 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
     private readonly initializerContext: PluginInitializerContext<BeatsManagementConfigType>
   ) {}
 
-  public async setup(core: CoreSetup<StartDeps>, { security }: SetupDeps) {
+  public async setup(core: CoreSetup<StartDeps>, { features, security }: SetupDeps) {
     this.securitySetup = security;
 
     const router = core.http.createRouter();
@@ -54,7 +54,7 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
       return this.beatsLibs!;
     });
 
-    plugins.features.registerElasticsearchFeature({
+    features.registerElasticsearchFeature({
       id: 'beats_management',
       management: {
         ingest: ['beats_management'],
