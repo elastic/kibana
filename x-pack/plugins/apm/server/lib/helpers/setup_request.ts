@@ -123,12 +123,9 @@ function getMlSetup(
     return;
   }
 
-  const ml = context.plugins.ml;
-  const client = context.core.elasticsearch.client;
   return {
     mlSystem: ml.mlSystemProvider(request),
     anomalyDetectors: ml.anomalyDetectorsProvider(request),
-    modules: ml.modulesProvider(request, context.core.savedObjects.client),
-    client,
+    modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }
