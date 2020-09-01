@@ -108,6 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           inputs: [
             {
               id: policyInfo.packagePolicy.id,
+              revision: 2,
               data_stream: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
