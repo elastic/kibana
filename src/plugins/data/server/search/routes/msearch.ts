@@ -27,7 +27,7 @@ import { getDefaultSearchParams } from '..';
 
 interface MsearchHeaders {
   index: string;
-  preference: number;
+  preference?: number | string;
 }
 
 interface MsearchRequest {
@@ -81,7 +81,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
               header: schema.object(
                 {
                   index: schema.string(),
-                  preference: schema.number(),
+                  preference: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
                 },
                 { unknowns: 'allow' }
               ),
