@@ -28,7 +28,7 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
       defaultMessage: 'Unify your team content.',
     }),
   ],
-  URL: '/app/enterprise_search',
+  URL: '/app/enterprise_search/overview',
 };
 
 export const APP_SEARCH_PLUGIN = {

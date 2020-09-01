@@ -6,6 +6,13 @@
 
 import React from 'react';
 
+import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
+
 export const EnterpriseSearch: React.FC = () => {
-  return <>Hello world</>;
+  return (
+    <>
+      <SetPageChrome isRoot />
+      Hello world
+    </>
+  );
 };
