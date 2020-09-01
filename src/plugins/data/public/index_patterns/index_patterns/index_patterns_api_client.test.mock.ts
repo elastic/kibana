@@ -22,5 +22,3 @@ import { setup } from 'test_utils/http_test_setup';
 export const { http } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
 });
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));
