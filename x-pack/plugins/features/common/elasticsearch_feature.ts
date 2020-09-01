@@ -44,7 +44,7 @@ export interface ElasticsearchFeatureConfig {
 
   /**
    * Feature privilege definition. Specify one or more privileges which grant access to this feature.
-   * Users must satisfy at least one of the defined sets of privileges in order to be granted access.
+   * Users must satisfy all privileges in at least one of the defined sets of privileges in order to be granted access.
    *
    * @example
    * ```ts

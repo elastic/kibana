@@ -25,7 +25,7 @@ import {
 
 import { SpacesService } from '../plugin';
 import { Actions } from './actions';
-import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import {
   CheckPrivilegesDynamicallyWithRequest,
   checkPrivilegesDynamicallyWithRequestFactory,
@@ -44,6 +44,7 @@ import { validateReservedPrivileges } from './validate_reserved_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
+import { CheckPrivilegesWithRequest } from './types';
 import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';

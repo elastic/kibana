@@ -5,8 +5,7 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
-import { KibanaFeatureConfig } from '../common/feature';
-import { ElasticsearchFeatureConfig } from '../common';
+import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
 
 describe('FeatureRegistry', () => {
   describe('Kibana Features', () => {
@@ -1243,7 +1242,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         privileges: [
           {
-            requiredClusterPrivileges: [],
+            requiredClusterPrivileges: ['all'],
             ui: [],
           },
         ],
@@ -1307,7 +1306,7 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it('requires privileges to declare requiredClusterPrivileges', () => {
+    it('requires privileges to declare some form of required es privileges', () => {
       const feature: ElasticsearchFeatureConfig = {
         id: 'test-feature',
         privileges: [
@@ -1320,7 +1319,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"requiredClusterPrivileges\\" fails because [\\"requiredClusterPrivileges\\" is required]]]"`
+        `"Feature test-feature has a privilege definition at index 0 without any privileges defined."`
       );
     });
 
@@ -1329,7 +1328,7 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         privileges: [
           {
-            requiredClusterPrivileges: [],
+            requiredClusterPrivileges: ['all'],
             ui: [],
           },
         ],
@@ -1354,7 +1353,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       privileges: [
         {
-          requiredClusterPrivileges: [],
+          requiredClusterPrivileges: ['all'],
           ui: [],
         },
       ],
@@ -1379,7 +1378,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       privileges: [
         {
-          requiredClusterPrivileges: [],
+          requiredClusterPrivileges: ['all'],
           ui: [],
         },
       ],

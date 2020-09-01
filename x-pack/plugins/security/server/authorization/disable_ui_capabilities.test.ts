@@ -9,7 +9,7 @@ import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
 import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
-import { Feature, ElasticsearchFeature } from '../../../features/server';
+import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
 import { AuthenticatedUser } from '..';
 
 type MockAuthzOptions =
@@ -66,9 +66,9 @@ describe('usingPrivileges', () => {
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
         [
-          new Feature({
+          new KibanaFeature({
             id: 'fooFeature',
-            name: 'Foo Feature',
+            name: 'Foo KibanaFeature',
             app: ['fooApp', 'foo'],
             navLinkId: 'foo',
             privileges: null,
@@ -154,9 +154,9 @@ describe('usingPrivileges', () => {
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
         [
-          new Feature({
+          new KibanaFeature({
             id: 'fooFeature',
-            name: 'Foo Feature',
+            name: 'Foo KibanaFeature',
             app: ['foo'],
             navLinkId: 'foo',
             privileges: null,
@@ -295,16 +295,16 @@ describe('usingPrivileges', () => {
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
+          name: 'Foo KibanaFeature',
           navLinkId: 'foo',
           app: [],
           privileges: null,
         }),
-        new Feature({
+        new KibanaFeature({
           id: 'barFeature',
-          name: 'Bar Feature',
+          name: 'Bar KibanaFeature',
           navLinkId: 'bar',
           app: ['bar'],
           privileges: null,
@@ -395,16 +395,16 @@ describe('usingPrivileges', () => {
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
+          name: 'Foo KibanaFeature',
           navLinkId: 'foo',
           app: [],
           privileges: null,
         }),
-        new Feature({
+        new KibanaFeature({
           id: 'barFeature',
-          name: 'Bar Feature',
+          name: 'Bar KibanaFeature',
           navLinkId: 'bar',
           app: [],
           privileges: null,
@@ -479,9 +479,9 @@ describe('all', () => {
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
+          name: 'Foo KibanaFeature',
           app: ['foo'],
           navLinkId: 'foo',
           privileges: null,

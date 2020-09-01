@@ -12,7 +12,7 @@ import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
 import { KibanaRequest, CoreSetup } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
-import { Feature } from '../../features/server';
+import { KibanaFeature } from '../../features/server';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -160,7 +160,7 @@ describe('Alerting Plugin', () => {
 function mockFeatures() {
   const features = featuresPluginMock.createSetup();
   features.getKibanaFeatures.mockReturnValue([
-    new Feature({
+    new KibanaFeature({
       id: 'appName',
       name: 'appName',
       app: [],

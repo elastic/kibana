@@ -5,7 +5,7 @@
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-import { Feature } from '.';
+import { KibanaFeature } from '.';
 import { SubFeaturePrivilegeGroupConfig, ElasticsearchFeature } from '../common';
 
 function createKibanaFeaturePrivilege(capabilities: string[] = []) {
@@ -42,7 +42,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             app: ['bar-app'],
@@ -88,7 +88,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -141,7 +141,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -210,7 +210,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -240,7 +240,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -284,7 +284,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -355,7 +355,7 @@ describe('populateUICapabilities', () => {
     expect(
       uiCapabilitiesForFeatures(
         [
-          new Feature({
+          new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
             navLinkId: 'newFeatureNavLink',
@@ -365,7 +365,7 @@ describe('populateUICapabilities', () => {
               read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
             },
           }),
-          new Feature({
+          new KibanaFeature({
             id: 'anotherNewFeature',
             name: 'another new feature',
             app: ['bar-app'],
@@ -374,7 +374,7 @@ describe('populateUICapabilities', () => {
               read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
             },
           }),
-          new Feature({
+          new KibanaFeature({
             id: 'yetAnotherNewFeature',
             name: 'yet another new feature',
             navLinkId: 'yetAnotherNavLink',

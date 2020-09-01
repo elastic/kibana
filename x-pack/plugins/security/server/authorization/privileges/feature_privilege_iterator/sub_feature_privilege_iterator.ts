@@ -5,10 +5,10 @@
  */
 
 import { SubFeaturePrivilegeConfig } from '../../../../../features/common';
-import { Feature } from '../../../../../features/server';
+import { KibanaFeature } from '../../../../../features/server';
 
 export function* subFeaturePrivilegeIterator(
-  feature: Feature
+  feature: KibanaFeature
 ): IterableIterator<SubFeaturePrivilegeConfig> {
   for (const subFeature of feature.subFeatures) {
     for (const group of subFeature.privilegeGroups) {

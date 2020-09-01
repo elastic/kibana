@@ -15,11 +15,15 @@ import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { KibanaFeature, KibanaFeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
-import { ElasticsearchFeatureConfig, ElasticsearchFeature } from '../common';
+import {
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+  KibanaFeature,
+  KibanaFeatureConfig,
+} from '../common';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.

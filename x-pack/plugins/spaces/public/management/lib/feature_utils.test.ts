@@ -5,7 +5,7 @@
  */
 
 import { getEnabledFeatures } from './feature_utils';
-import { FeatureConfig } from '../../../../features/public';
+import { KibanaFeatureConfig } from '../../../../features/public';
 
 const buildFeatures = () =>
   [
@@ -25,7 +25,7 @@ const buildFeatures = () =>
       id: 'feature4',
       name: 'feature 4',
     },
-  ] as FeatureConfig[];
+  ] as KibanaFeatureConfig[];
 
 const buildSpace = (disabledFeatures = [] as string[]) => ({
   id: 'space',

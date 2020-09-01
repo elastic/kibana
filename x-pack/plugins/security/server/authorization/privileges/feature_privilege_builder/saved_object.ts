@@ -5,7 +5,7 @@
  */
 
 import { flatten, uniq } from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = ['bulk_get', 'get', 'find'];
@@ -13,7 +13,10 @@ const writeOperations: string[] = ['create', 'bulk_create', 'update', 'bulk_upda
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
 export class FeaturePrivilegeSavedObjectBuilder extends BaseFeaturePrivilegeBuilder {
-  public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
+  public getActions(
+    privilegeDefinition: FeatureKibanaPrivileges,
+    feature: KibanaFeature
+  ): string[] {
     return uniq([
       ...flatten(
         privilegeDefinition.savedObject.all.map((type) => [

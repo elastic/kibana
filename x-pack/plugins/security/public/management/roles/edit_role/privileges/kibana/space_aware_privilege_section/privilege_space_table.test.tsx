@@ -13,7 +13,7 @@ import { PrivilegeDisplay } from './privilege_display';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { Feature } from '../../../../../../../../features/public';
+import { KibanaFeature } from '../../../../../../../../features/public';
 import { findTestSubject } from 'test_utils/find_test_subject';
 
 interface TableRow {
@@ -24,7 +24,7 @@ interface TableRow {
 }
 
 const features = [
-  new Feature({
+  new KibanaFeature({
     id: 'normal',
     name: 'normal feature',
     app: [],
@@ -39,7 +39,7 @@ const features = [
       },
     },
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'normal_with_sub',
     name: 'normal feature with sub features',
     app: [],
@@ -92,7 +92,7 @@ const features = [
       },
     ],
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'bothPrivilegesExcludedFromBase',
     name: 'bothPrivilegesExcludedFromBase',
     app: [],
@@ -109,7 +109,7 @@ const features = [
       },
     },
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'allPrivilegeExcludedFromBase',
     name: 'allPrivilegeExcludedFromBase',
     app: [],

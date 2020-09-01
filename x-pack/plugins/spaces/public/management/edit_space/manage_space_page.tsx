@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Feature, FeaturesPluginStart } from '../../../../features/public';
+import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
@@ -46,7 +46,7 @@ interface Props {
 
 interface State {
   space: Partial<Space>;
-  features: Feature[];
+  features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
   isLoading: boolean;
@@ -312,7 +312,7 @@ export class ManageSpacePage extends Component<Props, State> {
     }
   };
 
-  private loadSpace = async (spaceId: string, featuresPromise: Promise<Feature[]>) => {
+  private loadSpace = async (spaceId: string, featuresPromise: Promise<KibanaFeature[]>) => {
     const { spacesManager, onLoadSpace } = this.props;
 
     try {

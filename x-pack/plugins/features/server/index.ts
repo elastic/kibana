@@ -14,8 +14,8 @@ import { Plugin } from './plugin';
 export { uiCapabilitiesRegex } from './feature_schema';
 
 export {
-  Feature,
-  FeatureConfig,
+  KibanaFeature,
+  KibanaFeatureConfig,
   FeatureKibanaPrivileges,
   ElasticsearchFeature,
   ElasticsearchFeatureConfig,

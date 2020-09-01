@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { KibanaFeature } from '../common/feature';
-import { ElasticsearchFeature } from '../common';
+import { ElasticsearchFeature, KibanaFeature } from '../common';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'] as const;
 const ELIGIBLE_DEEP_MERGE_KEYS = ['management'] as const;
@@ -20,74 +20,19 @@ export function uiCapabilitiesForFeatures(
   features: KibanaFeature[],
   elasticsearchFeatures: ElasticsearchFeature[]
 ): UICapabilities {
-  const featureCapabilities = features.map(getCapabilitiesFromFeature);
-  const esFeatureCapabilities = elasticsearchFeatures.map(getCapabilitiesFromElasticsearchFeature);
+  const kibanaFeatureCapabilities = features.map(getCapabilitiesFromFeature);
+  const elasticsearchFeatureCapabilities = elasticsearchFeatures.map(getCapabilitiesFromFeature);
 
-  return buildCapabilities(...featureCapabilities, ...esFeatureCapabilities);
+  return buildCapabilities(...kibanaFeatureCapabilities, ...elasticsearchFeatureCapabilities);
 }
 
-function getCapabilitiesFromFeature(feature: KibanaFeature): FeatureCapabilities {
-  const UIFeatureCapabilities: FeatureCapabilities = {
-    catalogue: {},
-    [feature.id]: {},
-  };
-
-  if (feature.catalogue) {
-    UIFeatureCapabilities.catalogue = {
-      ...UIFeatureCapabilities.catalogue,
-      ...feature.catalogue.reduce(
-        (acc, capability) => ({
-          ...acc,
-          [capability]: true,
-        }),
-        {}
-      ),
-    };
-  }
-
-  if (feature.management) {
-    const sectionEntries = Object.entries(feature.management);
-    UIFeatureCapabilities.management = sectionEntries.reduce((acc, [sectionId, sectionItems]) => {
-      return {
-        ...acc,
-        [sectionId]: sectionItems.reduce((acc2, item) => {
-          return {
-            ...acc2,
-            [item]: true,
-          };
-        }, {}),
-      };
-    }, {});
-  }
-
-  const featurePrivileges = Object.values(feature.privileges ?? {});
-  if (feature.subFeatures) {
-    featurePrivileges.push(
-      ...feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2)
-    );
-  }
-  if (feature.reserved?.privileges) {
-    featurePrivileges.push(...feature.reserved.privileges.map((rp) => rp.privilege));
-  }
-
-  featurePrivileges.forEach((privilege) => {
-    UIFeatureCapabilities[feature.id] = {
-      ...UIFeatureCapabilities[feature.id],
-      ...privilege.ui.reduce(
-        (privilegeAcc, capability) => ({
-          ...privilegeAcc,
-          [capability]: true,
-        }),
-        {}
-      ),
-    };
-  });
-
-  return UIFeatureCapabilities;
-}
-
-function getCapabilitiesFromElasticsearchFeature(
-  feature: ElasticsearchFeature
+function getCapabilitiesFromFeature(
+  feature:
+    | Pick<
+        KibanaFeature,
+        'id' | 'catalogue' | 'management' | 'privileges' | 'subFeatures' | 'reserved'
+      >
+    | Pick<ElasticsearchFeature, 'id' | 'catalogue' | 'management' | 'privileges'>
 ): FeatureCapabilities {
   const UIFeatureCapabilities: FeatureCapabilities = {
     catalogue: {},
@@ -122,7 +67,20 @@ function getCapabilitiesFromElasticsearchFeature(
     }, {});
   }
 
-  const featurePrivileges = Object.values(feature.privileges ?? {});
+  const featurePrivileges = Object.values(feature.privileges ?? {}) as Writable<
+    Array<{ ui: RecursiveReadonly<string[]> }>
+  >;
+
+  if (isKibanaFeature(feature)) {
+    if (feature.subFeatures) {
+      featurePrivileges.push(
+        ...feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2)
+      );
+    }
+    if (feature.reserved?.privileges) {
+      featurePrivileges.push(...feature.reserved.privileges.map((rp) => rp.privilege));
+    }
+  }
 
   featurePrivileges.forEach((privilege) => {
     UIFeatureCapabilities[feature.id] = {
@@ -138,6 +96,20 @@ function getCapabilitiesFromElasticsearchFeature(
   });
 
   return UIFeatureCapabilities;
+}
+
+function isKibanaFeature(
+  feature: Partial<KibanaFeature> | Partial<ElasticsearchFeature>
+): feature is KibanaFeature {
+  // Elasticsearch features define privileges as an array,
+  // whereas Kibana features define privileges as an object,
+  // or they define reserved privileges, or they don't define either.
+  // Elasticsearch features are required to defined privileges.
+  return (
+    (feature as any).reserved != null ||
+    (feature.privileges && !Array.isArray(feature.privileges)) ||
+    feature.privileges === null
+  );
 }
 
 function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {

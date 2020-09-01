@@ -18,7 +18,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { CheckPrivilegesResponse } from '../authorization/check_privileges';
+import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {

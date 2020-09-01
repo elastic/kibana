@@ -45,12 +45,12 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
 |See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`subFeatures` (optional)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
 |See <<example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 

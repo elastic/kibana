@@ -21,7 +21,7 @@ import { mergeWith } from 'lodash';
 import { Capabilities } from './types';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  mergeWith({}, ...sources, (a: any, b: any, key: any) => {
+  mergeWith({}, ...sources, (a: any, b: any) => {
     if (
       (typeof a === 'boolean' && typeof b === 'object') ||
       (typeof a === 'object' && typeof b === 'boolean')

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 import {
   CoreSetup,
   HttpResources,
@@ -39,7 +39,7 @@ export interface RouteDefinitionParams {
   authc: Authentication;
   authz: AuthorizationServiceSetup;
   license: SecurityLicense;
-  getFeatures: () => Promise<Feature[]>;
+  getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
 }
 

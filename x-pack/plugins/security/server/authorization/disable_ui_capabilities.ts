@@ -9,18 +9,18 @@ import { UICapabilities } from 'ui/capabilities';
 import { RecursiveReadonlyArray } from '@kbn/utility-types';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
-  Feature,
+  KibanaFeature,
   ElasticsearchFeature,
   FeatureElasticsearchPrivileges,
 } from '../../../features/server';
 
-import { CheckPrivilegesResponse } from './check_privileges';
+import { CheckPrivilegesResponse } from './types';
 import { AuthorizationServiceSetup } from '.';
 import { AuthenticatedUser } from '..';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,
-  features: Feature[],
+  features: KibanaFeature[],
   elasticsearchFeatures: ElasticsearchFeature[],
   logger: Logger,
   authz: AuthorizationServiceSetup,
@@ -33,12 +33,14 @@ export function disableUICapabilitiesFactory(
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
 
-  const elasticsearchFeatureMap = elasticsearchFeatures.reduce((acc, esFeature) => {
+  const elasticsearchFeatureMap = elasticsearchFeatures.reduce<
+    Record<string, RecursiveReadonlyArray<FeatureElasticsearchPrivileges>>
+  >((acc, esFeature) => {
     return {
       ...acc,
       [esFeature.id]: esFeature.privileges,
     };
-  }, {} as Record<string, RecursiveReadonlyArray<FeatureElasticsearchPrivileges>>);
+  }, {});
 
   const allRequiredClusterPrivileges = Array.from(
     new Set(
@@ -52,7 +54,7 @@ export function disableUICapabilitiesFactory(
   const allRequiredIndexPrivileges = Object.values(elasticsearchFeatureMap)
     .flat()
     .filter((p) => !!p.requiredIndexPrivileges)
-    .reduce((acc, p) => {
+    .reduce<Record<string, string[]>>((acc, p) => {
       return {
         ...acc,
         ...Object.entries(p.requiredIndexPrivileges!).reduce((acc2, [indexName, privileges]) => {
@@ -60,9 +62,9 @@ export function disableUICapabilitiesFactory(
             ...acc2,
             [indexName]: [...(acc[indexName] ?? []), ...privileges],
           };
-        }, {} as Record<string, string[]>),
+        }, {}),
       };
-    }, {} as Record<string, string[]>);
+    }, {});
 
   const shouldDisableFeatureUICapability = (
     featureId: keyof UICapabilities,

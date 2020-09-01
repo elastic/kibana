@@ -7,7 +7,7 @@ import React from 'react';
 import { FeatureTable } from './feature_table';
 import { Role } from '../../../../../../../common/model';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature, SubFeatureConfig } from '../../../../../../../../features/public';
+import { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
 import { kibanaFeatures, createFeature } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
@@ -24,7 +24,7 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
 };
 
 interface TestConfig {
-  features: Feature[];
+  features: KibanaFeature[];
   role: Role;
   privilegeIndex: number;
   calculateDisplayedPrivileges: boolean;

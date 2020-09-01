@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 it('allows features to be defined without privileges', () => {
-  const feature: Feature = new Feature({
+  const feature: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
@@ -19,7 +19,7 @@ it('allows features to be defined without privileges', () => {
 });
 
 it('allows features with a single reserved privilege to be defined', () => {
-  const feature: Feature = new Feature({
+  const feature: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
@@ -45,7 +45,7 @@ it('allows features with a single reserved privilege to be defined', () => {
 });
 
 it('allows multiple features with reserved privileges to be defined', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
@@ -67,7 +67,7 @@ it('allows multiple features with reserved privileges to be defined', () => {
     },
   });
 
-  const feature2: Feature = new Feature({
+  const feature2: KibanaFeature = new KibanaFeature({
     id: 'foo2',
     name: 'foo',
     app: [],
@@ -93,7 +93,7 @@ it('allows multiple features with reserved privileges to be defined', () => {
 });
 
 it('prevents a feature from specifying the same reserved privilege id', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
@@ -131,7 +131,7 @@ it('prevents a feature from specifying the same reserved privilege id', () => {
 });
 
 it('prevents features from sharing a reserved privilege id', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
@@ -153,7 +153,7 @@ it('prevents features from sharing a reserved privilege id', () => {
     },
   });
 
-  const feature2: Feature = new Feature({
+  const feature2: KibanaFeature = new KibanaFeature({
     id: 'foo2',
     name: 'foo',
     app: [],

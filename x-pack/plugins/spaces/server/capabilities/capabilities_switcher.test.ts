@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../plugins/features/server';
+import { KibanaFeature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
@@ -80,7 +80,7 @@ const features = ([
       },
     },
   },
-] as unknown) as Feature[];
+] as unknown) as KibanaFeature[];
 
 const buildCapabilities = () =>
   Object.freeze({

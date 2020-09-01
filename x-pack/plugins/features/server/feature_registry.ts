@@ -6,8 +6,8 @@
 
 import { cloneDeep, uniq } from 'lodash';
 import {
-  FeatureConfig,
-  Feature,
+  KibanaFeatureConfig,
+  KibanaFeature,
   FeatureKibanaPrivileges,
   ElasticsearchFeatureConfig,
   ElasticsearchFeature,
@@ -16,10 +16,10 @@ import { validateKibanaFeature, validateElasticsearchFeature } from './feature_s
 
 export class FeatureRegistry {
   private locked = false;
-  private kibanaFeatures: Record<string, FeatureConfig> = {};
+  private kibanaFeatures: Record<string, KibanaFeatureConfig> = {};
   private esFeatures: Record<string, ElasticsearchFeatureConfig> = {};
 
-  public registerKibanaFeature(feature: FeatureConfig) {
+  public registerKibanaFeature(feature: KibanaFeatureConfig) {
     if (this.locked) {
       throw new Error(
         `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
@@ -55,9 +55,11 @@ export class FeatureRegistry {
     this.esFeatures[feature.id] = featureCopy;
   }
 
-  public getAllKibanaFeatures(): Feature[] {
+  public getAllKibanaFeatures(): KibanaFeature[] {
     this.locked = true;
-    return Object.values(this.kibanaFeatures).map((featureConfig) => new Feature(featureConfig));
+    return Object.values(this.kibanaFeatures).map(
+      (featureConfig) => new KibanaFeature(featureConfig)
+    );
   }
 
   public getAllElasticsearchFeatures(): ElasticsearchFeature[] {
@@ -68,7 +70,7 @@ export class FeatureRegistry {
   }
 }
 
-function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
+function applyAutomaticPrivilegeGrants(feature: KibanaFeatureConfig): KibanaFeatureConfig {
   const allPrivilege = feature.privileges?.all;
   const readPrivilege = feature.privileges?.read;
   const reservedPrivileges = (feature.reserved?.privileges ?? []).map((rp) => rp.privilege);

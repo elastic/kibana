@@ -6,7 +6,10 @@
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
-import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
+import {
+  PluginStartContract as FeaturesStartContract,
+  KibanaFeature,
+} from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
   AlertsAuthorization,
@@ -41,7 +44,7 @@ function mockSecurity() {
 }
 
 function mockFeature(appName: string, typeName?: string) {
-  return new Feature({
+  return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
@@ -84,7 +87,7 @@ function mockFeature(appName: string, typeName?: string) {
 }
 
 function mockFeatureWithSubFeature(appName: string, typeName: string) {
-  return new Feature({
+  return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],

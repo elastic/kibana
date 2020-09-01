@@ -12,50 +12,14 @@ import {
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
   CheckPrivilegesPayload,
+  CheckPrivileges,
+  CheckPrivilegesResponse,
 } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
   version: string;
-}
-
-export interface CheckPrivilegesResponse {
-  hasAllRequested: boolean;
-  username: string;
-  privileges: {
-    kibana: Array<{
-      /**
-       * If this attribute is undefined, this element is a privilege for the global resource.
-       */
-      resource?: string;
-      privilege: string;
-      authorized: boolean;
-    }>;
-    elasticsearch: {
-      cluster: Array<{
-        privilege: string;
-        authorized: boolean;
-      }>;
-      index: {
-        [indexName: string]: Array<{
-          privilege: string;
-          authorized: boolean;
-        }>;
-      };
-    };
-  };
-}
-
-export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
-
-export interface CheckPrivileges {
-  atSpace(spaceId: string, privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
-  atSpaces(
-    spaceIds: string[],
-    privileges: CheckPrivilegesPayload
-  ): Promise<CheckPrivilegesResponse>;
-  globally(privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
 }
 
 export function checkPrivilegesWithRequestFactory(
@@ -118,18 +82,17 @@ export function checkPrivilegesWithRequestFactory(
         })
       );
 
-      const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce(
-        (acc, [index, indexResponse]) => {
-          return {
-            ...acc,
-            [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
-              privilege,
-              authorized,
-            })),
-          };
-        },
-        {} as CheckPrivilegesResponse['privileges']['elasticsearch']['index']
-      );
+      const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce<
+        CheckPrivilegesResponse['privileges']['elasticsearch']['index']
+      >((acc, [index, indexResponse]) => {
+        return {
+          ...acc,
+          [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
+            privilege,
+            authorized,
+          })),
+        };
+      }, {});
 
       if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
         throw new Error(
