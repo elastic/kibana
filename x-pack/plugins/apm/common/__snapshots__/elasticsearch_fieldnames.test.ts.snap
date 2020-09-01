@@ -118,6 +118,10 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
+exports[`Error TRANS_DOM_INTERACTIVE 1`] = `undefined`;
+
+exports[`Error TRANS_TIME_TO_FIRST_BYTE 1`] = `undefined`;
+
 exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
@@ -266,6 +270,10 @@ exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
+exports[`Span TRANS_DOM_INTERACTIVE 1`] = `undefined`;
+
+exports[`Span TRANS_TIME_TO_FIRST_BYTE 1`] = `undefined`;
+
 exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
@@ -413,6 +421,10 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANS_DOM_INTERACTIVE 1`] = `undefined`;
+
+exports[`Transaction TRANS_TIME_TO_FIRST_BYTE 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
