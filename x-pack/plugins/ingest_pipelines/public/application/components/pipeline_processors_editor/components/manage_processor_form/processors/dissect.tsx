@@ -16,6 +16,7 @@ import {
   fieldValidators,
   UseField,
   Field,
+  useKibana,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
@@ -23,20 +24,20 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 
 const { emptyField } = fieldValidators;
 
-const fieldsConfig: Record<string, FieldConfig> = {
-  /* Required field config */
-  pattern: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
-      defaultMessage: 'Pattern',
-    }),
-    helpText: () => (
-      <EuiText>
+const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
+  return {
+    /* Required field config */
+    pattern: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
+        defaultMessage: 'Pattern',
+      }),
+      helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText"
-          defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {key_modifier} to alter the dissection behavior."
+          defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
           values={{
-            key_modifier: (
+            keyModifier: (
               <EuiLink
                 target="_blank"
                 external
@@ -52,38 +53,44 @@ const fieldsConfig: Record<string, FieldConfig> = {
             ),
           }}
         />
-      </EuiText>
-    ),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternRequiredError', {
-            defaultMessage: 'A pattern value is required.',
-          })
-        ),
-      },
-    ],
-  },
-  /* Optional field config */
-  append_separator: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
-      {
-        defaultMessage: 'Append separator (optional)',
-      }
-    ),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
-        defaultMessage="Characters used to separate fields when appending two or more results together. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
-      />
-    ),
-  },
+      ),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.ingestPipelines.pipelineEditor.dissectForm.patternRequiredError',
+              {
+                defaultMessage: 'A pattern value is required.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    /* Optional field config */
+    append_separator: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate(
+        'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
+        {
+          defaultMessage: 'Append separator (optional)',
+        }
+      ),
+      helpText: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
+          defaultMessage="Characters used to separate fields when appending two or more results together. Defaults to {value}."
+          values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
+        />
+      ),
+    },
+  };
 };
 
 export const Dissect: FunctionComponent = () => {
+  const { services } = useKibana();
+  const fieldsConfig = getFieldsConfig(services.documentation.getEsDocsBasePath());
+
   return (
     <>
       <FieldNameField
