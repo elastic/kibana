@@ -52,6 +52,8 @@ export const JsonEditor = React.memo(
       isControlled,
     });
 
+    // https://github.com/elastic/kibana/issues/73971
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const debouncedSetContent = useCallback(debounce(setContent, 300), [setContent]);
 
     // We let the consumer control the validation and the error message.
@@ -76,6 +78,7 @@ export const JsonEditor = React.memo(
           debouncedSetContent(updated);
         }
       },
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
       [isControlled]
     );
 
