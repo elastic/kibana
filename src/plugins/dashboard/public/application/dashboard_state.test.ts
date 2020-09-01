@@ -24,10 +24,6 @@ import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 
-jest.mock('ui/state_management/state', () => ({
-  State: {},
-}));
-
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
