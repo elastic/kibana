@@ -6,15 +6,8 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { HostItem } from '../common';
-import {
-  CursorType,
-  Inspect,
-  Maybe,
-  PageInfoPaginated,
-  RequestOptionsPaginated,
-  SortField,
-} from '../..';
+import { HostItem, HostsFields } from '../common';
+import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
   node: HostItem;
@@ -29,7 +22,6 @@ export interface HostsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostsRequestOptions extends RequestOptionsPaginated {
-  sort: SortField;
+export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
   defaultIndex: string[];
 }
