@@ -88,6 +88,9 @@ import {
   ACTION_ADD_TO_LIBRARY,
   AddToLibraryActionContext,
   AddToLibraryAction,
+  ACTION_LIBRARY_NOTIFICATION,
+  LibraryNotificationActionContext,
+  LibraryNotificationAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
