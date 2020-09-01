@@ -239,26 +239,6 @@ export const rules: OwnershipRule[] = [
     coverageOwner: 'kibana-core-ui',
   },
   {
-    files: [
-      '/src/plugins/dashboard/**/*.scss',
-      '/x-pack/plugins/canvas/**/*.scss',
-      '/src/legacy/core_plugins/kibana/public/home/**/*.scss',
-    ],
-    excludeFiles: [],
-    codeOwner: '@elastic/kibana-core-ui-designers',
-    coverageOwner: 'kibana-core-ui-designers',
-  },
-  {
-    files: [
-      '/x-pack/plugins/apm/**/*.scss',
-      '/x-pack/plugins/infra/**/*.scss',
-      '/x-pack/plugins/ingest_manager/**/*.scss',
-    ],
-    excludeFiles: [],
-    codeOwner: '@elastic/observability-design',
-    coverageOwner: 'observability-design',
-  },
-  {
     files: ['/x-pack/legacy/plugins/infra/', '/x-pack/plugins/infra/'],
     excludeFiles: [],
     codeOwner: '@elastic/logs-metrics-ui',
@@ -535,17 +515,6 @@ export const rules: OwnershipRule[] = [
     coverageOwner: 'kibana-alerting-services',
   },
   {
-    files: ['**/*.scss'],
-    excludeFiles: [],
-    codeOwner: '@elastic/kibana-design',
-    coverageOwner: 'kibana-design',
-  },
-  {
-    files: ['/packages/kbn-ui-framework/'],
-    excludeFiles: [],
-    coverageOwner: 'kibana-design',
-  },
-  {
     files: ['/x-pack/legacy/plugins/reporting', '/x-pack/plugins/reporting'],
     excludeFiles: [],
     codeOwner: '@elastic/kibana-reporting',
@@ -574,12 +543,6 @@ export const rules: OwnershipRule[] = [
     excludeFiles: [],
     codeOwner: '@elastic/workplace-search-frontend',
     coverageOwner: 'workplace-search-frontend',
-  },
-  {
-    files: ['/x-pack/plugins/enterprise_search/**/*.scss'],
-    excludeFiles: [],
-    codeOwner: '@elastic/ent-search-design',
-    coverageOwner: 'ent-search-design',
   },
   {
     files: [
@@ -677,5 +640,53 @@ export const rules: OwnershipRule[] = [
     excludeFiles: [],
     codeOwner: '@elastic/security-intelligence-analytics',
     coverageOwner: 'security-intelligence-analytics',
+  },
+  {
+    files: ['**/*.scss'],
+    excludeFiles: [],
+    codeOwner: '@elastic/kibana-design',
+    coverageOwner: 'kibana-design',
+  },
+  {
+    files: ['/packages/kbn-ui-framework/'],
+    excludeFiles: [],
+    coverageOwner: 'kibana-design',
+  },
+  {
+    files: [
+      '/src/plugins/dashboard/**/*.scss',
+      '/x-pack/plugins/canvas/**/*.scss',
+      '/src/legacy/core_plugins/kibana/public/home/**/*.scss',
+      '/x-pack/legacy/plugins/security/**/*.scss',
+      '/x-pack/legacy/plugins/spaces/**/*.scss',
+      '/x-pack/plugins/spaces/**/*.scss',
+      '/x-pack/plugins/security/**/*.scss',
+    ],
+    excludeFiles: [],
+    codeOwner: '@elastic/kibana-core-ui-designers',
+    coverageOwner: 'kibana-core-ui-designers',
+  },
+  {
+    files: [
+      '/x-pack/plugins/apm/**/*.scss',
+      '/x-pack/plugins/infra/**/*.scss',
+      '/x-pack/plugins/ingest_manager/**/*.scss',
+      '/x-pack/plugins/observability/**/*.scss',
+    ],
+    excludeFiles: [],
+    codeOwner: '@elastic/observability-design',
+    coverageOwner: 'observability-design',
+  },
+  {
+    files: ['/x-pack/plugins/enterprise_search/**/*.scss'],
+    excludeFiles: [],
+    codeOwner: '@elastic/ent-search-design',
+    coverageOwner: 'ent-search-design',
+  },
+  {
+    files: ['/x-pack/plugins/endpoint/**/*.scss', '/x-pack/plugins/security_solution/**/*.scss'],
+    excludeFiles: [],
+    codeOwner: '@elastic/security-design',
+    coverageOwner: 'security-design',
   },
 ];
