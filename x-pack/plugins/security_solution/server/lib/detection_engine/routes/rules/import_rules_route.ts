@@ -12,6 +12,7 @@ import { validate } from '../../../../../common/validate';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
+  ImportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   ImportRulesSchema as ImportRulesResponseSchema,
