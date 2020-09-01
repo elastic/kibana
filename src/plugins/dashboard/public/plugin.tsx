@@ -40,6 +40,7 @@ import {
   EmbeddableStart,
   SavedObjectEmbeddableInput,
   EmbeddableInput,
+  PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
@@ -84,6 +85,9 @@ import {
   ACTION_UNLINK_FROM_LIBRARY,
   UnlinkFromLibraryActionContext,
   UnlinkFromLibraryAction,
+  ACTION_ADD_TO_LIBRARY,
+  AddToLibraryActionContext,
+  AddToLibraryAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -96,11 +100,6 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
-import {
-  AddToLibraryAction,
-  ACTION_ADD_TO_LIBRARY,
-  AddToLibraryActionContext,
-} from './application/actions/add_to_library_action';
 import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
@@ -170,6 +169,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
+    [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
   }
 }
 
@@ -445,6 +445,10 @@ export class DashboardPlugin
       const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+
+      const libraryNotificationAction = new LibraryNotificationAction();
+      uiActions.registerAction(libraryNotificationAction);
+      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({

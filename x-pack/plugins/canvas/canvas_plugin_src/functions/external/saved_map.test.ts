@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('ui/new_platform');
+
 import { savedMap } from './saved_map';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';

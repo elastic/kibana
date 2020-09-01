@@ -30,6 +30,8 @@ import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { ScopedHistory } from '../scoped_history';
+import { Observable } from 'rxjs';
+import { MountPoint } from 'kibana/public';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -307,6 +309,191 @@ describe('ApplicationService', () => {
       );
       expect(history.entries.length).toEqual(2);
       expect(history.entries[1].pathname).toEqual('/app/app1');
+    });
+  });
+
+  describe('registering action menus', () => {
+    const getValue = (obs: Observable<MountPoint | undefined>): Promise<MountPoint | undefined> => {
+      return obs.pipe(take(1)).toPromise();
+    };
+
+    const mounter1: MountPoint = () => () => undefined;
+    const mounter2: MountPoint = () => () => undefined;
+
+    it('updates the observable value when an application is mounted', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      expect(await getValue(currentActionMenu$)).toBeUndefined();
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+    });
+
+    it('updates the observable value when switching application', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          return () => undefined;
+        },
+      });
+      register(Symbol(), {
+        id: 'app2',
+        title: 'App2',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter2);
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        await navigateToApp('app2');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter2);
+    });
+
+    it('updates the observable value to undefined when switching to an application without action menu', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          return () => undefined;
+        },
+      });
+      register(Symbol(), {
+        id: 'app2',
+        title: 'App2',
+        mount: async ({}: AppMountParameters) => {
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        await navigateToApp('app2');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBeUndefined();
+    });
+
+    it('allow applications to call `setHeaderActionMenu` multiple times', async () => {
+      const { register } = service.setup(setupDeps);
+
+      let resolveMount: () => void;
+      const promise = new Promise((resolve) => {
+        resolveMount = resolve;
+      });
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          promise.then(() => {
+            setHeaderActionMenu(mounter2);
+          });
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        resolveMount();
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter2);
+    });
+
+    it('allow applications to unset the current menu', async () => {
+      const { register } = service.setup(setupDeps);
+
+      let resolveMount: () => void;
+      const promise = new Promise((resolve) => {
+        resolveMount = resolve;
+      });
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          promise.then(() => {
+            setHeaderActionMenu(undefined);
+          });
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        resolveMount();
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBeUndefined();
     });
   });
 });
