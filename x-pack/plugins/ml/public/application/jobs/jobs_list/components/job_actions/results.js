@@ -11,11 +11,21 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { mlJobService } from '../../../../services/job_service';
 import { i18n } from '@kbn/i18n';
-import { getBasePath } from '../../../../util/dependency_cache';
+import { getBasePath, getUiSettings } from '../../../../util/dependency_cache';
+import {
+  ANOMALY_DETECTION_ENABLE_TIME_RANGE,
+  ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+} from '../../../../../../common/constants/settings';
 
 export function getLink(location, jobs) {
   const basePath = getBasePath();
-  const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
+  const useUserTimeSettings = getUiSettings().get(ANOMALY_DETECTION_ENABLE_TIME_RANGE);
+  const userTimeSettings = getUiSettings().get(ANOMALY_DETECTION_DEFAULT_TIME_RANGE);
+  const resultsPageUrl = mlJobService.createResultsUrlForJobs(
+    jobs,
+    location,
+    useUserTimeSettings === true && userTimeSettings !== undefined ? userTimeSettings : undefined
+  );
   return `${basePath.get()}/app/ml${resultsPageUrl}`;
 }
 
