@@ -9,7 +9,7 @@ export default function ({ getService }) {
 
   describe('getTile', () => {
     it('should validate params', async () => {
-     await supertest
+      await supertest
         .get(
           `/api/maps/mvt/getTile?x=15&y=11&z=5&geometryFieldName=coordinates&index=logstash*&requestBody=(_source:(includes:!(coordinates)),docvalue_fields:!(),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(coordinates))`
         )
