@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TextEditor } from '../field_components';
@@ -30,12 +30,29 @@ const fieldsConfig: Record<string, FieldConfig> = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
       defaultMessage: 'Pattern',
     }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText',
-      {
-        defaultMessage:
-          'Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard.',
-      }
+    helpText: () => (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText"
+          defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {key_modifier} to alter the dissection behavior."
+          values={{
+            key_modifier: (
+              <EuiLink
+                target="_blank"
+                external
+                href={esDocUrl + '/dissect-processor.html#dissect-key-modifiers'}
+              >
+                {i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText.dissectProcessorLink',
+                  {
+                    defaultMessage: 'key modifier',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
     ),
     validations: [
       {

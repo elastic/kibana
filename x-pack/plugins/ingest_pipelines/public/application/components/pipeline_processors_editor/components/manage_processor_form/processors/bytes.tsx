@@ -19,7 +19,7 @@ export const Bytes: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.bytesForm.fieldNameHelpText',
           {
             defaultMessage:
-              'Field to convert. If the field contains an array, each array value is converted.,
+              'Field to convert. If the field contains an array, each array value is converted.',
           }
         )}
       />

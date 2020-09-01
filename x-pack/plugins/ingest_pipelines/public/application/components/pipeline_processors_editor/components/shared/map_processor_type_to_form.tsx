@@ -54,7 +54,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.append', {
       defaultMessage:
-        "Appends values to an existing array, converts a scalar to an array and appends values, or creates an array containing the provided values if the field doesn't exist.",
+        "Appends values to a field's array. If the field contains a single value, the processor first converts it to an array. If the field doesn't exist, the processor creates an array containing the appended values.",
     }),
   },
   bytes: {
@@ -65,7 +65,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.bytes', {
       defaultMessage:
-        'Converts a human-readable byte value to its value in bytes. If the field is an array of strings, the processor converts all members of the array.',
+        'Converts digital storage units to bytes. For example, 1KB becomes 1024 bytes.',
     }),
   },
   circle: {
@@ -107,8 +107,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Date',
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.date', {
-      defaultMessage:
-        'Converts a date to a document timestamp.',
+      defaultMessage: 'Converts a date to a document timestamp.',
     }),
   },
   date_index_name: {
@@ -141,7 +140,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.dotExpander', {
       defaultMessage:
-        'Expands a field containing dot notation into an object field, and makes these fields accessible by other processors in the pipeline.',
+        'Expands a field containing dot notation into an object field. The object field is then accessible by other processors in the pipeline.',
     }),
   },
   drop: {
@@ -152,7 +151,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.drop', {
       defaultMessage:
-        'Drops the document without raising any errors. Useful for preventing documents from getting indexed based other conditions.',
+        'Drops documents without returning an error. Used to only index documents that meet specified conditions.',
     }),
   },
   enrich: {
