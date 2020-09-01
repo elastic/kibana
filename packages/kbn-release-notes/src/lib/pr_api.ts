@@ -187,7 +187,6 @@ export class PrApi {
    */
   private async gqlRequest(query: DocumentNode, variables: Record<string, unknown> = {}) {
     let attempt = 0;
-    const baseTimeout = 2000;
 
     while (true) {
       attempt += 1;
@@ -208,7 +207,7 @@ export class PrApi {
 
         return resp.data;
       } catch (error) {
-        if (!isAxiosResponseError(error) || !(error.response.status >= 500)) {
+        if (!isAxiosResponseError(error) || error.response.status < 500) {
           // rethrow error unless it is a 500+ response from github
           throw error;
         }
@@ -216,13 +215,13 @@ export class PrApi {
         const { status, data } = error.response;
         const resp = inspect(data);
 
-        if (attempt >= 3) {
+        if (attempt === 5) {
           throw new Error(
             `${status} response from Github, attempted request ${attempt} times: [${resp}]`
           );
         }
 
-        const delay = baseTimeout * attempt;
+        const delay = attempt * 2000;
         this.log.debug(`Github responded with ${status}, retrying in ${delay} ms: [${resp}]`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
