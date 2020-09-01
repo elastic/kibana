@@ -44,10 +44,6 @@ export function PageViewsTrend() {
     [end, start, serviceName, uiFilters, breakdown]
   );
 
-  const onBreakdownChange = (value: BreakdownItem | null) => {
-    setBreakdown(value);
-  };
-
   return (
     <div>
       <EuiFlexGroup responsive={false}>
@@ -59,7 +55,7 @@ export function PageViewsTrend() {
         <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
             selectedBreakdown={breakdown}
-            onBreakdownChange={onBreakdownChange}
+            onBreakdownChange={setBreakdown}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

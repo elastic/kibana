@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
@@ -27,27 +28,37 @@ export function BreakdownFilter({
 
   const items: BreakdownItem[] = [
     {
-      name: '- No breakdown -',
+      name: i18n.translate('xpack.apm.csm.breakDownFilter.noBreakdown', {
+        defaultMessage: 'No breakdown',
+      }),
       fieldName: NO_BREAKDOWN,
       type: 'category',
     },
     {
-      name: 'Browser',
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.browser', {
+        defaultMessage: 'Browser',
+      }),
       fieldName: USER_AGENT_NAME,
       type: 'category',
     },
     {
-      name: 'OS',
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.os', {
+        defaultMessage: 'OS',
+      }),
       fieldName: USER_AGENT_OS,
       type: 'category',
     },
     {
-      name: 'Device',
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.device', {
+        defaultMessage: 'Device',
+      }),
       fieldName: USER_AGENT_DEVICE,
       type: 'category',
     },
     {
-      name: 'Location',
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.location', {
+        defaultMessage: 'Location',
+      }),
       fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
       type: 'category',
     },
