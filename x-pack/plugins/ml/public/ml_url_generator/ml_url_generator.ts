@@ -24,7 +24,7 @@ import {
 } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
-  createAnomalyDetectionCreatJobSelectType,
+  createAnomalyDetectionCreateJobSelectType,
   createExplorerUrl,
   createSingleMetricViewerUrl,
 } from './anomaly_detection_urls_generator';
@@ -64,7 +64,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.ANOMALY_EXPLORER:
         return createExplorerUrl(appBasePath, mlUrlGeneratorState as ExplorerUrlState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
-        return createAnomalyDetectionCreatJobSelectType(
+        return createAnomalyDetectionCreateJobSelectType(
           appBasePath,
           mlUrlGeneratorState as MlGenericUrlState
         );

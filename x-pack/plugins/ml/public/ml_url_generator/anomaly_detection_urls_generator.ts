@@ -46,7 +46,7 @@ export function createAnomalyDetectionJobManagementUrl(
   return url;
 }
 
-export function createAnomalyDetectionCreatJobSelectType(
+export function createAnomalyDetectionCreateJobSelectType(
   appBasePath: string,
   mlGenericUrlState: MlGenericUrlState
 ): string {
