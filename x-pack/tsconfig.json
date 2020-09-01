@@ -22,9 +22,6 @@
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "ui/*": [
-        "src/legacy/ui/public/*"
-      ],
       "plugins/xpack_main/*": [
         "x-pack/legacy/plugins/xpack_main/public/*"
       ],

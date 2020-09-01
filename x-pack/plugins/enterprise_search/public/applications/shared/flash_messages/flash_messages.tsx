@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { useValues } from 'kea';
 import { EuiCallOut, EuiCallOutProps, EuiSpacer } from '@elastic/eui';
 
-import { FlashMessagesLogic, IFlashMessagesValues } from './flash_messages_logic';
+import { FlashMessagesLogic } from './flash_messages_logic';
 
 const FLASH_MESSAGE_TYPES = {
   success: { color: 'success' as EuiCallOutProps['color'], icon: 'check' },
@@ -18,7 +18,7 @@ const FLASH_MESSAGE_TYPES = {
 };
 
 export const FlashMessages: React.FC = ({ children }) => {
-  const { messages } = useValues(FlashMessagesLogic) as IFlashMessagesValues;
+  const { messages } = useValues(FlashMessagesLogic);
 
   // If we have no messages to display, do not render the element at all
   if (!messages.length) return null;

@@ -18,7 +18,8 @@ describe('config validation', () => {
           "*",
         ],
         "preconfigured": Object {},
-        "rejectUnauthorizedCertificates": true,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
       }
     `);
   });
@@ -34,7 +35,8 @@ describe('config validation', () => {
           },
         },
       },
-      rejectUnauthorizedCertificates: false,
+      proxyRejectUnauthorizedCertificates: false,
+      rejectUnauthorized: false,
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -55,7 +57,8 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
-        "rejectUnauthorizedCertificates": false,
+        "proxyRejectUnauthorizedCertificates": false,
+        "rejectUnauthorized": false,
       }
     `);
   });
