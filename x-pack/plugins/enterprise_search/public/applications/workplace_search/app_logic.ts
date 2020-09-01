@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
 import { IWorkplaceSearchInitialData } from '../../../common/types/workplace_search';
-import { IKeaLogic } from '../shared/types';
 
 export interface IAppValues extends IWorkplaceSearchInitialData {
   hasInitialized: boolean;
@@ -17,16 +16,16 @@ export interface IAppActions {
   initializeAppData(props: IInitialAppData): void;
 }
 
-export const AppLogic = kea({
-  actions: (): IAppActions => ({
+export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  actions: {
     initializeAppData: ({ workplaceSearch }) => workplaceSearch,
-  }),
-  reducers: () => ({
+  },
+  reducers: {
     hasInitialized: [
       false,
       {
         initializeAppData: () => true,
       },
     ],
-  }),
-}) as IKeaLogic<IAppValues, IAppActions>;
+  },
+});
