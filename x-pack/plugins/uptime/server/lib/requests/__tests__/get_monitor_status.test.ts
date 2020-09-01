@@ -470,7 +470,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-7*",
       }
     `);
   });
@@ -575,7 +575,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-7*",
       }
     `);
   });
