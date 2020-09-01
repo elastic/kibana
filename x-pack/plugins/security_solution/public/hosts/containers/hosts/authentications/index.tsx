@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { AbortError } from '../../../../../../../../src/plugins/data/common';
@@ -67,8 +67,9 @@ export const useAuthentications = ({
   type,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const { activePage, limit } = useSelector((state: State) =>
-    getAuthenticationsSelector(state, type)
+  const { activePage, limit } = useSelector(
+    (state: State) => getAuthenticationsSelector(state, type),
+    shallowEqual
   );
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
