@@ -7,7 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getShardTimeout(config: SharedGlobalConfig): string;
+export declare function getShardTimeout(config: SharedGlobalConfig): {
+    timeout: string;
+};
 ```
 
 ## Parameters
@@ -18,5 +20,7 @@ export declare function getShardTimeout(config: SharedGlobalConfig): string;
 
 <b>Returns:</b>
 
-`string`
+`{
+    timeout: string;
+}`
 

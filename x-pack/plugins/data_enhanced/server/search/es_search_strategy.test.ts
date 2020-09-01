@@ -40,6 +40,11 @@ describe('ES search strategy', () => {
   };
   const mockContext = {
     core: {
+      uiSettings: {
+        client: {
+          get: () => {},
+        },
+      },
       elasticsearch: { client: { asCurrentUser: { transport: { request: mockApiCaller } } } },
     },
   };
@@ -78,13 +83,13 @@ describe('ES search strategy', () => {
     expect(method).toBe('POST');
     expect(path).toBe('/logstash-*/_async_search');
     expect(body).toEqual({ query: {} });
-    expect(querystring).toHaveProperty('wait_for_completion_timeout');
-    expect(querystring).toHaveProperty('track_total_hits');
-    expect(querystring).toHaveProperty('ignore_unavailable');
-    expect(querystring).toHaveProperty('ignore_throttled');
-    expect(querystring).toHaveProperty('ignore_unavailable');
-    expect(querystring).toHaveProperty('keep_alive');
-    expect(querystring).toHaveProperty('batched_reduce_size');
+    expect(querystring).toHaveProperty('batchedReduceSize');
+    expect(querystring).toHaveProperty('ignoreThrottled');
+    expect(querystring).toHaveProperty('ignoreUnavailable');
+    expect(querystring).toHaveProperty('keepAlive');
+    expect(querystring).toHaveProperty('maxConcurrentShardRequests');
+    expect(querystring).toHaveProperty('trackTotalHits');
+    expect(querystring).toHaveProperty('waitForCompletionTimeout');
   });
 
   it('makes a GET request to async search with ID when ID is provided', async () => {
@@ -100,9 +105,13 @@ describe('ES search strategy', () => {
     expect(method).toBe('GET');
     expect(path).toBe('/_async_search/foo');
     expect(body).toEqual(undefined);
-    expect(querystring).not.toHaveProperty('batched_reduce_size');
-    expect(querystring).not.toHaveProperty('batched_reduce_size');
-    expect(querystring).not.toHaveProperty('batched_reduce_size');
+    expect(querystring).not.toHaveProperty('batchedReduceSize');
+    expect(querystring).not.toHaveProperty('ignoreThrottled');
+    expect(querystring).not.toHaveProperty('ignoreUnavailable');
+    expect(querystring).not.toHaveProperty('maxConcurrentShardRequests');
+    expect(querystring).not.toHaveProperty('trackTotalHits');
+    expect(querystring).toHaveProperty('keepAlive');
+    expect(querystring).toHaveProperty('waitForCompletionTimeout');
   });
 
   it('encodes special characters in the path', async () => {
@@ -136,7 +145,7 @@ describe('ES search strategy', () => {
     expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
   });
 
-  it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
+  it('sets waitForCompletionTimeout and keepAlive in the request', async () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'foo-*', body: {} };
@@ -146,7 +155,7 @@ describe('ES search strategy', () => {
 
     expect(mockApiCaller).toBeCalled();
     const { querystring } = mockApiCaller.mock.calls[0][0];
-    expect(querystring).toHaveProperty('wait_for_completion_timeout');
-    expect(querystring).toHaveProperty('keep_alive');
+    expect(querystring).toHaveProperty('keepAlive');
+    expect(querystring).toHaveProperty('waitForCompletionTimeout');
   });
 });

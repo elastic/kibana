@@ -38,10 +38,5 @@ export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient
     ignoreThrottled,
     ignoreUnavailable: true, // Don't fail if the index/indices don't exist
     trackTotalHits: true,
-    // restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
   };
-}
-
-export function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
 }
