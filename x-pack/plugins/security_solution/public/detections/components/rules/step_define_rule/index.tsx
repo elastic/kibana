@@ -111,10 +111,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ...stepDefineDefaultValue,
     index: indicesConfig,
   };
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(initialState.index, RuleStep.defineRule);
-
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -125,6 +121,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     form,
     watch: ['index', 'ruleType'],
   }) as unknown) as [DefineStepRule];
+  const [
+    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
+  ] = useFetchIndexPatterns(index, RuleStep.defineRule);
 
   // reset form when rule type changes
   useEffect(() => {
