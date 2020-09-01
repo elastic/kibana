@@ -39,9 +39,9 @@ interface PieOptions {
   colors: string[];
   legend: {
     show: boolean;
-    backgroundOpacity: number;
-    labelBoxBorderColor: string;
-    position: Legend;
+    backgroundOpacity?: number;
+    labelBoxBorderColor?: string;
+    position?: Legend;
   };
   grid: {
     show: boolean;

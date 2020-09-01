@@ -188,7 +188,7 @@ export class LegacyService implements CoreService {
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals(
       this.legacyPlugins.uiExports,
@@ -322,12 +322,13 @@ export class LegacyService implements CoreService {
       },
       status: {
         core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
+        set: setupDeps.core.status.plugins.set.bind(null, 'legacy'),
+        dependencies$: setupDeps.core.status.plugins.getDependenciesStatus$('legacy'),
+        derivedStatus$: setupDeps.core.status.plugins.getDerivedStatus$('legacy'),
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
-      },
-      uuid: {
-        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),

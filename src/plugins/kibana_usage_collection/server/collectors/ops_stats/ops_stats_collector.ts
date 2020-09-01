@@ -43,11 +43,13 @@ export function getOpsStatsCollector(
   metrics$.subscribe((_metrics) => {
     const metrics = cloneDeep(_metrics);
     // Ensure we only include the same data that Metricbeat collection would get
+    // @ts-expect-error
     delete metrics.process.pid;
     const responseTimes = {
       average: metrics.response_times.avg_in_millis,
       max: metrics.response_times.max_in_millis,
     };
+    // @ts-expect-error
     delete metrics.requests.statusCodes;
     lastMetrics = {
       ...metrics,
