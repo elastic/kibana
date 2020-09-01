@@ -1,17 +1,17 @@
 package builds.test
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
+import kibanaAgent
 
 object Jest : BuildType({
   name = "Jest Unit"
   paused = true
   description = "Executes Jest Unit Tests"
 
-  requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
-  }
+  kibanaAgent(8)
 
   steps {
     script {
@@ -27,4 +27,6 @@ object Jest : BuildType({
   features {
     junit()
   }
+
+  addTestArtifacts()
 })

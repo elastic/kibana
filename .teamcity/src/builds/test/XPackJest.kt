@@ -1,8 +1,9 @@
 package builds.test
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
 
 object XPackJest : BuildType({
   name = "X-Pack Jest Unit"
@@ -28,4 +29,6 @@ object XPackJest : BuildType({
   features {
     junit()
   }
+
+  addTestArtifacts()
 })

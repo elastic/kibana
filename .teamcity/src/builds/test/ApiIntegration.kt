@@ -1,8 +1,9 @@
 package builds.test
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
 
 object ApiIntegration : BuildType({
   name = "API Integration"
@@ -23,4 +24,6 @@ object ApiIntegration : BuildType({
   features {
     junit()
   }
+
+  addTestArtifacts()
 })

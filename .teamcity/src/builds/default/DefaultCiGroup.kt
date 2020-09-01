@@ -1,8 +1,9 @@
 package builds.default
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
 
 class DefaultCiGroup(val ciGroup: Int) : BuildType({
   id("DefaultCiGroup_$ciGroup")
@@ -31,4 +32,6 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   dependencies {
     defaultBuild()
   }
+
+  addTestArtifacts()
 })

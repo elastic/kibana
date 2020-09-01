@@ -2,15 +2,14 @@ package builds
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import kibanaAgent
 
 object Lint : BuildType({
   name = "Lint"
   paused = true
   description = "Executes Linting, such as eslint and sasslint"
 
-  requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-2-", "RQ_AGENT_NAME")
-  }
+  kibanaAgent(2)
 
   steps {
     script {

@@ -51,3 +51,22 @@ fun BuildType.kibanaAgent(size: String) {
 fun BuildType.kibanaAgent(size: Int) {
   kibanaAgent(size.toString())
 }
+
+fun BuildType.addTestArtifacts() {
+  this.artifactRules += "\n" + """
+    target/kibana-*
+    target/test-metrics/*
+    target/kibana-security-solution/**/*.png
+    target/junit/**/*
+    target/test-suites-ci-plan.json
+    test/**/screenshots/session/*.png
+    test/**/screenshots/failure/*.png
+    test/**/screenshots/diff/*.png
+    test/functional/failure_debug/html/*.html
+    x-pack/test/**/screenshots/session/*.png
+    x-pack/test/**/screenshots/failure/*.png
+    x-pack/test/**/screenshots/diff/*.png
+    x-pack/test/functional/failure_debug/html/*.html
+    x-pack/test/functional/apps/reporting/reports/session/*.pdf
+  """.trimIndent()
+}

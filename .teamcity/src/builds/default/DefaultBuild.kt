@@ -10,7 +10,10 @@ object DefaultBuild : BuildType({
   paused = true
   description = "Generates Default Build Distribution artifact"
 
-  artifactRules = "+:install/kibana/**/* => kibana-default.tar.gz"
+  artifactRules = """
+    +:install/kibana/**/* => kibana-default.tar.gz
+    target/kibana-*
+  """.trimIndent()
 
   kibanaAgent(16)
 
@@ -19,8 +22,8 @@ object DefaultBuild : BuildType({
       name = "Build Default Distribution"
       scriptContent =
         """
-                #!/bin/bash
-                ./.ci/teamcity/default/build.sh
+          #!/bin/bash
+          ./.ci/teamcity/default/build.sh
         """.trimIndent()
     }
   }

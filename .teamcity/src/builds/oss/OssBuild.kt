@@ -10,8 +10,6 @@ object OssBuild : BuildType({
   paused = true
   description = "Generates OSS Build Distribution artifact"
 
-  artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
-
   kibanaAgent(16)
 
   steps {
@@ -19,11 +17,13 @@ object OssBuild : BuildType({
       name = "Build OSS Distribution"
       scriptContent =
         """
-                #!/bin/bash
-                ./.ci/teamcity/oss/build.sh
+          #!/bin/bash
+          ./.ci/teamcity/oss/build.sh
         """.trimIndent()
     }
   }
+
+  artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
 })
 
 fun Dependencies.ossBuild(rules: String = "+:kibana-oss.tar.gz!** => build/kibana-build-oss") {

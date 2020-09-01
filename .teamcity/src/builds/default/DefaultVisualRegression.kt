@@ -1,8 +1,9 @@
 package builds.default
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
 
 object DefaultVisualRegression : BuildType({
   id("DefaultVisualRegression")
@@ -19,8 +20,8 @@ object DefaultVisualRegression : BuildType({
       name = "Default Visual Regression"
       scriptContent =
         """
-              #!/bin/bash
-              ./.ci/teamcity/default/visual_regression.sh
+          #!/bin/bash
+          ./.ci/teamcity/default/visual_regression.sh
         """.trimIndent()
     }
   }
@@ -32,4 +33,6 @@ object DefaultVisualRegression : BuildType({
   dependencies {
     defaultBuild()
   }
+
+  addTestArtifacts()
 })

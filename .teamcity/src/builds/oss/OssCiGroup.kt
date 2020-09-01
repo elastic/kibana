@@ -1,8 +1,9 @@
 package builds.oss
 
-import junit
+import addTestArtifacts
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import junit
 
 class OssCiGroup(val ciGroup: Int) : BuildType({
   id("OssCiGroup_$ciGroup")
@@ -18,8 +19,8 @@ class OssCiGroup(val ciGroup: Int) : BuildType({
       name = "OSS CI Group $ciGroup"
       scriptContent =
         """
-                #!/bin/bash
-                ./.ci/teamcity/oss/ci_group.sh $ciGroup
+          #!/bin/bash
+          ./.ci/teamcity/oss/ci_group.sh $ciGroup
         """.trimIndent()
     }
   }
@@ -31,4 +32,6 @@ class OssCiGroup(val ciGroup: Int) : BuildType({
   dependencies {
     ossBuild()
   }
+
+  addTestArtifacts()
 })
