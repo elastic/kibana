@@ -150,8 +150,9 @@ working on big documents.
 ==== Machine learning
 
 [horizontal]
-`ml:anomalyDetectionDefaultTimeRangeEnable`:: Enables the default time filter in
-the *Single Metric Viewer* and the *Anomaly Explorer*.
+`ml:anomalyDetectionDefaultTimeRangeEnable`:: Use the default time filter
+when you open the *Single Metric Viewer* or the *Anomaly Explorer*. If this
+setting is disabled, the job's full time range is shown.
 `ml:anomalyDetectionDefaultTimeRangeSet`:: Sets the default time filter for
 viewing {anomaly-job} results. This setting must contain `from` and `to`
 (see {ref}/common-options.html#date-math[accepted formats]). It is ignored
