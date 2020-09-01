@@ -35,7 +35,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
   const kibanaUrlsSettings = settings.data?.item?.kibana_urls;
-  const kibanaUrls = kibanaUrlsSettings
+  const kibanaUrl = kibanaUrlsSettings
     ? kibanaUrlsSettings[0]
     : `${window.location.origin}${core.http.basePath.get()}`;
 
@@ -51,7 +51,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       children: apiKey.data && (
         <ManualInstructions
           apiKey={apiKey.data.item}
-          kibanaUrls={kibanaUrls}
+          kibanaUrl={kibanaUrl}
           kibanaCASha256={kibanaCASha256}
         />
       ),

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
-  kibanaUrls: string;
+  kibanaUrl: string;
   apiKey: EnrollmentAPIKey;
   kibanaCASha256?: string;
 }
@@ -22,11 +22,11 @@ const CommandCode = styled.pre({
 });
 
 export const ManualInstructions: React.FunctionComponent<Props> = ({
-  kibanaUrls,
+  kibanaUrl,
   apiKey,
   kibanaCASha256,
 }) => {
-  const enrollArgs = `${kibanaUrls} ${apiKey.api_key}${
+  const enrollArgs = `${kibanaUrl} ${apiKey.api_key}${
     kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
   }`;
   const macOsLinuxTarCommand = `./elastic-agent enroll ${enrollArgs}
