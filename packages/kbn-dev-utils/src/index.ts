@@ -41,3 +41,6 @@ export * from './stdio';
 export * from './ci_stats_reporter';
 export * from './plugin_list';
 export * from './simple_kibana_platform_plugin_discovery';
+export * from './streams';
+export * from './babel';
+export * from './parse_kibana_platform_plugin';
