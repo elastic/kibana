@@ -44,7 +44,11 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     } else {
       const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
-      history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
+      history.push(
+        redirect
+          ? (redirect as string)
+          : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+      );
     }
   };
 
