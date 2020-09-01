@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { TlsTable } from '../../components/tls_table';
-import { TlsQuery } from '../../containers/tls';
+import { useNetworkTls } from '../../containers/tls';
 import { TlsQueryTableComponentProps } from './types';
 
 const TlsTableManage = manageQuery(TlsTable);
@@ -22,34 +22,36 @@ export const TlsQueryTable = ({
   skip,
   startDate,
   type,
-}: TlsQueryTableComponentProps) => (
-  <TlsQuery
-    endDate={endDate}
-    filterQuery={filterQuery}
-    flowTarget={flowTarget}
-    ip={ip}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={type}
-  >
-    {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
-      <TlsTableManage
-        data={tls}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        loading={loading}
-        loadPage={loadPage}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        refetch={refetch}
-        setQuery={setQuery}
-        totalCount={totalCount}
-        type={type}
-      />
-    )}
-  </TlsQuery>
-);
+}: TlsQueryTableComponentProps) => {
+  const [
+    loading,
+    { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch },
+  ] = useNetworkTls({
+    endDate,
+    filterQuery,
+    flowTarget,
+    ip,
+    skip,
+    startDate,
+    type,
+  });
+
+  return (
+    <TlsTableManage
+      data={tls}
+      id={id}
+      inspect={inspect}
+      isInspect={isInspected}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      loading={loading}
+      loadPage={loadPage}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      refetch={refetch}
+      setQuery={setQuery}
+      totalCount={totalCount}
+      type={type}
+    />
+  );
+};
 
 TlsQueryTable.displayName = 'TlsQueryTable';
