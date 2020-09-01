@@ -7,27 +7,27 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
 
-import { PHASE_INDEX_PRIORITY } from '../../../constants';
-
 import { LearnMoreLink } from './';
 import { OptionalLabel } from './';
 import { ErrableFormRow } from './';
+import { PhaseWithIndexPriority, Phases } from '../../../services/policies/types';
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
-interface Props {
-  errors: Record<string, string[]>;
-  // TODO add types for phaseData and setPhaseData after policy is typed
-  phase: string;
-  phaseData: any;
-  setPhaseData: (dataKey: string, value: any) => void;
+interface Props<T extends PhaseWithIndexPriority> {
+  errors?: PhaseValidationErrors<T>;
+  phase: keyof Phases & string;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: any) => void;
   isShowingErrors: boolean;
 }
-export const SetPriorityInput: React.FunctionComponent<Props> = ({
+export const SetPriorityInput = <T extends PhaseWithIndexPriority>({
   errors,
   phaseData,
   phase,
   setPhaseData,
   isShowingErrors,
-}) => {
+}: React.PropsWithChildren<Props<T>>) => {
+  const phaseIndexPriorityProperty = propertyof<T>('phaseIndexPriority');
   return (
     <EuiDescribedFormGroup
       title={
@@ -52,7 +52,7 @@ export const SetPriorityInput: React.FunctionComponent<Props> = ({
       fullWidth
     >
       <ErrableFormRow
-        id={`${phase}-${PHASE_INDEX_PRIORITY}`}
+        id={`${phase}-${phaseIndexPriorityProperty}`}
         label={
           <Fragment>
             <FormattedMessage
@@ -62,15 +62,14 @@ export const SetPriorityInput: React.FunctionComponent<Props> = ({
             <OptionalLabel />
           </Fragment>
         }
-        errorKey={PHASE_INDEX_PRIORITY}
         isShowingErrors={isShowingErrors}
-        errors={errors}
+        errors={errors?.phaseIndexPriority}
       >
         <EuiFieldNumber
-          id={`${phase}-${PHASE_INDEX_PRIORITY}`}
-          value={phaseData[PHASE_INDEX_PRIORITY]}
+          id={`${phase}-${phaseIndexPriorityProperty}`}
+          value={phaseData.phaseIndexPriority}
           onChange={(e) => {
-            setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
+            setPhaseData(phaseIndexPriorityProperty, e.target.value);
           }}
           min={0}
         />
