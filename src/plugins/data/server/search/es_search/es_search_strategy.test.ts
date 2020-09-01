@@ -36,7 +36,14 @@ describe('ES search strategy', () => {
     },
   });
   const mockContext = {
-    core: { elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } } },
+    core: {
+      uiSettings: {
+        client: {
+          get: () => {},
+        },
+      },
+      elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } },
+    },
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
@@ -61,7 +68,7 @@ describe('ES search strategy', () => {
       ...params,
       timeout: '0ms',
       ignoreUnavailable: true,
-      restTotalHitsAsInt: true,
+      trackTotalHits: true,
     });
   });
 
@@ -74,7 +81,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
-      restTotalHitsAsInt: true,
+      trackTotalHits: true,
     });
   });
 

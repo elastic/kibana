@@ -41,8 +41,11 @@ export const esSearchStrategyProvider = (
         throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
 
+      // ignoreThrottled is not supported in OSS
+      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
+
       const params = {
-        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...defaultParams,
         ...getShardTimeout(config),
         ...request.params,
       };

@@ -19,6 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { isEsResponse } from 'src/plugins/data/common';
 import { getRequestAbortedSignal } from '../../lib';
 import { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
@@ -58,9 +59,16 @@ export function registerSearchRoute(
           }
         );
 
-        response.rawResponse = shimHitsTotal(response.rawResponse);
-
-        return res.ok({ body: response });
+        return res.ok({
+          body: {
+            ...response,
+            ...(isEsResponse(response)
+              ? {
+                  rawResponse: shimHitsTotal(response.rawResponse),
+                }
+              : {}),
+          },
+        });
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,

@@ -26,7 +26,7 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |

@@ -214,7 +214,6 @@ export {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
-  toSnakeCase,
   usageProvider,
   SearchUsage,
 } from './search';

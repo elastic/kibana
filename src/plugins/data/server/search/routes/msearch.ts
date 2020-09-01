@@ -22,10 +22,9 @@ import { schema } from '@kbn/config-schema';
 
 import { SearchResponse } from 'elasticsearch';
 import { IRouter } from 'src/core/server';
-import { UI_SETTINGS } from '../../../common';
 import { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
-import { getShardTimeout, getDefaultSearchParams, toSnakeCase } from '..';
+import { getShardTimeout, getDefaultSearchParams } from '..';
 
 interface MsearchHeaders {
   index: string;
@@ -103,23 +102,23 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
       const body = convertRequestBody(request.body, timeout);
 
       // trackTotalHits is not supported by msearch
-      const { trackTotalHits, ...params } = await getDefaultSearchParams(
+      const { trackTotalHits, ...defaultParams } = await getDefaultSearchParams(
         context.core.uiSettings.client
       );
 
       try {
-        const response: Array<SearchResponse<any>> = await client.transport.request({
+        const response = await client.transport.request({
           method: 'GET',
           path: '/_msearch',
           body,
-          querystring: toSnakeCase(params),
+          querystring: defaultParams,
         });
 
         return res.ok({
           body: {
             ...response,
             body: {
-              responses: response.body.responses.map((r) => shimHitsTotal(r)),
+              responses: response.body.responses.map((r: SearchResponse<any>) => shimHitsTotal(r)),
             },
           },
         });
