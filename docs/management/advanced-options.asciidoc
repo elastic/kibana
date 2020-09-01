@@ -150,6 +150,14 @@ working on big documents.
 ==== Machine learning
 
 [horizontal]
+`ml:anomalyDetectionDefaultTimeRangeEnable`:: Enables the use of a default time
+range when viewing {anomaly-jobs}. The time range is defined in the
+`ml:anomalyDetectionDefaultTimeRangeSet` setting.
+`ml:anomalyDetectionDefaultTimeRangeSet`:: Sets the default time range to use
+when you open the *Single Metric Viewer* or the *Anomaly Explorer*. This setting
+should contain an array of objects, with each object containing
+`from` and `to` (see {ref}/common-options.html#date-math[accepted formats]). It
+is ignored unless `ml:anomalyDetectionDefaultTimeRangeEnable` is also enabled.
 `ml:fileDataVisualizerMaxFileSize`:: Sets the file size limit when importing
 data in the {data-viz}. The default value is `100MB`. The highest supported
 value for this setting is `1GB`.
