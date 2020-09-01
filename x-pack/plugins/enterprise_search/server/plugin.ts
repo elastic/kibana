@@ -81,8 +81,12 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       icon: 'logoEnterpriseSearch',
-      navLinkId: APP_SEARCH_PLUGIN.ID, // TODO - remove this once functional tests no longer rely on navLinkId
-      app: ['kibana', APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      app: [
+        'kibana',
+        ENTERPRISE_SEARCH_PLUGIN.ID,
+        APP_SEARCH_PLUGIN.ID,
+        WORKPLACE_SEARCH_PLUGIN.ID,
+      ],
       catalogue: [ENTERPRISE_SEARCH_PLUGIN.ID, APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
       privileges: null,
     });
@@ -94,14 +98,16 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+      const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
 
       return {
         navLinks: {
+          enterpriseSearch: showEnterpriseSearchOverview,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
-          enterpriseSearch: hasAppSearchAccess || hasWorkplaceSearchAccess,
+          enterpriseSearch: showEnterpriseSearchOverview,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
