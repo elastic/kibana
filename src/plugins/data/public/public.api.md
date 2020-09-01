@@ -1006,7 +1006,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
-    init(forceFieldRefresh?: boolean): Promise<this>;
+    init(): Promise<this>;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
