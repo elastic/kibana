@@ -180,6 +180,7 @@ export const TemplateForm = ({
       delete outputTemplate.template.aliases;
     }
     if (Object.keys(outputTemplate.template).length === 0) {
+      // @ts-expect-error
       delete outputTemplate.template;
     }
 
