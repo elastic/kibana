@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useRef, FocusEvent } from 'react';
 import {
-  EuiSelectable,
-  EuiPopover,
-  EuiPopoverFooter,
   EuiText,
+  EuiBadge,
+  EuiSelectableTemplateSitewide,
+  EuiSelectableTemplateSitewideOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
-  EuiIcon,
-  EuiSelectableOption,
 } from '@elastic/eui';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ApplicationStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 const useIfMounted = () => {
@@ -44,30 +40,37 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
+const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
+
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const ifMounted = useIfMounted();
-  const [isSearchFocused, setSearchFocus] = useState(false);
-  const [term, setTerm] = useState<string | null>(null);
-  const [options, _setOptions] = useState([] as GlobalSearchResult[]);
-  // const [isLoading, setLoadingState] = useState(false);
+  const [searchValue, setSearchValue] = useState<string | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
-  const [panelRef, setPanelRef] = useState<HTMLElement | null>(null);
+  const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
   const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
   const onSearch = useCallback(
-    (currentTerm: string) => {
-      if (currentTerm === term) return;
+    (currentValue: string) => {
+      if (currentValue === searchValue) return;
       const setOptions = (_options: GlobalSearchResult[]) => {
         ifMounted(() =>
-          _setOptions([..._options.map((option) => ({ key: option.id, ...option }))])
+          _setOptions([
+            ..._options.map((option) => ({
+              key: option.id,
+              label: option.title,
+              url: option.url,
+              ...(option.icon && { icon: { type: option.icon } }),
+              ...(option.type &&
+                option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
+            })),
+          ])
         );
       };
 
       let arr: GlobalSearchResult[] = [];
-      // setLoadingState(true);
-      globalSearch(currentTerm, {}).subscribe({
+      globalSearch(currentValue, {}).subscribe({
         next: ({ results }) => {
-          if (currentTerm.length > 0) {
+          if (currentValue.length > 0) {
             arr = [...results, ...arr].sort((a, b) => {
               if (a.score < b.score) return 1;
               if (a.score > b.score) return -1;
@@ -94,137 +97,80 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           // TODO
         },
         complete: () => {
-          ifMounted(() => setTerm(currentTerm));
-          // setLoadingState(false);
+          ifMounted(() => setSearchValue(currentValue));
         },
       });
     },
-    [globalSearch, term, ifMounted]
+    [globalSearch, searchValue, ifMounted]
   );
+
+  const onWindowKeyDown = (event: any) => {
+    if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
+      if (searchRef) {
+        event.preventDefault();
+        searchRef.focus();
+      }
+    }
+  };
+
+  const onChange = (selected: EuiSelectableTemplateSitewideOption[]) => {
+    // @ts-ignore - ts error is "union type is too complex to express"
+    const { url } = selected.find(({ checked }) => checked === 'on');
+
+    // TODO should we be worried about http://?
+    if (url.startsWith('https://')) window.location.assign(url);
+    else {
+      navigateToUrl(url);
+      (document.activeElement as HTMLElement).blur();
+      onSearch('');
+      // setSearchFocus(false);
+      if (searchRef) searchRef.value = '';
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', onWindowKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', onWindowKeyDown);
+    };
+  });
 
   useEffect(() => {
     onSearch('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const openSearch = (event: KeyboardEvent) => {
-      if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
-        if (searchRef) {
-          event.preventDefault();
-          searchRef.focus();
-        }
-      }
-    };
-    window.addEventListener('keydown', openSearch);
-
-    return () => {
-      window.removeEventListener('keydown', openSearch);
-    };
-  }, [searchRef, isWindows]);
-
   return (
-    <EuiSelectable
-      searchable
-      height={300}
-      singleSelection={true}
+    <EuiSelectableTemplateSitewide
+      onChange={onChange}
+      options={options}
       searchProps={{
         onSearch,
         'data-test-subj': 'header-search',
-        onFocus: () => {
-          setSearchFocus(true);
-        },
-        onBlur: (e: FocusEvent<HTMLInputElement>) => {
-          if (!panelRef?.contains(e.relatedTarget as HTMLButtonElement)) {
-            setSearchFocus(false);
-          }
-        },
-        placeholder: 'Search for anything...',
-        incremental: true,
-        compressed: true,
-        inputRef: (ref: HTMLInputElement | null) => {
-          setSearchRef(ref);
-        },
-        'aria-label': i18n.translate('xpack.globalSearchBar.primaryNav.screenReaderLabel', {
-          defaultMessage: 'Search for anything...',
-        }),
+        inputRef: setSearchRef,
       }}
-      listProps={{
-        rowHeight: 68,
-      }}
-      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
-      options={options}
-      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
-      renderOption={(option: EuiSelectableOption & GlobalSearchResult) => (
-        <>
-          <EuiFlexGroup responsive={false} gutterSize="s" data-test-subj="header-search-option">
-            <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
-            <EuiFlexItem>
-              {option.title}
-              <br />
-              {(option.type as string) !== 'application' && option.type}
+      popoverFooter={
+        <EuiText color="subdued" size="xs">
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            responsive={false}
+            wrap
+          >
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.globalSearchBar.searchBar.shortcut"
+                defaultMessage="Quickly search using"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                aria-hidden={true}
-                className="kibanaChromeSearch__itemGotoBadge"
-                color="hollow"
-              >
-                Go to <small>&#x21A9;</small>
-              </EuiBadge>
+              <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
-      )}
-      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
-      onChange={async (selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
-        const { url } = selected.find(({ checked }) => checked === 'on')!;
-
-        if (url.startsWith('https://')) window.location.assign(url);
-        // TODO should we be worried about http://?
-        else {
-          navigateToUrl(url);
-          (document.activeElement as HTMLElement).blur();
-          onSearch('');
-          setSearchFocus(false);
-          if (searchRef) searchRef.value = '';
-        }
-      }}
-    >
-      {(list, search) => (
-        <>
-          <EuiPopover
-            button={search}
-            isOpen={isSearchFocused}
-            closePopover={() => setSearchFocus(false)}
-            panelPaddingSize={'none'}
-            hasArrow={false}
-            panelRef={setPanelRef}
-          >
-            <div style={{ width: '600px' }}>{list}</div>
-            <EuiPopoverFooter>
-              <EuiText className="kibanaChromeSearch__popoverFooter" size="xs">
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false} component="p">
-                    <FormattedMessage
-                      id="xpack.globalSearchBar.searchBar.shortcut"
-                      defaultMessage="Quickly search using {shortcut}"
-                      values={{
-                        shortcut: <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>,
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiText>
-            </EuiPopoverFooter>
-          </EuiPopover>
-        </>
-      )}
-    </EuiSelectable>
+        </EuiText>
+      }
+    />
   );
 }

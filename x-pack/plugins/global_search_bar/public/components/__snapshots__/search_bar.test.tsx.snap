@@ -3,27 +3,30 @@
 exports[`SearchBar correctly filters and sorts results 1`] = `
 Array [
   Object {
-    "id": "Canvas",
+    "append": undefined,
+    "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Canvas",
-    "score": 42,
-    "title": "Canvas",
-    "type": "application",
+    "label": "Canvas",
+    "prepend": undefined,
+    "title": "Canvasundefinedundefined",
     "url": "/app/test/Canvas",
   },
   Object {
-    "id": "Discover",
+    "append": undefined,
+    "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
-    "score": 42,
-    "title": "Discover",
-    "type": "application",
+    "label": "Discover",
+    "prepend": undefined,
+    "title": "Discoverundefinedundefined",
     "url": "/app/test/Discover",
   },
   Object {
-    "id": "Graph",
+    "append": undefined,
+    "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Graph",
-    "score": 42,
-    "title": "Graph",
-    "type": "application",
+    "label": "Graph",
+    "prepend": undefined,
+    "title": "Graphundefinedundefined",
     "url": "/app/test/Graph",
   },
 ]
@@ -32,19 +35,26 @@ Array [
 exports[`SearchBar correctly filters and sorts results 2`] = `
 Array [
   Object {
-    "id": "Discover",
+    "append": undefined,
+    "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
-    "score": 42,
-    "title": "Discover",
-    "type": "application",
+    "label": "Discover",
+    "prepend": undefined,
+    "title": "Discoverundefinedundefined",
     "url": "/app/test/Discover",
   },
   Object {
-    "id": "My Dashboard",
+    "append": undefined,
+    "className": "euiSelectableTemplateSitewide__listItem",
     "key": "My Dashboard",
-    "score": 42,
-    "title": "My Dashboard",
-    "type": "test",
+    "label": "My Dashboard",
+    "meta": Array [
+      Object {
+        "text": "Test",
+      },
+    ],
+    "prepend": undefined,
+    "title": "My Dashboard •  Test",
     "url": "/app/test/My Dashboard",
   },
 ]
