@@ -265,9 +265,9 @@ const EditRulePageComponent: FC = () => {
 
       if (activeStepData?.isValid) {
         setStepData(activeStep, activeStepData.data, activeStepData.isValid);
+        setInitForm(true);
+        setActiveStep(tab.id as RuleStep);
       }
-      setInitForm(true);
-      setActiveStep(tab.id as RuleStep);
     },
     [activeStep, setStepData]
   );
