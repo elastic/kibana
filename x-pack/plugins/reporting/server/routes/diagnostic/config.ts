@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
@@ -47,10 +48,21 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
       const kibanaMaxContentBytes = config.get('csv', 'maxSizeBytes');
 
       if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
-        warnings.push(
-          `xpack.reporting.${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
-            `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your xpack.reporting.${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
+        const maxContentSizeWarning = i18n.translate(
+          `xpack.reporting.diagnostic.configSizeMismatch`,
+          {
+            defaultMessage:
+              `xpack.reporting.{KIBANA_MAX_SIZE_BYTES_PATH} ({kibanaMaxContentBytes}) is higher than ElasticSearch's {ES_MAX_SIZE_BYTES_PATH} ({elasticSearchMaxContentBytes}). ` +
+              `Please set {ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your xpack.reporting.{KIBANA_MAX_SIZE_BYTES_PATH} in Kibana.`,
+            values: {
+              kibanaMaxContentBytes,
+              elasticSearchMaxContentBytes,
+              KIBANA_MAX_SIZE_BYTES_PATH,
+              ES_MAX_SIZE_BYTES_PATH,
+            },
+          }
         );
+        warnings.push(maxContentSizeWarning);
       }
 
       if (warnings.length) {

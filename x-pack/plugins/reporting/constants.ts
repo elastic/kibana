@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
@@ -45,10 +46,22 @@ export const BROWSER_TEST_COMMON_ISSUES: Map<string, string> = new Map();
 
 BROWSER_TEST_COMMON_ISSUES.set(
   'Could not find the default font',
-  `Chrome couldn't find a default font, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.`
+  i18n.translate('xpack.reporting.diagnostic.browserMissingFonts', {
+    defaultMessage: `The browser couldn't locate a default font, please see {url} to fix this issue.`,
+    values: {
+      url:
+        'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+    },
+  })
 );
 
 BROWSER_TEST_COMMON_ISSUES.set(
   'cannot open shared object file',
-  `Chrome couldn't start properly due to missing system dependencies, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.`
+  i18n.translate('xpack.reporting.diagnostic.browserMissingDependency', {
+    defaultMessage: `The browser couldn't start properly due to missing system dependencies, please see {url}`,
+    values: {
+      url:
+        'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+    },
+  })
 );

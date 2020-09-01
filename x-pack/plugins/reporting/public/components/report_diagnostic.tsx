@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -90,8 +91,13 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       .catch((error) => {
         setState({
           isBusy: false,
-          help: [`There was a problem running the diagnostic: ${error}`],
-          logs: `${error.message}\n${error.stack}`,
+          help: [
+            i18n.translate('xpack.reporting.listing.diagnosticApiCallFailure', {
+              defaultMessage: `There was a problem running the diagnostic: {error}`,
+              values: { error },
+            }),
+          ],
+          logs: `${error.message}`,
           success: false,
           [statusProp]: 'danger',
         });
@@ -100,10 +106,15 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   const steps = [
     {
-      title: 'Verify Kibana Configuration',
+      title: i18n.translate('xpack.reporting.listing.diagnosticConfigTitle', {
+        defaultMessage: 'Verify Kibana Configuration',
+      }),
       children: (
         <Fragment>
-          <p>This ensures your Kibana configuration is setup properly for reports</p>
+          <FormattedMessage
+            id="xpack.reporting.listing.diagnosticConfigMessage"
+            defaultMessage="This check ensures your Kibana configuration is setup properly for reports."
+          />
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || configStatus === 'complete'}
@@ -111,7 +122,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
             onClick={apiWrapper(apiClient.verifyConfig, statuses.configStatus)}
             iconType={configStatus === 'complete' ? 'check' : undefined}
           >
-            Verify Configuration
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticConfigButton"
+              defaultMessage="Verify Configuration"
+            />
           </EuiButton>
         </Fragment>
       ),
@@ -121,13 +135,16 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   if (configStatus === 'complete') {
     steps.push({
-      title: 'Check Browser',
+      title: i18n.translate('xpack.reporting.listing.diagnosticBrowserTitle', {
+        defaultMessage: 'Check Browser',
+      }),
       children: (
         <Fragment>
-          <p>
-            Reporting utilizes a headless browser to generate PDF and PNGS, this check validates
-            that the browser binary can run properly
-          </p>
+          <FormattedMessage
+            id="xpack.reporting.listing.diagnosticBrowserMessage"
+            defaultMessage="Reporting utilizes a headless browser to generate PDF and PNGS, this check validates
+            that the browser binary can run properly."
+          />
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
@@ -135,7 +152,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
           >
-            Check Browser
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticBrowserButton"
+              defaultMessage="Check Browser"
+            />
           </EuiButton>
         </Fragment>
       ),
@@ -145,10 +165,15 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   if (chromeStatus === 'complete') {
     steps.push({
-      title: 'Check Screen Capture Capabilities',
+      title: i18n.translate('xpack.reporting.listing.diagnosticScreenshotTitle', {
+        defaultMessage: 'Check Screen Capture Capabilities',
+      }),
       children: (
         <Fragment>
-          <p>The final step checks if we can properly capture Kibana screens.</p>
+          <FormattedMessage
+            id="xpack.reporting.listing.diagnosticScreenshotMessage"
+            defaultMessage="The final step checks if we can properly capture Kibana screens."
+          />
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || screenshotStatus === 'complete'}
@@ -156,7 +181,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
             isLoading={isBusy && screenshotStatus === 'incomplete'}
             iconType={screenshotStatus === 'complete' ? 'check' : undefined}
           >
-            Capture Screen
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticScreenshotButton"
+              defaultMessage="Capture Screenshot"
+            />
           </EuiButton>
         </Fragment>
       ),
@@ -166,10 +194,15 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   if (screenshotStatus === 'complete') {
     steps.push({
-      title: 'All set!',
+      title: i18n.translate('xpack.reporting.listing.diagnosticSuccessTitle', {
+        defaultMessage: 'All set!',
+      }),
       children: (
         <Fragment>
-          <p>Excellent! Everything looks like shipshape for reporting to function!</p>
+          <FormattedMessage
+            id="xpack.reporting.listing.diagnosticSuccessMessage"
+            defaultMessage="Excellent! Everything looks like shipshape for reporting to function!"
+          />
         </Fragment>
       ),
       status: !success ? 'danger' : screenshotStatus,
@@ -178,7 +211,9 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   if (!success) {
     steps.push({
-      title: "Whoops! Looks like something isn't working properly.",
+      title: i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
+        defaultMessage: "Whoops! Looks like something isn't working properly.",
+      }),
       children: (
         <Fragment>
           {help.length ? (
@@ -191,7 +226,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           {logs.length ? (
             <Fragment>
               <EuiSpacer />
-              <p>Here are some more details about the issue:</p>
+              <FormattedMessage
+                id="xpack.reporting.listing.diagnosticFailureDescription"
+                defaultMessage="Here are some more details about the issue:"
+              />
               <EuiSpacer />
               <EuiCodeBlock>{logs}</EuiCodeBlock>
             </Fragment>
@@ -208,13 +246,19 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>Report Helper</h2>
+            <h2>
+              <FormattedMessage
+                id="xpack.reporting.listing.diagnosticTitle"
+                defaultMessage="Reporting Diagnostics"
+              />
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued">
-            <p>
-              Automatically run a series of diagnostics to troubleshoot common reporting problems.
-            </p>
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticDescription"
+              defaultMessage="Automatically run a series of diagnostics to troubleshoot common reporting problems."
+            />
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -228,8 +272,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       {flyout}
       <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
         <FormattedMessage
-          id="xpack.reporting.listing.helpButtonText"
-          defaultMessage="Check Reporting"
+          id="xpack.reporting.listing.diagnosticButton"
+          defaultMessage="Run reporting diagnostics..."
         />
       </EuiButtonEmpty>
     </div>

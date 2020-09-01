@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { omitBlacklistedHeaders } from '../../export_types/common';
@@ -101,7 +102,11 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           res.ok({
             body: {
               success: false,
-              help: [`We couldn't screenshot your Kibana install.`],
+              help: [
+                i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
+                  defaultMessage: `We couldn't screenshot your Kibana install.`,
+                }),
+              ],
               logs: error.message,
             } as DiagnosticResponse,
           })
