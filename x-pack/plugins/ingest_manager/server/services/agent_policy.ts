@@ -464,9 +464,10 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
+      if (!settings.kibana_urls) throw new Error('kibana_urls is missing')
       fullAgentPolicy.fleet = {
         kibana: {
-          hosts: settings.kibana_url || [],
+          hosts: settings.kibana_urls,
         },
       };
     }
