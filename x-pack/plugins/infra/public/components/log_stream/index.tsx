@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { noop } from 'lodash';
 import { useMount } from 'react-use';
-import { EuiPanel } from '@elastic/eui';
+import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
 
@@ -21,20 +21,20 @@ interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
   endTimestamp: number;
-  seamless?: boolean;
   query?: string;
   center?: LogEntriesCursor;
   highlight?: string;
+  height?: string | number;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({
   sourceId = 'default',
   startTimestamp,
   endTimestamp,
-  seamless = false,
   query,
   center,
   highlight,
+  height = '400px',
 }) => {
   // source boilerplate
   const { services } = useKibana();
@@ -80,36 +80,40 @@ export const LogStream: React.FC<LogStreamProps> = ({
     fetchEntries();
   });
 
-  const streamView = (
-    <ScrollableLogTextStreamView
-      target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
-      columnConfigurations={columnConfigurations}
-      items={streamItems}
-      scale="medium"
-      wrap={false}
-      isReloading={isReloading}
-      isLoadingMore={false}
-      hasMoreBeforeStart={false}
-      hasMoreAfterEnd={false}
-      isStreaming={false}
-      lastLoadedTime={null}
-      jumpToTarget={noop}
-      reportVisibleInterval={noop}
-      loadNewerItems={noop}
-      reloadItems={fetchEntries}
-      highlightedItem={highlight ?? null}
-      currentHighlightKey={null}
-      startDateExpression={''}
-      endDateExpression={''}
-      updateDateRange={noop}
-      startLiveStreaming={noop}
-    />
-  );
+  const parsedHeight = typeof height === 'number' ? `${height}px` : height;
 
-  // Rendering
-  if (seamless) {
-    return streamView;
-  } else {
-    return <EuiPanel>{streamView}</EuiPanel>;
-  }
+  return (
+    <LogStreamContent height={parsedHeight}>
+      <ScrollableLogTextStreamView
+        target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
+        columnConfigurations={columnConfigurations}
+        items={streamItems}
+        scale="medium"
+        wrap={false}
+        isReloading={isReloading}
+        isLoadingMore={false}
+        hasMoreBeforeStart={false}
+        hasMoreAfterEnd={false}
+        isStreaming={false}
+        lastLoadedTime={null}
+        jumpToTarget={noop}
+        reportVisibleInterval={noop}
+        loadNewerItems={noop}
+        reloadItems={fetchEntries}
+        highlightedItem={highlight ?? null}
+        currentHighlightKey={null}
+        startDateExpression={''}
+        endDateExpression={''}
+        updateDateRange={noop}
+        startLiveStreaming={noop}
+        hideScrollbar={false}
+      />
+    </LogStreamContent>
+  );
 };
+
+const LogStreamContent = euiStyled.div<{ height: string }>`
+  display: flex;
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  height: ${(props) => props.height};
+`;
