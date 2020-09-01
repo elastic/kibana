@@ -6,13 +6,13 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { cloneDeep } from 'lodash';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { clone } from '../models/policy_details_config';
 import { AdvancedOSes, OS } from '../types';
 
 export const PolicyAdvanced = React.memo(() => {
@@ -24,7 +24,7 @@ export const PolicyAdvanced = React.memo(() => {
   const onChange = useCallback(
     (event) => {
       if (policyDetailsConfig) {
-        const newPayload = clone(policyDetailsConfig);
+        const newPayload = cloneDeep(policyDetailsConfig);
         for (const os of OSes) {
           newPayload[os].advanced.elasticsearch.tls.verify_peer = event.target.value;
         }
@@ -39,6 +39,11 @@ export const PolicyAdvanced = React.memo(() => {
 
   const value =
     policyDetailsConfig && policyDetailsConfig.windows.advanced.elasticsearch.tls.verify_peer;
+  const onClick = useCallback(() => {
+    dispatch({
+      type: 'userClickedPolicyDetailsSaveButton',
+    });
+  }, [dispatch]);
   return (
     <WrapperPage>
       <EuiText>
@@ -47,6 +52,12 @@ export const PolicyAdvanced = React.memo(() => {
         </h1>
       </EuiText>
       <EuiFieldText value={value} onChange={onChange} />
+      <EuiButton onClick={onClick}>
+        <FormattedMessage
+          id="xpack.securitySolution.policyAdvanced.submit"
+          defaultMessage="Submit"
+        />
+      </EuiButton>
     </WrapperPage>
   );
 });
