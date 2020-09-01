@@ -16,8 +16,6 @@
  * formatRoute(ROUTE_PATH, { id: 2 }) // '/foo/bar/2/status'
  */
 
-import _isString from 'lodash/isString';
-
 interface ParamsObject {
   [key: string]: string | number;
 }
