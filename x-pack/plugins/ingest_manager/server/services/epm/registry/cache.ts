@@ -8,4 +8,6 @@ const cache: Map<string, Buffer> = new Map();
 export const cacheGet = (key: string) => cache.get(key);
 export const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
 export const cacheHas = (key: string) => cache.has(key);
+export const cacheClear = () => cache.clear();
+export const cacheDelete = (key: string) => cache.delete(key);
 export const getCacheKey = (key: string) => key + '.tar.gz';
