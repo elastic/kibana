@@ -23,13 +23,13 @@ type BucketsPath = string | Record<string, string>;
 
 type SourceOptions = string | string[];
 
-type MetricsAggregationOptions =
+type AggregationSourceOptions =
   | {
       field: string;
-      missing?: number;
+      missing?: unknown;
     }
   | {
-      script?: Script;
+      script: Script;
     };
 
 interface MetricsAggregationResponsePart {
@@ -57,10 +57,9 @@ type CompositeOptionsSource = Record<
 export interface AggregationOptionsByType {
   terms: {
     size?: number;
-    missing?: string;
     order?: SortOptions;
     execution_hint?: 'map' | 'global_ordinals';
-  } & MetricsAggregationOptions;
+  } & AggregationSourceOptions;
   date_histogram: {
     format?: string;
     min_doc_count?: number;
@@ -69,7 +68,7 @@ export interface AggregationOptionsByType {
       max: number;
     };
   } & ({ calendar_interval: string } | { fixed_interval: string }) &
-    MetricsAggregationOptions;
+    AggregationSourceOptions;
   histogram: {
     interval: number;
     min_doc_count?: number;
@@ -77,19 +76,19 @@ export interface AggregationOptionsByType {
       min?: number | string;
       max?: number | string;
     };
-  } & MetricsAggregationOptions;
-  avg: MetricsAggregationOptions;
-  max: MetricsAggregationOptions;
-  min: MetricsAggregationOptions;
-  sum: MetricsAggregationOptions;
-  value_count: MetricsAggregationOptions;
-  cardinality: MetricsAggregationOptions & {
+  } & AggregationSourceOptions;
+  avg: AggregationSourceOptions;
+  max: AggregationSourceOptions;
+  min: AggregationSourceOptions;
+  sum: AggregationSourceOptions;
+  value_count: AggregationSourceOptions;
+  cardinality: AggregationSourceOptions & {
     precision_threshold?: number;
   };
   percentiles: {
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
-  } & MetricsAggregationOptions;
+  } & AggregationSourceOptions;
   extended_stats: {
     field: string;
   };
@@ -137,15 +136,15 @@ export interface AggregationOptionsByType {
       | { from: string | number; to: string | number }
     >;
     keyed?: boolean;
-  } & MetricsAggregationOptions;
+  } & AggregationSourceOptions;
   auto_date_histogram: {
     buckets: number;
-  } & MetricsAggregationOptions;
+  } & AggregationSourceOptions;
   percentile_ranks: {
     values: string[];
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
-  } & MetricsAggregationOptions;
+  } & AggregationSourceOptions;
 }
 
 type AggregationType = keyof AggregationOptionsByType;

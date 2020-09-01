@@ -8,6 +8,7 @@ import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
+import { IFieldType } from 'src/plugins/data/common';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
@@ -33,6 +34,9 @@ export async function initFieldsRoute(setup: CoreSetup) {
                 name: schema.string(),
                 type: schema.string(),
                 esTypes: schema.maybe(schema.arrayOf(schema.string())),
+                scripted: schema.maybe(schema.boolean()),
+                lang: schema.maybe(schema.string()),
+                script: schema.maybe(schema.string()),
               },
               { unknowns: 'allow' }
             ),
@@ -83,21 +87,15 @@ export async function initFieldsRoute(setup: CoreSetup) {
           return res.ok({
             body: await getNumberHistogram(search, field),
           });
-        } else if (field.type === 'string') {
-          return res.ok({
-            body: await getStringSamples(search, field),
-          });
         } else if (field.type === 'date') {
           return res.ok({
             body: await getDateHistogram(search, field, { fromDate, toDate }),
           });
-        } else if (field.type === 'boolean') {
-          return res.ok({
-            body: await getStringSamples(search, field),
-          });
         }
 
-        return res.ok({});
+        return res.ok({
+          body: await getStringSamples(search, field),
+        });
       } catch (e) {
         if (e.status === 404) {
           return res.notFound();
@@ -119,8 +117,17 @@ export async function initFieldsRoute(setup: CoreSetup) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: { name: string; type: string; esTypes?: string[] }
+  field: IFieldType
 ): Promise<FieldStatsResponse> {
+  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
+    ? {
+        script: {
+          lang: field.lang as string,
+          source: field.script as string,
+        },
+      }
+    : { field: field.name };
+
   const searchBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -131,9 +138,9 @@ export async function getNumberHistogram(
         max_value: {
           max: { field: field.name },
         },
-        sample_count: { value_count: { field: field.name } },
+        sample_count: { value_count: { ...fieldRef } },
         top_values: {
-          terms: { field: field.name, size: 10 },
+          terms: { ...fieldRef, size: 10 },
         },
       },
     },
@@ -206,15 +213,27 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (body: unknown) => unknown,
-  field: { name: string; type: string }
+  field: IFieldType
 ): Promise<FieldStatsResponse> {
+  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
+    ? {
+        script: {
+          lang: field.lang as string,
+          source: field.script as string,
+        },
+      }
+    : { field: field.name };
+
   const topValuesBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
       aggs: {
-        sample_count: { value_count: { field: field.name } },
+        sample_count: { value_count: { ...fieldRef } },
         top_values: {
-          terms: { field: field.name, size: 10 },
+          terms: {
+            ...fieldRef,
+            size: 10,
+          },
         },
       },
     },
@@ -241,7 +260,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: (body: unknown) => unknown,
-  field: { name: string; type: string },
+  field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -264,8 +283,17 @@ export async function getDateHistogram(
   // TODO: Respect rollup intervals
   const fixedInterval = `${interval}ms`;
 
+  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
+    ? {
+        script: {
+          lang: field.lang as string,
+          source: field.script as string,
+        },
+      }
+    : { field: field.name };
+
   const histogramBody = {
-    histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
+    histo: { date_histogram: { ...fieldRef, fixed_interval: fixedInterval } },
   };
   const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,

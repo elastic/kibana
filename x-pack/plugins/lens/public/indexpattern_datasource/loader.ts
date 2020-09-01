@@ -49,21 +49,10 @@ export async function loadIndexPatterns({
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
-      const newFields = indexPattern.fields
+      const newFields = (indexPattern.fields as IndexPatternField[])
         .filter(
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-        )
-        .map(
-          (field): IndexPatternField => ({
-            name: field.name,
-            displayName: field.displayName,
-            type: field.type,
-            aggregatable: field.aggregatable,
-            searchable: field.searchable,
-            scripted: field.scripted,
-            esTypes: field.esTypes,
-          })
         )
         .concat(documentField);
 
