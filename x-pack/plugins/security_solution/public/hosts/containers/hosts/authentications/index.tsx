@@ -9,32 +9,32 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/data/common';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import {
   Direction,
   DocValueFields,
   HostPolicyResponseActionStatus,
   HostsQueries,
   PageInfoPaginated,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../../common/search_strategy/security_solution';
 import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
   AuthenticationsEdges,
-} from '../../../../common/search_strategy/security_solution/authentications';
+} from '../../../../../common/search_strategy/security_solution/authentications';
 
-import { inputsModel, State } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel, State } from '../../../../common/store';
+import { createFilter } from '../../../../common/containers/helpers';
+import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { useKibana } from '../../../../common/lib/kibana';
 
-import { hostsModel, hostsSelectors } from '../../store';
+import { hostsModel, hostsSelectors } from '../../../store';
 
 import * as i18n from './translations';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { getInspectResponse, InspectResponse } from '../helpers';
+import { ESTermQuery } from '../../../../../common/typed_json';
+import { getInspectResponse, InspectResponse } from '../../helpers';
 
 const ID = 'authenticationQuery';
 
