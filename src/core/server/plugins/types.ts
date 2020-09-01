@@ -93,6 +93,12 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @internal */
+export interface PluginDependencies {
+  asNames: ReadonlyMap<PluginName, PluginName[]>;
+  asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
+
 /**
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
@@ -278,6 +284,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {

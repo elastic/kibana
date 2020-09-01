@@ -26,6 +26,7 @@ import {
   ApplicationUsageTransactional,
   registerMappings,
 } from './saved_objects_types';
+import { applicationUsageSchema } from './schema';
 
 /**
  * Roll indices every 24h
@@ -40,7 +41,7 @@ export const ROLL_INDICES_START = 5 * 60 * 1000;
 export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
 export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
-interface ApplicationUsageTelemetryReport {
+export interface ApplicationUsageTelemetryReport {
   [appId: string]: {
     clicks_total: number;
     clicks_7_days: number;
@@ -60,93 +61,96 @@ export function registerApplicationUsageCollector(
 ) {
   registerMappings(registerType);
 
-  const collector = usageCollection.makeUsageCollector({
-    type: 'application_usage',
-    isReady: () => typeof getSavedObjectsClient() !== 'undefined',
-    fetch: async () => {
-      const savedObjectsClient = getSavedObjectsClient();
-      if (typeof savedObjectsClient === 'undefined') {
-        return;
-      }
-      const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
-        findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
-        findAll<ApplicationUsageTransactional>(savedObjectsClient, {
-          type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-        }),
-      ]);
+  const collector = usageCollection.makeUsageCollector<ApplicationUsageTelemetryReport | undefined>(
+    {
+      type: 'application_usage',
+      isReady: () => typeof getSavedObjectsClient() !== 'undefined',
+      schema: applicationUsageSchema,
+      fetch: async () => {
+        const savedObjectsClient = getSavedObjectsClient();
+        if (typeof savedObjectsClient === 'undefined') {
+          return;
+        }
+        const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
+          findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
+          findAll<ApplicationUsageTransactional>(savedObjectsClient, {
+            type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+          }),
+        ]);
 
-      const applicationUsageFromTotals = rawApplicationUsageTotals.reduce(
-        (acc, { attributes: { appId, minutesOnScreen, numberOfClicks } }) => {
-          const existing = acc[appId] || { clicks_total: 0, minutes_on_screen_total: 0 };
-          return {
-            ...acc,
-            [appId]: {
-              clicks_total: numberOfClicks + existing.clicks_total,
+        const applicationUsageFromTotals = rawApplicationUsageTotals.reduce(
+          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks } }) => {
+            const existing = acc[appId] || { clicks_total: 0, minutes_on_screen_total: 0 };
+            return {
+              ...acc,
+              [appId]: {
+                clicks_total: numberOfClicks + existing.clicks_total,
+                clicks_7_days: 0,
+                clicks_30_days: 0,
+                clicks_90_days: 0,
+                minutes_on_screen_total: minutesOnScreen + existing.minutes_on_screen_total,
+                minutes_on_screen_7_days: 0,
+                minutes_on_screen_30_days: 0,
+                minutes_on_screen_90_days: 0,
+              },
+            };
+          },
+          {} as ApplicationUsageTelemetryReport
+        );
+        const nowMinus7 = moment().subtract(7, 'days');
+        const nowMinus30 = moment().subtract(30, 'days');
+        const nowMinus90 = moment().subtract(90, 'days');
+
+        const applicationUsage = rawApplicationUsageTransactional.reduce(
+          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
+            const existing = acc[appId] || {
+              clicks_total: 0,
               clicks_7_days: 0,
               clicks_30_days: 0,
               clicks_90_days: 0,
-              minutes_on_screen_total: minutesOnScreen + existing.minutes_on_screen_total,
+              minutes_on_screen_total: 0,
               minutes_on_screen_7_days: 0,
               minutes_on_screen_30_days: 0,
               minutes_on_screen_90_days: 0,
-            },
-          };
-        },
-        {} as ApplicationUsageTelemetryReport
-      );
-      const nowMinus7 = moment().subtract(7, 'days');
-      const nowMinus30 = moment().subtract(30, 'days');
-      const nowMinus90 = moment().subtract(90, 'days');
+            };
 
-      const applicationUsage = rawApplicationUsageTransactional.reduce(
-        (acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
-          const existing = acc[appId] || {
-            clicks_total: 0,
-            clicks_7_days: 0,
-            clicks_30_days: 0,
-            clicks_90_days: 0,
-            minutes_on_screen_total: 0,
-            minutes_on_screen_7_days: 0,
-            minutes_on_screen_30_days: 0,
-            minutes_on_screen_90_days: 0,
-          };
+            const timeOfEntry = moment(timestamp as string);
+            const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
+            const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
+            const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
 
-          const timeOfEntry = moment(timestamp as string);
-          const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
-          const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
-          const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
+            const last7Days = {
+              clicks_7_days: existing.clicks_7_days + numberOfClicks,
+              minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
+            };
+            const last30Days = {
+              clicks_30_days: existing.clicks_30_days + numberOfClicks,
+              minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
+            };
+            const last90Days = {
+              clicks_90_days: existing.clicks_90_days + numberOfClicks,
+              minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
+            };
 
-          const last7Days = {
-            clicks_7_days: existing.clicks_7_days + numberOfClicks,
-            minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
-          };
-          const last30Days = {
-            clicks_30_days: existing.clicks_30_days + numberOfClicks,
-            minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
-          };
-          const last90Days = {
-            clicks_90_days: existing.clicks_90_days + numberOfClicks,
-            minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
-          };
+            return {
+              ...acc,
+              [appId]: {
+                ...existing,
+                clicks_total: existing.clicks_total + numberOfClicks,
+                minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
+                ...(isInLast7Days ? last7Days : {}),
+                ...(isInLast30Days ? last30Days : {}),
+                ...(isInLast90Days ? last90Days : {}),
+              },
+            };
+          },
+          applicationUsageFromTotals
+        );
 
-          return {
-            ...acc,
-            [appId]: {
-              ...existing,
-              clicks_total: existing.clicks_total + numberOfClicks,
-              minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
-              ...(isInLast7Days ? last7Days : {}),
-              ...(isInLast30Days ? last30Days : {}),
-              ...(isInLast90Days ? last90Days : {}),
-            },
-          };
-        },
-        applicationUsageFromTotals
-      );
-
-      return applicationUsage;
-    },
-  });
+        return applicationUsage;
+      },
+    }
+  );
 
   usageCollection.registerCollector(collector);
 

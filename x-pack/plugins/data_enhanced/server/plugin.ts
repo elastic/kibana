@@ -11,7 +11,6 @@ import {
   Plugin,
   Logger,
 } from '../../../../src/core/server';
-import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -19,6 +18,7 @@ import {
 } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../common';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -36,13 +36,19 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
     deps.data.search.registerSearchStrategy(
-      ES_SEARCH_STRATEGY,
+      ENHANCED_ES_SEARCH_STRATEGY,
       enhancedEsSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage
       )
     );
+
+    deps.data.__enhance({
+      search: {
+        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
+      },
+    });
   }
 
   public start(core: CoreStart) {}

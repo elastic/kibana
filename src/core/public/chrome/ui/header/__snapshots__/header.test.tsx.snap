@@ -29,6 +29,15 @@ exports[`Header renders 1`] = `
         "management": Object {},
         "navLinks": Object {},
       },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentAppId$": Observable {
         "_isScalar": false,
         "source": Subject {
@@ -640,6 +649,15 @@ exports[`Header renders 2`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+      },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
       },
       "currentAppId$": Observable {
         "_isScalar": false,
@@ -2283,10 +2301,12 @@ exports[`Header renders 2`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}
@@ -4852,6 +4872,15 @@ exports[`Header renders 3`] = `
         "management": Object {},
         "navLinks": Object {},
       },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentAppId$": Observable {
         "_isScalar": false,
         "source": Subject {
@@ -6494,10 +6523,12 @@ exports[`Header renders 3`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}
@@ -9261,6 +9292,8 @@ exports[`Header renders 3`] = `
                   data-test-subj="collapsibleNavGroup-recentlyViewed"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -9701,6 +9734,15 @@ exports[`Header renders 4`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+      },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
       },
       "currentAppId$": Observable {
         "_isScalar": false,
@@ -11306,10 +11348,12 @@ exports[`Header renders 4`] = `
     data-test-subj="headerGlobalNav"
   >
     <EuiHeader
+      id="headerGlobalNav"
       position="fixed"
     >
       <div
         className="euiHeader euiHeader--default euiHeader--fixed"
+        id="headerGlobalNav"
       >
         <EuiHeaderSection
           grow={false}

@@ -16,7 +16,7 @@ import { networkModel } from '../../store';
 
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import * as i18n from '../translations';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
@@ -33,7 +33,7 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 
-export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
+export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
     dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
@@ -64,7 +64,7 @@ export const DnsQueryTabBody = ({
     []
   );
 
-  const dnsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const dnsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       title: getTitle,
