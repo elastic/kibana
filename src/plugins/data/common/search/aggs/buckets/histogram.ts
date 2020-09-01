@@ -131,8 +131,8 @@ export const getHistogramBucketAgg = ({
           return childSearchSource
             .fetch(options)
             .then((resp: any) => {
-              const min = get(resp, 'aggregations.minAgg.value', 0);
-              const max = get(resp, 'aggregations.maxAgg.value', 0);
+              const min = resp.aggregations?.minAgg?.value ?? 0;
+              const max = resp.aggregations?.maxAgg?.value ?? 0;
 
               aggConfig.setAutoBounds({
                 min,
