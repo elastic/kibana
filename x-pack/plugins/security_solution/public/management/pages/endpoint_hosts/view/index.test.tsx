@@ -511,7 +511,7 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Configuration');
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
@@ -573,7 +573,7 @@ describe('when on the list page', () => {
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Configuration Response');
+        ).toBe('Policy Response');
       });
 
       it('should show a configuration section for each protection', async () => {
