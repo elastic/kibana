@@ -28,7 +28,6 @@ import { useServiceTransactionTypes } from '../../../hooks/useServiceTransaction
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -70,7 +69,6 @@ export function TransactionOverview() {
 
   // redirect to first transaction type
   useRedirect(
-    history,
     getRedirectLocation({
       urlParams,
       location,
@@ -126,7 +124,6 @@ export function TransactionOverview() {
           <ChartsSyncContextProvider>
             <TransactionCharts
               charts={transactionCharts}
-              location={location}
               urlParams={urlParams}
             />
           </ChartsSyncContextProvider>

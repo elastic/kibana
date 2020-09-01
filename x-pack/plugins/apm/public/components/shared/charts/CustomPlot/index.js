@@ -79,6 +79,10 @@ export class InnerCustomPlot extends PureComponent {
         return i === _i ? !disabledValue : !!disabledValue;
       });
 
+      if (typeof this.props.onToggleLegend === 'function') {
+        this.props.onToggleLegend(nextSeriesEnabledState);
+      }
+
       return {
         seriesEnabledState: nextSeriesEnabledState,
       };
@@ -242,6 +246,7 @@ InnerCustomPlot.propTypes = {
   ),
   noHits: PropTypes.bool,
   visibleLegendCount: PropTypes.number,
+  onToggleLegend: PropTypes.func,
 };
 
 InnerCustomPlot.defaultProps = {
