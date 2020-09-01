@@ -160,7 +160,6 @@ export class AlertingPlugin {
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
-    
 
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,

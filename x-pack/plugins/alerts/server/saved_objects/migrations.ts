@@ -7,54 +7,72 @@ import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
-  Logger
+  SavedObjectMigrationContext,
+  Logger,
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  eventLogger: Logger
+  logger: Logger
 ): SavedObjectMigrationMap {
-  const migrations: SavedObjectMigrationMap = {};
+  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
 
-  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts', eventLogger);
-  if (alertsMigration) {
-    migrations['7.9.0'] = alertsMigration;
-  }
+  const infrastructureMigration = changeAlertingConsumer(
+    encryptedSavedObjects,
+    'metrics',
+    'infrastructure'
+  );
 
-  const infrastructureMigration = changeAlertingConsumer(encryptedSavedObjects, 'metrics', 'infrastructure', eventLogger);
-  if (infrastructureMigration) {
-    migrations['7.10.0'] = infrastructureMigration;
+  return {
+    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+      if (doc.attributes.consumer === 'alerting') {
+        return executeMigration(doc, context, alertsMigration);
+      } else if (doc.attributes.consumer === 'metrics') {
+        return executeMigration(doc, context, infrastructureMigration);
+      }
+      return doc;
+    },
+  };
+}
+
+function executeMigration(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  context: SavedObjectMigrationContext,
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
+) {
+  try {
+    return migrationFunc(doc, context);
+  } catch (ex) {
+    context.log.error(
+      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
+      { alertDocument: doc }
+    );
   }
-  return migrations;
+  return doc;
 }
 
 function changeAlertingConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   from: string,
-  to: string,
-  eventLogger: Logger
-): SavedObjectMigrationFn<RawAlert, RawAlert> | undefined {
-  try {
-    return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-      function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-        return doc.attributes.consumer === from;
-      },
-      (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
-        const {
-          attributes: { consumer },
-        } = doc;
-        return {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            consumer: consumer === from ? to : consumer,
-          },
-        };
-      }
-    );
-  } catch (ex) {
-    eventLogger.error(`encryptedSavedObject migration from ${from} to ${to} failed with error: ${ex.message}`)
-  }
+  to: string
+): SavedObjectMigrationFn<RawAlert, RawAlert> {
+  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+      return doc.attributes.consumer === from;
+    },
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+      const {
+        attributes: { consumer },
+      } = doc;
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          consumer: consumer === from ? to : consumer,
+        },
+      };
+    }
+  );
 }

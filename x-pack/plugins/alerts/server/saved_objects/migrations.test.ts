@@ -6,9 +6,12 @@
 import uuid from 'uuid';
 import { getMigrations } from './migrations';
 import { RawAlert } from '../types';
+import { Logger } from '../../../../../src/core/server';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const { log } = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -22,7 +25,7 @@ describe('7.9.0', () => {
   });
 
   test('changes nothing on alerts by other plugins', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
+    const migration790 = getMigrations(encryptedSavedObjectsSetup, logger)['7.10.0'];
     const alert = getMockData({});
     expect(migration790(alert, { log })).toMatchObject(alert);
 
@@ -33,7 +36,7 @@ describe('7.9.0', () => {
   });
 
   test('migrates the consumer for alerting', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
+    const migration790 = getMigrations(encryptedSavedObjectsSetup, logger)['7.10.0'];
     const alert = getMockData({
       consumer: 'alerting',
     });
@@ -56,7 +59,7 @@ describe('7.10.0', () => {
   });
 
   test('changes nothing on alerts by other plugins', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup, logger)['7.10.0'];
     const alert = getMockData({});
     expect(migration710(alert, { log })).toMatchObject(alert);
 
@@ -67,7 +70,7 @@ describe('7.10.0', () => {
   });
 
   test('migrates the consumer for metrics', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup, logger)['7.10.0'];
     const alert = getMockData({
       consumer: 'metrics',
     });
