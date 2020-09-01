@@ -254,6 +254,8 @@ export const useField = <T>(
 
           validationErrors.push({
             ...validationResult,
+            // See comment below that explains why we add "__isBlocking__".
+            __isBlocking__: validationResult.__isBlocking__ ?? validation.isBlocking,
             validationType: validationType || VALIDATION_TYPES.FIELD,
           });
 
@@ -306,6 +308,11 @@ export const useField = <T>(
 
           validationErrors.push({
             ...(validationResult as ValidationError),
+            // We add an "__isBlocking__" property to know if this error is a blocker or no.
+            // Most validation errors are blockers but in some cases a validation is more a warning than an error
+            // like with the ComboBox items when they are added.
+            __isBlocking__:
+              (validationResult as ValidationError).__isBlocking__ ?? validation.isBlocking,
             validationType: validationType || VALIDATION_TYPES.FIELD,
           });
 
@@ -394,7 +401,13 @@ export const useField = <T>(
   );
 
   const _setErrors: FieldHook<T>['setErrors'] = useCallback((_errors) => {
-    setErrors(_errors.map((error) => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
+    setErrors(
+      _errors.map((error) => ({
+        validationType: VALIDATION_TYPES.FIELD,
+        __isBlocking__: true,
+        ...error,
+      }))
+    );
   }, []);
 
   /**
@@ -463,7 +476,8 @@ export const useField = <T>(
     [setValue, deserializeValue, defaultValue]
   );
 
-  const isValid = errors.length === 0;
+  // Don't take into account non blocker validation. Some are just warning (like trying to add a wrong ComboBox item)
+  const isValid = errors.filter((e) => e.__isBlocking__ !== false).length === 0;
 
   const field = useMemo<FieldHook<T>>(() => {
     return {
