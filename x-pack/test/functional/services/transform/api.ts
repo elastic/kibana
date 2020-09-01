@@ -83,6 +83,8 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanTransformIndices() {
+      // Delete all transforms using the API since we mustn't just delete
+      // all `.transform-*` indices since this might result in orphaned ES tasks.
       const {
         body: { transforms },
       } = await esSupertest.get(`/_transform/`).expect(200);
@@ -97,6 +99,10 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         await esSupertest.delete(`/_transform/${transformId}`).expect(200);
         await this.waitForTransformNotToExist(transformId);
       });
+
+      // Delete all transform related notifications to clear messages tabs
+      // in the transforms list expanded rows.
+      await this.deleteIndices('.transform-notifications-*');
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {
