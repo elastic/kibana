@@ -17,7 +17,6 @@ import {
   DocValueFields,
   HostPolicyResponseActionStatus,
   HostsQueries,
-  Inspect,
   PageInfoPaginated,
 } from '../../../../common/search_strategy/security_solution';
 import {
@@ -35,14 +34,14 @@ import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { getInspectResponse } from '../helpers';
+import { getInspectResponse, InspectResponse } from '../helpers';
 
 const ID = 'authenticationQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   id: string;
-  inspect: Inspect;
+  inspect: InspectResponse;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
