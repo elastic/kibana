@@ -15,7 +15,10 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
-import { AuthenticationsRequestOptions, AuthenticationsStrategyResponse } from './authentications';
+import {
+  AuthenticationsRequestOptions,
+  AuthenticationsStrategyResponse,
+} from './hosts/authentications';
 import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
 
 export * from './hosts';

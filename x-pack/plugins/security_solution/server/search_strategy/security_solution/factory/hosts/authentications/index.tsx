@@ -15,13 +15,12 @@ import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
   AuthenticationHit,
-  AuthenticationBucket,
-} from '../../../../../../common/search_strategy/security_solution/authentications';
+} from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
-import { formatAuthenticationData } from './helpers';
+import { formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
   buildDsl: (options: AuthenticationsRequestOptions) => {
@@ -39,24 +38,7 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const hits: AuthenticationHit[] = getOr(
-      [],
-      'aggregations.group_by_users.buckets',
-      response.rawResponse
-    ).map((bucket: AuthenticationBucket) => ({
-      _id: getOr(
-        `${bucket.key}+${bucket.doc_count}`,
-        'failures.lastFailure.hits.hits[0].id',
-        bucket
-      ),
-      _source: {
-        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
-        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
-      },
-      user: bucket.key,
-      failures: bucket.failures.doc_count,
-      successes: bucket.successes.doc_count,
-    }));
+    const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
       formatAuthenticationData(hit, auditdFieldsMap)
     );

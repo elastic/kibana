@@ -23,7 +23,7 @@ import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
   AuthenticationsEdges,
-} from '../../../../../common/search_strategy/security_solution/authentications';
+} from '../../../../../common/search_strategy/security_solution/hosts/authentications';
 
 import { inputsModel, State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -34,7 +34,8 @@ import { hostsModel, hostsSelectors } from '../../../store';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../../common/typed_json';
-import { getInspectResponse, InspectResponse } from '../../helpers';
+import { getInspectResponse } from '../../../../helpers';
+import { InspectResponse } from '../../../../types';
 
 const ID = 'authenticationQuery';
 

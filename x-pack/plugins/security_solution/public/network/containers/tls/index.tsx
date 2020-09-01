@@ -25,7 +25,7 @@ import {
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import * as i18n from './translations';
-import { getInspectResponse } from '../../../hosts/containers/helpers';
+import { getInspectResponse } from '../../../helpers';
 
 const ID = 'networkTlsQuery';
 

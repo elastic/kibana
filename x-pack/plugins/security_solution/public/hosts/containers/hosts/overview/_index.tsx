@@ -22,7 +22,8 @@ import {
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../../src/plugins/data/common';
-import { getInspectResponse, InspectResponse } from '../../helpers';
+import { getInspectResponse } from '../../../../helpers';
+import { InspectResponse } from '../../../../types';
 
 const ID = 'hostOverviewQuery';
 
