@@ -34,6 +34,12 @@ if [ "$GIT_CHANGES" ]; then
 fi
 
 ###
+### ensure Chromedriver install hook is triggered
+### when modules are up-to-date
+###
+node node_modules/chromedriver/install.js
+
+###
 ### Download es snapshots
 ###
 echo " -- downloading es snapshot"

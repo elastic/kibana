@@ -66,7 +66,10 @@ export async function getAnomalySeries({
 
   let mlJobIds: string[] = [];
   try {
-    mlJobIds = await getMLJobIds(setup.ml, uiFilters.environment);
+    mlJobIds = await getMLJobIds(
+      setup.ml.anomalyDetectors,
+      uiFilters.environment
+    );
   } catch (error) {
     logger.error(error);
     return;

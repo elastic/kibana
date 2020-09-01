@@ -36,6 +36,7 @@ import {
 import { mapToObject } from '../../utils/';
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
+import { getCoreSettings } from './settings';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -60,6 +61,8 @@ export class UiSettingsService
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
+    this.register(getCoreSettings());
+
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;
 
