@@ -16,7 +16,7 @@ export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
 }
 
-export class GlobalSearchProvidersPlugin implements Plugin<{}, {}> {
+export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   public async setup() {
     return {};
   }

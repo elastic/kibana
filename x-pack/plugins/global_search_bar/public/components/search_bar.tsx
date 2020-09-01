@@ -5,16 +5,17 @@
  */
 
 import {
-  EuiText,
   EuiBadge,
-  EuiSelectableTemplateSitewide,
-  EuiSelectableTemplateSitewideOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelectableTemplateSitewide,
+  EuiSelectableTemplateSitewideOption,
+  EuiText,
 } from '@elastic/eui';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ApplicationStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart } from 'kibana/public';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 const useIfMounted = () => {
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
+const blurEvent = new FocusEvent('blur');
 
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const ifMounted = useIfMounted();
@@ -94,7 +96,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           setOptions(arr);
         },
         error: () => {
-          // TODO
+          // TODO #74430 - add telemetry to see if errors are happening
+          // Not doing anything on error right now because it'll either just show the previous
+          // results or empty results which is basically what we want anyways
         },
         complete: () => {
           ifMounted(() => setSearchValue(currentValue));
@@ -104,7 +108,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     [globalSearch, searchValue, ifMounted]
   );
 
-  const onWindowKeyDown = (event: any) => {
+  const onWindowKeyDown = (event: KeyboardEvent) => {
     if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
       if (searchRef) {
         event.preventDefault();
@@ -117,14 +121,15 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     // @ts-ignore - ts error is "union type is too complex to express"
     const { url } = selected.find(({ checked }) => checked === 'on');
 
-    // TODO should we be worried about http://?
-    if (url.startsWith('https://')) window.location.assign(url);
+    if (/^https?:\/\//.test(url)) window.location.assign(url);
     else {
       navigateToUrl(url);
       (document.activeElement as HTMLElement).blur();
       onSearch('');
-      // setSearchFocus(false);
-      if (searchRef) searchRef.value = '';
+      if (searchRef) {
+        searchRef.value = '';
+        searchRef.dispatchEvent(blurEvent);
+      }
     }
   };
 
@@ -149,6 +154,10 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         onSearch,
         'data-test-subj': 'header-search',
         inputRef: setSearchRef,
+        isClearable: false,
+        placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
+          defaultMessage: 'Search Elastic',
+        }),
       }}
       popoverFooter={
         <EuiText color="subdued" size="xs">
@@ -159,15 +168,18 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
             responsive={false}
             wrap
           >
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.globalSearchBar.searchBar.shortcut"
-                defaultMessage="Quickly search using"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>
-            </EuiFlexItem>
+            <FormattedMessage
+              id="xpack.globalSearchBar.searchBar.shortcut"
+              defaultMessage="{what}{how}"
+              values={{
+                what: <EuiFlexItem grow={false}>Quickly search using:</EuiFlexItem>,
+                how: (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{isWindows ? 'Ctrl + S' : 'Command + S'}</EuiBadge>
+                  </EuiFlexItem>
+                ),
+              }}
+            />
           </EuiFlexGroup>
         </EuiText>
       }

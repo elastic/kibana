@@ -16,12 +16,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('./apps/login_page'),
-      // TODO uncomment after EUI is upgraded, before merging
-      // require.resolve('./apps/home'),
-      // require.resolve('./apps/grok_debugger'),
-      // require.resolve('./apps/search_profiler'),
-      // require.resolve('./apps/uptime'),
-      // require.resolve('./apps/painless_lab'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/grok_debugger'),
+      require.resolve('./apps/search_profiler'),
+      require.resolve('./apps/uptime'),
+      require.resolve('./apps/painless_lab'),
     ],
     pageObjects,
     services,

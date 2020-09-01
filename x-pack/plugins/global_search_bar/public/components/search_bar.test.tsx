@@ -88,7 +88,44 @@ describe('SearchBar', () => {
     });
     expect(findSpy).toHaveBeenCalledTimes(2);
   });
-  it('supports keyboard shortcuts', () => {
+
+  // TODO unskip
+  it.skip('supports keyboard shortcuts', () => {
     // cmd/ctrl+s focuses search bar, popover opens, results rendered
+    let component: ReactWrapper;
+
+    act(() => {
+      component = mountWithIntl(
+        <SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />
+      );
+    });
+
+    act(() => {
+      const searchEvent = new KeyboardEvent('keydown', {
+        key: '/',
+        ctrlKey: true,
+        metaKey: true,
+      } as any);
+      window.dispatchEvent(searchEvent);
+    });
+
+    act(() => {
+      component.update();
+    });
+
+    act(() => {
+      const searchEvent = new KeyboardEvent('keydown', {
+        key: 'a',
+      } as any);
+      window.dispatchEvent(searchEvent);
+    });
+
+    act(() => {
+      component.update();
+    });
+
+    act(() => {
+      expect(component.find('input').getDOMNode().getAttribute('value')).toBe('a');
+    });
   });
 });
