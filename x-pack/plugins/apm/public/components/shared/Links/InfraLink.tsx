@@ -5,12 +5,12 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { IBasePath } from 'kibana/public';
 import React from 'react';
 import url from 'url';
-import { fromQuery } from './url_helpers';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
 import { InfraAppId } from '../../../../../infra/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { fromQuery } from './url_helpers';
 
 interface InfraQueryParams {
   time?: number;
@@ -33,7 +33,7 @@ export const getInfraHref = ({
   path,
 }: {
   app: InfraAppId;
-  basePath: AppMountContextBasePath;
+  basePath: IBasePath;
   query: InfraQueryParams;
   path?: string;
 }) => {

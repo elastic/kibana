@@ -23,5 +23,6 @@ require('./harden');
 // The following require statements MUST be executed before any others - END
 
 require('symbol-observable');
+require('source-map-support/register');
 require('./root');
 require('./node_version_validator');

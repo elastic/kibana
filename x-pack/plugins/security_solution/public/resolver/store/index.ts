@@ -11,7 +11,7 @@ import { resolverReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
 import { ResolverAction } from './actions';
 
-export const storeFactory = (
+export const resolverStoreFactory = (
   dataAccessLayer: DataAccessLayer
 ): Store<ResolverState, ResolverAction> => {
   const actionsDenylist: Array<ResolverAction['type']> = ['userMovedPointer'];

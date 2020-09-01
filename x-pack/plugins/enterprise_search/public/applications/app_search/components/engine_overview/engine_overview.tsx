@@ -16,14 +16,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 import EnginesIcon from '../../assets/engine.svg';
 import MetaEnginesIcon from '../../assets/meta_engine.svg';
 
-import { LoadingState, EmptyState, ErrorState } from '../empty_states';
-import { EngineOverviewHeader } from '../engine_overview_header';
+import { EngineOverviewHeader, LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
@@ -42,8 +42,6 @@ export const EngineOverview: React.FC = () => {
   const { license } = useContext(LicenseContext) as ILicenseContext;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
-
   const [engines, setEngines] = useState([]);
   const [enginesPage, setEnginesPage] = useState(1);
   const [enginesTotal, setEnginesTotal] = useState(0);
@@ -57,16 +55,12 @@ export const EngineOverview: React.FC = () => {
     });
   };
   const setEnginesData = async (params: IGetEnginesParams, callbacks: ISetEnginesCallbacks) => {
-    try {
-      const response = await getEnginesData(params);
+    const response = await getEnginesData(params);
 
-      callbacks.setResults(response.results);
-      callbacks.setResultsTotal(response.meta.page.total_results);
+    callbacks.setResults(response.results);
+    callbacks.setResultsTotal(response.meta.page.total_results);
 
-      setIsLoading(false);
-    } catch (error) {
-      setHasErrorConnecting(true);
-    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -85,7 +79,6 @@ export const EngineOverview: React.FC = () => {
     }
   }, [license, metaEnginesPage]);
 
-  if (hasErrorConnecting) return <ErrorState />;
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
 
@@ -96,6 +89,7 @@ export const EngineOverview: React.FC = () => {
 
       <EngineOverviewHeader />
       <EuiPageContent panelPaddingSize="s" className="engineOverview">
+        <FlashMessages />
         <EuiPageContentHeader>
           <EuiTitle size="s">
             <h2>
