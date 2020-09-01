@@ -17,7 +17,7 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { cacheGet, cacheSet, cacheHas, getArchiveKey, setArchiveKey } from './cache';
+import { cacheGet, cacheSet, cacheHas, getArchiveLocation, setArchiveLocation } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
@@ -130,7 +130,9 @@ export async function getArchiveInfo(
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const paths: string[] = [];
-  const onEntry = (entry: ArchiveEntry) => {
+  const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
+  const bufferExtractor = getBufferExtractor(pkgName, pkgVersion);
+  await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
     const { file } = pathParts(path);
     if (!file) return;
@@ -138,9 +140,7 @@ export async function getArchiveInfo(
       cacheSet(path, buffer);
       paths.push(path);
     }
-  };
-
-  await extract(pkgName, pkgVersion, filter, onEntry);
+  });
 
   return paths;
 }
@@ -175,24 +175,17 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-async function extract(
-  pkgName: string,
-  pkgVersion: string,
-  filter = (entry: ArchiveEntry): boolean => true,
-  onEntry: (entry: ArchiveEntry) => void
-) {
-  const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
-  const archiveKey = getArchiveKey(pkgName, pkgVersion);
-  // shouldn't be possible since getOrFetchArchiveBuffer -> fetchArchiveBuffer sets the key
-  if (!archiveKey) throw new Error('no archive key');
-  const isZip = archiveKey.endsWith('.zip');
-  const libExtract = isZip ? unzipBuffer : untarBuffer;
+export function getBufferExtractor(pkgName: string, pkgVersion: string) {
+  const archiveLocation = getArchiveLocation(pkgName, pkgVersion);
+  if (!archiveLocation) throw new Error('no archive key');
+  const isZip = archiveLocation.endsWith('.zip');
+  const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
 
-  return libExtract(archiveBuffer, filter, onEntry);
+  return bufferExtractor;
 }
 
 async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
-  const key = getArchiveKey(pkgName, pkgVersion);
+  const key = getArchiveLocation(pkgName, pkgVersion);
   let buffer = key && cacheGet(key);
   if (!buffer) {
     buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
@@ -206,7 +199,7 @@ async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Pro
 }
 
 export async function ensureCachedArchiveInfo(name: string, version: string) {
-  const pkgkey = getArchiveKey(name, version);
+  const pkgkey = getArchiveLocation(name, version);
   if (!pkgkey || !cacheHas(pkgkey)) {
     await getArchiveInfo(name, version);
   }
@@ -217,7 +210,7 @@ async function fetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const buffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
-  setArchiveKey(pkgName, pkgVersion, archivePath);
+  setArchiveLocation(pkgName, pkgVersion, archivePath);
   cacheSet(archivePath, buffer);
 
   return buffer;
