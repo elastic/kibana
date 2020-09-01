@@ -165,6 +165,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
     onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 // @public
