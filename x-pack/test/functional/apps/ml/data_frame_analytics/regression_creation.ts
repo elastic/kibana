@@ -201,9 +201,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
 
           await ml.testExecution.logTestStep('displays the results view for created job');
-          await ml.dataFrameAnalyticsTable.openResultsView();
-          await ml.dataFrameAnalytics.assertRegressionEvaluatePanelElementsExists();
-          await ml.dataFrameAnalytics.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
+          await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
         });
       });
     }
