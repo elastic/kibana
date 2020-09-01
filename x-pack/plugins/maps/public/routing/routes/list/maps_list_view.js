@@ -12,6 +12,7 @@ import {
   getUiSettings,
   getToasts,
   getCoreChrome,
+  getHttp,
 } from '../../../kibana_services';
 import {
   EuiTitle,
@@ -32,8 +33,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../../../help_menu_util';
-import { Link } from 'react-router-dom';
 import { goToSpecifiedPath } from '../../maps_router';
+import { getNewMapPath } from '../../../../common/constants';
 
 export const EMPTY_FILTER = '';
 
@@ -387,15 +388,14 @@ export class MapsListView extends React.Component {
   renderListing() {
     let createButton;
     if (!this.state.readOnly) {
+      const newMap = getHttp().basePath.prepend(getNewMapPath());
       createButton = (
-        <Link to={'/map'}>
-          <EuiButton data-test-subj="newMapLink" fill>
-            <FormattedMessage
-              id="xpack.maps.mapListing.createMapButtonLabel"
-              defaultMessage="Create map"
-            />
-          </EuiButton>
-        </Link>
+        <EuiButton data-test-subj="newMapLink" fill href={newMap}>
+          <FormattedMessage
+            id="xpack.maps.mapListing.createMapButtonLabel"
+            defaultMessage="Create map"
+          />
+        </EuiButton>
       );
     }
     return (
