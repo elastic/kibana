@@ -34,7 +34,7 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useUrlParams()[0]();
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
-  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID);
+  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
   useEffect(() => {
     if (setBreadcrumbs) {
       setBreadcrumbs([makeBaseBreadcrumb(appPath, params)].concat(extraCrumbs));
