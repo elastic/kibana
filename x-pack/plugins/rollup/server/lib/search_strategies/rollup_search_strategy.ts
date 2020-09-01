@@ -32,6 +32,7 @@ export const getRollupSearchStrategy = (
         .getRollupIndexCaps({
           index: indexPattern,
         })
+        .then((res) => res.body)
         .catch(() => Promise.resolve({}));
     }
 

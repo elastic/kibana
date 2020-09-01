@@ -37,9 +37,3 @@ export interface RouteDependencies {
     IndexPatternsFetcher: typeof IndexPatternsFetcher;
   };
 }
-
-// TODO: When vis_type_timeseries is fully migrated to the NP, it shouldn't require this shim.
-export type CallWithRequestFactoryShim = (
-  elasticsearchServiceShim: CallWithRequestFactoryShim,
-  request: KibanaRequest
-) => LegacyAPICaller;

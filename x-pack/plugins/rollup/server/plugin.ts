@@ -17,17 +17,15 @@ import {
   ILegacyCustomClusterClient,
   Plugin,
   Logger,
-  KibanaRequest,
   PluginInitializerContext,
   ILegacyScopedClusterClient,
-  LegacyAPICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies, CallWithRequestFactoryShim } from './types';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
