@@ -13,11 +13,11 @@ export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 type Script =
   | string
   | {
-      lang?: string;
-      id?: string;
-      source?: string;
-      params?: Record<string, string | number>;
-    };
+    lang?: string;
+    id?: string;
+    source?: string;
+    params?: Record<string, string | number>;
+  };
 
 type BucketsPath = string | Record<string, string>;
 
@@ -25,12 +25,12 @@ type SourceOptions = string | string[];
 
 type MetricsAggregationOptions =
   | {
-      field: string;
-      missing?: number;
-    }
+    field: string;
+    missing?: number;
+  }
   | {
-      script?: Script;
-    };
+    script?: Script;
+  };
 
 interface MetricsAggregationResponsePart {
   value: number | null;
@@ -43,9 +43,9 @@ interface DateHistogramBucket {
 
 type GetCompositeKeys<
   TAggregationOptionsMap extends AggregationOptionsMap
-> = TAggregationOptionsMap extends {
-  composite: { sources: Array<infer Source> };
-}
+  > = TAggregationOptionsMap extends {
+    composite: { sources: Array<infer Source> };
+  }
   ? keyof Source
   : never;
 
@@ -56,30 +56,27 @@ type CompositeOptionsSource = Record<
 
 export interface AggregationOptionsByType {
   terms: {
-    field: string;
     size?: number;
     missing?: string;
     order?: SortOptions;
     execution_hint?: 'map' | 'global_ordinals';
-  };
+  } & MetricsAggregationOptions;
   date_histogram: {
-    field: string;
     format?: string;
     min_doc_count?: number;
     extended_bounds?: {
       min: number;
       max: number;
     };
-  } & ({ calendar_interval: string } | { fixed_interval: string });
+  } & ({ calendar_interval: string } | { fixed_interval: string }) & MetricsAggregationOptions;
   histogram: {
-    field: string;
     interval: number;
     min_doc_count?: number;
     extended_bounds?: {
       min?: number | string;
       max?: number | string;
     };
-  };
+  } & MetricsAggregationOptions;
   avg: MetricsAggregationOptions;
   max: MetricsAggregationOptions;
   min: MetricsAggregationOptions;
@@ -89,10 +86,9 @@ export interface AggregationOptionsByType {
     precision_threshold?: number;
   };
   percentiles: {
-    field: string;
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & MetricsAggregationOptions;
   extended_stats: {
     field: string;
   };
@@ -133,7 +129,6 @@ export interface AggregationOptionsByType {
     reduce_script: Script;
   };
   date_range: {
-    field: string;
     format?: string;
     ranges: Array<
       | { from: string | number }
@@ -141,17 +136,15 @@ export interface AggregationOptionsByType {
       | { from: string | number; to: string | number }
     >;
     keyed?: boolean;
-  };
+  } & MetricsAggregationOptions;
   auto_date_histogram: {
-    field: string;
     buckets: number;
-  };
+  } & MetricsAggregationOptions;
   percentile_ranks: {
-    field: string;
     values: string[];
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & MetricsAggregationOptions;
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -178,14 +171,14 @@ export interface AggregationInputMap {
 type BucketSubAggregationResponse<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
-> = TAggregationInputMap extends AggregationInputMap
+  > = TAggregationInputMap extends AggregationInputMap
   ? AggregationResponseMap<TAggregationInputMap, TDocument>
   : {};
 
 interface AggregationResponsePart<
   TAggregationOptionsMap extends AggregationOptionsMap,
   TDocument
-> {
+  > {
   terms: {
     buckets: Array<
       {
@@ -211,7 +204,7 @@ interface AggregationResponsePart<
   date_histogram: {
     buckets: Array<
       DateHistogramBucket &
-        BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+      BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -255,38 +248,38 @@ interface AggregationResponsePart<
     doc_count: number;
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
-    ? Array<
-        { doc_count: number } & AggregationResponseMap<
-          TAggregationOptionsMap['aggs'],
-          TDocument
-        >
-      >
-    : TAggregationOptionsMap extends {
-        filters: {
-          filters: Record<string, any>;
-        };
-      }
-    ? {
-        buckets: {
-          [key in keyof TAggregationOptionsMap['filters']['filters']]: {
-            doc_count: number;
-          } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
-        };
-      }
-    : never;
+  ? Array<
+    { doc_count: number } & AggregationResponseMap<
+      TAggregationOptionsMap['aggs'],
+      TDocument
+    >
+  >
+  : TAggregationOptionsMap extends {
+    filters: {
+      filters: Record<string, any>;
+    };
+  }
+  ? {
+    buckets: {
+      [key in keyof TAggregationOptionsMap['filters']['filters']]: {
+        doc_count: number;
+      } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+    };
+  }
+  : never;
   sampler: {
     doc_count: number;
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   derivative:
-    | {
-        value: number;
-      }
-    | undefined;
+  | {
+    value: number;
+  }
+  | undefined;
   bucket_script:
-    | {
-        value: number | null;
-      }
-    | undefined;
+  | {
+    value: number | null;
+  }
+  | undefined;
   composite: {
     after_key: Record<
       GetCompositeKeys<TAggregationOptionsMap>,
@@ -310,13 +303,13 @@ interface AggregationResponsePart<
   };
   date_range: {
     buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
-      ? Record<string, DateRangeBucket>
-      : { buckets: DateRangeBucket[] };
+    ? Record<string, DateRangeBucket>
+    : { buckets: DateRangeBucket[] };
   };
   auto_date_histogram: {
     buckets: Array<
       DateHistogramBucket &
-        AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
+      AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
     >;
     interval: string;
   };
@@ -325,8 +318,8 @@ interface AggregationResponsePart<
     values: TAggregationOptionsMap extends {
       percentile_ranks: { keyed: false };
     }
-      ? Array<{ key: number; value: number }>
-      : Record<string, number>;
+    ? Array<{ key: number; value: number }>
+    : Record<string, number>;
   };
 }
 
@@ -347,16 +340,16 @@ interface AggregationResponsePart<
 // types, e.g. { foo: string; bar?: undefined } | { foo?: undefined; bar: string };
 export type ValidAggregationKeysOf<
   T extends Record<string, any>
-> = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+  > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
 
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
-> = TAggregationInputMap extends AggregationInputMap
+  > = TAggregationInputMap extends AggregationInputMap
   ? {
-      [TName in keyof TAggregationInputMap]: AggregationResponsePart<
-        TAggregationInputMap[TName],
-        TDocument
-      >[AggregationType & ValidAggregationKeysOf<TAggregationInputMap[TName]>];
-    }
+    [TName in keyof TAggregationInputMap]: AggregationResponsePart<
+      TAggregationInputMap[TName],
+      TDocument
+    >[AggregationType & ValidAggregationKeysOf<TAggregationInputMap[TName]>];
+  }
   : undefined;
