@@ -106,8 +106,8 @@ exports[`Header renders 1`] = `
       "_isScalar": false,
       "_value": Object {
         "baseUrl": "",
+        "href": "",
         "id": "cloud-deployment-link",
-        "legacy": false,
         "title": "Manage cloud deployment",
       },
       "closed": false,
@@ -431,8 +431,8 @@ exports[`Header renders 1`] = `
       "_value": Array [
         Object {
           "baseUrl": "",
+          "href": "",
           "id": "kibana",
-          "legacy": false,
           "title": "kibana",
         },
       ],
@@ -832,8 +832,8 @@ exports[`Header renders 2`] = `
       "_isScalar": false,
       "_value": Object {
         "baseUrl": "",
+        "href": "",
         "id": "cloud-deployment-link",
-        "legacy": false,
         "title": "Manage cloud deployment",
       },
       "closed": false,
@@ -2025,8 +2025,8 @@ exports[`Header renders 2`] = `
       "_value": Array [
         Object {
           "baseUrl": "",
+          "href": "",
           "id": "kibana",
-          "legacy": false,
           "title": "kibana",
         },
       ],
@@ -2397,8 +2397,8 @@ exports[`Header renders 2`] = `
                       "_value": Array [
                         Object {
                           "baseUrl": "",
+                          "href": "",
                           "id": "kibana",
-                          "legacy": false,
                           "title": "kibana",
                         },
                       ],
@@ -4569,8 +4569,8 @@ exports[`Header renders 2`] = `
           "_isScalar": false,
           "_value": Object {
             "baseUrl": "",
+            "href": "",
             "id": "cloud-deployment-link",
-            "legacy": false,
             "title": "Manage cloud deployment",
           },
           "closed": false,
@@ -4628,8 +4628,8 @@ exports[`Header renders 2`] = `
           "_value": Array [
             Object {
               "baseUrl": "",
+              "href": "",
               "id": "kibana",
-              "legacy": false,
               "title": "kibana",
             },
           ],
@@ -5044,8 +5044,8 @@ exports[`Header renders 3`] = `
       "_isScalar": false,
       "_value": Object {
         "baseUrl": "",
+        "href": "",
         "id": "cloud-deployment-link",
-        "legacy": false,
         "title": "Manage cloud deployment",
       },
       "closed": false,
@@ -6237,8 +6237,8 @@ exports[`Header renders 3`] = `
       "_value": Array [
         Object {
           "baseUrl": "",
+          "href": "",
           "id": "kibana",
-          "legacy": false,
           "title": "kibana",
         },
       ],
@@ -6609,8 +6609,8 @@ exports[`Header renders 3`] = `
                       "_value": Array [
                         Object {
                           "baseUrl": "",
+                          "href": "",
                           "id": "kibana",
-                          "legacy": false,
                           "title": "kibana",
                         },
                       ],
@@ -8781,8 +8781,8 @@ exports[`Header renders 3`] = `
           "_isScalar": false,
           "_value": Object {
             "baseUrl": "",
+            "href": "",
             "id": "cloud-deployment-link",
-            "legacy": false,
             "title": "Manage cloud deployment",
           },
           "closed": false,
@@ -8840,8 +8840,8 @@ exports[`Header renders 3`] = `
           "_value": Array [
             Object {
               "baseUrl": "",
+              "href": "",
               "id": "kibana",
-              "legacy": false,
               "title": "kibana",
             },
           ],
@@ -9054,7 +9054,7 @@ exports[`Header renders 3`] = `
                             Array [
                               Object {
                                 "data-test-subj": "collapsibleNavCustomNavLink",
-                                "href": undefined,
+                                "href": "",
                                 "icon": undefined,
                                 "iconType": undefined,
                                 "isActive": false,
@@ -9078,6 +9078,7 @@ exports[`Header renders 3`] = `
                             <EuiListGroupItem
                               color="text"
                               data-test-subj="collapsibleNavCustomNavLink"
+                              href=""
                               isActive={false}
                               key="title-0"
                               label="Manage cloud deployment"
@@ -9451,6 +9452,7 @@ exports[`Header renders 3`] = `
                             <EuiListGroupItem
                               color="text"
                               data-test-subj="collapsibleNavAppLink"
+                              href=""
                               isActive={false}
                               label="kibana"
                               onClick={[Function]}
@@ -9897,8 +9899,8 @@ exports[`Header renders 4`] = `
       "_isScalar": false,
       "_value": Object {
         "baseUrl": "",
+        "href": "",
         "id": "cloud-deployment-link",
-        "legacy": false,
         "title": "Manage cloud deployment",
       },
       "closed": false,
@@ -11052,8 +11054,8 @@ exports[`Header renders 4`] = `
       "_value": Array [
         Object {
           "baseUrl": "",
+          "href": "",
           "id": "kibana",
-          "legacy": false,
           "title": "kibana",
         },
       ],
@@ -11426,8 +11428,8 @@ exports[`Header renders 4`] = `
                       "_value": Array [
                         Object {
                           "baseUrl": "",
+                          "href": "",
                           "id": "kibana",
-                          "legacy": false,
                           "title": "kibana",
                         },
                       ],
@@ -13599,8 +13601,8 @@ exports[`Header renders 4`] = `
           "_value": Array [
             Object {
               "baseUrl": "",
+              "href": "",
               "id": "kibana",
-              "legacy": false,
               "title": "kibana",
             },
           ],
@@ -14047,7 +14049,7 @@ exports[`Header renders 4`] = `
                           Array [
                             Object {
                               "data-test-subj": "navDrawerAppsMenuLink",
-                              "href": undefined,
+                              "href": "",
                               "icon": undefined,
                               "iconType": undefined,
                               "isActive": false,
@@ -14070,7 +14072,7 @@ exports[`Header renders 4`] = `
                                 "className": "euiNavDrawerGroup__item",
                                 "data-name": "kibana",
                                 "data-test-subj": "navDrawerAppsMenuLink",
-                                "href": undefined,
+                                "href": "",
                                 "icon": <span
                                   className="euiNavDrawerGroup__itemDefaultIcon"
                                 >
@@ -14097,6 +14099,7 @@ exports[`Header renders 4`] = `
                               className="euiNavDrawerGroup__item"
                               data-name="kibana"
                               data-test-subj="navDrawerAppsMenuLink"
+                              href=""
                               icon={
                                 <span
                                   className="euiNavDrawerGroup__itemDefaultIcon"

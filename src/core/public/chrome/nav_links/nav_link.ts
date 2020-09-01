@@ -74,11 +74,8 @@ export interface ChromeNavLink {
 
   /**
    * Settled state between `url`, `baseUrl`, and `active`
-   *
-   * @internalRemarks
-   * This should be required once legacy apps are gone.
    */
-  readonly href?: string;
+  readonly href: string;
 
   /**
    * Disables a link from being clickable.

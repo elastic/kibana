@@ -74,13 +74,13 @@ describe('Header', () => {
     const isLocked$ = new BehaviorSubject(false);
     const navType$ = new BehaviorSubject('modern' as NavType);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', legacy: false },
+      { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
     ]);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
       baseUrl: '',
-      legacy: false,
+      href: '',
     });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
