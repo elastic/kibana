@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
 
 let cachedLicense: ESLicense | undefined;
@@ -32,6 +32,52 @@ function fetchLicense(callCluster: LegacyAPICaller, local: boolean) {
       accept_enterprise: 'true',
     },
   });
+}
+
+/**
+ * Get the cluster's license from the connected node.
+ *
+ * This is the equivalent of GET /_license?local=true&accept_enterprise=true .
+ *
+ * Like any X-Pack related API, X-Pack must installed for this to work.
+ */
+async function getLicenseFromLocalOrMasterNewClient(esClient: ElasticsearchClient) {
+  let response;
+  try {
+    // Fetching the license from the local node is cheaper than getting it from the master node and good enough
+    const { body } = await esClient.license.get<{ license: ESLicense }>({
+      local: true,
+      accept_enterprise: true,
+    });
+    cachedLicense = body.license;
+    response = body.license;
+  } catch (err) {
+    // if there is an error, try to get the license from the master node:
+    if (cachedLicense) {
+      try {
+        const { body } = await esClient.license.get<{ license: ESLicense }>({
+          local: false,
+          accept_enterprise: true,
+        });
+        cachedLicense = body.license;
+        response = body.license;
+      } catch (masterError) {
+        if (masterError.statusCode === 404) {
+          // the master node doesn't have a license and we assume there isn't a license
+          cachedLicense = undefined;
+          response = undefined;
+        } else {
+          throw err;
+        }
+      }
+    }
+    if (err.statusCode === 404) {
+      cachedLicense = undefined;
+    } else {
+      throw err;
+    }
+  }
+  return response;
 }
 
 /**
@@ -68,9 +114,19 @@ async function getLicenseFromLocalOrMaster(callCluster: LegacyAPICaller) {
   return license;
 }
 
-export const getLocalLicense: LicenseGetter = async (clustersDetails, { callCluster }) => {
+export const getLocalLicense: LicenseGetter = async (
+  clustersDetails,
+  { callCluster, esClient }
+) => {
+  const useLegacy = true;
+  if (!useLegacy) {
+    const license = await getLicenseFromLocalOrMasterNewClient(esClient);
+    return clustersDetails.reduce(
+      (acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }),
+      {}
+    );
+  }
   const license = await getLicenseFromLocalOrMaster(callCluster);
-
   // It should be called only with 1 cluster element in the clustersDetails array, but doing reduce just in case.
   return clustersDetails.reduce((acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }), {});
 };

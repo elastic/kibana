@@ -18,7 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller, IClusterClient, ElasticsearchClient } from 'kibana/server';
+import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -118,7 +118,7 @@ export class CollectorSet {
   };
 
   // all collections eventually pass through bulkFetch.
-  // teh shape of the reponse is different when using the new ES client as is the error handling.
+  // the shape of the reponse is different when using the new ES client as is the error handling.
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
@@ -130,7 +130,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient), // note that the response shape is different between hte legacy and new clients. Each `fetch` method will need to ensure it handles reshaping the data correctly.
+            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the return shape appropriately.
           };
         } catch (err) {
           this.logger.warn(err);

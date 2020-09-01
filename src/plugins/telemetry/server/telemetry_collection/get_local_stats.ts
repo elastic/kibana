@@ -64,9 +64,9 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
  * Get statistics for all products joined by Elasticsearch cluster.
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
-  clustersDetails,
-  config, // contains the new esClient already scoped
-  context
+  clustersDetails, // array of cluster uuid's
+  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+  context // StatsCollectionContext contains logger and version (string)
 ) => {
   const { callCluster, usageCollection, esClient } = config;
 

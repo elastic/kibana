@@ -35,7 +35,6 @@ export interface ESClusterInfo {
     minimum_index_compatibility_version: string;
   };
 }
-
 /**
  * Get the cluster info from the connected cluster.
  *
@@ -48,5 +47,5 @@ export interface ESClusterInfo {
  */
 export function getClusterInfo(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
   const useLegacy = true;
-  return useLegacy ? callCluster<ESClusterInfo>('info') : esClient.info;
+  return useLegacy ? callCluster<ESClusterInfo>('info') : esClient.info();
 }
