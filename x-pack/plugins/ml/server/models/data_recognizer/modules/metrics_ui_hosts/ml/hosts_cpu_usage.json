@@ -1,0 +1,41 @@
+{
+    "job_type": "anomaly_detector",
+    "groups": [
+      "hosts",
+      "metrics"
+    ],
+    "description": "",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "max('cpu') partitionfield='host.name'",
+          "function": "max",
+          "field_name": "cpu",
+          "custom_rules": [
+            {
+              "actions": [
+                "skip_result"
+              ],
+              "conditions": [
+                {
+                  "applies_to": "actual",
+                  "operator": "lt",
+                  "value": 0.1
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "influencers": [
+        "host.name"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "64mb"
+    },
+    "custom_settings": {
+      "created_by": "ml-module-metrics-hosts"
+    }
+  }

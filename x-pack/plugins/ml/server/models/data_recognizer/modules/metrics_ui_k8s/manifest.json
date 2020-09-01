@@ -1,0 +1,56 @@
+{
+    "id": "metrics_k8s",
+    "title": "Metrics Kubernetes",
+    "description": "",
+    "type": "Metricbeat Data",
+    "logoFile": "logo.json",
+    "defaultIndexPattern": "metricbeat-*",
+    "query": {
+      "bool": {
+        "filter": [
+          {"exists": {"field": "kubernetes"}},
+          {"term": {"event.module": "kubernetes"}}
+        ]
+      }
+    },
+    "jobs": [
+      {
+        "id": "cpu_usage",
+        "file": "cpu_usage.json"
+      },
+      {
+        "id": "memory_usage",
+        "file": "memory_usage.json"
+      },
+      {
+        "id": "network_in",
+        "file": "network_in.json"
+      },
+      {
+        "id": "network_out",
+        "file": "network_out.json"
+      }
+    ],
+    "datafeeds": [
+      {
+        "id": "datafeed-cpu_usage",
+        "file": "datafeed_cpu_usage.json",
+        "job_id": "cpu_usage"
+      },
+      {
+        "id": "datafeed-memory_usage",
+        "file": "datafeed_memory_usage.json",
+        "job_id": "memory_usage"
+      },
+      {
+        "id": "datafeed-network_in",
+        "file": "datafeed_network_in.json",
+        "job_id": "network_in"
+      },
+      {
+        "id": "datafeed-network_out",
+        "file": "datafeed_network_out.json",
+        "job_id": "network_out"
+      }
+    ]
+  }

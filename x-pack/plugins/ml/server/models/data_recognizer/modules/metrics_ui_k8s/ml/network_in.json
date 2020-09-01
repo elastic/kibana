@@ -1,0 +1,36 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "",
+  "groups": [
+    "k8s",
+    "metrics"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "max(bytes_in_derivative)",
+        "function": "max",
+        "field_name": "bytes_in_derivative",
+        "partition_field_name": "kubernetes.namespace"
+      }
+    ],
+    "influencers": [
+      "kubernetes.namespace",
+      "kubernetes.pod.name"
+      ],
+    "summary_count_field_name": "doc_count"
+  },
+  "model_plot_config": {
+    "enabled": "true"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-metrics-k8s"
+  }
+}
