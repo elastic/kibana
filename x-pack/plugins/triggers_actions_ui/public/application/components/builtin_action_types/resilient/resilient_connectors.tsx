@@ -119,9 +119,9 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
             <EuiFieldText
               fullWidth
               isInvalid={isOrgIdInvalid}
-              name="connector-resilient-org-id"
+              name="connector-resilient-orgId"
               value={orgId || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-resilient-org-id-form-input"
+              data-test-subj="connector-resilient-orgId-form-input"
               onChange={(evt) => handleOnChangeActionConfig('orgId', evt.target.value)}
               onBlur={() => {
                 if (!orgId) {
