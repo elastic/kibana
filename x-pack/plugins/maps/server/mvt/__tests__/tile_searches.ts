@@ -9,7 +9,7 @@ import * as fs from 'fs';
 
 const search000path = path.resolve(__dirname, './json/0_0_0_search.json');
 const search000raw = fs.readFileSync(search000path);
-const search000json = JSON.parse(search000raw); // Prefer require() over setting the compiler options, which affect production modules as well
+const search000json = JSON.parse((search000raw as unknown) as string);
 
 export const TILE_SEARCHES = {
   '0.0.0': {
