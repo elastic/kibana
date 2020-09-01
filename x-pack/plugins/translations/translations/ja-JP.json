@@ -4433,8 +4433,6 @@
     "visualizations.newVisWizard.searchSelection.savedObjectType.search": "保存検索",
     "visualizations.newVisWizard.selectVisType": "ビジュアライゼーションのタイプを選択してください",
     "visualizations.newVisWizard.title": "新規ビジュアライゼーション",
-    "visualizations.newVisWizard.visTypeAliasDescription": "Visualize 外で Kibana アプリケーションを開きます。",
-    "visualizations.newVisWizard.visTypeAliasTitle": "Kibana アプリケーション",
     "visualizations.savedObjectName": "ビジュアライゼーション",
     "visualizations.visualizationTypeInvalidMessage": "無効なビジュアライゼーションタイプ \"{visType}\"",
     "visualize.badge.readOnly.text": "読み取り専用",
