@@ -41,8 +41,8 @@ import {
   getUseField,
   UseField,
   UseMultiFields,
-  FormDataProvider,
   useForm,
+  useFormData,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -111,7 +111,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ...stepDefineDefaultValue,
     index: indicesConfig,
   };
-  const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
   ] = useFetchIndexPatterns(initialState.index, RuleStep.defineRule);
@@ -122,7 +121,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, reset, submit } = form;
-  const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
+  const [{ index, ruleType }] = (useFormData<DefineStepRule>({
+    form,
+    watch: ['index', 'ruleType'],
+  }) as unknown) as [DefineStepRule];
+
+  // reset form when rule type changes
+  useEffect(() => {
+    reset({ resetValues: false });
+  }, [reset, ruleType]);
+
+  useEffect(() => {
+    setIndexModified(!isEqual(index, indicesConfig));
+  }, [index, indicesConfig]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -165,11 +176,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar}
-        schema={filterRuleFieldsForType(
-          schema as typeof schema & RuleFields,
-          initialState.ruleType
-        )}
-        data={filterRuleFieldsForType(initialState, initialState.ruleType)}
+        schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
+        data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
   ) : (
@@ -186,7 +194,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <CommonUseField
                 path="index"
@@ -235,7 +243,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow $isVisible={isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -254,7 +262,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={localRuleType === 'threshold'}
+            $isVisible={ruleType === 'threshold'}
             data-test-subj="thresholdInput"
             fullWidth
           >
@@ -282,22 +290,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
-            {({ index, ruleType }) => {
-              if (index != null) {
-                if (indexModified && isEqual(index, indicesConfig)) {
-                  setIndexModified(false);
-                } else if (!indexModified && !isEqual(index, indicesConfig)) {
-                  setIndexModified(true);
-                }
-              }
-              if (ruleType !== localRuleType) {
-                setLocalRuleType(ruleType);
-                clearErrors();
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 
