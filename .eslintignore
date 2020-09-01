@@ -41,7 +41,7 @@ target
 /x-pack/legacy/plugins/maps/public/vendor/**
 
 # package overrides
-/packages/eslint-config-kibana
+/packages/elastic-eslint-config-kibana
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-pm/dist
