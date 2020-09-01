@@ -26,6 +26,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse, InspectResponse } from '../helpers';
 
 const ID = 'hostsQuery';
 
@@ -34,7 +35,7 @@ export interface HostsArgs {
   endDate: string;
   hosts: HostsEdges[];
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: LoadPage;
   pageInfo: PageInfoPaginated;
@@ -139,7 +140,7 @@ export const useAllHost = ({
                   setHostsResponse((prevResponse) => ({
                     ...prevResponse,
                     hosts: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,

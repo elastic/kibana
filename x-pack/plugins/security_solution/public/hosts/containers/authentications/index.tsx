@@ -13,13 +13,16 @@ import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
+  Direction,
   DocValueFields,
+  HostPolicyResponseActionStatus,
+  HostsQueries,
+  Inspect,
   PageInfoPaginated,
 } from '../../../../common/search_strategy/security_solution';
 import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
-  AuthenticationsQuery,
   AuthenticationsEdges,
 } from '../../../../common/search_strategy/security_solution/authentications';
 
@@ -32,13 +35,14 @@ import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
+import { getInspectResponse } from '../helpers';
 
 const ID = 'authenticationQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: Inspect;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -76,13 +80,17 @@ export const useAuthentications = ({
   >({
     defaultIndex,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: AuthenticationsQuery.authentications,
+    factoryQueryType: HostsQueries.authentications,
     filterQuery: createFilter(filterQuery),
     pagination: generateTablePaginationOptions(activePage, limit),
     timerange: {
       interval: '12h',
       from: startDate,
       to: endDate,
+    },
+    sort: {
+      direction: Direction.desc,
+      field: HostPolicyResponseActionStatus.success,
     },
   });
 
@@ -137,7 +145,7 @@ export const useAuthentications = ({
                   setAuthenticationsResponse((prevResponse) => ({
                     ...prevResponse,
                     authentications: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,

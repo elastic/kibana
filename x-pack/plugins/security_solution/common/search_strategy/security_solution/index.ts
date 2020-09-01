@@ -15,18 +15,14 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
-import {
-  AuthenticationsQuery,
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
-} from './authentications';
+import { AuthenticationsRequestOptions, AuthenticationsStrategyResponse } from './authentications';
 import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
 
 export * from './hosts';
 export * from './network';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries | AuthenticationsQuery;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries;
 
 export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
@@ -37,7 +33,6 @@ export interface TotalValue {
 
 export interface Inspect {
   dsl: string[];
-  response: string[];
 }
 
 export interface PageInfoPaginated {
@@ -170,7 +165,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
-  : T extends AuthenticationsQuery.authentications
+  : T extends HostsQueries.authentications
   ? AuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
@@ -182,7 +177,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
-  : T extends AuthenticationsQuery.authentications
+  : T extends HostsQueries.authentications
   ? AuthenticationsRequestOptions
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions

@@ -6,6 +6,8 @@
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
 import { UserEcs } from '../../../ecs/user';
+import { SourceEcs } from '../../../ecs/source';
+import { HostEcs } from '../../../ecs/host';
 import {
   CursorType,
   Inspect,
@@ -16,10 +18,6 @@ import {
   Hit,
   TotalHit,
 } from '..';
-
-export enum AuthenticationsQuery {
-  authentications = 'authentications',
-}
 
 export interface AuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
@@ -58,75 +56,9 @@ export interface AuthenticationItem {
 export interface LastSourceHost {
   timestamp?: Maybe<string>;
 
-  source?: Maybe<SourceEcsFields>;
+  source?: Maybe<SourceEcs>;
 
-  host?: Maybe<HostEcsFields>;
-}
-
-export interface SourceEcsFields {
-  bytes?: Maybe<number[] | number>;
-
-  ip?: string[] | null;
-
-  port?: Maybe<number[] | number>;
-
-  domain?: Maybe<string[] | string>;
-
-  geo?: Maybe<GeoEcsFields>;
-
-  packets?: Maybe<number[] | number>;
-}
-
-export interface GeoEcsFields {
-  city_name?: Maybe<string[] | string>;
-
-  continent_name?: Maybe<string[] | string>;
-
-  country_iso_code?: Maybe<string[] | string>;
-
-  country_name?: Maybe<string[] | string>;
-
-  location?: Maybe<Location>;
-
-  region_iso_code?: Maybe<string[] | string>;
-
-  region_name?: Maybe<string[] | string>;
-}
-
-export interface Location {
-  lon?: Maybe<number[] | number>;
-
-  lat?: Maybe<number[] | number>;
-}
-
-export interface HostEcsFields {
-  architecture?: Maybe<string[] | string>;
-
-  id?: Maybe<string[] | string>;
-
-  ip?: Maybe<string[] | string>;
-
-  mac?: Maybe<string[] | string>;
-
-  name?: Maybe<string[]>;
-
-  os?: Maybe<OsEcsFields>;
-
-  type?: Maybe<string[] | string>;
-}
-
-export interface OsEcsFields {
-  platform?: Maybe<string[] | string>;
-
-  name?: Maybe<string[] | string>;
-
-  full?: Maybe<string[] | string>;
-
-  family?: Maybe<string[] | string>;
-
-  version?: Maybe<string[] | string>;
-
-  kernel?: Maybe<string[] | string>;
+  host?: Maybe<HostEcs>;
 }
 
 export interface AuthenticationHit extends Hit {

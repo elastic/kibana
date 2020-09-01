@@ -6,25 +6,24 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import {
   AuthenticationsEdges,
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
-  AuthenticationsQuery,
   AuthenticationHit,
   AuthenticationBucket,
-} from '../../../../../common/search_strategy/security_solution/authentications';
+} from '../../../../../../common/search_strategy/security_solution/authentications';
 
-import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../types';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 import { formatAuthenticationData } from './helpers';
 
-export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authentications> = {
+export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
   buildDsl: (options: AuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
@@ -65,7 +64,6 @@ export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authe
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
@@ -81,11 +79,4 @@ export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authe
       },
     };
   },
-};
-
-export const authenticationFactory: Record<
-  AuthenticationsQuery,
-  SecuritySolutionFactory<FactoryQueryTypes>
-> = {
-  [AuthenticationsQuery.authentications]: authentications,
 };
