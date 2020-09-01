@@ -21,7 +21,7 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
-
+import { validateTimeRange } from '../util/date_utils';
 const msgs = mlMessageBarService;
 let jobs = [];
 let datafeedIds = {};
@@ -935,22 +935,29 @@ function createJobStats(jobsList, jobStats) {
 function createResultsUrlForJobs(jobsList, resultsPage, userTimeRange) {
   let from = undefined;
   let to = undefined;
+  let mode = 'absolute';
   const jobIds = jobsList.map((j) => j.id);
 
-  // if user input is a valid time range object
-  if (userTimeRange) {
+  // if the custom default time filter is set and enabled in advanced settings
+  // if time is either absolute date or proper datemath format
+  if (validateTimeRange(userTimeRange)) {
     from = userTimeRange.from;
     to = userTimeRange.to;
+    // if both pass datemath's checks but are not technically absolute dates, use 'quick'
+    // e.g. "now-15m" "now+1d"
     const fromFieldAValidDate = moment(userTimeRange.from).isValid();
     const toFieldAValidDate = moment(userTimeRange.to).isValid();
-    // if both are not a valid date, use 'quick'
-    // e.g. "now-15m" "now+1d"
     if (!fromFieldAValidDate && !toFieldAValidDate) {
       return createResultsUrl(jobIds, from, to, resultsPage, 'quick');
     }
-    // if both fields are absolute date
-    // continue to createResultsUrl with from and to converted as normal
   } else {
+    // if time range is specified but with incorrect format
+    // change back to the default time range but alert the user
+    // that the advanced setting config is invalid
+    if (userTimeRange) {
+      mode = 'invalid';
+    }
+
     if (jobsList.length === 1) {
       from = jobsList[0].earliestTimestampMs;
       to = jobsList[0].latestResultsTimestampMs; // Will be max(latest source data, latest bucket results)
@@ -966,7 +973,7 @@ function createResultsUrlForJobs(jobsList, resultsPage, userTimeRange) {
   const fromString = moment(from).format(TIME_FORMAT); // Defaults to 'now' if 'from' is undefined
   const toString = moment(to).format(TIME_FORMAT); // Defaults to 'now' if 'to' is undefined
 
-  return createResultsUrl(jobIds, fromString, toString, resultsPage);
+  return createResultsUrl(jobIds, fromString, toString, resultsPage, mode);
 }
 
 function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
@@ -991,6 +998,9 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   path += `?_g=(ml:(jobIds:!(${idString}))`;
   path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
   path += `,to:'${to}'`;
+  if (mode === 'invalid') {
+    path += `,mode:invalid`;
+  }
   path += "))&_a=(query:(query_string:(analyze_wildcard:!t,query:'*')))";
 
   return path;

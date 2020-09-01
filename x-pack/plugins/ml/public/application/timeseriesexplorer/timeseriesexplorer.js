@@ -83,6 +83,7 @@ import {
   getFocusData,
 } from './timeseriesexplorer_utils';
 import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -838,7 +839,15 @@ export class TimeSeriesExplorer extends React.Component {
     const { invalidTimeRangeError } = this.props;
     if (invalidTimeRangeError) {
       const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(invalidTimeRangeError);
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+          defaultMessage:
+            'The time filter changed to the full range for this job due to invalid default time filter. Please check the advanced settings for {field}.',
+          values: {
+            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+          },
+        })
+      );
     }
 
     // Required to redraw the time series chart when the container is resized.

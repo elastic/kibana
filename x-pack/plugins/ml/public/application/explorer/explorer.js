@@ -68,6 +68,7 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
 const ExplorerPage = ({
   children,
@@ -149,7 +150,15 @@ export class Explorer extends React.Component {
     const { invalidTimeRangeError } = this.props;
     if (invalidTimeRangeError) {
       const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(invalidTimeRangeError);
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.explorer.invalidTimeRangeInUrlCallout', {
+          defaultMessage:
+            'The time filter changed to the full range for this job due to invalid default time filter. Please check the advanced settings for {field}.',
+          values: {
+            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+          },
+        })
+      );
     }
   }
 
