@@ -79,6 +79,7 @@ export const AppRouter: FunctionComponent<Props> = ({
               url,
             },
           }: RouteComponentProps<Params>) => {
+            // the id/mounter retrieval can be removed once #76348 is addressed
             const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
             return (
               <AppContainer

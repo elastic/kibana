@@ -226,7 +226,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
@@ -281,7 +281,7 @@ export interface CoreStart {
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {

@@ -256,7 +256,7 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
-      history: this.history,
+      history: this.history!,
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,

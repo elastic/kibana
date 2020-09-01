@@ -4622,7 +4622,6 @@ exports[`Header renders 2`] = `
       id="mockId"
       isLocked={false}
       isOpen={false}
-      legacyMode={false}
       navLinks$={
         BehaviorSubject {
           "_isScalar": false,
@@ -8835,7 +8834,6 @@ exports[`Header renders 3`] = `
       id="mockId"
       isLocked={true}
       isOpen={false}
-      legacyMode={false}
       navLinks$={
         BehaviorSubject {
           "_isScalar": false,
@@ -13595,7 +13593,6 @@ exports[`Header renders 4`] = `
         }
       }
       isLocked={true}
-      legacyMode={false}
       navLinks$={
         BehaviorSubject {
           "_isScalar": false,

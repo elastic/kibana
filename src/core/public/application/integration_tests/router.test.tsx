@@ -390,10 +390,4 @@ describe('AppRouter', () => {
 
     expect(dom?.exists(AppNotFound)).toBe(true);
   });
-
-  it('displays error page if legacy app is inaccessible', async () => {
-    const dom = await navigate('/app/disabledLegacyApp');
-
-    expect(dom?.exists(AppNotFound)).toBe(true);
-  });
 });

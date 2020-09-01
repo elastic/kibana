@@ -90,7 +90,6 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
 /**
- * Extension of {@link AppBase | common app properties} with the mount function.
  * @public
  */
 export interface App<HistoryLocationState = unknown> {
@@ -197,6 +196,7 @@ export interface App<HistoryLocationState = unknown> {
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
+
   /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
    * {@link AppMountDeprecated}.
@@ -640,7 +640,7 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
 export interface NavigateToAppOptions {
   /**
    * optional path inside application to deep link to.
-   * If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
+   * If undefined, will use {@link App.defaultPath | the app's default path}` as default.
    */
   path?: string;
   /**
@@ -649,9 +649,6 @@ export interface NavigateToAppOptions {
   state?: unknown;
   /**
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
-   *
-   * @remarks
-   * This option not be used when navigating from and/or to legacy applications.
    */
   replace?: boolean;
 }
@@ -762,8 +759,8 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
   getComponent(): JSX.Element | null;
 
   /**
-   * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
+   * The global history instance, exposed only to Core.
    * @internal
    */
-  history: History<unknown> | undefined;
+  history: History<unknown>;
 }

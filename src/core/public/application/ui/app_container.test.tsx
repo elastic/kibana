@@ -142,7 +142,6 @@ describe('AppContainer', () => {
       appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
       unmountBeforeMounting: false,
-      legacy: false,
       exactRoute: false,
       mount: async ({ element }: AppMountParameters) => {
         await waitPromise;

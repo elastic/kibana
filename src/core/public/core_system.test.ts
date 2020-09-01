@@ -385,7 +385,6 @@ describe('RenderingService targetDomElement', () => {
     let targetDomElementParentInStart: HTMLElement | null;
     MockRenderingService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementParentInStart = targetDomElement.parentElement;
-      return { legacyTargetDomElement: document.createElement('div') };
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
