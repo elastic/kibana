@@ -22,15 +22,15 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
    * @param {string} styles
    * @returns {Object}
    */
-  const parseStyle = (styles: any) =>
+  const parseStyle = (styles: string): object =>
     styles
       .split(';')
-      .filter((style: any) => style.split(':')[0] && style.split(':')[1])
-      .map((style: any) => [
+      .filter((style: string) => style.split(':')[0] && style.split(':')[1])
+      .map((style: string) => [
         style
           .split(':')[0]
           .trim()
-          .replace(/-./g, (c: any) => c.substr(1).toUpperCase()),
+          .replace(/-./g, (c: string) => c.substr(1).toUpperCase()),
         style.split(':').slice(1).join(':').trim(),
       ])
       .reduce(
@@ -71,12 +71,12 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      */
     async parseStyles() {
       const tableData = await this.getEndpointEventResolverNodeData('resolver:node', 'style');
-      const $ = [];
+      const styles = [];
       for (let i = 1; i < tableData.length; i++) {
         const eachStyle = parseStyle(tableData[i]);
-        $.push(eachStyle);
+        styles.push(eachStyle);
       }
-      return $;
+      return styles;
     },
     /**
      * Deletes DataStreams from Index Management.
