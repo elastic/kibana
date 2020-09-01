@@ -128,6 +128,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/dev_tools',
         hash: '/searchprofiler',
       },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
+      },
       spaceSelector: {
         pathname: '/',
       },

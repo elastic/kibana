@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
+import { StyledBreadcrumbs } from './panel_content_utilities';
+import { CrumbInfo } from '../../types';
 
 /**
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
