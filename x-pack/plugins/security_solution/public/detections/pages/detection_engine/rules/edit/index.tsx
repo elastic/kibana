@@ -214,38 +214,30 @@ const EditRulePageComponent: FC = () => {
   );
 
   const onSubmit = useCallback(async () => {
-    const activeForm = await stepsForm.current[activeStep]?.submit();
-    const invalidSteps = [
-      RuleStep.aboutRule,
-      RuleStep.defineRule,
-      RuleStep.scheduleRule,
-      RuleStep.ruleActions,
-    ].filter((step) => !stepIsValid(step === activeStep ? activeForm : stepsData.current[step]));
-
-    if (invalidSteps.length === 0 && activeForm != null) {
-      setTabHasError([]);
+    const activeStepData = await stepsForm.current[activeStep]?.submit();
+    if (activeStepData?.isValid) {
+      const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
+      const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
+      const schedule = isScheduleStep(activeStepData) ? activeStepData : scheduleStep;
+      const actions = isActionsStep(activeStepData) ? activeStepData : actionsStep;
 
       if (
-        stepIsValid(defineStep) &&
-        stepIsValid(aboutStep) &&
-        stepIsValid(scheduleStep) &&
-        stepIsValid(actionsStep)
+        stepIsValid(define) &&
+        stepIsValid(about) &&
+        stepIsValid(schedule) &&
+        stepIsValid(actions)
       ) {
+        setTabHasError([]);
         setRule({
-          ...formatRule(
-            isDefineStep(activeForm) ? activeForm.data : defineStep.data,
-            isAboutStep(activeForm) ? activeForm.data : aboutStep.data,
-            isScheduleStep(activeForm) ? activeForm.data : scheduleStep.data,
-            isActionsStep(activeForm) ? activeForm.data : actionsStep.data,
-            rule
-          ),
+          ...formatRule(define.data, about.data, schedule.data, actions.data, rule),
           ...(ruleId ? { id: ruleId } : {}),
         });
       }
     } else {
-      setTabHasError(invalidSteps);
+      // we currently only allow the active step to be invalid
+      setTabHasError([activeStep]);
     }
-  }, [activeStep, defineStep, aboutStep, scheduleStep, actionsStep, setRule, rule, ruleId]);
+  }, [aboutStep, actionsStep, activeStep, defineStep, rule, ruleId, scheduleStep, setRule]);
 
   useEffect(() => {
     if (rule != null) {
@@ -261,12 +253,16 @@ const EditRulePageComponent: FC = () => {
 
   const onTabClick = useCallback(
     async (tab: EuiTabbedContentTab) => {
+      const targetStep = tab.id as RuleStep;
       const activeStepData = await stepsForm.current[activeStep]?.submit();
 
       if (activeStepData?.isValid) {
-        setStepData(activeStep, activeStepData.data, activeStepData.isValid);
+        setStepData(activeStep, activeStepData.data, true);
         setInitForm(true);
-        setActiveStep(tab.id as RuleStep);
+        setTabHasError([]);
+        setActiveStep(targetStep);
+      } else {
+        setTabHasError([activeStep]);
       }
     },
     [activeStep, setStepData]
