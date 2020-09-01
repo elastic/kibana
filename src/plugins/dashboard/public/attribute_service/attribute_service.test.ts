@@ -17,30 +17,25 @@
  * under the License.
  */
 
+import { ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 import { mockAttributeService } from './attribute_service_mock';
 import { coreMock } from '../../../../core/public/mocks';
 
-interface DefaultTestAttributes {
+interface TestAttributes {
   title: string;
   testAttr1?: string;
   testAttr2?: { array: unknown[]; testAttr3: string };
 }
 
-interface DefaultByValueInput {
+interface TestByValueInput {
   id: string;
-  attributes: DefaultTestAttributes;
-}
-
-const customAttributesKey = 'reallyNeatAttributesKey';
-interface CustomTestByValueInput {
-  id: string;
-  [customAttributesKey]: DefaultTestAttributes;
+  [ATTRIBUTE_SERVICE_KEY]: TestAttributes;
 }
 
 describe('attributeService', () => {
   const defaultTestType = 'defaultTestType';
-  let attributes: DefaultTestAttributes;
-  let byValueInput: DefaultByValueInput;
+  let attributes: TestAttributes;
+  let byValueInput: TestByValueInput;
   let byReferenceInput: { id: string; savedObjectId: string };
 
   beforeEach(() => {
@@ -60,12 +55,10 @@ describe('attributeService', () => {
   });
 
   describe('determining input type', () => {
-    const defaultAttributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType);
-    const customAttributeService = mockAttributeService<
-      DefaultTestAttributes,
-      typeof customAttributesKey,
-      CustomTestByValueInput
-    >(defaultTestType);
+    const defaultAttributeService = mockAttributeService<TestAttributes>(defaultTestType);
+    const customAttributeService = mockAttributeService<TestAttributes, TestByValueInput>(
+      defaultTestType
+    );
 
     it('can determine input type given default types', () => {
       expect(
@@ -85,7 +78,7 @@ describe('attributeService', () => {
       expect(
         customAttributeService.inputIsRefType({
           id: '456',
-          [customAttributesKey]: { title: 'wow I am by value' },
+          [ATTRIBUTE_SERVICE_KEY]: { title: 'wow I am by value' },
         })
       ).toBeFalsy();
     });
@@ -97,7 +90,7 @@ describe('attributeService', () => {
       core.savedObjects.client.get = jest.fn().mockResolvedValueOnce({
         attributes,
       });
-      const attributeService = mockAttributeService<DefaultTestAttributes>(
+      const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
         undefined,
         core
@@ -106,22 +99,8 @@ describe('attributeService', () => {
     });
 
     it('returns attributes when when given value type input', async () => {
-      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType);
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType);
       expect(await attributeService.unwrapAttributes(byValueInput)).toEqual(attributes);
-    });
-
-    it('returns attributes with custom key when given value type input', async () => {
-      const customAttributeService = mockAttributeService<
-        DefaultTestAttributes,
-        typeof customAttributesKey,
-        CustomTestByValueInput
-      >(defaultTestType, { attributesKey: customAttributesKey });
-      expect(
-        await customAttributeService.unwrapAttributes({
-          id: '456',
-          [customAttributesKey]: attributes,
-        })
-      ).toEqual(attributes);
     });
 
     it('runs attributes through a custom unwrap method', async () => {
@@ -129,15 +108,13 @@ describe('attributeService', () => {
       core.savedObjects.client.get = jest.fn().mockResolvedValueOnce({
         attributes,
       });
-      const attributeService = mockAttributeService<DefaultTestAttributes>(
+      const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
         {
-          customUnwrapMethod: (savedObject) => {
-            return {
-              ...savedObject.attributes,
-              testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
-            };
-          },
+          customUnwrapMethod: (savedObject) => ({
+            ...savedObject.attributes,
+            testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+          }),
         },
         core
       );
@@ -150,24 +127,13 @@ describe('attributeService', () => {
 
   describe('wrapping attributes', () => {
     it('returns given attributes when use ref type is false', async () => {
-      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType);
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType);
       expect(await attributeService.wrapAttributes(attributes, false)).toEqual({ attributes });
-    });
-
-    it('returns given attributes with custom key when use ref type is false', async () => {
-      const attributeService = mockAttributeService<
-        DefaultTestAttributes,
-        typeof customAttributesKey,
-        CustomTestByValueInput
-      >(defaultTestType, { attributesKey: customAttributesKey });
-      expect(await attributeService.wrapAttributes(attributes, false)).toEqual({
-        [customAttributesKey]: attributes,
-      });
     });
 
     it('updates existing saved object with new attributes when given id', async () => {
       const core = coreMock.createStart();
-      const attributeService = mockAttributeService<DefaultTestAttributes>(
+      const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
         undefined,
         core
@@ -187,7 +153,7 @@ describe('attributeService', () => {
       core.savedObjects.client.create = jest.fn().mockResolvedValueOnce({
         id: '678',
       });
-      const attributeService = mockAttributeService<DefaultTestAttributes>(
+      const attributeService = mockAttributeService<TestAttributes>(
         defaultTestType,
         undefined,
         core
@@ -199,8 +165,8 @@ describe('attributeService', () => {
     });
 
     it('uses custom save method when given an id', async () => {
-      const customSaveMethod = jest.fn().mockReturnValue({ id: '678' });
-      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType, {
+      const customSaveMethod = jest.fn().mockReturnValue({ id: '123' });
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         customSaveMethod,
       });
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
@@ -215,13 +181,13 @@ describe('attributeService', () => {
 
     it('uses custom save method given no id', async () => {
       const customSaveMethod = jest.fn().mockReturnValue({ id: '678' });
-      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType, {
+      const attributeService = mockAttributeService<TestAttributes>(defaultTestType, {
         customSaveMethod,
       });
       expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
         savedObjectId: '678',
       });
-      expect(customSaveMethod).toHaveBeenCalledWith(defaultTestType, attributes);
+      expect(customSaveMethod).toHaveBeenCalledWith(defaultTestType, attributes, undefined);
     });
   });
 });

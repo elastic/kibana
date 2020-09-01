@@ -49,13 +49,9 @@ import {
  * can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
-export const ATTRIBUTE_SERVICE_DEFAULT_KEY = 'attributes';
+export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
-export interface AttributeServiceOptions<
-  A extends { title: string },
-  K extends string = typeof ATTRIBUTE_SERVICE_DEFAULT_KEY
-> {
-  attributesKey?: K;
+export interface AttributeServiceOptions<A extends { title: string }> {
   customSaveMethod?: (
     type: string,
     attributes: A,
@@ -66,14 +62,12 @@ export interface AttributeServiceOptions<
 
 export class AttributeService<
   SavedObjectAttributes extends { title: string },
-  AttributesKey extends string = typeof ATTRIBUTE_SERVICE_DEFAULT_KEY,
-  ValType extends EmbeddableInput &
-    { [key in AttributesKey]: SavedObjectAttributes } = EmbeddableInput &
-    { [key in AttributesKey]: SavedObjectAttributes },
+  ValType extends EmbeddableInput & {
+    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
+  } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > {
   private embeddableFactory?: EmbeddableFactory;
-  private attributesKey: AttributesKey;
 
   constructor(
     private type: string,
@@ -86,9 +80,8 @@ export class AttributeService<
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
-    private options?: AttributeServiceOptions<SavedObjectAttributes, AttributesKey>
+    private options?: AttributeServiceOptions<SavedObjectAttributes>
   ) {
-    this.attributesKey = options?.attributesKey || (ATTRIBUTE_SERVICE_DEFAULT_KEY as AttributesKey);
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
       if (!factory) {
@@ -107,7 +100,7 @@ export class AttributeService<
         ? this.options?.customUnwrapMethod(savedObject)
         : { ...savedObject.attributes };
     }
-    return input[this.attributesKey];
+    return input[ATTRIBUTE_SERVICE_KEY];
   }
 
   public async wrapAttributes(
@@ -120,7 +113,7 @@ export class AttributeService<
         ? (input as SavedObjectEmbeddableInput).savedObjectId
         : undefined;
     if (!useRefType) {
-      return { [this.attributesKey]: newAttributes } as ValType;
+      return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
     } else {
       try {
         const originalInput = input ? input : {};
@@ -205,7 +198,7 @@ export class AttributeService<
           }
         );
         try {
-          const newAttributes = { ...input[this.attributesKey] };
+          const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
           resolve(wrappedInput);
@@ -221,7 +214,7 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={embeddable.getTitle() || input[this.attributesKey].title}
+            title={embeddable.getTitle() || input[ATTRIBUTE_SERVICE_KEY].title}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

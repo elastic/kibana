@@ -103,7 +103,7 @@ import {
 } from './application/actions/add_to_library_action';
 import {
   AttributeServiceOptions,
-  ATTRIBUTE_SERVICE_DEFAULT_KEY,
+  ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
@@ -153,13 +153,14 @@ export interface DashboardStart {
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getAttributeService: <
     A extends { title: string },
-    K extends string = typeof ATTRIBUTE_SERVICE_DEFAULT_KEY,
-    V extends EmbeddableInput & { [key in K]: A } = EmbeddableInput & { [key in K]: A },
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A, K>
-  ) => AttributeService<A, K, V, R>;
+    options?: AttributeServiceOptions<A>
+  ) => AttributeService<A, V, R>;
 }
 
 declare module '../../../plugins/ui_actions/public' {

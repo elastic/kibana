@@ -21,20 +21,21 @@ import { EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddable_plugi
 import { coreMock } from '../../../../core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
 import { CoreStart } from '../../../../core/public';
-import { AttributeService, ATTRIBUTE_SERVICE_DEFAULT_KEY } from '..';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from '..';
 
 export const mockAttributeService = <
   A extends { title: string },
-  K extends string = typeof ATTRIBUTE_SERVICE_DEFAULT_KEY,
-  V extends EmbeddableInput & { [key in K]: A } = EmbeddableInput & { [key in K]: A },
+  V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+    [ATTRIBUTE_SERVICE_KEY]: A;
+  },
   R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 >(
   type: string,
-  options?: AttributeServiceOptions<A, K>,
+  options?: AttributeServiceOptions<A>,
   customCore?: jest.Mocked<CoreStart>
-): AttributeService<A, K, V, R> => {
+): AttributeService<A, V, R> => {
   const core = customCore ? customCore : coreMock.createStart();
-  const service = new AttributeService<A, K, V, R>(
+  const service = new AttributeService<A, V, R>(
     type,
     jest.fn(),
     core.savedObjects.client,
