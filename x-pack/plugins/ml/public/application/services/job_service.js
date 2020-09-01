@@ -792,7 +792,6 @@ class JobService {
   }
 
   createResultsUrlForJobs(jobsList, resultsPage, timeRange) {
-    console.log('timeRange', timeRange);
     return createResultsUrlForJobs(jobsList, resultsPage, timeRange);
   }
 
