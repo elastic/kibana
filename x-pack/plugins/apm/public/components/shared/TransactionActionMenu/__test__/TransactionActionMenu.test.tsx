@@ -4,54 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
-import { merge, tail } from 'lodash';
-import { TransactionActionMenu } from '../TransactionActionMenu';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import * as Transactions from './mockData';
-import {
-  expectTextsNotInDocument,
-  expectTextsInDocument,
-} from '../../../../utils/testHelpers';
-import * as hooks from '../../../../hooks/useFetcher';
-import { LicenseContext } from '../../../../context/LicenseContext';
 import { License } from '../../../../../../licensing/common/license';
-import {
-  MockApmPluginContextWrapper,
-  mockApmPluginContextValue,
-} from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { LicenseContext } from '../../../../context/LicenseContext';
+import * as hooks from '../../../../hooks/useFetcher';
 import * as apmApi from '../../../../services/rest/createCallApmApi';
-import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
+import {
+  expectTextsInDocument,
+  expectTextsNotInDocument,
+} from '../../../../utils/testHelpers';
+import { TransactionActionMenu } from '../TransactionActionMenu';
+import * as Transactions from './mockData';
 
-const getMock = () => {
-  return (merge({}, mockApmPluginContextValue, {
-    core: {
-      application: {
-        navigateToApp: jest.fn(),
-      },
-      http: {
-        basePath: {
-          remove: jest.fn((path: string) => {
-            return tail(path.split('/')).join('/');
-          }),
-        },
-      },
-    },
-  }) as unknown) as ApmPluginContextValue;
-};
-
-const renderTransaction = async (
-  transaction: Record<string, any>,
-  mock: ApmPluginContextValue = getMock()
-) => {
+const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />,
     {
       wrapper: ({ children }: { children?: React.ReactNode }) => (
-        <MockApmPluginContextWrapper value={mock}>
-          {children}
-        </MockApmPluginContextWrapper>
+        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
       ),
     }
   );
@@ -80,138 +53,148 @@ describe('TransactionActionMenu component', () => {
     expect(queryByText('View sample document')).not.toBeNull();
   });
 
-  it('should always render the trace logs link', async () => {
-    const mock = getMock();
-
-    const { queryByText, getByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData,
-      mock
-    );
-
-    expect(queryByText('Trace logs')).not.toBeNull();
-
-    fireEvent.click(getByText('Trace logs'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('logs', {
-      path:
-        'link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20%228b60bd32ecc6e1506735a8b6cfcf175c%22',
-    });
-  });
-
-  it('should not render the pod links when there is no pod id', async () => {
-    const { queryByText } = await renderTransaction(
+  it('always renders the trace logs link', async () => {
+    const { getByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('Pod logs')).toBeNull();
-    expect(queryByText('Pod metrics')).toBeNull();
+    expect(
+      (getByText('Trace logs').parentElement as HTMLAnchorElement).href
+    ).toEqual(
+      'http://localhost/basepath/app/logs/link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20%228b60bd32ecc6e1506735a8b6cfcf175c%22'
+    );
   });
 
-  it('should render the pod links when there is a pod id', async () => {
-    const mock = getMock();
+  describe('when there is no pod id', () => {
+    it('does not render the Pod logs link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
 
-    const { queryByText, getByText } = await renderTransaction(
-      Transactions.transactionWithKubernetesData,
-      mock
-    );
-
-    expect(queryByText('Pod logs')).not.toBeNull();
-    expect(queryByText('Pod metrics')).not.toBeNull();
-
-    fireEvent.click(getByText('Pod logs'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('logs', {
-      path: 'link-to/pod-logs/pod123456abcdef?time=1545092070952',
+      expect(queryByText('Pod logs')).toBeNull();
     });
 
-    (mock.core.application.navigateToApp as jest.Mock).mockClear();
+    it('does not render the Pod metrics link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
 
-    fireEvent.click(getByText('Pod metrics'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith(
-      'metrics',
-      {
-        path:
-          'link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952',
-      }
-    );
+      expect(queryByText('Pod metrics')).toBeNull();
+    });
   });
 
-  it('should not render the container links when there is no container id', async () => {
-    const { queryByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
-    );
+  describe('when there is a pod id', () => {
+    it('renders the pod logs link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithKubernetesData
+      );
 
-    expect(queryByText('Container logs')).toBeNull();
-    expect(queryByText('Container metrics')).toBeNull();
-  });
-
-  it('should render the container links when there is a container id', async () => {
-    const mock = getMock();
-
-    const { queryByText, getByText } = await renderTransaction(
-      Transactions.transactionWithContainerData,
-      mock
-    );
-
-    expect(queryByText('Container logs')).not.toBeNull();
-    expect(queryByText('Container metrics')).not.toBeNull();
-
-    fireEvent.click(getByText('Container logs'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('logs', {
-      path: 'link-to/container-logs/container123456abcdef?time=1545092070952',
+      expect(
+        (getByText('Pod logs').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/logs/link-to/pod-logs/pod123456abcdef?time=1545092070952'
+      );
     });
 
-    (mock.core.application.navigateToApp as jest.Mock).mockClear();
+    it('renders the pod metrics link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithKubernetesData
+      );
 
-    fireEvent.click(getByText('Container metrics'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith(
-      'metrics',
-      {
-        path:
-          'link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952',
-      }
-    );
+      expect(
+        (getByText('Pod metrics').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/metrics/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952'
+      );
+    });
   });
 
-  it('should not render the host links when there is no hostname', async () => {
-    const { queryByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
-    );
+  describe('when there is no container id', () => {
+    it('does not render the Container logs link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
 
-    expect(queryByText('Host logs')).toBeNull();
-    expect(queryByText('Host metrics')).toBeNull();
-  });
-
-  it('should render the host links when there is a hostname', async () => {
-    const mock = getMock();
-    const { queryByText, getByText } = await renderTransaction(
-      Transactions.transactionWithHostData,
-      mock
-    );
-
-    expect(queryByText('Host logs')).not.toBeNull();
-    expect(queryByText('Host metrics')).not.toBeNull();
-
-    fireEvent.click(getByText('Host logs'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('logs', {
-      path: 'link-to/host-logs/227453131a17?time=1545092070952',
+      expect(queryByText('Container logs')).toBeNull();
     });
 
-    (mock.core.application.navigateToApp as jest.Mock).mockClear();
+    it('does not render the Container metrics link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
 
-    fireEvent.click(getByText('Host metrics'));
+      expect(queryByText('Container metrics')).toBeNull();
+    });
+  });
 
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith(
-      'metrics',
-      {
-        path:
-          'link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952',
-      }
-    );
+  describe('when there is a container id', () => {
+    it('renders the Container logs link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithContainerData
+      );
+
+      expect(
+        (getByText('Container logs').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/logs/link-to/container-logs/container123456abcdef?time=1545092070952'
+      );
+    });
+
+    it('renders the Container metrics link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithContainerData
+      );
+
+      expect(
+        (getByText('Container metrics').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/metrics/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952'
+      );
+    });
+  });
+
+  describe('when there is no hostname', () => {
+    it('does not render the Host logs link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
+
+      expect(queryByText('Host logs')).toBeNull();
+    });
+
+    it('does not render the Host metrics link', async () => {
+      const { queryByText } = await renderTransaction(
+        Transactions.transactionWithMinimalData
+      );
+
+      expect(queryByText('Host metrics')).toBeNull();
+    });
+  });
+
+  describe('when there is a hostname', () => {
+    it('renders the Host logs link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+
+      expect(
+        (getByText('Host logs').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/logs/link-to/host-logs/227453131a17?time=1545092070952'
+      );
+    });
+
+    it('renders the Host metrics link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+
+      expect(
+        (getByText('Host metrics').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/metrics/link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952'
+      );
+    });
   });
 
   it('should not render the uptime link if there is no url available', async () => {
@@ -230,24 +213,21 @@ describe('TransactionActionMenu component', () => {
     expect(queryByText('Status')).toBeNull();
   });
 
-  it('should render the uptime link if there is a url with a domain', async () => {
-    const mock = getMock();
+  describe('when there is a url with a domain', () => {
+    it('renders the uptime link', async () => {
+      const { getByText } = await renderTransaction(
+        Transactions.transactionWithUrlAndDomain
+      );
 
-    const { queryByText, getByText } = await renderTransaction(
-      Transactions.transactionWithUrlAndDomain,
-      mock
-    );
-
-    expect(queryByText('Status')).not.toBeNull();
-
-    fireEvent.click(getByText('Status'));
-
-    expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('uptime', {
-      path: '?search=url.domain:%22example.com%22',
+      expect(
+        (getByText('Status').parentElement as HTMLAnchorElement).href
+      ).toEqual(
+        'http://localhost/basepath/app/uptime?search=url.domain:%22example.com%22'
+      );
     });
   });
 
-  it('should match the snapshot', async () => {
+  it('matches the snapshot', async () => {
     const { container } = await renderTransaction(
       Transactions.transactionWithAllData
     );

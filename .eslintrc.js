@@ -95,12 +95,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/es_ui_shared/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/eui_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -132,20 +126,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/index_management/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -302,10 +283,7 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: [
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
-                ],
+                target: ['(src|x-pack)/plugins/*/server/**/*'],
                 from: ['(src|x-pack)/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },

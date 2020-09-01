@@ -182,12 +182,12 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
-  private async indexFields(forceFieldRefresh: boolean = false, specs?: FieldSpec[]) {
+  private async indexFields(specs?: FieldSpec[]) {
     if (!this.id) {
       return;
     }
 
-    if (forceFieldRefresh || this.isFieldRefreshRequired(specs)) {
+    if (this.isFieldRefreshRequired(specs)) {
       await this.refreshFields();
     } else {
       if (specs) {
@@ -223,7 +223,7 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  private async updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+  private async updateFromElasticSearch(response: any) {
     if (!response.found) {
       throw new SavedObjectNotFound(savedObjectType, this.id, 'management/kibana/indexPatterns');
     }
@@ -257,7 +257,7 @@ export class IndexPattern implements IIndexPattern {
       });
     }
 
-    return this.indexFields(forceFieldRefresh, response.fields);
+    return this.indexFields(response.fields);
   }
 
   getComputedFields() {
@@ -301,7 +301,7 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  async init(forceFieldRefresh = false) {
+  async init() {
     if (!this.id) {
       return this; // no id === no elasticsearch document
     }
@@ -325,7 +325,7 @@ export class IndexPattern implements IIndexPattern {
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
-    await this.updateFromElasticSearch(response, forceFieldRefresh);
+    await this.updateFromElasticSearch(response);
     // Do it after to ensure we have the most up to date information
     this.originalBody = this.prepBody();
 
