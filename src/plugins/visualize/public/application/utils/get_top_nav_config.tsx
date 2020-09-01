@@ -38,6 +38,7 @@ import {
 } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -49,6 +50,7 @@ interface TopNavConfigParams {
   visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
 }
 
@@ -63,12 +65,12 @@ export const getTopNavConfig = (
     visInstance,
     stateContainer,
     visualizationIdFromUrl,
+    stateTransfer,
     embeddableId,
   }: TopNavConfigParams,
   {
     application,
     chrome,
-    embeddable,
     history,
     share,
     setActiveUrl,
@@ -118,8 +120,8 @@ export const getTopNavConfig = (
           history.replace(appPath);
           setActiveUrl(appPath);
 
-          if (newlyCreated && embeddable) {
-            embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
+          if (newlyCreated && stateTransfer) {
+            stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
               state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
             });
           } else {
@@ -174,7 +176,7 @@ export const getTopNavConfig = (
     if (embeddableId) {
       state.embeddableId = embeddableId;
     }
-    embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, { state });
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
   const topNavMenu: TopNavMenuData[] = [
@@ -284,6 +286,7 @@ export const getTopNavConfig = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
+                  getAppNameFromId={stateTransfer.getAppNameFromId}
                   objectType={'visualization'}
                   onClose={() => {}}
                   originatingApp={originatingApp}

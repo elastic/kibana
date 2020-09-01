@@ -9,7 +9,7 @@ Search strategy interface contains a search method that takes in a request and r
 <b>Signature:</b>
 
 ```typescript
-export interface ISearchStrategy 
+export interface ISearchStrategy<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> 
 ```
 
 ## Properties
@@ -17,5 +17,5 @@ export interface ISearchStrategy
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [cancel](./kibana-plugin-plugins-data-server.isearchstrategy.cancel.md) | <code>(context: RequestHandlerContext, id: string) =&gt; Promise&lt;void&gt;</code> |  |
-|  [search](./kibana-plugin-plugins-data-server.isearchstrategy.search.md) | <code>(context: RequestHandlerContext, request: IEsSearchRequest, options?: ISearchOptions) =&gt; Promise&lt;IEsSearchResponse&gt;</code> |  |
+|  [search](./kibana-plugin-plugins-data-server.isearchstrategy.search.md) | <code>(context: RequestHandlerContext, request: SearchStrategyRequest, options?: ISearchOptions) =&gt; Promise&lt;SearchStrategyResponse&gt;</code> |  |
 

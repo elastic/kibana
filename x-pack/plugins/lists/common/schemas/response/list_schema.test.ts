@@ -25,6 +25,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -69,6 +70,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -82,6 +84,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "created_by"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.created_by;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -95,6 +98,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "tie_breaker_id"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.tie_breaker_id;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -108,6 +112,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "type"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -121,6 +126,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_at"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.updated_at;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -134,6 +140,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_by"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.updated_by;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -147,6 +154,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "name"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -160,6 +168,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "description"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -144,8 +144,15 @@ export default function ({ getService }) {
         'authentication_realm',
         'lookup_realm',
         'authentication_provider',
+        'authentication_type',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
+      expect(apiResponse.body.authentication_provider).to.eql('__http__');
+      expect(apiResponse.body.authentication_realm).to.eql({
+        name: 'reserved',
+        type: 'reserved',
+      });
+      expect(apiResponse.body.authentication_type).to.be('realm');
     });
 
     describe('with session cookie', () => {
@@ -186,8 +193,15 @@ export default function ({ getService }) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
+        expect(apiResponse.body.authentication_provider).to.eql('basic');
+        expect(apiResponse.body.authentication_realm).to.eql({
+          name: 'reserved',
+          type: 'reserved',
+        });
+        expect(apiResponse.body.authentication_type).to.be('realm');
       });
 
       it('should extend cookie on every successful non-system API call', async () => {

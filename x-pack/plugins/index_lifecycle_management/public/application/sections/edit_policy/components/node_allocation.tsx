@@ -16,20 +16,12 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { PHASE_NODE_ATTRS } from '../../../constants';
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
-
-interface Props {
-  phase: string;
-  errors: Record<string, string[]>;
-  // TODO add types for phaseData and setPhaseData after policy is typed
-  phaseData: any;
-  setPhaseData: (dataKey: string, value: any) => void;
-  isShowingErrors: boolean;
-}
+import { PhaseWithAllocationAction, Phases } from '../../../services/policies/types';
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const learnMoreLink = (
   <Fragment>
@@ -46,13 +38,20 @@ const learnMoreLink = (
   </Fragment>
 );
 
-export const NodeAllocation: React.FunctionComponent<Props> = ({
+interface Props<T extends PhaseWithAllocationAction> {
+  phase: keyof Phases & string;
+  errors?: PhaseValidationErrors<T>;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
+  isShowingErrors: boolean;
+}
+export const NodeAllocation = <T extends PhaseWithAllocationAction>({
   phase,
   setPhaseData,
   errors,
   phaseData,
   isShowingErrors,
-}) => {
+}: React.PropsWithChildren<Props<T>>) => {
   const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
@@ -140,33 +139,35 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
     );
   }
 
+  // check that this string is a valid property
+  const nodeAttrsProperty = propertyof<T>('selectedNodeAttrs');
+
   return (
     <Fragment>
       <ErrableFormRow
-        id={`${phase}-${PHASE_NODE_ATTRS}`}
+        id={`${phase}-${nodeAttrsProperty}`}
         label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
           defaultMessage: 'Select a node attribute to control shard allocation',
         })}
-        errorKey={PHASE_NODE_ATTRS}
         isShowingErrors={isShowingErrors}
-        errors={errors}
+        errors={errors?.selectedNodeAttrs}
       >
         <EuiSelect
-          id={`${phase}-${PHASE_NODE_ATTRS}`}
-          value={phaseData[PHASE_NODE_ATTRS] || ' '}
+          id={`${phase}-${nodeAttrsProperty}`}
+          value={phaseData.selectedNodeAttrs || ' '}
           options={nodeOptions}
           onChange={(e) => {
-            setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+            setPhaseData(nodeAttrsProperty, e.target.value);
           }}
         />
       </ErrableFormRow>
-      {!!phaseData[PHASE_NODE_ATTRS] ? (
+      {!!phaseData.selectedNodeAttrs ? (
         <EuiButtonEmpty
           style={{ maxWidth: 400 }}
           data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
           flush="left"
           iconType="eye"
-          onClick={() => setSelectedNodeAttrsForDetails(phaseData[PHASE_NODE_ATTRS])}
+          onClick={() => setSelectedNodeAttrsForDetails(phaseData.selectedNodeAttrs)}
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
