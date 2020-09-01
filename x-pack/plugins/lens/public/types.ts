@@ -462,11 +462,6 @@ export interface Visualization<T = unknown> {
    */
   renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
   /**
-   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
-   * settings for the visualization. This toolbar is placed next to the Chart Switch
-   */
-  renderLeftToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
-  /**
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
