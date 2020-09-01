@@ -9989,7 +9989,6 @@
     "xpack.lens.xyChart.renderer.help": "X/Y チャートを再レンダリング",
     "xpack.lens.xyChart.seriesColor.auto": "自動",
     "xpack.lens.xyChart.seriesColor.label": "系列色",
-    "xpack.lens.xyChart.settingsLabel": "設定",
     "xpack.lens.xyChart.splitSeries": "系列を分割",
     "xpack.lens.xyChart.title.help": "軸のタイトル",
     "xpack.lens.xyChart.xAxisLabel": "X 軸",

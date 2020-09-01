@@ -9992,7 +9992,6 @@
     "xpack.lens.xyChart.renderer.help": "X/Y 图表呈现器",
     "xpack.lens.xyChart.seriesColor.auto": "自动",
     "xpack.lens.xyChart.seriesColor.label": "系列颜色",
-    "xpack.lens.xyChart.settingsLabel": "设置",
     "xpack.lens.xyChart.splitSeries": "拆分序列",
     "xpack.lens.xyChart.title.help": "轴标题",
     "xpack.lens.xyChart.xAxisLabel": "X 轴",
