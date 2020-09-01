@@ -11,12 +11,13 @@ import { httpServerMock, loggingSystemMock } from '../../../../../src/core/serve
 import { authorizationMock } from './index.mock';
 import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
 import { AuthenticatedUser } from '..';
+import { CheckPrivilegesResponse } from './types';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }
   | {
       resolveCheckPrivileges: {
-        privileges: { kibana: Array<{ privilege: string; authorized: boolean }> };
+        privileges: CheckPrivilegesResponse['privileges'];
       };
     };
 
@@ -36,8 +37,17 @@ const createMockAuthz = (options: MockAuthzOptions) => {
         throw options.rejectCheckPrivileges;
       }
 
-      const expected = options.resolveCheckPrivileges.privileges.kibana.map((x) => x.privilege);
-      expect(checkActions).toEqual({ kibana: expected, elasticsearch: { cluster: [], index: {} } });
+      const expectedKibana = options.resolveCheckPrivileges.privileges.kibana.map(
+        (x) => x.privilege
+      );
+      const expectedCluster = (
+        options.resolveCheckPrivileges.privileges.elasticsearch.cluster ?? []
+      ).map((x) => x.privilege);
+
+      expect(checkActions).toEqual({
+        kibana: expectedKibana,
+        elasticsearch: { cluster: expectedCluster, index: {} },
+      });
       return options.resolveCheckPrivileges;
     });
   });
@@ -288,6 +298,14 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
             { privilege: actions.ui.get('barFeature', 'bar'), authorized: false },
           ],
+          elasticsearch: {
+            cluster: [
+              { privilege: 'manage', authorized: false },
+              { privilege: 'monitor', authorized: true },
+              { privilege: 'manage_security', authorized: true },
+            ],
+            index: {},
+          },
         },
       },
     });
@@ -315,8 +333,21 @@ describe('usingPrivileges', () => {
           id: 'esFeature',
           privileges: [
             {
-              requiredClusterPrivileges: [],
-              ui: [],
+              requiredClusterPrivileges: ['manage'],
+              ui: ['es_manage'],
+            },
+            {
+              requiredClusterPrivileges: ['monitor'],
+              ui: ['es_monitor'],
+            },
+          ],
+        }),
+        new ElasticsearchFeature({
+          id: 'esSecurityFeature',
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage_security'],
+              ui: ['es_manage_sec'],
             },
           ],
         }),
@@ -348,6 +379,13 @@ describe('usingPrivileges', () => {
           foo: true,
           bar: true,
         },
+        esFeature: {
+          es_manage: true,
+          es_monitor: true,
+        },
+        esSecurityFeature: {
+          es_manage_sec: true,
+        },
       })
     );
 
@@ -372,6 +410,13 @@ describe('usingPrivileges', () => {
         foo: true,
         bar: false,
       },
+      esFeature: {
+        es_manage: false,
+        es_monitor: true,
+      },
+      esSecurityFeature: {
+        es_manage_sec: true,
+      },
     });
   });
 
@@ -388,6 +433,10 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
             { privilege: actions.ui.get('barFeature', 'bar'), authorized: true },
           ],
+          elasticsearch: {
+            cluster: [],
+            index: {},
+          },
         },
       },
     });
@@ -493,7 +542,7 @@ describe('all', () => {
           privileges: [
             {
               requiredClusterPrivileges: [],
-              ui: [],
+              ui: ['bar'],
             },
           ],
         }),
@@ -523,6 +572,9 @@ describe('all', () => {
           foo: true,
           bar: true,
         },
+        esFeature: {
+          bar: true,
+        },
       })
     );
     expect(result).toEqual({
@@ -542,6 +594,9 @@ describe('all', () => {
       },
       barFeature: {
         foo: false,
+        bar: false,
+      },
+      esFeature: {
         bar: false,
       },
     });

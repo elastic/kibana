@@ -5,7 +5,7 @@
  */
 
 import { flatten, isObject, mapValues } from 'lodash';
-import { RecursiveReadonlyArray } from '@kbn/utility-types';
+import { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
 import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
@@ -100,6 +100,12 @@ export function disableUICapabilitiesFactory(
       uiCapability: string,
       value: boolean | Record<string, boolean>
     ): string[] {
+      // Capabilities derived from Elasticsearch features should not be
+      // included here, as the result is used to check authorization against
+      // Kibana Privileges, rather than Elasticsearch Privileges.
+      if (elasticsearchFeatureMap.hasOwnProperty(featureId)) {
+        return [];
+      }
       if (typeof value === 'boolean') {
         return [authz.actions.ui.get(featureId, uiCapability)];
       }
@@ -158,41 +164,60 @@ export function disableUICapabilitiesFactory(
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
 
-      const hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
-        (x) => x.privilege === action && x.authorized === true
-      );
+      const isElasticsearchFeature = elasticsearchFeatureMap.hasOwnProperty(featureId);
 
-      if (hasRequiredKibanaPrivileges) {
-        return true;
+      if (!isElasticsearchFeature) {
+        const hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
+          (x) => x.privilege === action && x.authorized === true
+        );
+        return hasRequiredKibanaPrivileges;
       }
 
       const isCatalogueFeature = featureId === 'catalogue';
       const isManagementFeature = featureId === 'management';
 
-      if (isCatalogueFeature) {
-        const [catalogueEntry] = uiCapabilityParts;
-        return elasticsearchFeatures.some((esFeature) => {
+      return elasticsearchFeatures.some((esFeature) => {
+        if (isCatalogueFeature) {
+          const [catalogueEntry] = uiCapabilityParts;
           const featureGrantsCatalogueEntry = (esFeature.catalogue ?? []).includes(catalogueEntry);
           return (
             featureGrantsCatalogueEntry &&
-            hasRequiredElasticsearchPrivilegesForFeature(esFeature, checkPrivilegesResponse, user)
+            hasAnyRequiredElasticsearchPrivilegesForFeature(
+              esFeature,
+              checkPrivilegesResponse,
+              user
+            )
           );
-        });
-      } else if (isManagementFeature) {
-        const [managementSectionId, managementEntryId] = uiCapabilityParts;
-        return elasticsearchFeatures.some((esFeature) => {
+        } else if (isManagementFeature) {
+          const [managementSectionId, managementEntryId] = uiCapabilityParts;
           const featureGrantsManagementEntry =
             (esFeature.management ?? {}).hasOwnProperty(managementSectionId) &&
             esFeature.management![managementSectionId].includes(managementEntryId);
 
           return (
             featureGrantsManagementEntry &&
-            hasRequiredElasticsearchPrivilegesForFeature(esFeature, checkPrivilegesResponse, user)
+            hasAnyRequiredElasticsearchPrivilegesForFeature(
+              esFeature,
+              checkPrivilegesResponse,
+              user
+            )
           );
-        });
-      }
-
-      return hasRequiredKibanaPrivileges;
+        } else if (esFeature.id === featureId) {
+          if (uiCapabilityParts.length !== 1) {
+            // The current privilege system does not allow for this to happen.
+            // This is a safeguard against future changes.
+            throw new Error(
+              `Elasticsearch feature ${esFeature.id} expected a single capability, but found ${uiCapabilityParts.length}`
+            );
+          }
+          return hasRequiredElasticsearchPrivilegesForCapability(
+            esFeature,
+            uiCapabilityParts[0],
+            checkPrivilegesResponse,
+            user
+          );
+        }
+      });
     };
 
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {
@@ -232,31 +257,55 @@ export function disableUICapabilitiesFactory(
   };
 }
 
-function hasRequiredElasticsearchPrivilegesForFeature(
+function hasRequiredElasticsearchPrivilegesForCapability(
+  esFeature: ElasticsearchFeature,
+  uiCapability: string,
+  checkPrivilegesResponse: CheckPrivilegesResponse,
+  user: AuthenticatedUser | null
+) {
+  return esFeature.privileges.some((privilege) => {
+    const privilegeGrantsCapability = privilege.ui.includes(uiCapability);
+    if (!privilegeGrantsCapability) {
+      return false;
+    }
+
+    return isGrantedElasticsearchPrivilege(privilege, checkPrivilegesResponse, user);
+  });
+}
+
+function hasAnyRequiredElasticsearchPrivilegesForFeature(
   esFeature: ElasticsearchFeature,
   checkPrivilegesResponse: CheckPrivilegesResponse,
   user: AuthenticatedUser | null
 ) {
   return esFeature.privileges.some((privilege) => {
-    const hasRequiredClusterPrivileges = privilege.requiredClusterPrivileges.every(
-      (expectedClusterPriv) =>
-        checkPrivilegesResponse.privileges.elasticsearch.cluster.some(
-          (x) => x.privilege === expectedClusterPriv && x.authorized === true
-        )
-    );
+    return isGrantedElasticsearchPrivilege(privilege, checkPrivilegesResponse, user);
+  });
+}
 
-    const hasRequiredIndexPrivileges = Object.entries(
-      privilege.requiredIndexPrivileges ?? {}
-    ).every(([indexName, requiredIndexPrivileges]) => {
+function isGrantedElasticsearchPrivilege(
+  privilege: RecursiveReadonly<FeatureElasticsearchPrivileges>,
+  checkPrivilegesResponse: CheckPrivilegesResponse,
+  user: AuthenticatedUser | null
+) {
+  const hasRequiredClusterPrivileges = privilege.requiredClusterPrivileges.every(
+    (expectedClusterPriv) =>
+      checkPrivilegesResponse.privileges.elasticsearch.cluster.some(
+        (x) => x.privilege === expectedClusterPriv && x.authorized === true
+      )
+  );
+
+  const hasRequiredIndexPrivileges = Object.entries(privilege.requiredIndexPrivileges ?? {}).every(
+    ([indexName, requiredIndexPrivileges]) => {
       return checkPrivilegesResponse.privileges.elasticsearch.index[indexName]
         .filter((indexResponse) => requiredIndexPrivileges.includes(indexResponse.privilege))
         .every((indexResponse) => indexResponse.authorized);
-    });
+    }
+  );
 
-    const hasRequiredRoles = (privilege.requiredRoles ?? []).every(
-      (requiredRole) => user?.roles.includes(requiredRole) ?? false
-    );
+  const hasRequiredRoles = (privilege.requiredRoles ?? []).every(
+    (requiredRole) => user?.roles.includes(requiredRole) ?? false
+  );
 
-    return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges && hasRequiredRoles;
-  });
+  return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges && hasRequiredRoles;
 }
