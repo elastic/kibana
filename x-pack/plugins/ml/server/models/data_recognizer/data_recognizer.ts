@@ -16,6 +16,7 @@ import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import {
   KibanaObjects,
+  KibanaObjectConfig,
   ModuleDataFeed,
   ModuleJob,
   Module,
@@ -93,7 +94,7 @@ interface ObjectExistResponse {
   id: string;
   type: string;
   exists: boolean;
-  savedObject?: any;
+  savedObject?: { id: string; type: string; attributes: KibanaObjectConfig };
 }
 
 interface SaveResults {
@@ -671,14 +672,14 @@ export class DataRecognizer {
     let results = { saved_objects: [] as any[] };
     const filteredSavedObjects = objectExistResults
       .filter((o) => o.exists === false)
-      .map((o) => o.savedObject);
+      .map((o) => o.savedObject!);
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map((doc) => ({
           ...doc,
-          migrationVersion: doc.migrationVersion || {},
+          migrationVersion: {},
         }))
       );
     }

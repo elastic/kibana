@@ -98,7 +98,11 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       context,
       request,
     }),
-    ml: getMlSetup(context, request),
+    ml: getMlSetup(
+      context.plugins.ml,
+      context.core.savedObjects.client,
+      request
+    ),
     config,
   };
 
@@ -110,8 +114,12 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   } as InferSetup<TParams>;
 }
 
-function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
-  if (!context.plugins.ml) {
+function getMlSetup(
+  ml: APMRequestHandlerContext['plugins']['ml'],
+  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  request: KibanaRequest
+) {
+  if (!ml) {
     return;
   }
 

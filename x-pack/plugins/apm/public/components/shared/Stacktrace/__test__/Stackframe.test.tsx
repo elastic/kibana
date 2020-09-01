@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
-import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
 import { mountWithTheme } from '../../../../utils/testHelpers';
-import { Stackframe } from '../Stackframe';
+import { Stackframe as StackframeComponent } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
 describe('Stackframe', () => {
@@ -17,7 +17,7 @@ describe('Stackframe', () => {
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
       wrapper = mountWithTheme(
-        <Stackframe id="test" stackframe={stackframe} />
+        <StackframeComponent id="test" stackframe={stackframe} />
       );
     });
 
@@ -39,9 +39,9 @@ describe('Stackframe', () => {
   describe('when stackframe does not have source lines', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      const stackframe = { line: {} } as IStackframe;
+      const stackframe = { line: {} } as Stackframe;
       wrapper = mountWithTheme(
-        <Stackframe id="test" stackframe={stackframe} />
+        <StackframeComponent id="test" stackframe={stackframe} />
       );
     });
 
@@ -57,9 +57,9 @@ describe('Stackframe', () => {
   });
 
   it('should respect isLibraryFrame', () => {
-    const stackframe = { line: {} } as IStackframe;
+    const stackframe = { line: {} } as Stackframe;
     const wrapper = shallow(
-      <Stackframe id="test" stackframe={stackframe} isLibraryFrame />
+      <StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />
     );
     expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
   });

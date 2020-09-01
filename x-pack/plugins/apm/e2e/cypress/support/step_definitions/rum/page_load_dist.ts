@@ -9,7 +9,7 @@ import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 60 * 1000;
 
-Given(`a user click page load breakdown filter`, () => {
+Given(`a user clicks the page load breakdown filter`, () => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
