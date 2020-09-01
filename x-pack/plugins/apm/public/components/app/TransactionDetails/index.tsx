@@ -5,35 +5,36 @@
  */
 
 import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
-import { useWaterfall } from '../../../hooks/useWaterfall';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { TransactionDistribution } from './Distribution';
-import { WaterfallWithSummmary } from './WaterfallWithSummmary';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { RouteComponentProps } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { HeightRetainer } from '../../shared/HeightRetainer';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
+import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useWaterfall } from '../../../hooks/useWaterfall';
+import { ApmHeader } from '../../shared/ApmHeader';
 import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { HeightRetainer } from '../../shared/HeightRetainer';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
+import { TransactionDistribution } from './Distribution';
+import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 
-export function TransactionDetails() {
-  const location = useLocation();
+type TransactionDetailsProps = RouteComponentProps<{}>;
+
+export function TransactionDetails({ location }: TransactionDetailsProps) {
   const { urlParams } = useUrlParams();
   const {
     data: distributionData,

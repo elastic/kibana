@@ -11,7 +11,6 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import { LocationProvider } from '../../../../context/LocationContext';
 import {
   UrlParamsContext,
   useUiFilters,
@@ -46,11 +45,9 @@ function mountDatePicker(params?: IUrlParams) {
   return mount(
     <MockApmPluginContextWrapper>
       <Router history={history}>
-        <LocationProvider>
-          <MockUrlParamsProvider params={params}>
-            <DatePicker />
-          </MockUrlParamsProvider>
-        </LocationProvider>
+        <MockUrlParamsProvider params={params}>
+          <DatePicker />
+        </MockUrlParamsProvider>
       </Router>
     </MockApmPluginContextWrapper>
   );

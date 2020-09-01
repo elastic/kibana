@@ -6,6 +6,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { License } from '../../../../../../licensing/common/license';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
@@ -19,13 +20,19 @@ import {
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import * as Transactions from './mockData';
 
+function Wrapper({ children }: { children?: React.ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
+
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />,
     {
-      wrapper: ({ children }: { children?: React.ReactNode }) => (
-        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-      ),
+      wrapper: Wrapper,
     }
   );
 
@@ -246,14 +253,11 @@ describe('TransactionActionMenu component', () => {
     function renderTransactionActionMenuWithLicense(license: License) {
       return render(
         <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+          <TransactionActionMenu
+            transaction={Transactions.transactionWithMinimalData as Transaction}
+          />
+        </LicenseContext.Provider>,
+        { wrapper: Wrapper }
       );
     }
     it('doesnt show custom links when license is not valid', () => {
@@ -286,14 +290,11 @@ describe('TransactionActionMenu component', () => {
       });
       const component = render(
         <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+          <TransactionActionMenu
+            transaction={Transactions.transactionWithMinimalData as Transaction}
+          />
+        </LicenseContext.Provider>,
+        { wrapper: Wrapper }
       );
       act(() => {
         fireEvent.click(component.getByText('Actions'));

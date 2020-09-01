@@ -100,8 +100,8 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings/apm-indices',
-    component: () => (
-      <Settings>
+    component: (props: RouteComponentProps<{}>) => (
+      <Settings {...props}>
         <ApmIndices />
       </Settings>
     ),
@@ -113,8 +113,8 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings/agent-configuration',
-    component: () => (
-      <Settings>
+    component: (props: RouteComponentProps<{}>) => (
+      <Settings {...props}>
         <AgentConfigurations />
       </Settings>
     ),
@@ -133,7 +133,7 @@ export const routes: BreadcrumbRoute[] = [
       { defaultMessage: 'Create Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_CREATE,
-    component: () => <CreateAgentConfigurationRouteHandler />,
+    component: CreateAgentConfigurationRouteHandler,
   },
   {
     exact: true,
@@ -143,7 +143,7 @@ export const routes: BreadcrumbRoute[] = [
       { defaultMessage: 'Edit Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_EDIT,
-    component: () => <EditAgentConfigurationRouteHandler />,
+    component: EditAgentConfigurationRouteHandler,
   },
   {
     exact: true,
@@ -204,7 +204,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
-    component: () => <ServiceNodeMetrics />,
+    component: ServiceNodeMetrics,
     breadcrumb: ({ location }) => {
       const { serviceNodeName } = resolveUrlParams(location, {});
 
@@ -255,8 +255,8 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings/customize-ui',
-    component: () => (
-      <Settings>
+    component: (props: RouteComponentProps<{}>) => (
+      <Settings {...props}>
         <CustomizeUI />
       </Settings>
     ),
@@ -268,8 +268,8 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings/anomaly-detection',
-    component: () => (
-      <Settings>
+    component: (props: RouteComponentProps<{}>) => (
+      <Settings {...props}>
         <AnomalyDetection />
       </Settings>
     ),

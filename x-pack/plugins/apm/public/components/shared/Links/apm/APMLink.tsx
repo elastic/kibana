@@ -8,9 +8,9 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { IBasePath } from 'kibana/public';
 import { pick } from 'lodash';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import url from 'url';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { useLocation } from '../../../../hooks/useLocation';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {

@@ -18,6 +18,7 @@ import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
+import { MemoryRouter } from 'react-router-dom';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -25,28 +26,30 @@ const KibanaReactContext = createKibanaReactContext({
 
 function wrapper({ children }: { children: ReactChild }) {
   return (
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper
-        value={
-          ({
-            ...mockApmPluginContextValue,
-            core: {
-              ...mockApmPluginContextValue.core,
-              http: { ...mockApmPluginContextValue.core.http, get: httpGet },
-              notifications: {
-                ...mockApmPluginContextValue.core.notifications,
-                toasts: {
-                  ...mockApmPluginContextValue.core.notifications.toasts,
-                  addWarning,
+    <MemoryRouter>
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper
+          value={
+            ({
+              ...mockApmPluginContextValue,
+              core: {
+                ...mockApmPluginContextValue.core,
+                http: { ...mockApmPluginContextValue.core.http, get: httpGet },
+                notifications: {
+                  ...mockApmPluginContextValue.core.notifications,
+                  toasts: {
+                    ...mockApmPluginContextValue.core.notifications.toasts,
+                    addWarning,
+                  },
                 },
               },
-            },
-          } as unknown) as ApmPluginContextValue
-        }
-      >
-        {children}
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+            } as unknown) as ApmPluginContextValue
+          }
+        >
+          {children}
+        </MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
+    </MemoryRouter>
   );
 }
 

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo, ReactChild } from 'react';
-import { matchPath } from 'react-router-dom';
-import { useLocation } from '../hooks/useLocation';
+import { matchPath, useLocation } from 'react-router-dom';
 import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
 
 export const MatchedRouteContext = React.createContext<BreadcrumbRoute[]>([]);

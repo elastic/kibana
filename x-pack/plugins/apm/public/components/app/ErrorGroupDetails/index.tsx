@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
@@ -56,8 +56,9 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-export function ErrorGroupDetails() {
-  const location = useLocation();
+type ErrorGroupDetailsProps = RouteComponentProps<{}>;
+
+export function ErrorGroupDetails({ location }: ErrorGroupDetailsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
