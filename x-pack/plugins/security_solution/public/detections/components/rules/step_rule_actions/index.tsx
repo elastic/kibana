@@ -13,7 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import {
@@ -22,7 +22,7 @@ import {
   ActionsStepRule,
 } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import {
   ThrottleSelectField,
@@ -85,7 +85,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
   };
-  const [throttle, setThrottle] = useState<ActionsStepRule['throttle']>(initialState.throttle);
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
   const { form } = useForm<ActionsStepRule>({
     defaultValue: initialState,
@@ -93,6 +92,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, submit } = form;
+  const [{ throttle }] = (useFormData<ActionsStepRule>({
+    form,
+    watch: ['throttle'],
+  }) as unknown) as [ActionsStepRule];
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -120,7 +123,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       isDisabled: isLoading,
       dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
       hasNoInitialSelection: false,
-      handleChange: setThrottle,
       euiFieldProps: {
         options: throttleOptions,
       },
