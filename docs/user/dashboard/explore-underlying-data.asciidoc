@@ -2,10 +2,6 @@
 [[explore-the-underlying-data]]
 === Explore the underlying data for panels
 
-++++
-<titleabbrev>Explore the underlying data</titleabbrev>
-++++
-
 To explore the underlying data of the panels on your dashboard, {kib} opens *Discover*,
 where you can view and filter the data in the visualization panel. When {kib} opens *Discover*, the index pattern, filters, query, and time range for the visualization continue to apply.
 

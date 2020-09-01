@@ -181,8 +181,13 @@ image::images/tutorial-dashboard.png[]
 
 Now that you have the basics, you're ready to start exploring your own system data with {kib}.
 
-* To learn about searching and filtering your data, refer to {kibana-ref}/discover.html[Discover].
-* To learn about the visualization types {kib} has to offer, refer to <<types-of-panels, Types of panels>>.
-* To learn about configuring {kib} and managing your saved objects, refer to {kibana-ref}/management.html[Management].
-* To learn about the interactive console you can use to submit REST requests to {es}, refer to {kibana-ref}/console-kibana.html[Console].
+* To add your own data to {kib}, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
+
+* To search and filter your data, refer to {kibana-ref}/discover.html[Discover].
+
+* To create a dashboard with your own data, refer to <<dashboard, Dashboard>>.
+
+* To create maps that you can add to your dashboards, refer to <<maps,Maps>>.
+
+* To create presentations of your live data, refer to <canvas,Canvas>>.
 
