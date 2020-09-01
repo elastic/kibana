@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { get, isEmpty } from 'lodash/fp';
-import { Dispatch } from 'redux';
+import { useDispatch } from 'react-redux';
 
 import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { updateTimelineGraphEventId } from '../../../store/timeline/actions';
-import { EventType } from '../../../../timelines/store/timeline/model';
+import { EventType } from '../../../store/timeline/model';
 import { OnPinEvent, OnUnPinEvent } from '../events';
-
-import { TimelineRowAction, TimelineRowActionOnClick } from './actions';
+import { ActionIconItem } from './actions/action_icon_item';
 
 import * as i18n from './translations';
 import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
@@ -89,8 +88,8 @@ export const getEventIdToDataMapping = (
   timelineData: TimelineItem[],
   eventIds: string[],
   fieldsToKeep: string[]
-): Record<string, TimelineNonEcsData[]> => {
-  return timelineData.reduce((acc, v) => {
+): Record<string, TimelineNonEcsData[]> =>
+  timelineData.reduce((acc, v) => {
     const fvm = eventIds.includes(v._id)
       ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
       : {};
@@ -99,7 +98,6 @@ export const getEventIdToDataMapping = (
       ...fvm,
     };
   }, {});
-};
 
 /** Return eventType raw or signal */
 export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
@@ -109,29 +107,40 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
   return 'raw';
 };
 
-export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
+export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
+  get(['agent', 'type', 0], ecsData) === 'endpoint' &&
+  get(['process', 'entity_id'], ecsData)?.length === 1 &&
+  get(['process', 'entity_id', 0], ecsData) !== '';
+
+interface InvestigateInResolverActionProps {
+  timelineId: string;
+  ecsData: Ecs;
+}
+
+const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverActionProps> = ({
+  timelineId,
+  ecsData,
+}) => {
+  const dispatch = useDispatch();
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const handleClick = useCallback(
+    () => dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id })),
+    [dispatch, ecsData._id, timelineId]
+  );
+
   return (
-    get(['agent', 'type', 0], ecsData) === 'endpoint' &&
-    get(['process', 'entity_id'], ecsData)?.length === 1 &&
-    get(['process', 'entity_id', 0], ecsData) !== ''
+    <ActionIconItem
+      ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      dataTestSubj="investigate-in-resolver"
+      iconType="node"
+      id="investigateInResolver"
+      isDisabled={isDisabled}
+      onClick={handleClick}
+    />
   );
 };
 
-export const getInvestigateInResolverAction = ({
-  dispatch,
-  timelineId,
-}: {
-  dispatch: Dispatch;
-  timelineId: string;
-}): TimelineRowAction => ({
-  ariaLabel: i18n.ACTION_INVESTIGATE_IN_RESOLVER,
-  content: i18n.ACTION_INVESTIGATE_IN_RESOLVER,
-  dataTestSubj: 'investigate-in-resolver',
-  displayType: 'icon',
-  iconType: 'node',
-  id: 'investigateInResolver',
-  isActionDisabled: (ecsData?: Ecs) => !isInvestigateInResolverActionEnabled(ecsData),
-  onClick: ({ eventId }: TimelineRowActionOnClick) =>
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: eventId })),
-  width: DEFAULT_ICON_BUTTON_WIDTH,
-});
+InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
+
+export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);
