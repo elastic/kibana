@@ -70,7 +70,13 @@ export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = fa
                 : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
             }
             selectedOptions={typeField.value}
-            onChange={typeField.setValue}
+            onChange={(value) => {
+              if (value.length === 0) {
+                // Don't allow clearing the type. One must always be selected
+                return;
+              }
+              typeField.setValue(value);
+            }}
             isClearable={false}
             data-test-subj="fieldType"
           />

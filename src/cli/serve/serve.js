@@ -155,7 +155,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   );
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }

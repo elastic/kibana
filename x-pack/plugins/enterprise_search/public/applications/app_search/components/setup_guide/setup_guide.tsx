@@ -20,8 +20,8 @@ export const SetupGuide: React.FC = () => (
       defaultMessage: 'App Search',
     })}
     productEuiIcon="logoAppSearch"
-    standardAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#standard"
-    elasticsearchNativeAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
+    standardAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-standard"
+    elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm"
   >
     <SetBreadcrumbs text="Setup Guide" />
     <SendTelemetry action="viewed" metric="setup_guide" />
