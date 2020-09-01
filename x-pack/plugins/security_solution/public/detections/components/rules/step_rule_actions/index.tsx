@@ -68,23 +68,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
 }) => {
-  const initialState = defaultValues ?? stepActionsDefaultValue;
-  const [throttle, setThrottle] = useState<ActionsStepRule['throttle']>(initialState.throttle);
   const {
     services: {
       application,
       triggers_actions_ui: { actionTypeRegistry },
     },
   } = useKibana();
-  const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
-
-  const { form } = useForm<ActionsStepRule>({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const { getFields } = form;
-
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_ID}`, {
@@ -92,13 +81,18 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
-
-  useEffect(() => {
-    const urlField = getFields().kibanaSiemAppUrl;
-    if (urlField) {
-      urlField.setValue(kibanaAbsoluteUrl);
-    }
-  }, [getFields, kibanaAbsoluteUrl]);
+  const initialState = {
+    ...(defaultValues ?? stepActionsDefaultValue),
+    kibanaSiemAppUrl: kibanaAbsoluteUrl,
+  };
+  const [throttle, setThrottle] = useState<ActionsStepRule['throttle']>(initialState.throttle);
+  const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
+  const { form } = useForm<ActionsStepRule>({
+    defaultValue: initialState,
+    options: { stripEmptyFields: false },
+    schema,
+  });
+  const { getFields } = form;
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -116,15 +110,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form, setForm]);
 
-  const updateThrottle = useCallback(
-    (_throttle) => {
-      const throttleField = getFields().throttle;
-      throttleField.setValue(_throttle);
-      setThrottle(_throttle);
-    },
-    [getFields]
-  );
-
   const throttleOptions = useMemo(() => {
     return getThrottleOptions(throttle);
   }, [throttle]);
@@ -135,12 +120,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       isDisabled: isLoading,
       dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
       hasNoInitialSelection: false,
-      handleChange: updateThrottle,
+      handleChange: setThrottle,
       euiFieldProps: {
         options: throttleOptions,
       },
     }),
-    [isLoading, throttleOptions, updateThrottle]
+    [isLoading, throttleOptions]
   );
 
   return isReadOnlyView ? (
