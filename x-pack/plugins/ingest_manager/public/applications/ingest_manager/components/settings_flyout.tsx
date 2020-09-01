@@ -36,7 +36,7 @@ interface Props {
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useCore();
-  const kibanaUrlInput = useComboInput([], (value) => {
+  const kibanaUrlsInput = useComboInput([], (value) => {
     if (value.length === 0) {
       return [
         i18n.translate('xpack.ingestManager.settings.kibanaUrlEmptyError', {
@@ -72,7 +72,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   return {
     isLoading,
     onSubmit: async () => {
-      if (!kibanaUrlInput.validate() || !elasticsearchUrlInput.validate()) {
+      if (!kibanaUrlsInput.validate() || !elasticsearchUrlInput.validate()) {
         return;
       }
 
@@ -88,7 +88,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           throw outputResponse.error;
         }
         const settingsResponse = await sendPutSettings({
-          kibana_url: kibanaUrlInput.value,
+          kibana_urls: kibanaUrlsInput.value,
         });
         if (settingsResponse.error) {
           throw settingsResponse.error;
@@ -108,7 +108,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       }
     },
     inputs: {
-      kibanaUrl: kibanaUrlInput,
+      kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
     },
   };
@@ -131,8 +131,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   useEffect(() => {
     if (settings) {
-      inputs.kibanaUrl.setValue(
-        settings.kibana_url || [`${window.location.origin}${core.http.basePath.get()}`]
+      inputs.kibanaUrls.setValue(
+        settings.kibana_urls || [`${window.location.origin}${core.http.basePath.get()}`]
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,9 +234,9 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           label={i18n.translate('xpack.ingestManager.settings.kibanaUrlLabel', {
             defaultMessage: 'Kibana URL',
           })}
-          {...inputs.kibanaUrl.formRowProps}
+          {...inputs.kibanaUrls.formRowProps}
         >
-          <EuiComboBox noSuggestions {...inputs.kibanaUrl.props} />
+          <EuiComboBox noSuggestions {...inputs.kibanaUrls.props} />
         </EuiFormRow>
       </EuiFormRow>
       <EuiSpacer size="m" />

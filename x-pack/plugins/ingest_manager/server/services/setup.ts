@@ -76,7 +76,7 @@ async function createSetupSideEffects(
         return settingsService.saveSettings(soClient, {
           agent_auto_upgrade: true,
           package_auto_upgrade: true,
-          kibana_url: [cloudUrl || flagsUrl || defaultUrl].flat(),
+          kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
         });
       }
 

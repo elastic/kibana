@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/ingest_manager/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_url: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
+        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
 
       const getTestPolicy1Res = await kibanaServer.savedObjects.get({
         type: 'ingest-agent-policies',

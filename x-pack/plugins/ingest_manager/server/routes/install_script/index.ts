@@ -38,7 +38,7 @@ export const registerRoutes = ({
       const http = appContextService.getHttpSetup();
       const serverInfo = http.getServerInfo();
       const basePath = http.basePath;
-      const kibanaUrl = (await settingsService.getSettings(soClient)).kibana_url || [
+      const kibanaUrls = (await settingsService.getSettings(soClient)).kibana_urls || [
         url.format({
           protocol: serverInfo.protocol,
           hostname: serverInfo.hostname,
@@ -47,7 +47,7 @@ export const registerRoutes = ({
         }),
       ];
 
-      const script = getScript(request.params.osType, kibanaUrl[0]);
+      const script = getScript(request.params.osType, kibanaUrls[0]);
 
       return response.ok({ body: script });
     }

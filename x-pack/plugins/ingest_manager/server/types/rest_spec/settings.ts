@@ -12,7 +12,7 @@ export const PutSettingsRequestSchema = {
   body: schema.object({
     agent_auto_upgrade: schema.maybe(schema.boolean()),
     package_auto_upgrade: schema.maybe(schema.boolean()),
-    kibana_url: schema.maybe(
+    kibana_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {
           if (isDiffPathProtocol(value)) {
