@@ -34,6 +34,7 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
+  FieldSpec,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
@@ -204,16 +205,26 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const spec = {
+    const parsedFields = fields ? JSON.parse(fields) : undefined;
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : undefined;
+
+    Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
+      const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
+      if (field) {
+        field.format = value;
+      }
+    });
+
+    const spec: IndexPatternSpec = {
       id,
       version,
       title,
       timeFieldName,
       intervalName,
       // fields,
-      fields: fields ? JSON.parse(fields) : undefined,
+      fields: parsedFields,
       sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
-      fieldFormatMap: fieldFormatMap ? JSON.parse(fieldFormatMap) : undefined,
+      // fieldFormatMap: parsedFieldFormatMap,
       typeMeta: typeMeta ? JSON.parse(typeMeta) : undefined,
       type,
     };

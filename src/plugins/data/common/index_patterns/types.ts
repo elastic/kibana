@@ -170,10 +170,12 @@ export interface IndexPatternSpec {
   id?: string;
   version?: string;
   title?: string;
+  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: FieldSpec[];
   typeMeta?: TypeMeta;
+  type?: string;
 }
 
 export interface SourceFilter {
