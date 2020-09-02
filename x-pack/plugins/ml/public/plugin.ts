@@ -34,7 +34,7 @@ import { registerFeature } from './register_feature';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { registerUrlGenerator } from './url_generator';
+import { registerUrlGenerator } from './ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { registerEmbeddables } from './embeddables';
 
@@ -96,12 +96,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },
-          {
-            element: params.element,
-            appBasePath: params.appBasePath,
-            onAppLeave: params.onAppLeave,
-            history: params.history,
-          }
+          params
         );
       },
     });
