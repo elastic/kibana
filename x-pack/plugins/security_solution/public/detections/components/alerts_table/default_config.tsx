@@ -263,7 +263,8 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status: FILTER_OPEN,
+        status,
+        selectedStatus: FILTER_OPEN,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
@@ -282,7 +283,8 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status: FILTER_CLOSED,
+        status,
+        selectedStatus: FILTER_CLOSED,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
@@ -301,7 +303,8 @@ export const getAlertActions = ({
         onAlertStatusUpdateSuccess,
         setEventsDeleted,
         setEventsLoading,
-        status: FILTER_IN_PROGRESS,
+        status,
+        selectedStatus: FILTER_IN_PROGRESS,
       }),
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
