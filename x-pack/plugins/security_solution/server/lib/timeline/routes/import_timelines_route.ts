@@ -12,7 +12,7 @@ import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 
 import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
 import { importTimelines } from './utils/import_timelines';
@@ -28,7 +28,7 @@ export const importTimelinesRoute = (
     {
       path: `${TIMELINE_IMPORT_URL}`,
       validate: {
-        body: buildRouteValidation(ImportTimelinesPayloadSchemaRt),
+        body: buildRouteValidationWithExcess(ImportTimelinesPayloadSchemaRt),
       },
       options: {
         tags: ['access:securitySolution'],
