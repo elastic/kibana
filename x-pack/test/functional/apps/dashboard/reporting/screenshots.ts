@@ -50,6 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -84,6 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);

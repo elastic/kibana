@@ -684,7 +684,10 @@ export class DashboardAppController {
     const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateNavBar = () => {
       ReactDOM.render(
-        <navigation.ui.TopNavMenu {...getNavBarProps()} setMenuMountPoint={setHeaderActionMenu} />,
+        <navigation.ui.TopNavMenu
+          {...getNavBarProps()}
+          {...(isEmbeddedExternally ? {} : { setMenuMountPoint: setHeaderActionMenu })}
+        />,
         dashboardNavBar
       );
     };

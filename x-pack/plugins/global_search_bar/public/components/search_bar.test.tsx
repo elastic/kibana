@@ -89,43 +89,16 @@ describe('SearchBar', () => {
     expect(findSpy).toHaveBeenCalledTimes(2);
   });
 
-  // TODO unskip
-  it.skip('supports keyboard shortcuts', () => {
-    // cmd/ctrl+s focuses search bar, popover opens, results rendered
-    let component: ReactWrapper;
+  it('supports keyboard shortcuts', () => {
+    mountWithIntl(<SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />);
 
-    act(() => {
-      component = mountWithIntl(
-        <SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />
-      );
-    });
+    const searchEvent = new KeyboardEvent('keydown', {
+      key: '/',
+      ctrlKey: true,
+      metaKey: true,
+    } as any);
+    window.dispatchEvent(searchEvent);
 
-    act(() => {
-      const searchEvent = new KeyboardEvent('keydown', {
-        key: '/',
-        ctrlKey: true,
-        metaKey: true,
-      } as any);
-      window.dispatchEvent(searchEvent);
-    });
-
-    act(() => {
-      component.update();
-    });
-
-    act(() => {
-      const searchEvent = new KeyboardEvent('keydown', {
-        key: 'a',
-      } as any);
-      window.dispatchEvent(searchEvent);
-    });
-
-    act(() => {
-      component.update();
-    });
-
-    act(() => {
-      expect(component.find('input').getDOMNode().getAttribute('value')).toBe('a');
-    });
+    expect(document.activeElement).toMatchSnapshot();
   });
 });

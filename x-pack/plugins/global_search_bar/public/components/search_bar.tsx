@@ -154,7 +154,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         onSearch,
         'data-test-subj': 'header-search',
         inputRef: setSearchRef,
-        isClearable: false,
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
