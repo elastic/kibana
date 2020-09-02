@@ -14,6 +14,7 @@ import { AlertServices } from '../../../../alerts/server';
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
 export type BoundaryType = 'entireIndex'; // Will expand to cover more, i.e. - providedShapes, etc.
+export const ActionGroupId = 'tracking threshold met';
 
 export function getAlertType(
   service: Service
@@ -47,7 +48,6 @@ export function getAlertType(
     defaultMessage: 'Geo tracking threshold',
   });
 
-  const ActionGroupId = 'tracking threshold met';
   const actionGroupName = i18n.translate(
     'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
     {

@@ -4,70 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { executeEsQueryFactory } from './es_query_builder';
+import _ from 'lodash';
+import { executeEsQueryFactory, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerts/server';
-import { BoundaryType, TrackingEvent } from './alert_type';
+import { ActionGroupId, BoundaryType, TrackingEvent } from './alert_type';
 
-function getEntityDates(esQueryResults, dateField) {
-  // console.log('ES QUERY RESULTS');
-  // console.log(esQueryResults);
-  if (!esQueryResults.aggregations) {
-    return [];
-  }
-
-  const {
-    aggregations: {
-      entitySplit: { buckets: aggResults = [] },
-    },
-  } = esQueryResults;
-
-  return aggResults.map((aggResult) => {
-    const {
-      key: entityName,
-      entityHits: {
-        hits: { hits: topAggHits },
-      },
-    } = aggResult;
-
-    const {
-      fields: { [dateField]: dates },
-    } = topAggHits[0];
-    return {
-      name: entityName,
-      dates,
-    };
-  });
+// Flatten agg results and get latest locations for each entity
+function transformResults(results) {
+  return _.chain(results)
+    .get('aggregations.shapes.buckets', {})
+    .flatMap((bucket, bucketKey) => {
+      const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
+      return _.map(subBuckets, (subBucket) => ({
+        shapeLocation: bucketKey,
+        entityName: subBucket.key,
+        dateInShape: _.get(subBucket, 'entityHits.hits.hits[0].fields.date[0]', null),
+      }));
+    })
+    .orderBy(['entityName', 'dateInShape'], ['desc', 'desc'])
+    .uniqBy('entityName')
+    .value();
 }
 
-function getAlertableEntities(prevEntityDates, currEntityDates) {
-  // console.log('Last and current');
-  // console.log(lastAlertEntities, currAlertEntities);
-  // console.log('**********************');
-  const lastAlertNames = prevEntityDates.map(({ name }) => name);
-  const alertableEntities = [];
-  currEntityDates.forEach(({ name, dates }) => {
-    if (!lastAlertNames.includes(name)) {
-      return;
-    }
-    if (dates.length > 1) {
-      // Check that the prior hit isn't more recent than the one on the other side of the
-      // shape(s). If it is, there was just a movement within the same space
-      const otherSideEntity = lastAlertEntities.find(
-        ({ name: lastEntityName }) => lastEntityName === name
-      );
-      const otherSideEntityTime = new Date(otherSideEntity.dates[0]).getTime();
-      const lastDateInCurrentSpace =
-        new Date(dates[0]).getTime() > new Date(dates[1]).getTime() ? dates[1] : dates[0];
-      const currSideEntitySecondTime = new Date(lastDateInCurrentSpace).getTime();
-      if (currSideEntitySecondTime > otherSideEntityTime) {
-        return;
-      }
-    }
-    alertableEntities.push(name);
-  });
-  // console.log('Alertable entities');
-  // console.log(alertableEntities);
-  return alertableEntities;
+function getMovedEntities(prevToCurrentIntervalResults, currentIntervalResults, trackingEvent) {
+  const currLocationArr = transformResults(currentIntervalResults);
+  const prevLocationArr = transformResults(prevToCurrentIntervalResults);
+
+  return (
+    currLocationArr
+      // Check if shape has a previous location and has moved
+      .reduce((accu, { entityName, shapeLocation, dateInShape }) => {
+        const prevLocationObj = prevLocationArr.find(
+          (locationObj) => locationObj.entityName === entityName
+        );
+        if (!prevLocationObj) {
+          return accu;
+        }
+        if (shapeLocation !== prevLocationObj.shapeLocation) {
+          accu.push({
+            entityName,
+            currLocation: {
+              shape: shapeLocation,
+              date: dateInShape,
+            },
+            prevLocation: {
+              shape: prevLocationObj.shapeLocation,
+              date: prevLocationObj.dateInShape,
+            },
+          });
+        }
+        return accu;
+      }, [])
+      // Do not track entries to or exits from 'other'
+      .filter((entityMovementDescriptor) =>
+        trackingEvent === 'entered'
+          ? entityMovementDescriptor.currLocation.shape !== OTHER_CATEGORY
+          : entityMovementDescriptor.prevLocation.shape !== OTHER_CATEGORY
+      )
+  );
 }
 
 export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
@@ -91,34 +85,22 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       boundaryGeoField: string; //
     };
   }) {
-    const executeEsQuery = executeEsQueryFactory(params, services, log);
-    const trackingEvent = params.trackingEvent;
-    const isContained = trackingEvent === 'entered';
-    // Get top hits either inside or outside (dependent on value of `isContained`) of the shape(s)
-    // for previous interval
-    const prevToCurrentIntervalResults = await executeEsQuery(
-      '',
-      currIntervalStartTime,
-      !isContained,
-      1
-    );
-    // Get top hits opposite of previous shape(s) query for current interval
-    const currentIntervalResults = await executeEsQuery(
-      currIntervalStartTime,
-      currIntervalEndTime,
-      isContained,
-      2 // Get one additional for later check this wasn't a movement in the same space
+    const executeEsQuery = await executeEsQueryFactory(params, services, log);
+
+    const currentIntervalResults = await executeEsQuery(currIntervalStartTime, currIntervalEndTime);
+    // No need to compare if no changes in current interval
+    if (!_.get(currentIntervalResults, 'hits.total.value')) {
+      return;
+    }
+    const prevToCurrentIntervalResults = await executeEsQuery('', currIntervalStartTime);
+
+    const movedEntities = getMovedEntities(
+      prevToCurrentIntervalResults,
+      currentIntervalResults,
+      params.trackingEvent
     );
 
-    const prevEntityDates = getEntityDates(prevToCurrentIntervalResults, params.dateField);
-    const currEntityDates = getEntityDates(currentIntervalResults, params.dateField);
-
-    // Determine if any of the entities that were previously top hits inside or outside have
-    // any top hits in the opposite space indicating a crossing event
-    const alertableEntities = getAlertableEntities(prevEntityDates, currEntityDates);
-
-    // console.log('*****************Alerting check run**********************');
-    alertableEntities.forEach((entityName) =>
-      services.alertInstanceFactory(entityName).scheduleActions('default')
+    movedEntities.forEach(({ entityName, currLocation, prevLocation }) =>
+      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId)
     );
   };
