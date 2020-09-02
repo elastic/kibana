@@ -27,7 +27,7 @@ import { Readable } from 'stream';
  *  @return {Readable}
  */
 export function createListStream<T = any>(items: T | T[] = []) {
-  const queue = Array.isArray(items) ? items : [items];
+  const queue = Array.isArray(items) ? [...items] : [items];
 
   return new Readable({
     objectMode: true,
