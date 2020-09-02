@@ -10,16 +10,20 @@ import { ValidationResult } from '../../../../../../triggers_actions_ui/public/t
 import { AlertParams, Criteria } from '../../../../../common/alerting/logs/log_threshold/types';
 
 export interface CriterionErrors {
-  field: string[];
-  comparator: string[];
-  value: string[];
+  [id: string]: {
+    field: string[];
+    comparator: string[];
+    value: string[];
+  };
 }
 
 export interface Errors {
   threshold: {
     value: string[];
   };
-  criteria: CriterionErrors[] | [CriterionErrors[], CriterionErrors[]];
+  criteria: {
+    [id: string]: CriterionErrors;
+  };
   timeWindowSize: string[];
   timeSizeUnit: string[];
 }
@@ -38,7 +42,7 @@ export function validateExpression({
     threshold: {
       value: [],
     },
-    criteria: criteria && criteria.length > 0 && !Array.isArray(criteria[0]) ? [] : [[], []],
+    criteria: {},
     timeSizeUnit: [],
     timeWindowSize: [],
   };
@@ -65,47 +69,48 @@ export function validateExpression({
 
   // Criteria validation
   if (criteria && criteria.length > 0) {
-    const getCriterionErrors = (_criteria: Criteria): CriterionErrors[] => {
-      const criterionErrors: CriterionErrors[] = [];
-      _criteria.forEach((criterion) => {
-        const _errors: CriterionErrors = {
+    const getCriterionErrors = (_criteria: Criteria): CriterionErrors => {
+      const _errors: CriterionErrors = {};
+
+      _criteria.forEach((criterion, idx) => {
+        _errors[idx] = {
           field: [],
           comparator: [],
           value: [],
         };
         if (!criterion.field) {
-          _errors.field.push(
+          _errors[idx].field.push(
             i18n.translate('xpack.infra.logs.alertFlyout.error.criterionFieldRequired', {
               defaultMessage: 'Field is required.',
             })
           );
         }
         if (!criterion.comparator) {
-          _errors.comparator.push(
+          _errors[idx].comparator.push(
             i18n.translate('xpack.infra.logs.alertFlyout.error.criterionComparatorRequired', {
               defaultMessage: 'Comparator is required.',
             })
           );
         }
         if (!criterion.value) {
-          _errors.value.push(
+          _errors[idx].value.push(
             i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
               defaultMessage: 'Value is required.',
             })
           );
         }
-        criterionErrors.push(_errors);
       });
-      return criterionErrors;
+      return _errors;
     };
 
     if (!Array.isArray(criteria[0])) {
       const criteriaErrors = getCriterionErrors(criteria as Criteria);
-      errors.criteria = criteriaErrors;
+      errors.criteria[0] = criteriaErrors;
     } else {
       const numeratorErrors = getCriterionErrors(criteria[0] as Criteria);
+      errors.criteria[0] = numeratorErrors;
       const denominatorErrors = getCriterionErrors(criteria[1] as Criteria);
-      errors.criteria = [numeratorErrors, denominatorErrors];
+      errors.criteria[1] = denominatorErrors;
     }
   }
 

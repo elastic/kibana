@@ -94,7 +94,7 @@ interface Props {
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   canDelete: boolean;
-  errors: CriterionErrors;
+  errors: IErrorObject;
 }
 
 export const Criterion: React.FC<Props> = ({

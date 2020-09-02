@@ -52,17 +52,9 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
   return (
     <div>
       {!Array.isArray(criteria[0]) ? (
-        <CountCriteria
-          {...props}
-          criteria={criteria as CountCriteriaType}
-          errors={errors as CriterionErrors[]}
-        />
+        <CountCriteria {...props} criteria={criteria as CountCriteriaType} errors={errors} />
       ) : (
-        <RatioCriteria
-          {...props}
-          criteria={criteria as RatioCriteriaType}
-          errors={errors as [CriterionErrors[], CriterionErrors[]]}
-        />
+        <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} errors={errors} />
       )}
     </div>
   );
@@ -75,7 +67,7 @@ interface CriteriaWrapperProps {
   removeCriterion: (idx: number) => void;
   addCriterion: () => void;
   criteria: CriteriaType;
-  errors: CriterionErrors[];
+  errors: CriterionErrors;
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
 }
@@ -127,7 +119,7 @@ interface RatioCriteriaProps {
   alertParams: SharedProps['alertParams'];
   fields: SharedProps['fields'];
   criteria: RatioCriteriaType;
-  errors: [CriterionErrors[], CriterionErrors[]];
+  errors: Errors['criteria'];
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;
@@ -193,14 +185,14 @@ interface CountCriteriaProps {
   alertParams: SharedProps['alertParams'];
   fields: SharedProps['fields'];
   criteria: CountCriteriaType;
-  errors: CriterionErrors[];
+  errors: Errors['criteria'];
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }
 
 const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
-  const { criteria, updateCriteria } = props;
+  const { criteria, updateCriteria, errors } = props;
 
   const handleUpdateCriteria = useCallback(
     (criteriaParam: CriteriaType) => {
@@ -220,6 +212,7 @@ const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
       updateCriterion={updateCriterion}
       addCriterion={addCriterion}
       removeCriterion={removeCriterion}
+      errors={errors[0]}
     />
   );
 };
