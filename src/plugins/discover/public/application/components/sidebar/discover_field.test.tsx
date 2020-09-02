@@ -80,10 +80,11 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
   const props = {
     indexPattern,
     field,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
+    getDetails: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
+    onShowDetails: jest.fn(),
     showDetails,
     selected,
     useShortDots,
@@ -102,10 +103,5 @@ describe('discover sidebar field', function () {
     const { comp, props } = getComponent(true);
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
-  });
-  it('should trigger getDetails', function () {
-    const { comp, props } = getComponent(true);
-    findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
 });
