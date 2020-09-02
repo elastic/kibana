@@ -6,7 +6,7 @@
 
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
 import { map } from 'lodash/fp';
-import { EuiFormRow, EuiComboBox, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSelectOption, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -138,14 +138,14 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   return (
     <Fragment>
-      <EuiTitle size="s">
+      {/* <EuiTitle size="s">
         <h3>
           {i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.jira.title', {
             defaultMessage: 'Issue',
           })}
         </h3>
       </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="m" /> */}
       <>
         <EuiFormRow
           fullWidth
@@ -168,36 +168,38 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             }}
           />
         </EuiFormRow>
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule />
         <>
           {hasPriority && (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
-                    {
-                      defaultMessage: 'Priority',
-                    }
-                  )}
-                >
-                  <EuiSelect
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFormRow
                     fullWidth
-                    isLoading={isLoadingFields}
-                    disabled={isLoadingIssueTypes || isLoadingFields}
-                    data-test-subj="prioritySelect"
-                    options={prioritiesSelectOptions}
-                    value={priority}
-                    onChange={(e) => {
-                      editSubActionProperty('priority', e.target.value);
-                    }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
+                      {
+                        defaultMessage: 'Priority',
+                      }
+                    )}
+                  >
+                    <EuiSelect
+                      fullWidth
+                      isLoading={isLoadingFields}
+                      disabled={isLoadingIssueTypes || isLoadingFields}
+                      data-test-subj="prioritySelect"
+                      options={prioritiesSelectOptions}
+                      value={priority}
+                      onChange={(e) => {
+                        editSubActionProperty('priority', e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </>
           )}
-          <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
             error={errors.title}
