@@ -39,7 +39,7 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
             // Need this filtering temporary to display only Case owned ServiceNow connectors
             (![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID].includes(action.actionTypeId) ||
               ([SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID].includes(action.actionTypeId) &&
-                action.config!.isCaseOwned))
+                action.config?.isCaseOwned === true))
         );
         return response.ok({ body: results });
       } catch (error) {
