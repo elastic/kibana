@@ -15,11 +15,12 @@ import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { DeleteTrustedAppsRequestSchema } from '../../../../common/endpoint/schema/trusted_apps';
+import { DeleteTrustedAppsRequestParams } from './types';
 
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<
-  TypeOf<typeof DeleteTrustedAppsRequestSchema.params>,
+  DeleteTrustedAppsRequestParams,
   TypeOf<typeof DeleteTrustedAppsRequestSchema.query>,
   TypeOf<typeof DeleteTrustedAppsRequestSchema.body>
 > => {
@@ -40,7 +41,7 @@ export const getTrustedAppsDeleteRouteHandler = (
         return res.notFound({ body: `trusted app id [${id}] not found` });
       }
 
-      return res.ok({ body: response });
+      return res.ok();
     } catch (error) {
       logger.error(error);
       return res.internalError({ body: error });
