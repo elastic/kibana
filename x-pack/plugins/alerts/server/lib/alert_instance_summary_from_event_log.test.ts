@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert, AlertStatus } from '../types';
+import { SanitizedAlert, AlertInstanceSummary } from '../types';
 import { IValidatedEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
-import { alertStatusFromEventLog } from './alert_status_from_event_log';
+import { alertInstanceSummaryFromEventLog } from './alert_instance_summary_from_event_log';
 
 const ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 const dateStart = '2020-06-18T00:00:00.000Z';
 const dateEnd = dateString(dateStart, ONE_HOUR_IN_MILLIS);
 
-describe('alertStatusFromEventLog', () => {
+describe('alertInstanceSummaryFromEventLog', () => {
   test('no events and muted ids', async () => {
     const alert = createAlert({});
     const events: IValidatedEvent[] = [];
-    const status: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    expect(status).toMatchInlineSnapshot(`
+    expect(summary).toMatchInlineSnapshot(`
       Object {
         "alertTypeId": "123",
         "consumer": "alert-consumer",
@@ -52,14 +57,14 @@ describe('alertStatusFromEventLog', () => {
       muteAll: true,
     });
     const events: IValidatedEvent[] = [];
-    const status: AlertStatus = alertStatusFromEventLog({
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
       events,
       dateStart: dateString(dateEnd, ONE_HOUR_IN_MILLIS),
       dateEnd: dateString(dateEnd, ONE_HOUR_IN_MILLIS * 2),
     });
 
-    expect(status).toMatchInlineSnapshot(`
+    expect(summary).toMatchInlineSnapshot(`
       Object {
         "alertTypeId": "456",
         "consumer": "alert-consumer-2",
@@ -87,9 +92,14 @@ describe('alertStatusFromEventLog', () => {
       mutedInstanceIds: ['instance-1', 'instance-2'],
     });
     const events: IValidatedEvent[] = [];
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -115,9 +125,14 @@ describe('alertStatusFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {},
@@ -136,9 +151,14 @@ describe('alertStatusFromEventLog', () => {
       .addExecute('rut roh!')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, errorMessages, instances } = alertStatus;
+    const { lastRun, status, errorMessages, instances } = summary;
     expect({ lastRun, status, errorMessages, instances }).toMatchInlineSnapshot(`
       Object {
         "errorMessages": Array [
@@ -170,9 +190,14 @@ describe('alertStatusFromEventLog', () => {
       .addResolvedInstance('instance-1')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -199,9 +224,14 @@ describe('alertStatusFromEventLog', () => {
       .addResolvedInstance('instance-1')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -229,9 +259,14 @@ describe('alertStatusFromEventLog', () => {
       .addActiveInstance('instance-1')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -258,9 +293,14 @@ describe('alertStatusFromEventLog', () => {
       .addActiveInstance('instance-1')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -291,9 +331,14 @@ describe('alertStatusFromEventLog', () => {
       .addResolvedInstance('instance-2')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {
@@ -335,9 +380,14 @@ describe('alertStatusFromEventLog', () => {
       .addActiveInstance('instance-1')
       .getEvents();
 
-    const alertStatus: AlertStatus = alertStatusFromEventLog({ alert, events, dateStart, dateEnd });
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
 
-    const { lastRun, status, instances } = alertStatus;
+    const { lastRun, status, instances } = summary;
     expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
       Object {
         "instances": Object {

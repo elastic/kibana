@@ -18,20 +18,20 @@ import {
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createGetAlertStatusTests({ getService }: FtrProviderContext) {
+export default function createGetAlertInstanceSummaryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  describe('getAlertStatus', () => {
+  describe('getAlertInstanceSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
 
     it(`handles non-existant alert`, async () => {
       await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1/status`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1/_instnace_summary`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -49,7 +49,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
 
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/status`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -82,7 +82,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/status`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -119,7 +119,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${
           createdAlert.id
-        }/status?dateStart=${dateStart}`
+        }/_instance_status?dateStart=${dateStart}`
       );
       expect(response.status).to.eql(200);
       const { statusStartDate, statusEndDate } = response.body;
@@ -140,7 +140,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${
           createdAlert.id
-        }/status?dateStart=${dateStart}`
+        }/_instance_status?dateStart=${dateStart}`
       );
       expect(response.status).to.eql(400);
       expect(response.body).to.eql({
@@ -161,7 +161,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
       await alertUtils.muteInstance(createdAlert.id, '1');
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/status`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -184,7 +184,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
 
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/status`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
       const { errorMessages } = response.body;
       expect(errorMessages.length).to.be.greaterThan(0);
@@ -218,7 +218,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
       await alertUtils.muteInstance(createdAlert.id, 'instanceD');
       await waitForEvents(createdAlert.id, ['new-instance', 'resolved-instance']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/status`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );
 
       const actualInstances = response.body.instances;
