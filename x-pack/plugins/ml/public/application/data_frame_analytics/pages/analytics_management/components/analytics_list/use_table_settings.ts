@@ -35,13 +35,16 @@ interface UseTableSettingsReturnValue {
   sorting: EuiTableSortingType<any>;
 }
 
-export function useTableSettings(items: DataFrameAnalyticsListRow[]): UseTableSettingsReturnValue {
+export function useTableSettings(
+  sortByField: string,
+  items: DataFrameAnalyticsListRow[]
+): UseTableSettingsReturnValue {
   const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings>({
     pageIndex: 0,
     pageSize: PAGE_SIZE,
     totalItemCount: 0,
     hidePerPageOptions: false,
-    sortField: DataFrameAnalyticsListColumn.id,
+    sortField: sortByField,
     sortDirection: 'asc',
   });
 
@@ -74,7 +77,7 @@ export function useTableSettings(items: DataFrameAnalyticsListRow[]): UseTableSe
 
   const onTableChange = ({
     page = { index: 0, size: PAGE_SIZE },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
+    sort = { field: sortByField, direction: 'asc' },
   }: {
     page?: { index: number; size: number };
     sort?: { field: string; direction: Direction };

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   Direction,
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiTitle,
   EuiButton,
+  EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
   EuiButtonIcon,
@@ -42,6 +43,8 @@ import {
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
+import { useTableSettings } from '../analytics_list/use_table_settings';
+import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -66,21 +69,46 @@ export const ModelsList: FC = () => {
   const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<string>(ModelsTableToConfigMapping.id);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
-
+  const [filteredModels, setFilteredModels] = useState<{
+    active: boolean;
+    items: ModelItem[];
+  }>({
+    active: false,
+    items: [],
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-
   const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const setQueryClauses = (queryClauses: any) => {
+    if (queryClauses.length) {
+      const filtered = filterAnalyticsModels(items, queryClauses);
+      setFilteredModels({ active: true, items: filtered });
+    } else {
+      setFilteredModels({ active: false, items: [] });
+    }
+  };
+
+  const filterList = () => {
+    if (searchQueryText !== '') {
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      setQueryClauses(clauses);
+    } else {
+      setQueryClauses([]);
+    }
+  };
+
+  useEffect(() => {
+    filterList();
+  }, [searchQueryText]);
 
   /**
    * Fetches inference trained models.
@@ -355,20 +383,26 @@ export const ModelsList: FC = () => {
     },
   ];
 
-  const pagination = {
-    initialPageIndex: pageIndex,
-    initialPageSize: pageSize,
-    totalItemCount: items.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
+  const filters =
+    inferenceTypesOptions && inferenceTypesOptions.length > 0
+      ? [
+          {
+            type: 'field_value_selection',
+            field: 'type',
+            name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+              defaultMessage: 'Type',
+            }),
+            multiSelect: 'or',
+            options: inferenceTypesOptions,
+          },
+        ]
+      : [];
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+    ModelsTableToConfigMapping.id,
+    filteredModels.active ? filteredModels.items : items
+  );
+
   const search: EuiSearchBarProps = {
     query: searchQueryText,
     onChange: (searchChange) => {
@@ -428,19 +462,6 @@ export const ModelsList: FC = () => {
       : {}),
   };
 
-  const onTableChange: EuiInMemoryTable<ModelItem>['onTableChange'] = ({
-    page = { index: 0, size: 10 },
-    sort = { field: ModelsTableToConfigMapping.id, direction: 'asc' },
-  }) => {
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-
-    const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
-  };
-
   const isSelectionAllowed = canDeleteDataFrameAnalytics;
 
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
@@ -473,21 +494,25 @@ export const ModelsList: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable
-          allowNeutralSort={false}
+        <AnalyticsSearchBar
+          filters={filters}
+          searchQueryText={searchQueryText}
+          setSearchQueryText={setSearchQueryText}
+        />
+        <EuiSpacer size="l" />
+        <EuiBasicTable
           columns={columns}
           hasActions={true}
           isExpandable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={pageOfItems}
           itemId={ModelsTableToConfigMapping.id}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
+          onChange={onTableChange}
+          pagination={pagination!}
           sorting={sorting}
-          search={search}
-          selection={selection}
+          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}

@@ -193,6 +193,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
 
   const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+    DataFrameAnalyticsListColumn.id,
     filteredAnalytics.active ? filteredAnalytics.items : analytics
   );
 
