@@ -5,6 +5,7 @@
  */
 
 import { HttpStart } from 'kibana/public';
+import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
 import {
   GetTrustedListAppsResponse,
   GetTrustedAppsListRequest,
@@ -18,7 +19,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   constructor(private http: HttpStart) {}
 
   async getTrustedAppsList(request: GetTrustedAppsListRequest) {
-    return this.http.get<GetTrustedListAppsResponse>('/api/endpoint/trusted_apps', {
+    return this.http.get<GetTrustedListAppsResponse>(TRUSTED_APPS_LIST_API, {
       query: request,
     });
   }
