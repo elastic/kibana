@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export { esSearchStrategyProvider } from './es_search_strategy';
-export * from './get_default_search_params';
-export { getTotalLoaded } from './get_total_loaded';
-export * from './to_snake_case';
+import { mapKeys, snakeCase } from 'lodash';
 
-export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common';
+export function toSnakeCase(obj: Record<string, any>) {
+  return mapKeys(obj, (value, key) => snakeCase(key));
+}

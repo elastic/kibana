@@ -24,7 +24,7 @@ import { SearchResponse } from 'elasticsearch';
 import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
-import { getShardTimeout, getDefaultSearchParams } from '..';
+import { getShardTimeout, getDefaultSearchParams, toSnakeCase } from '..';
 
 interface MsearchHeaders {
   index: string;
@@ -111,7 +111,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
           method: 'GET',
           path: '/_msearch',
           body,
-          querystring: defaultParams,
+          querystring: toSnakeCase(defaultParams),
         });
 
         return res.ok({
