@@ -14,7 +14,11 @@ export const MAPBOX_STYLES = {
     filter: [
       'all',
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
-      ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
+      [
+        'all',
+        ['!=', ['get', '__kbn_too_many_features__'], true],
+        ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
+      ],
     ],
     layout: { visibility: 'visible' },
     paint: {
@@ -84,7 +88,11 @@ export const MAPBOX_STYLES = {
     filter: [
       'all',
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
-      ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
+      [
+        'all',
+        ['!=', ['get', '__kbn_too_many_features__'], true],
+        ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
+      ],
     ],
     layout: { visibility: 'visible' },
     paint: {
@@ -151,20 +159,18 @@ export const MAPBOX_STYLES = {
       'all',
       ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
       [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString'],
+        'all',
+        ['!=', ['get', '__kbn_too_many_features__'], true],
+        [
+          'any',
+          ['==', ['geometry-type'], 'Polygon'],
+          ['==', ['geometry-type'], 'MultiPolygon'],
+          ['==', ['geometry-type'], 'LineString'],
+          ['==', ['geometry-type'], 'MultiLineString'],
+        ],
       ],
     ],
-    layout: {
-      visibility: 'visible',
-    },
-    paint: {
-      /* 'line-color': '' */ // Obtained dynamically
-      'line-opacity': 0.75,
-      'line-width': 1,
-    },
+    layout: { visibility: 'visible' },
+    paint: { 'line-color': '#41937c', 'line-opacity': 0.75, 'line-width': 1 },
   },
 };
