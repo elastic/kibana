@@ -19,7 +19,7 @@ import {
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { AccordionTitle } from '../../../../components/rules/accordion_title';
 import { FormData, FormHook } from '../../../../../shared_imports';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
@@ -84,13 +84,15 @@ const StepDefineRuleAccordion: StyledComponent<
 StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
 const CreateRulePageComponent: React.FC = () => {
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
