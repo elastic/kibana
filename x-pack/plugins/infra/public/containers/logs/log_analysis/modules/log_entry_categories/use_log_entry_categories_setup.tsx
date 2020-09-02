@@ -6,13 +6,12 @@
 
 import { useAnalysisSetupState } from '../../log_analysis_setup_state';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
-import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
 
 export const useLogEntryCategoriesSetup = () => {
   const {
+    categoryQualityWarnings,
     cleanUpAndSetUpModule,
     fetchJobStatus,
-    jobSummaries,
     lastSetupErrorMessages,
     moduleDescriptor,
     setUpModule,
@@ -20,8 +19,6 @@ export const useLogEntryCategoriesSetup = () => {
     sourceConfiguration,
     viewResults,
   } = useLogEntryCategoriesModuleContext();
-
-  const { categoryQualityWarnings } = useLogEntryCategoriesQuality({ jobSummaries });
 
   const {
     cleanUpAndSetUp,
