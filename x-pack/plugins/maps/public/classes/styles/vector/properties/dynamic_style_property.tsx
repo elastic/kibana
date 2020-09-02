@@ -50,7 +50,8 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
 
 export type FieldFormatter = (value: string | number | undefined) => string | number;
 
-export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
+export class DynamicStyleProperty<T>
+  extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
   static type = STYLE_TYPE.DYNAMIC;
 
@@ -327,16 +328,20 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
       return null;
     }
 
+    const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
+
     return this.isCategorical() ? (
       <CategoricalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onFieldMetaOptionsChange}
+        switchDisabled={switchDisabled}
       />
     ) : (
       <OrdinalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
         onChange={onFieldMetaOptionsChange}
+        switchDisabled={switchDisabled}
       />
     );
   }
