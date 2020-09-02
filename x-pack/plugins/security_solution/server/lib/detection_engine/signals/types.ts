@@ -44,8 +44,15 @@ export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
   signal?: {
-    parent: Ancestor;
+    // parent is deprecated: new signals should populate parents instead
+    // both are optional until all signals with parent are gone and we can safely remove it
+    parent?: Ancestor;
+    parents?: Ancestor[];
     ancestors: Ancestor[];
+    rule: {
+      id: string;
+    };
+    depth: number;
   };
 }
 
@@ -113,7 +120,7 @@ export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
 };
 
 export interface Ancestor {
-  rule: string;
+  rule?: string;
   id: string;
   type: string;
   index: string;
@@ -122,12 +129,13 @@ export interface Ancestor {
 
 export interface Signal {
   rule: Partial<RulesSchema>;
-  parent: Ancestor;
+  parents: Ancestor[];
   ancestors: Ancestor[];
-  original_time: string;
+  original_time?: string;
   original_event?: SearchTypes;
   status: Status;
   threshold_count?: SearchTypes;
+  depth: number;
 }
 
 export interface SignalHit {

@@ -46,20 +46,20 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
-        parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          id: sampleIdGuid,
-          type: 'event',
-          index: 'myFakeSignalIndex',
-          depth: 1,
-        },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -101,6 +101,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -148,20 +149,20 @@ describe('buildBulkBody', () => {
           kind: 'event',
           module: 'system',
         },
-        parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          id: sampleIdGuid,
-          type: 'event',
-          index: 'myFakeSignalIndex',
-          depth: 1,
-        },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -203,6 +204,7 @@ describe('buildBulkBody', () => {
           threat: [],
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -248,20 +250,20 @@ describe('buildBulkBody', () => {
           dataset: 'socket',
           module: 'system',
         },
-        parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          id: sampleIdGuid,
-          type: 'event',
-          index: 'myFakeSignalIndex',
-          depth: 1,
-        },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -303,6 +305,7 @@ describe('buildBulkBody', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -341,20 +344,20 @@ describe('buildBulkBody', () => {
         original_event: {
           kind: 'event',
         },
-        parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          id: sampleIdGuid,
-          type: 'event',
-          index: 'myFakeSignalIndex',
-          depth: 1,
-        },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -396,6 +399,7 @@ describe('buildBulkBody', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
