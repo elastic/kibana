@@ -39,7 +39,7 @@ const onFormHook = (_form: FormHook<any>) => {
   formHook = _form;
 };
 
-describe('use_form() hook', () => {
+describe('useForm() hook', () => {
   beforeEach(() => {
     formHook = null;
   });

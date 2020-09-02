@@ -30,6 +30,7 @@ import { first } from 'rxjs/operators';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
+  FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
@@ -42,6 +43,7 @@ import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { AppNavLinkStatus } from '../../../core/public';
+import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -68,7 +70,7 @@ export class HomePublicPlugin
     { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
-      id: 'home',
+      id: PLUGIN_ID,
       title: 'Home',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -109,8 +111,58 @@ export class HomePublicPlugin
     });
     kibanaLegacy.forwardApp('home', 'home');
 
+    const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
+
+    featureCatalogue.register({
+      id: 'home_tutorial_directory',
+      title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
+        defaultMessage: 'Add data',
+      }),
+      description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
+        defaultMessage: 'Ingest data from popular apps and services.',
+      }),
+      icon: 'indexOpen',
+      showOnHomePage: true,
+      path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
+      category: 'data' as FeatureCatalogueCategory.DATA,
+      order: 500,
+    });
+
+    featureCatalogue.registerSolution({
+      id: 'kibana',
+      title: i18n.translate('home.kibana.featureCatalogue.title', {
+        defaultMessage: 'Kibana',
+      }),
+      subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
+        defaultMessage: 'Visualize & analyze',
+      }),
+      descriptions: [
+        i18n.translate('home.kibana.featureCatalogueDescription1', {
+          defaultMessage: 'Analyze data in dashboards.',
+        }),
+        i18n.translate('home.kibana.featureCatalogueDescription2', {
+          defaultMessage: 'Search and find insights.',
+        }),
+        i18n.translate('home.kibana.featureCatalogueDescription3', {
+          defaultMessage: 'Design pixel-perfect reports.',
+        }),
+        i18n.translate('home.kibana.featureCatalogueDescription4', {
+          defaultMessage: 'Plot geographic data.',
+        }),
+        i18n.translate('home.kibana.featureCatalogueDescription5', {
+          defaultMessage: 'Model, predict, and detect.',
+        }),
+        i18n.translate('home.kibana.featureCatalogueDescription6', {
+          defaultMessage: 'Reveal patterns and relationships.',
+        }),
+      ],
+      icon: 'logoKibana',
+      path: '/app/dashboards',
+      order: 400,
+    });
+
     return {
-      featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
+      featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
     };
@@ -124,7 +176,7 @@ export class HomePublicPlugin
 
     // If the home app is the initial location when loading Kibana...
     if (
-      window.location.pathname === http.basePath.prepend(`/app/home`) &&
+      window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
       window.location.hash === ''
     ) {
       // ...wait for the app to mount initially and then...
@@ -157,5 +209,6 @@ export interface HomePublicPluginSetup {
    * be replaced by display specific extension points.
    * @deprecated
    */
+
   environment: EnvironmentSetup;
 }

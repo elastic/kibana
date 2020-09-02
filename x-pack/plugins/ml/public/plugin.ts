@@ -50,7 +50,7 @@ export interface MlSetupDependencies {
   management?: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
@@ -96,12 +96,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },
-          {
-            element: params.element,
-            appBasePath: params.appBasePath,
-            onAppLeave: params.onAppLeave,
-            history: params.history,
-          }
+          params
         );
       },
     });
@@ -111,7 +106,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       const [coreStart] = await core.getStartServices();
       if (isMlEnabled(license)) {
         // add ML to home page
-        registerFeature(pluginsSetup.home);
+        if (pluginsSetup.home) {
+          registerFeature(pluginsSetup.home);
+        }
 
         // register ML for the index pattern management no data screen.
         pluginsSetup.indexPatternManagement.environment.update({

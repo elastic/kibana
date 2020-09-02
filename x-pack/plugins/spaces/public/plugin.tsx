@@ -15,6 +15,7 @@ import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space';
 import { AdvancedSettingsService } from './advanced_settings';
 import { ManagementService } from './management';
 import { spaceSelectorApp } from './space_selector';
@@ -67,6 +68,12 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     }
 
     if (plugins.savedObjectsManagement) {
+      const shareSavedObjectsToSpaceService = new ShareSavedObjectsToSpaceService();
+      shareSavedObjectsToSpaceService.setup({
+        spacesManager: this.spacesManager,
+        notificationsSetup: core.notifications,
+        savedObjectsManagementSetup: plugins.savedObjectsManagement,
+      });
       const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
       copySavedObjectsToSpaceService.setup({
         spacesManager: this.spacesManager,
