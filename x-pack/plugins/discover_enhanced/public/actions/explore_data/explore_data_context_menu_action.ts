@@ -5,11 +5,21 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableContext, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
+import { UiActionsPresentableGrouping as PresentableGrouping } from '../../../../../../src/plugins/ui_actions/public';
+
+const embeddableContextMenuDrilldownGrouping: PresentableGrouping<{ embeddable?: IEmbeddable }> = [
+  {
+    id: 'drilldowns-group',
+    getDisplayName: () => 'Drilldowns',
+    getIconType: () => 'tag',
+    order: 25,
+  },
+];
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
@@ -25,6 +35,8 @@ export class ExploreDataContextMenuAction
   public readonly type = ACTION_EXPLORE_DATA;
 
   public readonly order = 200;
+
+  public readonly grouping = embeddableContextMenuDrilldownGrouping;
 
   protected readonly getUrl = async (context: EmbeddableContext): Promise<KibanaURL> => {
     const { plugins } = this.params.start();
