@@ -14,7 +14,7 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
         Object {
           "displayName": "Elastic",
           "excluded": false,
-          "format": undefined,
+          "formatTitle": undefined,
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
@@ -40,7 +40,7 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
         Object {
           "displayName": "timestamp",
           "excluded": false,
-          "format": undefined,
+          "formatTitle": undefined,
           "info": Array [],
           "name": "timestamp",
           "type": "date",
@@ -65,7 +65,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
         Object {
           "displayName": "Elastic",
           "excluded": false,
-          "format": undefined,
+          "formatTitle": undefined,
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
@@ -74,7 +74,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
         Object {
           "displayName": "timestamp",
           "excluded": false,
-          "format": undefined,
+          "formatTitle": undefined,
           "info": Array [],
           "name": "timestamp",
           "type": "date",
@@ -82,7 +82,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
         Object {
           "displayName": "conflictingField",
           "excluded": false,
-          "format": undefined,
+          "formatTitle": undefined,
           "info": Array [],
           "name": "conflictingField",
           "type": "conflict",

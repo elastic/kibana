@@ -14,7 +14,7 @@ export declare class IndexPatternField implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(spec, displayName)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
+|  [(constructor)(spec)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
 
 ## Properties
 
@@ -23,7 +23,7 @@ export declare class IndexPatternField implements IFieldType
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
 |  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt; &#124; undefined</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> |  |
-|  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
+|  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>any</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> |  |
@@ -43,5 +43,5 @@ export declare class IndexPatternField implements IFieldType
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [toJSON()](./kibana-plugin-plugins-data-public.indexpatternfield.tojson.md) |  |  |
-|  [toSpec({ getFormatterForField, })](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
+|  [toSpec({ getFormatterForField })](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
 

@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-remove(field: IFieldType): void;
+remove(field: IFieldType | FieldSpec): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  field | <code>IFieldType</code> |  |
+|  field | <code>IFieldType &#124; FieldSpec</code> |  |
 
 <b>Returns:</b>
 

@@ -19,7 +19,7 @@ export interface IFieldType
 |  [displayName](./kibana-plugin-plugins-data-server.ifieldtype.displayname.md) | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-server.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-server.ifieldtype.filterable.md) | <code>boolean</code> |  |
-|  [format](./kibana-plugin-plugins-data-server.ifieldtype.format.md) | <code>any</code> |  |
+|  [format](./kibana-plugin-plugins-data-server.ifieldtype.format.md) | <code>FieldFormat</code> |  |
 |  [lang](./kibana-plugin-plugins-data-server.ifieldtype.lang.md) | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-server.ifieldtype.name.md) | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-server.ifieldtype.readfromdocvalues.md) | <code>boolean</code> |  |
@@ -28,7 +28,7 @@ export interface IFieldType
 |  [searchable](./kibana-plugin-plugins-data-server.ifieldtype.searchable.md) | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-server.ifieldtype.sortable.md) | <code>boolean</code> |  |
 |  [subType](./kibana-plugin-plugins-data-server.ifieldtype.subtype.md) | <code>IFieldSubType</code> |  |
-|  [toSpec](./kibana-plugin-plugins-data-server.ifieldtype.tospec.md) | <code>(options?: {</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }) =&gt; FieldSpec</code> |  |
+|  [toSpec](./kibana-plugin-plugins-data-server.ifieldtype.tospec.md) | <code>(options: SpecOptions) =&gt; FieldSpec</code> |  |
 |  [type](./kibana-plugin-plugins-data-server.ifieldtype.type.md) | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-server.ifieldtype.visualizable.md) | <code>boolean</code> |  |
 

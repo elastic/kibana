@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean) => IIndexPatternFieldList
+fieldList: (specs?: FieldSpec[]) => IIndexPatternFieldList
 ```

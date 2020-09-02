@@ -7,9 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec({ getFormatterForField, }?: {
-        getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): {
+toSpec({ getFormatterForField }?: SpecOptions): {
         count: number;
         script: string | undefined;
         lang: string | undefined;
@@ -26,6 +24,7 @@ toSpec({ getFormatterForField, }?: {
             id: any;
             params: any;
         } | undefined;
+        shortDotsEnable: boolean | undefined;
     };
 ```
 
@@ -33,7 +32,7 @@ toSpec({ getFormatterForField, }?: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { getFormatterForField, } | <code>{</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }</code> |  |
+|  { getFormatterForField } | <code>SpecOptions</code> |  |
 
 <b>Returns:</b>
 
@@ -54,5 +53,6 @@ toSpec({ getFormatterForField, }?: {
             id: any;
             params: any;
         } | undefined;
+        shortDotsEnable: boolean | undefined;
     }`
 

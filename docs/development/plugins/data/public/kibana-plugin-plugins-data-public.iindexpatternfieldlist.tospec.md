@@ -7,16 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec(options?: {
-        getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): FieldSpec[];
+toSpec(options?: SpecOptions): FieldSpec[];
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }</code> |  |
+|  options | <code>SpecOptions</code> |  |
 
 <b>Returns:</b>
 

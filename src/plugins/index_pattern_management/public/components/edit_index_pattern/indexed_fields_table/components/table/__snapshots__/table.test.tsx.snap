@@ -50,7 +50,7 @@ exports[`Table should render normally 1`] = `
       },
       Object {
         "dataType": "string",
-        "field": "format",
+        "field": "formatTitle",
         "name": "Format",
         "sortable": true,
       },
@@ -97,25 +97,30 @@ exports[`Table should render normally 1`] = `
   items={
     Array [
       Object {
-        "displayName": "Elastic",
+        "aggregatable": true,
         "excluded": false,
+        "formatTitle": "",
         "info": Array [],
         "name": "Elastic",
         "searchable": true,
         "type": "name",
       },
       Object {
-        "displayName": "timestamp",
+        "aggregatable": false,
         "excluded": false,
+        "formatTitle": "YYYY-MM-DD",
         "info": Array [],
         "name": "timestamp",
+        "searchable": false,
         "type": "date",
       },
       Object {
-        "displayName": "conflictingField",
+        "aggregatable": false,
         "excluded": false,
+        "formatTitle": "",
         "info": Array [],
         "name": "conflictingField",
+        "searchable": false,
         "type": "conflict",
       },
     ]
