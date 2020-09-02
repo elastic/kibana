@@ -20,6 +20,12 @@ import {
   AuthenticationsStrategyResponse,
 } from './hosts/authentications';
 import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
+  NetworkQueries,
+  NetworkTlsStrategyResponse,
+  NetworkTlsRequestOptions,
+  NetworkHttpStrategyResponse,
+  NetworkHttpRequestOptions,
+} from './network';
 
 export * from './hosts';
 export * from './network';
@@ -160,6 +166,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
+  : T extends NetworkQueries.http
+  ? NetworkHttpStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -172,6 +180,13 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptions
   : never;
 
 export type StringOrNumber = string | number;
+
+export interface GenericBuckets {
+  key: string;
+  doc_count: number;
+}

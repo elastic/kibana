@@ -14,7 +14,7 @@ import { hostsModel } from '../../store';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import { KpiHostsChartColors } from '../../components/kpi_hosts/types';
@@ -49,7 +49,7 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
   },
 };
 
-const histogramConfigs: MatrixHisrogramConfigs = {
+const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     authStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
