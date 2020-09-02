@@ -3,3 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+require('../../../../../src/setup_node_env');
+require('./resolver_generator_script');
