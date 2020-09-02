@@ -22,12 +22,14 @@ import {
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../../helpers';
+import { InspectResponse } from '../../../../types';
 
 const ID = 'hostOverviewQuery';
 
 export interface HostOverviewArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   hostOverview: HostItem;
   refetch: inputsModel.Refetch;
   startDate: string;
@@ -97,7 +99,7 @@ export const useHostOverview = ({
                   setHostOverviewResponse((prevResponse) => ({
                     ...prevResponse,
                     hostOverview: response.hostOverview,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
                 }
