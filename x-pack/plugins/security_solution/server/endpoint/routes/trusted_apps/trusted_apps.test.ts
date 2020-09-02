@@ -23,14 +23,22 @@ import {
 import { xpackMocks } from '../../../../../../mocks';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { EndpointAppContext } from '../../types';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListClient, ListClient } from '../../../../../lists/server';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+
+type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
+  lists?: {
+    getListClient: () => jest.Mocked<ListClient>;
+    getExceptionListClient: () => jest.Mocked<ExceptionListClient>;
+  };
+};
 
 describe('when invoking endpoint trusted apps route handlers', () => {
   let routerMock: jest.Mocked<IRouter>;
   let endpointAppContextService: EndpointAppContextService;
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: RequestHandlerContextWithLists;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let exceptionsListClient: jest.Mocked<ExceptionListClient>;
   let endpointAppContext: EndpointAppContext;
@@ -39,7 +47,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    exceptionsListClient = startContract.exceptionsListService as jest.Mocked<ExceptionListClient>;
+    exceptionsListClient = getExceptionListClientMock() as jest.Mocked<ExceptionListClient>;
     endpointAppContextService.start(startContract);
     endpointAppContext = {
       ...createMockEndpointAppContext(),
@@ -48,7 +56,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     registerTrustedAppsRoutes(routerMock, endpointAppContext);
 
     // For use in individual API calls
-    context = xpackMocks.createRequestHandlerContext();
+    context = {
+      ...xpackMocks.createRequestHandlerContext(),
+      lists: {
+        getListClient: jest.fn(),
+        getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+      },
+    };
     response = httpServerMock.createResponseFactory();
   });
 
