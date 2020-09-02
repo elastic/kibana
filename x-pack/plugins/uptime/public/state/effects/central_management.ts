@@ -61,6 +61,10 @@ function* mapFieldsToConfig(fields: PostPackagePolicyParams): any {
                 type: 'text',
                 value: fields.schedule,
               },
+              tags: {
+                type: 'text',
+                value: fields.tags,
+              },
               urls: {
                 type: 'text',
                 value: fields.url,

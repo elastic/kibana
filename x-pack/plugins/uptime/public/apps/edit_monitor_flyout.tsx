@@ -263,6 +263,7 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
                     packagePolicyName,
                     name,
                     schedule: periodCount + periodUnit,
+                    tags: selectedTags.map((tag) => tag.label),
                     url,
                   })
                 }

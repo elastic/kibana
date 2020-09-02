@@ -21,6 +21,7 @@ export interface PostPackagePolicyParams {
   packagePolicyName: string;
   name: string;
   schedule: string;
+  tags: string[];
   url: string;
 }
 
