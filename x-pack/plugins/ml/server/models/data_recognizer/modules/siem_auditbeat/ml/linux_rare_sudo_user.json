@@ -3,7 +3,8 @@
     "description": "Security: Auditbeat - Looks for sudo activity from an unusual user context.",
     "groups": [
       "security",
-      "auditbeat"
+      "auditbeat",
+      "process"
     ],
     "analysis_config": {
       "bucket_span": "15m",
