@@ -216,7 +216,7 @@ export async function resolveIndexPatternConflicts(
 
     if (!allResolved) {
       // The user decided to skip this conflict so do nothing
-      return;
+      continue;
     }
     obj.searchSource = await dependencies.search.searchSource.create(
       serializedSearchSourceWithInjectedReferences
@@ -253,7 +253,7 @@ export async function resolveSavedSearches(
     const obj = await getSavedObject(searchDoc, services);
     if (!obj) {
       // Just ignore?
-      return;
+      continue;
     }
     if (await importDocument(obj, searchDoc, overwriteAll)) {
       importCount++;
