@@ -42,12 +42,14 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
-export interface MlGenericUrlState {
-  page:
-    | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
-    | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE;
-  pageState: MlGenericUrlPageState;
-}
+export type MlGenericUrlState = MLPageState<
+  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
+  | typeof ML_PAGES.CALENDARS_MANAGE
+  | typeof ML_PAGES.FILTER_LISTS_MANAGE,
+  MlGenericUrlPageState | undefined
+>;
 
 export interface AnomalyDetectionQueryState {
   jobId?: JobId;

@@ -68,6 +68,9 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
         return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.FILTER_LISTS_MANAGE:
+      case ML_PAGES.CALENDARS_MANAGE:
+        return `${appBasePath}/${mlUrlGeneratorState.page}`;
       default:
         throw new Error('Page type is not provided or unknown');
     }

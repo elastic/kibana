@@ -39,8 +39,6 @@ type MaxScoresByGroup = Dictionary<{
   index?: number;
 }>;
 
-const createJobLink = '#/jobs/new_job/step/index_or_search';
-
 function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
   const anomalyScores: MaxScoresByGroup = {};
   groups.forEach((group) => {
