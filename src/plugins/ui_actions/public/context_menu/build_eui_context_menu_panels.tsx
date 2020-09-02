@@ -127,7 +127,7 @@ export async function buildContextMenuForActions({
 
   for (const panel of panelList) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
-    panel.items = items.sort((a, b) => (a._order > b._order ? 1 : -1));
+    panel.items = items.sort((a, b) => (a._order < b._order ? 1 : -1));
   }
 
   return panelList;
