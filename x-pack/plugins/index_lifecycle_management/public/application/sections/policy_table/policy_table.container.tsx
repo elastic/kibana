@@ -5,56 +5,44 @@
  */
 
 import React from 'react';
+import { ApplicationStart } from 'kibana/public';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PolicyTable as PresentationComponent } from './policy_table';
 import { useLoadPoliciesList } from '../../services/api';
 
-import { EditPolicy as PresentationComponent } from './edit_policy';
-
-interface RouterProps {
-  policyName: string;
-}
-
 interface Props {
-  getUrlForApp: (
-    appId: string,
-    options?: {
-      path?: string;
-      absolute?: boolean;
-    }
-  ) => string;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<RouterProps>> = ({
-  match: {
-    params: { policyName },
-  },
-  getUrlForApp,
+export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> = ({
+  navigateToApp,
   history,
 }) => {
-  const { error, isLoading, data: policies, sendRequest } = useLoadPoliciesList(false);
+  const { data: policies, isLoading, error, sendRequest } = useLoadPoliciesList(true);
+
   if (isLoading) {
     return (
       <EuiEmptyPrompt
         title={<EuiLoadingSpinner size="xl" />}
         body={
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.policiesLoading"
+            id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
             defaultMessage="Loading policies..."
           />
         }
       />
     );
   }
-  if (error || !policies) {
+  if (error) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
       <EuiEmptyPrompt
         title={
           <h2>
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
+              id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
               defaultMessage="Unable to load existing lifecycle policies"
             />
           </h2>
@@ -67,7 +55,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         actions={
           <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
+              id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
               defaultMessage="Try again"
             />
           </EuiButton>
@@ -78,10 +66,10 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
 
   return (
     <PresentationComponent
-      policies={policies}
+      policies={policies || []}
       history={history}
-      getUrlForApp={getUrlForApp}
-      policyName={policyName}
+      navigateToApp={navigateToApp}
+      updatePolicies={sendRequest}
     />
   );
 };
