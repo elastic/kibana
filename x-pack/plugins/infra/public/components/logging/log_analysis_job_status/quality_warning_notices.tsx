@@ -44,7 +44,7 @@ export const CategoryQualityWarnings: React.FC<{
             id={detailAccordionId}
             buttonContent={
               <FormattedMessage
-                id="xpack.infra-logs.logEntryCategories.categoryQualityWarningDetailsAccordionButtonLabel"
+                id="xpack.infra.logs.logEntryCategories.categoryQualityWarningDetailsAccordionButtonLabel"
                 defaultMessage="Details"
               />
             }
