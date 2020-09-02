@@ -8,7 +8,7 @@ import React from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { OwnProps } from './types';
-import { NetworkHttpQuery } from '../../containers/network_http';
+import { useNetworkHttp } from '../../containers/network_http';
 import { NetworkHttpTable } from '../../components/network_http_table';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
@@ -21,43 +21,35 @@ export const NetworkHttpQueryTable = ({
   skip,
   startDate,
   type,
-}: OwnProps) => (
-  <NetworkHttpQuery
-    endDate={endDate}
-    filterQuery={filterQuery}
-    ip={ip}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={type}
-  >
-    {({
-      id,
-      inspect,
-      isInspected,
-      loading,
-      loadPage,
-      networkHttp,
-      pageInfo,
-      refetch,
-      totalCount,
-    }) => (
-      <NetworkHttpTableManage
-        data={networkHttp}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        loading={loading}
-        loadPage={loadPage}
-        refetch={refetch}
-        setQuery={setQuery}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        totalCount={totalCount}
-        type={type}
-      />
-    )}
-  </NetworkHttpQuery>
-);
+}: OwnProps) => {
+  const [
+    loading,
+    { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
+  ] = useNetworkHttp({
+    endDate,
+    filterQuery,
+    ip,
+    skip,
+    startDate,
+    type,
+  });
+
+  return (
+    <NetworkHttpTableManage
+      data={networkHttp}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      id={id}
+      inspect={inspect}
+      isInspect={isInspected}
+      loading={loading}
+      loadPage={loadPage}
+      refetch={refetch}
+      setQuery={setQuery}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      totalCount={totalCount}
+      type={type}
+    />
+  );
+};
 
 NetworkHttpQueryTable.displayName = 'NetworkHttpQueryTable';
