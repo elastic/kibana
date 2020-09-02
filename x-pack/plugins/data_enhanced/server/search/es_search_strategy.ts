@@ -15,6 +15,7 @@ import {
   ISearchOptions,
   getDefaultSearchParams,
   getShardTimeout,
+  toSnakeCase,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
@@ -82,7 +83,7 @@ export const enhancedEsSearchStrategyProvider = (
     const method = request.id ? 'GET' : 'POST';
     const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-    const querystring = {
+    const querystring = toSnakeCase({
       waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
       keepAlive: '1m', // Extend the TTL for this search request by one minute
       ...(request.id
@@ -92,7 +93,7 @@ export const enhancedEsSearchStrategyProvider = (
             batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
           }),
       ...queryParams,
-    };
+    });
     // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
     const esResponse = await esClient.transport.request({
       method,
@@ -121,11 +122,11 @@ export const enhancedEsSearchStrategyProvider = (
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
-    const querystring = {
+    const querystring = toSnakeCase({
       ...getShardTimeout(config),
       ...(await getDefaultSearchParams(uiSettingsClient)),
       ...params,
-    };
+    });
 
     const esResponse = await esClient.transport.request({
       method,

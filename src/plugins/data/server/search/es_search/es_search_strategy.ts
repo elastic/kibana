@@ -22,6 +22,7 @@ import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
+import { toSnakeCase } from './to_snake_case';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
 
 export const esSearchStrategyProvider = (
@@ -44,11 +45,11 @@ export const esSearchStrategyProvider = (
       // ignoreThrottled is not supported in OSS
       const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
 
-      const params = {
+      const params = toSnakeCase({
         ...defaultParams,
         ...getShardTimeout(config),
         ...request.params,
-      };
+      });
 
       try {
         const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(

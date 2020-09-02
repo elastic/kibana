@@ -211,6 +211,7 @@ export {
   ISearchOptions,
   ISearchSetup,
   ISearchStart,
+  toSnakeCase,
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
