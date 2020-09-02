@@ -325,3 +325,29 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
   </EuiFlexGroup>
 </div>
 `;
+
+exports[`renderFieldMetaPopover Should disable toggle when field is not backed by geojson source 1`] = `
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  styleName="lineColor"
+  switchDisabled={true}
+/>
+`;
+
+exports[`renderFieldMetaPopover Should enable toggle when field is backed by geojson-source 1`] = `
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  styleName="lineColor"
+  switchDisabled={false}
+/>
+`;
