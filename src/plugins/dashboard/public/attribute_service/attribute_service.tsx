@@ -174,8 +174,7 @@ export class AttributeService<
 
   getInputAsRefType = async (
     input: ValType | RefType,
-    embeddable: IEmbeddable,
-    saveOptions?: { showSaveModal: boolean } | { title: string }
+    saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string }
   ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
       return input;
@@ -214,7 +213,11 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={embeddable.getTitle() || input[ATTRIBUTE_SERVICE_KEY].title}
+            title={
+              'saveModalTitle' in saveOptions && saveOptions.saveModalTitle
+                ? saveOptions.saveModalTitle
+                : input[ATTRIBUTE_SERVICE_KEY].title
+            }
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}
