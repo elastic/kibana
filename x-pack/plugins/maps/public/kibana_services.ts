@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { CoreStart } from '../../../../src/core/public';
@@ -64,9 +64,8 @@ export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspe
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
 // map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsLegacyConfigType;
-export const setKibanaCommonConfig = (config: MapsLegacyConfigType) =>
-  (kibanaCommonConfig = config);
+let kibanaCommonConfig: MapsLegacyConfig;
+export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
 export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
