@@ -122,13 +122,10 @@ function getMlSetup(
   if (!ml) {
     return;
   }
-  const mlClient = ml.mlClient.asScoped(request);
-  const mlSystem = ml.mlSystemProvider(mlClient, request);
+
   return {
-    mlClient,
-    mlSystem,
-    modules: ml.modulesProvider(mlClient, request, savedObjectsClient),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
-    mlAnomalySearch: mlSystem.mlAnomalySearch,
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }
