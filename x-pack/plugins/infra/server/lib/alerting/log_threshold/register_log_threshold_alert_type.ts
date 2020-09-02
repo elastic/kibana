@@ -50,7 +50,7 @@ export async function registerLogThresholdAlertType(
     validate: {
       params: {
         validate: (params) => decodeOrThrow(AlertParamsRT)(params),
-      }
+      },
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
