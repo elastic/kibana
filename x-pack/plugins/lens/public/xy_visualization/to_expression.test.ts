@@ -96,6 +96,7 @@ describe('#toExpression', () => {
       },
       frame.datasourceLayers
     ) as Ast;
+    expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
     expect(expression.chain[0].arguments.showYLeftAxisTitle[0]).toBe(true);
     expect(expression.chain[0].arguments.showYRightAxisTitle[0]).toBe(true);
   });
