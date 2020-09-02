@@ -25,13 +25,15 @@ import {
 } from '../../../../common/search_strategy/security_solution';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
+import { InspectResponse } from '../../../types';
+import { getInspectResponse } from '../../../helpers';
 
 const ID = 'networkHttpQuery';
 
 export interface NetworkHttpArgs {
   id: string;
   ip?: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   networkHttp: NetworkHttpEdges[];
@@ -134,7 +136,7 @@ export const useNetworkHttp = ({
                   setNetworkHttpResponse((prevResponse) => ({
                     ...prevResponse,
                     networkHttp: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
