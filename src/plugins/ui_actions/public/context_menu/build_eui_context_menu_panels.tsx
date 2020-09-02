@@ -40,47 +40,6 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
   trigger: Trigger;
 }
 
-/**
- * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
- */
-export async function buildContextMenuForActions({
-  actions,
-  title = defaultTitle,
-  closeMenu,
-}: {
-  actions: ActionWithContext[];
-  title?: string;
-  closeMenu: () => void;
-}): Promise<EuiContextMenuPanelDescriptor[]> {
-  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
-  const promises = actions.map(async ({ action, context, trigger }, index) => {
-    const isCompatible = await action.isCompatible({
-      ...context,
-      trigger,
-    });
-    if (!isCompatible) {
-      return;
-    }
-
-    items[index] = await convertPanelActionToContextMenuItem({
-      action,
-      actionContext: context,
-      trigger,
-      closeMenu,
-    });
-  });
-
-  await Promise.all(promises);
-
-  return [
-    {
-      id: 'main',
-      title,
-      items: items.filter(Boolean),
-    },
-  ];
-}
-
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
   event: React.MouseEvent
 ) => {
@@ -94,40 +53,48 @@ const onClick = (action: Action, context: ActionExecutionContext<object>, close:
     ) {
       event.preventDefault();
       action.execute(context);
-    } else {
-      // let browser handle navigation
     }
-  } else {
-    // not a link
-    action.execute(context);
-  }
-
+  } else action.execute(context);
   close();
 };
 
-async function convertPanelActionToContextMenuItem<Context extends object>({
-  action,
-  actionContext,
-  trigger,
+/**
+ * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
+ */
+export async function buildContextMenuForActions({
+  actions,
+  title = defaultTitle,
   closeMenu,
 }: {
-  action: Action<Context>;
-  actionContext: Context;
-  trigger: Trigger;
+  actions: ActionWithContext[];
+  title?: string;
   closeMenu: () => void;
-}): Promise<EuiContextMenuPanelItemDescriptor> {
-  const context: ActionExecutionContext<Context> = { ...actionContext, trigger };
-  const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
-    name: action.MenuItem
-      ? React.createElement(uiToReactComponent(action.MenuItem), { context })
-      : action.getDisplayName(context),
-    icon: action.getIconType(context),
-    panel: _.get(action, 'childContextMenuPanel.id'),
-    'data-test-subj': `embeddablePanelAction-${action.id}`,
-  };
+}): Promise<EuiContextMenuPanelDescriptor[]> {
+  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
+  const promises = actions.map(async (item, index) => {
+    const { action } = item;
+    const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
+    const isCompatible = await item.action.isCompatible(context);
+    if (!isCompatible) return;
+    items[index] = {
+      name: action.MenuItem
+        ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+        : action.getDisplayName(context),
+      icon: action.getIconType(context),
+      panel: _.get(action, 'childContextMenuPanel.id'),
+      'data-test-subj': `embeddablePanelAction-${action.id}`,
+      onClick: onClick(action, context, closeMenu),
+      href: action.getHref ? await action.getHref(context) : undefined,
+    };
+  });
 
-  menuPanelItem.onClick = onClick(action, context, closeMenu);
-  if (action.getHref) menuPanelItem.href = await action.getHref(context);
+  await Promise.all(promises);
 
-  return menuPanelItem;
+  return [
+    {
+      id: 'mainMenu',
+      title,
+      items: items.filter(Boolean),
+    },
+  ];
 }
