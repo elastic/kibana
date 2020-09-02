@@ -75,7 +75,7 @@ export const PostAgentCheckinRequestBodyJSONSchema = {
     },
   },
   additionalProperties: false,
-  required: ['status', 'events'],
+  required: ['events'],
 };
 
 export const PostAgentEnrollRequestBodyJSONSchema = {
