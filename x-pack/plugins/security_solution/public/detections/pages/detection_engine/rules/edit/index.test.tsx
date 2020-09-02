@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { EditRulePage } from './index';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { useParams } from 'react-router-dom';
 
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
@@ -28,7 +28,7 @@ jest.mock('react-router-dom', () => {
 
 describe('EditRulePage', () => {
   it('renders correctly', () => {
-    (useUserInfo as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
     const wrapper = shallow(<EditRulePage />, { wrappingComponent: TestProviders });
 

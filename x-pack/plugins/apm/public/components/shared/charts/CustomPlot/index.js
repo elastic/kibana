@@ -67,7 +67,7 @@ export class InnerCustomPlot extends PureComponent {
     (series) => {
       return series.slice(
         0,
-        VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
+        this.props.visibleLegendCount + getHiddenLegendCount(series)
       );
     }
   );
@@ -128,14 +128,20 @@ export class InnerCustomPlot extends PureComponent {
   }
 
   render() {
-    const { series, truncateLegends, width, annotations } = this.props;
+    const {
+      series,
+      truncateLegends,
+      width,
+      annotations,
+      visibleLegendCount,
+    } = this.props;
 
     if (!width) {
       return null;
     }
 
     const hiddenSeriesCount = Math.max(
-      series.length - VISIBLE_LEGEND_COUNT - getHiddenLegendCount(series),
+      series.length - visibleLegendCount - getHiddenLegendCount(series),
       0
     );
     const visibleSeries = this.getVisibleSeries({ series });
@@ -239,6 +245,7 @@ InnerCustomPlot.propTypes = {
     })
   ),
   noHits: PropTypes.bool,
+  visibleLegendCount: PropTypes.number,
   onToggleLegend: PropTypes.func,
 };
 
@@ -249,6 +256,7 @@ InnerCustomPlot.defaultProps = {
   truncateLegends: false,
   xAxisTickSizeOuter: 0,
   noHits: false,
+  visibleLegendCount: VISIBLE_LEGEND_COUNT,
 };
 
 export default makeWidthFlexible(InnerCustomPlot);

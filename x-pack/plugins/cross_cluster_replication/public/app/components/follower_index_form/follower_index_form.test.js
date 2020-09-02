@@ -6,8 +6,6 @@
 
 import { updateFields, updateFormErrors } from './follower_index_form';
 
-jest.mock('ui/new_platform');
-
 describe('<FollowerIndexForm /> state transitions', () => {
   it('updateFormErrors() should merge errors with existing fieldsErrors', () => {
     const errors = { name: 'Some error' };
