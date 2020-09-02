@@ -19,10 +19,9 @@ import {
 } from '../state/async_data_binding';
 import { ItemsPage } from '../state/items_page';
 
-type ListBinding = Immutable<AsyncDataBinding<ItemsPage<TrustedApp>, ServerApiError>>;
-type StaleListBinding = Immutable<StaleAsyncBinding<ItemsPage<TrustedApp>, ServerApiError>>;
-
-const listDataBindingChanged = (newBinding: ListBinding): Immutable<ListDataBindingChanged> => ({
+const createListDataBindingChangedAction = (
+  newBinding: Immutable<AsyncDataBinding<ItemsPage<TrustedApp>, ServerApiError>>
+): Immutable<ListDataBindingChanged> => ({
   type: 'listDataBindingChanged',
   payload: { newBinding },
 });
@@ -34,10 +33,12 @@ const refreshList = async (
   const list = store.getState().list;
 
   store.dispatch(
-    listDataBindingChanged({
+    createListDataBindingChangedAction({
       type: 'InProgressAsyncBinding',
       // need to think on how to avoid the casting
-      previousBinding: list.currentPage as StaleListBinding,
+      previousBinding: list.currentPage as Immutable<
+        StaleAsyncBinding<ItemsPage<TrustedApp>, ServerApiError>
+      >,
     })
   );
 
@@ -48,7 +49,7 @@ const refreshList = async (
     );
 
     store.dispatch(
-      listDataBindingChanged({
+      createListDataBindingChangedAction({
         type: 'PresentAsyncBinding',
         data: {
           items: response.data,
@@ -59,7 +60,7 @@ const refreshList = async (
     );
   } catch (error) {
     store.dispatch(
-      listDataBindingChanged({
+      createListDataBindingChangedAction({
         type: 'FailedAsyncBinding',
         error,
         lastPresentBinding: getLastPresentDataBinding(list.currentPage),
