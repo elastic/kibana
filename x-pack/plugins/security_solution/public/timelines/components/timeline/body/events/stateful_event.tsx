@@ -12,12 +12,8 @@ import VisibilitySensor from 'react-visibility-sensor';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { useTimelineDetails } from '../../../../containers/details';
-import {
-  TimelineItem,
-  TimelineNonEcsData,
-  DetailItem,
-} from '../../../../../../common/search_strategy/timeline';
-import { Ecs } from '../../../../../../common/ecs';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import { DetailItem } from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -239,7 +235,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                   />
                 </EventsTrSupplement>
 
-                {getRowRenderer<Ecs>(event.ecs, rowRenderers).renderRow({
+                {getRowRenderer(event.ecs, rowRenderers).renderRow({
                   browserFields,
                   data: event.ecs,
                   timelineId,

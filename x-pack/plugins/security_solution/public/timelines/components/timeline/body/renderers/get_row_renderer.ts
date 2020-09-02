@@ -11,7 +11,7 @@ const unhandledRowRenderer = (): never => {
   throw new Error('Unhandled Row Renderer');
 };
 
-export const getRowRenderer = <T = Ecs>(ecs: T, rowRenderers: RowRenderer[]): RowRenderer => {
+export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer => {
   const renderer = rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs));
   if (renderer == null) {
     return unhandledRowRenderer();
