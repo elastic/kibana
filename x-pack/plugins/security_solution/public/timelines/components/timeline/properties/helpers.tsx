@@ -272,9 +272,6 @@ export interface NewTimelineProps {
 
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
@@ -282,7 +279,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     });
     const button = getButton({ outline, title });
 
-    return capabilitiesCanUserCRUD ? button : null;
+    return button;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
@@ -334,26 +331,23 @@ const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, tog
 LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
-  noteIds: string[];
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ noteIds, toggleShowNotes, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, timelineType }) => {
+  const isTemplate = timelineType === TimelineType.template;
 
-    return (
-      <EuiButtonIcon
-        aria-label={i18n.NOTES}
-        data-test-subj="timeline-notes-button-small"
-        iconType="editorComment"
-        onClick={() => toggleShowNotes()}
-        isDisabled={isTemplate}
-      />
-    );
-  }
-);
+  return (
+    <EuiButtonIcon
+      aria-label={i18n.NOTES}
+      data-test-subj="timeline-notes-button-small"
+      iconType="editorComment"
+      onClick={() => toggleShowNotes()}
+      isDisabled={isTemplate}
+    />
+  );
+});
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
@@ -378,11 +372,7 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
         {size === 'l' ? (
           <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton
-            noteIds={noteIds}
-            toggleShowNotes={toggleShowNotes}
-            timelineType={timelineType}
-          />
+          <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>

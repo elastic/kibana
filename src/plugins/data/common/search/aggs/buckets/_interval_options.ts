@@ -20,12 +20,15 @@
 import { i18n } from '@kbn/i18n';
 import { IBucketAggConfig } from './bucket_agg_type';
 
+export const autoInterval = 'auto';
+export const isAutoInterval = (value: unknown) => value === autoInterval;
+
 export const intervalOptions = [
   {
     display: i18n.translate('data.search.aggs.buckets.intervalOptions.autoDisplayName', {
       defaultMessage: 'Auto',
     }),
-    val: 'auto',
+    val: autoInterval,
     enabled(agg: IBucketAggConfig) {
       // not only do we need a time field, but the selected field needs
       // to be the time field. (see #3028)
