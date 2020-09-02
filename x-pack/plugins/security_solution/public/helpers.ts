@@ -6,7 +6,12 @@
 
 import { CoreStart } from '../../../../src/core/public';
 import { APP_ID } from '../common/constants';
+import {
+  FactoryQueryTypes,
+  StrategyResponseType,
+} from '../common/search_strategy/security_solution';
 import { SecurityPageName } from './app/types';
+import { InspectResponse } from './types';
 
 export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
   const { application } = coreStart;
@@ -73,3 +78,11 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       break;
   }
 };
+
+export const getInspectResponse = <T extends FactoryQueryTypes>(
+  response: StrategyResponseType<T>,
+  prevResponse: InspectResponse
+): InspectResponse => ({
+  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  response: response != null ? [JSON.stringify(response, null, 2)] : prevResponse?.response,
+});

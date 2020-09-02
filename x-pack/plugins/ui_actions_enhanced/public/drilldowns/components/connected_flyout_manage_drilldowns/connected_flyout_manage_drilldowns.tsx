@@ -148,7 +148,7 @@ export function createFlyoutManageDrilldowns({
         icon: actionFactory?.getIconType(drilldownFactoryContext),
         error: !actionFactory
           ? invalidDrilldownType(drilldown.action.factoryId) // this shouldn't happen for the end user, but useful during development
-          : !actionFactory.isCompatibleLicence()
+          : !actionFactory.isCompatibleLicense()
           ? insufficientLicenseLevel
           : undefined,
         triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as TriggerId)),
