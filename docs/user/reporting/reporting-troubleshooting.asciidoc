@@ -19,7 +19,7 @@ Having trouble? Here are solutions to common problems you might encounter while 
 [float]
 [[reporting-troubleshooting-diagnostics]]
 === Reporting Diagnostics
-Reporting comes with a built-in utility to try and find common issues automatically. When Kibana is running, navigate to the Report Listing page, and click the "Run reporting diagnostics..." button. This will open up a diagnostic tool that allows you to check various parts of reportings technology stack, and see where problems might be.
+Reporting comes with a built-in utility to try to automatically find common issues. When Kibana is running, navigate to the Report Listing page, and click the "Run reporting diagnostics..." button. This will open up a diagnostic tool that checks various parts of the Kibana deployment to come up with any relevant recommendations.
 
 [float]
 [[reporting-troubleshooting-system-dependencies]]

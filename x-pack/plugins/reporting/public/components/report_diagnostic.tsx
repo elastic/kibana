@@ -142,8 +142,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
         <Fragment>
           <FormattedMessage
             id="xpack.reporting.listing.diagnosticBrowserMessage"
-            defaultMessage="Reporting utilizes a headless browser to generate PDF and PNGS, this check validates
-            that the browser binary can run properly."
+            defaultMessage="Reporting utilizes a headless browser to generate PDF and PNGS. This check validates
+            that the browser can launch successfully."
           />
           <EuiSpacer />
           <EuiButton
@@ -172,7 +172,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
         <Fragment>
           <FormattedMessage
             id="xpack.reporting.listing.diagnosticScreenshotMessage"
-            defaultMessage="The final step checks if we can properly capture Kibana screens."
+            defaultMessage="This check ensures the headless browser can capture a screenshot of a page."
           />
           <EuiSpacer />
           <EuiButton

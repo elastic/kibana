@@ -96,9 +96,9 @@ describe('POST /diagnose/config', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "xpack.reporting.csv.maxSizeBytes (10485760) is higher than ElasticSearch's http.max_content_length (5242880). Please set http.max_content_length in ElasticSearch to match, or lower your xpack.reporting.csv.maxSizeBytes in Kibana to avoid this warning.",
+              "xpack.reporting.csv.maxSizeBytes (10485760) is higher than ElasticSearch's http.max_content_length (5242880). Please set http.max_content_length in ElasticSearch to match, or lower your xpack.reporting.csv.maxSizeBytes in Kibana.",
             ],
-            "logs": "xpack.reporting.csv.maxSizeBytes (10485760) is higher than ElasticSearch's http.max_content_length (5242880). Please set http.max_content_length in ElasticSearch to match, or lower your xpack.reporting.csv.maxSizeBytes in Kibana to avoid this warning.",
+            "logs": "xpack.reporting.csv.maxSizeBytes (10485760) is higher than ElasticSearch's http.max_content_length (5242880). Please set http.max_content_length in ElasticSearch to match, or lower your xpack.reporting.csv.maxSizeBytes in Kibana.",
             "success": false,
           }
         `);

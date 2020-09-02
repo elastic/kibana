@@ -49,7 +49,7 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
 
       if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
         const maxContentSizeWarning = i18n.translate(
-          `xpack.reporting.diagnostic.configSizeMismatch`,
+          'xpack.reporting.diagnostic.configSizeMismatch',
           {
             defaultMessage:
               `xpack.reporting.{KIBANA_MAX_SIZE_BYTES_PATH} ({kibanaMaxContentBytes}) is higher than ElasticSearch's {ES_MAX_SIZE_BYTES_PATH} ({elasticSearchMaxContentBytes}). ` +

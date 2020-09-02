@@ -55,6 +55,7 @@ describe('POST /diagnose/browser', () => {
       pid: 123,
       stderr: 'stderr',
       once: jest.fn(),
+      on: jest.fn(),
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
@@ -74,7 +75,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => cb(devtoolMessage),
+      on: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
@@ -95,15 +96,16 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => cb(logs),
+      on: (e: string, cb: any) => setTimeout(() => cb(logs), 0),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
 
     mockedSpawn.mockImplementation(() => ({
-      once: (e: string, cb: any) => cb(), // Invoke the exit event
+      once: (e: string, cb: any) => setTimeout(() => cb(), 0), // Invoke the exit event
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
+      on: jest.fn(),
     }));
 
     return supertest(httpSetup.server.listener)
@@ -113,7 +115,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "Chrome couldn't find a default font, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
             "logs": "Could not find the default font
           ",
@@ -130,17 +132,18 @@ describe('POST /diagnose/browser', () => {
 
     mockedCreateInterface.mockImplementation(() => ({
       on: (e: string, cb: any) => {
-        cb(devtoolMessage);
-        cb(fontNotFoundMessage);
+        setTimeout(() => cb(devtoolMessage), 0);
+        setTimeout(() => cb(fontNotFoundMessage), 0);
       },
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
 
     mockedSpawn.mockImplementation(() => ({
-      once: (e: string, cb: any) => cb(),
+      once: (e: string, cb: any) => setTimeout(() => cb(), 0),
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
+      on: jest.fn(),
     }));
 
     return supertest(httpSetup.server.listener)
@@ -150,7 +153,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "Chrome couldn't find a default font, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
             "logs": "DevTools listening on (ws://localhost:4000)
           Could not find the default font
@@ -176,10 +179,11 @@ describe('POST /diagnose/browser', () => {
       pid: 123,
       stderr: 'stderr',
       once: jest.fn(),
+      on: jest.fn(),
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => cb(devtoolMessage),
+      on: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeAllListeners: createInterfaceListenersMock,
       close: createInterfaceCloseMock,
     }));
