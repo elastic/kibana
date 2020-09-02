@@ -7,6 +7,7 @@
 import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -17,7 +18,7 @@ export const makeBaseBreadcrumb = (
   href: string,
   navigateToHref?: (url: string) => Promise<void>,
   params?: UptimeUrlParams
-): ChromeBreadcrumb => {
+): EuiBreadcrumb => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
     // We don't want to encode this values because they are often set to Date.now(), the relative
@@ -31,7 +32,7 @@ export const makeBaseBreadcrumb = (
       defaultMessage: 'Uptime',
     }),
     href,
-    onClick: (event: MouseEvent) => {
+    onClick: (event) => {
       if (href && navigateToHref) {
         event.preventDefault();
         navigateToHref(href);
