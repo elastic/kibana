@@ -20,21 +20,35 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { toasts } from '../../../../services/notification';
-import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
-import { showApiError } from '../../../../services/api_errors';
-import { LearnMoreLink } from '../../../edit_policy/components';
+import { LearnMoreLink } from '../../edit_policy/components';
+import { PolicyFromES } from '../../../services/policies/types';
+import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../services/api';
+import { toasts } from '../../../services/notification';
+import { showApiError } from '../../../services/api_errors';
 
-export class AddPolicyToTemplateConfirmModal extends Component {
-  state = {
-    templates: [],
-  };
+interface Props {
+  policy: PolicyFromES;
+  onCancel: () => void;
+}
+interface State {
+  templates: Array<{ name: string }>;
+  templateName?: string;
+  aliasName?: string;
+  templateError?: string;
+}
+export class AddPolicyToTemplateConfirmModal extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      templates: [],
+    };
+  }
   async componentDidMount() {
     const templates = await loadIndexTemplates();
     this.setState({ templates });
   }
   addPolicyToTemplate = async () => {
-    const { policy, callback, onCancel } = this.props;
+    const { policy, onCancel } = this.props;
     const { templateName, aliasName } = this.state;
     const policyName = policy.name;
     if (!templateName) {
@@ -70,9 +84,6 @@ export class AddPolicyToTemplateConfirmModal extends Component {
         }
       );
       showApiError(e, title);
-    }
-    if (callback) {
-      callback();
     }
   };
   renderTemplateHasPolicyWarning() {
@@ -144,7 +155,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
             options={options}
             value={templateName}
             onChange={(e) => {
-              this.setState({ templateError: null, templateName: e.target.value });
+              this.setState({ templateError: undefined, templateName: e.target.value });
             }}
           />
         </EuiFormRow>
@@ -204,7 +215,6 @@ export class AddPolicyToTemplateConfirmModal extends Component {
               defaultMessage: 'Add policy',
             }
           )}
-          onClose={onCancel}
         >
           <EuiText>
             <p>

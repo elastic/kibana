@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NoMatch } from './no_match';
+export default function loadTests({ loadTestFile }) {
+  describe('Settings Endpoints', () => {
+    loadTestFile(require.resolve('./update'));
+  });
+}
