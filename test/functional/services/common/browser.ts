@@ -164,6 +164,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Gets the page/document title of the focused window/frame.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     */
+    public async getTitle() {
+      return await driver.getTitle();
+    }
+
+    /**
      * Navigates the focused window/frame to a new URL.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#get
      *
@@ -480,6 +488,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async switchToFrame(idOrElement: number | WebElementWrapper) {
       const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
       await driver.switchTo().frame(_id);
+    }
+
+    public async checkBrowserPermission(permission: string): Promise<boolean> {
+      const result: any = await driver.executeAsyncScript(
+        `navigator.permissions.query({name:'${permission}'}).then(arguments[0])`
+      );
+
+      return Boolean(result?.state === 'granted');
+    }
+
+    public getClipboardValue(): Promise<string> {
+      return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
     }
   })();
 }

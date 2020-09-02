@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
 import { Dispatch } from 'redux';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import uuid from 'uuid/v4';
 
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
@@ -44,12 +44,8 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import {
-  fitToDataBounds,
-  syncDataForAllJoinLayers,
-  syncDataForAllLayers,
-} from './data_request_actions';
-import { addLayer } from './layer_actions';
+import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
@@ -57,7 +53,8 @@ import {
   MapExtent,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { INITIAL_LOCATION } from '../../common/constants';
+import { scaleBounds } from '../../common/elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -98,13 +95,21 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
-      dispatch<any>(addLayer(layerDescriptor));
-    });
-
+    const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
     dispatch({
       type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
     });
+
+    if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayerWithoutDataSync(layerDescriptor));
+      });
+      dispatch<any>(autoFitToBounds());
+    } else {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayer(layerDescriptor));
+      });
+    }
   };
 }
 
@@ -196,17 +201,16 @@ function generateQueryTimestamp() {
   return new Date().toISOString();
 }
 
-let lastSetQueryCallId: string = '';
 export function setQuery({
   query,
   timeFilters,
   filters = [],
-  refresh = false,
+  forceRefresh = false,
 }: {
-  filters: Filter[];
+  filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
-  refresh?: boolean;
+  forceRefresh?: boolean;
 }) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const prevQuery = getQuery(getState());
@@ -215,30 +219,34 @@ export function setQuery({
         ? prevQuery.queryLastTriggeredAt
         : generateQueryTimestamp();
 
-    dispatch({
-      type: SET_QUERY,
+    const nextQueryContext = {
       timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
       query: {
         ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
-        queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
+        queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
+    };
+
+    const prevQueryContext = {
+      timeFilters: getTimeFilters(getState()),
+      query: getQuery(getState()),
+      filters: getFilters(getState()),
+    };
+
+    if (_.isEqual(nextQueryContext, prevQueryContext)) {
+      // do nothing if query context has not changed
+      return;
+    }
+
+    dispatch({
+      type: SET_QUERY,
+      ...nextQueryContext,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
-      // Joins are performed on the client.
-      // As a result, bounds for join layers must also be performed on the client.
-      // Therefore join layers need to fetch data prior to auto fitting bounds.
-      const localSetQueryCallId = uuid();
-      lastSetQueryCallId = localSetQueryCallId;
-      await dispatch<any>(syncDataForAllJoinLayers());
-
-      // setQuery can be triggered before async data fetching completes
-      // Only continue execution path if setQuery has not been re-triggered.
-      if (localSetQueryCallId === lastSetQueryCallId) {
-        dispatch<any>(fitToDataBounds());
-      }
+      dispatch<any>(autoFitToBounds());
     } else {
       await dispatch<any>(syncDataForAllLayers());
     }
@@ -263,7 +271,7 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateDrawState(drawState: DrawState) {
+export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way

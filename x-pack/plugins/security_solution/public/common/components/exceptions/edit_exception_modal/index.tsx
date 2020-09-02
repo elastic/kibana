@@ -23,12 +23,14 @@ import {
 } from '@elastic/eui';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
+import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { ExceptionBuilderComponent } from '../builder';
@@ -43,14 +45,17 @@ import {
   lowercaseHashValues,
 } from '../helpers';
 import { Loader } from '../../loader';
+import { ErrorInfo, ErrorCallout } from '../error_callout';
 
 interface EditExceptionModalProps {
   ruleName: string;
+  ruleId: string;
   ruleIndices: string[];
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
   onCancel: () => void;
   onConfirm: () => void;
+  onRuleChange?: () => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -83,14 +88,18 @@ const ModalBodySection = styled.section`
 
 export const EditExceptionModal = memo(function EditExceptionModal({
   ruleName,
+  ruleId,
   ruleIndices,
   exceptionItem,
   exceptionListType,
   onCancel,
   onConfirm,
+  onRuleChange,
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -108,18 +117,44 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     'rules'
   );
 
-  const onError = useCallback(
-    (error) => {
+  const handleExceptionUpdateError = useCallback(
+    (error: Error, statusCode: number | null, message: string | null) => {
       if (error.message.includes('Conflict')) {
         setHasVersionConflict(true);
       } else {
-        addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
-        onCancel();
+        setUpdateError({
+          reason: error.message,
+          code: statusCode,
+          details: message,
+          listListId: exceptionItem.list_id,
+        });
       }
+    },
+    [setUpdateError, setHasVersionConflict, exceptionItem.list_id]
+  );
+
+  const handleDissasociationSuccess = useCallback(
+    (id: string): void => {
+      addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
+
+      if (onRuleChange) {
+        onRuleChange();
+      }
+
+      onCancel();
+    },
+    [addSuccess, onCancel, onRuleChange]
+  );
+
+  const handleDissasociationError = useCallback(
+    (error: Error): void => {
+      addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
+      onCancel();
     },
     [addError, onCancel]
   );
-  const onSuccess = useCallback(() => {
+
+  const handleExceptionUpdateSuccess = useCallback((): void => {
     addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
     onConfirm();
   }, [addSuccess, onConfirm]);
@@ -127,8 +162,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
       http,
-      onSuccess,
-      onError,
+      onSuccess: handleExceptionUpdateSuccess,
+      onError: handleExceptionUpdateError,
     }
   );
 
@@ -137,7 +172,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [
@@ -222,11 +257,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             {ruleName}
           </ModalHeaderSubtitle>
         </ModalHeader>
-
         {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
           <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
         )}
-
         {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
@@ -259,7 +292,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection>
               <EuiFormRow fullWidth>
                 <EuiCheckbox
-                  id="close-alert-on-add-add-exception-checkbox"
+                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                  id="close-alert-on-add-edit-exception-checkbox"
                   label={
                     shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
                   }
@@ -271,7 +305,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               {exceptionListType === 'endpoint' && (
                 <>
                   <EuiSpacer />
-                  <EuiText color="subdued" size="s">
+                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>
                 </>
@@ -279,7 +313,18 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </ModalBodySection>
           </>
         )}
-
+        {updateError != null && (
+          <ModalBodySection>
+            <ErrorCallout
+              http={http}
+              errorInfo={updateError}
+              rule={maybeRule}
+              onCancel={onCancel}
+              onSuccess={handleDissasociationSuccess}
+              onError={handleDissasociationError}
+            />
+          </ModalBodySection>
+        )}
         {hasVersionConflict && (
           <ModalBodySection>
             <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
@@ -287,19 +332,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </EuiCallOut>
           </ModalBodySection>
         )}
+        {updateError == null && (
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
-
-          <EuiButton
-            onClick={onEditExceptionConfirm}
-            isLoading={addExceptionIsLoading}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
-          </EuiButton>
-        </EuiModalFooter>
+            <EuiButton
+              data-test-subj="edit-exception-confirm-button"
+              onClick={onEditExceptionConfirm}
+              isLoading={addExceptionIsLoading}
+              isDisabled={isSubmitButtonDisabled}
+              fill
+            >
+              {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
+            </EuiButton>
+          </EuiModalFooter>
+        )}
       </Modal>
     </EuiOverlayMask>
   );

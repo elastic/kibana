@@ -23,5 +23,6 @@ export const PageContent = euiStyled.div`
 `;
 
 export const FlexPage = euiStyled(EuiPage)`
+  align-self: stretch;
   flex: 1 0 0%;
 `;

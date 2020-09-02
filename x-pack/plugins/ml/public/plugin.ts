@@ -20,8 +20,10 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerManagementSection } from './application/management';
@@ -48,11 +50,12 @@ export interface MlSetupDependencies {
   management?: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -93,21 +96,27 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },
-          {
-            element: params.element,
-            appBasePath: params.appBasePath,
-            onAppLeave: params.onAppLeave,
-            history: params.history,
-          }
+          params
         );
       },
     });
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe((license) => {
+    licensing.subscribe(async (license) => {
+      const [coreStart] = await core.getStartServices();
       if (isMlEnabled(license)) {
         // add ML to home page
-        registerFeature(pluginsSetup.home);
+        if (pluginsSetup.home) {
+          registerFeature(pluginsSetup.home);
+        }
+
+        // register ML for the index pattern management no data screen.
+        pluginsSetup.indexPatternManagement.environment.update({
+          ml: () =>
+            coreStart.application.capabilities.ml.canFindFileStructure
+              ? MlCardState.ENABLED
+              : MlCardState.HIDDEN,
+        });
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {

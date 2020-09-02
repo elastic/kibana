@@ -14,18 +14,18 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
 
   return {
     /**
-     * Navigate to the Hosts list page
+     * Navigate to the Endpoints list page
      */
-    async navigateToHostList(searchParams?: string) {
+    async navigateToEndpointList(searchParams?: string) {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolutionManagement',
-        `/hosts${searchParams ? `?${searchParams}` : ''}`
+        `/endpoints${searchParams ? `?${searchParams}` : ''}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async waitForTableToHaveData(dataTestSubj: string) {
-      await retry.waitForWithTimeout('table to have data', 2000, async () => {
+    async waitForTableToHaveData(dataTestSubj: string, timeout = 2000) {
+      await retry.waitForWithTimeout('table to have data', timeout, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
           return false;
@@ -51,7 +51,7 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       });
     },
 
-    async hostFlyoutDescriptionKeys(dataTestSubj: string) {
+    async endpointFlyoutDescriptionKeys(dataTestSubj: string) {
       await testSubjects.exists(dataTestSubj);
       const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
       const $ = await detailsData.parseDomContent();
@@ -65,7 +65,7 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
         );
     },
 
-    async hostFlyoutDescriptionValues(dataTestSubj: string) {
+    async endpointFlyoutDescriptionValues(dataTestSubj: string) {
       await testSubjects.exists(dataTestSubj);
       const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
       const $ = await detailsData.parseDomContent();

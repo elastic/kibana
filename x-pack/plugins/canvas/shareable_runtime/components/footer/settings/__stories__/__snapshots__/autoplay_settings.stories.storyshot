@@ -145,7 +145,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 type="submit"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <span
                     className="euiButton__text"
@@ -308,7 +308,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 type="submit"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <span
                     className="euiButton__text"
@@ -471,7 +471,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 type="submit"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <span
                     className="euiButton__text"

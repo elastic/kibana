@@ -15,6 +15,7 @@ import {
 import { getInitialState } from './state/initial_state';
 
 import { CoreSetup } from '../../../../src/core/public';
+import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 import { CanvasSetupDeps } from './plugin';
 
 export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
@@ -31,7 +32,7 @@ export async function createFreshStore(core: CoreSetup, plugins: CanvasSetupDeps
   const basePath = core.http.basePath.get();
 
   // Retrieve server functions
-  const serverFunctionsResponse = await core.http.get(`/api/interpreter/fns`);
+  const serverFunctionsResponse = await core.http.get(API_ROUTE_FUNCTIONS);
   const serverFunctions = Object.values(serverFunctionsResponse);
 
   initialState.app = {

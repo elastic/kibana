@@ -18,7 +18,8 @@
  */
 
 import { Url } from 'url';
-import { Request, ApplicationState } from 'hapi';
+import uuid from 'uuid';
+import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -34,9 +35,17 @@ const requestSymbol = Symbol('request');
 /**
  * @internal
  */
-export interface KibanaRouteState extends ApplicationState {
+export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
 }
+
+/**
+ * @internal
+ */
+export interface KibanaRequestState extends ApplicationState {
+  requestId: string;
+}
+
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -134,6 +143,15 @@ export class KibanaRequest<
 
     return { query, params, body };
   }
+  /**
+   * A identifier to identify this request.
+   *
+   * @remarks
+   * Depending on the user's configuration, this value may be sourced from the
+   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
+   * per request.
+   */
+  public readonly id: string;
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
@@ -171,6 +189,11 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
+    // The `requestId` property will not be populated for requests that are 'faked' by internal systems that leverage
+    // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
+    // In these cases, the id defaults to a newly generated UUID.
+    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
+
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
@@ -211,15 +234,21 @@ export class KibanaRequest<
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
-    const timeout = request.route.settings.timeout?.socket;
+    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
+      request.route.settings.payload || {};
 
+    // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
+    // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
+    const socketTimeout = (request.raw.req.socket as any)?.timeout;
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
+      xsrfRequired: (request.route.settings.app as KibanaRouteOptions)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
-      timeout: typeof timeout === 'number' ? timeout - 1 : undefined, // We are forced to have the timeout be 1 millisecond greater than the server and payload so we subtract one here to give the user consist settings
+      timeout: {
+        payload: payloadTimeout,
+        idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
+      },
       body: isSafeMethod(method)
         ? undefined
         : {
@@ -270,7 +299,11 @@ export class KibanaRequest<
 export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
-function isKibanaRequest(request: unknown): request is KibanaRequest {
+/**
+ * Checks if an incoming request is a {@link KibanaRequest}
+ * @internal
+ */
+export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 

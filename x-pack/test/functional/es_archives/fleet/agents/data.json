@@ -9,10 +9,13 @@
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent1_filebeat",
-        "config_id": "config1",
+        "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -32,6 +35,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -51,6 +57,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -70,6 +79,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -85,11 +97,14 @@
         "created_at" : "2019-10-10T16:31:12.518Z",
         "name": "FleetEnrollmentKey:1",
         "api_key_id" : "key",
-        "config_id" : "policy:1",
+        "policy_id" : "policy1",
         "active" : true
       },
       "type" : "fleet-enrollment-api-keys",
-      "references": []
+      "references": [],
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
     }
   }
 }
@@ -108,6 +123,9 @@
         "message": "State changed from STOPPED to STARTED",
         "payload": "{\"previous_state\": \"STOPPED\"}",
         "timestamp": "2019-09-20T17:30:22.950Z"
+      },
+      "migrationVersion": {
+        "fleet-agent-events": "7.10.0"
       }
     }
   }
@@ -203,16 +221,16 @@
 {
   "type": "doc",
   "value": {
-    "id": "ingest-agent-policies:config1",
+    "id": "ingest-agent-policies:policy1",
     "index": ".kibana",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {
-        "name": "Test config",
+        "name": "Test policy",
         "namespace": "default",
-        "description": "Config 1",
+        "description": "Policy 1",
         "status": "active",
-        "package_configs": [],
+        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
@@ -221,6 +239,9 @@
         "revision": 2,
         "updated_at": "2020-05-07T19:34:42.533Z",
         "updated_by": "system"
+      },
+      "migrationVersion": {
+        "ingest-agent-policies": "7.10.0"
       }
     }
   }

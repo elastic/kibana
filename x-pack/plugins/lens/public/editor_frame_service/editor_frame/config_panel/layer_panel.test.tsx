@@ -58,6 +58,7 @@ describe('LayerPanel', () => {
       onRemoveLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
+      dataTestSubj: 'lns_layerPanel-0',
     };
   }
 

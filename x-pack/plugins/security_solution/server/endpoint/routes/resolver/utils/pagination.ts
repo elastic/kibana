@@ -7,13 +7,7 @@
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
-
-type SortFields = [
-  {
-    '@timestamp': string;
-  },
-  { [x: string]: string }
-];
+import { ChildrenPaginationCursor } from './children_pagination';
 
 type SearchAfterFields = [number, string];
 
@@ -21,6 +15,27 @@ interface PaginationCursor {
   timestamp: number;
   eventID: string;
 }
+
+/**
+ * The sort direction for the timestamp field
+ */
+export type TimeSortDirection = 'asc' | 'desc';
+
+/**
+ * Defines the sorting fields for queries that leverage pagination
+ */
+export type SortFields = [
+  {
+    '@timestamp': string;
+  },
+  { [x: string]: string }
+];
+
+/**
+ * Defines a type of a function used to convert the parsed json data into a typescript type.
+ * If the function fails to transform the data it should return undefined.
+ */
+export type Decoder<T> = (parsed: T | undefined) => T | undefined;
 
 /**
  * Interface for defining the returned pagination information.
@@ -32,9 +47,41 @@ export interface PaginationFields {
 }
 
 /**
+ * A function to encode a cursor from a pagination object.
+ *
+ * @param data Transforms a pagination cursor into a base64 encoded string
+ */
+export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
+  const value = JSON.stringify(data);
+  return Buffer.from(value, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+/**
+ * A function to decode a cursor.
+ *
+ * @param cursor a cursor encoded by the `urlEncodeCursor` function
+ * @param decode a function to transform the parsed data into an actual type
+ */
+export function urlDecodeCursor<T>(cursor: string, decode: Decoder<T>): T | undefined {
+  const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
+  const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
+  let parsed: T;
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    return;
+  }
+
+  return decode(parsed);
+}
+
+/**
  * This class handles constructing pagination cursors that resolver can use to return additional events in subsequent
- * queries. It also constructs an aggregation query to determine the totals for other queries. This class should be used
- * with a query to build cursors for paginated results.
+ * queries.
  */
 export class PaginationBuilder {
   constructor(
@@ -52,22 +99,16 @@ export class PaginationBuilder {
     private readonly eventID?: string
   ) {}
 
-  private static urlEncodeCursor(data: PaginationCursor): string {
-    const value = JSON.stringify(data);
-    return Buffer.from(value, 'utf8')
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
-  }
-
-  private static urlDecodeCursor(cursor: string): PaginationCursor {
-    const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
-    const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
-    const { timestamp, eventID } = JSON.parse(data);
-    // take some extra care to only grab the things we want
-    // convert the timestamp string to date object
-    return { timestamp, eventID };
+  /**
+   * Validates that the parsed object is actually a PaginationCursor.
+   *
+   * @param parsed an object parsed from an encoded cursor.
+   */
+  static decode(parsed: PaginationCursor | undefined): PaginationCursor | undefined {
+    if (parsed && parsed.timestamp && parsed.eventID) {
+      const { timestamp, eventID } = parsed;
+      return { timestamp, eventID };
+    }
   }
 
   /**
@@ -81,7 +122,7 @@ export class PaginationBuilder {
       timestamp: lastResult['@timestamp'],
       eventID: eventId(lastResult) === undefined ? '' : String(eventId(lastResult)),
     };
-    return PaginationBuilder.urlEncodeCursor(cursor);
+    return urlEncodeCursor(cursor);
   }
 
   /**
@@ -107,8 +148,8 @@ export class PaginationBuilder {
   static createBuilder(limit: number, after?: string): PaginationBuilder {
     if (after) {
       try {
-        const cursor = PaginationBuilder.urlDecodeCursor(after);
-        if (cursor.timestamp && cursor.eventID) {
+        const cursor = urlDecodeCursor(after, PaginationBuilder.decode);
+        if (cursor && cursor.timestamp && cursor.eventID) {
           return new PaginationBuilder(limit, cursor.timestamp, cursor.eventID);
         }
       } catch (err) {
@@ -122,10 +163,14 @@ export class PaginationBuilder {
    * Helper for creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFieldsAsInterface(tiebreaker: string): PaginationFields {
-    const sort: SortFields = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+  buildQueryFieldsAsInterface(
+    tiebreaker: string,
+    timeSort: TimeSortDirection = 'asc'
+  ): PaginationFields {
+    const sort: SortFields = [{ '@timestamp': timeSort }, { [tiebreaker]: 'asc' }];
     let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {
       searchAfter = [this.timestamp, this.eventID];
@@ -138,11 +183,12 @@ export class PaginationBuilder {
    * Creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFields(tiebreaker: string): JsonObject {
+  buildQueryFields(tiebreaker: string, timeSort: TimeSortDirection = 'asc'): JsonObject {
     const fields: JsonObject = {};
-    const pagination = this.buildQueryFieldsAsInterface(tiebreaker);
+    const pagination = this.buildQueryFieldsAsInterface(tiebreaker, timeSort);
     fields.sort = pagination.sort;
     fields.size = pagination.size;
     if (pagination.searchAfter) {

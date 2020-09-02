@@ -20,7 +20,6 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TableHeader } from './table_header';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
 import { IndexPattern, IFieldType } from '../../../../../kibana_services';

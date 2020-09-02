@@ -58,8 +58,13 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username, password })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
 
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -76,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.eql('realm');
     });
 
     describe('initiating SPNEGO', () => {
@@ -115,7 +121,14 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const expectedUserRoles = ['kibana_admin'];
+        const isAnonymousAccessEnabled = (config.get(
+          'esTestCluster.serverArgs'
+        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+
+        // `superuser_anonymous` role is derived from the enabled anonymous access.
+        const expectedUserRoles = isAnonymousAccessEnabled
+          ? ['kibana_admin', 'superuser_anonymous']
+          : ['kibana_admin'];
 
         await supertest
           .get('/internal/security/me')
@@ -134,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: 'kerberos',
+            authentication_type: 'token',
           });
       });
 

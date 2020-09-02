@@ -138,8 +138,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 500 if job handler throws an error', async () => {
-    // throw an error from enqueueJob
-    core.getEnqueueJob = jest.fn().mockRejectedValue('Sorry, this tests says no');
+    callClusterStub.withArgs('index').rejects('silly');
 
     registerJobGenerationRoutes(core, mockLogger);
 

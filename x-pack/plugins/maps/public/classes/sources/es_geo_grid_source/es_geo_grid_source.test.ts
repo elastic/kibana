@@ -3,16 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MapExtent, MapFilters } from '../../../../common/descriptor_types';
+import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services');
-jest.mock('ui/new_platform');
 
-import {
-  getIndexPatternService,
-  getSearchService,
-  fetchSearchSourceAndRecordWithInspector,
-} from '../../../kibana_services';
+import { getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -24,6 +19,7 @@ import { SearchSource } from '../../../../../../../src/plugins/data/public/searc
 
 export class MockSearchSource {
   setField = jest.fn();
+  setParent() {}
 }
 
 describe('ESGeoGridSource', () => {
@@ -54,6 +50,51 @@ describe('ESGeoGridSource', () => {
     },
     {}
   );
+  geogridSource._runEsQuery = async (args: unknown) => {
+    return {
+      took: 71,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 748 + 683,
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        gridSplit: {
+          buckets: [
+            {
+              key: '4/4/6',
+              doc_count: 748,
+              gridCentroid: {
+                location: {
+                  lat: 35.64189018148127,
+                  lon: -82.84314106196105,
+                },
+                count: 748,
+              },
+            },
+            {
+              key: '4/3/6',
+              doc_count: 683,
+              gridCentroid: {
+                location: {
+                  lat: 35.24134021274211,
+                  lon: -98.45945192042787,
+                },
+                count: 683,
+              },
+            },
+          ],
+        },
+      },
+    };
+  };
 
   describe('getGeoJsonWithMeta', () => {
     let mockSearchSource: unknown;
@@ -64,6 +105,9 @@ describe('ESGeoGridSource', () => {
           async create() {
             return mockSearchSource as SearchSource;
           },
+          createEmpty() {
+            return mockSearchSource as SearchSource;
+          },
         },
       };
 
@@ -71,50 +115,6 @@ describe('ESGeoGridSource', () => {
       getIndexPatternService.mockReturnValue(mockIndexPatternService);
       // @ts-expect-error
       getSearchService.mockReturnValue(mockSearchService);
-      // @ts-expect-error
-      fetchSearchSourceAndRecordWithInspector.mockReturnValue({
-        took: 71,
-        timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 748 + 683,
-          max_score: null,
-          hits: [],
-        },
-        aggregations: {
-          gridSplit: {
-            buckets: [
-              {
-                key: '4/4/6',
-                doc_count: 748,
-                gridCentroid: {
-                  location: {
-                    lat: 35.64189018148127,
-                    lon: -82.84314106196105,
-                  },
-                  count: 748,
-                },
-              },
-              {
-                key: '4/3/6',
-                doc_count: 683,
-                gridCentroid: {
-                  location: {
-                    lat: 35.24134021274211,
-                    lon: -98.45945192042787,
-                  },
-                  count: 683,
-                },
-              },
-            ],
-          },
-        },
-      });
     });
 
     const extent: MapExtent = {
@@ -124,7 +124,7 @@ describe('ESGeoGridSource', () => {
       maxLat: 80,
     };
 
-    const mapFilters: MapFilters = {
+    const mapFilters: VectorSourceRequestMeta = {
       geogridPrecision: 4,
       filters: [],
       timeFilters: {
@@ -132,8 +132,16 @@ describe('ESGeoGridSource', () => {
         to: '15m',
         mode: 'relative',
       },
-      // extent,
+      extent,
+      applyGlobalQuery: true,
+      fieldNames: [],
       buffer: extent,
+      sourceQuery: {
+        query: '',
+        language: 'KQL',
+        queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
+      },
+      sourceMeta: null,
       zoom: 0,
     };
 

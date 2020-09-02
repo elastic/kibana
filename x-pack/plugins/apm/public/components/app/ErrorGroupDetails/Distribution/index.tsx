@@ -107,7 +107,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage: '{occCount} occurrences',
+            defaultMessage:
+              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
             values: { occCount: value },
           })
         }

@@ -19,6 +19,7 @@
 
 import {
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
 } from 'src/core/public';
@@ -35,7 +36,7 @@ describe('processImportResponse()', () => {
     expect(result.importCount).toBe(0);
   });
 
-  test('conflict errors get added to failedImports', () => {
+  test('conflict errors get added to failedImports and result in idle status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -46,6 +47,7 @@ describe('processImportResponse()', () => {
           error: {
             type: 'conflict',
           } as SavedObjectsImportConflictError,
+          meta: {},
         },
       ],
     };
@@ -58,14 +60,49 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
       ]
     `);
+    expect(result.status).toBe('idle');
   });
 
-  test('unknown errors get added to failedImports', () => {
+  test('ambiguous conflict errors get added to failedImports and result in idle status', () => {
+    const response = {
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          type: 'a',
+          id: '1',
+          error: {
+            type: 'ambiguous_conflict',
+          } as SavedObjectsImportAmbiguousConflictError,
+          meta: {},
+        },
+      ],
+    };
+    const result = processImportResponse(response);
+    expect(result.failedImports).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "error": Object {
+            "type": "ambiguous_conflict",
+          },
+          "obj": Object {
+            "id": "1",
+            "meta": Object {},
+            "type": "a",
+          },
+        },
+      ]
+    `);
+    expect(result.status).toBe('idle');
+  });
+
+  test('unknown errors get added to failedImports and result in success status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -76,6 +113,7 @@ describe('processImportResponse()', () => {
           error: {
             type: 'unknown',
           } as SavedObjectsImportUnknownError,
+          meta: {},
         },
       ],
     };
@@ -88,14 +126,16 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
       ]
     `);
+    expect(result.status).toBe('success');
   });
 
-  test('missing references get added to failedImports', () => {
+  test('missing references get added to failedImports and result in idle status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -112,6 +152,7 @@ describe('processImportResponse()', () => {
               },
             ],
           } as SavedObjectsImportMissingReferencesError,
+          meta: {},
         },
       ],
     };
@@ -130,10 +171,58 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
       ]
     `);
+    expect(result.status).toBe('idle');
+  });
+
+  test('missing references get added to unmatchedReferences, but are not duplicated', () => {
+    const response = {
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          type: 'a',
+          id: '1',
+          error: {
+            type: 'missing_references',
+            references: [
+              { type: 'index-pattern', id: '2' },
+              { type: 'index-pattern', id: '3' },
+              { type: 'index-pattern', id: '2' }, // duplicate that should not show in the result's unmatchedReferences
+            ],
+          } as SavedObjectsImportMissingReferencesError,
+          meta: {},
+        },
+      ],
+    };
+    const result = processImportResponse(response);
+    expect(result.unmatchedReferences).toEqual([
+      expect.objectContaining({ existingIndexPatternId: '2' }),
+      expect.objectContaining({ existingIndexPatternId: '3' }),
+    ]);
+  });
+
+  test('success results get added to successfulImports and result in success status', () => {
+    const response = {
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'a', id: '1', meta: {} }],
+    };
+    const result = processImportResponse(response);
+    expect(result.successfulImports).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+          "meta": Object {},
+          "type": "a",
+        },
+      ]
+    `);
+    expect(result.status).toBe('success');
   });
 });

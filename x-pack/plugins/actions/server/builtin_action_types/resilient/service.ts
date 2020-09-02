@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 
+import { Logger } from '../../../../../../src/core/server';
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import {
   ResilientPublicConfigurationType,
@@ -19,6 +20,7 @@ import {
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
+import { ProxySettings } from '../../types';
 
 const BASE_URL = `rest`;
 const INCIDENT_URL = `incidents`;
@@ -57,10 +59,11 @@ export const formatUpdateRequest = ({
   };
 };
 
-export const createExternalService = ({
-  config,
-  secrets,
-}: ExternalServiceCredentials): ExternalService => {
+export const createExternalService = (
+  { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
+  proxySettings?: ProxySettings
+): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
   const { apiKeyId, apiKeySecret } = secrets as ResilientSecretConfigurationType;
 
@@ -88,9 +91,11 @@ export const createExternalService = ({
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
         params: {
           text_content_output_format: 'objects_convert',
         },
+        proxySettings,
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
@@ -107,6 +112,7 @@ export const createExternalService = ({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
+        logger,
         data: {
           ...incident,
           description: {
@@ -115,6 +121,7 @@ export const createExternalService = ({
           },
           discovered_date: Date.now(),
         },
+        proxySettings,
       });
 
       return {
@@ -139,7 +146,9 @@ export const createExternalService = ({
         axios: axiosInstance,
         method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data,
+        proxySettings,
       });
 
       if (!res.data.success) {
@@ -170,7 +179,9 @@ export const createExternalService = ({
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
+        logger,
         data: { text: { format: 'text', content: comment.comment } },
+        proxySettings,
       });
 
       return {

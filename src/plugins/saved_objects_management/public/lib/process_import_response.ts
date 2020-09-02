@@ -20,40 +20,49 @@
 import {
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
+  SavedObjectsImportSuccess,
 } from 'src/core/public';
 
 export interface FailedImport {
-  obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
+  obj: Omit<SavedObjectsImportError, 'error'>;
   error:
     | SavedObjectsImportConflictError
+    | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;
 }
 
+interface UnmatchedReference {
+  existingIndexPatternId: string;
+  list: Array<Omit<SavedObjectsImportError, 'error'>>;
+  newIndexPatternId?: string;
+}
+
 export interface ProcessedImportResponse {
   failedImports: FailedImport[];
-  unmatchedReferences: Array<{
-    existingIndexPatternId: string;
-    list: Array<Record<string, any>>;
-    newIndexPatternId: string | undefined;
-  }>;
+  successfulImports: SavedObjectsImportSuccess[];
+  unmatchedReferences: UnmatchedReference[];
   status: 'success' | 'idle';
   importCount: number;
   conflictedSavedObjectsLinkedToSavedSearches: undefined;
   conflictedSearchDocs: undefined;
 }
 
+const isAnyConflict = ({ type }: FailedImport['error']) =>
+  type === 'conflict' || type === 'ambiguous_conflict';
+
 export function processImportResponse(
   response: SavedObjectsImportResponse
 ): ProcessedImportResponse {
   // Go through the failures and split between unmatchedReferences and failedImports
   const failedImports = [];
-  const unmatchedReferences = new Map();
+  const unmatchedReferences = new Map<string, UnmatchedReference>();
   for (const { error, ...obj } of response.errors || []) {
     failedImports.push({ obj, error });
     if (error.type !== 'missing_references') {
@@ -69,19 +78,21 @@ export function processImportResponse(
         list: [],
         newIndexPatternId: undefined,
       };
-      conflict.list.push(obj);
-      unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
+      if (!conflict.list.some(({ type, id }) => type === obj.type && id === obj.id)) {
+        conflict.list.push(obj);
+        unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
+      }
     }
   }
 
   return {
     failedImports,
+    successfulImports: response.successResults ?? [],
     unmatchedReferences: Array.from(unmatchedReferences.values()),
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.
     status:
-      unmatchedReferences.size === 0 &&
-      !failedImports.some((issue) => issue.error.type === 'conflict')
+      unmatchedReferences.size === 0 && !failedImports.some((issue) => isAnyConflict(issue.error))
         ? 'success'
         : 'idle',
     importCount: response.successCount,

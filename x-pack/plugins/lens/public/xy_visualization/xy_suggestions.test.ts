@@ -54,6 +54,18 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function histogramCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        isBucketed: true,
+        label: `${columnId} histogram`,
+        scale: 'interval',
+      },
+    };
+  }
+
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
@@ -274,6 +286,33 @@ describe('xy_suggestions', () => {
     `);
   });
 
+  test('suggests all basic x y chart with histogram on x', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), histogramCol('duration')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": undefined,
+          "x": "duration",
+          "y": Array [
+            "bytes",
+          ],
+        },
+      ]
+    `);
+  });
+
   test('does not suggest multiple splits', () => {
     const suggestions = getSuggestions({
       table: {
@@ -445,6 +484,10 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -483,6 +526,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -592,6 +639,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -631,6 +682,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price'],
@@ -671,6 +726,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
