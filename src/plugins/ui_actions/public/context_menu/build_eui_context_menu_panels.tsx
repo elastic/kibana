@@ -40,6 +40,9 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
   trigger: Trigger;
 }
 
+type ItemDescriptor = EuiContextMenuPanelItemDescriptor & { _order: number };
+type PanelDescriptor = EuiContextMenuPanelDescriptor & { items: ItemDescriptor[] };
+
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
   event: React.MouseEvent
 ) => {
@@ -58,6 +61,12 @@ const onClick = (action: Action, context: ActionExecutionContext<object>, close:
   close();
 };
 
+export interface BuildContextMenuParams {
+  actions: ActionWithContext[];
+  title?: string;
+  closeMenu: () => void;
+}
+
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
@@ -65,18 +74,41 @@ export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
   closeMenu,
-}: {
-  actions: ActionWithContext[];
-  title?: string;
-  closeMenu: () => void;
-}): Promise<EuiContextMenuPanelDescriptor[]> {
-  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
-  const promises = actions.map(async (item, index) => {
+}: BuildContextMenuParams): Promise<PanelDescriptor[]> {
+  const panels: Record<string, PanelDescriptor> = {
+    mainPanel: {
+      id: 'mainMenu',
+      title,
+      items: [],
+    },
+  };
+  const promises = actions.map(async (item) => {
     const { action } = item;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
     if (!isCompatible) return;
-    items[index] = {
+    let parentPanel = 'mainPanel';
+    let currentPanel = '';
+    if (action.grouping && action.grouping) {
+      for (const group of action.grouping) {
+        currentPanel = group.id;
+        if (!panels[currentPanel]) {
+          const name = group.getDisplayName ? group.getDisplayName(context) : group.id;
+          panels[currentPanel] = {
+            id: currentPanel,
+            title: name,
+            items: [],
+          };
+          panels[parentPanel].items!.push({
+            name,
+            panel: currentPanel,
+            _order: group.order || 0,
+          });
+        }
+        parentPanel = currentPanel;
+      }
+    }
+    panels[parentPanel].items!.push({
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -85,16 +117,17 @@ export async function buildContextMenuForActions({
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,
-    };
+      _order: action.order || 0,
+    });
   });
-
   await Promise.all(promises);
 
-  return [
-    {
-      id: 'mainMenu',
-      title,
-      items: items.filter(Boolean),
-    },
-  ];
+  const panelList: PanelDescriptor[] = Object.values(panels);
+
+  for (const panel of panelList) {
+    const items = panel.items.filter(Boolean) as ItemDescriptor[];
+    panel.items = items.sort((a, b) => (a._order > b._order ? 1 : -1));
+  }
+
+  return panelList;
 }

@@ -14,7 +14,7 @@ import { UiActionsPresentableGrouping as PresentableGrouping } from '../../../..
 
 const embeddableContextMenuDrilldownGrouping: PresentableGrouping<{ embeddable?: IEmbeddable }> = [
   {
-    id: 'drilldowns-group',
+    id: 'drilldowns',
     getDisplayName: () => 'Drilldowns',
     getIconType: () => 'tag',
     order: 25,
