@@ -18514,7 +18514,6 @@
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle": "クラスターがアップグレードされました",
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription": "1 つまたは複数の Elasticsearch ノードに、 Kibana よりも新しいバージョンの Elasticsearch があります。すべてのノードがアップグレードされた後で Kibana をアップグレードしてください。",
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle": "クラスターをアップグレード中です",
-    "xpack.uptime.addDataButtonLabel": "データの追加",
     "xpack.uptime.alerts.anomaly.criteriaExpression.ariaLabel": "選択したモニターの条件を表示する式。",
     "xpack.uptime.alerts.anomaly.criteriaExpression.description": "監視するとき",
     "xpack.uptime.alerts.anomaly.scoreExpression.ariaLabel": "異常アラートしきい値の条件を表示する式。",

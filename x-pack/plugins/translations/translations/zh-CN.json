@@ -18525,7 +18525,6 @@
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle": "您的集群已升级",
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription": "一个或多个 Elasticsearch 节点的 Elasticsearch 版本比 Kibana 版本新。所有节点升级后，请升级 Kibana。",
     "xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle": "您的集群正在升级",
-    "xpack.uptime.addDataButtonLabel": "添加数据",
     "xpack.uptime.alerts.anomaly.criteriaExpression.ariaLabel": "显示选定监测的条件的表达式。",
     "xpack.uptime.alerts.anomaly.criteriaExpression.description": "当监测",
     "xpack.uptime.alerts.anomaly.scoreExpression.ariaLabel": "显示异常告警阈值的条件的表达式。",
