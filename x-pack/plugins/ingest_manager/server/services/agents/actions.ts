@@ -9,6 +9,7 @@ import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/typ
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { savedObjectToAgentAction } from './saved_objects';
 import { appContextService } from '../app_context';
+import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
@@ -29,9 +30,24 @@ export async function getAgentActionsForCheckin(
   soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentAction[]> {
+  const filter = nodeTypes.function.buildNode('and', [
+    nodeTypes.function.buildNode(
+      'not',
+      nodeTypes.function.buildNode(
+        'is',
+        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
+        '*'
+      )
+    ),
+    nodeTypes.function.buildNode(
+      'is',
+      `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`,
+      agentId
+    ),
+  ]);
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * and ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id:${agentId}`,
+    filter,
   });
 
   return Promise.all(
@@ -78,9 +94,26 @@ export async function getAgentActionByIds(
 }
 
 export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
+  const filter = nodeTypes.function.buildNode('and', [
+    nodeTypes.function.buildNode(
+      'not',
+      nodeTypes.function.buildNode(
+        'is',
+        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
+        '*'
+      )
+    ),
+    nodeTypes.function.buildNode(
+      'range',
+      `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at`,
+      {
+        gte: timestamp,
+      }
+    ),
+  ]);
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * AND ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at >= "${timestamp}"`,
+    filter,
   });
 
   return res.saved_objects.map(savedObjectToAgentAction);
