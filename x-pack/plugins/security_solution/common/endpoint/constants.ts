@@ -11,3 +11,6 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
 export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;
+
+export const TRUSTED_APPS_LIST_API = '/api/endpoint/trusted_apps';
+export const TRUSTED_APPS_CREATE_API = '/api/endpoint/trusted_apps';

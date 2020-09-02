@@ -9,40 +9,40 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import {
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-  PHASE_WARM,
-  PHASE_COLD,
-  PHASE_DELETE,
-} from '../../../constants';
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { PhaseWithMinAge, Phases } from '../../../services/policies/types';
 
-function getTimingLabelForPhase(phase: string) {
+function getTimingLabelForPhase(phase: keyof Phases) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
-    case PHASE_WARM:
+    case 'warm':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeLabel', {
         defaultMessage: 'Timing for warm phase',
       });
 
-    case PHASE_COLD:
+    case 'cold':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeLabel', {
         defaultMessage: 'Timing for cold phase',
       });
 
-    case PHASE_DELETE:
+    case 'frozen':
+      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseFrozen.minimumAgeLabel', {
+        defaultMessage: 'Timing for frozen phase',
+      });
+
+    case 'delete':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeLabel', {
         defaultMessage: 'Timing for delete phase',
       });
   }
 }
 
-function getUnitsAriaLabelForPhase(phase: string) {
+function getUnitsAriaLabelForPhase(phase: keyof Phases) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
-    case PHASE_WARM:
+    case 'warm':
       return i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel',
         {
@@ -50,7 +50,7 @@ function getUnitsAriaLabelForPhase(phase: string) {
         }
       );
 
-    case PHASE_COLD:
+    case 'cold':
       return i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel',
         {
@@ -58,7 +58,7 @@ function getUnitsAriaLabelForPhase(phase: string) {
         }
       );
 
-    case PHASE_DELETE:
+    case 'delete':
       return i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel',
         {
@@ -68,24 +68,23 @@ function getUnitsAriaLabelForPhase(phase: string) {
   }
 }
 
-interface Props {
+interface Props<T extends PhaseWithMinAge> {
   rolloverEnabled: boolean;
-  errors: Record<string, string[]>;
-  phase: string;
-  // TODO add types for phaseData and setPhaseData after policy is typed
-  phaseData: any;
-  setPhaseData: (dataKey: string, value: any) => void;
+  errors?: PhaseValidationErrors<T>;
+  phase: keyof Phases & string;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
   isShowingErrors: boolean;
 }
 
-export const MinAgeInput: React.FunctionComponent<Props> = ({
+export const MinAgeInput = <Phase extends PhaseWithMinAge>({
   rolloverEnabled,
   errors,
   phaseData,
   phase,
   setPhaseData,
   isShowingErrors,
-}) => {
+}: React.PropsWithChildren<Props<Phase>>): React.ReactElement => {
   let daysOptionLabel;
   let hoursOptionLabel;
   let minutesOptionLabel;
@@ -192,15 +191,17 @@ export const MinAgeInput: React.FunctionComponent<Props> = ({
     );
   }
 
+  // check that these strings are valid properties
+  const selectedMinimumAgeProperty = propertyof<Phase>('selectedMinimumAge');
+  const selectedMinimumAgeUnitsProperty = propertyof<Phase>('selectedMinimumAgeUnits');
   return (
     <EuiFlexGroup>
       <EuiFlexItem style={{ maxWidth: 140 }}>
         <ErrableFormRow
-          id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
+          id={`${phase}-${selectedMinimumAgeProperty}`}
           label={getTimingLabelForPhase(phase)}
-          errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
-          errors={errors}
+          errors={errors?.selectedMinimumAge}
           helpText={
             <LearnMoreLink
               docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
@@ -214,10 +215,10 @@ export const MinAgeInput: React.FunctionComponent<Props> = ({
           }
         >
           <EuiFieldNumber
-            id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
-            value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
+            id={`${phase}-${selectedMinimumAgeProperty}`}
+            value={phaseData.selectedMinimumAge}
             onChange={async (e) => {
-              setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
+              setPhaseData(selectedMinimumAgeProperty, e.target.value);
             }}
             min={0}
           />
@@ -227,8 +228,8 @@ export const MinAgeInput: React.FunctionComponent<Props> = ({
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}
-            value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
-            onChange={(e) => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
+            value={phaseData.selectedMinimumAgeUnits}
+            onChange={(e) => setPhaseData(selectedMinimumAgeUnitsProperty, e.target.value)}
             options={[
               {
                 value: 'd',

@@ -4,78 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './copy_to_space_form.scss';
 import React from 'react';
-import {
-  EuiSwitch,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../types';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import { CopyModeControl, CopyMode } from './copy_mode_control';
 
 interface Props {
+  savedObject: SavedObjectsManagementRecord;
   spaces: Space[];
   onUpdate: (copyOptions: CopyOptions) => void;
   copyOptions: CopyOptions;
 }
 
 export const CopyToSpaceForm = (props: Props) => {
-  const setOverwrite = (overwrite: boolean) => props.onUpdate({ ...props.copyOptions, overwrite });
+  const { savedObject, spaces, onUpdate, copyOptions } = props;
+
+  // if the user is not creating new copies, prevent them from copying objects an object into a space where it already exists
+  const getDisabledSpaceIds = (createNewCopies: boolean) =>
+    createNewCopies
+      ? new Set<string>()
+      : (savedObject.namespaces ?? []).reduce((acc, cur) => acc.add(cur), new Set<string>());
+
+  const changeCopyMode = ({ createNewCopies, overwrite }: CopyMode) => {
+    const disabled = getDisabledSpaceIds(createNewCopies);
+    const selectedSpaceIds = copyOptions.selectedSpaceIds.filter((x) => !disabled.has(x));
+    onUpdate({ ...copyOptions, createNewCopies, overwrite, selectedSpaceIds });
+  };
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
-    props.onUpdate({ ...props.copyOptions, selectedSpaceIds });
+    onUpdate({ ...copyOptions, selectedSpaceIds });
 
   return (
     <div data-test-subj="copy-to-space-form">
-      <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
-        <EuiListGroupItem
-          className="spcCopyToSpaceIncludeRelated"
-          iconType={'check'}
-          label={
-            <span className="spcCopyToSpaceIncludeRelated__label">
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
-                defaultMessage="Including related saved objects"
-              />
-            </span>
-          }
-        />
-      </EuiListGroup>
-
-      <EuiSpacer />
-
-      <EuiSwitch
-        data-test-subj="cts-form-overwrite"
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.automaticallyOverwrite"
-            defaultMessage="Automatically overwrite all saved objects"
-          />
-        }
-        checked={props.copyOptions.overwrite}
-        onChange={(e) => setOverwrite(e.target.checked)}
+      <CopyModeControl
+        initialValues={copyOptions}
+        updateSelection={(newValues: CopyMode) => changeCopyMode(newValues)}
       />
 
-      <EuiHorizontalRule margin="m" />
+      <EuiSpacer />
 
       <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-            defaultMessage="Select spaces to copy into"
+            defaultMessage="Select space(s):"
           />
         }
         fullWidth
       >
         <SelectableSpacesControl
-          spaces={props.spaces}
-          selectedSpaceIds={props.copyOptions.selectedSpaceIds}
+          spaces={spaces}
+          selectedSpaceIds={copyOptions.selectedSpaceIds}
+          disabledSpaceIds={getDisabledSpaceIds(copyOptions.createNewCopies)}
           onChange={(selection) => setSelectedSpaceIds(selection)}
         />
       </EuiFormRow>

@@ -227,7 +227,7 @@ export class TopNPanelConfig extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -243,7 +243,7 @@ export class TopNPanelConfig extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }

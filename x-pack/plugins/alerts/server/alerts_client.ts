@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, omitBy, isUndefined, isEqual, map, uniq, pick, truncate } from 'lodash';
+import { omit, omitBy, isUndefined, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Logger, SavedObjectReference, SavedObject } from 'src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
@@ -1060,7 +1060,7 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
+    return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
 }
 
