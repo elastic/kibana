@@ -49,8 +49,6 @@ See also <<breaking-changes-7.9,breaking changes in 7.9>>.
 [float]
 [[bug-v7.9.1]]
 === Bug fixes
-Alerting::
-* Fixes alerts unable to create / update when the name has trailing whitepaces {kibana-pull}76079[#76079]
 APM::
 * Pluralizes for occurrences vs occurrence {kibana-pull}74564[#74564]
 * User can't navigate back home using browser nav when clicking link {kibana-pull}75755[#75755]
@@ -69,6 +67,7 @@ Machine Learning::
 * Adds date picker back onto index based data visualizer page {kibana-pull}75658[#75658]
 * Adds authorization header to DFA job update request {kibana-pull}75899[#75899]
 * Removes encoding for scheduled events labels  {kibana-pull}75973[#75973]
+* Anomaly Explorer / Single Metric Viewer: Fix error reporting for annotations {kibana-pull}74953[#74953]
 Management::
 * The watch API considers an index action without a defined index name to be valid, but the Watcher UI 
 didn't validate accordingly. This resulted in a bug manifested as the UI rejecting attempts to create 
