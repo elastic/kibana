@@ -14,7 +14,11 @@ import { StepAboutRule } from '.';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import {
+  AboutStepRule,
+  RuleStepsFormHooks,
+  RuleStep,
+} from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -30,7 +34,19 @@ afterAll(() => {
 });
 /* eslint-enable no-console */
 
-describe.skip('StepAboutRuleComponent', () => {
+describe('StepAboutRuleComponent', () => {
+  let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
+  const setFormHook = <K extends keyof RuleStepsFormHooks>(
+    step: K,
+    hook: RuleStepsFormHooks[K]
+  ) => {
+    formHook = hook as typeof formHook;
+  };
+
+  beforeEach(() => {
+    formHook = null;
+  });
+
   test('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
     const wrapper = shallow(
       <StepAboutRule
@@ -45,7 +61,7 @@ describe.skip('StepAboutRuleComponent', () => {
     expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
   });
 
-  test('it prevents user from clicking continue if no "description" defined', () => {
+  it('is invalid if description is not present', async () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -53,42 +69,28 @@ describe.skip('StepAboutRuleComponent', () => {
           defaultValues={stepAboutDefaultValue}
           descriptionColumns="multi"
           isReadOnlyView={false}
+          setForm={setFormHook}
           isLoading={false}
-          setForm={jest.fn()}
         />
       </ThemeProvider>
     );
+
+    if (!formHook) {
+      throw new Error('Form hook not set, but tests depend on it');
+    }
 
     wrapper
       .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
       .first()
       .simulate('change', { target: { value: 'Test name text' } });
 
-    const descriptionInput = wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first();
     wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
 
-    expect(
-      wrapper.find('[data-test-subj="detectionEngineStepAboutRuleName"] input').first().props()
-        .value
-    ).toEqual('Test name text');
-    expect(descriptionInput.props().value).toEqual('');
-    expect(
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] label')
-        .first()
-        .hasClass('euiFormLabel-isInvalid')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] EuiTextArea')
-        .first()
-        .prop('isInvalid')
-    ).toBeTruthy();
+    const result = await formHook();
+    expect(result?.isValid).toEqual(false);
   });
 
-  test('it prevents user from clicking continue if no "name" defined', () => {
+  it('is invalid if no "name" is present', async () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -96,72 +98,58 @@ describe.skip('StepAboutRuleComponent', () => {
           defaultValues={stepAboutDefaultValue}
           descriptionColumns="multi"
           isReadOnlyView={false}
+          setForm={setFormHook}
           isLoading={false}
-          setForm={jest.fn()}
         />
       </ThemeProvider>
     );
+
+    if (!formHook) {
+      throw new Error('Form hook not set, but tests depend on it');
+    }
 
     wrapper
       .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
       .first()
       .simulate('change', { target: { value: 'Test description text' } });
 
-    const nameInput = wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first();
-
     wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
 
-    expect(
+    const result = await formHook();
+    expect(result?.isValid).toEqual(false);
+  });
+
+  it('is valid if both "name" and "description" are present', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          setForm={setFormHook}
+          isLoading={false}
+        />
+      </ThemeProvider>
+    );
+
+    if (!formHook) {
+      throw new Error('Form hook not set, but tests depend on it');
+    }
+
+    await act(async () => {
       wrapper
         .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
         .first()
-        .props().value
-    ).toEqual('Test description text');
-    expect(nameInput.props().value).toEqual('');
-    expect(
+        .simulate('change', { target: { value: 'Test description text' } });
       wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] label')
+        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
         .first()
-        .hasClass('euiFormLabel-isInvalid')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] EuiFieldText')
-        .first()
-        .prop('isInvalid')
-    ).toBeTruthy();
-  });
+        .simulate('change', { target: { value: 'Test name text' } });
 
-  test('it allows user to click continue if "name" and "description" are defined', async () => {
-    const stepDataMock = jest.fn();
-    const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          isLoading={false}
-          setForm={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
-
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
-
-    await act(async () => {
-      wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click').update();
+      wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
     });
+
     const expected: AboutStepRule = {
       author: [],
       isAssociatedToEndpointList: false,
@@ -174,7 +162,7 @@ describe.skip('StepAboutRuleComponent', () => {
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: { value: 50, mapping: [], isMappingChecked: false },
+      riskScore: { value: 21, mapping: [], isMappingChecked: false },
       severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
       tags: [],
       threat: [
@@ -186,11 +174,12 @@ describe.skip('StepAboutRuleComponent', () => {
       ],
     };
 
-    expect(stepDataMock.mock.calls[0][1]).toEqual(expected);
+    const result = await formHook();
+    expect(result?.isValid).toEqual(true);
+    expect(result?.data).toEqual(expected);
   });
 
   test('it allows user to set the risk score as a number (and not a string)', async () => {
-    const stepDataMock = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -198,32 +187,35 @@ describe.skip('StepAboutRuleComponent', () => {
           defaultValues={stepAboutDefaultValue}
           descriptionColumns="multi"
           isReadOnlyView={false}
+          setForm={setFormHook}
           isLoading={false}
-          setForm={jest.fn()}
         />
       </ThemeProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
-
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
-
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
-      .first()
-      .simulate('change', { target: { value: '80' } });
+    if (!formHook) {
+      throw new Error('Form hook not set, but tests depend on it');
+    }
 
     await act(async () => {
+      wrapper
+        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+        .first()
+        .simulate('change', { target: { value: 'Test name text' } });
+
+      wrapper
+        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+        .first()
+        .simulate('change', { target: { value: 'Test description text' } });
+
+      wrapper
+        .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
+        .first()
+        .simulate('change', { target: { value: '80' } });
       wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
     });
 
-    const expected: Omit<AboutStepRule, 'isNew'> = {
+    const expected: AboutStepRule = {
       author: [],
       isAssociatedToEndpointList: false,
       isBuildingBlock: false,
@@ -246,6 +238,9 @@ describe.skip('StepAboutRuleComponent', () => {
         },
       ],
     };
-    expect(stepDataMock.mock.calls[0][1]).toEqual(expected);
+
+    const result = await formHook();
+    expect(result?.isValid).toEqual(true);
+    expect(result?.data).toEqual(expected);
   });
 });
