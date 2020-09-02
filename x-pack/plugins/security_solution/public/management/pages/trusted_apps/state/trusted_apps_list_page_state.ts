@@ -8,21 +8,21 @@ import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { ServerApiError } from '../../../../common/types';
 import { AsyncDataBinding } from './async_data_binding';
 
-export interface PageInfo {
+export interface PaginationInfo {
   index: number;
   size: number;
 }
 
-export interface TrustedAppsItemsPage {
+export interface TrustedAppsListData {
   items: TrustedApp[];
-  pageInfo: PageInfo;
   totalItemsCount: number;
+  paginationInfo: PaginationInfo;
 }
 
-export interface TrustedAppsPageState {
-  list: {
-    currentPage: AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>;
-    currentPageInfo: PageInfo;
+export interface TrustedAppsListPageState {
+  listView: {
+    currentListData: AsyncDataBinding<TrustedAppsListData, ServerApiError>;
+    currentPaginationInfo: PaginationInfo;
   };
   active: boolean;
 }
