@@ -21,6 +21,8 @@ import expect from '@kbn/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -280,9 +282,6 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-      ////
       it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
@@ -330,7 +329,6 @@ export default function ({ getService, getPageObjects }) {
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
         expect(isSuccessful).to.be(true);
       });
-      ////
 
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.savedObjects.importFile(
