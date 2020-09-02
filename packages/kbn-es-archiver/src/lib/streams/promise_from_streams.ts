@@ -30,14 +30,17 @@
  *  Errors emitted from any stream will cause
  *  the promise to be rejected with that error.
  *
- *  @param  {Array<Stream>} streams
- *  @return {Promise<any>}
+ *  @param streams
+ *  @return
  */
 
 import { pipeline, Writable } from 'stream';
+import { promisify } from 'util';
 
-export async function createPromiseFromStreams(streams) {
-  let finalChunk;
+const asyncPipeline = promisify(pipeline);
+
+export async function createPromiseFromStreams<T = any>(streams: any): Promise<T> {
+  let finalChunk: any;
   const last = streams[streams.length - 1];
   if (typeof last.read !== 'function' && streams.length === 1) {
     // For a nicer error than what stream.pipeline throws
@@ -50,17 +53,15 @@ export async function createPromiseFromStreams(streams) {
         // Use object mode even when "last" stream isn't. This allows to
         // capture the last chunk as-is.
         objectMode: true,
-        write(chunk, enc, done) {
+        write(chunk, _, done) {
           finalChunk = chunk;
           done();
         },
       })
     );
   }
-  return new Promise((resolve, reject) => {
-    pipeline(...streams, (err) => {
-      if (err) return reject(err);
-      resolve(finalChunk);
-    });
-  });
+
+  await asyncPipeline(...(streams as [any]));
+
+  return finalChunk;
 }

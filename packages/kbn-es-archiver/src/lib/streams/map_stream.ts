@@ -17,27 +17,19 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
+import { Transform } from 'stream';
 
-/**
- *  Create a Readable stream that provides the items
- *  from a list as objects to subscribers
- *
- *  @param  {Array<any>} items - the list of items to provide
- *  @return {Readable}
- */
-export function createListStream(items = []) {
-  const queue = [].concat(items);
+export function createMapStream<T = any>(fn: (chunk: any, i: number) => T | Promise<T>) {
+  let i = 0;
 
-  return new Readable({
+  return new Transform({
     objectMode: true,
-    read(size) {
-      queue.splice(0, size).forEach((item) => {
-        this.push(item);
-      });
-
-      if (!queue.length) {
-        this.push(null);
+    async transform(value, _, done) {
+      try {
+        this.push(await fn(value, i++));
+        done();
+      } catch (err) {
+        done(err);
       }
     },
   });

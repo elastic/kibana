@@ -26,13 +26,16 @@ import { Transform } from 'stream';
  *  stream provides the result of final call to the reducer to
  *  subscribers.
  *
- *  @param  {Function}
- *  @param  {any} initial Initial value for the stream, if undefined
+ *  @param
+ *  @param  initial Initial value for the stream, if undefined
  *                        then the first chunk provided is used as the
  *                        initial value.
- *  @return {Transform}
+ *  @return
  */
-export function createReduceStream(reducer, initial) {
+export function createReduceStream(
+  reducer: (acc: any, chunk: any, env: string) => any,
+  initial: any
+) {
   let i = -1;
   let value = initial;
 

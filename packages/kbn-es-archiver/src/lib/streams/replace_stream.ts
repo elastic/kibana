@@ -19,7 +19,7 @@
 
 import { Transform } from 'stream';
 
-export function createReplaceStream(toReplace, replacement) {
+export function createReplaceStream(toReplace: string, replacement: string) {
   if (typeof toReplace !== 'string') {
     throw new TypeError('toReplace must be a string');
   }
@@ -27,7 +27,7 @@ export function createReplaceStream(toReplace, replacement) {
   let buffer = Buffer.alloc(0);
   return new Transform({
     objectMode: false,
-    async transform(value, enc, done) {
+    async transform(value, _, done) {
       try {
         buffer = Buffer.concat([buffer, value], buffer.length + value.length);
 
@@ -78,7 +78,6 @@ export function createReplaceStream(toReplace, replacement) {
         this.push(buffer);
       }
 
-      buffer = null;
       callback();
     },
   });

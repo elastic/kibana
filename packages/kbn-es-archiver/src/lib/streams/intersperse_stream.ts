@@ -37,16 +37,16 @@ import { Transform } from 'stream';
  *      createConcatStream()
  *    ]) // produces a single value "foo bar"
  *
- *  @param  {String|Buffer} intersperseChunk
- *  @return {Transform}
+ *  @param intersperseChunk
+ *  @return
  */
-export function createIntersperseStream(intersperseChunk) {
+export function createIntersperseStream(intersperseChunk: any) {
   let first = true;
 
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
-    transform(chunk, enc, callback) {
+    transform(chunk, _, callback) {
       try {
         if (first) {
           first = false;
@@ -55,7 +55,7 @@ export function createIntersperseStream(intersperseChunk) {
         }
 
         this.push(chunk);
-        callback(null);
+        callback(undefined);
       } catch (err) {
         callback(err);
       }

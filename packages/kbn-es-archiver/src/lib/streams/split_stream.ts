@@ -35,16 +35,16 @@ import { Transform } from 'stream';
  *    - an empty string or Buffer will not produce a stream of individual
  *      bytes like `string.split('')` would
  *
- *  @param  {String} splitChunk
- *  @return {Transform}
+ *  @param splitChunk
+ *  @return
  */
-export function createSplitStream(splitChunk) {
+export function createSplitStream(splitChunk: string) {
   let unsplitBuffer = Buffer.alloc(0);
 
   return new Transform({
     writableObjectMode: false,
     readableObjectMode: true,
-    transform(chunk, enc, callback) {
+    transform(chunk, _, callback) {
       try {
         let i;
         let toSplit = Buffer.concat([unsplitBuffer, chunk]);
@@ -55,7 +55,7 @@ export function createSplitStream(splitChunk) {
         }
 
         unsplitBuffer = toSplit;
-        callback(null);
+        callback(undefined);
       } catch (err) {
         callback(err);
       }
@@ -65,7 +65,7 @@ export function createSplitStream(splitChunk) {
       try {
         this.push(unsplitBuffer.toString('utf8'));
 
-        callback(null);
+        callback(undefined);
       } catch (err) {
         callback(err);
       }

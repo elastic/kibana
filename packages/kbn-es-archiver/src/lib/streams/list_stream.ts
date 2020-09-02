@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { Transform } from 'stream';
+import { Readable } from 'stream';
 
-export function createMapStream(fn) {
-  let i = 0;
+/**
+ *  Create a Readable stream that provides the items
+ *  from a list as objects to subscribers
+ *
+ *  @param items - the list of items to provide
+ *  @return
+ */
+export function createListStream(items: any | any[] = []) {
+  const queue: any[] = [].concat(items);
 
-  return new Transform({
+  return new Readable({
     objectMode: true,
-    async transform(value, enc, done) {
-      try {
-        this.push(await fn(value, i++));
-        done();
-      } catch (err) {
-        done(err);
+    read(size) {
+      queue.splice(0, size).forEach((item) => {
+        this.push(item);
+      });
+
+      if (!queue.length) {
+        this.push(null);
       }
     },
   });

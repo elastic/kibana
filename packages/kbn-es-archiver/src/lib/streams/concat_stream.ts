@@ -17,28 +17,30 @@
  * under the License.
  */
 
-import { createListStream } from './';
+import { createReduceStream } from './reduce_stream';
 
-describe('listStream', () => {
-  test('provides the values in the initial list', async () => {
-    const str = createListStream([1, 2, 3, 4]);
-    const onData = jest.fn();
-    str.on('data', onData);
-
-    await new Promise((resolve) => str.on('end', resolve));
-
-    expect(onData).toHaveBeenCalledTimes(4);
-    expect(onData.mock.calls[0]).toEqual([1]);
-    expect(onData.mock.calls[1]).toEqual([2]);
-    expect(onData.mock.calls[2]).toEqual([3]);
-    expect(onData.mock.calls[3]).toEqual([4]);
-  });
-
-  test('does not modify the list passed', async () => {
-    const list = [1, 2, 3, 4];
-    const str = createListStream(list);
-    str.resume();
-    await new Promise((resolve) => str.on('end', resolve));
-    expect(list).toEqual([1, 2, 3, 4]);
-  });
-});
+/**
+ *  Creates a Transform stream that consumes all provided
+ *  values and concatenates them using each values `concat`
+ *  method.
+ *
+ *  Concatenate strings:
+ *    createListStream(['f', 'o', 'o'])
+ *      .pipe(createConcatStream())
+ *      .on('data', console.log)
+ *      // logs "foo"
+ *
+ *  Concatenate values into an array:
+ *    createListStream([1,2,3])
+ *      .pipe(createConcatStream([]))
+ *      .on('data', console.log)
+ *      // logs "[1,2,3]"
+ *
+ *
+ *  @param {any} initial The initial value that subsequent
+ *                       items will concat with
+ *  @return {Transform}
+ */
+export function createConcatStream(initial: any) {
+  return createReduceStream((acc, chunk) => acc.concat(chunk), initial);
+}
