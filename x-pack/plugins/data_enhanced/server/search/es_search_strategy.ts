@@ -112,14 +112,18 @@ async function asyncSearch(
   });
 
   // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
-  const esResponse = await client.transport.request({
+  const promise = client.transport.request({
     method,
     path,
     body,
     querystring,
   });
 
+  // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+  if (options?.signal) options.signal.addEventListener('abort', () => promise.abort());
+  const esResponse = await promise;
   const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
+
   return {
     id,
     isPartial,
@@ -139,14 +143,18 @@ async function rollupSearch(
   const path = encodeURI(`/${index}/_rollup_search`);
   const querystring = toSnakeCase(params);
 
-  const esResponse = await client.transport.request({
+  const promise = client.transport.request({
     method,
     path,
     body,
     querystring,
   });
 
+  // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+  if (options?.signal) options.signal.addEventListener('abort', () => promise.abort());
+  const esResponse = await promise;
   const response = esResponse.body as SearchResponse<any>;
+
   return {
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
