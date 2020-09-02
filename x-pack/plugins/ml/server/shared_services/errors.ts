@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { annotationProvider } from './annotation';
-
-export function annotationServiceProvider(client: IScopedClusterClient) {
-  return {
-    ...annotationProvider(client),
-  };
+export class MLClusterClientUninitialized extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }
