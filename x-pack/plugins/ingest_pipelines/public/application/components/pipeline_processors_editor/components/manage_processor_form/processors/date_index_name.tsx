@@ -65,7 +65,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldHelpText',
-      { defaultMessage: 'Prefix to add to the index name before the printed date.' }
+      { defaultMessage: 'Prefix to add before the printed date in the index name.' }
     ),
   },
   index_name_format: {
