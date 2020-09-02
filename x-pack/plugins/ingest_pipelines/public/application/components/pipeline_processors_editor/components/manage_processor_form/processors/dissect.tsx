@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
+import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TextEditor } from '../field_components';

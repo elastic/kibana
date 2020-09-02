@@ -5,7 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent, ReactNode } from 'react';
+import { React, FunctionComponent, ReactNode } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import {
   Append,
@@ -86,7 +88,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.convert', {
       defaultMessage:
-        'Converts a field in the currently ingested document to a different type, such as converting a string to an integer.',
+        'Converts a field to a different data type. For example, you can convert a string to an long.',
     }),
   },
   csv: {
@@ -115,10 +117,15 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
       defaultMessage: 'Date index name',
     }),
-    description: i18n.translate('xpack.ingestPipelines.processors.description.dateIndexName', {
-      defaultMessage:
-        'Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as my-index-yyyy-MM-dd.',
-    }),
+    description: {
+      defaultMessage: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.processors.description.dateIndexName"
+          defaultMessage="Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as {value}."
+          values={{ value: <EuiCode inline>{'my-index-yyyy-MM-dd'}</EuiCode> }}
+        />
+      ),
+    },
   },
   dissect: {
     FieldsComponent: Dissect,
