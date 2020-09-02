@@ -85,6 +85,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             isCaseOwned: true,
           },
           secrets: mockJira.secrets,
+        })
+        .expect(403, {
+          statusCode: 403,
+          error: 'Forbidden',
+          message:
+            'Action type .jira is disabled because your basic license does not support it. Please upgrade your license.',
         });
     });
   });
