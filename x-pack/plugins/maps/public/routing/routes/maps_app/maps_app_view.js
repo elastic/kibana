@@ -459,7 +459,7 @@ export class MapsAppView extends React.Component {
     newFilters.forEach((filter) => {
       filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
     });
-    this._onFiltersChange([...this.props.filters, ...newFilters]);
+    this._updateFiltersAndDispatch([...this.props.filters, ...newFilters]);
   };
 
   render() {
