@@ -4,11 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { annotationProvider } from './annotation';
-
-export function annotationServiceProvider(client: IScopedClusterClient) {
-  return {
-    ...annotationProvider(client),
-  };
-}
+export { LicenseCheck, licenseChecks } from './license_checks';
+export { InsufficientBasicLicenseError, InsufficientFullLicenseError } from './errors';
