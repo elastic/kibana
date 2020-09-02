@@ -126,6 +126,7 @@ export class DocumentMigrator implements VersionedTransformer {
       kibanaVersion,
       migrations: this.migrations,
       validateDoc,
+      log,
     });
   }
 
@@ -234,14 +235,16 @@ function buildDocumentTransform({
   kibanaVersion,
   migrations,
   validateDoc,
+  log,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
   validateDoc: ValidateDoc;
+  log: Logger;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
-      ? applyMigrations(doc, migrations)
+      ? applyMigrations(doc, migrations, log)
       : markAsUpToDate(doc, migrations);
 
     validateDoc(result);
@@ -257,13 +260,24 @@ function buildDocumentTransform({
   };
 }
 
-function applyMigrations(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
-  while (true) {
-    const prop = nextUnmigratedProp(doc, migrations);
-    if (!prop) {
-      return doc;
+function applyMigrations(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  log: Logger
+) {
+  try {
+    while (true) {
+      const prop = nextUnmigratedProp(doc, migrations);
+      if (!prop) {
+        return doc;
+      }
+      doc = migrateProp(doc, prop, migrations);
     }
-    doc = migrateProp(doc, prop, migrations);
+  } catch (e) {
+    if (!e.alreadyLogged) {
+      log.error(`Error applying migrations to doc ${doc.type}:${doc.id}: ${e}`);
+    }
+    throw e;
   }
 }
 
@@ -325,6 +339,8 @@ function wrapWithTry(
       log.warn(
         `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
       );
+
+      error.alreadyLogged = true;
       throw error;
     }
   };
@@ -360,7 +376,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
 }
 
 /**
- * Applies any relevent migrations to the document for the specified property.
+ * Applies any relevant migrations to the document for the specified property.
  */
 function migrateProp(
   doc: SavedObjectUnsanitizedDoc,

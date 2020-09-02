@@ -25,9 +25,6 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-const mockLoggerFactory = loggingSystemMock.create();
-const mockLogger = mockLoggerFactory.get('mock logger');
-
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
   types.forEach((type) =>
@@ -44,6 +41,14 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 };
 
 describe('DocumentMigrator', () => {
+  let mockLoggerFactory: ReturnType<typeof loggingSystemMock.create>;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    mockLoggerFactory = loggingSystemMock.create();
+    mockLogger = mockLoggerFactory.get('mock logger');
+  });
+
   function testOpts() {
     return {
       kibanaVersion: '25.2.3',
@@ -579,6 +584,71 @@ describe('DocumentMigrator', () => {
     }
   });
 
+  it('logs error during `applyMigrations` that are outside of transform functions', () => {
+    const log = mockLogger;
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
+          '1.2.3': (doc) => doc,
+        },
+      }),
+      log,
+    });
+    const higherVersionDoc = {
+      id: 'smelly',
+      type: 'dog',
+      attributes: {},
+      migrationVersion: {
+        dog: '76.12.1',
+      },
+    };
+
+    try {
+      migrator.migrate(_.cloneDeep(higherVersionDoc));
+      expect('Did not throw').toEqual('But it should have!');
+    } catch (error) {
+      expect(error.message).toMatchInlineSnapshot(
+        `"Document \\"smelly\\" has property \\"dog\\" which belongs to a more recent version of Kibana [76.12.1]. The last known version is [1.2.3]"`
+      );
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      const loggedError = loggingSystemMock.collect(mockLoggerFactory).error[0][0];
+      expect(loggedError).toMatchInlineSnapshot(
+        `"Error applying migrations to doc dog:smelly: Error: Document \\"smelly\\" has property \\"dog\\" which belongs to a more recent version of Kibana [76.12.1]. The last known version is [1.2.3]"`
+      );
+    }
+  });
+
+  it('only logs error from transform function once', () => {
+    const log = mockLogger;
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
+          '1.2.3': () => {
+            throw new Error('Dang diggity!');
+          },
+        },
+      }),
+      log,
+    });
+    const failedDoc = {
+      id: 'smelly',
+      type: 'dog',
+      attributes: {},
+      migrationVersion: {},
+    };
+    try {
+      migrator.migrate(_.cloneDeep(failedDoc));
+      expect('Did not throw').toEqual('But it should have!');
+    } catch (error) {
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    }
+  });
+
   it('logs message in transform function', () => {
     const logTestMsg = '...said the joker to the thief';
     const migrator = new DocumentMigrator({
@@ -603,7 +673,7 @@ describe('DocumentMigrator', () => {
     };
     migrator.migrate(doc);
     expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-    expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).warn[0][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {

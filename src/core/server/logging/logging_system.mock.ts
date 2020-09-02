@@ -22,6 +22,10 @@ import { ILoggingSystem } from './logging_system';
 import { LoggerFactory } from './logger_factory';
 import { loggerMock, MockedLogger } from './logger.mock';
 
+type MockedLoggingSystem = Omit<jest.Mocked<ILoggingSystem>, 'get'> & {
+  get: jest.MockedFunction<(...context: string[]) => MockedLogger>;
+};
+
 const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();
 
@@ -30,7 +34,7 @@ const createLoggingSystemMock = () => {
     context,
   }));
 
-  const mocked: jest.Mocked<ILoggingSystem> = {
+  const mocked: MockedLoggingSystem = {
     get: jest.fn(),
     asLoggerFactory: jest.fn(),
     setContextConfig: jest.fn(),
