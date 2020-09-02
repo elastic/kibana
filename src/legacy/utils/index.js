@@ -34,4 +34,5 @@ export {
   createSplitStream,
   createMapStream,
   createReplaceStream,
+  createFilterStream,
 } from '../../core/server/utils/';
