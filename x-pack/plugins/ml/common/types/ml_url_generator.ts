@@ -52,11 +52,7 @@ export interface AnomalyDetectionQueryState {
 
 export type AnomalyDetectionUrlState = MLPageState<
   typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  | {
-      jobId?: JobId;
-      groupIds?: string[];
-    }
-  | undefined
+  AnomalyDetectionQueryState | undefined
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {

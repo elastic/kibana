@@ -11,14 +11,13 @@ import {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsQueryState,
-  DataFrameAnalyticsUrlState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 
 export function createDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
-  mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
+  mlUrlGeneratorState: DataFrameAnalyticsQueryState | undefined
 ): string {
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
 
