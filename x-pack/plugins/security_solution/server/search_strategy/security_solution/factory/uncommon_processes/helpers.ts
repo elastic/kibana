@@ -65,16 +65,19 @@ export const formatUncommonProcessesData = (
     (flattenedFields, fieldName) => {
       flattenedFields.node._id = hit._id;
       flattenedFields.node.instances = getOr(0, 'total.value', hit);
-      // flattenedFields.node.hosts = hit.host != null ? [[hit.host]] : [[]];
-      set('node.hosts', [[hit.host]], flattenedFields);
+      flattenedFields.node.hosts = hit.host;
+
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
       }
 
       const mergedResult = mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-      const fieldPath = `node.${fieldName}`;
-      const fieldValue = get(fieldPath, mergedResult);
-
+      let fieldPath = `node.${fieldName}`;
+      let fieldValue = get(fieldPath, mergedResult);
+      if (fieldPath === 'node.hosts.name') {
+        fieldPath = `node.hosts.0.name`;
+        fieldValue = get(fieldPath, mergedResult);
+      }
       return set(fieldPath, toArray(fieldValue), mergedResult);
     },
     {
