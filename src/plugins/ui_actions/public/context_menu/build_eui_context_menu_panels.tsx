@@ -22,7 +22,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { Action } from '../actions';
+import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
 import { BaseContext } from '../types';
 
@@ -51,17 +51,19 @@ export async function buildContextMenuForActions({
   actions: ActionWithContext[];
   title?: string;
   closeMenu: () => void;
-}): Promise<EuiContextMenuPanelDescriptor> {
+}): Promise<EuiContextMenuPanelDescriptor[]> {
   const menuItems = await buildEuiContextMenuPanelItems({
     actions,
     closeMenu,
   });
 
-  return {
-    id: 'mainMenu',
-    title,
-    items: menuItems,
-  };
+  return [
+    {
+      id: 'mainMenu',
+      title,
+      items: menuItems,
+    },
+  ];
 }
 
 /**
@@ -108,22 +110,12 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
   trigger: Trigger;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelItemDescriptor> {
+  const context: ActionExecutionContext<Context> = { ...actionContext, trigger };
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
-      ? React.createElement(uiToReactComponent(action.MenuItem), {
-          context: {
-            ...actionContext,
-            trigger,
-          },
-        })
-      : action.getDisplayName({
-          ...actionContext,
-          trigger,
-        }),
-    icon: action.getIconType({
-      ...actionContext,
-      trigger,
-    }),
+      ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+      : action.getDisplayName(context),
+    icon: action.getIconType(context),
     panel: _.get(action, 'childContextMenuPanel.id'),
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
@@ -138,29 +130,20 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        action.execute({
-          ...actionContext,
-          trigger,
-        });
+        action.execute(context);
       } else {
         // let browser handle navigation
       }
     } else {
       // not a link
-      action.execute({
-        ...actionContext,
-        trigger,
-      });
+      action.execute(context);
     }
 
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = await action.getHref({
-      ...actionContext,
-      trigger,
-    });
+    const href = await action.getHref(context);
     if (href) {
       menuPanelItem.href = href;
     }
