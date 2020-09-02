@@ -14,7 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./bwc_generation_urls'));
     loadTestFile(require.resolve('./csv_job_params'));
     loadTestFile(require.resolve('./csv_saved_search'));
-    loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./network_policy'));
+    loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./usage'));
   });
 }
