@@ -5,7 +5,9 @@
  */
 
 export * from './tls';
+export * from './http';
 
 export enum NetworkQueries {
+  http = 'http',
   tls = 'tls',
 }
