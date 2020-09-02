@@ -13,6 +13,7 @@ import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
+import { getBasePath } from '../../../../util/dependency_cache';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -31,7 +32,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(`#/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
+    window.open(`${basePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
   }
 
   // Note we use display:none for the DataRecognizer section as it needs to be
