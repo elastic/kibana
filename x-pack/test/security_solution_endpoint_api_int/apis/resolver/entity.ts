@@ -25,8 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
       // this id is from the es archive
       const _id = 'fa7eb1546f44fd47d8868be8d74e0082e19f22df493c67a7725457978eb648ab';
       const { body }: { body: ResolverEntityIndex } = await supertest.get(
-        // using the same indices value here twice to force the query parameter to be an array
-        // for some reason using supertest's query() function doesn't construct a parsable array
         `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
       );
       expect(body).eql([
@@ -42,8 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
       // this id is from the es archive
       const _id = 'no-entity-id-field';
       const { body }: { body: ResolverEntityIndex } = await supertest.get(
-        // using the same indices value here twice to force the query parameter to be an array
-        // for some reason using supertest's query() function doesn't construct a parsable array
         `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
       );
       expect(body).to.be.empty();
@@ -53,8 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
       // this id is from the es archive
       const _id = 'no-process-field';
       const { body }: { body: ResolverEntityIndex } = await supertest.get(
-        // using the same indices value here twice to force the query parameter to be an array
-        // for some reason using supertest's query() function doesn't construct a parsable array
         `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
       );
       expect(body).to.be.empty();
