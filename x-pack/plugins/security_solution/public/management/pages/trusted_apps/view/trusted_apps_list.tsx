@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -85,6 +85,9 @@ const COLUMN_DEFINITIONS = [
 ];
 
 export const TrustedAppsList = memo(() => {
+  const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex) - 1;
+  const pageSize = useTrustedAppsSelector(getListCurrentPageSize);
+  const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
   const history = useHistory();
 
   return (
@@ -93,11 +96,11 @@ export const TrustedAppsList = memo(() => {
       items={[...useTrustedAppsSelector(getListItems)]}
       error={useTrustedAppsSelector(getListErrorMessage)}
       loading={useTrustedAppsSelector(isListLoading)}
-      pagination={{
-        pageIndex: useTrustedAppsSelector(getListCurrentPageIndex) - 1,
-        pageSize: useTrustedAppsSelector(getListCurrentPageSize),
-        totalItemCount: useTrustedAppsSelector(getListTotalItemsCount),
-      }}
+      pagination={useMemo(() => ({ pageIndex, pageSize, totalItemCount }), [
+        pageIndex,
+        pageSize,
+        totalItemCount,
+      ])}
       onChange={useCallback(
         ({ page }: { page: { index: number; size: number } }) => {
           history.push(
