@@ -23,6 +23,9 @@ import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
 import { FieldSpec } from '../types';
 
 describe('Field', function () {
+  function flatten(obj: Record<string, any>) {
+    return JSON.parse(JSON.stringify(obj));
+  }
   function getField(values = {}) {
     return new IndexPatternField({ ...fieldValues, ...values });
   }
@@ -132,6 +135,11 @@ describe('Field', function () {
 
     const fieldD = getField({ scripted: false, indexed: false, searchable: false });
     expect(fieldD.filterable).toEqual(false);
+  });
+
+  it('exports the property to JSON', () => {
+    const field = new IndexPatternField(fieldValues);
+    expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
