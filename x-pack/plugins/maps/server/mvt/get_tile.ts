@@ -31,6 +31,29 @@ interface ESBounds {
   };
 }
 
+export async function getGridTile({
+  logger,
+  callElasticsearch,
+  index,
+  geometryFieldName,
+  x,
+  y,
+  z,
+  requestBody = {},
+}: {
+  x: number;
+  y: number;
+  z: number;
+  geometryFieldName: string;
+  index: string;
+  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  logger: Logger;
+  requestBody: any;
+}): Promise<Buffer | null> {
+  logger.warn('getGridTile not implemented');
+  return null;
+}
+
 export async function getTile({
   logger,
   callElasticsearch,
