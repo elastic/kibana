@@ -54,7 +54,7 @@ describe('NodesChangedAlert', () => {
   });
 
   describe('execute', () => {
-    function FakeDate() { }
+    function FakeDate() {}
     FakeDate.prototype.valueOf = () => 1;
 
     const clusterUuid = 'abc123';

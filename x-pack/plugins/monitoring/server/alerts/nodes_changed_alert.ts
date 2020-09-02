@@ -120,29 +120,29 @@ export class NodesChangedAlert extends BaseAlert {
     const addedText =
       Object.values(states.added).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.addedFiringMessage', {
-          defaultMessage: `Elasticsearch nodes '{added}' added to this cluster.`,
-          values: {
-            added: Object.values(states.added).join(','),
-          },
-        })
+            defaultMessage: `Elasticsearch nodes '{added}' added to this cluster.`,
+            values: {
+              added: Object.values(states.added).join(','),
+            },
+          })
         : null;
     const removedText =
       Object.values(states.removed).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.removedFiringMessage', {
-          defaultMessage: `Elasticsearch nodes '{removed}' removed from this cluster.`,
-          values: {
-            removed: Object.values(states.removed).join(','),
-          },
-        })
+            defaultMessage: `Elasticsearch nodes '{removed}' removed from this cluster.`,
+            values: {
+              removed: Object.values(states.removed).join(','),
+            },
+          })
         : null;
     const restartedText =
       Object.values(states.restarted).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage', {
-          defaultMessage: `Elasticsearch nodes '{restarted}' restarted in this cluster.`,
-          values: {
-            restarted: Object.values(states.restarted).join(','),
-          },
-        })
+            defaultMessage: `Elasticsearch nodes '{restarted}' restarted in this cluster.`,
+            values: {
+              restarted: Object.values(states.restarted).join(','),
+            },
+          })
         : null;
 
     return {
