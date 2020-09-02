@@ -16,7 +16,7 @@ const embeddableContextMenuDrilldownGrouping: PresentableGrouping<{ embeddable?:
   {
     id: 'drilldowns',
     getDisplayName: () => 'Drilldowns',
-    getIconType: () => 'tag',
+    getIconType: () => 'symlink',
     order: 25,
   },
 ];

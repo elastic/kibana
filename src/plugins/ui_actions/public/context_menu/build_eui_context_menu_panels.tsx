@@ -102,6 +102,7 @@ export async function buildContextMenuForActions({
           panels[parentPanel].items!.push({
             name,
             panel: currentPanel,
+            icon: group.getIconType ? group.getIconType(context) : 'empty',
             _order: group.order || 0,
           });
         }
