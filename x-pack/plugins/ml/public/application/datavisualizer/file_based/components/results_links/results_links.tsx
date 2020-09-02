@@ -58,7 +58,7 @@ export const ResultsLinks: FC<Props> = ({
       },
     });
     await navigateToPath(path);
-  }, [globalState]);
+  }, [indexPatternId, globalState]);
 
   const createNewMlJob = useCallback(async () => {
     const path = await mlUrlGenerator.createUrl({
@@ -69,7 +69,7 @@ export const ResultsLinks: FC<Props> = ({
       },
     });
     await navigateToPath(path);
-  }, [globalState]);
+  }, [indexPatternId, globalState]);
 
   useEffect(() => {
     setShowCreateJobLink(checkPermission('canCreateJob') && mlNodesAvailable());
@@ -124,7 +124,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`${basePath.get()}/app/discover#/?&_a=(index:'${indexPatternId}')${globalStateString}`}
+            href={`${basePath.get()}/app/discover/?&_a=(index:'${indexPatternId}')${globalStateString}`}
           />
         </EuiFlexItem>
       )}
