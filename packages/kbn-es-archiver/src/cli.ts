@@ -122,6 +122,7 @@ export function runCli() {
       `,
       flags: {
         boolean: ['raw'],
+        string: ['query'],
         help: `
           --raw              don't gzip the archives
         `,
@@ -140,7 +141,17 @@ export function runCli() {
           throw createFlagError('--raw does not take a value');
         }
 
-        await esArchiver.save(name, indices, { raw });
+        const query = flags.query;
+        let parsedQuery;
+        if (typeof query === 'string') {
+          try {
+            parsedQuery = JSON.parse(query);
+          } catch (err) {
+            throw createFlagError('--query should be valid JSON');
+          }
+        }
+
+        await esArchiver.save(name, indices, { raw, query: parsedQuery });
       },
     })
     .command({
