@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
@@ -65,7 +65,7 @@ export const TimelinesPageComponent: React.FC = () => {
                 {tabName === TimelineType.default ? (
                   <EuiFlexItem>
                     <NewTimeline
-                      timelineId="timeline-1"
+                      timelineId={TimelineId.active}
                       outline={true}
                       data-test-subj="create-default-btn"
                     />
