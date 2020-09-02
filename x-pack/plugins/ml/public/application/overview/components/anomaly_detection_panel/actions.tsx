@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 
-// @ts-ignore no module file
-
 interface Props {
   jobsList: MlSummaryJobs;
 }

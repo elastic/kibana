@@ -842,7 +842,7 @@ export class TimeSeriesExplorer extends React.Component {
       toastNotifications.addWarning(
         i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
           defaultMessage:
-            'The time filter changed to the full range for this job due to invalid default time filter. Please check the advanced settings for {field}.',
+            'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
           values: {
             field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
           },
