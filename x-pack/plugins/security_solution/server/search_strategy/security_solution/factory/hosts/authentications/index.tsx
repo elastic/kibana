@@ -9,50 +9,56 @@ import { getOr } from 'lodash/fp';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import {
-  NetworkHttpStrategyResponse,
-  NetworkQueries,
-  NetworkHttpRequestOptions,
-  NetworkHttpEdges,
-} from '../../../../../../common/search_strategy/security_solution/network';
+  AuthenticationsEdges,
+  AuthenticationsRequestOptions,
+  AuthenticationsStrategyResponse,
+  AuthenticationHit,
+} from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
+import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
+import { formatAuthenticationData, getHits } from './helpers';
 
-import { getHttpEdges } from './helpers';
-import { buildHttpQuery } from './query.http_network.dsl';
-
-export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
-  buildDsl: (options: NetworkHttpRequestOptions) => {
+export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
+  buildDsl: (options: AuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-    return buildHttpQuery(options);
+
+    return buildAuthenticationQuery(options);
   },
   parse: async (
-    options: NetworkHttpRequestOptions,
+    options: AuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<NetworkHttpStrategyResponse> => {
+  ): Promise<AuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.http_count.value', response.rawResponse);
-    const networkHttpEdges: NetworkHttpEdges[] = getHttpEdges(response);
+    const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
+
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = networkHttpEdges.splice(cursorStart, querySize - cursorStart);
+    const hits: AuthenticationHit[] = getHits(response);
+    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
+      formatAuthenticationData(hit, auditdFieldsMap)
+    );
+
+    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
-      dsl: [inspectStringifyObject(buildHttpQuery(options))],
+      dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
     return {
       ...response,
-      edges,
       inspect,
+      edges,
+      totalCount,
       pageInfo: {
         activePage: activePage ? activePage : 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },
-      totalCount,
     };
   },
 };
