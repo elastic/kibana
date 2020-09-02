@@ -25,10 +25,10 @@ import { xpackMocks } from '../../../../../../mocks';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { EndpointAppContext } from '../../types';
 import { ExceptionListClient, ListClient } from '../../../../../lists/server';
-import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
 import { DeleteTrustedAppsRequestParams } from './types';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
   lists?: {
@@ -49,7 +49,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    exceptionsListClient = getExceptionListClientMock() as jest.Mocked<ExceptionListClient>;
+    exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
     endpointAppContextService.start(startContract);
     endpointAppContext = {
       ...createMockEndpointAppContext(),
