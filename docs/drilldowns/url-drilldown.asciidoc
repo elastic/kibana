@@ -10,10 +10,10 @@ The destination URL can be dynamic, depending on the dashboard context or user�
 
 For example, you might have a dashboard that shows data from a Github repository.
 You can create a drilldown that navigates from this dashboard to Github.
-Refer to the Try it section for instructions on how to create this drilldown.
-TODO: link to try it section
+Refer to the <<try-it, Try it section>> for instructions on how to create this drilldown.
 
-[Example gif or video]
+[role="screenshot"]
+image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
 
 URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
 
@@ -37,7 +37,7 @@ image:images/url_drilldown_pick_an_action.png[Action picker]
 + 
 `https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}`
 +
-This example URL navigates to {kib} issues on Github. `{{event.value}}` will be substituted with a value associated with a clicked pie slice. Please note, that in _preview_ `{{event.value}}` is substituted with dummy value.
+This example URL navigates to {kib} issues on Github. `{{event.value}}` will be substituted with a value associated with a clicked pie slice. Please note, that in _preview_ `{{event.value}}` is substituted with <<values-in-preview, dummy>> value.
 [role="screenshot"]
 image:images/url_drilldown_url_template.png[URL template input]
 . Click *Create drilldown*.
@@ -60,8 +60,7 @@ image:images/url_drilldown_github.png[Github]
 === Picking a trigger for a URL drilldown
 
 Some panels support multiple user interactions (called triggers) for which you can configure a URL drilldown. The list of supported variables in the URL template depends on the trigger you selected.
-TODO: link
-In the preceding example, you configured a URL drilldown on a pie chart. The only trigger that pie chart supports is clicking on a pie slice, so you didn’t have to pick a trigger.
+In the preceding <<try-it, example>>, you configured a URL drilldown on a pie chart. The only trigger that pie chart supports is clicking on a pie slice, so you didn’t have to pick a trigger.
 
 However, the sample *[Logs] Unique Visitors vs. Average Bytes* chart supports both clicking on a data point and selecting a range. When you create a URL drilldown for this  chart, you have the following choices:
 
@@ -82,10 +81,11 @@ The URL template input uses Handlebars — a simple templating language. Handleb
 https://github.com/elastic/kibana/issues?q={{event.value}}
 ```
 
-A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced with values from the dashboard and interaction context.
+A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
 
 Refer to Handlebars https://handlebarsjs.com/guide/expressions.html#expressions[documentation] to learn about advanced use cases.
 
+[[helpers]]
 In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Handlebars helpers, you can use the following custom helpers:
 
 
@@ -123,12 +123,13 @@ The URL drilldown template has three sources for variables:
 . *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. Example: ``{{context.panel.filters}}`` which gives access to filters that applied to the current panel.
 . *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
 
+[[values-in-preview]]
 A subtle but important difference between *context* and *event* variables is that *context* variables use real values in previews when creating a URL drilldown. 
 For example, `{{context.panel.filters}}` are previewed with the current filters that applied to a panel. 
 *Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
 
 Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
-To work around this, {kib} provides a sample interaction that relies on a picked trigger. TODO: link here
+To work around this, {kib} provides a sample interaction that relies on a picked <<trigger-picker, trigger>>.
 So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
 Such previews can help you make sure that the structure of your URL template is valid.
 However, to ensure that the configured URL drilldown works as expected with your data, you have to retest the drilldown through the panel after saving a dashboard.
@@ -169,7 +170,8 @@ You can access the full list of variables available for the current panel and se
 
 | 
 | context.panel.filters
-| List of {kib} filters applied to a panel. _Tip: Use in combination with `rison` TODO: link helpers for internal {kib} navigations with carrying over current filters._
+| List of {kib} filters applied to a panel. +  
+_Tip: Use in combination with <<helpers, rison>> helper for internal {kib} navigations with carrying over current filters._
 
 | 
 | context.panel.query.query
@@ -182,7 +184,8 @@ You can access the full list of variables available for the current panel and se
 | 
 | context.panel.timeRange.from +
 context.panel.timeRange.to
-| Current time picker values. _Tip: Use in combination with `date` helper to format date_.
+| Current time picker values. +
+_Tip: Use in combination with <<helpers, date>> helper to format date_.
 
 | 
 | context.panel.timeRange.indexPatternId +
@@ -211,7 +214,7 @@ context.panel.timeRange.indexPatternIds
 
 |
 | event.negate
-| If drilldown is meant to be "negative" context. (for example, a "filter-out" loop clicked...)
+| If drilldown executed is a "negative" context. (for example, a "filter-out" loop clicked...)
 
 | *Range selection* trigger
 |
@@ -220,7 +223,8 @@ context.panel.timeRange.indexPatternIds
 |
 | event.from +
 event.to
-| `from` and `to` values of selected range. Depending on your data, could be either a date or number. _Tip: Consider using a `date` helper for date formatting._
+| `from` and `to` values of selected range. Depending on your data, could be either a date or number. +
+_Tip: Consider using <<helpers, date>> helper for date formatting._
 
 |
 | event.key
