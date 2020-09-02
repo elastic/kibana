@@ -34,7 +34,7 @@ public static @Field TASK_QUEUES_COUNTER = 0
 
 */
 def call(Map options = [:], Closure closure) {
-  def config = [ parallel: 12 ] + options
+  def config = [ parallel: 10 ] + options
   def counter = ++TASK_QUEUES_COUNTER
 
   // We're basically abusing withEnv() to create a "scope" for all steps inside of a withTaskQueue block
