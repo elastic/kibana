@@ -10,7 +10,7 @@ export function getInitialQuery({
   mapStateJSON,
   appState = {},
 }: {
-  mapStateJSON: any;
+  mapStateJSON: string;
   appState: {
     query?: string | { [key: string]: any };
   };

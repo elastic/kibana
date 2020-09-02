@@ -47,13 +47,13 @@ export async function renderApp(
   };
 }
 
-interface AppProps {
+interface Props {
   history: AppMountParameters['history'] | RouteComponentProps['history'];
   appBasePath: AppMountParameters['appBasePath'];
   onAppLeave: AppMountParameters['onAppLeave'];
 }
 
-const App: React.FC<AppProps> = ({ history, appBasePath, onAppLeave }) => {
+const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 

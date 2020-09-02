@@ -51,7 +51,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 
-interface MapsAppViewProps {
+interface Props {
   savedMap: any;
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
@@ -88,7 +88,7 @@ interface MapsAppViewProps {
   query: MapQuery | undefined;
 }
 
-interface MapsAppViewState {
+interface State {
   initialized: boolean;
   initialLayerListConfig: any;
   indexPatterns: IndexPattern[];
@@ -96,7 +96,7 @@ interface MapsAppViewState {
   originatingApp?: string;
 }
 
-export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewState> {
+export class MapsAppView extends React.Component<Props, State> {
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
@@ -104,7 +104,7 @@ export class MapsAppView extends React.Component<MapsAppViewProps, MapsAppViewSt
   _prevIndexPatternIds: string[] | null = null;
   _isMounted?: boolean;
 
-  constructor(props: MapsAppViewProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       indexPatterns: [],

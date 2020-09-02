@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
@@ -59,16 +60,19 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-interface DispatchSetQueryArgs {
-  filters?: Filter[];
-  query?: Query;
-  timeFilters?: TimeRange;
-  forceRefresh?: boolean;
-}
-
-function mapDispatchToProps(dispatch: ThunkDispatch<Promise<string>, MapStoreState, any>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    dispatchSetQuery: ({ forceRefresh, filters, query, timeFilters }: DispatchSetQueryArgs) => {
+    dispatchSetQuery: ({
+      forceRefresh,
+      filters,
+      query,
+      timeFilters,
+    }: {
+      filters?: Filter[];
+      query?: Query;
+      timeFilters?: TimeRange;
+      forceRefresh?: boolean;
+    }) => {
       dispatch(
         setQuery({
           filters,

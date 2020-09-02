@@ -13,14 +13,14 @@ import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { MapsAppView } from '.';
 
-interface LoadMapAndRenderProps {
+interface Props {
   savedMapId?: Record<string, unknown>;
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
 }
 
-export const LoadMapAndRender = class extends React.Component<LoadMapAndRenderProps> {
+export const LoadMapAndRender = class extends React.Component<Props> {
   _isMounted!: boolean;
   state = {
     savedMap: null,

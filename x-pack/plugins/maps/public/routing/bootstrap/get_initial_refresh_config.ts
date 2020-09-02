@@ -12,7 +12,7 @@ export function getInitialRefreshConfig({
   mapStateJSON,
   globalState = {},
 }: {
-  mapStateJSON: any;
+  mapStateJSON: string;
   globalState: QueryState;
 }) {
   const uiSettings = getUiSettings();
