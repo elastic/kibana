@@ -136,20 +136,6 @@ export interface RequestBasicOptions extends IEsSearchRequest {
 }
 
 /** A mapping of semantic fields to their document counterparts */
-export interface SourceFields {
-  /** The field to identify a container by */
-  container: string;
-  /** The fields to identify a host by */
-  host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
-  /** The field to identify a pod by */
-  pod: string;
-  /** The field to use as a tiebreaker for log events that have identical timestamps */
-  tiebreaker: string;
-  /** The field to use as a timestamp for metrics and logs */
-  timestamp: string;
-}
 
 export interface RequestOptions<Field = string> extends RequestBasicOptions {
   pagination: PaginationInput;
