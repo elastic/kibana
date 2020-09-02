@@ -5,18 +5,21 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { GetTrustedListAppsResponse } from '../../../../../common/endpoint/types/trusted_apps';
+import {
+  GetTrustedListAppsResponse,
+  GetTrustedAppsListRequest,
+} from '../../../../../common/endpoint/types/trusted_apps';
 
 export interface TrustedAppsService {
-  getTrustedAppsList(page: number, perPage: number): Promise<GetTrustedListAppsResponse>;
+  getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedListAppsResponse>;
 }
 
 export class TrustedAppsHttpService implements TrustedAppsService {
   constructor(private http: HttpStart) {}
 
-  async getTrustedAppsList(page: number, perPage: number): Promise<GetTrustedListAppsResponse> {
+  async getTrustedAppsList(request: GetTrustedAppsListRequest) {
     return this.http.get<GetTrustedListAppsResponse>('/api/endpoint/trusted_apps', {
-      query: { page, per_page: perPage },
+      query: request,
     });
   }
 }

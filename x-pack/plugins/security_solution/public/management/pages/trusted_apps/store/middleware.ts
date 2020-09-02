@@ -43,10 +43,10 @@ const refreshList = async (
   );
 
   try {
-    const response = await trustedAppsService.getTrustedAppsList(
-      list.currentPageInfo.index,
-      list.currentPageInfo.size
-    );
+    const response = await trustedAppsService.getTrustedAppsList({
+      page: list.currentPageInfo.index,
+      per_page: list.currentPageInfo.size,
+    });
 
     store.dispatch(
       createListDataBindingChangedAction({
