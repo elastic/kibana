@@ -23,7 +23,7 @@ import { IndexPattern } from '../../../../../data/public';
 
 it('returns the `JsonCodeEditor` component', () => {
   const props = {
-    hit: { _index: 'test', _source: { test: 123 } },
+    hit: { _index: 'test', _type: 'doc', _id: 'foo', _score: 1, _source: { test: 123 } },
     columns: [],
     indexPattern: {} as IndexPattern,
     filter: jest.fn(),

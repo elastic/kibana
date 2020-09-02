@@ -127,7 +127,8 @@ export const getNodeMetrics = (
       avg: null,
     }));
   }
-  const lastBucket = findLastFullBucket(nodeBuckets, options) as any;
+  const lastBucket = findLastFullBucket(nodeBuckets, options);
+  if (!lastBucket) return [];
   return options.metrics.map((metric, index) => {
     const metricResult: SnapshotNodeMetric = {
       name: metric.type,

@@ -11,7 +11,6 @@ import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
-  Field,
   SelectField,
   NumericField,
 } from '../../../../../../shared_imports';
@@ -19,22 +18,12 @@ import {
 import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
+import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldHelpText',
-      {
-        defaultMessage: 'By default field is updated in-place.',
-      }
-    ),
-  },
+  /* Required fields config */
   error_distance: {
     type: FIELD_TYPES.NUMBER,
     deserializer: (v) => (typeof v === 'number' && !isNaN(v) ? v : 1.0),
@@ -71,6 +60,7 @@ const fieldsConfig: FieldsConfig = {
   },
   shape_type: {
     type: FIELD_TYPES.SELECT,
+    serializer: String,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldLabel', {
       defaultMessage: 'Shape type',
     }),
@@ -132,7 +122,7 @@ export const Circle: FunctionComponent = () => {
         path="fields.shape_type"
       />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

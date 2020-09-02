@@ -47,7 +47,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
         Given a list of URLs, Heartbeat asks the simple question: Are you alive? \
         [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html',
+        learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
       },
     }),
     euiIconType: 'uptimeApp',

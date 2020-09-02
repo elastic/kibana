@@ -22,7 +22,6 @@ import { ColorPicker, ColorPickerProps } from './color_picker';
 import { mount } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import { EuiColorPicker, EuiIconTip } from '@elastic/eui';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ColorPicker', () => {

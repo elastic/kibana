@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as React from 'react';
 import { Container, isErrorEmbeddable } from '../lib';

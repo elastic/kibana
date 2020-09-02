@@ -31,8 +31,6 @@ export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSe
   'UiSettings'
 );
 
-export const [getHttp, setHttp] = createGetterSetter<CoreStart['http']>('Http');
-
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
 );
@@ -46,10 +44,6 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
-
-export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
-  CoreStart['injectedMetadata']
->('InjectedMetadata');
 
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']

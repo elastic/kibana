@@ -18,13 +18,10 @@
  */
 
 import { getMSearchParams } from './get_msearch_params';
-import { IUiSettingsClient } from '../../../../../core/public';
-import { UI_SETTINGS } from '../../../common';
+import { GetConfigFn, UI_SETTINGS } from '../../../common';
 
-function getConfigStub(config: any = {}) {
-  return {
-    get: (key) => config[key],
-  } as IUiSettingsClient;
+function getConfigStub(config: any = {}): GetConfigFn {
+  return (key) => config[key];
 }
 
 describe('getMSearchParams', () => {

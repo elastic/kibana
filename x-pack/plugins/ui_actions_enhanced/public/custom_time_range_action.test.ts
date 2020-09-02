@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
@@ -21,8 +20,6 @@ import {
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';
-
-jest.mock('ui/new_platform');
 
 const createOpenModalMock = () => {
   const mock = jest.fn();

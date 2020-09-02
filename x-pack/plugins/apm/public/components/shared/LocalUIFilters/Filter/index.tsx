@@ -164,7 +164,7 @@ function Filter({ name, title, options, onChange, value, showCount }: Props) {
             }}
             value={value}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </>
       ) : null}
     </>

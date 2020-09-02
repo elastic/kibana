@@ -65,7 +65,7 @@ function getItemsWithRelativeImpact(
     key: string | Record<string, any>;
     avg?: number | null;
     count?: number | null;
-    p95?: number;
+    p95?: number | null;
     sample?: Transaction;
   }>
 ) {
@@ -110,6 +110,7 @@ export async function transactionGroupsFetcher(
 
   const isTopTraces = options.type === 'top_traces';
 
+  // @ts-expect-error
   delete projection.body.aggs;
 
   // traces overview is hardcoded to 10000
@@ -187,7 +188,7 @@ export interface TransactionGroup {
   key: Record<string, any> | string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
-  p95: number | undefined;
+  p95: number | null | undefined;
   impact: number;
   sample: Transaction;
 }
