@@ -5,6 +5,7 @@ import builds.*
 import builds.default.*
 import builds.oss.*
 import builds.test.*
+import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import kibanaAgent
@@ -62,9 +63,6 @@ object Kibana : Project({
 
   buildType(Lint)
 
-  val ossCiGroups = (1..12).map { OssCiGroup(it) }
-  val defaultCiGroups = (1..10).map { DefaultCiGroup(it) }
-
   subProject {
     id("Test")
     name = "Test"
@@ -92,30 +90,14 @@ object Kibana : Project({
       id("OSS_Functional")
       name = "Functional"
 
-      buildType {
-        id("CIGroups_Composite")
-        name = "CI Groups"
-        type = BuildTypeSettings.Type.COMPOSITE
-
-        dependencies {
-          for (ciGroup in ossCiGroups) {
-            snapshot(ciGroup) {
-              reuseBuilds = ReuseBuilds.SUCCESSFUL
-              onDependencyCancel = FailureAction.CANCEL
-              onDependencyFailure = FailureAction.CANCEL
-              synchronizeRevisions = true
-            }
-          }
-        }
-      }
-
+      buildType(OssCiGroups)
       buildType(OssVisualRegression)
 
       subProject {
         id("CIGroups")
         name = "CI Groups"
 
-        for (ciGroup in ossCiGroups) buildType(ciGroup)
+        ossCiGroups.forEach { buildType(it) }
       }
     }
   }
@@ -130,30 +112,14 @@ object Kibana : Project({
       id("Default_Functional")
       name = "Functional"
 
-      buildType {
-        id("Default_CIGroups_Composite")
-        name = "CI Groups"
-        type = BuildTypeSettings.Type.COMPOSITE
-
-        dependencies {
-          for (ciGroup in defaultCiGroups) {
-            snapshot(ciGroup) {
-              reuseBuilds = ReuseBuilds.SUCCESSFUL
-              onDependencyCancel = FailureAction.CANCEL
-              onDependencyFailure = FailureAction.CANCEL
-              synchronizeRevisions = true
-            }
-          }
-        }
-      }
-
+      buildType(DefaultCiGroups)
       buildType(DefaultVisualRegression)
 
       subProject {
         id("Default_CIGroups")
         name = "CI Groups"
 
-        for (ciGroup in defaultCiGroups) buildType(ciGroup)
+        defaultCiGroups.forEach { buildType(it) }
       }
     }
   }
@@ -164,24 +130,15 @@ object Kibana : Project({
     name = "Kitchen Sink"
     type = BuildTypeSettings.Type.COMPOSITE
 
-    dependencies {
-      val builds = listOf(
-        AllTests,
-        OssVisualRegression,
-        DefaultVisualRegression,
-        Lint,
-        ossCiGroups[0],
-        defaultCiGroups[0]
-      )
+    val builds = listOf(
+      AllTests,
+      OssVisualRegression,
+      DefaultVisualRegression,
+      Lint,
+      ossCiGroups[0],
+      defaultCiGroups[0]
+    )
 
-      for (build in builds) {
-        snapshot(build) {
-          reuseBuilds = ReuseBuilds.SUCCESSFUL
-          onDependencyCancel = FailureAction.CANCEL
-          onDependencyFailure = FailureAction.CANCEL
-          synchronizeRevisions = true
-        }
-      }
-    }
+    dependsOn(*builds.toTypedArray())
   }
 })

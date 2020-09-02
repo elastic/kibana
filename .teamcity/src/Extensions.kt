@@ -10,7 +10,7 @@ fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
 }
 
 fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
-  val wrapped = ProjectFeature {
+  feature {
     type = "CloudImage"
     param("subnet", "teamcity")
     param("growingId", "true")
@@ -31,7 +31,6 @@ fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
     param("diskSizeGb", "")
     init()
   }
-  feature(wrapped)
 }
 
 fun ProjectFeatures.kibanaAgent(size: String, init: ProjectFeature.() -> Unit = {}) {
@@ -92,4 +91,20 @@ fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
       buildProbablyHanging = true
     }
   }
+}
+
+fun BuildType.dependsOn(buildType: BuildType, init: SnapshotDependency.() -> Unit = {}) {
+  dependencies {
+    snapshot(buildType) {
+      reuseBuilds = ReuseBuilds.SUCCESSFUL
+      onDependencyCancel = FailureAction.CANCEL
+      onDependencyFailure = FailureAction.CANCEL
+      synchronizeRevisions = true
+      init()
+    }
+  }
+}
+
+fun BuildType.dependsOn(vararg buildTypes: BuildType, init: SnapshotDependency.() -> Unit = {}) {
+  buildTypes.forEach { dependsOn(it, init) }
 }
