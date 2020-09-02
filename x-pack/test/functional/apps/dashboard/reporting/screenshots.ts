@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('foo', () => {
+    describe('Print PDF button', () => {
       it('is not available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
