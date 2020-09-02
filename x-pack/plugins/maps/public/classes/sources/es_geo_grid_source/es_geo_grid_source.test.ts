@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MapExtent, MapFilters } from '../../../../common/descriptor_types';
+import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services');
 
@@ -19,6 +19,7 @@ import { SearchSource } from '../../../../../../../src/plugins/data/public/searc
 
 export class MockSearchSource {
   setField = jest.fn();
+  setParent() {}
 }
 
 describe('ESGeoGridSource', () => {
@@ -104,6 +105,9 @@ describe('ESGeoGridSource', () => {
           async create() {
             return mockSearchSource as SearchSource;
           },
+          createEmpty() {
+            return mockSearchSource as SearchSource;
+          },
         },
       };
 
@@ -120,7 +124,7 @@ describe('ESGeoGridSource', () => {
       maxLat: 80,
     };
 
-    const mapFilters: MapFilters = {
+    const mapFilters: VectorSourceRequestMeta = {
       geogridPrecision: 4,
       filters: [],
       timeFilters: {
@@ -128,8 +132,16 @@ describe('ESGeoGridSource', () => {
         to: '15m',
         mode: 'relative',
       },
-      // extent,
+      extent,
+      applyGlobalQuery: true,
+      fieldNames: [],
       buffer: extent,
+      sourceQuery: {
+        query: '',
+        language: 'KQL',
+        queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
+      },
+      sourceMeta: null,
       zoom: 0,
     };
 
