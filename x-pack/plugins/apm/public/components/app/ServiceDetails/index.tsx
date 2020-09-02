@@ -75,7 +75,7 @@ export function ServiceDetails({ match, tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs tab={tab} />
+      <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
   );
 }

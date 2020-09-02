@@ -15,7 +15,6 @@ import {
 interface PathParams {
   processorEvent?: UIProcessorEvent;
   serviceName?: string;
-  serviceNodeName?: string;
   traceId?: string;
 }
 
@@ -76,7 +75,6 @@ export function getPathParams(pathname: string = ''): PathParams {
     case 'services':
       let servicePageName = paths[2];
       const serviceName = paths[1];
-      const serviceNodeName = paths[3];
 
       if (servicePageName === 'nodes' && paths.length > 3) {
         servicePageName = 'metrics';
@@ -97,7 +95,6 @@ export function getPathParams(pathname: string = ''): PathParams {
           return {
             processorEvent: ProcessorEvent.metric,
             serviceName,
-            serviceNodeName,
           };
         case 'nodes':
           return {

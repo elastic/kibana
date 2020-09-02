@@ -47,19 +47,16 @@ type ServiceNodeMetricsProps = RouteComponentProps<{
   serviceNodeName: string;
 }>;
 
-export function ServiceNodeMetrics({
-  serviceName,
-  serviceNodeName,
-}: ServiceNodeMetricsProps) {
+export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
-
+  const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && serviceNodeName && start && end) {
+      if (start && end) {
         return callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
@@ -175,7 +172,7 @@ export function ServiceNodeMetrics({
         </EuiFlexGroup>
       )}
       <EuiHorizontalRule margin="m" />
-      {agentName && serviceNodeName && (
+      {agentName && (
         <ChartsSyncContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map((chart) => (

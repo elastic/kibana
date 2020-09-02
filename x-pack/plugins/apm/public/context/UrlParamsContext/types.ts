@@ -29,7 +29,6 @@ export type IUrlParams = {
   waterfallItemId?: string;
   page?: number;
   pageSize?: number;
-  serviceNodeName?: string;
   searchTerm?: string;
   processorEvent?: UIProcessorEvent;
   traceIdLink?: string;
