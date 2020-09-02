@@ -1,5 +1,6 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
+import projects.kibanaConfiguration
 
 fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   feature {
@@ -12,12 +13,12 @@ fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
 fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
   feature {
     type = "CloudImage"
-    param("subnet", "teamcity")
+    param("network", kibanaConfiguration.agentNetwork)
+    param("subnet", kibanaConfiguration.agentSubnet)
     param("growingId", "true")
     param("agent_pool_id", "-2")
     param("sourceProject", "elastic-kibana-184716")
 //      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
-    param("network", "teamcity")
     param("preemptible", "false")
 //      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
 //      param("sourceImageFamily", "kibana-teamcity-dev-agents")

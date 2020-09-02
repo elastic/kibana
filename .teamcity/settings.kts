@@ -1,6 +1,12 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import settings.Kibana
+import projects.Kibana
+import projects.KibanaConfiguration
 
 version = "2020.1"
 
-project(Kibana)
+val config = KibanaConfiguration(
+  DSLContext.getParameter("agentNetwork", "teamcity"),
+  DSLContext.getParameter("agentSubnet", "teamcity")
+)
+
+project(Kibana(config))
