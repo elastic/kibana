@@ -21,6 +21,66 @@ import {
 import { PageInfo } from '../state/items_page';
 import { ListViewState } from '../state/list_view_state';
 
+import { FormattedDate } from '../../../../common/components/formatted_date';
+
+const OS_TITLES: { [K in TrustedApp['os']]: string } = {
+  windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
+    defaultMessage: 'Windows',
+  }),
+  macos: i18n.translate('xpack.securitySolution.trustedapps.os.macos', {
+    defaultMessage: 'Mac OS',
+  }),
+  linux: i18n.translate('xpack.securitySolution.trustedapps.os.linux', {
+    defaultMessage: 'Linux',
+  }),
+};
+
+const COLUMN_TITLES: { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string } = {
+  name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.name', {
+    defaultMessage: 'Name',
+  }),
+  os: i18n.translate('xpack.securitySolution.trustedapps.list.columns.os', {
+    defaultMessage: 'OS',
+  }),
+  created_at: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdAt', {
+    defaultMessage: 'Date Created',
+  }),
+  created_by: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdBy', {
+    defaultMessage: 'Created By',
+  }),
+};
+
+const COLUMN_DEFINITIONS = [
+  {
+    field: 'name',
+    name: COLUMN_TITLES.name,
+  },
+  {
+    field: 'os',
+    name: COLUMN_TITLES.os,
+    render(value: TrustedApp['os'], record: Immutable<TrustedApp>) {
+      return OS_TITLES[value];
+    },
+  },
+  {
+    field: 'created_at',
+    name: COLUMN_TITLES.created_at,
+    render(value: TrustedApp['created_at'], record: Immutable<TrustedApp>) {
+      return (
+        <FormattedDate
+          fieldName={COLUMN_TITLES.created_at}
+          value={value}
+          className="eui-textTruncate"
+        />
+      );
+    },
+  },
+  {
+    field: 'created_by',
+    name: COLUMN_TITLES.created_by,
+  },
+];
+
 interface TrustedAppsListProps {
   state: Immutable<ListViewState<TrustedApp>>;
 }
@@ -31,34 +91,10 @@ export function TrustedAppsList(props: TrustedAppsListProps) {
 
   return (
     <EuiBasicTable
+      columns={COLUMN_DEFINITIONS}
       items={[...(data?.items || [])]}
-      columns={[
-        {
-          field: 'name',
-          name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.name', {
-            defaultMessage: 'Name',
-          }),
-        },
-        {
-          field: 'os',
-          name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.os', {
-            defaultMessage: 'OS',
-          }),
-        },
-        {
-          field: 'created_at',
-          name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdAt', {
-            defaultMessage: 'Date Created',
-          }),
-        },
-        {
-          field: 'created_by',
-          name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.createdBy', {
-            defaultMessage: 'Created By',
-          }),
-        },
-      ]}
       error={getCurrentError(props.state.currentPage)?.message}
+      loading={isInProgressBinding(props.state.currentPage)}
       pagination={{
         pageIndex: props.state.currentPageInfo.index - 1,
         pageSize: props.state.currentPageInfo.size,
@@ -72,7 +108,6 @@ export function TrustedAppsList(props: TrustedAppsListProps) {
           })
         );
       }}
-      loading={isInProgressBinding(props.state.currentPage)}
     />
   );
 }
