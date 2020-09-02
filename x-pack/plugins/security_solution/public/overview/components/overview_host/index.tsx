@@ -60,18 +60,15 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     [navigateToApp, urlSearch]
   );
 
-  const subtitleValues = useMemo(() => {
-    const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
-      (total, stat) => total + stat.count,
-      0
-    );
-    const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
+  const hostEventsCount = useMemo(
+    () => getOverviewHostStats(overviewHost).reduce((total, stat) => total + stat.count, 0),
+    [overviewHost]
+  );
 
-    return {
-      formattedHostEventsCount,
-      hostEventsCount,
-    };
-  }, [defaultNumberFormat, overviewHost]);
+  const formattedHostEventsCount = useMemo(
+    () => numeral(hostEventsCount).format(defaultNumberFormat),
+    [defaultNumberFormat, hostEventsCount]
+  );
 
   const hostPageButton = useMemo(
     () => (
@@ -96,7 +93,10 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                 <FormattedMessage
                   defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
                   id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
-                  values={subtitleValues}
+                  values={{
+                    hostEventsCount,
+                    formattedHostEventsCount,
+                  }}
                 />
               ) : (
                 <>{''}</>
