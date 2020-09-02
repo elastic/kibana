@@ -22,6 +22,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
 import { Typeahead } from './Typeahead';
+import { useProcessorEvent } from './use_processor_event';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -53,7 +54,7 @@ export function KueryBar() {
 
   let currentRequestCheck;
 
-  const { processorEvent } = urlParams;
+  const processorEvent = useProcessorEvent();
 
   const examples = {
     transaction: 'transaction.duration.us > 300000',
@@ -102,7 +103,12 @@ export function KueryBar() {
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
-          boolFilter: getBoolFilter(urlParams, serviceName, groupId),
+          boolFilter: getBoolFilter({
+            groupId,
+            processorEvent,
+            serviceName,
+            urlParams,
+          }),
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,

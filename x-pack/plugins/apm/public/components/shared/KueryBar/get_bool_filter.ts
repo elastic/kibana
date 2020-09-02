@@ -4,22 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
 import {
-  TRANSACTION_TYPE,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
-  TRANSACTION_NAME,
   SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { UIProcessorEvent } from '../../../../common/processor_event';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
-export function getBoolFilter(
-  urlParams: IUrlParams,
-  serviceName?: string,
-  groupId?: string
-) {
-  const { start, end, processorEvent } = urlParams;
+export function getBoolFilter({
+  groupId,
+  processorEvent,
+  serviceName,
+  urlParams,
+}: {
+  groupId?: string;
+  processorEvent?: UIProcessorEvent;
+  serviceName?: string;
+  urlParams: IUrlParams;
+}) {
+  const { start, end } = urlParams;
 
   if (!start || !end) {
     throw new Error('Date range was not defined');

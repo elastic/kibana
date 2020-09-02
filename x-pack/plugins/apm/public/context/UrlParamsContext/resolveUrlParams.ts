@@ -7,7 +7,6 @@
 import { Location } from 'history';
 import { IUrlParams } from './types';
 import {
-  getPathParams,
   removeUndefinedProps,
   getStart,
   getEnd,
@@ -26,10 +25,6 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const { processorEvent, traceId: traceIdLink } = getPathParams(
-    location.pathname
-  );
-
   const query = toQuery(location.search);
 
   const {
@@ -81,9 +76,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
 
-    // path params
-    processorEvent,
-    traceIdLink,
     // ui filters
     environment,
     ...localUIFilters,
