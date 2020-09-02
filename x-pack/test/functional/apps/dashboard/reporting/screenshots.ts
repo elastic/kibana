@@ -83,6 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('becomes available when saved', async () => {
