@@ -255,7 +255,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
             description: getItemDescription(analysisStatsValues.timing_stats),
           },
           ...Object.entries(
-            analysisStatsValues.parameters || analysisStatsValues.hyperparameters
+            analysisStatsValues.parameters || analysisStatsValues.hyperparameters || {}
           ).map(([stateKey, stateValue]) => {
             const title = stateKey.toString();
             return { title, description: getItemDescription(stateValue) };
