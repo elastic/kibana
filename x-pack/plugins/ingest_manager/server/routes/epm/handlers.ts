@@ -43,7 +43,6 @@ export const getCategoriesHandler: RequestHandler<
     const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
@@ -66,7 +65,6 @@ export const getListHandler: RequestHandler<
     });
     const body: GetPackagesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({
       body,
@@ -85,7 +83,6 @@ export const getLimitedListHandler: RequestHandler = async (context, request, re
     const res = await getLimitedPackages({ savedObjectsClient });
     const body: GetLimitedPackagesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({
       body,
@@ -136,7 +133,6 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
@@ -166,7 +162,6 @@ export const installPackageHandler: RequestHandler<
     });
     const body: InstallPackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
@@ -206,7 +201,6 @@ export const deletePackageHandler: RequestHandler<TypeOf<
     const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
     const body: DeletePackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
