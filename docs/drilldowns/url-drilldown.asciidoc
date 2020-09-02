@@ -34,8 +34,10 @@ This example shows how to create the "Show on Github" drilldown shown earlier in
 [role="screenshot"]
 image:images/url_drilldown_pick_an_action.png[Action picker]
 . Enter a URL template: 
-+ 
-`https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}`
++
+```
+https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
+```
 +
 This example URL navigates to {kib} issues on Github. `{{event.value}}` will be substituted with a value associated with a clicked pie slice. Please note, that in _preview_ `{{event.value}}` is substituted with <<values-in-preview, dummy>> value.
 [role="screenshot"]
@@ -46,7 +48,7 @@ image:images/url_drilldown_url_template.png[URL template input]
 If you don’t save the drilldown, and then navigate away, the drilldown is lost.
 
 . In `[Logs] Visitors by OS`, click any slice of the pie, and then select the drilldown *Show on Github*.
-
++
 [role="screenshot"]
 image:images/url_drilldown_popup.png[URL drilldown popup]
 
