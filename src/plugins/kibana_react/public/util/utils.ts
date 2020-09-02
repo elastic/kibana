@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export { toMountPoint } from './to_mount_point';
-export { MountPointPortal } from './mount_point_portal';
-export { useIfMounted } from './utils';
+import { useCallback, useEffect, useRef } from 'react';
+
+export const useIfMounted = () => {
+  const isMounted = useRef(true);
+  useEffect(
+    () => () => {
+      isMounted.current = false;
+    },
+    []
+  );
+
+  const ifMounted = useCallback((func) => {
+    if (isMounted.current && func) {
+      func();
+    }
+  }, []);
+
+  return ifMounted;
+};
