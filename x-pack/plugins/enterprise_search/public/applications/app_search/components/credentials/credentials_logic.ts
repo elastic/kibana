@@ -72,6 +72,7 @@ export interface ICredentialsLogicValues {
 }
 
 export const CredentialsLogic = kea({
+  path: ['enterprise_search', 'app_search', 'credentials'],
   actions: () => ({
     addEngineName: (engineName: string) => engineName,
     onApiKeyDelete: (tokenName: string) => tokenName,
