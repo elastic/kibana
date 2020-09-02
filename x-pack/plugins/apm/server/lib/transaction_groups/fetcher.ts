@@ -67,7 +67,7 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
-    p95?: number;
+    p95?: number | null;
   }>
 ) {
   const values = items
@@ -215,6 +215,6 @@ export interface TransactionGroup {
   transactionType: string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
-  p95: number | undefined;
+  p95: number | null | undefined;
   impact: number;
 }

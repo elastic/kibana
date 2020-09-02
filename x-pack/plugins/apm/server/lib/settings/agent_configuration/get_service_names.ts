@@ -34,12 +34,14 @@ export async function getServiceNames({
       ],
     },
     body: {
+      timeout: '1ms',
       size: 0,
       aggs: {
         services: {
           terms: {
             field: SERVICE_NAME,
             size: 50,
+            min_doc_count: 0,
           },
         },
       },
