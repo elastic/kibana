@@ -16,59 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { ApiResponse, RequestParams } from '@elastic/elasticsearch';
 import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
 import {
-  DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
-  DataPatternName,
-  DataTelemetryType,
-} from './constants';
-
-export interface DataTelemetryBasePayload {
-  index_count: number;
-  ecs_index_count?: number;
-  doc_count?: number;
-  size_in_bytes?: number;
-}
-
-export interface DataTelemetryDocument extends DataTelemetryBasePayload {
-  data_stream?: {
-    dataset?: string;
-    type?: DataTelemetryType | string; // The union of types is to help autocompletion with some known `data_stream.type`s
-  };
-  package?: {
-    name: string;
-  };
-  shipper?: string;
-  pattern_name?: DataPatternName;
-}
-
-export type DataTelemetryPayload = DataTelemetryDocument[];
-
-export interface DataTelemetryIndex {
-  name: string;
-  packageName?: string; // Populated by Ingest Manager at `_meta.package.name`
-  managedBy?: string; // Populated by Ingest Manager at `_meta.managed_by`
-  dataStreamDataset?: string; // To be obtained from `mappings.data_stream.dataset` if it's a constant keyword
-  dataStreamType?: string; // To be obtained from `mappings.data_stream.type` if it's a constant keyword
-  shipper?: string; // To be obtained from `_meta.beat` if it's set
-  isECS?: boolean; // Optional because it can't be obtained via Monitoring.
-
-  // The fields below are optional because we might not be able to obtain them if the user does not
-  // have access to the index.
-  docCount?: number;
-  sizeInBytes?: number;
-}
-
-type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
-
-type DataDescriptor = AtLeastOne<{
-  packageName: string;
-  dataStreamDataset: string;
-  dataStreamType: string;
-  shipper: string;
-  patternName: DataPatternName; // When found from the list of the index patterns
-}>;
+  DataDescriptor,
+  AtLeastOne,
+  DataTelemetryDocument,
+  DataTelemetryBasePayload,
+  DataTelemetryPayload,
+  IndexMappings,
+  IndexStats,
+  DataTelemetryIndex,
+} from './types';
 
 function findMatchingDescriptors({
   name,
@@ -171,106 +131,22 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   return [...acc.values()];
 }
 
-interface IndexStats {
-  indices: {
-    [indexName: string]: {
-      total: {
-        docs: {
-          count: number;
-          deleted: number;
-        };
-        store: {
-          size_in_bytes: number;
-        };
-      };
-    };
-  };
-}
-
-interface IndexStatistics {
-  [indexName: string]: {
-    total: {
-      docs: {
-        count: number;
-        deleted: number;
-      };
-      store: {
-        size_in_bytes: number;
-      };
-    };
-  };
-}
-interface IndexMappings {
-  [indexName: string]: {
-    mappings: {
-      _meta?: {
-        beat?: string;
-
-        // Ingest Manager provided metadata
-        package?: {
-          name?: string;
-        };
-        managed_by?: string; // Typically "ingest-manager"
-      };
-      properties: {
-        data_stream?: {
-          properties: {
-            dataset?: {
-              type: string;
-              value?: string;
-            };
-            type?: {
-              type: string;
-              value?: string;
-            };
-          };
-        };
-        ecs?: {
-          properties: {
-            version?: {
-              type: string;
-            };
-          };
-        };
-      };
-    };
-  };
-}
-interface GetMappingsResponse {
-  body: IndexMappings;
-  statusCode: number | null;
-  headers: Record<string, any> | null;
-  warnings: string[] | null;
-  meta: object;
-}
-interface IndexStatsResponse {
-  body: IndexStatistics;
-  statusCode: number | null;
-  headers: Record<string, any> | null;
-  warnings: string[] | null;
-  meta: object;
-}
-
 export async function getDataTelemetry(
   callCluster: LegacyAPICaller,
   esClient: ElasticsearchClient
 ) {
+  const useLegacy = false;
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
-    // check which client we need to use for now, evetually replace the legacy client with the new one. Hard-coding use of the legacy client for now
-    const useLegacy = true;
-    if (!useLegacy) {
-      const [getMappingsResponse, indexStatsResponse]: [
-        GetMappingsResponse,
-        IndexStatsResponse
-      ] = await Promise.all([
+    if (useLegacy) {
+      const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
         // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
-        esClient.indices.getMapping({
-          index: '*',
-          filter_path: [
+        callCluster('indices.getMapping', {
+          index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
+          filterPath: [
             // _meta.beat tells the shipper
             '*.mappings._meta.beat',
             // _meta.package.name tells the Ingest Manager's package
@@ -287,47 +163,53 @@ export async function getDataTelemetry(
           ],
         }),
         // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
-        esClient.indices.stats({
+        callCluster<IndexStats>('indices.stats', {
           index,
           level: 'indices',
           metric: ['docs', 'store'],
-          filter_path: ['indices.*.total'],
+          filterPath: ['indices.*.total'],
         }),
       ]);
-      const indexMappings: IndexMappings = getMappingsResponse.body;
-      const indexStats: IndexStats = indexStatsResponse.body;
+      const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
     }
 
-    const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
-      // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
-      callCluster('indices.getMapping', {
-        index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
-        filterPath: [
-          // _meta.beat tells the shipper
-          '*.mappings._meta.beat',
-          // _meta.package.name tells the Ingest Manager's package
-          '*.mappings._meta.package.name',
-          // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
-          '*.mappings._meta.managed_by',
-          // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
-          '*.mappings.properties.ecs.properties.version.type',
+    const indexMappingsParams: RequestParams.IndicesGetMapping = {
+      index: '*',
+      filter_path: [
+        // _meta.beat tells the shipper
+        '*.mappings._meta.beat',
+        // _meta.package.name tells the Ingest Manager's package
+        '*.mappings._meta.package.name',
+        // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
+        '*.mappings._meta.managed_by',
+        // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
+        '*.mappings.properties.ecs.properties.version.type',
 
-          // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
-          '*.mappings.properties.data_stream.properties.type.value',
-          // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
-          '*.mappings.properties.data_stream.properties.dataset.value',
-        ],
-      }),
-      // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
-      callCluster<IndexStats>('indices.stats', {
-        index,
-        level: 'indices',
-        metric: ['docs', 'store'],
-        filterPath: ['indices.*.total'],
-      }),
+        // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
+        '*.mappings.properties.data_stream.properties.type.value',
+        // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
+        '*.mappings.properties.data_stream.properties.dataset.value',
+      ],
+    };
+    const indicesStatsParams: RequestParams.IndicesStats = {
+      index: 'index',
+      level: 'indices',
+      metric: ['docs', 'store'],
+      filter_path: ['indices.*.total'],
+    };
+    const [indexMappingsResponse, indexStatsResponse]: [
+      ApiResponse,
+      ApiResponse
+    ] = await Promise.all([
+      esClient.indices.getMapping(indexMappingsParams),
+      esClient.indices.stats(indicesStatsParams),
     ]);
 
+    const indexMappings = indexMappingsResponse.body as IndexMappings;
+    const indexStats = indexStatsResponse.body as IndexStats;
+
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
+
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,

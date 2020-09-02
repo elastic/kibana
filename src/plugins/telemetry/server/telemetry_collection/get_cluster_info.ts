@@ -35,6 +35,17 @@ export interface ESClusterInfo {
     minimum_index_compatibility_version: string;
   };
 }
+export interface ESClusterInfoResponse {
+  body: ESClusterInfo;
+  statusCode: number;
+  headers: object;
+  warnings: string[];
+  meta: object;
+}
+export async function clusterInfoGetter(esClient: ElasticsearchClient) {
+  const { body } = ((await esClient.info()) as unknown) as ESClusterInfoResponse;
+  return body;
+}
 /**
  * Get the cluster info from the connected cluster.
  *
@@ -44,8 +55,16 @@ export interface ESClusterInfo {
  * @param {function} esClient The asInternalUser handler (exposed for testing)
  *
  * TODO: needs work on using the new client
+ * The new client always returns an object of the shape, regardless of an error during the request execution:
+ * {
+ *  body: object | boolean
+ *  statusCode: number
+ *  headers: object
+ *  warnings: [string],
+ *  meta: object
+ * }
  */
 export function getClusterInfo(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
   const useLegacy = true;
-  return useLegacy ? callCluster<ESClusterInfo>('info') : esClient.info();
+  return useLegacy ? callCluster<ESClusterInfo>('info') : clusterInfoGetter(esClient);
 }

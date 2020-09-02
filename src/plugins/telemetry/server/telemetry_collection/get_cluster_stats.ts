@@ -26,15 +26,11 @@ import { TIMEOUT } from './constants';
  * This is the equivalent to GET /_cluster/stats?timeout=30s.
  */
 export async function getClusterStats(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
-  // add some sort of a check to see which client we want or,
-  // hack:
   const useLegacy = true;
-  // alternatively, just replace the call with the new client
   const legacyClusterStats = await callCluster('cluster.stats', {
     timeout: TIMEOUT,
   });
-  // new client implementation:
-  const { body } = await esClient.cluster.stats({ timeout: TIMEOUT }); // the response has changed
+  const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });
   return useLegacy ? legacyClusterStats : body;
 }
 

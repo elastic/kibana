@@ -58,7 +58,7 @@ export async function fetchNodesUsage(
   callCluster: LegacyAPICaller,
   esClient: ElasticsearchClient
 ): Promise<NodesFeatureUsageResponse> {
-  const useLegacy = true;
+  const useLegacy = false;
   const legacyResponse = await callCluster('transport.request', {
     method: 'GET',
     path: '/_nodes/usage',
