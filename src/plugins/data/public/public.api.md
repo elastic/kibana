@@ -1022,11 +1022,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     title: string;
     // (undocumented)
-    toJSON(): string | undefined;
-    // (undocumented)
     toSpec(): IndexPatternSpec;
-    // (undocumented)
-    toString(): string;
     // (undocumented)
     type: string | undefined;
     // (undocumented)
