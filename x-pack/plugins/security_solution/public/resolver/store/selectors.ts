@@ -81,17 +81,19 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
   dataSelectors.layout
 );
 
+export const databaseIndices = composeSelectors(dataStateSelector, dataSelectors.indices);
+
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseDocumentIDToFetch = composeSelectors(
+export const databaseParameters = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToFetch
+  dataSelectors.databaseParameters
 );
 
-export const databaseDocumentIDToAbort = composeSelectors(
+export const parametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToAbort
+  dataSelectors.parametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(

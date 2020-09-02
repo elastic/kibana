@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
 import {
@@ -15,6 +16,7 @@ import {
   AABB,
   VisibleEntites,
   SectionData,
+  DatabaseParameters,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -34,16 +36,24 @@ import {
   LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
+import * as databaseParametersModel from '../../models/database_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 import { formatDate } from '../../view/panels/panel_content_utilities';
 
 /**
+ * Returns the indices the backend will use to find the origin document for resolver.
+ */
+export function indices(state: DataState): string[] | undefined {
+  return state.indices;
+}
+
+/**
  * If there is currently a request.
  */
 export function isLoading(state: DataState): boolean {
-  return state.pendingRequestDatabaseDocumentID !== undefined;
+  return state.pendingRequestParameters !== undefined;
 }
 
 /**
@@ -440,16 +450,17 @@ export const relatedEventInfoByEntityId: (
 /**
  * If we need to fetch, this is the ID to fetch.
  */
-export function databaseDocumentIDToFetch(state: DataState): string | null {
-  // If there is an ID, it must match either the last received version, or the pending version.
+export function databaseParameters(state: DataState): DatabaseParameters | null {
+  // If there is a parameters object, it must match either the version used in the last request,
+  // or the version used in the pending request.
   // Otherwise, we need to fetch it
   // NB: this technique will not allow for refreshing of data.
   if (
-    state.databaseDocumentID !== undefined &&
-    state.databaseDocumentID !== state.pendingRequestDatabaseDocumentID &&
-    state.databaseDocumentID !== state.lastResponse?.databaseDocumentID
+    state.currentParameters !== undefined &&
+    !databaseParametersModel.equal(state.currentParameters, state.lastResponse?.parameters) &&
+    !databaseParametersModel.equal(state.currentParameters, state.pendingRequestParameters)
   ) {
-    return state.databaseDocumentID;
+    return state.currentParameters;
   } else {
     return null;
   }
@@ -672,15 +683,15 @@ export const nodesAndEdgelines: (
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */
-export function databaseDocumentIDToAbort(state: DataState): string | null {
+export function parametersToAbort(state: DataState): DatabaseParameters | null {
   /**
-   * If there is a pending request, and its not for the current databaseDocumentID (even, if the current databaseDocumentID is undefined) then we should abort the request.
+   * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.pendingRequestDatabaseDocumentID !== undefined &&
-    state.pendingRequestDatabaseDocumentID !== state.databaseDocumentID
+    state.pendingRequestParameters !== undefined &&
+    !databaseParametersModel.equal(state.pendingRequestParameters, state.currentParameters)
   ) {
-    return state.pendingRequestDatabaseDocumentID;
+    return state.pendingRequestParameters;
   } else {
     return null;
   }

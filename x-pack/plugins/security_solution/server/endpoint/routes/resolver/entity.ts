@@ -18,11 +18,6 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    const siemClient = context.securitySolution!.getAppClient();
-    const queryIndices = indices;
-    // if the alert was promoted by a rule it will exist in the signals index so search there too
-    queryIndices.push(siemClient.getSignalsIndex());
-
     /**
      * A safe type for the response based on the semantics of the query.
      * We specify _source, asking for `process.entity_id` and we only
@@ -49,7 +44,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       'search',
       {
         ignoreUnavailable: true,
-        index: queryIndices,
+        index: indices,
         body: {
           // only return process.entity_id
           _source: 'process.entity_id',

@@ -194,20 +194,30 @@ export interface VisibleEntites {
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
+export interface DatabaseParameters {
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  databaseDocumentID: string;
+  indices: string[];
+}
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
+
   /**
-   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   * The parameters passed from the resolver properties
    */
-  readonly databaseDocumentID?: string;
+  readonly currentParameters?: DatabaseParameters;
+
   /**
    * The id used for the pending request, if there is one.
    */
-  readonly pendingRequestDatabaseDocumentID?: string;
+  readonly pendingRequestParameters?: DatabaseParameters;
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
@@ -216,13 +226,18 @@ export interface DataState {
   readonly resolverComponentInstanceID?: string;
 
   /**
+   * The indices that the backend will use to search for the document ID.
+   */
+  readonly indices?: string[];
+
+  /**
    * The parameters and response from the last successful request.
    */
   readonly lastResponse?: {
     /**
      * The id used in the request.
      */
-    readonly databaseDocumentID: string;
+    readonly parameters: DatabaseParameters;
   } & (
     | {
         /**
@@ -495,11 +510,6 @@ export interface DataAccessLayer {
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
 
   /**
-   * Get an array of index patterns that contain events.
-   */
-  indexPatterns: () => string[];
-
-  /**
    * Get entities matching a document.
    */
   entities: (parameters: {
@@ -524,13 +534,18 @@ export interface ResolverProps {
    * The `_id` value of an event in ES.
    * Used as the origin of the Resolver graph.
    */
-  databaseDocumentID?: string;
+  databaseDocumentID: string;
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
+
+  /**
+   * Indices that the backend should use to find the originating document.
+   */
+  indices: string[];
 }
 
 /**

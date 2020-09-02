@@ -43,7 +43,7 @@ describe('resolver selectors', () => {
               secondAncestorID,
             }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: { databaseDocumentID: '', indices: [] },
           },
         });
       });
@@ -77,7 +77,7 @@ describe('resolver selectors', () => {
           payload: {
             result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: { databaseDocumentID: '', indices: [] },
           },
         });
       });

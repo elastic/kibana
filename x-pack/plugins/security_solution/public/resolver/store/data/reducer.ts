@@ -7,6 +7,7 @@
 import { Reducer } from 'redux';
 import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
+import * as databaseParameters from '../../models/database_parameters';
 
 const initialState: DataState = {
   relatedEvents: new Map(),
@@ -18,7 +19,10 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   if (action.type === 'appReceivedNewExternalProperties') {
     const nextState: DataState = {
       ...state,
-      databaseDocumentID: action.payload.databaseDocumentID,
+      currentParameters: {
+        databaseDocumentID: action.payload.databaseDocumentID,
+        indices: action.payload.indices,
+      },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
     };
     return nextState;
@@ -26,14 +30,17 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     // keep track of what we're requesting, this way we know when to request and when not to.
     return {
       ...state,
-      pendingRequestDatabaseDocumentID: action.payload,
+      pendingRequestParameters: {
+        databaseDocumentID: action.payload.databaseDocumentID,
+        indices: action.payload.indices,
+      },
     };
   } else if (action.type === 'appAbortedResolverDataRequest') {
-    if (action.payload === state.pendingRequestDatabaseDocumentID) {
+    if (databaseParameters.equal(action.payload, state.pendingRequestParameters)) {
       // the request we were awaiting was aborted
       return {
         ...state,
-        pendingRequestDatabaseDocumentID: undefined,
+        pendingRequestParameters: undefined,
       };
     } else {
       return state;
@@ -48,23 +55,23 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
        */
       lastResponse: {
         result: action.payload.result,
-        databaseDocumentID: action.payload.databaseDocumentID,
+        parameters: action.payload.parameters,
         successful: true,
       },
 
       // This assumes that if we just received something, there is no longer a pending request.
       // This cannot model multiple in-flight requests
-      pendingRequestDatabaseDocumentID: undefined,
+      pendingRequestParameters: undefined,
     };
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {
     /** Only handle this if we are expecting a response */
-    if (state.pendingRequestDatabaseDocumentID !== undefined) {
+    if (state.pendingRequestParameters !== undefined) {
       const nextState: DataState = {
         ...state,
-        pendingRequestDatabaseDocumentID: undefined,
+        pendingRequestParameters: undefined,
         lastResponse: {
-          databaseDocumentID: state.pendingRequestDatabaseDocumentID,
+          parameters: state.pendingRequestParameters,
           successful: false,
         },
       };
