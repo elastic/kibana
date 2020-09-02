@@ -23,17 +23,15 @@ export const getLocalFilterQuery = ({
   const field = localUIFilters[localUIFilterName];
   const filter = getUiFiltersES(omit(uiFilters, field.name));
 
-  const projectionSource =
-    projection.body.aggs &&
-    projection.body.aggs[Object.keys(projection.body.aggs)[0]].terms;
-  const bucketCountAggregation = projectionSource
+  const bucketCountAggregation = projection.body.aggs
     ? {
         aggs: {
           bucket_count: {
-            cardinality:
-              'field' in projectionSource
-                ? { field: projectionSource.field }
-                : { script: projectionSource.script },
+            cardinality: {
+              field:
+                projection.body.aggs[Object.keys(projection.body.aggs)[0]].terms
+                  .field,
+            },
           },
         },
       }
