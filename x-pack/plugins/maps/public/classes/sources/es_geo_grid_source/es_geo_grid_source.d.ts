@@ -7,8 +7,9 @@
 import { AbstractESAggSource } from '../es_agg_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
+import { ITiledSingleLayerVectorSource } from '../vector_source';
 
-export class ESGeoGridSource extends AbstractESAggSource {
+export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     indexPatternId,
     geoField,
@@ -21,4 +22,21 @@ export class ESGeoGridSource extends AbstractESAggSource {
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
+
+  getLayerName(): string;
+
+  getUrlTemplateWithMeta(
+    searchFilters: MapFilters & {
+      applyGlobalQuery: boolean;
+      fieldNames: string[];
+      geogridPrecision?: number;
+      sourceQuery: MapQuery;
+      sourceMeta: VectorSourceSyncMeta;
+    }
+  ): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }>;
 }
