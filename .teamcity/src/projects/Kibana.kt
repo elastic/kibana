@@ -149,8 +149,8 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
         OssVisualRegression,
         DefaultVisualRegression,
         Lint,
-        ossCiGroups[0],
-        defaultCiGroups[0]
+        *ossCiGroups.toTypedArray(),
+        *defaultCiGroups.toTypedArray()
       )
 
       dependsOn(*builds.toTypedArray())

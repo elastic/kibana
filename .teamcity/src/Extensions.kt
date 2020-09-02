@@ -87,7 +87,7 @@ fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
       }
       buildFailedToStart = true
       buildFailed = true
-      buildFinishedSuccessfully = true
+      buildFinishedSuccessfully = false
       firstBuildErrorOccurs = true
       buildProbablyHanging = true
     }

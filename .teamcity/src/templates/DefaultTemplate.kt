@@ -41,7 +41,7 @@ object DefaultTemplate : Template({
   }
 
   failureConditions {
-    executionTimeoutMin = 60
+    executionTimeoutMin = 120
   }
 
   params {
