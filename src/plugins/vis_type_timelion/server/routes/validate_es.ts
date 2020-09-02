@@ -41,7 +41,7 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
             aggs: {
               maxAgg: {
                 max: {
-                  ield: timefield,
+                  field: timefield,
                 },
               },
               minAgg: {
