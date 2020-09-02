@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const es = getService('es');
+  const testSubjects = getService('testSubjects');
 
   describe('Screenshots', () => {
     before('initialize tests', async () => {
@@ -41,16 +42,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
+    describe('foo', () => {
       it('is not available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('becomes available when saved', async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -85,7 +86,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);

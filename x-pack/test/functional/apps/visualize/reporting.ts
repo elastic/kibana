@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.reporting.setTimepickerInDataRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Histogram');

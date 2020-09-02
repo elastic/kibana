@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
