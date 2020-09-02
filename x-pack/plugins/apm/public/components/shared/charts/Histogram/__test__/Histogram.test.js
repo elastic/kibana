@@ -13,12 +13,26 @@ import {
   getDurationFormatter,
   asInteger,
 } from '../../../../../utils/formatters';
-import { toJson, mountWithTheme } from '../../../../../utils/testHelpers';
+import {
+  disableConsoleWarning,
+  toJson,
+  mountWithTheme,
+} from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
 
 describe('Histogram', () => {
+  let mockConsole;
   let wrapper;
+
   const onClick = jest.fn();
+
+  beforeAll(() => {
+    mockConsole = disableConsoleWarning('Warning: componentWillReceiveProps');
+  });
+
+  afterAll(() => {
+    mockConsole.mockRestore();
+  });
 
   beforeEach(() => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);

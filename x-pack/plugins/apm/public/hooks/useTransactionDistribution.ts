@@ -5,12 +5,12 @@
  */
 
 import { flatten, omit } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
-import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 
@@ -31,6 +31,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     transactionName,
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
+
+  const history = useHistory();
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
     async (callApmApi) => {

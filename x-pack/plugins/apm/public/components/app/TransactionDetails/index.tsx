@@ -5,35 +5,32 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
 import { isEmpty, flatten } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
-import { history } from '../../../utils/history';
-import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 
 interface Sample {
   traceId: string;
@@ -43,6 +40,7 @@ interface Sample {
 export function TransactionDetails() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
+  const history = useHistory();
   const {
     data: distributionData,
     status: distributionStatus,
@@ -114,21 +112,9 @@ export function TransactionDetails() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionChartsData}
               urlParams={urlParams}
-              location={location}
             />
           </ChartsSyncContextProvider>
 

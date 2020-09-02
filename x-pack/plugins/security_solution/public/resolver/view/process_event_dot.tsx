@@ -12,13 +12,13 @@ import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } 
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3 } from '../types';
+import { Vector2, Matrix3, ResolverState } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { useResolverQueryParams } from './use_resolver_query_params';
+import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -118,7 +118,9 @@ const UnstyledProcessEventDot = React.memo(
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
       throw new Error('Tried to render a node with no ID');
     }
-    const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
+    const relatedEventStats = useSelector((state: ResolverState) =>
+      selectors.relatedEventsStats(state)(nodeID)
+    );
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -126,11 +128,13 @@ const UnstyledProcessEventDot = React.memo(
       htmlIDPrefix,
     ]);
 
-    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+    const ariaLevel: number | null = useSelector((state: ResolverState) =>
+      selectors.ariaLevel(state)(nodeID)
+    );
 
     // the node ID to 'flowto'
-    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
-      nodeID
+    const ariaFlowtoNodeID: string | null = useSelector((state: ResolverState) =>
+      selectors.ariaFlowtoNodeID(state)(timeAtRender)(nodeID)
     );
 
     const isShowingEventActions = xScale > 0.8;
@@ -238,7 +242,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const { pushToQueryParams } = useResolverQueryParams();
+    const pushToQueryParams = useReplaceBreadcrumbParameters();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current?.beginElement) {
@@ -290,8 +294,8 @@ const UnstyledProcessEventDot = React.memo(
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
-    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(
-      event as ResolverEvent
+    const grandTotal: number | null = useSelector((state: ResolverState) =>
+      selectors.relatedEventTotalForProcess(state)(event as ResolverEvent)
     );
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */

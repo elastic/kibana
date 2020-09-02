@@ -42,6 +42,7 @@ export const config = {
       }
     ),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
+    metricsInterval: schema.number({ defaultValue: 30 }),
   }),
 };
 
@@ -81,6 +82,7 @@ export function mergeConfigs(
       apmConfig.telemetryCollectionEnabled,
     'xpack.apm.searchAggregatedTransactions':
       apmConfig.searchAggregatedTransactions,
+    'xpack.apm.metricsInterval': apmConfig.metricsInterval,
   };
 }
 

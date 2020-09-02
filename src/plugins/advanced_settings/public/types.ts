@@ -18,6 +18,8 @@
  */
 
 import { ComponentRegistry } from './component_registry';
+import { HomePublicPluginSetup } from '../../home/public';
+
 import { ManagementSetup } from '../../management/public';
 
 export interface AdvancedSettingsSetup {
@@ -29,6 +31,7 @@ export interface AdvancedSettingsStart {
 
 export interface AdvancedSettingsPluginSetup {
   management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export { ComponentRegistry };

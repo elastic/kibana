@@ -147,7 +147,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "euiIconType": "logoSecurity",
-            "id": "security",
+            "id": "securitySolution",
             "label": "Security",
             "order": 4000,
           },
@@ -650,6 +650,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -901,6 +903,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-kibana"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1188,6 +1192,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-observability"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1393,11 +1399,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </EuiAccordion>
               </EuiCollapsibleNavGroup>
               <EuiCollapsibleNavGroup
-                data-test-subj="collapsibleNavGroup-security"
+                data-test-subj="collapsibleNavGroup-securitySolution"
                 iconType="logoSecurity"
                 initialIsOpen={true}
                 isCollapsible={true}
-                key="security"
+                key="securitySolution"
                 onToggle={[Function]}
                 title="Security"
               >
@@ -1433,15 +1439,17 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexGroup>
                   }
                   className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-security"
+                  data-test-subj="collapsibleNavGroup-securitySolution"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
                   <div
                     className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                    data-test-subj="collapsibleNavGroup-security"
+                    data-test-subj="collapsibleNavGroup-securitySolution"
                     onToggle={[Function]}
                   >
                     <div
@@ -1636,6 +1644,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-management"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -2624,6 +2634,8 @@ exports[`CollapsibleNav renders the default nav 2`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -3305,6 +3317,8 @@ exports[`CollapsibleNav renders the default nav 3`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
