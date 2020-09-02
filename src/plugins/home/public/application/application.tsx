@@ -41,18 +41,19 @@ export const renderApp = async (
 
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  // This must be called before the app is mounted to avoid call this after the redirect to default app logic kicks in
+  const unlisten = history.listen((location) => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   render(
     <KibanaContextProvider services={{ ...coreStart }}>
       <HomeApp directories={directories} />
     </KibanaContextProvider>,
     element
   );
-
-  // dispatch synthetic hash change event to update hash history objects
-  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-  const unlisten = history.listen(() => {
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  });
 
   return () => {
     unmountComponentAtNode(element);
