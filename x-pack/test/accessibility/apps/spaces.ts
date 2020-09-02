@@ -4,89 +4,215 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// a11y tests for spaces, space selection and spacce creation and feature controls
+
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'spaceSelector', 'home', 'header', 'security']);
   const a11y = getService('a11y');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
+  const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
-  describe('Kibana Home', () => {
+  describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
+      await esArchiver.load('empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
-    it('Kibana Home view', async () => {
+    it('navigate to manage spaces home page', async () => {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickManageSpaces();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
     });
 
-    it('all plugins view page meets a11y requirements', async () => {
-      await PageObjects.home.clickAllKibanaPlugins();
+    it('click on create space button', async () => {
+      await PageObjects.spaceSelector.clickCreateSpace();
       await a11y.testAppSnapshot();
     });
 
-    it('visualize & explore details tab meets a11y requirements', async () => {
-      await PageObjects.home.clickVisualizeExplorePlugins();
+    it('click on input space name', async () => {
+      await PageObjects.spaceSelector.clickEnterSpaceName();
       await a11y.testAppSnapshot();
     });
 
-    it('administrative detail tab meets a11y requirements', async () => {
-      await PageObjects.home.clickAdminPlugin();
+    it('add in space name as space a', async () => {
+      await PageObjects.spaceSelector.addSpaceName('space_a');
       await a11y.testAppSnapshot();
     });
 
-    it('navigating to console app from administration tab meets a11y requirements', async () => {
-      await PageObjects.home.clickOnConsole();
-      // wait till dev tools app is loaded (lazy loading the bundle)
-      await retry.waitFor(
-        'switched to dev tools',
-        async () => (await globalNav.getLastBreadcrumb()) === 'Dev Tools'
-      );
+    it('click on space avatar to open customize space avatar', async () => {
+      await PageObjects.spaceSelector.clickSpaceAcustomAvatar();
       await a11y.testAppSnapshot();
     });
 
-    // issue:  https://github.com/elastic/kibana/issues/38980
-    it.skip('navigating back to home page from console meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogo();
+    it('click on space initials input in ', async () => {
+      await PageObjects.spaceSelector.clickSpaceInitials();
       await a11y.testAppSnapshot();
     });
 
-    // Extra clickon logo step here will be removed after preceding test is fixed.
-    it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await PageObjects.home.clickOnLogo();
-      await PageObjects.home.clickOnAddData();
+    it('add in space initials as sa', async () => {
+      await PageObjects.spaceSelector.addSpaceInitials('sa');
       await a11y.testAppSnapshot();
     });
 
-    it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogsTutorial();
+    it('click on the color picker', async () => {
+      await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();
     });
 
-    it('click on cloud tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnCloudTutorial();
+    // Using hex values to set color
+    it('click on a color in color picker in customize space', async () => {
+      await PageObjects.spaceSelector.setColorinPicker('#2E5C57');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    // close custom dialog - adding file upload test here
+    it('click escape to close the custom avatar dialog box', async () => {
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('click customize URL identifier', async () => {
+      await PageObjects.spaceSelector.clickOnCustomizeURL();
       await a11y.testAppSnapshot();
     });
 
-    it('click on side nav to see all the side nav menu', async () => {
-      await PageObjects.home.clickOnLogo();
-      await PageObjects.home.clickOnToggleNavButton();
+    it('click on space URL display box', async () => {
+      await PageObjects.spaceSelector.clickOnSpaceURLDisplay();
       await a11y.testAppSnapshot();
     });
 
-    it('Dock the side nav', async () => {
-      await PageObjects.home.dockTheSideNav();
+    it('set the space URL value', async () => {
+      await PageObjects.spaceSelector.setSpaceURL('yay');
       await a11y.testAppSnapshot();
     });
 
-    it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
-      await PageObjects.home.collapseObservabibilitySideNav();
+    it('click on reset URL value', async () => {
+      await PageObjects.spaceSelector.clickOnCustomizeURL();
       await a11y.testAppSnapshot();
     });
 
-    it('unDock the side nav', async () => {
-      await PageObjects.home.dockTheSideNav();
+    it('click on describe the space block', async () => {
+      await PageObjects.spaceSelector.clickOnDescriptionOfSpace();
+      await a11y.testAppSnapshot();
+    });
+
+    it('set the description of the space', async () => {
+      const spaceDescription = 'This is a rocking a11y space';
+      await PageObjects.spaceSelector.setOnDescriptionOfSpace(spaceDescription);
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on "show" button to open customize feature display', async () => {
+      await PageObjects.spaceSelector.clickShowFeatures();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on change all next to show? table header to change all feature visibility', async () => {
+      await PageObjects.spaceSelector.clickFeaturesVisibilityButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on hide all features option', async () => {
+      await PageObjects.spaceSelector.clickHideAllFeatures();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on show all features option', async () => {
+      await PageObjects.spaceSelector.clickFeaturesVisibilityButton();
+      await PageObjects.spaceSelector.clickShowAllFeatures();
+      await a11y.testAppSnapshot();
+    });
+
+    it('hide enterprisesearch feature as one of the examples to toggle the visibibility of a feature', async () => {
+      await PageObjects.spaceSelector.toggleFeatureVisibility('enterpriseSearch');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click on save space', async () => {
+      await PageObjects.spaceSelector.clickSaveSpaceCreation();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on edit space a', async () => {
+      await PageObjects.spaceSelector.clickSpaceEditButton('space_a');
+      await a11y.testAppSnapshot();
+    });
+
+    it('update description on space a and click update', async () => {
+      const spaceDescription = 'A11y rocks this space';
+      await PageObjects.spaceSelector.setOnDescriptionOfSpace(spaceDescription);
+      await PageObjects.spaceSelector.clickSaveSpaceCreation();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click cancel after choosing to click edit on space a', async () => {
+      await PageObjects.spaceSelector.clickSpaceEditButton('space_a');
+      await PageObjects.spaceSelector.clickCancelSpaceCreation();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on roles page from manage spaces page', async () => {
+      await PageObjects.spaceSelector.clickGoToRolesPage();
+      await a11y.testAppSnapshot();
+    });
+
+    it('navigate back to spaces management page', async () => {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickManageSpaces();
+      await a11y.testAppSnapshot();
+    });
+
+    it('create space b so that we can delete it', async () => {
+      await PageObjects.spaceSelector.clickCreateSpace();
+      await PageObjects.spaceSelector.clickEnterSpaceName();
+      await PageObjects.spaceSelector.addSpaceName('space_b');
+      await PageObjects.spaceSelector.clickSaveSpaceCreation();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click on space b to navigate space b', async () => {
+      await PageObjects.common.navigateToApp('home');
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickSpaceAvatar('space_b');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click on manage spaces from space b in top menu to navigate to manage spaces page in space b', async () => {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickManageSpaces();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click on delete space b', async () => {
+      await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on cancel so cancel button gets tested', async () => {
+      await PageObjects.spaceSelector.cancelDeletingSpace();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click delete again on space b and set the space name to space_b in confirm space name input box', async () => {
+      await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
+      await PageObjects.spaceSelector.setSpaceNameTobeDeleted('space_b');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click confirm delete and Kibana takes the user to space selection page because we are deleting the current space', async () => {
+      await PageObjects.spaceSelector.confirmDeletingSpace();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Select space a from space selector page', async () => {
+      await PageObjects.spaceSelector.clickSpaceCard('space_a');
       await a11y.testAppSnapshot();
     });
   });

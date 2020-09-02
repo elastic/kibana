@@ -101,6 +101,7 @@ export class FeatureTable extends Component<Props, {}> {
 
         return (
           <EuiSwitch
+            data-test-subj={`${record.feature.id}-toggle`}
             id={record.feature.id}
             checked={checked}
             onChange={this.onChange(record.feature.id) as any}
