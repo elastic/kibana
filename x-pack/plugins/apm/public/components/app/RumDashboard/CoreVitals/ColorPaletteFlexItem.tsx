@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  euiPaletteForStatus,
-  EuiSpacer,
-  EuiStat,
-  EuiToolTip,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { PaletteLegends } from './PaletteLegends';
 import {
   AVERAGE_LABEL,
   GOOD_LABEL,
@@ -108,7 +100,7 @@ export function ColorPaletteFlexItem({
           }
         )}
       >
-        <ColoredSpan title={hexCode} style={spanStyle} />
+        <ColoredSpan style={spanStyle} />
       </EuiToolTip>
     </EuiFlexItem>
   );

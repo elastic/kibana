@@ -33,13 +33,15 @@ export function CoreVitalItem({
 
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
 
+  const biggestValIndex = ranks.indexOf(Math.max(...ranks));
+
   return (
     <>
       <EuiStat
         titleSize="s"
         title={value}
         description={title}
-        titleColor={palette[0]}
+        titleColor={palette[biggestValIndex]}
         isLoading={loading}
       />
       <EuiSpacer size="s" />
