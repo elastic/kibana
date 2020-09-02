@@ -262,7 +262,7 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  FieldList,
+  fieldList,
 } from '../common';
 
 /*
@@ -440,7 +440,7 @@ export {
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
-export { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 

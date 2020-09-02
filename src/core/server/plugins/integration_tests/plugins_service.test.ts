@@ -28,12 +28,14 @@ import { BehaviorSubject, from } from 'rxjs';
 import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
 import { Plugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
+  const environmentSetup = environmentServiceMock.createSetupContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -158,7 +160,7 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover();
+    await pluginsService.discover({ environment: environmentSetup });
 
     const setupDeps = coreMock.createInternalSetup();
     await pluginsService.setup(setupDeps);

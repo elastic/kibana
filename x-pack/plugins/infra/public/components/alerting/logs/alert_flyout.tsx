@@ -5,6 +5,8 @@
  */
 
 import React, { useContext } from 'react';
+import { ApplicationStart, DocLinksStart, HttpStart, NotificationsStart } from 'src/core/public';
+
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -15,9 +17,16 @@ interface Props {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface KibanaDeps {
+  notifications: NotificationsStart;
+  http: HttpStart;
+  docLinks: DocLinksStart;
+  application: ApplicationStart;
+}
+
 export const AlertFlyout = (props: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-  const { services } = useKibana();
+  const { services } = useKibana<KibanaDeps>();
 
   return (
     <>
@@ -27,7 +36,7 @@ export const AlertFlyout = (props: Props) => {
             metadata: {
               isInternal: true,
             },
-            toastNotifications: services.notifications?.toasts,
+            toastNotifications: services.notifications.toasts,
             http: services.http,
             docLinks: services.docLinks,
             capabilities: services.application.capabilities,

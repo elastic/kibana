@@ -102,7 +102,6 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.action).to.be('checkin');
-      expect(apiResponse.success).to.be(true);
     });
   });
 }

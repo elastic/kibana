@@ -114,7 +114,6 @@ export const isMlAdmin = async ({
   request: KibanaRequest;
   ml: MlPluginSetup;
 }): Promise<boolean> => {
-  const scopedMlClient = ml.mlClient.asScoped(request);
-  const mlCapabilities = await ml.mlSystemProvider(scopedMlClient, request).mlCapabilities();
+  const mlCapabilities = await ml.mlSystemProvider(request).mlCapabilities();
   return hasMlAdminPermissions(mlCapabilities);
 };

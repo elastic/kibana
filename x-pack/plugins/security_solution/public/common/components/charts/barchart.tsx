@@ -98,11 +98,24 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        tickSize={tickSize}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
         tickFormat={xTickFormatter}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+      <Axis
+        id={yAxisId}
+        position={Position.Left}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
+        tickFormat={yTickFormatter}
+      />
     </Chart>
   ) : null;
 };
