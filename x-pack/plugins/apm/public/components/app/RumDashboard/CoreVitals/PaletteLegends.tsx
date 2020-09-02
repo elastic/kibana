@@ -10,8 +10,10 @@ import {
   EuiFlexItem,
   EuiHealth,
   euiPaletteForStatus,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { getCoreVitalTooltipMessage, Thresholds } from './CoreVitalItem';
 
 const PaletteLegend = styled(EuiHealth)`
   &:hover {
@@ -24,9 +26,16 @@ const PaletteLegend = styled(EuiHealth)`
 interface Props {
   onItemHover: (ind: number | null) => void;
   ranks: number[];
+  thresholds: Thresholds;
+  title: string;
 }
 
-export function PaletteLegends({ ranks, onItemHover }: Props) {
+export function PaletteLegends({
+  ranks,
+  title,
+  onItemHover,
+  thresholds,
+}: Props) {
   const palette = euiPaletteForStatus(3);
 
   return (
@@ -42,7 +51,17 @@ export function PaletteLegends({ ranks, onItemHover }: Props) {
             onItemHover(null);
           }}
         >
-          <PaletteLegend color={color}>{ranks?.[ind]}%</PaletteLegend>
+          <EuiToolTip
+            content={getCoreVitalTooltipMessage(
+              thresholds,
+              ind,
+              title,
+              ranks[ind]
+            )}
+            position="bottom"
+          >
+            <PaletteLegend color={color}>{ranks?.[ind]}%</PaletteLegend>
+          </EuiToolTip>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

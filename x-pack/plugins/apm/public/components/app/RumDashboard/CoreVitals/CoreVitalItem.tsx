@@ -11,15 +11,57 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './PaletteLegends';
 import { ColorPaletteFlexItem } from './ColorPaletteFlexItem';
+import {
+  AVERAGE_LABEL,
+  GOOD_LABEL,
+  LESS_LABEL,
+  MORE_LABEL,
+  POOR_LABEL,
+} from './translations';
+
+export interface Thresholds {
+  good: string;
+  bad: string;
+}
 
 interface Props {
   title: string;
   value: string;
   ranks?: number[];
   loading: boolean;
-  thresholds: { good: string; bad: string };
+  thresholds: Thresholds;
+}
+
+export function getCoreVitalTooltipMessage(
+  thresholds: Thresholds,
+  position: number,
+  title: string,
+  percentage: number
+) {
+  const good = position === 0;
+  const bad = position === 2;
+  const average = !good && !bad;
+
+  return i18n.translate('xpack.apm.csm.dashboard.webVitals.palette.tooltip', {
+    defaultMessage:
+      '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
+    values: {
+      percentage,
+      title: title?.toLowerCase(),
+      exp: good ? GOOD_LABEL : bad ? POOR_LABEL : AVERAGE_LABEL,
+      moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
+      value: good || average ? thresholds.good : thresholds.bad,
+      averageMessage: average
+        ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
+            defaultMessage: ' and less than {bad}',
+            values: { bad: thresholds.bad },
+          })
+        : '',
+    },
+  });
 }
 
 export function CoreVitalItem({
@@ -57,14 +99,20 @@ export function CoreVitalItem({
             position={ind}
             inFocus={inFocusInd !== ind && inFocusInd !== null}
             percentage={ranks[ind]}
-            title={title}
-            thresholds={thresholds}
+            tooltip={getCoreVitalTooltipMessage(
+              thresholds,
+              ind,
+              title,
+              ranks[ind]
+            )}
           />
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <PaletteLegends
         ranks={ranks}
+        thresholds={thresholds}
+        title={title}
         onItemHover={(ind) => {
           setInFocusInd(ind);
         }}

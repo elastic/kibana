@@ -6,15 +6,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import {
-  AVERAGE_LABEL,
-  GOOD_LABEL,
-  LESS_LABEL,
-  MORE_LABEL,
-  POOR_LABEL,
-} from './translations';
 
 const ColoredSpan = styled.div`
   height: 16px;
@@ -59,47 +51,20 @@ export function ColorPaletteFlexItem({
   hexCode,
   inFocus,
   percentage,
-  title,
-  thresholds,
+  tooltip,
   position,
 }: {
   hexCode: string;
   position: number;
   inFocus: boolean;
   percentage: number;
-  title: string;
-  thresholds: { good: string; bad: string };
+  tooltip: string;
 }) {
-  const good = position === 0;
-  const bad = position === 2;
-  const average = !good && !bad;
-
   const spanStyle = getSpanStyle(position, inFocus, hexCode, percentage);
 
   return (
     <EuiFlexItem key={hexCode} grow={false} style={{ width: percentage + '%' }}>
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.csm.dashboard.webVitals.palette.tooltip',
-          {
-            defaultMessage:
-              '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
-            values: {
-              percentage,
-              title: title?.toLowerCase(),
-              exp: good ? GOOD_LABEL : bad ? POOR_LABEL : AVERAGE_LABEL,
-              moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
-              value: good || average ? thresholds.good : thresholds.bad,
-              averageMessage: average
-                ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
-                    defaultMessage: ' and less than {bad}',
-                    values: { bad: thresholds.bad },
-                  })
-                : '',
-            },
-          }
-        )}
-      >
+      <EuiToolTip content={tooltip}>
         <ColoredSpan style={spanStyle} />
       </EuiToolTip>
     </EuiFlexItem>
