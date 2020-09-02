@@ -282,14 +282,6 @@ export enum OperatorEnum {
   EXCLUDED = 'excluded',
 }
 
-export const operator_type = t.keyof({
-  exists: null,
-  list: null,
-  match: null,
-  match_any: null,
-  nested: null,
-});
-export type OperatorType = t.TypeOf<typeof operator_type>;
 export enum OperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
