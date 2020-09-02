@@ -22,6 +22,7 @@ import {
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 import { AlertsContext } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
+import { Errors, CriterionErrors } from '../validation';
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
@@ -35,7 +36,7 @@ const RATIO_SEPERATOR_TEXT = i18n.translate(
 interface SharedProps {
   fields: IFieldType[];
   criteria?: AlertParams['criteria'];
-  errors: IErrorObject;
+  errors: Errors['criteria'];
   alertParams: Partial<AlertParams>;
   context: AlertsContext;
   sourceId: string;
@@ -45,15 +46,23 @@ interface SharedProps {
 type CriteriaProps = SharedProps;
 
 export const Criteria: React.FC<CriteriaProps> = (props) => {
-  const { criteria } = props;
+  const { criteria, errors } = props;
   if (!criteria || criteria.length === 0) return null;
 
   return (
     <div>
       {!Array.isArray(criteria[0]) ? (
-        <CountCriteria {...props} criteria={criteria as CountCriteriaType} />
+        <CountCriteria
+          {...props}
+          criteria={criteria as CountCriteriaType}
+          errors={errors as CriterionErrors[]}
+        />
       ) : (
-        <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} />
+        <RatioCriteria
+          {...props}
+          criteria={criteria as RatioCriteriaType}
+          errors={errors as [CriterionErrors[], CriterionErrors[]]}
+        />
       )}
     </div>
   );
@@ -66,7 +75,7 @@ interface CriteriaWrapperProps {
   removeCriterion: (idx: number) => void;
   addCriterion: () => void;
   criteria: CriteriaType;
-  errors: SharedProps['errors'];
+  errors: CriterionErrors[];
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
 }
@@ -83,6 +92,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     context,
     sourceId,
   } = props;
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow>
@@ -96,7 +106,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
                 updateCriterion={updateCriterion}
                 removeCriterion={removeCriterion}
                 canDelete={criteria.length > 1}
-                errors={errors[idx.toString()] as IErrorObject}
+                errors={errors[idx]}
               />
               <CriterionPreview
                 alertParams={alertParams}
@@ -117,14 +127,14 @@ interface RatioCriteriaProps {
   alertParams: SharedProps['alertParams'];
   fields: SharedProps['fields'];
   criteria: RatioCriteriaType;
-  errors: SharedProps['errors'];
+  errors: [CriterionErrors[], CriterionErrors[]];
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }
 
 const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
-  const { criteria, updateCriteria } = props;
+  const { criteria, errors, updateCriteria } = props;
 
   const handleUpdateNumeratorCriteria = useCallback(
     (criteriaParam: CriteriaType) => {
@@ -162,6 +172,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         updateCriterion={updateNumeratorCriterion}
         addCriterion={addNumeratorCriterion}
         removeCriterion={removeNumeratorCriterion}
+        errors={errors[0]}
       />
 
       <EuiText color="secondary">{RATIO_SEPERATOR_TEXT.toUpperCase()}</EuiText>
@@ -172,6 +183,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         updateCriterion={updateDenominatorCriterion}
         addCriterion={addDenominatorCriterion}
         removeCriterion={removeDenominatorCriterion}
+        errors={errors[1]}
       />
     </>
   );
@@ -181,7 +193,7 @@ interface CountCriteriaProps {
   alertParams: SharedProps['alertParams'];
   fields: SharedProps['fields'];
   criteria: CountCriteriaType;
-  errors: SharedProps['errors'];
+  errors: CriterionErrors[];
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;

@@ -13,8 +13,6 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import {
   AlertParams,
@@ -27,6 +25,7 @@ import { TypeSwitcher } from './type_switcher';
 import { useSourceId } from '../../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../../containers/logs/log_source';
 import { GroupByExpression } from '../../../shared/group_by_expression/group_by_expression';
+import { Errors } from '../validation';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -40,7 +39,7 @@ interface LogsContextMeta {
 
 export type AlertsContext = AlertsContextValue<LogsContextMeta>;
 interface Props {
-  errors: IErrorObject;
+  errors: Errors;
   alertParams: Partial<AlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -219,12 +218,9 @@ export const Editor: React.FC<Props> = (props) => {
     (type: ThresholdType) => {
       // TODO: If the user has already configured some criteria, take them across
       if (type === 'count') {
-        setAlertParams('criteria', [DEFAULT_CRITERIA]);
+        setAlertParams('criteria', DEFAULT_COUNT_EXPRESSION.criteria);
       } else {
-        setAlertParams('criteria', [
-          [DEFAULT_CRITERIA],
-          [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
-        ]);
+        setAlertParams('criteria', DEFAULT_RATIO_EXPRESSION.criteria);
       }
     },
     [setAlertParams]
@@ -240,7 +236,7 @@ export const Editor: React.FC<Props> = (props) => {
       <Criteria
         fields={supportedFields}
         criteria={alertParams.criteria}
-        errors={errors.criteria as IErrorObject}
+        errors={errors.criteria}
         alertParams={alertParams}
         context={alertsContext}
         sourceId={sourceId}
@@ -251,7 +247,7 @@ export const Editor: React.FC<Props> = (props) => {
         comparator={alertParams.threshold?.comparator}
         value={alertParams.threshold?.value}
         updateThreshold={updateThreshold}
-        errors={errors.threshold as IErrorObject}
+        errors={errors.threshold}
       />
 
       <ForLastExpression
@@ -259,7 +255,7 @@ export const Editor: React.FC<Props> = (props) => {
         timeWindowUnit={alertParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
-        errors={errors as { [key: string]: string[] }}
+        errors={{ timeWindowSize: errors.timeWindowSize, timeSizeUnit: errors.timeSizeUnit }}
       />
 
       <GroupByExpression

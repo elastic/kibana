@@ -26,6 +26,7 @@ import {
   Criterion as CriterionType,
   ComparatorToi18nMap,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
+import { CriterionErrors } from '../validation';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
@@ -93,7 +94,7 @@ interface Props {
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   canDelete: boolean;
-  errors: IErrorObject;
+  errors: CriterionErrors;
 }
 
 export const Criterion: React.FC<Props> = ({
@@ -103,13 +104,8 @@ export const Criterion: React.FC<Props> = ({
   updateCriterion,
   removeCriterion,
   canDelete,
-  errors: realErrors,
+  errors,
 }) => {
-  const errors = {
-    field: [],
-    comparator: [],
-    value: [],
-  };
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 

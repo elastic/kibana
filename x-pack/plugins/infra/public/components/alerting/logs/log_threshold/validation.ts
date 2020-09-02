@@ -7,7 +7,22 @@
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../../triggers_actions_ui/public/types';
-import { AlertParams } from '../../../../../common/alerting/logs/log_threshold/types';
+import { AlertParams, Criteria } from '../../../../../common/alerting/logs/log_threshold/types';
+
+export interface CriterionErrors {
+  field: string[];
+  comparator: string[];
+  value: string[];
+}
+
+export interface Errors {
+  threshold: {
+    value: string[];
+  };
+  criteria: CriterionErrors[] | [CriterionErrors[], CriterionErrors[]];
+  timeWindowSize: string[];
+  timeSizeUnit: string[];
+}
 
 export function validateExpression({
   threshold,
@@ -19,24 +34,11 @@ export function validateExpression({
 
   // NOTE: In the case of components provided by the Alerting framework the error property names
   // must match what they expect.
-  const errors: {
-    threshold: {
-      value: string[];
-    };
-    criteria: {
-      [id: string]: {
-        field: string[];
-        comparator: string[];
-        value: string[];
-      };
-    };
-    timeWindowSize: string[];
-    timeSizeUnit: string[];
-  } = {
+  const errors: Errors = {
     threshold: {
       value: [],
     },
-    criteria: {},
+    criteria: criteria && criteria.length > 0 && !Array.isArray(criteria[0]) ? [] : [[], []],
     timeSizeUnit: [],
     timeWindowSize: [],
   };
@@ -61,38 +63,50 @@ export function validateExpression({
     );
   }
 
-  // TODO: Reinstate
+  // Criteria validation
   if (criteria && criteria.length > 0) {
-    // Criteria validation
-    criteria.forEach((criterion, idx: number) => {
-      // const id = idx.toString();
-      // errors.criteria[id] = {
-      //   field: [],
-      //   comparator: [],
-      //   value: [],
-      // };
-      // if (!criterion.field) {
-      //   errors.criteria[id].field.push(
-      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionFieldRequired', {
-      //       defaultMessage: 'Field is required.',
-      //     })
-      //   );
-      // }
-      // if (!criterion.comparator) {
-      //   errors.criteria[id].comparator.push(
-      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionComparatorRequired', {
-      //       defaultMessage: 'Comparator is required.',
-      //     })
-      //   );
-      // }
-      // if (!criterion.value) {
-      //   errors.criteria[id].value.push(
-      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
-      //       defaultMessage: 'Value is required.',
-      //     })
-      //   );
-      // }
-    });
+    const getCriterionErrors = (_criteria: Criteria): CriterionErrors[] => {
+      const criterionErrors: CriterionErrors[] = [];
+      _criteria.forEach((criterion) => {
+        const _errors: CriterionErrors = {
+          field: [],
+          comparator: [],
+          value: [],
+        };
+        if (!criterion.field) {
+          _errors.field.push(
+            i18n.translate('xpack.infra.logs.alertFlyout.error.criterionFieldRequired', {
+              defaultMessage: 'Field is required.',
+            })
+          );
+        }
+        if (!criterion.comparator) {
+          _errors.comparator.push(
+            i18n.translate('xpack.infra.logs.alertFlyout.error.criterionComparatorRequired', {
+              defaultMessage: 'Comparator is required.',
+            })
+          );
+        }
+        if (!criterion.value) {
+          _errors.value.push(
+            i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
+              defaultMessage: 'Value is required.',
+            })
+          );
+        }
+        criterionErrors.push(_errors);
+      });
+      return criterionErrors;
+    };
+
+    if (!Array.isArray(criteria[0])) {
+      const criteriaErrors = getCriterionErrors(criteria as Criteria);
+      errors.criteria = criteriaErrors;
+    } else {
+      const numeratorErrors = getCriterionErrors(criteria[0] as Criteria);
+      const denominatorErrors = getCriterionErrors(criteria[1] as Criteria);
+      errors.criteria = [numeratorErrors, denominatorErrors];
+    }
   }
 
   return validationResult;
