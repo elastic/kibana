@@ -29,6 +29,13 @@ See {ref}/encrypting-communications.html[Encrypting communications].
 {kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
 the features that will no longer be supported if you revert to a basic license.
 
+[float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access *License Management*.
+
+You can add this privilege in *Stack Management > Security > Roles*.
+
 [discrete]
 [[update-license]]
 === Update your license

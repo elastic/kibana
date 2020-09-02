@@ -21,6 +21,13 @@ image::images/cross-cluster-replication-list-view.png[][Cross-cluster replicatio
 Refer to {ref}/ccr-overview.html[this document] for more information.
 
 [float]
+=== Required permissions
+
+The `manage` and `manage_ccr` cluster privileges are required to access *Cross-Cluster Replication*.
+
+You can add these privileges in *Stack Management > Security > Roles*.
+
+[float]
 [[configure-replication]]
 === Configure replication
 

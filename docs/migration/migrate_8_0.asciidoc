@@ -136,6 +136,17 @@ custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
 instead be assigned the `kibana_admin` role to maintain their current
 access level.
 
+=== `kibana_dashboard_only_user` role has been removed.
+
+*Details:* The `kibana_dashboard_only_user` role has been removed.
+If you wish to restrict access to just the Dashboard feature, create
+custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
+
+*Impact:* Any users currently assigned the `kibana_dashboard_only_user` role will need to be assigned a custom role which only grants access to the Dashboard feature.
+
+Granting additional cluster or index privileges may enable certain
+**Stack Monitoring** features.
+
 [float]
 [[breaking_80_reporting_changes]]
 === Reporting changes

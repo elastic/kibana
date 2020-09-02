@@ -12,6 +12,13 @@ To get started, open the menu, then go to *Stack Management > Data > Remote Clus
 image::images/remote-clusters-list-view.png[Remote Clusters list view, including Add a remote cluster button]
 
 [float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access *Remote Clusters*.
+
+You can add this privilege in *Stack Management > Security > Roles*.
+
+[float]
 [[managing-remote-clusters]]
 === Add a remote cluster
 
