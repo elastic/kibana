@@ -6,7 +6,7 @@
 import * as i18n from './translations';
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../components/matrix_histogram/types';
 import { HistogramType } from '../../../../graphql/types';
 
@@ -19,7 +19,7 @@ export const anomaliesStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = i18n.ANOMALIES_STACK_BY_JOB_ID;
 
-export const histogramConfigs: MatrixHisrogramConfigs = {
+export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     anomaliesStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? anomaliesStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_ANOMALIES_DATA,
