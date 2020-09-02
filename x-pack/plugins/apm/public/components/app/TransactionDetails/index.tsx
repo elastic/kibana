@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -24,11 +23,9 @@ import { useTransactionDistribution } from '../../../hooks/useTransactionDistrib
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 
@@ -87,21 +84,9 @@ export function TransactionDetails({ location }: TransactionDetailsProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionChartsData}
               urlParams={urlParams}
-              location={location}
             />
           </ChartsSyncContextProvider>
 
