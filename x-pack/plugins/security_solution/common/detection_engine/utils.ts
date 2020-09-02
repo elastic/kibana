@@ -8,7 +8,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
 import { EntriesArray } from '../shared_imports';
-import { RuleType } from './types';
+import { Type } from './schemas/common/schemas';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
@@ -20,7 +20,7 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
-export const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
+export const isThresholdRule = (ruleType: Type) => ruleType === 'threshold';
 
 export const parseScheduleDates = (time: string): moment.Moment | null => {
   const isValidDateString = !isNaN(Date.parse(time));
