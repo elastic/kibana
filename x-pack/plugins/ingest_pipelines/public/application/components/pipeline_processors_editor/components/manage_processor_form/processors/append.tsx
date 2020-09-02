@@ -47,8 +47,7 @@ export const Append: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.fieldHelpText', {
-          defaultMessage:
-            'Field to append values to.',
+          defaultMessage: 'Field to append values to.',
         })}
       />
 
