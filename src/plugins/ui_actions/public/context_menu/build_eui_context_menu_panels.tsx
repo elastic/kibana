@@ -52,30 +52,6 @@ export async function buildContextMenuForActions({
   title?: string;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor[]> {
-  const menuItems = await buildEuiContextMenuPanelItems({
-    actions,
-    closeMenu,
-  });
-
-  return [
-    {
-      id: 'mainMenu',
-      title,
-      items: menuItems,
-    },
-  ];
-}
-
-/**
- * Transform an array of Actions into the shape needed to build an EUIContextMenu
- */
-async function buildEuiContextMenuPanelItems({
-  actions,
-  closeMenu,
-}: {
-  actions: ActionWithContext[];
-  closeMenu: () => void;
-}) {
   const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
   const promises = actions.map(async ({ action, context, trigger }, index) => {
     const isCompatible = await action.isCompatible({
@@ -96,8 +72,38 @@ async function buildEuiContextMenuPanelItems({
 
   await Promise.all(promises);
 
-  return items.filter(Boolean);
+  return [
+    {
+      id: 'main',
+      title,
+      items: items.filter(Boolean),
+    },
+  ];
 }
+
+const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
+  event: React.MouseEvent
+) => {
+  if (event.currentTarget instanceof HTMLAnchorElement) {
+    // from react-router's <Link/>
+    if (
+      !event.defaultPrevented && // onClick prevented default
+      event.button === 0 && // ignore everything but left clicks
+      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+    ) {
+      event.preventDefault();
+      action.execute(context);
+    } else {
+      // let browser handle navigation
+    }
+  } else {
+    // not a link
+    action.execute(context);
+  }
+
+  close();
+};
 
 async function convertPanelActionToContextMenuItem<Context extends object>({
   action,
@@ -120,34 +126,8 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = (event) => {
-    if (event.currentTarget instanceof HTMLAnchorElement) {
-      // from react-router's <Link/>
-      if (
-        !event.defaultPrevented && // onClick prevented default
-        event.button === 0 && // ignore everything but left clicks
-        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-      ) {
-        event.preventDefault();
-        action.execute(context);
-      } else {
-        // let browser handle navigation
-      }
-    } else {
-      // not a link
-      action.execute(context);
-    }
-
-    closeMenu();
-  };
-
-  if (action.getHref) {
-    const href = await action.getHref(context);
-    if (href) {
-      menuPanelItem.href = href;
-    }
-  }
+  menuPanelItem.onClick = onClick(action, context, closeMenu);
+  if (action.getHref) menuPanelItem.href = await action.getHref(context);
 
   return menuPanelItem;
 }
