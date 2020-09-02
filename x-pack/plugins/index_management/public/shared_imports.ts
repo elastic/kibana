@@ -21,7 +21,6 @@ export {
   VALIDATION_TYPES,
   FieldConfig,
   useForm,
-  useFormData,
   Form,
   getUseField,
   UseField,

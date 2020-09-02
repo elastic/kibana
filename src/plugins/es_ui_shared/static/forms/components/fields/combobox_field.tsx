@@ -74,7 +74,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   };
 
   const onSearchComboChange = (value: string) => {
-    if (value !== undefined) {
+    if (value) {
       field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
     }
   };

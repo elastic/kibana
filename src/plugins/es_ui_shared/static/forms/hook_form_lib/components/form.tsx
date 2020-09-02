@@ -21,7 +21,6 @@ import React, { ReactNode } from 'react';
 import { EuiForm } from '@elastic/eui';
 
 import { FormProvider } from '../form_context';
-import { FormDataContextProvider } from '../form_data_context';
 import { FormHook } from '../types';
 
 interface Props {
@@ -31,14 +30,8 @@ interface Props {
   [key: string]: any;
 }
 
-export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => {
-  const { getFormData, __getFormData$ } = form;
-
-  return (
-    <FormDataContextProvider getFormData={getFormData} getFormData$={__getFormData$}>
-      <FormProvider form={form}>
-        <FormWrapper {...rest} />
-      </FormProvider>
-    </FormDataContextProvider>
-  );
-};
+export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => (
+  <FormProvider form={form}>
+    <FormWrapper {...rest} />
+  </FormProvider>
+);

@@ -125,7 +125,6 @@ export const schemas: Record<string, FormSchema> = {
         {
           validator: indexPatternField(i18n),
           type: VALIDATION_TYPES.ARRAY_ITEM,
-          isBlocking: false,
         },
       ],
     },
@@ -214,11 +213,13 @@ export const schemas: Record<string, FormSchema> = {
         }
       },
     },
-    addMeta: {
-      type: FIELD_TYPES.TOGGLE,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
-        defaultMessage: 'Add metadata',
-      }),
+    __internal__: {
+      addMeta: {
+        type: FIELD_TYPES.TOGGLE,
+        label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
+          defaultMessage: 'Add metadata',
+        }),
+      },
     },
   },
 };
