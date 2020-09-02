@@ -20,9 +20,9 @@ import {
   createSingleMetricViewerUrl,
 } from './anomaly_detection_urls_generator';
 import {
-  createDataframeAnalyticsUrl,
-  createDataframeAnalyticsExplorationUrl,
-} from './dataframe_analytics_urls_generator';
+  createDataFrameAnalyticsJobManagementUrl,
+  createDataFrameAnalyticsExplorationUrl,
+} from './data_frame_analytics_urls_generator';
 import {
   createIndexDataVisualizerUrl,
   createDataVisualizerUrl,
@@ -59,9 +59,9 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
-        return createDataframeAnalyticsUrl(appBasePath, mlUrlGeneratorState.pageState);
+        return createDataFrameAnalyticsJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
-        return createDataframeAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
+        return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:

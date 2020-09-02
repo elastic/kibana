@@ -8,10 +8,9 @@ import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/comm
 import { JobId } from '../../../reporting/common/types';
 import { ML_PAGES } from '../constants/ml_url_generator';
 
-export interface MLPageState<PageType, PageState> {
-  page: PageType;
-  pageState?: PageState;
-}
+export type MLPageState<PageType, PageState = undefined> = PageState extends undefined
+  ? { page: PageType }
+  : { page: PageType; pageState: PageState };
 
 export const ANALYSIS_CONFIG_TYPE = {
   OUTLIER_DETECTION: 'outlier_detection',
@@ -53,10 +52,11 @@ export interface AnomalyDetectionQueryState {
 
 export type AnomalyDetectionUrlState = MLPageState<
   typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  {
-    jobId?: JobId;
-    groupIds?: string[];
-  }
+  | {
+      jobId?: JobId;
+      groupIds?: string[];
+    }
+  | undefined
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
@@ -149,7 +149,7 @@ export interface DataFrameAnalyticsQueryState {
 
 export type DataFrameAnalyticsUrlState = MLPageState<
   typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-  DataFrameAnalyticsQueryState
+  DataFrameAnalyticsQueryState | undefined
 >;
 
 export interface DataVisualizerUrlState {

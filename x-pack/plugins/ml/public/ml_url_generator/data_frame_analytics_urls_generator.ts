@@ -16,7 +16,7 @@ import {
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 
-export function createDataframeAnalyticsUrl(
+export function createDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
 ): string {
@@ -43,7 +43,7 @@ export function createDataframeAnalyticsUrl(
 /**
  * Creates URL to the DataFrameAnalytics Exploration page
  */
-export function createDataframeAnalyticsExplorationUrl(
+export function createDataFrameAnalyticsExplorationUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
 ): string {
