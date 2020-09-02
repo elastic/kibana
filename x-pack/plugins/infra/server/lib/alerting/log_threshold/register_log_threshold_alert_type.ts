@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerts/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-  Comparator,
+  AlertParamsRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const documentCountActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.documentCountActionVariableDescription',
@@ -34,34 +34,6 @@ const groupByActionVariableDescription = i18n.translate(
   }
 );
 
-const countSchema = schema.object({
-  value: schema.number(),
-  comparator: schema.oneOf([
-    schema.literal(Comparator.GT),
-    schema.literal(Comparator.LT),
-    schema.literal(Comparator.GT_OR_EQ),
-    schema.literal(Comparator.LT_OR_EQ),
-    schema.literal(Comparator.EQ),
-  ]),
-});
-
-const criteriaSchema = schema.object({
-  field: schema.string(),
-  comparator: schema.oneOf([
-    schema.literal(Comparator.GT),
-    schema.literal(Comparator.LT),
-    schema.literal(Comparator.GT_OR_EQ),
-    schema.literal(Comparator.LT_OR_EQ),
-    schema.literal(Comparator.EQ),
-    schema.literal(Comparator.NOT_EQ),
-    schema.literal(Comparator.MATCH),
-    schema.literal(Comparator.NOT_MATCH),
-    schema.literal(Comparator.MATCH_PHRASE),
-    schema.literal(Comparator.NOT_MATCH_PHRASE),
-  ]),
-  value: schema.oneOf([schema.number(), schema.string()]),
-});
-
 export async function registerLogThresholdAlertType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -76,13 +48,9 @@ export async function registerLogThresholdAlertType(
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     name: 'Log threshold',
     validate: {
-      params: schema.object({
-        count: countSchema,
-        criteria: schema.arrayOf(criteriaSchema),
-        timeUnit: schema.string(),
-        timeSize: schema.number(),
-        groupBy: schema.maybe(schema.arrayOf(schema.string())),
-      }),
+      params: {
+        validate: (params) => decodeOrThrow(AlertParamsRT)(params),
+      }
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
