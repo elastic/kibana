@@ -20,6 +20,7 @@
 import moment from 'moment';
 
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
+import { autoInterval } from '../../_interval_options';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {
@@ -103,7 +104,7 @@ describe('TimeBuckets', () => {
 
   test('setInterval/getInterval - intreval is a "auto"', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
-    timeBuckets.setInterval('auto');
+    timeBuckets.setInterval(autoInterval);
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('0 milliseconds');
