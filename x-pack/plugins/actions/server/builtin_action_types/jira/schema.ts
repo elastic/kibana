@@ -12,7 +12,7 @@ export const ExternalIncidentServiceConfiguration = {
   projectKey: schema.string(),
   // TODO: to remove - set it optional for the current stage to support Case Jira implementation
   incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.maybe(schema.boolean()),
+  isCaseOwned: schema.nullable(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
@@ -45,7 +45,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   priority: schema.nullable(schema.string()),
   labels: schema.nullable(schema.arrayOf(schema.string())),
   // TODO: modify later to string[] - need for support Case schema
-  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  comments: schema.nullable(schema.arrayOf(CommentSchema)),
   ...EntityInformation,
 });
 

@@ -18,7 +18,12 @@ import {
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import { PushToServiceResponse, TransformFieldsArgs, Comment } from './case_types';
+import {
+  PushToServiceResponse,
+  TransformFieldsArgs,
+  Comment,
+  EntityInformation,
+} from './case_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
@@ -141,14 +146,7 @@ export const transformFields = ({
       [cur.key]: transform({
         value: cur.value,
         date: params.updatedAt ?? params.createdAt,
-        user:
-          (params.updatedBy != null
-            ? params.updatedBy.fullName
-              ? params.updatedBy.fullName
-              : params.updatedBy.username
-            : params.createdBy.fullName
-            ? params.createdBy.fullName
-            : params.createdBy.username) ?? '',
+        user: getEntity(params),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
@@ -161,17 +159,21 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
     comment: flow(...pipes.map((p) => transformers[p]))({
       value: c.comment,
       date: c.updatedAt ?? c.createdAt,
-      user:
-        (c.updatedBy != null
-          ? c.updatedBy.fullName
-            ? c.updatedBy.fullName
-            : c.updatedBy.username
-          : c.createdBy.fullName
-          ? c.createdBy.fullName
-          : c.createdBy.username) ?? '',
+      user: getEntity(c),
     }).value,
   }));
 };
+
+export const getEntity = (entity: EntityInformation): string =>
+  (entity.updatedBy != null
+    ? entity.updatedBy.fullName
+      ? entity.updatedBy.fullName
+      : entity.updatedBy.username
+    : entity.createdBy != null
+    ? entity.createdBy.fullName
+      ? entity.createdBy.fullName
+      : entity.createdBy.username
+    : '') ?? '';
 
 export const api: ExternalServiceApi = {
   handshake: handshakeHandler,

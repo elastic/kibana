@@ -9,7 +9,12 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
-import { IncidentConfigurationSchema, MapRecordSchema, CommentSchema } from './case_schema';
+import {
+  IncidentConfigurationSchema,
+  MapRecordSchema,
+  CommentSchema,
+  EntityInformationSchema,
+} from './case_schema';
 import {
   PushToServiceApiParams,
   ExternalServiceIncidentResponse,
@@ -23,6 +28,7 @@ export interface CreateCommentRequest {
 export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 export type MapRecord = TypeOf<typeof MapRecordSchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
+export type EntityInformation = TypeOf<typeof EntityInformationSchema>;
 
 export interface ExternalServiceCommentResponse {
   commentId: string;
