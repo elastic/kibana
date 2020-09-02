@@ -21,6 +21,7 @@ interface Props {
 
 export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const basePath = getBasePath();
 
   const recognizerResults = {
     count: 0,
@@ -87,7 +88,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
-        href={`#/jobs/new_job/advanced?index=${indexPattern}`}
+        href={`${basePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`}
         data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
       />
     </div>
