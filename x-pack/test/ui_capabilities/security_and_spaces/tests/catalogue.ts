@@ -64,6 +64,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'enterpriseSearch',
               'appSearch',
               'workplaceSearch',
+              'spaces',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(
