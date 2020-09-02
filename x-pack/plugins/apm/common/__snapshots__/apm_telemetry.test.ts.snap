@@ -571,15 +571,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                       }
                     },
                     "environments": {
-                      "services_without_environment": {
-                        "type": "long"
-                      },
-                      "services_with_multiple_environments": {
-                        "type": "long"
-                      },
-                      "top_enviroments": {
-                        "type": "keyword",
-                        "ignore_above": 1024
+                      "properties": {
+                        "services_without_environment": {
+                          "type": "long"
+                        },
+                        "services_with_multiple_environments": {
+                          "type": "long"
+                        },
+                        "top_enviroments": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
                       }
                     },
                     "cloud": {

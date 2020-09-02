@@ -107,9 +107,11 @@ export function getApmTelemetryMapping() {
         },
       },
       environments: {
-        services_without_environment: long,
-        services_with_multiple_environments: long,
-        top_enviroments: keyword,
+        properties: {
+          services_without_environment: long,
+          services_with_multiple_environments: long,
+          top_enviroments: keyword,
+        },
       },
       cloud: {
         properties: {
