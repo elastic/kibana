@@ -168,6 +168,7 @@ export class CreateIndexPatternWizard extends Component<
       ...this.state.indexPatternCreationType.getIndexPatternMappings(),
     });
 
+    emptyPattern._fetchFields();
     const createdId = await emptyPattern.create();
     if (!createdId) {
       const confirmMessage = i18n.translate(

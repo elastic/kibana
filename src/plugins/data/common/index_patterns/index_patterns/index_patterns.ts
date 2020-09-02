@@ -256,6 +256,28 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
+  async create(spec: IndexPatternSpec): Promise<IndexPattern> {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+
+    const indexPattern = new IndexPattern({
+      spec,
+      savedObjectsClient: this.savedObjectsClient,
+      apiClient: this.apiClient,
+      patternCache: indexPatternCache,
+      fieldFormats: this.fieldFormats,
+      onNotification: this.onNotification,
+      onError: this.onError,
+      shortDotsEnable,
+      metaFields,
+    });
+
+    await indexPattern._fetchFields();
+    await indexPattern.create();
+
+    return indexPattern;
+  }
+
   async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);

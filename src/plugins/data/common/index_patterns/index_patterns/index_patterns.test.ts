@@ -33,6 +33,7 @@ jest.mock('./index_pattern', () => {
     init = async () => {
       return this;
     };
+    initFromSpec = async () => {};
   }
 
   return {
@@ -45,14 +46,15 @@ describe('IndexPatterns', () => {
   let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
+    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
-      () =>
-        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
-          Array<SavedObject<any>>
-        >
+      () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
+    savedObjectsClient.get = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(indexPatternObj) as Promise<SavedObject<any>>);
 
     indexPatterns = new IndexPatternsService({
       uiSettings: ({
