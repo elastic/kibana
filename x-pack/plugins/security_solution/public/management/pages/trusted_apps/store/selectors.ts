@@ -7,7 +7,7 @@
 import { Immutable } from '../../../../../common/endpoint/types';
 import { TrustedAppsPageState } from '../state/trusted_apps_page_state';
 import { pageInfosEqual } from '../state/items_page';
-import { isStaleBinding } from '../state/async_data_binding';
+import { isOutdatedBinding } from '../state/async_data_binding';
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>) => {
   const currentPageInfo = state.list.currentPageInfo;
@@ -15,7 +15,7 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>) =
 
   return (
     state.active &&
-    isStaleBinding(currentPage, (data) => pageInfosEqual(currentPageInfo, data.pageInfo))
+    isOutdatedBinding(currentPage, (data) => pageInfosEqual(currentPageInfo, data.pageInfo))
   );
 };
 

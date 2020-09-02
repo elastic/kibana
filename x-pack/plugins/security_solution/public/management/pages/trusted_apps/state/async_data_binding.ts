@@ -75,7 +75,7 @@ export const getCurrentError = <T, E>(binding: Immutable<AsyncDataBinding<T, E>>
   return isFailedAsyncBinding(binding) ? binding.error : undefined;
 };
 
-export const isStaleBinding = <T, E>(
+export const isOutdatedBinding = <T, E>(
   binding: AsyncDataBinding<T, E>,
   isFresh: (data: T) => boolean
 ): boolean =>
