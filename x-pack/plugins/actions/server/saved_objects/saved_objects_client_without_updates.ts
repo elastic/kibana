@@ -9,6 +9,11 @@ type AlertSavedObjectsCreateOptions = Omit<SavedObjectsCreateOptions, 'id' | 'ov
 type AlertSavedObjectsUpdateOptions = Omit<SavedObjectsCreateOptions, 'id' | 'overwrite'> &
   Pick<Required<SavedObjectsCreateOptions>, 'id' | 'overwrite'>;
 
+/**
+ * This type ensures that:
+ * 1. We never accidentally call `update`
+ * 2. We always specify `overwrite` when call `create` _with_ an `id`.
+ */
 export type SavedObjectsClientWithoutUpdates = Omit<
   SavedObjectsClientContract,
   'create' | 'update' | 'bulkUpdate'
