@@ -15,7 +15,13 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
-import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
+import {
+  NetworkQueries,
+  NetworkTlsStrategyResponse,
+  NetworkTlsRequestOptions,
+  NetworkHttpStrategyResponse,
+  NetworkHttpRequestOptions,
+} from './network';
 
 export * from './hosts';
 export * from './network';
@@ -116,6 +122,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
+  : T extends NetworkQueries.http
+  ? NetworkHttpStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -126,4 +134,11 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptions
   : never;
+
+export interface GenericBuckets {
+  key: string;
+  doc_count: number;
+}

@@ -43,14 +43,20 @@ export class FeatureUsageService {
   public setup(): FeatureUsageServiceSetup {
     return {
       register: (featureName, licenseType) => {
-        if (this.lastUsages.has(featureName)) {
-          throw new Error(`Feature '${featureName}' has already been registered.`);
+        const registered = this.lastUsages.get(featureName);
+        if (registered) {
+          if (registered.licenseType !== licenseType) {
+            throw new Error(
+              `Feature '${featureName}' has already been registered with another license type. (current: ${registered.licenseType}, new: ${licenseType})`
+            );
+          }
+        } else {
+          this.lastUsages.set(featureName, {
+            name: featureName,
+            lastUsed: null,
+            licenseType,
+          });
         }
-        this.lastUsages.set(featureName, {
-          name: featureName,
-          lastUsed: null,
-          licenseType,
-        });
       },
     };
   }

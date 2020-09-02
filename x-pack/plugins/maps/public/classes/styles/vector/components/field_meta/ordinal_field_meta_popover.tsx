@@ -40,6 +40,7 @@ type Props = {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (fieldMetaOptions: FieldMetaOptions) => void;
+  switchDisabled: boolean;
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {
@@ -66,6 +67,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
             checked={props.fieldMetaOptions.isEnabled}
             onChange={onIsEnabledChange}
             compressed
+            disabled={props.switchDisabled}
           />
         </EuiFormRow>
 
