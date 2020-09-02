@@ -262,7 +262,6 @@ ${theme.eui.euiColorLightShade}`,
 export const getCytoscapeOptions = (
   theme: EuiTheme
 ): cytoscape.CytoscapeOptions => ({
-  // autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
