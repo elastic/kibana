@@ -8,43 +8,46 @@ import { ServerApiError } from '../../../../common/types';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
-import { TrustedAppsItemsPage, TrustedAppsPageState } from '../state/trusted_apps_page_state';
-import { TrustedAppsHttpService, TrustedAppsService } from '../service';
-import { needsRefreshOfListData } from './selectors';
-import { ListDataBindingChanged } from './action';
 import {
   AsyncDataBinding,
   StaleAsyncBinding,
   getLastPresentDataBinding,
 } from '../state/async_data_binding';
+import {
+  TrustedAppsListData,
+  TrustedAppsListPageState,
+} from '../state/trusted_apps_list_page_state';
+import { TrustedAppsHttpService, TrustedAppsService } from '../service';
+import { needsRefreshOfListData } from './selectors';
+import { ListDataBindingChanged } from './action';
 
 const createListDataBindingChangedAction = (
-  newBinding: Immutable<AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>>
+  newBinding: Immutable<AsyncDataBinding<TrustedAppsListData, ServerApiError>>
 ): Immutable<ListDataBindingChanged> => ({
   type: 'listDataBindingChanged',
   payload: { newBinding },
 });
 
 const refreshList = async (
-  store: ImmutableMiddlewareAPI<TrustedAppsPageState, AppAction>,
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const list = store.getState().list;
+  const list = store.getState().listView;
 
   store.dispatch(
     createListDataBindingChangedAction({
       type: 'InProgressAsyncBinding',
       // need to think on how to avoid the casting
-      previousBinding: list.currentPage as Immutable<
-        StaleAsyncBinding<TrustedAppsItemsPage, ServerApiError>
+      previousBinding: list.currentListData as Immutable<
+        StaleAsyncBinding<TrustedAppsListData, ServerApiError>
       >,
     })
   );
 
   try {
     const response = await trustedAppsService.getTrustedAppsList({
-      page: list.currentPageInfo.index,
-      per_page: list.currentPageInfo.size,
+      page: list.currentPaginationInfo.index,
+      per_page: list.currentPaginationInfo.size,
     });
 
     store.dispatch(
@@ -52,7 +55,7 @@ const refreshList = async (
         type: 'PresentAsyncBinding',
         data: {
           items: response.data,
-          pageInfo: list.currentPageInfo,
+          paginationInfo: list.currentPaginationInfo,
           totalItemsCount: response.total,
         },
       })
@@ -62,13 +65,13 @@ const refreshList = async (
       createListDataBindingChangedAction({
         type: 'FailedAsyncBinding',
         error,
-        lastPresentBinding: getLastPresentDataBinding(list.currentPage),
+        lastPresentBinding: getLastPresentDataBinding(list.currentListData),
       })
     );
   }
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsPageState> = (
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
   coreStart
 ) => {
   const trustedAppsService: TrustedAppsService = new TrustedAppsHttpService(coreStart.http);

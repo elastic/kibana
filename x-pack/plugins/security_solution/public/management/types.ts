@@ -8,7 +8,7 @@ import { CombinedState } from 'redux';
 import { SecurityPageName } from '../app/types';
 import { PolicyListState, PolicyDetailsState } from './pages/policy/types';
 import { EndpointState } from './pages/endpoint_hosts/types';
-import { TrustedAppsPageState } from './pages/trusted_apps/state/trusted_apps_page_state';
+import { TrustedAppsListPageState } from './pages/trusted_apps/state/trusted_apps_list_page_state';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
@@ -20,7 +20,7 @@ export type ManagementState = CombinedState<{
   policyList: PolicyListState;
   policyDetails: PolicyDetailsState;
   endpoints: EndpointState;
-  trustedApps: TrustedAppsPageState;
+  trustedApps: TrustedAppsListPageState;
 }>;
 
 /**

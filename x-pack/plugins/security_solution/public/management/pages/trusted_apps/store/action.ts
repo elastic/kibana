@@ -7,12 +7,12 @@
 import { ServerApiError } from '../../../../common/types';
 import { RoutingAction } from '../../../../common/store/routing/action';
 import { AsyncDataBinding } from '../state/async_data_binding';
-import { TrustedAppsItemsPage } from '../state/trusted_apps_page_state';
+import { TrustedAppsListData } from '../state/trusted_apps_list_page_state';
 
 export interface ListDataBindingChanged {
   type: 'listDataBindingChanged';
   payload: {
-    newBinding: AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>;
+    newBinding: AsyncDataBinding<TrustedAppsListData, ServerApiError>;
   };
 }
 

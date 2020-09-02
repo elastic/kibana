@@ -12,18 +12,18 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../../common/constants';
 import { ListDataBindingChanged, TrustedAppsPageAction } from './action';
-import { TrustedAppsPageState } from '../state/trusted_apps_page_state';
+import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
 
-type StateReducer = ImmutableReducer<TrustedAppsPageState, TrustedAppsPageAction>;
+type StateReducer = ImmutableReducer<TrustedAppsListPageState, TrustedAppsPageAction>;
 type CaseReducer<T extends TrustedAppsPageAction> = (
-  state: Immutable<TrustedAppsPageState>,
+  state: Immutable<TrustedAppsListPageState>,
   action: Immutable<T>
-) => Immutable<TrustedAppsPageState>;
+) => Immutable<TrustedAppsListPageState>;
 
-const initialPageState: TrustedAppsPageState = {
-  list: {
-    currentPage: { type: 'UninitialisedAsyncBinding' },
-    currentPageInfo: {
+const initialPageState: TrustedAppsListPageState = {
+  listView: {
+    currentListData: { type: 'UninitialisedAsyncBinding' },
+    currentPaginationInfo: {
       index: 1,
       size: 10,
     },
@@ -43,9 +43,9 @@ const isTrustedAppsPageLocation = (location: Immutable<AppLocation>) => {
 const listDataBindingChanged: CaseReducer<ListDataBindingChanged> = (state, action) => {
   return {
     ...state,
-    list: {
-      ...state.list,
-      currentPage: action.payload.newBinding,
+    listView: {
+      ...state.listView,
+      currentListData: action.payload.newBinding,
     },
   };
 };
@@ -56,9 +56,9 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
 
     return {
       ...state,
-      list: {
-        ...state.list,
-        currentPageInfo: {
+      listView: {
+        ...state.listView,
+        currentPaginationInfo: {
           index: Number(query.page_index) || 1,
           size: Number(query.page_size) || 10,
         },
