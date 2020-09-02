@@ -11,6 +11,12 @@ accordingly, and delete the patch script.
 changeTemplate(RelativeId("DefaultTemplate")) {
     params {
         expect {
+            password("env.CI_STATS_HOST", "credentialsJSON:933ba93e-4b06-44c1-8724-8c536651f2b6", display = ParameterDisplay.HIDDEN)
+        }
+        update {
+            password("env.CI_STATS_HOST", "credentialsJSON:f8462bff-1384-4c37-8ed7-914a6407f568", display = ParameterDisplay.HIDDEN)
+        }
+        expect {
             password("env.KIBANA_CI_STATS_CONFIG", "", display = ParameterDisplay.HIDDEN)
         }
         update {
