@@ -30,6 +30,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
+  agentPolicies: {},
   endpointsExist: true,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
@@ -67,6 +68,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       nonExistingPolicies: {
         ...state.nonExistingPolicies,
+        ...action.payload,
+      },
+    };
+  } else if (action.type === 'serverReturnedEndpointAgentPolicies') {
+    return {
+      ...state,
+      agentPolicies: {
+        ...state.agentPolicies,
         ...action.payload,
       },
     };

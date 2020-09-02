@@ -124,6 +124,7 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
+    agentPolicies,
     autoRefreshInterval,
     isAutoRefreshEnabled,
   } = useEndpointSelector(selector);
@@ -400,7 +401,7 @@ export const EndpointList = () => {
                         data-test-subj="hostLink"
                         appId="securitySolution"
                         appPath={`hosts/${item.metadata.host.hostname}`}
-                        href={`${services.application.getUrlForApp('securitySolution')}/hosts/${
+                        href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
                           item.metadata.host.hostname
                         }`}
                       >
@@ -414,9 +415,11 @@ export const EndpointList = () => {
                       <LinkToApp
                         data-test-subj="agentPolicyLink"
                         appId="ingestManager"
-                        appPath={`#/policies/${item.metadata.Endpoint.policy.applied.id}`}
-                        href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
-                          item.metadata.elastic.agent.id
+                        appPath={`#/policies/${
+                          agentPolicies[item.metadata.Endpoint.policy.applied.id]
+                        }`}
+                        href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
+                          agentPolicies[item.metadata.elastic.agent.id]
                         }`}
                       >
                         <FormattedMessage
@@ -430,7 +433,7 @@ export const EndpointList = () => {
                         data-test-subj="agentDetailsLink"
                         appId="ingestManager"
                         appPath={`#/fleet/agents/${item.metadata.elastic.agent.id}`}
-                        href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
+                        href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
                           item.metadata.elastic.agent.id
                         }`}
                       >
@@ -448,7 +451,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [formatUrl, queryParams, search, services.application]);
+  }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {

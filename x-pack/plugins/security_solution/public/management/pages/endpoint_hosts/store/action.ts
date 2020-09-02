@@ -83,7 +83,7 @@ interface ServerReturnedEndpointNonExistingPolicies {
 
 interface ServerReturnedEndpointAgentPolicies {
   type: 'serverReturnedEndpointAgentPolicies';
-  payload: EndpointState['nonExistingPolicies'];
+  payload: EndpointState['agentPolicies'];
 }
 
 interface ServerReturnedEndpointExistValue {
@@ -119,4 +119,5 @@ export type EndpointAction =
   | ServerReturnedEndpointPackageInfo
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
+  | ServerReturnedEndpointAgentPolicies
   | UserUpdatedEndpointListRefreshOptions;
