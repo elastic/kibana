@@ -6,7 +6,7 @@
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
 import { RuleType } from '../../../../../common/detection_engine/types';
@@ -59,7 +59,7 @@ interface StepRuleDescriptionProps<T> {
   schema: FormSchema<T>;
 }
 
-export const StepRuleDescription = <T,>({
+export const StepRuleDescriptionComponent = <T,>({
   data,
   columns = 'multi',
   indexPatterns,
@@ -124,6 +124,10 @@ export const StepRuleDescription = <T,>({
     </EuiFlexGroup>
   );
 };
+
+export const StepRuleDescription = memo(
+  StepRuleDescriptionComponent
+) as typeof StepRuleDescriptionComponent;
 
 export const buildListItems = <T,>(
   data: unknown,
