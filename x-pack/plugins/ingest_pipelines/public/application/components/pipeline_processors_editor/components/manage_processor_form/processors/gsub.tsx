@@ -29,7 +29,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     deserializer: String,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldHelpText', {
-      defaultMessage: 'Regular expression used to match substrings in the field',
+      defaultMessage: 'Regular expression used to match substrings in the field.',
     }),
     validations: [
       {
@@ -49,7 +49,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
-      { defaultMessage: 'Replacement text for matches' }
+      { defaultMessage: 'Replacement text for matches.' }
     ),
     validations: [
       {
@@ -69,7 +69,7 @@ export const Gsub: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.gsubForm.fieldNameHelpText',
-          { defaultMessage: 'Field to search for matches' }
+          { defaultMessage: 'Field to search for matches.' }
         )}
       />
 
