@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { AuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/authentications';
+import { AuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';

@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useAuthentications } from '../../containers/hosts/authentications';
+import { useAuthentications } from '../../containers/authentications';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../store';
 import {

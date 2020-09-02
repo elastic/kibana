@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { UserEcs } from '../../../ecs/user';
-import { SourceEcs } from '../../../ecs/source';
-import { HostEcs } from '../../../ecs/host';
+import { UserEcs } from '../../../../ecs/user';
+import { SourceEcs } from '../../../../ecs/source';
+import { HostEcs } from '../../../../ecs/host';
 import {
   CursorType,
   Inspect,
@@ -17,15 +17,12 @@ import {
   StringOrNumber,
   Hit,
   TotalHit,
-} from '..';
+} from '../../';
 
 export interface AuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
-
   totalCount: number;
-
   pageInfo: PageInfoPaginated;
-
   inspect?: Maybe<Inspect>;
 }
 
@@ -35,29 +32,21 @@ export interface AuthenticationsRequestOptions extends RequestOptionsPaginated {
 
 export interface AuthenticationsEdges {
   node: AuthenticationItem;
-
   cursor: CursorType;
 }
 
 export interface AuthenticationItem {
   _id: string;
-
   failures: number;
-
   successes: number;
-
   user: UserEcs;
-
   lastSuccess?: Maybe<LastSourceHost>;
-
   lastFailure?: Maybe<LastSourceHost>;
 }
 
 export interface LastSourceHost {
   timestamp?: Maybe<string>;
-
   source?: Maybe<SourceEcs>;
-
   host?: Maybe<HostEcs>;
 }
 
