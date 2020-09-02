@@ -3,13 +3,15 @@ package projects
 import org.junit.Assert.*
 import org.junit.Test
 
-val TestConfig = KibanaConfiguration("network", "subnet")
+val TestConfig = KibanaConfiguration {
+  agentNetwork = "network"
+  agentSubnet = "subnet"
+}
 
 class KibanaTest {
   @Test
   fun test_Default_Configuration_Exists() {
     assertNotNull(kibanaConfiguration)
-    assertEquals("teamcity", kibanaConfiguration.agentNetwork)
     Kibana()
     assertEquals("teamcity", kibanaConfiguration.agentNetwork)
   }

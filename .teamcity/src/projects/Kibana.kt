@@ -11,10 +11,14 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnect
 import kibanaAgent
 import templates.DefaultTemplate
 
-class KibanaConfiguration(
-  val agentNetwork: String = "teamcity",
-  val agentSubnet: String = "teamcity"
-)
+class KibanaConfiguration() {
+  var agentNetwork: String = "teamcity"
+  var agentSubnet: String = "teamcity"
+
+  constructor(init: KibanaConfiguration.() -> Unit) : this() {
+    init()
+  }
+}
 
 var kibanaConfiguration = KibanaConfiguration()
 
