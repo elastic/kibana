@@ -19,7 +19,7 @@ import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
 } from './hosts/authentications';
-import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
+import {
   NetworkQueries,
   NetworkTlsStrategyResponse,
   NetworkTlsRequestOptions,
