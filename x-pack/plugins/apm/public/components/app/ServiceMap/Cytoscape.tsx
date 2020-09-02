@@ -137,8 +137,6 @@ export function Cytoscape({
           resetConnectedEdgeStyle();
         }
         cy.layout(getLayoutOptions(nodeHeight)).run();
-        cy.nodes().grabify();
-        // cy.elements().panify();
       }
     };
     let layoutstopDelayTimeout: NodeJS.Timeout;
