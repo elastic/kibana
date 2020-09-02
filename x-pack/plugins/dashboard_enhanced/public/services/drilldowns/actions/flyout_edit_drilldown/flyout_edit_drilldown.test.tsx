@@ -83,11 +83,6 @@ describe('isCompatible', () => {
     };
   }
 
-  test('not compatible if no drilldowns', async () => {
-    const { action, context } = setupIsCompatible();
-    expect(await action.isCompatible(context)).toBe(false);
-  });
-
   test('not compatible if embeddable is not enhanced', async () => {
     const { action, context } = setupIsCompatible({ isEmbeddableEnhanced: false });
     expect(await action.isCompatible(context)).toBe(false);
