@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlServerLicense } from '../lib/license';
+import { MlServerLicense } from '../../lib/license';
+import { InsufficientFullLicenseError, InsufficientBasicLicenseError } from './errors';
 
 export type LicenseCheck = () => void;
 
@@ -14,12 +15,12 @@ export function licenseChecks(
   return {
     isFullLicense() {
       if (mlLicense.isFullLicense() === false) {
-        throw Error('Platinum, Enterprise or trial license needed');
+        throw new InsufficientFullLicenseError('Platinum, Enterprise or trial license needed');
       }
     },
     isMinimumLicense() {
       if (mlLicense.isMinimumLicense() === false) {
-        throw Error('Basic license needed');
+        throw new InsufficientBasicLicenseError('Basic license needed');
       }
     },
   };
