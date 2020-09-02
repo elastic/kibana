@@ -165,16 +165,21 @@ export function disableUICapabilitiesFactory(
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
 
       const isElasticsearchFeature = elasticsearchFeatureMap.hasOwnProperty(featureId);
-
-      if (!isElasticsearchFeature) {
-        const hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
-          (x) => x.privilege === action && x.authorized === true
-        );
-        return hasRequiredKibanaPrivileges;
-      }
-
       const isCatalogueFeature = featureId === 'catalogue';
       const isManagementFeature = featureId === 'management';
+
+      let hasRequiredKibanaPrivileges = false;
+      if (!isElasticsearchFeature) {
+        hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
+          (x) => x.privilege === action && x.authorized === true
+        );
+
+        // Catalogue and management capbility buckets can also be influenced by ES privileges,
+        // so the early return is not possible for these.
+        if ((!isCatalogueFeature && !isManagementFeature) || hasRequiredKibanaPrivileges) {
+          return hasRequiredKibanaPrivileges;
+        }
+      }
 
       return elasticsearchFeatures.some((esFeature) => {
         if (isCatalogueFeature) {

@@ -293,6 +293,10 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('navLinks', 'quz'), authorized: false },
             { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
             { privilege: actions.ui.get('management', 'kibana', 'settings'), authorized: false },
+            {
+              privilege: actions.ui.get('management', 'kibana', 'esManagement'),
+              authorized: false,
+            },
             { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
             { privilege: actions.ui.get('fooFeature', 'bar'), authorized: false },
             { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
@@ -351,6 +355,18 @@ describe('usingPrivileges', () => {
             },
           ],
         }),
+        new ElasticsearchFeature({
+          id: 'esManagementFeature',
+          management: {
+            kibana: ['esManagement'],
+          },
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage_security'],
+              ui: [],
+            },
+          ],
+        }),
       ],
       loggingSystemMock.create().get(),
       mockAuthz,
@@ -368,6 +384,7 @@ describe('usingPrivileges', () => {
           kibana: {
             indices: true,
             settings: false,
+            esManagement: true,
           },
         },
         catalogue: {},
@@ -386,6 +403,7 @@ describe('usingPrivileges', () => {
         esSecurityFeature: {
           es_manage_sec: true,
         },
+        esManagementFeature: {},
       })
     );
 
@@ -399,6 +417,7 @@ describe('usingPrivileges', () => {
         kibana: {
           indices: true,
           settings: false,
+          esManagement: true,
         },
       },
       catalogue: {},
@@ -417,6 +436,7 @@ describe('usingPrivileges', () => {
       esSecurityFeature: {
         es_manage_sec: true,
       },
+      esManagementFeature: {},
     });
   });
 
