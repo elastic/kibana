@@ -199,7 +199,11 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, title) {
 
 def runTests(isQuick) {
   if (isQuick) {
-    workers.functional('just-oss-ciGroup2', { kibanaPipeline.buildOss() }, [ ossProks()['oss-ciGroup2'] ])
+
+    Closure buildOss = { kibanaPipeline.buildOss() }
+    Map runGroup = [ ossProks()['oss-ciGroup2'] ]
+    workers.functional('just-oss-ciGroup2', buildOss, runGroup)
+
   } else {
     parallel(allTests())
   }
