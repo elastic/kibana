@@ -218,6 +218,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.legendLabel', {
           defaultMessage: 'Legend',
         })}
+        icon="copy"
       >
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {

@@ -16,7 +16,7 @@ export interface ToolbarPopoverProps {
   /**
    * Determines the button icon
    */
-  icon?: string;
+  icon: string;
   /**
    * Determines if the popover is disabled
    */
@@ -30,7 +30,7 @@ export interface ToolbarPopoverProps {
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   children,
   title,
-  icon = 'beaker',
+  icon,
   isDisabled = false,
   handlePopoverState,
 }) => {

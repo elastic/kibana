@@ -150,14 +150,14 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       ? datasource.getOperationForColumnId(layer.accessors[0])
       : null;
 
-    let yRightTitle: string | undefined = '';
+    let yRightTitle: string = '';
     if (rightAxisLayer.length > 0) {
       const yConfig = rightAxisLayer[0].yConfig;
       const dataSourceNewLayer = frame.datasourceLayers[rightAxisLayer[0].layerId];
       const y = yConfig
         ? dataSourceNewLayer.getOperationForColumnId(yConfig[yConfig.length - 1].forAccessor)
         : null;
-      yRightTitle = y?.label;
+      yRightTitle = y?.label || '';
     }
 
     return {
@@ -284,16 +284,16 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             })}
           >
             <ToolbarPopover
-              title={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-                defaultMessage: 'Fill missing values',
+              title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
+                defaultMessage: 'Values',
               })}
               isDisabled={!hasNonBarSeries}
               icon="visText"
             >
               <EuiFormRow
                 display="columnCompressed"
-                label={i18n.translate('xpack.lens.xyChart.fittingDisplayLabel', {
-                  defaultMessage: 'Display',
+                label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                  defaultMessage: 'Missing Values',
                 })}
               >
                 <EuiSuperSelect
@@ -324,6 +324,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             title={i18n.translate('xpack.lens.xyChart.legendLabel', {
               defaultMessage: 'Legend',
             })}
+            icon="copy"
           >
             <EuiFormRow
               display="columnCompressed"
@@ -394,6 +395,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               defaultMessage: 'Left Axis',
             })}
             handlePopoverState={setPopoversOpenState}
+            icon="sortLeft"
           >
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
@@ -459,6 +461,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               defaultMessage: 'Bottom Axis',
             })}
             handlePopoverState={setPopoversOpenState}
+            icon="sortDown"
           >
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
@@ -529,6 +532,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               })}
               handlePopoverState={setPopoversOpenState}
               isDisabled={rightAxisLayer?.length === 0 ?? true}
+              icon="sortRight"
             >
               <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>

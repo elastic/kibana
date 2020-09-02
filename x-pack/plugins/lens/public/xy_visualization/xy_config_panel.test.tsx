@@ -132,6 +132,22 @@ describe('XY Config panels', () => {
       expect(component.find(ToolbarPopover).at(4).prop('isDisabled')).toEqual(true);
     });
 
+    it('should enable the popover if there is right axis', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+          }}
+        />
+      );
+
+      expect(component.find(ToolbarPopover).at(4).prop('isDisabled')).toEqual(false);
+    });
+
     it('should show the values of the X and Y axes titles on the corresponding input text', () => {
       const state = testState();
       const component = shallow(
