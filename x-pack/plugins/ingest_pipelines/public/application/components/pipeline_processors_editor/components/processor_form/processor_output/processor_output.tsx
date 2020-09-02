@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -31,12 +31,6 @@ export interface Props {
 }
 
 const i18nTexts = {
-  noOutputCalloutTitle: i18n.translate(
-    'xpack.ingestPipelines.processorOutput.noOutputCalloutTitle',
-    {
-      defaultMessage: 'Unable to load the processor output.',
-    }
-  ),
   tabDescription: i18n.translate('xpack.ingestPipelines.processorOutput.descriptionText', {
     defaultMessage:
       'View how the processor affects the ingest document as it passes through the pipeline.',
@@ -88,7 +82,7 @@ const i18nTexts = {
   }),
 };
 
-export const ProcessorOutput: React.FunctionComponent<Props> = ({
+export const ProcessorOutput: FunctionComponent<Props> = ({
   processorOutput,
   documents,
   selectedDocumentIndex,
@@ -162,7 +156,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
           </EuiCallOut>
         );
       default:
-        return NoOutputCallout;
+        return <NoOutputCallOut />;
     }
   };
 
