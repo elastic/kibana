@@ -30,6 +30,9 @@ import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 
+export const GTE_SYMBOL = '\u2265';
+export const LT_SYMBOL = '\u003c';
+
 /**
  * Certain aggs have custom field formats that are not part of the field formats
  * registry. This function will take the `getFormat` function which is used inside
@@ -53,14 +56,12 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             id: nestedFormatter.id,
             params: nestedFormatter.params,
           });
-          const gte = '\u2265';
-          const lt = '\u003c';
           return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
             defaultMessage: '{gte} {from} and {lt} {to}',
             values: {
-              gte,
+              gte: GTE_SYMBOL,
               from: format.convert(range.gte),
-              lt,
+              lt: LT_SYMBOL,
               to: format.convert(range.lt),
             },
           });

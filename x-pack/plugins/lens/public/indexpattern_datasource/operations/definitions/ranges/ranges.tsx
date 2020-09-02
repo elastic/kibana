@@ -8,14 +8,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 
+import { autoInterval } from '../../../../../../../../src/plugins/data/common';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 
-// TODO update with the AutoInterval PR when ready
-export const autoInterval = 0;
 export const DEFAULT_INTERVAL = 1000;
+// TODO: find a way to read the UI settings config from here
+export const HISTOGRAM_MAX_BARS = 100;
 
 export const MODES = {
   Range: 'range',
@@ -34,7 +35,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
   params: {
     type: MODES_TYPES;
-    interval: number;
+    interval: 'auto' | number;
     maxBars: number;
     intervalBase?: number;
     ranges: RangeType[];
@@ -79,7 +80,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
         type: MODES.Histogram,
         interval: autoInterval,
         ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-        maxBars: 1,
+        maxBars: HISTOGRAM_MAX_BARS, // TODO: need to make an async request here to workout the right number
       },
     };
   },
@@ -124,8 +125,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, columnId }) => {
-    const isAutoInterval = currentColumn.params.interval === autoInterval;
+  paramEditor: ({ state, setState, currentColumn, layerId, columnId, data }) => {
     const setParam: UpdateParamsFnType = (paramName, value) => {
       setState(
         updateColumnParam({
@@ -159,7 +159,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
     return (
       <EuiForm>
         <RangeEditor
-          isAutoInterval={isAutoInterval}
+          onAutoIntervalToggle={(enabled: boolean) =>
+            setParam('interval', enabled ? autoInterval : 0)
+          }
           setParam={setParam}
           params={currentColumn.params}
           onChangeMode={onChangeMode}

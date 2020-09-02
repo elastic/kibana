@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButtonGroup,
   EuiSpacer,
   EuiDroppable,
   EuiDragDropContext,
@@ -30,16 +29,21 @@ import {
   EuiRange,
   EuiForm,
   EuiSwitch,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import {
+  isAutoInterval,
+  GTE_SYMBOL,
+  LT_SYMBOL,
+} from '../../../../../../../../src/plugins/data/common';
+import {
   RangeType,
-  DEFAULT_INTERVAL,
-  autoInterval,
   MODES,
   RangeColumnParams,
   UpdateParamsFnType,
   MODES_TYPES,
+  HISTOGRAM_MAX_BARS,
 } from './ranges';
 
 // Taken from the Visualize editor
@@ -48,18 +52,19 @@ const TO_PLACEHOLDER = '+\u221E';
 
 // TODO: improve this
 const isValidNumber = (value: number | '') => value !== '' && !isNaN(value) && isFinite(value);
+const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
 const isValidRange = (range: RangeType): boolean => {
   const { from, to } = range;
-  return isValidNumber(from) && isValidNumber(to);
+  return isValidNumber(from) && isValidNumber(to) && isRangeWithin(range);
 };
 
 const getSafeLabel = (range: RangeType) =>
-  range.label || isValidRange(range) ? `${range.from} - ${range.to}` : '';
+  range.label || (isValidRange(range) ? `${range.from} - ${range.to}` : '');
 
 // TODO: Make the autoInterval magic happen here:
 // It should make the user able to choose how many buckets he wants
 const BaseRangeEditor = ({
-  isAutoInterval,
+  autoIntervalEnabled,
   maxBars,
   interval,
   onToggleEditor,
@@ -67,7 +72,7 @@ const BaseRangeEditor = ({
   onMaxBarsChange,
   onIntervalChange,
 }: {
-  isAutoInterval: boolean;
+  autoIntervalEnabled: boolean;
   maxBars: number;
   interval: number;
   onToggleEditor: () => void;
@@ -75,42 +80,32 @@ const BaseRangeEditor = ({
   onMaxBarsChange: (newMaxBars: number) => void;
   onIntervalChange: (newInterval: number) => void;
 }) => {
-  const sectionLabel = isAutoInterval
+  const sectionLabel = autoIntervalEnabled
     ? i18n.translate('xpack.lens.indexPattern.ranges.maxBars', {
         defaultMessage: 'Max bars',
       })
     : i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-        defaultMessage: 'Granularity',
+        defaultMessage: 'Interval size',
       });
 
-  const counterButtons = [
-    {
-      id: `increment`,
-      label: '+',
-    },
-    {
-      id: `decrement`,
-      label: '-',
-    },
-  ];
   return (
     <>
       <EuiSwitch
         label={i18n.translate('xpack.lens.indexPattern.ranges.autoInterval', {
           defaultMessage: 'Auto interval',
         })}
-        checked={isAutoInterval}
+        checked={autoIntervalEnabled}
         onChange={(e) => toggleAutoInterval(e.target.checked)}
         data-test-subj="indexPattern-ranges-auto-interval"
       />
       <EuiSpacer />
       <EuiFormRow label={sectionLabel} data-test-subj="indexPattern-ranges-section-label">
         <>
-          {isAutoInterval ? (
+          {autoIntervalEnabled ? (
             <EuiRange
               id={htmlIdGenerator()()}
               min={1}
-              max={100}
+              max={HISTOGRAM_MAX_BARS}
               step={1}
               value={maxBars}
               onChange={({ target }) => onMaxBarsChange(Number(get(target, 'value', 100)))}
@@ -118,18 +113,6 @@ const BaseRangeEditor = ({
             />
           ) : (
             <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  data-test-subj="lens-range-interval-buttons"
-                  options={counterButtons}
-                  onChange={(id) => {
-                    const delta = id === 'increment' ? +1 : -1;
-                    onIntervalChange(interval + delta);
-                  }}
-                  buttonSize="compressed"
-                  isFullWidth
-                />
-              </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldNumber
                   data-test-subj="lens-range-interval-field"
@@ -165,9 +148,28 @@ const RangePopover = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
-  const { from, to, label } = tempRange;
+  const { from, to } = tempRange;
 
   const safeLabel = getSafeLabel(tempRange);
+
+  const gtePrependLabel = i18n.translate(
+    'xpack.lens.indexPattern.ranges.greaterThanOrEqualPrepend',
+    {
+      defaultMessage: GTE_SYMBOL,
+    }
+  );
+  const gteTooltipContent = i18n.translate(
+    'xpack.lens.indexPattern.ranges.greaterThanOrEqualTooltip',
+    {
+      defaultMessage: 'Greater than or equal to',
+    }
+  );
+  const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
+    defaultMessage: LT_SYMBOL,
+  });
+  const ltTooltipContent = i18n.translate('xpack.lens.indexPattern.ranges.lessThanTooltip', {
+    defaultMessage: 'Less than',
+  });
 
   return (
     <EuiPopover
@@ -176,6 +178,9 @@ const RangePopover = ({
       closePopover={() => {
         setIsPopoverOpen(false);
         if (isValidRange(tempRange)) {
+          // reset the temporary range for later use
+          setTempRange(range);
+          // send the range back to the main state
           setRange(tempRange);
         }
       }}
@@ -186,17 +191,22 @@ const RangePopover = ({
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem>
               <EuiFieldNumber
-                value={isFinite(from) ? Number(from) : ''}
+                value={isValidNumber(from) ? Number(from) : ''}
                 onChange={({ target }) =>
                   setTempRange({
                     ...tempRange,
                     from: target.value ? Number(target.value) : -Infinity,
                   })
                 }
-                append="<="
+                prepend={
+                  <EuiToolTip content={gteTooltipContent}>
+                    <EuiText size="s">{gtePrependLabel}</EuiText>
+                  </EuiToolTip>
+                }
                 fullWidth={true}
                 compressed={true}
                 placeholder={FROM_PLACEHOLDER}
+                isInvalid={isValidNumber(from) && !isRangeWithin(tempRange)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -211,10 +221,15 @@ const RangePopover = ({
                     to: target.value ? Number(target.value) : -Infinity,
                   })
                 }
-                prepend=">"
+                prepend={
+                  <EuiToolTip content={ltTooltipContent}>
+                    <EuiText size="s">{ltPrependLabel}</EuiText>
+                  </EuiToolTip>
+                }
                 fullWidth={true}
                 compressed={true}
                 placeholder={TO_PLACEHOLDER}
+                isInvalid={isValidNumber(to) && !isRangeWithin(tempRange)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -294,10 +309,10 @@ const AdvancedRangeEditor = ({
                 <EuiDraggable spacing="m" key={id} index={idx} draggableId={id} customDragHandle>
                   {(provided) => {
                     return (
-                      <EuiPanel paddingSize="none">
+                      <EuiPanel paddingSize="none" {...provided.dragHandleProps}>
                         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                           <EuiFlexItem grow={false}>
-                            <div {...provided.dragHandleProps} className="lnsLayerPanel_dndGrab">
+                            <div className="lnsLayerPanel_dndGrab">
                               <EuiIcon
                                 type="grab"
                                 aria-label={i18n.translate(
@@ -382,17 +397,19 @@ const AdvancedRangeEditor = ({
 };
 
 export const RangeEditor = ({
-  isAutoInterval,
+  onAutoIntervalToggle,
   setParam,
   params,
   onChangeMode,
 }: {
-  isAutoInterval: boolean;
   params: RangeColumnParams;
   setParam: UpdateParamsFnType;
+  onAutoIntervalToggle: (enabled: boolean) => void;
   onChangeMode: (mode: MODES_TYPES) => void;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
+  const isAutoIntervalEnabled = isAutoInterval(params.interval);
+  const numericIntervalValue: number = isAutoIntervalEnabled ? 0 : (params.interval as number);
 
   if (isAdvancedEditor) {
     return (
@@ -410,12 +427,10 @@ export const RangeEditor = ({
   }
   return (
     <BaseRangeEditor
-      isAutoInterval={isAutoInterval}
-      interval={params.interval}
+      autoIntervalEnabled={isAutoIntervalEnabled}
+      interval={numericIntervalValue}
       maxBars={params.maxBars}
-      toggleAutoInterval={(enabled: boolean) => {
-        setParam('interval', enabled ? autoInterval : DEFAULT_INTERVAL);
-      }}
+      toggleAutoInterval={onAutoIntervalToggle}
       onMaxBarsChange={(maxBars: number) => {
         setParam('maxBars', maxBars);
       }}
