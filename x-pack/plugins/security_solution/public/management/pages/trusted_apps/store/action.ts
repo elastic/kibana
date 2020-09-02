@@ -9,11 +9,11 @@ import { RoutingAction } from '../../../../common/store/routing/action';
 import { AsyncDataBinding } from '../state/async_data_binding';
 import { TrustedAppsListData } from '../state/trusted_apps_list_page_state';
 
-export interface ListDataBindingChanged {
-  type: 'listDataBindingChanged';
+export interface TrustedAppsListDataBindingChanged {
+  type: 'trustedAppsListDataBindingChanged';
   payload: {
     newBinding: AsyncDataBinding<TrustedAppsListData, ServerApiError>;
   };
 }
 
-export type TrustedAppsPageAction = ListDataBindingChanged | RoutingAction;
+export type TrustedAppsPageAction = TrustedAppsListDataBindingChanged | RoutingAction;

@@ -11,7 +11,7 @@ import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../../common/constants';
-import { ListDataBindingChanged, TrustedAppsPageAction } from './action';
+import { TrustedAppsListDataBindingChanged, TrustedAppsPageAction } from './action';
 import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, TrustedAppsPageAction>;
@@ -40,7 +40,10 @@ const isTrustedAppsPageLocation = (location: Immutable<AppLocation>) => {
   );
 };
 
-const listDataBindingChanged: CaseReducer<ListDataBindingChanged> = (state, action) => {
+const trustedAppsListDataBindingChanged: CaseReducer<TrustedAppsListDataBindingChanged> = (
+  state,
+  action
+) => {
   return {
     ...state,
     listView: {
@@ -75,8 +78,8 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
 
 const reducer: StateReducer = (state = initialPageState, action) => {
   switch (action.type) {
-    case 'listDataBindingChanged':
-      return listDataBindingChanged(state, action);
+    case 'trustedAppsListDataBindingChanged':
+      return trustedAppsListDataBindingChanged(state, action);
 
     case 'userChangedUrl':
       return userChangedUrl(state, action);

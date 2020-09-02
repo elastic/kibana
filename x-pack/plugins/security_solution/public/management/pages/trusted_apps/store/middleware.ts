@@ -19,12 +19,12 @@ import {
 } from '../state/trusted_apps_list_page_state';
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 import { needsRefreshOfListData } from './selectors';
-import { ListDataBindingChanged } from './action';
+import { TrustedAppsListDataBindingChanged } from './action';
 
 const createListDataBindingChangedAction = (
   newBinding: Immutable<AsyncDataBinding<TrustedAppsListData, ServerApiError>>
-): Immutable<ListDataBindingChanged> => ({
-  type: 'listDataBindingChanged',
+): Immutable<TrustedAppsListDataBindingChanged> => ({
+  type: 'trustedAppsListDataBindingChanged',
   payload: { newBinding },
 });
 
