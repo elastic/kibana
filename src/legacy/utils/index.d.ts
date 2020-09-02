@@ -16,5 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Readable, Writable, Transform, TransformOptions } from 'stream';
+
+export function concatStreamProviders(
+  sourceProviders: Array<() => Readable>,
+  options: TransformOptions
+): Transform;
+export function createIntersperseStream(intersperseChunk: string | Buffer): Transform;
+export function createSplitStream<T>(splitChunk: T): Transform;
+export function createListStream(items: any | any[]): Readable;
+export function createReduceStream<T>(reducer: (value: any, chunk: T, enc: string) => T): Transform;
+export function createPromiseFromStreams<T>([first, ...rest]: [Readable, ...Writable[]]): Promise<
+  T
+>;
+export function createConcatStream(initial?: any): Transform;
+export function createMapStream<T>(fn: (value: T, i: number) => void): Transform;
+export function createReplaceStream(toReplace: string, replacement: string | Buffer): Transform;
+export function createFilterStream<T>(fn: (obj: T) => boolean): Transform;
 
 export function unset(object: object, rawPath: string): void;

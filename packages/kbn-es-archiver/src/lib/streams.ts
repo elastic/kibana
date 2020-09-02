@@ -17,4 +17,15 @@
  * under the License.
  */
 
-export * from '../../../../src/core/server/utils/streams';
+export {
+  createFilterStream,
+  concatStreamProviders,
+  createConcatStream,
+  createIntersperseStream,
+  createListStream,
+  createPromiseFromStreams,
+  createReduceStream,
+  createSplitStream,
+  createMapStream,
+  createReplaceStream,
+} from '../../../../src/legacy/utils';
