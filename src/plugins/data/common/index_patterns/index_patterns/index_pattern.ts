@@ -189,22 +189,22 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Helper function to extend  field specs with e.g. displayName
+   * Helper function to extend  field specs with e.g. customName
    */
   private getFieldSpecs(specs: FieldSpec[] | undefined) {
     if (!Array.isArray(specs)) {
       return [];
     }
     return specs.map((spec) => {
-      return { ...spec, customLabel: this.getFieldSpecCustomLabel(spec.name) };
+      return { ...spec, customName: this.getFieldSpecCustomName(spec.name) };
     });
   }
-  private getFieldSpecCustomLabel(name: string) {
+  private getFieldSpecCustomName(name: string) {
     const fields = this.attributes?.fields;
     if (!fields || !fields[name]) {
       return;
     }
-    return fields[name].customLabel;
+    return fields[name].customName;
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -461,8 +461,8 @@ export class IndexPattern implements IIndexPattern {
   prepBody() {
     const attribFields = {} as any;
     for (const field of this.fields) {
-      if (field.customLabel) {
-        attribFields[field.name] = { customLabel: field.customLabel };
+      if (field.customName) {
+        attribFields[field.name] = { customName: field.customName };
       }
     }
     const body = {

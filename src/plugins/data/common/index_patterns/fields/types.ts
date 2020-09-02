@@ -37,7 +37,7 @@ export interface IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
-  customLabel?: string;
+  customName?: string;
   format?: any;
   toSpec?: () => FieldSpec;
 }

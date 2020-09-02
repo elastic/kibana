@@ -76,12 +76,12 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
-  public get customLabel() {
-    return this.spec.customLabel;
+  public get customName() {
+    return this.spec.customName;
   }
 
-  public set customLabel(label) {
-    this.spec.customLabel = label;
+  public set customName(label) {
+    this.spec.customName = label;
   }
 
   public get conflictDescriptions() {
@@ -98,8 +98,8 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get displayName() {
-    return this.spec.customLabel
-      ? this.spec.customLabel
+    return this.spec.customName
+      ? this.spec.customName
       : this.spec.shortDotsEnable
       ? shortenDottedString(this.spec.name)
       : this.spec.name;
@@ -171,7 +171,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
-      customLabel: this.customLabel,
+      customName: this.customName,
     };
   }
 
@@ -189,7 +189,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
-      customLabel: this.customLabel,
+      customName: this.customName,
       shortDotsEnable: this.spec.shortDotsEnable,
       format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
     };

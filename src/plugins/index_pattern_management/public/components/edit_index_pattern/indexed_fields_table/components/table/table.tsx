@@ -151,9 +151,9 @@ const editDescription = i18n.translate(
   { defaultMessage: 'Edit' }
 );
 
-const customLabelDescription = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.customLabelTooltip',
-  { defaultMessage: 'This field has a custom label' }
+const customNameDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.customNameTooltip',
+  { defaultMessage: 'A custom name for the field.' }
 );
 
 interface IndexedFieldProps {
@@ -197,11 +197,11 @@ export class Table extends PureComponent<IndexedFieldProps> {
             />
           </span>
         ) : null}
-        {field.customLabel && field.customLabel !== field.name ? (
+        {field.customName && field.customName !== field.name ? (
           <div>
-            <EuiToolTip content={customLabelDescription}>
+            <EuiToolTip content={customNameDescription}>
               <EuiBadge iconType="flag" iconSide="left">
-                {field.customLabel}
+                {field.customName}
               </EuiBadge>
             </EuiToolTip>
           </div>

@@ -62,7 +62,7 @@ export interface IndexPatternAttributes {
  */
 
 export interface IndexPatternAttrs {
-  fields: { [key: string]: { customLabel: string } };
+  fields: { [key: string]: { customName: string } };
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -173,7 +173,7 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
-  customLabel?: string;
+  customName?: string;
   // not persisted
   shortDotsEnable?: boolean;
 }

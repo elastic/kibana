@@ -639,7 +639,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customLabel: string | undefined;
+        customName: string | undefined;
         shortDotsEnable: boolean | undefined;
         format: any;
     }[];
@@ -846,7 +846,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customLabel?: string;
+    customName?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)
@@ -1123,8 +1123,8 @@ export class IndexPatternField implements IFieldType {
     get count(): number;
     set count(count: number);
     // (undocumented)
-    get customLabel(): string | undefined;
-    set customLabel(label: string | undefined);
+    get customName(): string | undefined;
+    set customName(label: string | undefined);
     // (undocumented)
     get displayName(): any;
     // (undocumented)
@@ -1169,7 +1169,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customLabel: string | undefined;
+        customName: string | undefined;
     };
     // (undocumented)
     toSpec(): {
@@ -1185,7 +1185,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customLabel: string | undefined;
+        customName: string | undefined;
         shortDotsEnable: boolean | undefined;
         format: any;
     };

@@ -126,7 +126,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
-  customLabel: string;
+  customName: string;
 }
 
 export interface FieldEdiorProps {
@@ -166,7 +166,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
-      customLabel: '',
+      customName: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -212,7 +212,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldFormatId: indexPattern.fieldFormatMap
         ? indexPattern.fieldFormatMap[spec.name]?.type?.id
         : undefined,
-      customLabel: indexPattern.attributes?.fields[spec.name]?.customLabel || '',
+      customName: indexPattern.attributes?.fields[spec.name]?.customName || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -418,27 +418,27 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
-  renderCustomLabel() {
-    const { customLabel, spec } = this.state;
+  renderCustomName() {
+    const { customName, spec } = this.state;
 
     return (
       <EuiFormRow
-        label={i18n.translate('indexPatternManagement.customLabelLabel', {
-          defaultMessage: 'Custom label',
+        label={i18n.translate('indexPatternManagement.customNameLabel', {
+          defaultMessage: 'Custom name',
         })}
         helpText={
           <FormattedMessage
-            id="indexPatternManagement.customLabelHelpText"
-            defaultMessage="A custom label is displayed instead of the original field name. It is useful e.g. when the original field name is very long."
+            id="indexPatternManagement.customNameHelpText"
+            defaultMessage="Useful when the full field name is very long."
           />
         }
       >
         <EuiFieldText
-          value={customLabel || ''}
+          value={customName || ''}
           placeholder={spec.name}
-          data-test-subj="editorFieldCustomLabel"
+          data-test-subj="editorFieldCustomName"
           onChange={(e) => {
-            this.setState({ customLabel: e.target.value });
+            this.setState({ customName: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -811,7 +811,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId, customLabel } = this.state;
+    const { fieldFormatId, customName } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -853,8 +853,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
-    if (field.customLabel !== customLabel) {
-      field.customLabel = customLabel;
+    if (field.customName !== customName) {
+      field.customName = customName;
       indexPattern.fields.update(field);
     }
 
@@ -918,7 +918,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
-          {this.renderCustomLabel()}
+          {this.renderCustomName()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

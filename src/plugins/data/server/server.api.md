@@ -539,7 +539,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customLabel?: string;
+    customName?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)

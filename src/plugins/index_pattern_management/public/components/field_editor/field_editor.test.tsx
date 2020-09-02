@@ -179,7 +179,7 @@ describe('FieldEditor', () => {
     };
     indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
     indexPattern.fieldFormatMap = { test: field };
-    indexPattern.attributes = { fields: { test: { customLabel: 'Test' } } };
+    indexPattern.attributes = { fields: { test: { customName: 'Test' } } };
 
     indexPattern.save = jest.fn(() => Promise.resolve());
 
@@ -195,7 +195,7 @@ describe('FieldEditor', () => {
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
-    const input = findTestSubject(component, 'editorFieldCustomLabel');
+    const input = findTestSubject(component, 'editorFieldCustomName');
     expect(input.props().value).toBe('Test');
     input.simulate('change', { target: { value: 'new Test' } });
     const saveBtn = findTestSubject(component, 'fieldSaveButton');
@@ -206,7 +206,7 @@ describe('FieldEditor', () => {
       Object {
         "fields": Object {
           "test": Object {
-            "customLabel": "Test",
+            "customName": "Test",
           },
         },
       }
