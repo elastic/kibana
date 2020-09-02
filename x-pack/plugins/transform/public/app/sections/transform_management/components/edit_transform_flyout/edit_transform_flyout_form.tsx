@@ -58,6 +58,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       <EuiSpacer size="l" />
 
       <EuiAccordion
+        data-test-subj="transformEditAccordionDestination"
         id="transformEditAccordionDestination"
         buttonContent={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormDestinationButtonContent',
@@ -97,6 +98,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       <EuiSpacer size="l" />
 
       <EuiAccordion
+        data-test-subj="transformEditAccordionAdvancedSettings"
         id="transformEditAccordionAdvancedSettings"
         buttonContent={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormAdvancedSettingsButtonContent',
@@ -106,49 +108,54 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         )}
         paddingSize="s"
       >
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutDocsPerSecondInput"
-          errorMessages={formFields.docsPerSecond.errorMessages}
-          helpText={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
-            {
-              defaultMessage:
-                'To enable throttling, set a limit of documents per second of input documents.',
-            }
-          )}
-          label={i18n.translate('xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel', {
-            defaultMessage: 'Documents per second',
-          })}
-          onChange={(value) => dispatch({ field: 'docsPerSecond', value })}
-          value={formFields.docsPerSecond.value}
-        />
+        <div data-test-subj="transformEditAccordionAdvancedSettingsContent">
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutDocsPerSecondInput"
+            errorMessages={formFields.docsPerSecond.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+              {
+                defaultMessage:
+                  'To enable throttling, set a limit of documents per second of input documents.',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel',
+              {
+                defaultMessage: 'Documents per second',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'docsPerSecond', value })}
+            value={formFields.docsPerSecond.value}
+          />
 
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
-          errorMessages={formFields.maxPageSearchSize.errorMessages}
-          helpText={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
-            {
-              defaultMessage:
-                'Defines the initial page size to use for the composite aggregation for each checkpoint.',
-            }
-          )}
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeLabel',
-            {
-              defaultMessage: 'Maximum page search size',
-            }
-          )}
-          onChange={(value) => dispatch({ field: 'maxPageSearchSize', value })}
-          value={formFields.maxPageSearchSize.value}
-          placeholder={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizePlaceholderText',
-            {
-              defaultMessage: 'Default: {defaultValue}',
-              values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
-            }
-          )}
-        />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
+            errorMessages={formFields.maxPageSearchSize.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
+              {
+                defaultMessage:
+                  'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeLabel',
+              {
+                defaultMessage: 'Maximum page search size',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'maxPageSearchSize', value })}
+            value={formFields.maxPageSearchSize.value}
+            placeholder={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizePlaceholderText',
+              {
+                defaultMessage: 'Default: {defaultValue}',
+                values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
+              }
+            )}
+          />
+        </div>
       </EuiAccordion>
     </EuiForm>
   );
