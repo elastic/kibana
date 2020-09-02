@@ -16,6 +16,9 @@ import {
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
   EsDataTypeUnion,
+  ExceptionListTypeEnum,
+  OperatorEnum,
+  OperatorTypeEnum,
   Type,
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,
@@ -67,15 +70,16 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should contain 4 keys', () => {
+    test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if operatorType is updated, you
       // also update the OperatorTypeEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
       const keys = Object.keys(operatorType.keys);
+      const enumKeys = Object.keys(OperatorTypeEnum);
 
-      expect(keys.length).toEqual(4);
+      expect(keys.length).toEqual(enumKeys.length);
     });
   });
 
@@ -98,15 +102,16 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should contain 2 keys', () => {
+    test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if operator is updated, you
       // also update the operatorEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
       const keys = Object.keys(operator.keys);
+      const enumKeys = Object.keys(OperatorEnum);
 
-      expect(keys.length).toEqual(2);
+      expect(keys.length).toEqual(enumKeys.length);
     });
   });
 
@@ -129,15 +134,16 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should contain 2 keys', () => {
+    test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if exceptionListType is updated, you
       // also update the ExceptionListTypeEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
       const keys = Object.keys(exceptionListType.keys);
+      const enumKeys = Object.keys(ExceptionListTypeEnum);
 
-      expect(keys.length).toEqual(2);
+      expect(keys.length).toEqual(enumKeys.length);
     });
   });
 

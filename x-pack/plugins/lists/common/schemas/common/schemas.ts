@@ -287,6 +287,7 @@ export const operator_type = t.keyof({
   list: null,
   match: null,
   match_any: null,
+  nested: null,
 });
 export type OperatorType = t.TypeOf<typeof operator_type>;
 export enum OperatorTypeEnum {
