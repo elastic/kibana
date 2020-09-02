@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('Endpoint Event Resolver', function () {
-    this.tags(['ciGroup7']);
 
     before(async () => {
       await esArchiver.load('endpoint/resolver_tree/api_feature', { useCreate: true });
