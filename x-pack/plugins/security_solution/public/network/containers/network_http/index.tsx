@@ -124,7 +124,7 @@ export const useNetworkHttp = ({
         const searchSubscription$ = data.search
           .search<NetworkHttpRequestOptions, NetworkHttpStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {

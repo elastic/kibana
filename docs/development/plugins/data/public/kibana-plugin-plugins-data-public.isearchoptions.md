@@ -14,6 +14,6 @@ export interface ISearchOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [signal](./kibana-plugin-plugins-data-public.isearchoptions.signal.md) | <code>AbortSignal</code> |  |
+|  [abortSignal](./kibana-plugin-plugins-data-public.isearchoptions.abortsignal.md) | <code>AbortSignal</code> |  |
 |  [strategy](./kibana-plugin-plugins-data-public.isearchoptions.strategy.md) | <code>string</code> |  |
 

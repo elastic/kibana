@@ -34,7 +34,7 @@ import { IndexPatternsContract } from '../../common/index_patterns/index_pattern
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 export interface ISearchOptions {
-  signal?: AbortSignal;
+  abortSignal?: AbortSignal;
   strategy?: string;
 }
 

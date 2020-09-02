@@ -342,7 +342,6 @@ export {
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
   extractSearchSourceReferences,
-  FetchOptions,
   getEsPreference,
   getSearchParamsFromRequest,
   IEsSearchRequest,

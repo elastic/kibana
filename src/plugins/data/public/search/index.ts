@@ -34,7 +34,7 @@ export { getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { SearchError, FetchOptions, getSearchParamsFromRequest, SearchRequest } from './fetch';
+export { SearchError, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 export {
   ISearchSource,

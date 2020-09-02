@@ -19,7 +19,7 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
+import { FetchHandlers } from '../fetch/types';
 import { SearchRequest } from '../index';
 import { SearchResponse } from 'elasticsearch';
 import { GetConfigFn, UI_SETTINGS } from '../../../common';
