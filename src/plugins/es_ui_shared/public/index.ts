@@ -39,7 +39,7 @@ export {
   UseRequestResponse,
   sendRequest,
   useRequest,
-} from './request/np_ready_request';
+} from './request';
 
 export { indices } from './indices';
 

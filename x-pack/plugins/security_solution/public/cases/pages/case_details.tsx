@@ -20,7 +20,7 @@ import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/call
 export const CaseDetailsPage = React.memo(() => {
   const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
-  const { detailName: caseId } = useParams();
+  const { detailName: caseId } = useParams<{ detailName?: string }>();
   const search = useGetUrlSearch(navTabs.case);
 
   if (userPermissions != null && !userPermissions.read) {
