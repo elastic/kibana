@@ -10,8 +10,6 @@ export const DeleteTrustedAppsRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
-  body: schema.maybe(schema.never()),
-  query: schema.maybe(schema.object({})),
 };
 
 export const GetTrustedAppsRequestSchema = {

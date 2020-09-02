@@ -5,7 +5,6 @@
  */
 
 import { RequestHandler } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
 import {
   GetTrustedAppsListRequest,
   GetTrustedListAppsResponse,
@@ -14,16 +13,11 @@ import {
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { DeleteTrustedAppsRequestSchema } from '../../../../common/endpoint/schema/trusted_apps';
 import { DeleteTrustedAppsRequestParams } from './types';
 
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<
-  DeleteTrustedAppsRequestParams,
-  TypeOf<typeof DeleteTrustedAppsRequestSchema.query>,
-  TypeOf<typeof DeleteTrustedAppsRequestSchema.body>
-> => {
+): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
