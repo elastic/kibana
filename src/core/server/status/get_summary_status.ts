@@ -23,7 +23,10 @@ import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from './types'
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.
  * @param statuses
  */
-export const getSummaryStatus = (statuses: Array<[string, ServiceStatus]>): ServiceStatus => {
+export const getSummaryStatus = (
+  statuses: Array<[string, ServiceStatus]>,
+  { allAvailableSummary = `All services are available` }: { allAvailableSummary?: string } = {}
+): ServiceStatus => {
   const grouped = groupByLevel(statuses);
   const highestSeverityLevel = getHighestSeverityLevel(grouped.keys());
   const highestSeverityGroup = grouped.get(highestSeverityLevel)!;
@@ -31,13 +34,18 @@ export const getSummaryStatus = (statuses: Array<[string, ServiceStatus]>): Serv
   if (highestSeverityLevel === ServiceStatusLevels.available) {
     return {
       level: ServiceStatusLevels.available,
-      summary: `All services are available`,
+      summary: allAvailableSummary,
     };
   } else if (highestSeverityGroup.size === 1) {
     const [serviceName, status] = [...highestSeverityGroup.entries()][0];
     return {
       ...status,
       summary: `[${serviceName}]: ${status.summary!}`,
+      // TODO: include URL to status page
+      detail: status.detail ?? `See the status page for more information`,
+      meta: {
+        affectedServices: { [serviceName]: status },
+      },
     };
   } else {
     return {
