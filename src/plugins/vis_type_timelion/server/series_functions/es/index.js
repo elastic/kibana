@@ -130,7 +130,7 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
-    const [, deps] = await tlConfig.getStartServices();
+    const deps = (await tlConfig.getStartServices())[1];
 
     const resp = await deps.data.search.search(tlConfig.context, body, {
       strategy: ES_SEARCH_STRATEGY,
