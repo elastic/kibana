@@ -5,5 +5,5 @@
  */
 
 export const FILE_DATA_VISUALIZER_MAX_FILE_SIZE = 'ml:fileDataVisualizerMaxFileSize';
-export const ANOMALY_DETECTION_ENABLE_TIME_RANGE = 'ml:anomalyDetectionTimeDefaultsEnable';
-export const ANOMALY_DETECTION_DEFAULT_TIME_RANGE = 'ml:anomalyDetectionTimeDefaults';
+export const ANOMALY_DETECTION_ENABLE_TIME_RANGE = 'ml:anomalyDetection:results:enableTmeDefaults';
+export const ANOMALY_DETECTION_DEFAULT_TIME_RANGE = 'ml:anomalyDetection:results:timeDefaults';
