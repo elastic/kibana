@@ -38,7 +38,6 @@ import {
 } from '../../../../core/public';
 import {
   SavedObjectSaveModal,
-  showSaveModal,
   OnSaveProps,
   SaveResult,
   checkForDuplicateTitle,
@@ -50,22 +49,32 @@ import {
  * can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
+export const ATTRIBUTE_SERVICE_KEY = 'attributes';
+
 export interface AttributeServiceOptions<A extends { title: string }> {
-  customSaveMethod?: (attributes: A, savedObjectId?: string) => Promise<{ id: string }>;
+  customSaveMethod?: (
+    type: string,
+    attributes: A,
+    savedObjectId?: string
+  ) => Promise<{ id: string }>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
 export class AttributeService<
   SavedObjectAttributes extends { title: string },
   ValType extends EmbeddableInput & {
-    attributes: SavedObjectAttributes;
-  },
-  RefType extends SavedObjectEmbeddableInput
+    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
+  } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
+  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > {
   private embeddableFactory?: EmbeddableFactory;
 
   constructor(
     private type: string,
+    private showSaveModal: (
+      saveModal: React.ReactElement,
+      I18nContext: I18nStart['Context']
+    ) => void,
     private savedObjectsClient: SavedObjectsClientContract,
     private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
@@ -91,31 +100,35 @@ export class AttributeService<
         ? this.options?.customUnwrapMethod(savedObject)
         : { ...savedObject.attributes };
     }
-    return input.attributes;
+    return input[ATTRIBUTE_SERVICE_KEY];
   }
 
   public async wrapAttributes(
     newAttributes: SavedObjectAttributes,
     useRefType: boolean,
-    embeddable?: IEmbeddable
+    input?: ValType | RefType
   ): Promise<Omit<ValType | RefType, 'id'>> {
     const savedObjectId =
-      embeddable && isSavedObjectEmbeddableInput(embeddable.getInput())
-        ? (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
+      input && this.inputIsRefType(input)
+        ? (input as SavedObjectEmbeddableInput).savedObjectId
         : undefined;
     if (!useRefType) {
-      return { attributes: newAttributes } as ValType;
+      return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
     } else {
       try {
+        const originalInput = input ? input : {};
         if (savedObjectId) {
-          if (this.options?.customSaveMethod) await this.options.customSaveMethod(newAttributes);
-          else await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-          return { savedObjectId } as RefType;
+          if (this.options?.customSaveMethod) {
+            await this.options.customSaveMethod(this.type, newAttributes, savedObjectId);
+          } else {
+            await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+          }
+          return { ...originalInput, savedObjectId } as RefType;
         } else {
           const savedItem = this.options?.customSaveMethod
-            ? await this.options.customSaveMethod(newAttributes, savedObjectId)
+            ? await this.options.customSaveMethod(this.type, newAttributes)
             : await this.savedObjectsClient.create(this.type, newAttributes);
-          return { savedObjectId: savedItem.id } as RefType;
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
         }
       } catch (error) {
         this.toasts.addDanger({
@@ -183,7 +196,7 @@ export class AttributeService<
           }
         );
         try {
-          const newAttributes = { ...input.attributes };
+          const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
           resolve(wrappedInput);
@@ -195,11 +208,11 @@ export class AttributeService<
       };
 
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
-        showSaveModal(
+        this.showSaveModal(
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={embeddable.getTitle() || input.attributes.title}
+            title={embeddable.getTitle() || input[ATTRIBUTE_SERVICE_KEY].title}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

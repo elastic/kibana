@@ -47,7 +47,6 @@ export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
-  references: SavedObject<LensSavedObjectAttributes>['references'];
 } & LensInheritedInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensInheritedInput;
@@ -64,11 +63,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 }
 
 export interface LensEmbeddableDeps {
-  attributeService: AttributeService<
-    LensSavedObjectAttributes,
-    LensByValueInput,
-    LensByReferenceInput
-  >;
+  attributeService: AttributeService<LensSavedObjectAttributes>;
   documentToExpression: (doc: Document) => Promise<Ast | null>;
   toExpressionString: (astObj: Ast, type?: string) => string;
   editable: boolean;

@@ -11,7 +11,7 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import { DashboardFeatureFlagConfig, AttributeService } from 'src/plugins/dashboard/public';
 import { Optional } from '@kbn/utility-types';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -23,18 +23,33 @@ import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import {
+  LensEmbeddableInput,
+  LensSavedObjectAttributes,
+  LensByReferenceInput,
+  LensByValueInput,
+} from '../editor_frame_service/embeddable/embeddable';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
-  createEditorFrame: EditorFrameStart['createInstance'],
-  getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>
+  options: {
+    createEditorFrame: EditorFrameStart['createInstance'];
+    getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
+    attributeService: AttributeService<
+      LensSavedObjectAttributes,
+      LensByValueInput,
+      LensByReferenceInput
+    >;
+  }
 ) {
+  const { createEditorFrame, getByValueFeatureFlag, attributeService } = options;
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data: dataStart, navigation, embeddable } = startDependencies;
   const savedObjectsClient = coreStart.savedObjects.client;
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+
+  // console.log('mounter.tsx got attributeService? ', attributeService);
 
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
@@ -60,10 +75,7 @@ export async function mountApp(
     }
   };
 
-  const redirectToOrigin = (
-    routeProps: RouteComponentProps<{ id?: string }>,
-    input?: Optional<LensEmbeddableInput, 'id'>
-  ) => {
+  const redirectToOrigin = (input?: Optional<LensEmbeddableInput, 'id'>) => {
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
@@ -94,9 +106,7 @@ export async function mountApp(
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
         featureFlagConfig={featureFlagConfig}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
-        redirectToOrigin={(input?: Optional<LensEmbeddableInput, 'id'>) =>
-          redirectToOrigin(routeProps, input)
-        }
+        redirectToOrigin={redirectToOrigin}
         embeddableEditorIncomingState={embeddableEditorIncomingState}
         getAppNameFromId={stateTransfer?.getAppNameFromId}
         onAppLeave={params.onAppLeave}

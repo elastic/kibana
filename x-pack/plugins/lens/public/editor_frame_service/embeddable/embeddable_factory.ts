@@ -20,18 +20,23 @@ import {
 import {
   Embeddable,
   LensSavedObjectAttributes,
-  LensByValueInput,
   LensByReferenceInput,
   LensEmbeddableInput,
+  LensByValueInput,
 } from './embeddable';
-import { DOC_TYPE, SavedObjectIndexStore } from '../../persistence';
+import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { AttributeService, DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 import { Document } from '../../persistence/saved_object_store';
 
-interface StartServices {
+export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
+  attributeService: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >;
   capabilities: RecursiveReadonly<Capabilities>;
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -51,13 +56,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     getIconForSavedObject: () => 'lensApp',
   };
 
-  private attributeService?: AttributeService<
-    LensSavedObjectAttributes,
-    LensByValueInput,
-    LensByReferenceInput
-  >;
-
-  constructor(private getStartServices: () => Promise<StartServices>) {}
+  constructor(private getStartServices: () => Promise<LensEmbeddableStartServices>) {}
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
@@ -93,36 +92,16 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       uiActions,
       coreHttp,
       savedObjectsClient,
+      attributeService,
       indexPatternService,
       dashboard,
     } = await this.getStartServices();
-    if (!this.attributeService) {
-      const savedObjectStore = new SavedObjectIndexStore(savedObjectsClient);
-      this.attributeService = dashboard!.getAttributeService<
-        LensSavedObjectAttributes,
-        LensByValueInput,
-        LensByReferenceInput
-      >(this.type, {
-        customSaveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
-          const savedDoc = await savedObjectStore.save({
-            ...attributes,
-            savedObjectId,
-            type: this.type,
-          });
-          return { id: savedDoc.savedObjectId };
-        },
-        customUnwrapMethod: (savedObject) => {
-          return {
-            ...savedObject.attributes,
-            references: savedObject.references,
-          };
-        },
-      });
-    }
+
+    // console.log('embeddable factory got attributeService?: ', attributeService);
 
     return new Embeddable(
       {
-        attributeService: this.attributeService!,
+        attributeService,
         indexPatternService,
         timefilter,
         expressionRenderer,

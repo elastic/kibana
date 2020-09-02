@@ -51,7 +51,7 @@ import {
 interface LensAppState {
   indicateNoData: boolean;
   isLoading: boolean;
-  byValueMode: boolean;
+  isByValueMode: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
   originatingApp?: string;
@@ -108,7 +108,7 @@ export function App({
     return {
       isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
       isSaveModalVisible: false,
-      byValueMode:
+      isByValueMode:
         featureFlagConfig.allowByValueEmbeddables &&
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
@@ -262,7 +262,7 @@ export function App({
             },
           ]
         : []),
-      ...(!state.byValueMode
+      ...(!state.isByValueMode
         ? [
             {
               href: core.http.basePath.prepend(`/app/visualize#/`),
@@ -278,7 +278,7 @@ export function App({
         : []),
       {
         text: state.persistedDoc
-          ? state.byValueMode
+          ? state.isByValueMode
             ? i18n.translate('xpack.lens.breadcrumbsByValue', {
                 defaultMessage: 'Edit Visualization',
               })
@@ -292,7 +292,7 @@ export function App({
     core.http.basePath,
     state.persistedDoc,
     state.originatingApp,
-    state.byValueMode,
+    state.isByValueMode,
     redirectTo,
     getAppNameFromId,
   ]);
@@ -306,7 +306,7 @@ export function App({
         setState((s) => ({ ...s, isLoading: true }));
         docStorage
           .load(savedObjectId)
-          .then((doc) => updateDoc(doc))
+          .then((doc) => setActiveDocument(doc))
           .catch(() => {
             setState((s) => ({ ...s, isLoading: false }));
 
@@ -318,11 +318,11 @@ export function App({
 
             redirectTo();
           });
-      } else if (state.byValueMode && !!embeddableEditorIncomingState?.valueInput) {
+      } else if (state.isByValueMode && !!embeddableEditorIncomingState?.valueInput) {
         const doc: Document = {
           ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
         };
-        updateDoc(doc);
+        setActiveDocument(doc);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -339,7 +339,7 @@ export function App({
     ]
   );
 
-  const updateDoc = async (doc: Document) => {
+  const setActiveDocument = (doc: Document) => {
     getAllIndexPatterns(
       _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
       data.indexPatterns,
@@ -378,7 +378,7 @@ export function App({
       return;
     }
 
-    if (saveProps.newCopyOnSave && !state.byValueMode) {
+    if (saveProps.newCopyOnSave && !state.isByValueMode) {
       if (embeddableEditorIncomingState?.embeddableId) {
         embeddableEditorIncomingState.embeddableId = undefined;
       }
@@ -391,12 +391,12 @@ export function App({
       title: saveProps.newTitle,
     };
 
-    const addedToLibrary = state.byValueMode && saveToLibrary;
+    const addedToLibrary = state.isByValueMode && saveToLibrary;
 
     const newlyCreated =
-      saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.byValueMode);
+      saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.isByValueMode);
 
-    if (state.byValueMode && !saveToLibrary && redirectToOrigin) {
+    if (state.isByValueMode && !saveToLibrary && redirectToOrigin) {
       await setState((s: LensAppState) => ({ ...s, persistedDoc: doc }));
       const { savedObjectId: id, type, ...attributes } = doc;
       redirectToOrigin({ attributes } as LensByValueInput);
@@ -427,7 +427,7 @@ export function App({
           const currentOriginatingApp = state.originatingApp;
           setState((s) => ({
             ...s,
-            byValueMode: false,
+            isByValueMode: false,
             isSaveModalVisible: false,
             originatingApp:
               newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
@@ -482,7 +482,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(editFromContainerMode || state.byValueMode
+                ...(editFromContainerMode || state.isByValueMode
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -494,7 +494,7 @@ export function App({
                           if (savingPermitted && lastKnownDoc) {
                             runSave({
                               newTitle: lastKnownDoc.title,
-                              newCopyOnSave: !editFromContainerMode || state.byValueMode,
+                              newCopyOnSave: !editFromContainerMode || state.isByValueMode,
                               isTitleDuplicateConfirmed: false,
                               returnToOrigin: true,
                             });
@@ -507,14 +507,14 @@ export function App({
                   : []),
                 {
                   label:
-                    editFromContainerMode || state.byValueMode
+                    editFromContainerMode || state.isByValueMode
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !editFromContainerMode && !state.byValueMode,
+                  emphasize: !editFromContainerMode && !state.isByValueMode,
                   run: () => {
                     if (savingPermitted) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -655,7 +655,7 @@ export function App({
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             getAppNameFromId={getAppNameFromId}
             documentInfo={{
-              id: state.byValueMode ? undefined : lastKnownDoc.savedObjectId,
+              id: state.isByValueMode ? undefined : lastKnownDoc.savedObjectId,
               title: lastKnownDoc.title || '',
               description: lastKnownDoc.description || '',
             }}

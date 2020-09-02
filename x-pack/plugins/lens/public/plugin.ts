@@ -7,7 +7,7 @@
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
+import { DashboardStart, AttributeService } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -34,6 +34,12 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
+import {
+  LensSavedObjectAttributes,
+  LensByValueInput,
+  LensByReferenceInput,
+} from './editor_frame_service/embeddable/embeddable';
+import { getLensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -56,6 +62,11 @@ export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
   private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
+  private attributeService: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  > | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
@@ -81,11 +92,15 @@ export class LensPlugin {
       charts,
     }: LensPluginSetupDependencies
   ) {
-    const editorFrameSetupInterface = this.editorFrameService.setup(core, {
-      data,
-      embeddable,
-      expressions,
-    });
+    const editorFrameSetupInterface = this.editorFrameService.setup(
+      core,
+      {
+        data,
+        embeddable,
+        expressions,
+      },
+      () => this.attributeService!
+    );
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
@@ -118,7 +133,11 @@ export class LensPlugin {
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(core, params, this.createEditorFrame!, getByValueFeatureFlag);
+        return mountApp(core, params, {
+          createEditorFrame: this.createEditorFrame!,
+          attributeService: this.attributeService!,
+          getByValueFeatureFlag,
+        });
       },
     });
 
@@ -126,6 +145,7 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
+    this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
   }
 
