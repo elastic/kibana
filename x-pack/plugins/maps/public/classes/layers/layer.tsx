@@ -423,7 +423,7 @@ export class AbstractLayer implements ILayer {
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange });
+    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {

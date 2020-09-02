@@ -48,9 +48,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
     };
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  renderSourceSettingsEditor({ onChange, currentLayerType }) {
     return (
       <UpdateSourceEditor
+        currentLayerType={currentLayerType}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
@@ -112,7 +113,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   getGeoGridPrecision(zoom) {
-    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    const delta = this._getGeoGridPrecisionResolutionDelta();
+    if (delta === null) {
+      return NaN;
+    }
+    const targetGeotileLevel = Math.ceil(zoom) + delta;
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
@@ -127,6 +132,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
       return 4;
+    }
+
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // The target-precision needs to be determined server side.
+      return null;
     }
 
     throw new Error(

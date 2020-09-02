@@ -215,5 +215,21 @@ describe('ESGeoGridSource', () => {
     it('should use heuristic to derive precision', () => {
       expect(geogridSource.getGeoGridPrecision(10)).toBe(12);
     });
+
+    it('Should not return valid precision for super-fine resolution', () => {
+      const superFineSource = new ESGeoGridSource(
+        {
+          id: 'foobar',
+          indexPatternId: 'fooIp',
+          geoField: geoFieldName,
+          metrics: [],
+          resolution: GRID_RESOLUTION.SUPER_FINE,
+          type: SOURCE_TYPES.ES_GEO_GRID,
+          requestType: RENDER_AS.HEATMAP,
+        },
+        {}
+      );
+      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
+    });
   });
 });

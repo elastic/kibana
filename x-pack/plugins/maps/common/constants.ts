@@ -164,6 +164,7 @@ export enum GRID_RESOLUTION {
   COARSE = 'COARSE',
   FINE = 'FINE',
   MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
 }
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';

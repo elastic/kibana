@@ -6,7 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -62,8 +62,28 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onResolutionChange = (e) => {
-    this.props.onChange({ propName: 'resolution', value: e });
+  _onResolutionChange = (resolution) => {
+    let newLayerType;
+    if (
+      this.props.currentLayerType === LAYER_TYPE.VECTOR ||
+      this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
+    ) {
+      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+        newLayerType = LAYER_TYPE.TILED_VECTOR;
+      } else {
+        newLayerType = LAYER_TYPE.VECTOR;
+      }
+    } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
+      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+        throw new Error('NOT SUPPORTED!!');
+      } else {
+        newLayerType = LAYER_TYPE.HEATMAP;
+      }
+    } else {
+      throw new Error('Unexpected layer-type');
+    }
+
+    this.props.onChange({ propName: 'resolution', value: resolution, newLayerType });
   };
 
   _onRequestTypeSelect = (requestType) => {
@@ -115,6 +135,7 @@ export class UpdateSourceEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
+            includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
           />
