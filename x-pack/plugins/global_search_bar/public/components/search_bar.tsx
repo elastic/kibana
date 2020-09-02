@@ -137,7 +137,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     window.addEventListener('keydown', onWindowKeyDown);
 
     return () => {
-      window.removeEventListener('resize', onWindowKeyDown);
+      window.removeEventListener('keydown', onWindowKeyDown);
     };
   });
 
