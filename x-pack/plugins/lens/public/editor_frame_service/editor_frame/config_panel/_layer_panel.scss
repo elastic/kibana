@@ -37,7 +37,6 @@
 
 .lnsLayerPanel__anchor {
   width: 100%;
-  padding: $euiSizeS;
 }
 
 .lnsLayerPanel__dndGrab {
@@ -45,6 +44,7 @@
 }
 
 .lnsLayerPanel__filterLink {
+  min-height: $euiSizeM;
   width: 100%;
   align-self: flex-start;
   word-break: break-word;

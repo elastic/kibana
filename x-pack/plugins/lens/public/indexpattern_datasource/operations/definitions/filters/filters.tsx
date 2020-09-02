@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React, { MouseEventHandler, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Query } from 'src/plugins/data/public';
 import {
@@ -131,22 +131,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
 
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-
     const filters = currentColumn.params.filters;
-
-    const onDragEnd = ({
-      source,
-      destination,
-    }: {
-      source?: DraggableLocation;
-      destination?: DraggableLocation;
-    }) => {
-      if (source && destination) {
-        const items = euiDragDropReorder(filters, source.index, destination.index);
-        setFilters(items);
-      }
-    };
-
     const setFilters = (newFilters: Filter[]) =>
       setState(
         updateColumnParam({
@@ -165,111 +150,134 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
             defaultMessage: 'Queries',
           })}
         >
-          <div>
-            <EuiDragDropContext onDragEnd={onDragEnd}>
-              <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
-                {filters?.map((filter: Filter, idx: number) => {
-                  const { input, label } = filter;
-                  const id = `${JSON.stringify(input.query)}_${label}`;
-                  return (
-                    <EuiDraggable
-                      spacing="m"
-                      key={id}
-                      index={idx}
-                      draggableId={id}
-                      customDragHandle={true}
-                    >
-                      {(provided) => (
-                        <EuiPanel paddingSize="none">
-                          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <div {...provided.dragHandleProps} className="lnsLayerPanel__dndGrab">
-                                <EuiIcon
-                                  type="grab"
-                                  aria-label={i18n.translate(
-                                    'xpack.lens.indexPattern.filters.grabIcon',
-                                    {
-                                      defaultMessage: 'Grab icon',
-                                    }
-                                  )}
-                                />
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              grow={true}
-                              data-test-subj="indexPattern-filters-existingFilterContainer"
-                            >
-                              <FilterPopover
-                                indexPattern={indexPattern}
-                                filter={filter}
-                                Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                                  <EuiLink
-                                    color="text"
-                                    onClick={onClick}
-                                    className="lnsLayerPanel__filterLink"
-                                    data-test-subj="indexPattern-filters-existingFilterTrigger"
-                                  >
-                                    <EuiText size="s" textAlign="left">
-                                      {label ? label : input.query}
-                                    </EuiText>
-                                  </EuiLink>
-                                )}
-                                setFilter={(newFilter: Filter) => {
-                                  if (countDuplicates(filters, newFilter) > 0) {
-                                    newFilter.label = makeUniqueLabel(filters, newFilter);
-                                  }
-                                  setFilters(
-                                    filters.map((f: Filter) => (f === filter ? newFilter : f))
-                                  );
-                                }}
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                size="m"
-                                iconType="cross"
-                                color="danger"
-                                data-test-subj="indexPattern-filters-existingFilterDelete"
-                                onClick={() => {
-                                  setFilters(filters.filter((f: Filter) => f !== filter));
-                                }}
-                                aria-label={i18n.translate(
-                                  'xpack.lens.indexPattern.filters.deleteSearchQuery',
-                                  {
-                                    defaultMessage: 'Delete search query',
-                                  }
-                                )}
-                              />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                      )}
-                    </EuiDraggable>
-                  );
-                })}
-              </EuiDroppable>
-            </EuiDragDropContext>
-
-            <FilterPopover
-              indexPattern={indexPattern}
-              filter={emptyFilter}
-              Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                <EuiButtonEmpty iconType="plusInCircle" onClick={onClick}>
-                  {i18n.translate('xpack.lens.indexPattern.filters.addSearchQuery', {
-                    defaultMessage: 'Add a search query',
-                  })}
-                </EuiButtonEmpty>
-              )}
-              setFilter={(newFilter: Filter) => {
-                if (countDuplicates(filters, newFilter) > 0) {
-                  newFilter.label = makeUniqueLabel(filters, newFilter);
-                }
-                setFilters(filters.concat(newFilter));
-              }}
-            />
-          </div>
+          <FilterList filters={filters} setFilters={setFilters} indexPattern={indexPattern} />
         </EuiFormRow>
       </EuiForm>
     );
   },
+};
+
+const FilterList = ({
+  filters,
+  setFilters,
+  indexPattern,
+}: {
+  filters: Filter[];
+  setFilters: Function;
+  indexPattern: IndexPattern;
+}) => {
+  const [isLastOpen, setIsLastOpen] = useState(false);
+
+  const onDragEnd = ({
+    source,
+    destination,
+  }: {
+    source?: DraggableLocation;
+    destination?: DraggableLocation;
+  }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(filters, source.index, destination.index);
+      setFilters(items);
+    }
+  };
+  return (
+    <div>
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
+          {filters?.map((filter: Filter, idx: number) => {
+            const { input, label } = filter;
+            const id = `${JSON.stringify(input.query)}_${label}`;
+            return (
+              <EuiDraggable
+                spacing="m"
+                key={id}
+                index={idx}
+                draggableId={id}
+                customDragHandle={true}
+              >
+                {(provided) => (
+                  <EuiPanel paddingSize="none">
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <div {...provided.dragHandleProps} className="lnsLayerPanel__dndGrab">
+                          <EuiIcon
+                            type="grab"
+                            aria-label={i18n.translate('xpack.lens.indexPattern.filters.grabIcon', {
+                              defaultMessage: 'Grab icon',
+                            })}
+                          />
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={true}
+                        data-test-subj="indexPattern-filters-existingFilterContainer"
+                      >
+                        <FilterPopover
+                          isLastOpen={idx === filters.length - 1 && isLastOpen}
+                          setIsLastOpen={setIsLastOpen}
+                          indexPattern={indexPattern}
+                          filter={filter}
+                          Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                            <EuiLink
+                              color="text"
+                              onClick={onClick}
+                              className="lnsLayerPanel__filterLink"
+                              data-test-subj="indexPattern-filters-existingFilterTrigger"
+                            >
+                              <EuiText size="s" textAlign="left">
+                                {label ? label : input.query}
+                              </EuiText>
+                            </EuiLink>
+                          )}
+                          setFilter={(newFilter: Filter) => {
+                            if (countDuplicates(filters, newFilter) > 0) {
+                              newFilter.label = makeUniqueLabel(filters, newFilter);
+                            }
+                            setFilters(filters.map((f: Filter) => (f === filter ? newFilter : f)));
+                          }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          size="m"
+                          iconType="cross"
+                          color="danger"
+                          data-test-subj="indexPattern-filters-existingFilterDelete"
+                          onClick={() => {
+                            setFilters(filters.filter((f: Filter) => f !== filter));
+                          }}
+                          aria-label={i18n.translate(
+                            'xpack.lens.indexPattern.filters.deleteSearchQuery',
+                            {
+                              defaultMessage: 'Delete search query',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
+              </EuiDraggable>
+            );
+          })}
+        </EuiDroppable>
+      </EuiDragDropContext>
+
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        onClick={() => {
+          const newFilter = { ...emptyFilter };
+          if (countDuplicates(filters, newFilter) > 0) {
+            newFilter.label = makeUniqueLabel(filters, newFilter);
+          }
+          setFilters(filters.concat(newFilter));
+          setIsLastOpen(true);
+        }}
+      >
+        {i18n.translate('xpack.lens.indexPattern.filters.addSearchQuery', {
+          defaultMessage: 'Add a search query',
+        })}
+      </EuiButtonEmpty>
+    </div>
+  );
 };

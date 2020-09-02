@@ -30,13 +30,21 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
+  isLastOpen,
+  setIsLastOpen,
 }: {
   filter: Filter;
   setFilter: Function;
   indexPattern: IndexPattern;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
+  isLastOpen: boolean;
+  setIsLastOpen: Function;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const setPopoverOpen = (isOpen: boolean) => {
+    setIsPopoverOpen(isOpen);
+    setIsLastOpen(isOpen);
+  };
   const [tempFilter, setTempFilter] = useState(filter);
 
   const inputRef = useRef<HTMLInputElement>();
@@ -52,7 +60,7 @@ export const FilterPopover = ({
       if (input.query.length) {
         if (tempFilter.label) {
           setFilter(tempFilter);
-          setIsPopoverOpen(false);
+          setPopoverOpen(false);
         } else {
           if (inputRef.current) inputRef.current.focus();
         }
@@ -67,12 +75,19 @@ export const FilterPopover = ({
       anchorClassName="lnsLayerPanel__anchor"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       ownFocus
-      isOpen={isPopoverOpen}
+      isOpen={isLastOpen || isPopoverOpen}
       closePopover={() => {
-        setIsPopoverOpen(false);
+        setPopoverOpen(false);
         setTempFilter(filter);
       }}
-      button={<Button onClick={() => setIsPopoverOpen((open) => !open)} />}
+      button={
+        <Button
+          onClick={() => {
+            setIsPopoverOpen((open) => !open);
+            setIsLastOpen(false);
+          }}
+        />
+      }
     >
       <EuiForm>
         <EuiFormRow fullWidth>
@@ -111,12 +126,12 @@ export const FilterPopover = ({
               if (keys.ENTER === key) {
                 if (tempFilter.input.query.length) {
                   setFilter(tempFilter);
-                  setIsPopoverOpen(false);
+                  setPopoverOpen(false);
                   setTempFilter(emptyFilter);
                 }
               }
               if (keys.ESCAPE === key) {
-                setIsPopoverOpen(false);
+                setPopoverOpen(false);
               }
             }}
             fullWidth
