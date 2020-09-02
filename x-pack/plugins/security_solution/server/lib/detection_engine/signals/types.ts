@@ -52,7 +52,8 @@ export interface SignalSource {
     rule: {
       id: string;
     };
-    depth: number;
+    // signal.depth doesn't exist on pre-7.10 signals
+    depth?: number;
   };
 }
 

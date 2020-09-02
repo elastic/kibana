@@ -14,7 +14,9 @@ export const buildParent = (doc: SignalSourceHit): Ancestor => {
       id: doc._id,
       type: 'signal',
       index: doc._index,
-      depth: doc._source.signal.depth,
+      // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
+      // and should have signal.parent.depth instead. signal.parent.depth is treated as equivalent to signal.depth.
+      depth: doc._source.signal.depth ?? doc._source.signal?.parent?.depth ?? 1,
     };
   } else {
     return {
@@ -37,8 +39,8 @@ export const buildAncestorsSignal = (doc: SignalSourceHit): Signal['ancestors'] 
 };
 
 export const buildSignal = (docs: SignalSourceHit[], rule: Partial<RulesSchema>): Signal => {
-  const depth = docs.reduce((acc, doc) => Math.max(doc._source.signal?.depth ?? 0, acc), 0) + 1;
   const parents = docs.map(buildParent);
+  const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
     (acc: Ancestor[], doc) => acc.concat(buildAncestorsSignal(doc)),
     []
