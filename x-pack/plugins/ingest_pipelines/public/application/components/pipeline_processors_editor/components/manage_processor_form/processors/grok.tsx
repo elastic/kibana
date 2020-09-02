@@ -6,27 +6,32 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
   UseField,
-  Field,
+  FieldConfig,
   UseArray,
-  ArrayItem,
   ToggleField,
   fieldValidators,
+  getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor } from '../field_components';
-
-import { DragAndDropList } from '../components';
+import { XJsonEditor, DragAndDropTextList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, to, from } from './shared';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { isJsonField } = fieldValidators;
+
+const i18nTexts = {
+  addPatternLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel',
+    { defaultMessage: 'Add pattern' }
+  ),
+};
 
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
@@ -42,12 +47,17 @@ const fieldsConfig: FieldsConfig = {
     }),
     validations: [
       {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
-            { defaultMessage: 'A value is required.' }
-          )
-        ),
+        validator: ({ value }) => {
+          const maybeArray = value as string[] | undefined;
+          if (!maybeArray || maybeArray.length === 0 || maybeArray.every((v) => !v)) {
+            return {
+              message: i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
+                { defaultMessage: 'A value is required.' }
+              ),
+            };
+          }
+        },
       },
     ],
   },
@@ -108,40 +118,24 @@ export const Grok: FunctionComponent = () => {
         )}
       />
 
-      <UseArray path="fields.patterns">
-        {({ items, addItem, removeItem, moveItem }) => {
+      <UseArray path="fields.patterns" config={fieldsConfig.patterns as FieldConfig<any, string[]>}>
+        {({ field, items, addItem, removeItem, moveItem }) => {
+          const { errorMessage } = getFieldValidityAndErrorMessage(field);
           return (
-            <EuiFormRow fullWidth>
-              <>
-                <DragAndDropList<ArrayItem>
-                  value={items}
-                  onMove={(sourceIdx, destinationIdx) => {
-                    moveItem(sourceIdx, destinationIdx);
-                  }}
-                  renderItem={(item) => {
-                    return (
-                      <EuiFlexGroup key={item.id} gutterSize="none">
-                        <EuiFlexItem>
-                          <UseField
-                            key={item.id}
-                            path={item.path}
-                            component={Field}
-                            componentProps={{ euiFieldProps: { compressed: true } }}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType="minusInCircle"
-                            color="danger"
-                            onClick={() => removeItem(item.id)}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    );
-                  }}
-                />
-                <EuiButtonIcon iconType="plusInCircle" onClick={addItem} />
-              </>
+            <EuiFormRow
+              label={field.label}
+              helpText={field.helpText}
+              isInvalid={typeof errorMessage === 'string'}
+              error={errorMessage}
+              fullWidth
+            >
+              <DragAndDropTextList
+                value={items}
+                onMove={moveItem}
+                onAdd={addItem}
+                onRemove={removeItem}
+                addLabel={i18nTexts.addPatternLabel}
+              />
             </EuiFormRow>
           );
         }}

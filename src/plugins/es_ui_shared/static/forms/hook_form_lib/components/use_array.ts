@@ -17,16 +17,20 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
 
+import { FieldConfig, FormData, FieldHook } from '../types';
 import { useFormContext } from '../form_context';
+import { useField, useFormData } from '../hooks';
 
-interface Props {
+interface Props<T extends unknown[] = unknown[]> {
   path: string;
+  config?: FieldConfig<FormData, T>;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
   children: (args: {
+    field: FieldHook<T>;
     items: ArrayItem[];
     addItem: () => void;
     removeItem: (id: number) => void;
@@ -55,13 +59,15 @@ export interface ArrayItem {
  *
  * Look at the README.md for some examples.
  */
-export const UseArray = ({
+export const UseArray = <T extends unknown[] = unknown[]>({
   path,
+  config,
   initialNumberOfItems,
   readDefaultValueOnForm = true,
   children,
-}: Props) => {
+}: Props<T>) => {
   const didMountRef = useRef(false);
+  const didInitFieldRef = useRef(false);
   const form = useFormContext();
   const defaultValues = readDefaultValueOnForm && (form.getFieldDefaultValue(path) as any[]);
   const uniqueId = useRef(0);
@@ -73,17 +79,27 @@ export const UseArray = ({
       isNew: false,
     }));
 
-  const getNewItemAtIndex = (index: number): ArrayItem => ({
-    id: uniqueId.current++,
-    path: `${path}[${index}]`,
-    isNew: true,
-  });
+  const getNewItemAtIndex = useCallback(
+    (index: number): ArrayItem => ({
+      id: uniqueId.current++,
+      path: `${path}[${index}]`,
+      isNew: true,
+    }),
+    [path]
+  );
 
   const initialState = defaultValues
     ? getInitialItemsFromValues(defaultValues)
     : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
 
   const [items, setItems] = useState<ArrayItem[]>(initialState);
+  const paths = useMemo<string[]>(() => {
+    return items.map((item) => item.path);
+  }, [items]);
+
+  const field = useField<T>(form, path, config);
+  const { setValue, reset } = field;
+  const [formData] = useFormData({ watch: paths });
 
   const updatePaths = useCallback(
     (_rows: ArrayItem[]) => {
@@ -98,26 +114,54 @@ export const UseArray = ({
     [path]
   );
 
-  const addItem = () => {
+  const addItem = useCallback(() => {
     setItems((previousItems) => {
       const itemIndex = previousItems.length;
       return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
-  };
+  }, [setItems, getNewItemAtIndex]);
 
-  const removeItem = (id: number) => {
-    setItems((previousItems) => {
-      const updatedItems = previousItems.filter((item) => item.id !== id);
-      return updatePaths(updatedItems);
-    });
-  };
+  const removeItem = useCallback(
+    (id: number) => {
+      setItems((previousItems) => {
+        const updatedItems = previousItems.filter((item) => item.id !== id);
+        return updatePaths(updatedItems);
+      });
+    },
+    [setItems, updatePaths]
+  );
 
-  const moveItem = (sourceIdx: number, destinationIdx: number) => {
-    setItems((previousItems) => {
-      const reorderedItems = euiDragDropReorder(previousItems, sourceIdx, destinationIdx);
-      return updatePaths(reorderedItems);
-    });
-  };
+  const moveItem = useCallback(
+    (sourceIdx: number, destinationIdx: number) => {
+      setItems((previousItems) => {
+        const reorderedItems = euiDragDropReorder(previousItems, sourceIdx, destinationIdx);
+        return updatePaths(reorderedItems);
+      });
+    },
+    [setItems, updatePaths]
+  );
+
+  useEffect(() => {
+    if (didInitFieldRef.current) {
+      setValue(
+        items.map((item) => {
+          return formData[item.path];
+        }) as T
+      );
+    }
+  }, [formData, setValue, items]);
+
+  useEffect(() => {
+    if (didMountRef.current && !didInitFieldRef.current) {
+      reset({
+        resetValue: true,
+        defaultValue: items.map((item) => {
+          return formData[item.path];
+        }) as T,
+      });
+      didInitFieldRef.current = true;
+    }
+  }, [reset, items, formData]);
 
   useEffect(() => {
     if (didMountRef.current) {
@@ -127,7 +171,7 @@ export const UseArray = ({
     } else {
       didMountRef.current = true;
     }
-  }, [path, updatePaths]);
+  }, [path, updatePaths, reset]);
 
-  return children({ items, addItem, removeItem, moveItem });
+  return children({ field, items, addItem, removeItem, moveItem });
 };
