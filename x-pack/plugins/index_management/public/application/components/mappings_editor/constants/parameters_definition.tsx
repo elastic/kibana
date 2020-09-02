@@ -29,7 +29,7 @@ import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
 
 const { toInt } = fieldFormatters;
-const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
+const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;
 
 const commonErrorMessages = {
   smallerThanZero: i18n.translate(
@@ -403,6 +403,63 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       ],
     },
     schema: t.string,
+  },
+  value: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.valueLabel', {
+        defaultMessage: 'Value',
+      }),
+    },
+    schema: t.string,
+  },
+  meta: {
+    fieldConfig: {
+      defaultValue: '',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaLabel', {
+        defaultMessage: 'Meta',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.metaHelpText"
+          defaultMessage="Use JSON format: {code}"
+          values={{
+            code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorJsonError', {
+              defaultMessage: 'The meta JSON is not valid.',
+            }),
+            { allowEmptyString: true }
+          ),
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        try {
+          const parsed = JSON.parse(value);
+          // If an empty object was passed, strip out this value entirely.
+          if (!Object.keys(parsed).length) {
+            return undefined;
+          }
+          return parsed;
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
+    schema: t.any,
   },
   max_input_length: {
     fieldConfig: {
