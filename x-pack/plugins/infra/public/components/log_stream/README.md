@@ -13,7 +13,7 @@ import { LogStream } from '../../../../../../infra/public';
 To use the component, there are several things you need to ensure in your plugin:
 
 - In your `kibana.json` plugin, you need to either add `"requiredBundles": ["infra"]` or `"requiredPlugins": ["infra"]`.
-- Your plugin needs to be wrapped with a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
+- The component needs to be mounted inside the hiearchy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
 
 ## Usage
 
@@ -67,3 +67,7 @@ By default the `<LogStream />` uses the `"default"` source confiuration, but if 
 ```tsx
 <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} sourceId="my_source" />
 ```
+
+### Considerations
+
+As mentioned in the prerequisites, the component relies on `kibana-react` to access kibana's core services. If this is not the case the component will throw an exception when rendering. We advise to use an `<EuiErrorBoundary>` in your component hierarchy to catch this error if necessary.
