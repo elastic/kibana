@@ -35,7 +35,6 @@ function setSessionJson(json: string) {
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, json);
 }
 
-const getCytoscapeWidth = () => window.innerWidth - 240;
 const getCytoscapeHeight = () => window.innerHeight - 300;
 
 storiesOf(STORYBOOK_PATH, module)
@@ -83,11 +82,7 @@ storiesOf(STORYBOOK_PATH, module)
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <Cytoscape
-            elements={elements}
-            height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
-          />
+          <Cytoscape elements={elements} height={getCytoscapeHeight()} />
 
           {json && (
             <EuiCodeEditor
@@ -129,11 +124,7 @@ storiesOf(STORYBOOK_PATH, module)
 
       return (
         <div>
-          <Cytoscape
-            elements={elements}
-            height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
-          />
+          <Cytoscape elements={elements} height={getCytoscapeHeight()} />
           <EuiForm isInvalid={error !== undefined} error={error}>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -217,7 +208,6 @@ storiesOf(STORYBOOK_PATH, module)
           <Cytoscape
             elements={exampleResponseTodo.elements}
             height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
           />
         </div>
       );
@@ -237,7 +227,6 @@ storiesOf(STORYBOOK_PATH, module)
           <Cytoscape
             elements={exampleResponseOpbeansBeats.elements}
             height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
           />
         </div>
       );
@@ -257,7 +246,6 @@ storiesOf(STORYBOOK_PATH, module)
           <Cytoscape
             elements={exampleResponseHipsterStore.elements}
             height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
           />
         </div>
       );
@@ -277,7 +265,6 @@ storiesOf(STORYBOOK_PATH, module)
           <Cytoscape
             elements={exampleResponseOneDomainManyIPs.elements}
             height={getCytoscapeHeight()}
-            width={getCytoscapeWidth()}
           />
         </div>
       );
