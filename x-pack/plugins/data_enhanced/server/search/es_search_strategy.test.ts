@@ -83,13 +83,13 @@ describe('ES search strategy', () => {
     expect(method).toBe('POST');
     expect(path).toBe('/logstash-*/_async_search');
     expect(body).toEqual({ query: {} });
-    expect(querystring).toHaveProperty('batchedReduceSize');
-    expect(querystring).toHaveProperty('ignoreThrottled');
-    expect(querystring).toHaveProperty('ignoreUnavailable');
-    expect(querystring).toHaveProperty('keepAlive');
-    expect(querystring).toHaveProperty('maxConcurrentShardRequests');
-    expect(querystring).toHaveProperty('trackTotalHits');
-    expect(querystring).toHaveProperty('waitForCompletionTimeout');
+    expect(querystring).toHaveProperty('batched_reduce_size');
+    expect(querystring).toHaveProperty('ignore_throttled');
+    expect(querystring).toHaveProperty('ignore_unavailable');
+    expect(querystring).toHaveProperty('max_concurrent_shard_requests');
+    expect(querystring).toHaveProperty('track_total_hits');
+    expect(querystring).toHaveProperty('keep_alive');
+    expect(querystring).toHaveProperty('wait_for_completion_timeout');
   });
 
   it('makes a GET request to async search with ID when ID is provided', async () => {
@@ -105,13 +105,13 @@ describe('ES search strategy', () => {
     expect(method).toBe('GET');
     expect(path).toBe('/_async_search/foo');
     expect(body).toEqual(undefined);
-    expect(querystring).not.toHaveProperty('batchedReduceSize');
-    expect(querystring).not.toHaveProperty('ignoreThrottled');
-    expect(querystring).not.toHaveProperty('ignoreUnavailable');
-    expect(querystring).not.toHaveProperty('maxConcurrentShardRequests');
-    expect(querystring).not.toHaveProperty('trackTotalHits');
-    expect(querystring).toHaveProperty('keepAlive');
-    expect(querystring).toHaveProperty('waitForCompletionTimeout');
+    expect(querystring).not.toHaveProperty('batched_reduce_size');
+    expect(querystring).not.toHaveProperty('ignore_throttled');
+    expect(querystring).not.toHaveProperty('ignore_unavailable');
+    expect(querystring).not.toHaveProperty('max_concurrent_shard_requests');
+    expect(querystring).not.toHaveProperty('track_total_hits');
+    expect(querystring).toHaveProperty('keep_alive');
+    expect(querystring).toHaveProperty('wait_for_completion_timeout');
   });
 
   it('encodes special characters in the path', async () => {
@@ -155,7 +155,7 @@ describe('ES search strategy', () => {
 
     expect(mockApiCaller).toBeCalled();
     const { querystring } = mockApiCaller.mock.calls[0][0];
-    expect(querystring).toHaveProperty('keepAlive');
-    expect(querystring).toHaveProperty('waitForCompletionTimeout');
+    expect(querystring).toHaveProperty('keep_alive');
+    expect(querystring).toHaveProperty('wait_for_completion_timeout');
   });
 });
