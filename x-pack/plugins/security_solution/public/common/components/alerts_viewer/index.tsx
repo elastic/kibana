@@ -15,7 +15,7 @@ import * as i18n from './translations';
 import { useUiSetting$ } from '../../lib/kibana';
 import { MatrixHistogramContainer } from '../matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
-import { MatrixHisrogramConfigs } from '../matrix_histogram/types';
+import { MatrixHistogramConfigs } from '../matrix_histogram/types';
 const ID = 'alertsOverTimeQuery';
 
 export const AlertsView = ({
@@ -38,7 +38,7 @@ export const AlertsView = ({
     []
   );
   const { globalFullScreen } = useFullScreen();
-  const alertsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const alertsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       subtitle: getSubtitle,

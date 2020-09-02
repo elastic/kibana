@@ -133,7 +133,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       createRouteHandlerContext(license$, core.getStartServices)
     );
 
-    registerRoutes(core.http.createRouter(), core.getStartServices);
+    const featureUsageSetup = this.featureUsage.setup();
+
+    registerRoutes(core.http.createRouter(), featureUsageSetup, core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
 
     this.refresh = refresh;
@@ -143,7 +145,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       refresh,
       license$,
       createLicensePoller: this.createLicensePoller.bind(this),
-      featureUsage: this.featureUsage.setup(),
+      featureUsage: featureUsageSetup,
     };
   }
 

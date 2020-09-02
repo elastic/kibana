@@ -48,6 +48,13 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       selectedNode: nodeID,
     };
     return next;
+  } else if (action.type === 'appReceivedNewExternalProperties') {
+    const next: ResolverUIState = {
+      ...state,
+      locationSearch: action.payload.locationSearch,
+      resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
+    };
+    return next;
   } else {
     return state;
   }

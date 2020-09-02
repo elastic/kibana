@@ -7,7 +7,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -22,15 +22,10 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import {
-  useManageTimeline,
-  TimelineRowActionArgs,
-} from '../../../timelines/components/manage_timeline';
-import { useApolloClient } from '../../../common/utils/apollo_context';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 import { updateAlertStatusAction } from './actions';
 import {
-  getAlertActions,
   requiredFieldsForActions,
   alertsDefaultModel,
   buildAlertStatusFilter,
@@ -39,23 +34,16 @@ import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18n from './translations';
 import {
-  CreateTimelineProps,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
   UpdateAlertsStatusCallback,
   UpdateAlertsStatusProps,
 } from './types';
-import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
 import {
   useStateToaster,
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
-import {
-  AddExceptionModal,
-  AddExceptionModalBaseProps,
-} from '../../../common/components/exceptions/add_exception_modal';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -71,14 +59,6 @@ interface OwnProps {
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
-
-const addExceptionModalInitialState: AddExceptionModalBaseProps = {
-  ruleName: '',
-  ruleId: '',
-  ruleIndices: [],
-  exceptionListType: 'detection',
-  alertData: undefined,
-};
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
@@ -101,30 +81,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   onShowBuildingBlockAlertsChanged,
   signalsIndex,
   to,
-  updateTimeline,
-  updateTimelineIsLoading,
 }) => {
-  const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
-
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-  const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
-  const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionModalBaseProps>(
-    addExceptionModalInitialState
-  );
   const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : [],
     'alerts_table'
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
-  const {
-    initializeTimeline,
-    setSelectAll,
-    setTimelineRowActions,
-    setIndexToAdd,
-  } = useManageTimeline();
+  const { initializeTimeline, setSelectAll, setIndexToAdd } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -147,27 +113,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return null;
     },
     [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
-  );
-
-  // Callback for creating a new timeline -- utilized by row/batch actions
-  const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote, notes }: CreateTimelineProps) => {
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
-      updateTimeline({
-        duplicate: true,
-        forceNotes: true,
-        from: fromTimeline,
-        id: 'timeline-1',
-        notes,
-        timeline: {
-          ...timeline,
-          show: true,
-        },
-        to: toTimeline,
-        ruleNote,
-      })();
-    },
-    [updateTimeline, updateTimelineIsLoading]
   );
 
   const setEventsLoadingCallback = useCallback(
@@ -218,28 +163,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
-  );
-
-  const openAddExceptionModalCallback = useCallback(
-    ({
-      ruleName,
-      ruleIndices,
-      ruleId,
-      exceptionListType,
-      alertData,
-    }: AddExceptionModalBaseProps) => {
-      if (alertData !== null && alertData !== undefined) {
-        setShouldShowAddExceptionModal(true);
-        setAddExceptionModalState({
-          ruleName,
-          ruleId,
-          ruleIndices,
-          exceptionListType,
-          alertData,
-        });
-      }
-    },
-    [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
@@ -297,7 +220,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
           : undefined,
         alertIds: Object.keys(selectedEventIds),
-        status,
         selectedStatus,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
@@ -352,42 +274,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  // Send to Timeline / Update Alert Status Actions for each table row
-  const additionalActions = useMemo(
-    () => ({ ecsData, nonEcsData }: TimelineRowActionArgs) =>
-      getAlertActions({
-        apolloClient,
-        canUserCRUD,
-        createTimeline: createTimelineCallback,
-        ecsRowData: ecsData,
-        nonEcsRowData: nonEcsData,
-        dispatch,
-        hasIndexWrite,
-        onAlertStatusUpdateFailure,
-        onAlertStatusUpdateSuccess,
-        setEventsDeleted: setEventsDeletedCallback,
-        setEventsLoading: setEventsLoadingCallback,
-        status: filterGroup,
-        timelineId,
-        updateTimelineIsLoading,
-        openAddExceptionModal: openAddExceptionModalCallback,
-      }),
-    [
-      apolloClient,
-      canUserCRUD,
-      createTimelineCallback,
-      dispatch,
-      hasIndexWrite,
-      filterGroup,
-      setEventsLoadingCallback,
-      setEventsDeletedCallback,
-      timelineId,
-      updateTimelineIsLoading,
-      onAlertStatusUpdateSuccess,
-      onAlertStatusUpdateFailure,
-      openAddExceptionModalCallback,
-    ]
-  );
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
@@ -408,20 +294,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
       selectAll: false,
-      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
+      queryFields: requiredFieldsForActions,
       title: '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    setTimelineRowActions({
-      id: timelineId,
-      queryFields: requiredFieldsForActions,
-      timelineRowActions: additionalActions,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [additionalActions]);
 
   useEffect(() => {
     setIndexToAdd({ id: timelineId, indexToAdd: defaultIndices });
@@ -431,19 +308,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]
   );
-
-  const closeAddExceptionModal = useCallback(() => {
-    setShouldShowAddExceptionModal(false);
-    setAddExceptionModalState(addExceptionModalInitialState);
-  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
-
-  const onAddExceptionCancel = useCallback(() => {
-    closeAddExceptionModal();
-  }, [closeAddExceptionModal]);
-
-  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
-    closeAddExceptionModal,
-  ]);
 
   if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
@@ -455,30 +319,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }
 
   return (
-    <>
-      <StatefulEventsViewer
-        defaultIndices={defaultIndices}
-        pageFilters={defaultFiltersMemo}
-        defaultModel={alertsDefaultModel}
-        end={to}
-        headerFilterGroup={headerFilterGroup}
-        id={timelineId}
-        start={from}
-        utilityBar={utilityBarCallback}
-      />
-      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
-        <AddExceptionModal
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={filterGroup}
-        />
-      )}
-    </>
+    <StatefulEventsViewer
+      defaultIndices={defaultIndices}
+      pageFilters={defaultFiltersMemo}
+      defaultModel={alertsDefaultModel}
+      end={to}
+      headerFilterGroup={headerFilterGroup}
+      id={timelineId}
+      start={from}
+      utilityBar={utilityBarCallback}
+    />
   );
 };
 
@@ -528,9 +378,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
   clearEventsDeleted: ({ id }: { id: string }) =>
     dispatch(timelineActions.clearEventsDeleted({ id })),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-  updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

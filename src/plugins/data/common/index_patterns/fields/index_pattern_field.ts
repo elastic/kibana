@@ -165,7 +165,6 @@ export class IndexPatternField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
-      // format: this.format.toJSON(),
       shortDotsEnable: this.spec.shortDotsEnable,
     };
   }
