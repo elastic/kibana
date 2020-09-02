@@ -784,6 +784,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  wildcard: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
+      defaultMessage: 'Wildcard',
+    }),
+    value: 'wildcard',
+    documentation: {
+      main: '/keyword.html#wildcard-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.wildcardLongDescription"
+          defaultMessage="Wildcard fields store values optimized for wildcard grep-like queries."
+        />
+      </p>
+    ),
+  },
   other: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.otherDescription', {
       defaultMessage: 'Other',
@@ -825,6 +842,7 @@ export const MAIN_TYPES: MainType[] = [
   'shape',
   'text',
   'token_count',
+  'wildcard',
   'other',
 ];
 
