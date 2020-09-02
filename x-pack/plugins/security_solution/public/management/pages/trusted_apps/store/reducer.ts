@@ -10,7 +10,11 @@ import { matchPath } from 'react-router-dom';
 import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
-import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../../common/constants';
+import {
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+} from '../../../common/constants';
 import { TrustedAppsListDataBindingChanged, TrustedAppsPageAction } from './action';
 import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
 
@@ -19,17 +23,6 @@ type CaseReducer<T extends TrustedAppsPageAction> = (
   state: Immutable<TrustedAppsListPageState>,
   action: Immutable<T>
 ) => Immutable<TrustedAppsListPageState>;
-
-const initialPageState: TrustedAppsListPageState = {
-  listView: {
-    currentListData: { type: 'UninitialisedAsyncBinding' },
-    currentPaginationInfo: {
-      index: 1,
-      size: 10,
-    },
-  },
-  active: false,
-};
 
 const isTrustedAppsPageLocation = (location: Immutable<AppLocation>) => {
   return (
@@ -62,8 +55,8 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
       listView: {
         ...state.listView,
         currentPaginationInfo: {
-          index: Number(query.page_index) || 1,
-          size: Number(query.page_size) || 10,
+          index: Number(query.page_index) || MANAGEMENT_DEFAULT_PAGE,
+          size: Number(query.page_size) || MANAGEMENT_DEFAULT_PAGE_SIZE,
         },
       },
       active: true,
@@ -76,7 +69,21 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
 };
 
-const reducer: StateReducer = (state = initialPageState, action) => {
+export const initialTrustedAppsPageState: TrustedAppsListPageState = {
+  listView: {
+    currentListData: { type: 'UninitialisedAsyncBinding' },
+    currentPaginationInfo: {
+      index: MANAGEMENT_DEFAULT_PAGE,
+      size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    },
+  },
+  active: false,
+};
+
+export const trustedAppsPageReducer: StateReducer = (
+  state = initialTrustedAppsPageState,
+  action
+) => {
   switch (action.type) {
     case 'trustedAppsListDataBindingChanged':
       return trustedAppsListDataBindingChanged(state, action);
@@ -87,6 +94,3 @@ const reducer: StateReducer = (state = initialPageState, action) => {
 
   return state;
 };
-
-export { initialPageState as initialTrustedAppsPageState };
-export { reducer as trustedAppsPageReducer };
