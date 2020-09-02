@@ -144,6 +144,7 @@ export class DashboardAppController {
       i18n: i18nStart,
     },
     history,
+    setHeaderActionMenu,
     kbnUrlStateStorage,
     usageCollection,
     navigation,
@@ -682,7 +683,10 @@ export class DashboardAppController {
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateNavBar = () => {
-      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+      ReactDOM.render(
+        <navigation.ui.TopNavMenu {...getNavBarProps()} setMenuMountPoint={setHeaderActionMenu} />,
+        dashboardNavBar
+      );
     };
 
     const unmountNavBar = () => {

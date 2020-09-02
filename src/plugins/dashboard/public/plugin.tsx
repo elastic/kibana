@@ -331,6 +331,7 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
           scopedHistory: () => this.currentHistory!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
           restorePreviousUrl,
         };
