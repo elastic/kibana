@@ -31,7 +31,7 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       perPage: request.query.perPage,
       kuery: request.query.kuery,
     });
-    const body: GetEnrollmentAPIKeysResponse = { list: items, success: true, total, page, perPage };
+    const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
 
     return response.ok({ body });
   } catch (e) {
@@ -54,7 +54,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
       agentPolicyId: request.body.policy_id,
     });
 
-    const body: PostEnrollmentAPIKeyResponse = { item: apiKey, success: true, action: 'created' };
+    const body: PostEnrollmentAPIKeyResponse = { item: apiKey, action: 'created' };
 
     return response.ok({ body });
   } catch (e) {
@@ -78,7 +78,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<TypeOf<
   try {
     await APIKeyService.deleteEnrollmentApiKey(soClient, request.params.keyId);
 
-    const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted', success: true };
+    const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
     return response.ok({ body });
   } catch (e) {
@@ -100,7 +100,7 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<TypeOf<
   const soClient = context.core.savedObjects.client;
   try {
     const apiKey = await APIKeyService.getEnrollmentAPIKey(soClient, request.params.keyId);
-    const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey, success: true };
+    const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
 
     return response.ok({ body });
   } catch (e) {

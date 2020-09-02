@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse, SearchParams } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
-type MlAnomalySearch = <T>(searchParams: SearchParams) => Promise<SearchResponse<T>>;
+type MlAnomalySearch = <T>(searchParams: RequestParams.Search) => Promise<SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
