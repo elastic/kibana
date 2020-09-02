@@ -7,7 +7,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
-import { appContextService } from '../../../app_context';
 
 export const stopTransforms = async (transformIds: string[], callCluster: CallESAsCurrentUser) => {
   for (const transformId of transformIds) {
@@ -24,10 +23,7 @@ export const deleteTransforms = async (
   callCluster: CallESAsCurrentUser,
   transformIds: string[]
 ) => {
-  appContextService.getLogger().info(`Deleting\n${JSON.stringify(transformIds)}`);
   for (const transformId of transformIds) {
-    // eslint-disable-next-line no-console
-    console.log(`Deleting\n ${transformId}`);
     await stopTransforms([transformId], callCluster);
     await callCluster('transport.request', {
       method: 'DELETE',
@@ -42,13 +38,12 @@ export const deleteTransformRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
-  installedEsIdToRemove: string[]
+  installedEsIdToRemove: string[],
+  currentInstalledEsTransformIds: string[]
 ) => {
-  // eslint-disable-next-line no-console
-  console.log(installedEsIdToRemove);
   const filteredAssets = installedEsAssets.filter(({ type, id }) => {
     if (type !== ElasticsearchAssetType.transform) return true;
-    return !installedEsIdToRemove.includes(id);
+    return currentInstalledEsTransformIds.includes(id) || !installedEsIdToRemove.includes(id);
   });
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: filteredAssets,

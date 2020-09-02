@@ -16,7 +16,8 @@ import {
 } from '../../../../../common/types/models';
 import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
-import { deleteTransforms, deleteTransformRefs, stopTransforms } from './remove';
+import { deleteTransforms, deleteTransformRefs } from './remove';
+import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;
@@ -42,102 +43,75 @@ export const installTransformForDataset = async (
     );
   }
 
-  try {
-    // stop current transform
-    await stopTransforms(
-      previousInstalledTransformEsAssets.map((asset) => asset.id),
-      callCluster
-    );
+  // delete all previous transform
+  await deleteTransforms(
+    callCluster,
+    previousInstalledTransformEsAssets.map((asset) => asset.id)
+  );
+  // install the latest dataset
+  const datasets = registryPackage.datasets;
+  if (!datasets?.length) return [];
+  const installNameSuffix = `${registryPackage.version}`;
 
-    // install the latest dataset
-    const datasets = registryPackage.datasets;
-    if (!datasets?.length) return [];
-    const installNameSuffix = `${registryPackage.version}-${timestamp()}`;
+  const transformPaths = paths.filter((path) => isTransform(path));
 
-    const transformPaths = paths.filter((path) => isTransform(path));
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(transformPaths));
-
-    const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
-      transformPaths.forEach((path) => {
-        if (isDatasetTransform(path, dataset.path)) {
-          acc.push({ path, dataset });
-        }
-      });
-      return acc;
-    }, []);
-
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(transformPathDatasets));
-
-    const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
-      (acc, transformPathDataset) => {
-        if (transformPathDataset) {
-          acc.push({
-            id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
-            type: ElasticsearchAssetType.transform,
-          });
-        }
-        return acc;
-      },
-      []
-    );
-
-    // get and save transform refs before installing pipelines
-    // eslint-disable-next-line no-console
-    console.log(`transform: ${JSON.stringify(transformRefs)}`);
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
-
-    const transforms: TransformInstallation[] = transformPathDatasets.map(
-      (transformPathDataset: TransformPathDataset) => {
-        return {
-          installationName: getTransformNameForInstallation(
-            transformPathDataset,
-            installNameSuffix
-          ),
-          content: Registry.getAsset(transformPathDataset.path).toString('utf-8'),
-        };
+  const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
+    transformPaths.forEach((path) => {
+      if (isDatasetTransform(path, dataset.path)) {
+        acc.push({ path, dataset });
       }
-    );
-
-    const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform });
     });
+    return acc;
+  }, []);
 
-    const installedTransforms = await Promise.all([
-      Promise.all(installationPromises),
-    ]).then((results) => results.flat());
+  const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
+    (acc, transformPathDataset) => {
+      if (transformPathDataset) {
+        acc.push({
+          id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
+          type: ElasticsearchAssetType.transform,
+        });
+      }
+      return acc;
+    },
+    []
+  );
 
-    const currentInstallation = await getInstallation({
-      savedObjectsClient,
-      pkgName: registryPackage.name,
-    });
+  // get and save transform refs before installing transforms
+  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
 
-    // delete all previous transform
-    await deleteTransforms(
-      callCluster,
-      previousInstalledTransformEsAssets.map((asset) => asset.id)
-    );
+  const transforms: TransformInstallation[] = transformPathDatasets.map(
+    (transformPathDataset: TransformPathDataset) => {
+      return {
+        installationName: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
+        content: getAsset(transformPathDataset.path).toString('utf-8'),
+      };
+    }
+  );
 
-    // remove the saved object reference
-    await deleteTransformRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
-      registryPackage.name,
-      previousInstalledTransformEsAssets.map((asset) => asset.id)
-    );
+  const installationPromises = transforms.map(async (transform) => {
+    return installTransform({ callCluster, transform });
+  });
 
-    return installedTransforms;
-  } catch (e) {
-    // delete all resources we tried to install
-    // restart old transform again
-    throw e;
-  }
-};
+  const installedTransforms = await Promise.all([
+    Promise.all(installationPromises),
+  ]).then((results) => results.flat());
 
-const timestamp = () => {
-  const dt = new Date();
-  return `${dt.getFullYear()}${dt.getUTCMonth()}${dt.getUTCDay()}${dt.getUTCMinutes()}`;
+  const currentInstallation = await getInstallation({
+    savedObjectsClient,
+    pkgName: registryPackage.name,
+  });
+
+  // remove the saved object reference
+  await deleteTransformRefs(
+    savedObjectsClient,
+    currentInstallation?.installed_es || [],
+    registryPackage.name,
+    previousInstalledTransformEsAssets.map((asset) => asset.id),
+    installedTransforms.map((installed) => installed.id)
+  );
+
+  return installedTransforms;
 };
 
 const isTransform = (path: string) => {
