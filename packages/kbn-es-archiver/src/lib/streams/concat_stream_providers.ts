@@ -24,10 +24,6 @@ import { PassThrough, TransformOptions } from 'stream';
  *  to a single stream in order. Stream providers are only
  *  called right before they will be consumed, and only one
  *  provider will be active at a time.
- *
- *  @param sourceProviders
- *  @param options options passed to the PassThrough constructor
- *  @return combined stream
  */
 export function concatStreamProviders(
   sourceProviders: Array<() => NodeJS.ReadableStream>,

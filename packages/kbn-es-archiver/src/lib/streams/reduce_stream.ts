@@ -25,12 +25,6 @@ import { Transform } from 'stream';
  *  for the stream. Once all chunks have been received the reduce
  *  stream provides the result of final call to the reducer to
  *  subscribers.
- *
- *  @param
- *  @param  initial Initial value for the stream, if undefined
- *                        then the first chunk provided is used as the
- *                        initial value.
- *  @return
  */
 export function createReduceStream(
   reducer: (acc: any, chunk: any, env: string) => any,

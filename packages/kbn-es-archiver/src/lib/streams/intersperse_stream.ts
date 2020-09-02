@@ -36,9 +36,6 @@ import { Transform } from 'stream';
  *      createIntersperseStream(' '),
  *      createConcatStream()
  *    ]) // produces a single value "foo bar"
- *
- *  @param intersperseChunk
- *  @return
  */
 export function createIntersperseStream(intersperseChunk: any) {
   let first = true;

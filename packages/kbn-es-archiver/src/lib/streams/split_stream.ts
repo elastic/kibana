@@ -34,9 +34,6 @@ import { Transform } from 'stream';
  *    - splitChunk cannot be a regexp
  *    - an empty string or Buffer will not produce a stream of individual
  *      bytes like `string.split('')` would
- *
- *  @param splitChunk
- *  @return
  */
 export function createSplitStream(splitChunk: string) {
   let unsplitBuffer = Buffer.alloc(0);

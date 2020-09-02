@@ -29,9 +29,6 @@
  *
  *  Errors emitted from any stream will cause
  *  the promise to be rejected with that error.
- *
- *  @param streams
- *  @return
  */
 
 import { pipeline, Writable } from 'stream';

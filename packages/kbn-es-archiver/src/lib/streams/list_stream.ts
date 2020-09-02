@@ -22,9 +22,6 @@ import { Readable } from 'stream';
 /**
  *  Create a Readable stream that provides the items
  *  from a list as objects to subscribers
- *
- *  @param items - the list of items to provide
- *  @return
  */
 export function createListStream(items: any | any[] = []) {
   const queue: any[] = [].concat(items);

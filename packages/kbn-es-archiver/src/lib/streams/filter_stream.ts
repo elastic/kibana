@@ -22,7 +22,7 @@ import { Transform } from 'stream';
 export function createFilterStream<T>(fn: (obj: T) => boolean) {
   return new Transform({
     objectMode: true,
-    async transform(obj, enc, done) {
+    async transform(obj, _, done) {
       const canPushDownStream = fn(obj);
       if (canPushDownStream) {
         this.push(obj);
