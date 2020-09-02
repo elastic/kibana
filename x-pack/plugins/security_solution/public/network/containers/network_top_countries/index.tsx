@@ -80,7 +80,7 @@ export const useNetworkTopCountries = ({
     flowTarget,
     // inspect: isInspected,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkTopCountriesSort: sort,
+    sort,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -186,12 +186,12 @@ export const useNetworkTopCountries = ({
         defaultIndex,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
+        sort,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        networkTopCountriesSort: sort,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

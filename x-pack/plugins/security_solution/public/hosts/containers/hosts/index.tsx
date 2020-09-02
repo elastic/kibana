@@ -48,6 +48,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
@@ -56,6 +57,7 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
+  skip = false,
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
@@ -190,7 +192,7 @@ export const useAllHost = ({
           field: sortField,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
@@ -203,6 +205,7 @@ export const useAllHost = ({
     endDate,
     filterQuery,
     limit,
+    skip,
     startDate,
     sortField,
   ]);

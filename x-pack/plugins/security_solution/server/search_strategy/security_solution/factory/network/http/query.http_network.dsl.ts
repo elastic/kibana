@@ -6,8 +6,10 @@
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import { NetworkHttpRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
-import { NetworkHttpSortField } from '../../../../../graphql/types';
+import {
+  NetworkHttpRequestOptions,
+  SortField,
+} from '../../../../../../common/search_strategy/security_solution';
 
 const getCountAgg = () => ({
   http_count: {
@@ -20,7 +22,7 @@ const getCountAgg = () => ({
 export const buildHttpQuery = ({
   defaultIndex,
   filterQuery,
-  networkHttpSort,
+  sort,
   pagination: { querySize },
   timerange: { from, to },
   ip,
@@ -42,7 +44,7 @@ export const buildHttpQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(),
-        ...getHttpAggs(networkHttpSort, querySize),
+        ...getHttpAggs(sort, querySize),
       },
       query: {
         bool: ip
@@ -73,13 +75,13 @@ export const buildHttpQuery = ({
   return dslQuery;
 };
 
-const getHttpAggs = (networkHttpSortField: NetworkHttpSortField, querySize: number) => ({
+const getHttpAggs = (sortField: SortField, querySize: number) => ({
   url: {
     terms: {
       field: `url.path`,
       size: querySize,
       order: {
-        _count: networkHttpSortField.direction,
+        _count: sortField.direction,
       },
     },
     aggs: {
