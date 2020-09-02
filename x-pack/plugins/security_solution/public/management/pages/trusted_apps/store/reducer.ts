@@ -10,6 +10,7 @@ import { matchPath } from 'react-router-dom';
 import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_DEFAULT_PAGE,
@@ -48,15 +49,15 @@ const trustedAppsListDataBindingChanged: CaseReducer<TrustedAppsListDataBindingC
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isTrustedAppsPageLocation(action.payload)) {
-    const query = parse(action.payload.search.slice(1));
+    const paginationParams = extractListPaginationParams(parse(action.payload.search.slice(1)));
 
     return {
       ...state,
       listView: {
         ...state.listView,
         currentPaginationInfo: {
-          index: Number(query.page_index) || MANAGEMENT_DEFAULT_PAGE,
-          size: Number(query.page_size) || MANAGEMENT_DEFAULT_PAGE_SIZE,
+          index: paginationParams.page_index,
+          size: paginationParams.page_size,
         },
       },
       active: true,

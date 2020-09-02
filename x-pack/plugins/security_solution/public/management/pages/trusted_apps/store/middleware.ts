@@ -46,7 +46,7 @@ const refreshList = async (
 
   try {
     const response = await trustedAppsService.getTrustedAppsList({
-      page: list.currentPaginationInfo.index,
+      page: list.currentPaginationInfo.index + 1,
       per_page: list.currentPaginationInfo.size,
     });
 

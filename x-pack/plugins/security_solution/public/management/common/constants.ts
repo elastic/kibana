@@ -27,7 +27,8 @@ export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';
 /** Namespace within the Management state where trusted apps page state is maintained */
 export const MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE = 'trustedApps';
 
-export const MANAGEMENT_DEFAULT_PAGE = 1;
+export const MANAGEMENT_PAGE_SIZE_OPTIONS = [10, 20, 50];
+export const MANAGEMENT_DEFAULT_PAGE = 0;
 export const MANAGEMENT_DEFAULT_PAGE_SIZE = 10;
 
 // --[ DEFAULTS ]---------------------------------------------------------------------------

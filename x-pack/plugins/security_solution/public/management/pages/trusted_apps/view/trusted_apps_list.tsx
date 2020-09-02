@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Immutable } from '../../../../../common/endpoint/types';
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { getTrustedAppsListPath } from '../../../common/routing';
 
 import {
@@ -96,16 +97,21 @@ export const TrustedAppsList = memo(() => {
       items={[...useTrustedAppsSelector(getListItems)]}
       error={useTrustedAppsSelector(getListErrorMessage)}
       loading={useTrustedAppsSelector(isListLoading)}
-      pagination={useMemo(() => ({ pageIndex, pageSize, totalItemCount }), [
-        pageIndex,
-        pageSize,
-        totalItemCount,
-      ])}
+      pagination={useMemo(
+        () => ({
+          pageIndex,
+          pageSize,
+          totalItemCount,
+          hidePerPageOptions: false,
+          pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS,
+        }),
+        [pageIndex, pageSize, totalItemCount]
+      )}
       onChange={useCallback(
         ({ page }: { page: { index: number; size: number } }) => {
           history.push(
             getTrustedAppsListPath({
-              page_index: page.index + 1,
+              page_index: page.index,
               page_size: page.size,
             })
           );

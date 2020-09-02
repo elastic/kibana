@@ -12,6 +12,7 @@ import querystring from 'querystring';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
@@ -88,12 +89,12 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-interface TrustedAppsListParams {
+interface ListPaginationParams {
   page_index?: number;
   page_size?: number;
 }
 
-const normalizeTrustedAppsListParams = (params?: TrustedAppsListParams) => {
+const normalizeListPaginationParams = (params?: ListPaginationParams) => {
   if (params) {
     return {
       ...(params.page_index === MANAGEMENT_DEFAULT_PAGE ? {} : { page_index: params.page_index }),
@@ -104,10 +105,31 @@ const normalizeTrustedAppsListParams = (params?: TrustedAppsListParams) => {
   }
 };
 
-export const getTrustedAppsListPath = (params?: TrustedAppsListParams) => {
+const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string) => {
+  return Array.isArray(query[key]) ? query[key][0] : query[key];
+};
+
+const extractPageIndex = (query: querystring.ParsedUrlQuery) => {
+  const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
+
+  return !Number.isFinite(pageIndex) || pageIndex < 0 ? pageIndex : MANAGEMENT_DEFAULT_PAGE;
+};
+
+const extractPageSize = (query: querystring.ParsedUrlQuery) => {
+  const pageSize = Number(extractFirstParamValue(query, 'page_size'));
+
+  return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
+};
+
+export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  page_index: extractPageIndex(query),
+  page_size: extractPageSize(query),
+});
+
+export const getTrustedAppsListPath = (params?: ListPaginationParams) => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
 
-  return `${path}${appendSearch(querystring.stringify(normalizeTrustedAppsListParams(params)))}`;
+  return `${path}${appendSearch(querystring.stringify(normalizeListPaginationParams(params)))}`;
 };
