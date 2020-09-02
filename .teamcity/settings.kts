@@ -5,8 +5,8 @@ import projects.KibanaConfiguration
 version = "2020.1"
 
 val config = KibanaConfiguration(
-  DSLContext.getParameter("agentNetwork", "teamcity"),
-  DSLContext.getParameter("agentSubnet", "teamcity")
+  DslContext.getParameter("agentNetwork", "teamcity"),
+  DslContext.getParameter("agentSubnet", "teamcity")
 )
 
 project(Kibana(config))
