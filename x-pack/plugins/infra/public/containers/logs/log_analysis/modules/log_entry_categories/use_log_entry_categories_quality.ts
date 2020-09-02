@@ -51,15 +51,13 @@ export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: J
   );
 
   useDeepCompareEffect(() => {
-    if (jobSummariesWithPartitionedCategoryWarnings.length > 0) {
-      fetchLatestWarnedDatasetsStats(
-        jobSummariesWithPartitionedCategoryWarnings.map((jobSummary) => ({
-          jobId: jobSummary.id,
-          startTime: jobSummary.fullJob?.create_time ?? 0,
-          endTime: jobSummary.fullJob?.model_size_stats?.log_time ?? Date.now(),
-        }))
-      );
-    }
+    fetchLatestWarnedDatasetsStats(
+      jobSummariesWithPartitionedCategoryWarnings.map((jobSummary) => ({
+        jobId: jobSummary.id,
+        startTime: jobSummary.fullJob?.create_time ?? 0,
+        endTime: jobSummary.fullJob?.model_size_stats?.log_time ?? Date.now(),
+      }))
+    );
   }, [jobSummariesWithPartitionedCategoryWarnings]);
 
   const categoryQualityWarnings: QualityWarning[] = useMemo(
