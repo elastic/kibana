@@ -67,12 +67,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should invalide an existing api keys', async () => {
-        const { body: apiResponse } = await supertest
+        await supertest
           .delete(`/api/ingest_manager/fleet/enrollment-api-keys/${keyId}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-
-        expect(apiResponse.success).to.eql(true);
 
         const {
           body: { api_keys: apiKeys },
@@ -113,7 +111,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(apiResponse.success).to.eql(true);
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
       });
 
@@ -125,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
           })
           .expect(200);
-        expect(apiResponse.success).to.eql(true);
+
         const { body: privileges } = await getEsClientForAPIKey(
           providerContext,
           apiResponse.item.api_key

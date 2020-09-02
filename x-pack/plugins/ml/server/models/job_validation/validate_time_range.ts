@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
@@ -26,15 +26,12 @@ const BUCKET_SPAN_COMPARE_FACTOR = 25;
 const MIN_TIME_SPAN_MS = 7200000;
 const MIN_TIME_SPAN_READABLE = '2 hours';
 
-export async function isValidTimeField(
-  { callAsCurrentUser }: ILegacyScopedClusterClient,
-  job: CombinedJob
-) {
+export async function isValidTimeField({ asCurrentUser }: IScopedClusterClient, job: CombinedJob) {
   const index = job.datafeed_config.indices.join(',');
   const timeField = job.data_description.time_field;
 
   // check if time_field is of type 'date' or 'date_nanos'
-  const fieldCaps = await callAsCurrentUser('fieldCaps', {
+  const { body: fieldCaps } = await asCurrentUser.fieldCaps({
     index,
     fields: [timeField],
   });
@@ -47,7 +44,7 @@ export async function isValidTimeField(
 }
 
 export async function validateTimeRange(
-  mlClientCluster: ILegacyScopedClusterClient,
+  mlClientCluster: IScopedClusterClient,
   job: CombinedJob,
   timeRange?: Partial<TimeRange>
 ) {

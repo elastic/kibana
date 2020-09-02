@@ -9,12 +9,10 @@ import { noop } from 'lodash/fp';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager';
-import { TimelineRowAction } from '../timeline/body/actions';
 import { SubsetTimelineModel } from '../../store/timeline/model';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
 import { timelineDefaults as timelineDefaultModel } from '../../store/timeline/defaults';
-import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
@@ -25,14 +23,9 @@ interface ManageTimelineInit {
   indexToAdd?: string[] | null;
   loadingText?: string;
   selectAll?: boolean;
-  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+  queryFields?: string[];
   title?: string;
   unit?: (totalCount: number) => string;
-}
-
-export interface TimelineRowActionArgs {
-  ecsData: Ecs;
-  nonEcsData: TimelineNonEcsData[];
 }
 
 interface ManageTimeline {
@@ -46,7 +39,6 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -75,14 +67,6 @@ type ActionManageTimeline =
       type: 'SET_SELECT_ALL';
       id: string;
       payload: boolean;
-    }
-  | {
-      type: 'SET_TIMELINE_ACTIONS';
-      id: string;
-      payload: {
-        queryFields?: string[];
-        timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
-      };
     };
 
 export const getTimelineDefaults = (id: string) => ({
@@ -95,7 +79,6 @@ export const getTimelineDefaults = (id: string) => ({
   id,
   isLoading: false,
   queryFields: [],
-  timelineRowActions: () => [],
   title: i18n.EVENTS,
   unit: (n: number) => i18n.UNIT(n),
 });
@@ -129,14 +112,7 @@ const reducerManageTimeline = (
           selectAll: action.payload,
         },
       } as ManageTimelineById;
-    case 'SET_TIMELINE_ACTIONS':
-      return {
-        ...state,
-        [action.id]: {
-          ...state[action.id],
-          ...action.payload,
-        },
-      } as ManageTimelineById;
+
     case 'SET_IS_LOADING':
       return {
         ...state,
@@ -159,11 +135,6 @@ export interface UseTimelineManager {
   setIndexToAdd: (indexToAddArgs: { id: string; indexToAdd: string[] }) => void;
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
   setSelectAll: (selectAllArgs: { id: string; selectAll: boolean }) => void;
-  setTimelineRowActions: (actionsArgs: {
-    id: string;
-    queryFields?: string[];
-    timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
-  }) => void;
 }
 
 export const useTimelineManager = (
@@ -180,25 +151,6 @@ export const useTimelineManager = (
       payload: newTimeline,
     });
   }, []);
-
-  const setTimelineRowActions = useCallback(
-    ({
-      id,
-      queryFields,
-      timelineRowActions,
-    }: {
-      id: string;
-      queryFields?: string[];
-      timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
-    }) => {
-      dispatch({
-        type: 'SET_TIMELINE_ACTIONS',
-        id,
-        payload: { queryFields, timelineRowActions },
-      });
-    },
-    []
-  );
 
   const setIsTimelineLoading = useCallback(
     ({ id, isLoading }: { id: string; isLoading: boolean }) => {
@@ -236,7 +188,7 @@ export const useTimelineManager = (
       if (state[id] != null) {
         return state[id];
       }
-      initializeTimeline({ id, timelineRowActions: () => [] });
+      initializeTimeline({ id });
       return getTimelineDefaults(id);
     },
     [initializeTimeline, state]
@@ -261,7 +213,6 @@ export const useTimelineManager = (
     setIndexToAdd,
     setIsTimelineLoading,
     setSelectAll,
-    setTimelineRowActions,
   };
 };
 
@@ -274,7 +225,6 @@ const init = {
   setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
   setSelectAll: () => noop,
-  setTimelineRowActions: () => noop,
 };
 
 const ManageTimelineContext = createContext<UseTimelineManager>(init);
