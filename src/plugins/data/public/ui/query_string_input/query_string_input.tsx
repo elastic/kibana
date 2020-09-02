@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Component } from 'react';
-import React from 'react';
+import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -30,6 +29,7 @@ import {
   EuiButton,
   EuiLink,
   htmlIdGenerator,
+  EuiPortal,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -42,6 +42,7 @@ import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../k
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
 interface Props {
@@ -60,6 +61,7 @@ interface Props {
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
+  size?: SuggestionsListSize;
 }
 
 interface State {
@@ -70,6 +72,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
+  queryBarRect: DOMRect | undefined;
 }
 
 const KEY_CODES = {
@@ -93,6 +96,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
+    queryBarRect: undefined,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -101,6 +105,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
+  private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -494,8 +499,13 @@ export class QueryStringInputUI extends Component<Props, State> {
 
     this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.handleListUpdate();
 
     window.addEventListener('resize', this.handleAutoHeight);
+    window.addEventListener('scroll', this.handleListUpdate, {
+      passive: true, // for better performance as we won't call preventDefault
+      capture: true, // scroll events don't bubble, they must be captured instead
+    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -533,12 +543,19 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('scroll', this.handleListUpdate);
   }
+
+  handleListUpdate = () =>
+    this.setState({
+      queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
+    });
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
     }
+    this.handleListUpdate();
   };
 
   handleRemoveHeight = () => {
@@ -587,6 +604,7 @@ export class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper kuiLocalSearchAssistedInput"
+              ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
                 placeholder={
@@ -633,15 +651,18 @@ export class QueryStringInputUI extends Component<Props, State> {
                 {this.getQueryString()}
               </EuiTextArea>
             </div>
-
-            <SuggestionsComponent
-              show={this.state.isSuggestionsVisible}
-              suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-              index={this.state.index}
-              onClick={this.onClickSuggestion}
-              onMouseEnter={this.onMouseEnterSuggestion}
-              loadMore={this.increaseLimit}
-            />
+            <EuiPortal>
+              <SuggestionsComponent
+                show={this.state.isSuggestionsVisible}
+                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                index={this.state.index}
+                onClick={this.onClickSuggestion}
+                onMouseEnter={this.onMouseEnterSuggestion}
+                loadMore={this.increaseLimit}
+                queryBarRect={this.state.queryBarRect}
+                size={this.props.size}
+              />
+            </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
 

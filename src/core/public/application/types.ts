@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
+import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
 import { IContextProvider } from '../context';
@@ -495,6 +496,37 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
+
+  /**
+   * A function that can be used to set the mount point used to populate the application action container
+   * in the chrome header.
+   *
+   * Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call.
+   * Calling the handler with `undefined` will unmount the current mount point.
+   * Calling the handler after the application has been unmounted will have no effect.
+   *
+   * @example
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { BrowserRouter, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *    const { renderApp } = await import('./application');
+   *    const { renderActionMenu } = await import('./action_menu');
+   *    setHeaderActionMenu((element) => {
+   *      return renderActionMenu(element);
+   *    })
+   *    return renderApp({ element, history });
+   * }
+   * ```
+   */
+  setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 /**
@@ -819,6 +851,14 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * The potential action menu set by the currently mounted app.
+   * Consumed by the chrome header.
+   *
+   * @internal
+   */
+  currentActionMenu$: Observable<MountPoint | undefined>;
 
   /**
    * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
