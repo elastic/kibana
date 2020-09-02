@@ -555,7 +555,12 @@ describe('#bulkUpdate', () => {
   });
 
   describe('namespace', () => {
-    const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
+    const doTest = async (
+      optionsNamespace: string | undefined,
+      expectOptionsNamespaceInDescriptor: boolean,
+      objectNamespace: string | undefined,
+      expectObjectNamespaceInDescriptor: boolean
+    ) => {
       const docs = [
         {
           id: 'some-id',
@@ -566,12 +571,13 @@ describe('#bulkUpdate', () => {
             attrThree: 'three',
           },
           version: 'some-version',
+          namespace: objectNamespace,
         },
       ];
-      const options = { namespace };
+      const options = { namespace: optionsNamespace };
 
       mockBaseClient.bulkUpdate.mockResolvedValue({
-        saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
+        saved_objects: docs.map(({ namespace, ...doc }) => ({ ...doc, references: undefined })),
       });
 
       await expect(wrapper.bulkUpdate(docs, options)).resolves.toEqual({
@@ -594,7 +600,11 @@ describe('#bulkUpdate', () => {
         {
           type: 'known-type',
           id: 'some-id',
-          namespace: expectNamespaceInDescriptor ? namespace : undefined,
+          namespace: expectObjectNamespaceInDescriptor
+            ? objectNamespace
+            : expectOptionsNamespaceInDescriptor
+            ? optionsNamespace
+            : undefined,
         },
         { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
         { user: mockAuthenticatedUser() }
@@ -612,6 +622,7 @@ describe('#bulkUpdate', () => {
               attrThree: 'three',
             },
             version: 'some-version',
+            namespace: objectNamespace,
 
             references: undefined,
           },
@@ -620,13 +631,26 @@ describe('#bulkUpdate', () => {
       );
     };
 
-    it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
-      await doTest('some-namespace', true);
+    it('does not use options `namespace` or object `namespace` to encrypt attributes if neither are specified', async () => {
+      await doTest(undefined, false, undefined, false);
     });
 
-    it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
-      await doTest('some-namespace', false);
+    describe('with a single-namespace type', () => {
+      it('uses options `namespace` to encrypt attributes if it is specified and object `namespace` is not', async () => {
+        await doTest('some-namespace', true, undefined, false);
+      });
+
+      it('uses object `namespace` to encrypt attributes if it is specified', async () => {
+        // object namespace supersedes options namespace
+        await doTest('some-namespace', false, 'another-namespace', true);
+      });
+    });
+
+    describe('with a non-single-namespace type', () => {
+      it('does not use object `namespace` or options `namespace` to encrypt attributes if it is specified', async () => {
+        mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
+        await doTest('some-namespace', false, 'another-namespace', false);
+      });
     });
   });
 
