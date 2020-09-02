@@ -197,16 +197,20 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, title) {
   }
 }
 
-def runTests(title) {
-//  parallel(allTests())
-  if (title) {
-    allTests()[title]
+def runTests(isQuick) {
+  if (isQuick) {
+    workers
+      .functional(
+        'kibana-oss-tests',
+        { kibanaPipeline.buildOss() },
+        kibanaPipeline.ossCiGroupProcess(2)
+      )
   } else {
     parallel(allTests())
   }
 }
 
-def allTests () {
+def allTests() {
   return [
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
     'x-pack-intake-agent': {
@@ -228,6 +232,7 @@ def allTests () {
     ),
   ]
 }
+
 def ossProks() {
   return [
     'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
