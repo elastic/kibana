@@ -35,8 +35,8 @@ export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonPro
     response: IEsSearchResponse<unknown>
   ): Promise<UncommonProcessesStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.process_count.value', response);
-    const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
+    const totalCount = getOr(0, 'aggregations.process_count.value', response.rawResponse);
+    const buckets = getOr([], 'aggregations.group_by_process.buckets', response.rawResponse);
     const hits = getHits(buckets);
 
     const uncommonProcessesEdges = hits.map((hit) =>
