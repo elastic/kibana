@@ -4,5 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LicenseContext, LicenseProvider, ILicenseContext } from './license_context';
-export { hasPlatinumLicense, hasGoldLicense } from './license_checks';
+.logo404 {
+  width: $euiSize * 8;
+  height: $euiSize * 8;
+
+  fill: $euiColorEmptyShade;
+  stroke: $euiColorLightShade;
+
+  &__light {
+    fill: $euiColorLightShade;
+  }
+
+  &__dark {
+    fill: $euiColorMediumShade;
+  }
+}
