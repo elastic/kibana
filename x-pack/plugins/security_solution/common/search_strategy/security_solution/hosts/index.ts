@@ -5,14 +5,16 @@
  */
 
 export * from './all';
+export * from './authentications';
 export * from './common';
 export * from './details';
 export * from './overview';
 export * from './first_last_seen';
 
 export enum HostsQueries {
+  authentications = 'authentications',
   details = 'details',
+  firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
   overview = 'overview',
-  firstLastSeen = 'firstLastSeen',
 }

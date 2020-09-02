@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,
@@ -25,6 +25,7 @@ import { listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+import { getSettings } from './settings';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -260,6 +261,25 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     return this._update(soClient, id, {}, options?.user);
   }
+  public async bumpAllAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision'],
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+  }
 
   public async assignPackagePolicies(
     soClient: SavedObjectsClientContract,
@@ -370,6 +390,7 @@ class AgentPolicyService {
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     let agentPolicy;
+    const standalone = options?.standalone;
 
     try {
       agentPolicy = await this.get(soClient, id);
@@ -434,6 +455,22 @@ class AgentPolicyService {
             },
           }),
     };
+
+    // only add settings if not in standalone
+    if (!standalone) {
+      let settings;
+      try {
+        settings = await getSettings(soClient);
+      } catch (error) {
+        throw new Error('Default settings is not setup');
+      }
+      if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
+      fullAgentPolicy.fleet = {
+        kibana: {
+          hosts: settings.kibana_urls,
+        },
+      };
+    }
 
     return fullAgentPolicy;
   }
