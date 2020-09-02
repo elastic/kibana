@@ -66,7 +66,10 @@ export class TiledVectorLayer extends VectorLayer {
     const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+
       if (data) {
+        // console.log('urlT', { existing: data.urlTemplate, new: templateWithMeta.urlTemplate });
+
         const canSkipBecauseNoChanges =
           data.layerName === this._source.getLayerName() &&
           data.minSourceZoom === this._source.getMinZoom() &&
@@ -74,6 +77,7 @@ export class TiledVectorLayer extends VectorLayer {
           data.urlTemplate === templateWithMeta.urlTemplate;
 
         if (canSkipBecauseNoChanges) {
+          // console.loog('CAN SKIP!!~!');
           return null;
         }
       }

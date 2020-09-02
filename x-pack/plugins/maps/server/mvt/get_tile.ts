@@ -13,8 +13,12 @@ import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
+  GEOCENTROID_AGG_NAME,
+  GEOTILE_GRID_AGG_NAME,
   KBN_TOO_MANY_FEATURES_PROPERTY,
+  MAX_ZOOM,
   MVT_SOURCE_LAYER_NAME,
+  SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
 import { hitsToGeoJson } from '../../common/elasticsearch_geo_utils';
@@ -51,7 +55,109 @@ export async function getGridTile({
   requestBody: any;
 }): Promise<Buffer | null> {
   logger.warn('getGridTile not implemented');
-  return null;
+
+  const esBbox = tileToESBbox(x, y, z);
+  const geojsonPolyhon = tileToGeoJsonPolygon(x, y, z);
+
+  try {
+    let result;
+    try {
+      // todo: needs to be different from geo_point and geo_shape
+      const geoBoundingBox = {
+        geo_bounding_box: {
+          [geometryFieldName]: esBbox,
+        },
+      };
+      requestBody.query.bool.filter.push(geoBoundingBox);
+
+      const targetPrecision = Math.min(z + SUPER_FINE_ZOOM_DELTA, MAX_ZOOM);
+      logger.warn(`z ${z} -> targetPrecision ${targetPrecision}`);
+
+      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = targetPrecision;
+      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
+
+      const esGeotileGridQuery = {
+        index,
+        body: requestBody,
+      };
+
+      logger.warn(JSON.stringify(esGeotileGridQuery));
+
+      const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
+
+      // logger.warn(JSON.stringify(gridAggResult, null, '\t'));
+
+      // todo: pass iun aggnames
+      const aggNames = ['doc_count'];
+      const ffeats = [];
+      gridAggResult.aggregations[GEOTILE_GRID_AGG_NAME].buckets.forEach((bucket) => {
+        const feature = {
+          type: 'Feature',
+          properties: {},
+          geometry: null,
+        };
+
+        for (let i = 0; i < aggNames.length; i++) {
+          const aggName = aggNames[i];
+          if (aggName === 'doc_count') {
+            feature.properties[aggName] = bucket[aggName];
+            feature.properties.count = bucket[aggName];
+          } else if (aggName === GEOCENTROID_AGG_NAME) {
+            // do nothing
+          } else {
+            feature.properties[aggName] = bucket[aggName].value;
+          }
+        }
+
+        feature.properties[KBN_TOO_MANY_FEATURES_PROPERTY] = false;
+
+        // Todo: needs to differentiate output between clusters and grids
+        const centroid = {
+          type: 'Point',
+          coordinates: [
+            parseFloat(bucket[GEOCENTROID_AGG_NAME].location.lon),
+            parseFloat(bucket[GEOCENTROID_AGG_NAME].location.lat),
+          ],
+        };
+
+        feature.geometry = centroid;
+
+        ffeats.push(feature);
+      });
+
+      const featureCollection = {
+        features: ffeats,
+        type: 'FeatureCollection',
+      };
+
+      const tileIndex = geojsonvt(featureCollection, {
+        maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
+        tolerance: 3, // simplification tolerance (higher means simpler)
+        extent: 4096, // tile extent (both width and height)
+        buffer: 64, // tile buffer on each side
+        debug: 0, // logging level (0 to disable, 1 or 2)
+        lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
+        promoteId: null, // name of a feature property to promote to feature.id. Cannot be used with `generateId`
+        generateId: false, // whether to generate feature ids. Cannot be used with `promoteId`
+        indexMaxZoom: 5, // max zoom in the initial tile index
+        indexMaxPoints: 100000, // max number of points per tile in the index
+      });
+      const tile = tileIndex.getTile(z, x, y);
+
+      if (tile) {
+        const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_LAYER_NAME]: tile }, { version: 2 });
+        return Buffer.from(pbf);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      logger.warn(e.message);
+      throw e;
+    }
+  } catch (e) {
+    logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    return null;
+  }
 }
 
 export async function getTile({
@@ -225,6 +331,18 @@ function tile2long(x: number, z: number): number {
 function tile2lat(y: number, z: number): number {
   const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, z);
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+}
+
+function tileToESBbox(x, y, z) {
+  const wLon = tile2long(x, z);
+  const sLat = tile2lat(y + 1, z);
+  const eLon = tile2long(x + 1, z);
+  const nLat = tile2lat(y, z);
+
+  return {
+    top_left: [wLon, nLat],
+    bottom_right: [eLon, sLat],
+  };
 }
 
 function esBboxToGeoJsonPolygon(esBounds: ESBounds): Polygon {

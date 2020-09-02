@@ -110,15 +110,15 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
       });
 
       if (tile) {
-        // return response.ok({
-        //   body: tile,
-        //   headers: {
-        //     'content-disposition': 'inline',
-        //     'content-length': `${tile.length}`,
-        //     'Content-Type': 'application/x-protobuf',
-        //     'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-        //   },
-        // });
+        return response.ok({
+          body: tile,
+          headers: {
+            'content-disposition': 'inline',
+            'content-length': `${tile.length}`,
+            'Content-Type': 'application/x-protobuf',
+            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
+          },
+        });
       } else {
         return response.ok({
           headers: {

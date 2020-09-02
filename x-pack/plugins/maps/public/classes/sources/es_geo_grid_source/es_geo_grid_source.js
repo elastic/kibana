@@ -18,6 +18,8 @@ import {
   MVT_SOURCE_LAYER_NAME,
   GIS_API_PATH,
   MVT_GETGRIDTILE_API_PATH,
+  GEOTILE_GRID_AGG_NAME,
+  GEOCENTROID_AGG_NAME,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -106,7 +108,16 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   isGeoGridPrecisionAware() {
-    return true;
+    console.log('is precisoin aware?', this._descriptor.resolution);
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // MVT gridded data should not bootstrap each time the precision changes
+      // MBtiles needs to handle this
+      console.log('NOT AWARE');
+      return false;
+    } else {
+      // Should requery each time grid-precision changes
+      return true;
+    }
   }
 
   showJoinEditor() {
@@ -171,7 +182,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           size: gridsPerRequest,
           sources: [
             {
-              gridSplit: {
+              [GEOTILE_GRID_AGG_NAME]: {
                 geotile_grid: {
                   bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
@@ -182,7 +193,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ],
         },
         aggs: {
-          gridCentroid: {
+          [GEOCENTROID_AGG_NAME]: {
             geo_centroid: {
               field: this._descriptor.geoField,
             },
@@ -249,16 +260,16 @@ export class ESGeoGridSource extends AbstractESAggSource {
     { indexPattern, precision, bufferedExtent }
   ) {
     searchSource.setField('aggs', {
-      gridSplit: {
+      [GEOTILE_GRID_AGG_NAME]: {
         geotile_grid: {
-          bounds: makeESBbox(bufferedExtent),
+          bounds: bufferedExtent ? makeESBbox(bufferedExtent) : null,
           field: this._descriptor.geoField,
           precision,
           size: DEFAULT_MAX_BUCKETS_LIMIT,
           shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
-          gridCentroid: {
+          [GEOCENTROID_AGG_NAME]: {
             geo_centroid: {
               field: this._descriptor.geoField,
             },
@@ -351,8 +362,8 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     this._addNonCompositeAggregationsToSearchSource(searchSource, {
       indexPattern,
-      precision: searchFilters.geogridPrecision,
-      bufferedExtent: searchFilters.buffer,
+      precision: -1, // This needs to be set server-side
+      bufferedExtent: null, //this needs to be stripped server-side
     });
 
     //todo!
@@ -360,7 +371,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
     const dsl = await searchSource.getSearchRequestBody();
 
-    console.log(JSON.stringify(dsl, null, '\t'));
+    // console.log(JSON.stringify(dsl, null, '\t'));
 
     const risonDsl = rison.encode(dsl);
 
