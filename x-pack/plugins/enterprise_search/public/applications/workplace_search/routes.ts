@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { formatRoute } from '../shared/react_router_helpers';
+import { generatePath } from 'react-router-dom';
 
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 
@@ -113,4 +113,4 @@ export const getContentSourcePath = (
   path: string,
   sourceId: string,
   isOrganization: boolean
-): string => formatRoute(isOrganization ? `${ORG_PATH}/${path}` : path, { sourceId });
+): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });

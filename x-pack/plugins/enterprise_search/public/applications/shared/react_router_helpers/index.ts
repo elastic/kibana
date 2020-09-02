@@ -7,4 +7,3 @@
 export { letBrowserHandleEvent } from './link_events';
 export { EuiReactRouterLink as EuiLink } from './eui_link';
 export { EuiReactRouterButton as EuiButton } from './eui_link';
-export { formatRoute } from './format_route';
