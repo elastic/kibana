@@ -141,6 +141,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           alignItems="center"
           justifyContent="spaceBetween"
           data-test-subj={selectorToDataTestSubject(selector)}
+          data-processor-id={processor.id}
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
