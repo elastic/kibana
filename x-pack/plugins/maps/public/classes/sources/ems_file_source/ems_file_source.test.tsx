@@ -6,7 +6,6 @@
 
 import { EMSFileSource } from './ems_file_source';
 
-jest.mock('ui/new_platform');
 jest.mock('../../layers/vector_layer/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {

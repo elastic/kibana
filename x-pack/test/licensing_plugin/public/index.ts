@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../services';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Licensing plugin public client', function () {
     this.tags('ciGroup2');
+    loadTestFile(require.resolve('./feature_usage'));
     // MUST BE LAST! CHANGES LICENSE TYPE!
     loadTestFile(require.resolve('./updates'));
   });

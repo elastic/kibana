@@ -31,11 +31,17 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
 }) => {
   const { config = {}, isManagedPolicy } = policy;
 
-  const updatePolicyConfig = (updatedFields: Partial<SlmPolicyPayload['config']>): void => {
+  const updatePolicyConfig = (
+    updatedFields: Partial<SlmPolicyPayload['config']>,
+    validationHelperData = {}
+  ): void => {
     const newConfig = { ...config, ...updatedFields };
-    updatePolicy({
-      config: newConfig,
-    });
+    updatePolicy(
+      {
+        config: newConfig,
+      },
+      validationHelperData
+    );
   };
 
   const renderIgnoreUnavailableField = () => (
