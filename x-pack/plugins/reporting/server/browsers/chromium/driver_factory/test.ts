@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { spawn } from 'child_process';
 import del from 'del';
 import { mkdtempSync } from 'fs';
-import { uniq } from 'lodash';
+import { once, uniq } from 'lodash';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { createInterface } from 'readline';
@@ -91,7 +91,14 @@ export const browserTest = (
     const timer = setTimeout(
       () =>
         doneOnce(
-          new Error(`Browser didn't bind successfully in ${browserLaunchTimeToWait} milliseconds`)
+          new Error(
+            i18n.translate('xpack.reporting.diagnostic.browserLaunchTimedout', {
+              defaultMessage: `Browser didn't bind successfully in {browserLaunchTimeToWait} milliseconds`,
+              values: {
+                browserLaunchTimeToWait,
+              },
+            })
+          )
         ),
       browserLaunchTimeToWait
     );
@@ -107,7 +114,13 @@ export const browserTest = (
     });
 
     browserProcess.once('exit', () =>
-      doneOnce(new Error(`Browser exited abnormally during startup`))
+      doneOnce(
+        new Error(
+          i18n.translate('xpack.reporting.diagnostic.browserCrashed', {
+            defaultMessage: `Browser exited abnormally during startup`,
+          })
+        )
+      )
     );
 
     browserProcess.on('error', () => doneOnce(new Error(`Browser errored abnormally`)));
