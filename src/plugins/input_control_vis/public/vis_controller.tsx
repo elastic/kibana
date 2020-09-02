@@ -54,7 +54,6 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
     async render(visData: any, visParams: VisParams) {
       this.visParams = visParams;
-      this.controls = [];
       this.controls = await this.initControls();
       const [{ i18n }] = await deps.core.getStartServices();
       this.I18nContext = i18n.Context;
@@ -106,7 +105,12 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 
       const getControl = (controlId: string) => {
-        return controls.find(({ id }) => id === controlId);
+        const control = controls.find(({ id }) => id === controlId);
+        const lastControl = this.controls.find(({ id }) => id === controlId);
+        if (control && lastControl) {
+          control.value = lastControl.value;
+        }
+        return control;
       };
 
       const controlInitPromises: Array<Promise<void>> = [];
