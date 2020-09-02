@@ -420,16 +420,27 @@ export class DashboardAppController {
               ) : null;
             };
 
-            outputSubscription = new Subscription();
-            outputSubscription.add(
-              merge(dashboardContainer.getOutput$(), dashboardContainer.getInput$())
-                .pipe(
-                  mapTo(dashboardContainer),
-                  startWith(dashboardContainer), // to trigger initial index pattern update
-                  updateIndexPatternsOperator
+            outputSubscription = merge(
+              // output of dashboard container itself
+              dashboardContainer.getOutput$(),
+              // plus output of dashboard container children,
+              // children may change, so make sure we subscribe/unsubscribe with switchMap
+              dashboardContainer.getInput$().pipe(
+                map((v) => dashboardContainer!.getChildIds()),
+                distinctUntilChanged(deepEqual),
+                switchMap((newChildIds: string[]) =>
+                  merge(
+                    newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$())
+                  )
                 )
-                .subscribe()
-            );
+              )
+            )
+              .pipe(
+                mapTo(dashboardContainer),
+                startWith(dashboardContainer), // to trigger initial index pattern update
+                updateIndexPatternsOperator
+              )
+              .subscribe();
 
             inputSubscription = dashboardContainer.getInput$().subscribe(() => {
               let dirty = false;
