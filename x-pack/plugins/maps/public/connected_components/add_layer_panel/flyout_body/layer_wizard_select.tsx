@@ -14,6 +14,7 @@ import {
   EuiLoadingContent,
   EuiFacetGroup,
   EuiFacetButton,
+  EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -150,16 +151,28 @@ export class LayerWizardSelect extends Component<Props, State> {
           this.props.onSelect(layerWizard);
         };
 
+        const isDisabled = layerWizard.getIsDisabled ? layerWizard.getIsDisabled() : false;
+        const card = (
+          <EuiCard
+            title={layerWizard.title}
+            titleSize="xs"
+            icon={icon}
+            onClick={onClick}
+            description={layerWizard.description}
+            isDisabled={isDisabled}
+            data-test-subj={_.camelCase(layerWizard.title)}
+          />
+        );
+
         return (
           <EuiFlexItem key={layerWizard.title}>
-            <EuiCard
-              title={layerWizard.title}
-              titleSize="xs"
-              icon={icon}
-              onClick={onClick}
-              description={layerWizard.description}
-              data-test-subj={_.camelCase(layerWizard.title)}
-            />
+            {isDisabled && layerWizard.disabledReason ? (
+              <EuiToolTip position="top" content={layerWizard.disabledReason}>
+                {card}
+              </EuiToolTip>
+            ) : (
+              card
+            )}
           </EuiFlexItem>
         );
       });

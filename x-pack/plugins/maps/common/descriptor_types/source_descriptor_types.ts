@@ -59,6 +59,11 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   resolution?: GRID_RESOLUTION;
 };
 
+export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  splitField: string;
+  sortField: string;
+};
+
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
