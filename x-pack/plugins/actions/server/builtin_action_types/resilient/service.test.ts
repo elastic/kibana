@@ -445,7 +445,14 @@ describe('IBM Resilient service', () => {
 
       const res = await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+          createdBy: null,
+          createdAt: null,
+          updatedAt: null,
+          updatedBy: null,
+        },
       });
 
       expect(res).toEqual({
@@ -465,7 +472,14 @@ describe('IBM Resilient service', () => {
 
       await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+          createdBy: null,
+          createdAt: null,
+          updatedAt: null,
+          updatedBy: null,
+        },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -491,7 +505,14 @@ describe('IBM Resilient service', () => {
       expect(
         service.createComment({
           incidentId: '1',
-          comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
+          comment: {
+            comment: 'comment',
+            commentId: 'comment-1',
+            createdBy: null,
+            createdAt: null,
+            updatedAt: null,
+            updatedBy: null,
+          },
         })
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred'

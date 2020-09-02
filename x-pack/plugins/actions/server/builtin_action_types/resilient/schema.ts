@@ -12,7 +12,7 @@ export const ExternalIncidentServiceConfiguration = {
   orgId: schema.string(),
   // TODO: to remove - set it optional for the current stage to support Case implementation
   incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.maybe(schema.boolean()),
+  isCaseOwned: schema.nullable(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
@@ -44,7 +44,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.number()),
   // TODO: remove later  - need for support Case push multiple comments
-  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  comments: schema.nullable(schema.arrayOf(CommentSchema)),
   ...EntityInformation,
 });
 

@@ -21,6 +21,7 @@ import {
   ExecutorSubActionPushParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
+  EntityInformationSchema,
 } from './schema';
 import { LicenseType } from '../../../../../legacy/common/constants';
 
@@ -49,6 +50,7 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type MapRecord = TypeOf<typeof MapRecordSchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
+export type EntityInformation = TypeOf<typeof EntityInformationSchema>;
 
 export interface ExternalServiceConfiguration {
   id: string;

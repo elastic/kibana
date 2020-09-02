@@ -108,13 +108,14 @@ async function executor(
       ? buildMap(config.incidentConfiguration.mapping)
       : null;
     const externalObject =
-      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
+      config.incidentConfiguration && mapping
+        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
+        : {};
 
     data = await api.pushToService({
       externalService,
       mapping,
       params: { ...pushToServiceParams, externalObject },
-      secrets,
       logger,
     });
 

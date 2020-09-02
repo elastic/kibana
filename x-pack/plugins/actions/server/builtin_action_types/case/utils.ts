@@ -13,6 +13,7 @@ import { ExecutorParamsSchema } from './schema';
 import {
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
+  EntityInformation,
 } from './types';
 
 import {
@@ -177,14 +178,7 @@ export const transformFields = ({
       [cur.key]: transform({
         value: cur.value,
         date: params.updatedAt ?? params.createdAt,
-        user:
-          (params.updatedBy != null
-            ? params.updatedBy.fullName
-              ? params.updatedBy.fullName
-              : params.updatedBy.username
-            : params.createdBy.fullName
-            ? params.createdBy.fullName
-            : params.createdBy.username) ?? '',
+        user: getEntity(params),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
@@ -197,14 +191,7 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
     comment: flow(...pipes.map((p) => transformers[p]))({
       value: c.comment,
       date: c.updatedAt ?? c.createdAt,
-      user:
-        (c.updatedBy != null
-          ? c.updatedBy.fullName
-            ? c.updatedBy.fullName
-            : c.updatedBy.username
-          : c.createdBy.fullName
-          ? c.createdBy.fullName
-          : c.createdBy.username) ?? '',
+      user: getEntity(c),
     }).value,
   }));
 };
@@ -212,3 +199,16 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
 export const getErrorMessage = (connector: string, msg: string) => {
   return `[Action][${connector}]: ${msg}`;
 };
+
+type Nullable<T> = { [P in keyof T]: T[P] | null };
+
+export const getEntity = (entity: Nullable<EntityInformation>): string =>
+  (entity.updatedBy != null
+    ? entity.updatedBy.fullName
+      ? entity.updatedBy.fullName
+      : entity.updatedBy.username
+    : entity.createdBy != null
+    ? entity.createdBy.fullName
+      ? entity.createdBy.fullName
+      : entity.createdBy.username
+    : '') ?? '';
