@@ -31,7 +31,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
     it(`handles non-existant alert`, async () => {
       await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1/_instnace_summary`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1/_instance_summary`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -119,7 +119,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${
           createdAlert.id
-        }/_instance_status?dateStart=${dateStart}`
+        }/_instance_summary?dateStart=${dateStart}`
       );
       expect(response.status).to.eql(200);
       const { statusStartDate, statusEndDate } = response.body;
@@ -140,7 +140,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${
           createdAlert.id
-        }/_instance_status?dateStart=${dateStart}`
+        }/_instance_summary?dateStart=${dateStart}`
       );
       expect(response.status).to.eql(400);
       expect(response.body).to.eql({
