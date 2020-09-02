@@ -51,6 +51,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   public readonly order = 8;
 
   readonly minimalLicense = 'gold';
+  readonly licenseFeatureName = 'URL drilldown';
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
