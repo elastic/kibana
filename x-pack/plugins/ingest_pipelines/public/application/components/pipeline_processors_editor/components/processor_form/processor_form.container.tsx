@@ -95,18 +95,29 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFormUpdate]);
 
-  const ViewComponent = processor ? EditProcessorForm : AddProcessorForm;
-
-  return (
-    <ViewComponent
-      {...rest}
-      processor={processor}
-      form={form}
-      getDefaultProcessorOptions={getDefaultProcessorOptions}
-      esDocsBasePath={services.documentation.getEsDocsBasePath()}
-      closeFlyout={onClose}
-      resetProcessors={resetProcessors}
-      handleSubmit={handleSubmit}
-    />
-  );
+  if (processor) {
+    return (
+      <EditProcessorForm
+        {...rest}
+        processor={processor!}
+        form={form}
+        getDefaultProcessorOptions={getDefaultProcessorOptions}
+        esDocsBasePath={services.documentation.getEsDocsBasePath()}
+        closeFlyout={onClose}
+        resetProcessors={resetProcessors}
+        handleSubmit={handleSubmit}
+      />
+    );
+  } else {
+    return (
+      <AddProcessorForm
+        {...rest}
+        form={form}
+        getDefaultProcessorOptions={getDefaultProcessorOptions}
+        esDocsBasePath={services.documentation.getEsDocsBasePath()}
+        closeFlyout={onClose}
+        handleSubmit={handleSubmit}
+      />
+    );
+  }
 };

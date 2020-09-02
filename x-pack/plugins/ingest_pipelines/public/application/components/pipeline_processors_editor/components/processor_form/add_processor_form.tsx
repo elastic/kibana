@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
-import { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
 
 import { DocumentationButton } from './documentation_button';
@@ -31,13 +30,11 @@ interface Fields {
 }
 export interface Props {
   isOnFailure: boolean;
-  processor?: ProcessorInternal;
   form: FormHook<Fields>;
   onOpen: () => void;
   esDocsBasePath: string;
   getDefaultProcessorOptions: () => Fields;
   closeFlyout: () => void;
-  resetProcessors: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
 }
 

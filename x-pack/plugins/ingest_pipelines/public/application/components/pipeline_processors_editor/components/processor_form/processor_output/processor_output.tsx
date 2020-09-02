@@ -120,7 +120,11 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
       case 'error':
         return (
           <EuiCallOut iconType={ErrorIcon} title={i18nTexts.processorErrorTitle} color="danger">
-            <EuiCodeBlock transparentBackground language="json" paddingSize="none">
+            <EuiCodeBlock
+              language="json"
+              paddingSize="none"
+              className="processorOutput__callOutCodeBlock"
+            >
               {JSON.stringify(error, null, 2)}
             </EuiCodeBlock>
           </EuiCallOut>
@@ -147,7 +151,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <div data-test-subj="processorOutputTabContent" className="processorsOutput">
+    <div data-test-subj="processorOutputTabContent" className="processorOutput">
       <EuiText>
         <p>{i18nTexts.tabDescription}</p>
       </EuiText>

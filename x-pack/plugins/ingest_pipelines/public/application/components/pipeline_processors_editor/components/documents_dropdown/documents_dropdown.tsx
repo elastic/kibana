@@ -6,14 +6,9 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
 import {
-  EuiSelect,
   EuiButton,
-  EuiButtonIcon,
-  EuiToolTip,
   EuiPopover,
-  EuiContextMenu,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
   EuiPopoverTitle,
   EuiSelectable,
   EuiHorizontalRule,
@@ -83,11 +78,12 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       panelPaddingSize="none"
       withTitle
       repositionOnScroll
+      data-test-subj="documentsDropdown"
     >
       <EuiSelectable
         singleSelection
         options={documents.map((doc, index) => ({
-          index,
+          key: index.toString(),
           checked: selectedDocumentIndex === index ? 'on' : undefined,
           label: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.documentLabel', {
             defaultMessage: 'Document {documentNumber}',
@@ -98,7 +94,10 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
         }))}
         onChange={(newOptions) => {
           const selectedOption = newOptions.find((option) => option.checked === 'on');
-          updateSelectedDocument(selectedOption.index);
+          if (selectedOption) {
+            updateSelectedDocument(Number(selectedOption.key!));
+          }
+
           setShowPopover(false);
         }}
       >
@@ -118,7 +117,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
             size="s"
             onClick={() => {
               openFlyout!('documents');
-              setPopoverOpen(false);
+              setShowPopover(false);
             }}
             data-test-subj="addDocumentsButton"
           >
