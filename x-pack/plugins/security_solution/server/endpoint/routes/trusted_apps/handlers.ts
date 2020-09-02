@@ -8,9 +8,10 @@ import { RequestHandler } from 'kibana/server';
 import {
   GetTrustedAppsListRequest,
   GetTrustedListAppsResponse,
+  PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { exceptionItemToTrustedAppItem } from './utils';
+import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 export const getTrustedAppsListRouteHandler = (
@@ -24,7 +25,7 @@ export const getTrustedAppsListRouteHandler = (
 
     try {
       // Ensure list is created if it does not exist
-      await exceptionsListService?.createTrustedAppsList();
+      await exceptionsListService.createTrustedAppsList();
       const results = await exceptionsListService.findExceptionListItem({
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         page,
@@ -41,6 +42,35 @@ export const getTrustedAppsListRouteHandler = (
         per_page: results?.per_page ?? perPage!,
       };
       return res.ok({ body });
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
+
+export const getTrustedAppsCreateRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (constext, req, res) => {
+    const exceptionsListService = endpointAppContext.service.getExceptionsList();
+    const newTrustedApp = req.body;
+
+    try {
+      // Ensure list is created if it does not exist
+      await exceptionsListService.createTrustedAppsList();
+
+      const createdTrustedAppExceptionItem = await exceptionsListService.createExceptionListItem(
+        newTrustedAppItemToExceptionItem(newTrustedApp)
+      );
+
+      return res.ok({
+        body: {
+          data: exceptionItemToTrustedAppItem(createdTrustedAppExceptionItem),
+        },
+      });
     } catch (error) {
       logger.error(error);
       return res.internalError({ body: error });
