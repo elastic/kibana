@@ -26,7 +26,7 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const { processorEvent, serviceName, traceId: traceIdLink } = getPathParams(
+  const { processorEvent, traceId: traceIdLink } = getPathParams(
     location.pathname
   );
 
@@ -83,7 +83,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
     // path params
     processorEvent,
-    serviceName,
     traceIdLink,
     // ui filters
     environment,

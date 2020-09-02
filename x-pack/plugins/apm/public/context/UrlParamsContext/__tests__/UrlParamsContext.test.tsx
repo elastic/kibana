@@ -53,7 +53,6 @@ describe('UrlParamsContext', () => {
     const params = getDataFromOutput(wrapper);
 
     expect(params).toEqual({
-      serviceName: 'opbeans-node',
       page: 0,
       processorEvent: 'transaction',
     });

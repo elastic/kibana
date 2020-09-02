@@ -33,7 +33,7 @@ import { RouteName } from './route_names';
  * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
  */
 export function renderAsRedirectTo(to: string) {
-  return ({ location }: RouteComponentProps<Params>) => {
+  return ({ location }: RouteComponentProps<{}>) => {
     let resolvedUrl: URL | undefined;
 
     // Redirect root URLs with a hash to support backward compatibility with URLs
@@ -154,7 +154,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/',
-    render: renderAsRedirectTo('/services'),
+    component: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
     name: RouteName.HOME,
   },
@@ -179,7 +179,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings',
-    render: renderAsRedirectTo('/settings/agent-configuration'),
+    component: renderAsRedirectTo('/settings/agent-configuration'),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings',
     }),
@@ -228,7 +228,7 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
-    render: (props: RouteComponentProps<{ serviceName: string }>) =>
+    component: (props: RouteComponentProps<{ serviceName: string }>) =>
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),
