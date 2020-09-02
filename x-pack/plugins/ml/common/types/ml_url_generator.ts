@@ -18,7 +18,7 @@ export const ANALYSIS_CONFIG_TYPE = {
   CLASSIFICATION: 'classification',
 } as const;
 
-type DATAFRAME_ANALYTICS_TYPE = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+type DataFrameAnalyticsType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
@@ -162,7 +162,7 @@ export interface DataVisualizerUrlState {
 export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
-    analysisType: DATAFRAME_ANALYTICS_TYPE;
+    analysisType: DataFrameAnalyticsType;
   };
 }
 
@@ -170,7 +170,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
   typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
   {
     jobId: JobId;
-    analysisType: DATAFRAME_ANALYTICS_TYPE;
+    analysisType: DataFrameAnalyticsType;
   }
 >;
 
