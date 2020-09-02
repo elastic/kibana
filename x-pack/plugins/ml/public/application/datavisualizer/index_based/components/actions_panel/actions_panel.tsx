@@ -32,7 +32,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(`${basePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
+    window.open(`${getBasePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
   }
 
   // Note we use display:none for the DataRecognizer section as it needs to be
@@ -87,7 +87,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
-        href={`#/jobs/new_job/advanced?index=${indexPattern}`}
+        href={`${getBasePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`}
         data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
       />
     </div>
