@@ -7,6 +7,11 @@
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit, Signal, Ancestor } from './types';
 
+/**
+ * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
+ * signal's `signal.parents` array.
+ * @param doc The parent signal or event
+ */
 export const buildParent = (doc: SignalSourceHit): Ancestor => {
   if (doc._source.signal != null) {
     return {
@@ -28,6 +33,11 @@ export const buildParent = (doc: SignalSourceHit): Ancestor => {
   }
 };
 
+/**
+ * Takes a parent signal or event document with N ancestors and adds the parent document to the ancestry array,
+ * creating an array of N+1 ancestors.
+ * @param doc The parent signal/event for which to extend the ancestry.
+ */
 export const buildAncestorsSignal = (doc: SignalSourceHit): Signal['ancestors'] => {
   const newAncestor = buildParent(doc);
   const existingAncestors = doc._source.signal?.ancestors;
@@ -38,6 +48,11 @@ export const buildAncestorsSignal = (doc: SignalSourceHit): Signal['ancestors'] 
   }
 };
 
+/**
+ * Builds the `signal.*` fields that are common across all signals.
+ * @param docs The parent signals/events of the new signal to be built.
+ * @param rule The rule that is generating the new signal.
+ */
 export const buildSignal = (docs: SignalSourceHit[], rule: Partial<RulesSchema>): Signal => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -54,6 +69,10 @@ export const buildSignal = (docs: SignalSourceHit[], rule: Partial<RulesSchema>)
   };
 };
 
+/**
+ * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
+ * @param doc The parent signal/event of the new signal to be built.
+ */
 export const additionalSignalFields = (doc: SignalSourceHit) => {
   return {
     original_time: doc._source['@timestamp'],
