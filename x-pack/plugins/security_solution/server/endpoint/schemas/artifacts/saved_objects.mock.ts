@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildArtifact,
-  maybeCompressArtifact,
-  isCompressed,
-  ArtifactConstants,
-} from '../../lib/artifacts';
+import { buildArtifact, maybeCompressArtifact, isCompressed } from '../../lib/artifacts';
 import { getTranslatedExceptionListMock } from './lists.mock';
 import {
   InternalManifestSchema,
@@ -30,15 +25,9 @@ const compressArtifact = async (artifact: InternalArtifactCompleteSchema) => {
 export const getInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
-  opts?: { compress: boolean },
-  artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+  opts?: { compress: boolean }
 ): Promise<InternalArtifactCompleteSchema> => {
-  const artifact = await buildArtifact(
-    getTranslatedExceptionListMock(),
-    os,
-    schemaVersion,
-    artifactName
-  );
+  const artifact = await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
@@ -47,12 +36,7 @@ export const getEmptyInternalArtifactMock = async (
   schemaVersion: string,
   opts?: { compress: boolean }
 ): Promise<InternalArtifactCompleteSchema> => {
-  const artifact = await buildArtifact(
-    { entries: [] },
-    os,
-    schemaVersion,
-    ArtifactConstants.GLOBAL_ALLOWLIST_NAME
-  );
+  const artifact = await buildArtifact({ entries: [] }, os, schemaVersion);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
@@ -63,12 +47,7 @@ export const getInternalArtifactMockWithDiffs = async (
 ): Promise<InternalArtifactCompleteSchema> => {
   const mock = getTranslatedExceptionListMock();
   mock.entries.pop();
-  const artifact = await buildArtifact(
-    mock,
-    os,
-    schemaVersion,
-    ArtifactConstants.GLOBAL_ALLOWLIST_NAME
-  );
+  const artifact = await buildArtifact(mock, os, schemaVersion);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
