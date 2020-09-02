@@ -65,7 +65,7 @@ Lens and visualizations::
 Machine Learning::
 * Fixes file import button on basic license {kibana-pull}75458[#75458]
 * Adds date picker back onto index based data visualizer page {kibana-pull}75658[#75658]
-* Adds authorization header to DFA job update request {kibana-pull}75899[#75899]
+* Adds authorization header to data frame analytics job update request {kibana-pull}75899[#75899]
 * Removes encoding for scheduled events labels  {kibana-pull}75973[#75973]
 * Anomaly Explorer / Single Metric Viewer: Fix error reporting for annotations {kibana-pull}74953[#74953]
 Management::
@@ -83,7 +83,7 @@ Maps::
 * Fixes drawing shapes {kibana-pull}74689[#74689]
 * Fixes layer sorting issue with hidden layers at map load {kibana-pull}76007[#76007]
 Monitoring::
-* Fixes bug where kibana crashes with collection disabled {kibana-pull}75335[#75335]
+* Fixes bug where Kibana crashes with collection disabled {kibana-pull}75335[#75335]
 * Swallows errors in opt-in remote notification from the server {kibana-pull}75641[#75641]
 Operations::
 * Adds map configurations to docker list {kibana-pull}75035[#75035]
