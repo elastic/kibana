@@ -270,6 +270,20 @@ describe('getOperationTypesForField', () => {
           Object {
             "operationMetaData": Object {
               "dataType": "number",
+              "isBucketed": true,
+              "scale": "interval",
+            },
+            "operations": Array [
+              Object {
+                "field": "bytes",
+                "operationType": "range",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
               "isBucketed": false,
               "scale": "ratio",
             },

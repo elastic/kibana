@@ -101,9 +101,10 @@ const BaseRangeEditor = ({
         })}
         checked={isAutoInterval}
         onChange={(e) => toggleAutoInterval(e.target.checked)}
+        data-test-subj="indexPattern-ranges-auto-interval"
       />
       <EuiSpacer />
-      <EuiFormRow label={sectionLabel}>
+      <EuiFormRow label={sectionLabel} data-test-subj="indexPattern-ranges-section-label">
         <>
           {isAutoInterval ? (
             <EuiRange
