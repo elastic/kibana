@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient, Logger } from 'kibana/server';
+import { IUiSettingsClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -24,7 +24,6 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
-
 import { AlertingDefaults } from './alerts_common';
 
 interface ParamDetails {
@@ -46,15 +45,12 @@ export class DiskUsageAlert extends BaseAlert {
       type: AlertParamType.Duration,
     },
   };
-
+  public static paramDetails = DiskUsageAlert.PARAM_DETAILS;
   public static readonly TYPE = ALERT_DISK_USAGE;
-
   public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
     defaultMessage: 'Disk Usage',
   });
-
   public type = DiskUsageAlert.TYPE;
-  public paramDetails = DiskUsageAlert.PARAM_DETAILS;
   public label = DiskUsageAlert.LABEL;
 
   protected defaultParams = {
@@ -62,7 +58,21 @@ export class DiskUsageAlert extends BaseAlert {
     duration: '5m',
   };
 
-  protected actionVariables = [...Object.values(AlertingDefaults.ACTION_VARIABLES.context)];
+  protected actionVariables = [
+    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+    {
+      name: 'nodes',
+      description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.nodes', {
+        defaultMessage: 'The list of nodes reporting high disk usage.',
+      }),
+    },
+    {
+      name: 'count',
+      description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.count', {
+        defaultMessage: 'The number of nodes reporting high disk usage.',
+      }),
+    },
+  ];
 
   protected async fetchData(
     params: CommonAlertParams,
@@ -86,14 +96,14 @@ export class DiskUsageAlert extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const diskUsed = 100 - stat.diskAvailable;
+      const { clusterUuid, nodeId, diskUsage, ccs } = stat;
       return {
-        instanceKey: `${stat.clusterUuid}:${stat.nodeId}`,
-        clusterUuid: stat.clusterUuid,
-        shouldFire: diskUsed > threshold,
+        instanceKey: `${clusterUuid}:${nodeId}`,
+        shouldFire: diskUsage > threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
-        ccs: stat.ccs,
+        clusterUuid,
+        ccs,
       };
     });
   }
@@ -202,12 +212,7 @@ export class DiskUsageAlert extends BaseAlert {
       return;
     }
 
-    const ccs = alertStates.reduce((accum: string, state): string => {
-      if (state.ccs) {
-        return state.ccs;
-      }
-      return accum;
-    }, '');
+    const ccs = alertStates.find((state) => state.ccs)?.ccs;
 
     const firingCount = alertStates.filter((alertState) => alertState.ui.isFiring).length;
 
@@ -252,7 +257,7 @@ export class DiskUsageAlert extends BaseAlert {
       instance.scheduleActions('default', {
         internalShortMessage,
         internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
-        state: AlertingDefaults.ACTION_VARIABLES.state.firing,
+        state: AlertingDefaults.ALERT_STATE.firing,
         nodes: (alertStates as AlertDiskUsageState[])
           .filter((state: AlertDiskUsageState) => state.ui.isFiring)
           .map((state: AlertDiskUsageState) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
@@ -283,7 +288,7 @@ export class DiskUsageAlert extends BaseAlert {
         instance.scheduleActions('default', {
           internalShortMessage: internalMessage,
           internalFullMessage: internalMessage,
-          state: AlertingDefaults.ACTION_VARIABLES.state.resolved,
+          state: AlertingDefaults.ALERT_STATE.resolved,
           nodes: resolvedNodes,
           count: resolvedCount,
           clusterName: cluster.clusterName,
@@ -292,74 +297,64 @@ export class DiskUsageAlert extends BaseAlert {
     }
   }
 
-  // TODO:
-  protected processData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    logger: Logger
-  ) {
+  protected processData(data: AlertData[], clusters: AlertCluster[], services: AlertServices) {
+    const currentUTC = +new Date();
     for (const cluster of clusters) {
       const nodes = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
-      if (nodes.length === 0) {
+      if (!nodes.length) {
         continue;
       }
 
       const firingNodeUuids = nodes.reduce((list: string[], node) => {
-        const stat = node.meta as AlertDiskUsageState;
+        const stat = node.meta;
         if (node.shouldFire) {
           list.push(stat.nodeId);
         }
         return list;
-      }, [] as string[]);
-      firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
+      }, []);
+
+      firingNodeUuids.sort();
+
       const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const state = (instance.getState() as unknown) as AlertInstanceState;
+      const state = instance.getState() as AlertInstanceState;
       const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
+
       let shouldExecuteActions = false;
       for (const node of nodes) {
         const stat = node.meta as AlertDiskUsageState;
-        let nodeState: AlertDiskUsageState;
+
         const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
           const nodeAlertState = alertState as AlertDiskUsageState;
           return (
             nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
-            nodeAlertState.nodeId === (node.meta as AlertDiskUsageState).nodeId
+            nodeAlertState.nodeId === node.meta.nodeId
           );
         });
-        if (indexInState > -1) {
-          nodeState = alertInstanceState.alertStates[indexInState] as AlertDiskUsageState;
-        } else {
-          nodeState = this.getDefaultAlertState(cluster, node) as AlertDiskUsageState;
-        }
+        const nodeState = (indexInState > -1
+          ? alertInstanceState.alertStates[indexInState]
+          : this.getDefaultAlertState(cluster, node)) as AlertDiskUsageState;
 
         nodeState.diskUsage = stat.diskUsage;
         nodeState.nodeId = stat.nodeId;
         nodeState.nodeName = stat.nodeName;
+        nodeState.ui.message = this.getUiMessage(nodeState, node);
+        shouldExecuteActions = shouldExecuteActions || node.shouldFire || nodeState.ui.isFiring;
 
         if (node.shouldFire) {
-          nodeState.ui.triggeredMS = new Date().valueOf();
+          nodeState.ui.triggeredMS = currentUTC;
           nodeState.ui.isFiring = true;
-          nodeState.ui.message = this.getUiMessage(nodeState, node);
           nodeState.ui.severity = node.severity;
           nodeState.ui.resolvedMS = 0;
-          shouldExecuteActions = true;
-        } else if (!node.shouldFire && nodeState.ui.isFiring) {
+        } else if (nodeState.ui.isFiring) {
           nodeState.ui.isFiring = false;
-          nodeState.ui.resolvedMS = new Date().valueOf();
-          nodeState.ui.message = this.getUiMessage(nodeState, node);
-          shouldExecuteActions = true;
+          nodeState.ui.resolvedMS = currentUTC;
         }
 
-        if (indexInState === -1) {
+        if (indexInState < 0) {
           alertInstanceState.alertStates.push(nodeState);
         } else {
-          alertInstanceState.alertStates = [
-            ...alertInstanceState.alertStates.slice(0, indexInState),
-            nodeState,
-            ...alertInstanceState.alertStates.slice(indexInState + 1),
-          ];
+          alertInstanceState.alertStates.splice(indexInState, 0, nodeState);
         }
       }
 

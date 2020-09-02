@@ -73,13 +73,14 @@ export async function fetchDiskUsageNodeStats(
                     field: 'node_stats.fs.total.available_in_bytes',
                   },
                 },
-                free_ratio_percentile: {
+                usage_ratio_percentile: {
                   bucket_script: {
                     buckets_path: {
                       available_in_bytes: 'available_in_bytes',
                       total_in_bytes: 'total_in_bytes',
                     },
-                    script: 'Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
+                    script:
+                      '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
                   },
                 },
                 name: {
@@ -107,11 +108,15 @@ export async function fetchDiskUsageNodeStats(
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
       const indexName = get(node, 'index.buckets[0].key', '');
+      const diskUsage = Number(get(node, 'usage_ratio_percentile.value'));
+      if (isNaN(diskUsage) || diskUsage === undefined || diskUsage === null) {
+        continue;
+      }
       stats.push({
+        diskUsage,
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
         nodeName: get(node, 'name.buckets[0].key'),
-        diskAvailable: get(node, 'free_ratio_percentile.value'),
         ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
       });
     }
