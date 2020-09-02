@@ -65,7 +65,7 @@ Lens and visualizations::
 Machine Learning::
 * Fixes file import button on basic license {kibana-pull}75458[#75458]
 * Adds date picker back onto index based data visualizer page {kibana-pull}75658[#75658]
-* Adds authorization header to DFA job update request {kibana-pull}75899[#75899]
+* Adds authorization header to data frame analytics job update request {kibana-pull}75899[#75899]
 * Removes encoding for scheduled events labels  {kibana-pull}75973[#75973]
 * Anomaly Explorer / Single Metric Viewer: Fix error reporting for annotations {kibana-pull}74953[#74953]
 Management::
