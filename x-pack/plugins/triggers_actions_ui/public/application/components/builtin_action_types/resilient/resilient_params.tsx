@@ -68,8 +68,8 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
 
   useEffect(() => {
     const options = severity.map((s) => ({
-      value: s.id ?? '',
-      text: s.name ?? '',
+      value: s.id.toString(),
+      text: s.name,
     }));
 
     setSeveritySelectOptions(options);
@@ -97,9 +97,9 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   useEffect(() => {
     setIncidentTypesComboBoxOptions(
       allIncidentTypes
-        ? allIncidentTypes.map((type: { id: string; name: string }) => ({
+        ? allIncidentTypes.map((type: { id: number; name: string }) => ({
             label: type.name,
-            value: type.id,
+            value: type.id.toString(),
           }))
         : []
     );
@@ -208,7 +208,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <TextAreaWithMessageVariables
         index={index}
         editAction={(key, value) => {
-          editSubActionProperty(key, [{ commentId: '1', comment: value }]);
+          editSubActionProperty(key, [{ commentId: 'alert-comment', comment: value }]);
         }}
         messageVariables={messageVariables}
         paramsProperty={'comments'}

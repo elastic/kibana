@@ -10,7 +10,7 @@ import { ActionConnector } from '../../../../types';
 import { getSeverity } from './api';
 import * as i18n from './translations';
 
-type Severity = Array<{ id: string; name: string }>;
+type Severity = Array<{ id: number; name: string }>;
 
 interface Props {
   http: HttpSetup;

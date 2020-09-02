@@ -16,8 +16,8 @@ export interface ResilientActionParams {
     title: string;
     description: string;
     externalId: string | null;
-    incidentTypes: string[];
-    severityCode: string;
+    incidentTypes: number[];
+    severityCode: number;
     comments: Array<{ commentId: string; comment: string }>;
   };
 }
