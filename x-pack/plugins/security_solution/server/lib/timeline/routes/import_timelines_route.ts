@@ -5,6 +5,7 @@
  */
 
 import { extname } from 'path';
+import { Readable } from 'stream';
 
 import { IRouter } from '../../../../../../../src/core/server';
 
@@ -60,7 +61,7 @@ export const importTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const res = await importTimelines(
-          file,
+          (file as unknown) as Readable,
           config.maxTimelineImportExportSize,
           frameworkRequest,
           isImmutable === 'true'

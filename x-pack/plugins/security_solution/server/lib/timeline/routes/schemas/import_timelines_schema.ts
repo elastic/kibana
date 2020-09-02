@@ -53,3 +53,5 @@ export const ImportTimelinesPayloadSchemaRt = rt.intersection([
   }),
   rt.partial({ isImmutable: booleanInString }),
 ]);
+
+export type ImportTimelinesPayloadSchema = rt.TypeOf<typeof ImportTimelinesPayloadSchemaRt>;

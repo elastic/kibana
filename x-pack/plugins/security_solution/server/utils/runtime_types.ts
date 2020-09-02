@@ -89,16 +89,18 @@ const getExcessProps = (
         ),
       ];
     }
-    if (get(props, [k]) != null && childrenProps != null) {
+    if (codecChildren != null && childrenProps != null) {
       return [...acc, ...getExcessProps(childrenProps, childrenObject)];
-    } else if (get(props, [k]) == null) {
+    } else if (codecChildren == null) {
       return [...acc, k];
     }
     return acc;
   }, []);
 };
 
-export function excess<C extends rt.InterfaceType<rt.Props> | GenericIntersectionC>(codec: C): C {
+export const excess = <C extends rt.InterfaceType<rt.Props> | GenericIntersectionC>(
+  codec: C
+): C => {
   const codecProps = getProps(codec);
 
   const r = new rt.InterfaceType(
@@ -123,4 +125,4 @@ export function excess<C extends rt.InterfaceType<rt.Props> | GenericIntersectio
     codecProps
   );
   return r as C;
-}
+};
