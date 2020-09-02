@@ -16,6 +16,7 @@ import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,
+  createAnomalyDetectionCreateJobSelectIndex,
   createExplorerUrl,
   createSingleMetricViewerUrl,
 } from './anomaly_detection_urls_generator';
@@ -56,6 +57,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
           appBasePath,
           mlUrlGeneratorState.pageState
         );
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX:
+        return createAnomalyDetectionCreateJobSelectIndex(
+          appBasePath,
+          mlUrlGeneratorState.pageState
+        );
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
@@ -68,8 +74,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
         return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.OVERVIEW:
+      case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
       case ML_PAGES.CALENDARS_MANAGE:
+      case ML_PAGES.ACCESS_DENIED:
         return `${appBasePath}/${mlUrlGeneratorState.page}`;
       default:
         throw new Error('Page type is not provided or unknown');

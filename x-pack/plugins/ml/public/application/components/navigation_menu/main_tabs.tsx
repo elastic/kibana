@@ -5,14 +5,12 @@
  */
 
 import React, { FC, useState } from 'react';
-import { encode } from 'rison-node';
 
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { useUrlState } from '../../util/url_state';
-
 import { TabId } from './navigation_menu';
+import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
 
 export interface Tab {
   id: TabId;
@@ -66,7 +64,7 @@ function getTabs(disableLinks: boolean): Tab[] {
 }
 interface TabData {
   testSubject: string;
-  pathId?: string;
+  pathId?: MlUrlGeneratorState['page'];
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
@@ -80,23 +78,30 @@ const TAB_DATA: Record<TabId, TabData> = {
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
-  const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: TabId) {
     setSelectedTabId(id);
   }
 
   const tabs = getTabs(disableLinks);
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+
+  const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+    const path = await mlUrlGenerator.createUrl({
+      page: defaultPathId,
+    });
+    await navigateToPath(path, true); // set preserve search to true
+  };
 
   return (
     <EuiTabs display="condensed">
       {tabs.map((tab: Tab) => {
         const { id, disabled } = tab;
         const testSubject = TAB_DATA[id].testSubject;
-        const defaultPathId = TAB_DATA[id].pathId || id;
+        const defaultPathId = (TAB_DATA[id].pathId || id) as MlUrlGeneratorState['page'];
         // globalState (e.g. selected jobs and time range) should be retained when changing pages.
         // appState will not be considered.
-        const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
 
         return disabled ? (
           <EuiTab key={`${id}-key`} className={'mlNavigationMenu__mainTab'} disabled={true}>
@@ -106,7 +111,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           <div className="euiTab" key={`div-${id}-key`}>
             <EuiLink
               data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-              href={`#/${defaultPathId}${fullGlobalStateString}`}
+              onClick={() => redirectToTab(defaultPathId)}
               key={`${id}-key`}
               color="text"
             >

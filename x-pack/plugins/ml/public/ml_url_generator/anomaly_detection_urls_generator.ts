@@ -56,6 +56,17 @@ export function createAnomalyDetectionCreateJobSelectType(
   );
 }
 
+export function createAnomalyDetectionCreateJobSelectIndex(
+  appBasePath: string,
+  pageState: MlGenericUrlState['pageState']
+): string {
+  return createIndexBasedMlUrl(
+    appBasePath,
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    pageState
+  );
+}
+
 /**
  * Creates URL to the Anomaly Explorer page
  */
