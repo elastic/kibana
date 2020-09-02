@@ -76,7 +76,7 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginStartDependencies {
