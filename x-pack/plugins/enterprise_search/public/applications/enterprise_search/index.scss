@@ -1,0 +1,154 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+.euiCallOut a {
+  text-decoration: underline;
+}
+
+.product-selector-callout {
+  margin-bottom: 20px;
+
+  @include euiBreakpoint('s', 'm', 'l', 'xl') {
+    margin-top: -20px;
+    margin-bottom: 40px;
+  }
+
+  &--expired {
+    max-width: 600px;
+  }
+}
+
+.euiPage {
+  padding-top: 78px;
+  background-image: url('./assets/bg_enterprise_search.svg')!important;
+  background-repeat: no-repeat;
+  background-size: 670px;
+  background-position: center -27px;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    padding-top: 158px;
+    background-size: 1160px;
+    background-position: center -48px;
+  }
+}
+
+.euiPageHeader {
+  margin-bottom: 24px;
+}
+
+.euiPageHeaderSection {
+  text-align: center;
+  margin: auto;
+}
+
+.euiTitle--large {
+  text-align: center;
+}
+
+.euiTitle--small {
+  font-weight: 500;
+  color: $euiColorMediumShade;
+  font-size: 15px;
+  margin-top: 0;
+
+  @include euiBreakpoint('s', 'm', 'l', 'xl') {
+    font-size: 19px;
+    margin-bottom: 22px;
+  }
+}
+
+.euiTitle+.euiTitle {
+  margin-top: 0;
+
+  @include euiBreakpoint('s', 'm', 'l', 'xl') {
+    margin-top: 8px;
+  }
+}
+
+.product-cards {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+}
+
+.card {
+  border-radius: 8px;
+  margin-bottom: 32px;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-bottom: 50px;
+  }
+
+  &__title {
+    font-weight: bold;
+    margin-bottom: 13px;
+    font-size: 18px;
+    line-height: 1.3;
+
+    @include euiBreakpoint('s', 'm', 'l', 'xl') {
+      font-size: 24px;
+      margin-bottom: 19px;
+    }
+  }
+
+  &__description {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.45;
+    color: $euiColorMediumShade;
+    margin-bottom: 15px;
+
+    @include euiBreakpoint('s', 'm', 'l', 'xl') {
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+  }
+}
+
+.product-card {
+  overflow: hidden;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    width: calc(50% - 25px);
+  }
+
+  &__image-container {
+    max-height: 115px;
+    overflow: hidden;
+    background-color: #0076CC;
+
+    @include euiBreakpoint('s', 'm', 'l', 'xl') {
+      max-height: none;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    height: auto;
+  }
+
+  &__content {
+    padding: 30px;
+
+    @include euiBreakpoint('s', 'm', 'l', 'xl') {
+      padding: 41px 41px 46px;
+    }
+  }
+
+  &__inner-content {
+    max-width: 350px;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+.product-card+.product-card {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-left: 50px;
+  }
+}
