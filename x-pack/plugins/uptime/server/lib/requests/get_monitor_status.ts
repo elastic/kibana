@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 
 export interface GetMonitorStatusParams {
-  filters?: string;
+  filters?: any;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
@@ -77,6 +77,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(filters?.bool ? [filters] : []),
             ],
           },
         },
@@ -114,15 +116,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
         },
       },
     };
-
-    /**
-     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
-     * to the bool of the parsed filters.
-     */
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
-    }
 
     /**
      * Perform a logical `and` against the selected location filters.
