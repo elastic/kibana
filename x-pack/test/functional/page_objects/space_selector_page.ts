@@ -166,9 +166,8 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.click('space-avatar-space_b');
     }
 
-    async goToSpecificSpace(spaceId: string) {
+    async goToSpecificSpace(spaceName: string) {
       await testSubjects.click(`${spaceName}-gotoSpace`);
-      await PageObjects.common.sleep(1000);
     }
 
     async clickSpaceAvatar(spaceId: string) {
