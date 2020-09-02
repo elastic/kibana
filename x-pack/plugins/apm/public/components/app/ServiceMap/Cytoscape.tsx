@@ -74,6 +74,14 @@ function getLayoutOptions(nodeHeight: number): cytoscape.LayoutOptions {
   };
 }
 
+/*
+ * @notice
+ * This product includes code in the function applyCubicBezierStyles that was
+ * inspired by a public Codepen, which was available under a "MIT" license.
+ *
+ * Copyright (c) 2020 by Guillaume (https://codepen.io/guillaumethomas/pen/xxbbBKO)
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ */
 function applyCubicBezierStyles(edges: cytoscape.EdgeCollection) {
   edges.forEach((edge) => {
     const { x: x0, y: y0 } = edge.source().position();
@@ -83,6 +91,8 @@ function applyCubicBezierStyles(edges: cytoscape.EdgeCollection) {
     const z = Math.sqrt(x * x + y * y);
     const costheta = z === 0 ? 0 : x / z;
     const alpha = 0.25;
+    // Two values for control-point-distances represent a pair symmetric quadratic
+    // bezier curves joined to appear as a single cubic bezier curve:
     edge.style('control-point-distances', [
       -alpha * y * costheta,
       alpha * y * costheta,
