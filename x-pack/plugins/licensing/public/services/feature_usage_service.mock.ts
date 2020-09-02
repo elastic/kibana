@@ -15,6 +15,8 @@ const createSetupMock = (): jest.Mocked<FeatureUsageServiceSetup> => {
     register: jest.fn(),
   };
 
+  mock.register.mockImplementation(() => Promise.resolve());
+
   return mock;
 };
 
@@ -22,6 +24,8 @@ const createStartMock = (): jest.Mocked<FeatureUsageServiceStart> => {
   const mock = {
     notifyUsage: jest.fn(),
   };
+
+  mock.notifyUsage.mockImplementation(() => Promise.resolve());
 
   return mock;
 };
