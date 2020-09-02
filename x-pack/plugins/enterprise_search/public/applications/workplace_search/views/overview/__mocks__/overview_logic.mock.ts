@@ -7,7 +7,7 @@
 import { IOverviewValues } from '../overview_logic';
 import { IAccount, IOrganization } from '../../../types';
 
-export const mockLogicValues = {
+export const mockValues = {
   accountsCount: 0,
   activityFeed: [],
   canCreateContentSources: false,
@@ -22,24 +22,23 @@ export const mockLogicValues = {
   personalSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
-  flashMessages: {},
 } as IOverviewValues;
 
-export const mockLogicActions = {
+export const mockActions = {
   initializeOverview: jest.fn(() => ({})),
 };
 
 jest.mock('kea', () => ({
   ...(jest.requireActual('kea') as object),
-  useActions: jest.fn(() => ({ ...mockLogicActions })),
-  useValues: jest.fn(() => ({ ...mockLogicValues })),
+  useActions: jest.fn(() => ({ ...mockActions })),
+  useValues: jest.fn(() => ({ ...mockValues })),
 }));
 
 import { useValues } from 'kea';
 
 export const setMockValues = (values: object) => {
   (useValues as jest.Mock).mockImplementationOnce(() => ({
-    ...mockLogicValues,
+    ...mockValues,
     ...values,
   }));
 };
