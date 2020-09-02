@@ -44,8 +44,10 @@ describe('useBreadcrumbs', () => {
     );
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
-    expect(getBreadcrumbs()).toStrictEqual(
-      [makeBaseBreadcrumb('/app/uptime', urlParams)].concat(expectedCrumbs)
+    expect(JSON.stringify(getBreadcrumbs())).toEqual(
+      JSON.stringify(
+        [makeBaseBreadcrumb('/app/uptime', jest.fn(), urlParams)].concat(expectedCrumbs)
+      )
     );
   });
 });
@@ -58,6 +60,7 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   const core = {
     application: {
       getUrlForApp: () => '/app/uptime',
+      navigateToUrl: jest.fn(),
     },
     chrome: {
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
