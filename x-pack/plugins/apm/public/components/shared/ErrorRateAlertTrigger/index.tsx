@@ -34,7 +34,7 @@ interface Props {
 
 export function ErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });

@@ -11,7 +11,7 @@ import { useFetcher } from './useFetcher';
 const INITIAL_DATA = { transactionTypes: [] };
 
 export function useServiceTransactionTypes(urlParams: IUrlParams) {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
   const { data = INITIAL_DATA } = useFetcher(
     (callApmApi) => {

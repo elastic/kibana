@@ -8,13 +8,13 @@ import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 
 export function useAgentName() {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
 
   const { data: agentName, error, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/agent_name',
           params: {

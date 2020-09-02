@@ -31,7 +31,7 @@ const ShiftedEuiText = styled(EuiText)`
 `;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
 
   if (!hasValidMlLicense || !mlJobId) {

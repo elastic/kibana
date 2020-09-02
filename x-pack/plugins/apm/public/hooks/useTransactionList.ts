@@ -21,7 +21,7 @@ const DEFAULT_RESPONSE: TransactionsAPIResponse = {
 };
 
 export function useTransactionList(urlParams: IUrlParams) {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(

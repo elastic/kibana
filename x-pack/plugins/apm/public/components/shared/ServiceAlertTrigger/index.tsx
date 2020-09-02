@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function ServiceAlertTrigger(props: Props) {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
 
   const {
     fields,

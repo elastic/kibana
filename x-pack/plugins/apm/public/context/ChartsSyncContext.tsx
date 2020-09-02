@@ -20,7 +20,7 @@ const ChartsSyncContext = React.createContext<{
 function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
   const [time, setTime] = useState<number | null>(null);
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;

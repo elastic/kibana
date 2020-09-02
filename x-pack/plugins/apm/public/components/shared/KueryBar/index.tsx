@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   esKuery,
@@ -38,6 +38,10 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 export function KueryBar() {
+  const { groupId, serviceName } = useParams<{
+    groupId?: string;
+    serviceName?: string;
+  }>();
   const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -98,7 +102,7 @@ export function KueryBar() {
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
-          boolFilter: getBoolFilter(urlParams),
+          boolFilter: getBoolFilter(urlParams, serviceName, groupId),
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,

@@ -63,7 +63,7 @@ function getOptions(environments: string[]) {
 export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;

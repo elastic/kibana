@@ -14,8 +14,12 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
-export function getBoolFilter(urlParams: IUrlParams) {
-  const { start, end, serviceName, processorEvent } = urlParams;
+export function getBoolFilter(
+  urlParams: IUrlParams,
+  serviceName?: string,
+  groupId?: string
+) {
+  const { start, end, processorEvent } = urlParams;
 
   if (!start || !end) {
     throw new Error('Date range was not defined');
@@ -63,9 +67,9 @@ export function getBoolFilter(urlParams: IUrlParams) {
         term: { [PROCESSOR_EVENT]: 'error' },
       });
 
-      if (urlParams.errorGroupId) {
+      if (groupId) {
         boolFilter.push({
-          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId },
+          term: { [ERROR_GROUP_ID]: groupId },
         });
       }
       break;
