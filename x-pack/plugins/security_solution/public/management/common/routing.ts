@@ -90,11 +90,13 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
 };
 
 interface ListPaginationParams {
-  page_index?: number;
-  page_size?: number;
+  page_index: number;
+  page_size: number;
 }
 
-const normalizeListPaginationParams = (params?: ListPaginationParams) => {
+const normalizeListPaginationParams = (
+  params?: Partial<ListPaginationParams>
+): Partial<ListPaginationParams> => {
   if (params) {
     return {
       ...(params.page_index === MANAGEMENT_DEFAULT_PAGE ? {} : { page_index: params.page_index }),
@@ -105,28 +107,32 @@ const normalizeListPaginationParams = (params?: ListPaginationParams) => {
   }
 };
 
-const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string) => {
-  return Array.isArray(query[key]) ? query[key][0] : query[key];
+const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+  const value = query[key];
+
+  return Array.isArray(value) ? value[0] : value;
 };
 
-const extractPageIndex = (query: querystring.ParsedUrlQuery) => {
+const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
   const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
 
   return !Number.isFinite(pageIndex) || pageIndex < 0 ? pageIndex : MANAGEMENT_DEFAULT_PAGE;
 };
 
-const extractPageSize = (query: querystring.ParsedUrlQuery) => {
+const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
   const pageSize = Number(extractFirstParamValue(query, 'page_size'));
 
   return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
 };
 
-export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+export const extractListPaginationParams = (
+  query: querystring.ParsedUrlQuery
+): ListPaginationParams => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
 });
 
-export const getTrustedAppsListPath = (params?: ListPaginationParams) => {
+export const getTrustedAppsListPath = (params?: Partial<ListPaginationParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
