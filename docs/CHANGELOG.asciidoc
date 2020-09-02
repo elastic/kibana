@@ -83,7 +83,7 @@ Maps::
 * Fixes drawing shapes {kibana-pull}74689[#74689]
 * Fixes layer sorting issue with hidden layers at map load {kibana-pull}76007[#76007]
 Monitoring::
-* Fixes bug where kibana crashes with collection disabled {kibana-pull}75335[#75335]
+* Fixes bug where Kibana crashes with collection disabled {kibana-pull}75335[#75335]
 * Swallows errors in opt-in remote notification from the server {kibana-pull}75641[#75641]
 Operations::
 * Adds map configurations to docker list {kibana-pull}75035[#75035]
