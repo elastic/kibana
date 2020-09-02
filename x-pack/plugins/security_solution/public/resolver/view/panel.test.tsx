@@ -81,7 +81,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           };
         })
       ).toYieldEqualTo({
-        title: 'c',
+        title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
           ['process.executable', 'executable'],
@@ -92,6 +92,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           ['process.hash.md5', 'hash.md5'],
           ['process.args', 'args'],
         ],
+      });
+    });
+    it('should have breaking opportunities (<wbr>s) in node titles to allow wrapping', async () => {
+      await expect(
+        simulator().map(() => {
+          const titleWrapper = simulator().testSubject('resolver:node-detail:title');
+          return {
+            wordBreaks: titleWrapper.find('wbr').length,
+          };
+        })
+      ).toYieldEqualTo({
+        // The GeneratedText component adds 1 <wbr> after the period and one at the end
+        wordBreaks: 2,
       });
     });
   });
@@ -174,7 +187,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
               .testSubject('resolver:node-list:node-link:title')
               .map((node) => node.text());
           })
-        ).toYieldEqualTo(['c', 'd', 'e']);
+        ).toYieldEqualTo(['c.ext', 'd', 'e']);
       });
     });
   });

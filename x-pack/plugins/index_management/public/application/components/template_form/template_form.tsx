@@ -180,6 +180,7 @@ export const TemplateForm = ({
       delete outputTemplate.template.aliases;
     }
     if (Object.keys(outputTemplate.template).length === 0) {
+      // @ts-expect-error
       delete outputTemplate.template;
     }
 
@@ -191,8 +192,8 @@ export const TemplateForm = ({
       wizardData: WizardContent
     ): TemplateDeserialized => {
       const outputTemplate = {
-        ...initialTemplate,
         ...wizardData.logistics,
+        _kbnMeta: initialTemplate._kbnMeta,
         composedOf: wizardData.components,
         template: {
           settings: wizardData.settings,
