@@ -84,7 +84,6 @@ export class UptimePlugin
     });
 
     core.application.register({
-      appRoute: '/app/uptime',
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
       order: 8400,
