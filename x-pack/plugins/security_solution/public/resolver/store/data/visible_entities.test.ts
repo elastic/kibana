@@ -112,7 +112,10 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: {
+          result: mockResolverTree({ events })!,
+          parameters: { databaseDocumentID: '', indices: [] },
+        },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -140,7 +143,10 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: {
+          result: mockResolverTree({ events })!,
+          parameters: { databaseDocumentID: '', indices: [] },
+        },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);

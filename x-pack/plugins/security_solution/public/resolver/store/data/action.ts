@@ -50,7 +50,7 @@ interface AppAbortedResolverDataRequest {
  */
 interface ServerFailedToReturnRelatedEventData {
   readonly type: 'serverFailedToReturnRelatedEventData';
-  readonly payload: DatabaseParameters;
+  readonly payload: string;
 }
 
 /**

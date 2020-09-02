@@ -192,7 +192,7 @@ const GraphOverlayComponent = ({
 
       <EuiHorizontalRule margin="none" />
       <StyledResolver
-        databaseDocumentID={graphEventId}
+        databaseDocumentID={graphEventId ?? ''}
         resolverComponentInstanceID={currentTimeline.id}
         indices={indices}
       />

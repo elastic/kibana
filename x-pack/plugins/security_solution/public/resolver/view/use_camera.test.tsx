@@ -181,7 +181,7 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, databaseDocumentID: '' },
+            payload: { result: tree, parameters: { databaseDocumentID: '', indices: [] } },
           };
           act(() => {
             store.dispatch(serverResponseAction);

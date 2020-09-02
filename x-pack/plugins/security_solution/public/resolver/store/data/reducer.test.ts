@@ -27,7 +27,7 @@ describe('Resolver Data Middleware', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          databaseDocumentID: '',
+          parameters: { databaseDocumentID: '', indices: [] },
         },
       };
       store.dispatch(action);
