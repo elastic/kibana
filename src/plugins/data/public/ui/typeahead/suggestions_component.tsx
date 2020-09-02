@@ -19,15 +19,8 @@
 
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import classNames from 'classnames';
-import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import {
-  SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
-  SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
-  SUGGESTIONS_LIST_REQUIRED_WIDTH,
-} from './constants';
 
 interface Props {
   index: number | null;
@@ -36,24 +29,18 @@ interface Props {
   show: boolean;
   suggestions: QuerySuggestion[];
   loadMore: () => void;
-  queryBarRect?: DOMRect;
-  size?: SuggestionsListSize;
 }
-
-export type SuggestionsListSize = 's' | 'l';
 
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
   public render() {
-    if (!this.props.queryBarRect || !this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.show || isEmpty(this.props.suggestions)) {
       return null;
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const isDescriptionFittable =
-        this.props.queryBarRect!.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
       return (
         <SuggestionComponent
           innerRef={(node) => (this.childNodes[index] = node)}
@@ -63,38 +50,17 @@ export class SuggestionsComponent extends Component<Props> {
           onMouseEnter={() => this.props.onMouseEnter(index)}
           ariaId={'suggestion-' + index}
           key={`${suggestion.type} - ${suggestion.text}`}
-          shouldDisplayDescription={isDescriptionFittable}
         />
       );
     });
 
-    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
-    const { queryBarRect } = this.props;
-
-    // reflects if the suggestions list has enough space below to be opened down
-    const isSuggestionsListFittable =
-      documentHeight - (queryBarRect.top + queryBarRect.height) >
-      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
-    const verticalListPosition = isSuggestionsListFittable
-      ? `top: ${window.scrollY + queryBarRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
-      : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
-
     return (
-      <StyledSuggestionsListDiv
-        queryBarRect={queryBarRect}
-        verticalListPosition={verticalListPosition}
-      >
-        <div
-          className={classNames('kbnTypeahead', { 'kbnTypeahead--small': this.props.size === 's' })}
-        >
-          <div
-            className={classNames('kbnTypeahead__popover', {
-              ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
-              ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
-            })}
-          >
+      <div className="reactSuggestionTypeahead">
+        <div className="kbnTypeahead">
+          <div className="kbnTypeahead__popover">
             <div
               id="kbnTypeahead__items"
+              className="kbnTypeahead__items"
               role="listbox"
               ref={(node) => (this.parentNode = node)}
               onScroll={this.handleScroll}
@@ -103,7 +69,7 @@ export class SuggestionsComponent extends Component<Props> {
             </div>
           </div>
         </div>
-      </StyledSuggestionsListDiv>
+      </div>
     );
   }
 
@@ -150,11 +116,3 @@ export class SuggestionsComponent extends Component<Props> {
     }
   };
 }
-
-const StyledSuggestionsListDiv = styled.div`
-  ${(props: { queryBarRect: DOMRect; verticalListPosition: string }) => `
-      position: absolute;
-      left: ${props.queryBarRect.left}px;
-      width: ${props.queryBarRect.width}px;
-      ${props.verticalListPosition}`}
-`;

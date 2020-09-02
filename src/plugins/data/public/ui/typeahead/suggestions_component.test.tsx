@@ -54,7 +54,6 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -70,7 +69,6 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -86,7 +84,6 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -103,7 +100,6 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -120,7 +116,6 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -139,7 +134,6 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
