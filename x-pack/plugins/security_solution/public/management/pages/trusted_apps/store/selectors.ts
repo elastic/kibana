@@ -6,14 +6,17 @@
 
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
-import { TrustedAppsPageState } from '../state/trusted_apps_page_state';
-import { pageInfosEqual } from '../state/items_page';
+import { PageInfo, TrustedAppsPageState } from '../state/trusted_apps_page_state';
+
 import {
   getCurrentError,
   getLastPresentData,
   isInProgressBinding,
   isOutdatedBinding,
 } from '../state/async_data_binding';
+
+const pageInfosEqual = (pageInfo1: PageInfo, pageInfo2: PageInfo): boolean =>
+  pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>): boolean => {
   const currentPageInfo = state.list.currentPageInfo;

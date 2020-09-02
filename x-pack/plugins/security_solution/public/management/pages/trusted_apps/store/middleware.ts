@@ -5,10 +5,10 @@
  */
 
 import { ServerApiError } from '../../../../common/types';
-import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
+import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
-import { TrustedAppsPageState as PageState } from '../state/trusted_apps_page_state';
+import { TrustedAppsItemsPage, TrustedAppsPageState } from '../state/trusted_apps_page_state';
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 import { needsRefreshOfListData } from './selectors';
 import { ListDataBindingChanged } from './action';
@@ -17,17 +17,16 @@ import {
   StaleAsyncBinding,
   getLastPresentDataBinding,
 } from '../state/async_data_binding';
-import { ItemsPage } from '../state/items_page';
 
 const createListDataBindingChangedAction = (
-  newBinding: Immutable<AsyncDataBinding<ItemsPage<TrustedApp>, ServerApiError>>
+  newBinding: Immutable<AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>>
 ): Immutable<ListDataBindingChanged> => ({
   type: 'listDataBindingChanged',
   payload: { newBinding },
 });
 
 const refreshList = async (
-  store: ImmutableMiddlewareAPI<PageState, AppAction>,
+  store: ImmutableMiddlewareAPI<TrustedAppsPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
   const list = store.getState().list;
@@ -37,7 +36,7 @@ const refreshList = async (
       type: 'InProgressAsyncBinding',
       // need to think on how to avoid the casting
       previousBinding: list.currentPage as Immutable<
-        StaleAsyncBinding<ItemsPage<TrustedApp>, ServerApiError>
+        StaleAsyncBinding<TrustedAppsItemsPage, ServerApiError>
       >,
     })
   );
@@ -69,7 +68,9 @@ const refreshList = async (
   }
 };
 
-const middlewareFactory: ImmutableMiddlewareFactory<PageState> = (coreStart) => {
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsPageState> = (
+  coreStart
+) => {
   const trustedAppsService: TrustedAppsService = new TrustedAppsHttpService(coreStart.http);
 
   return (store) => (next) => async (action) => {
@@ -80,5 +81,3 @@ const middlewareFactory: ImmutableMiddlewareFactory<PageState> = (coreStart) => 
     }
   };
 };
-
-export { middlewareFactory as trustedAppsPageMiddlewareFactory };

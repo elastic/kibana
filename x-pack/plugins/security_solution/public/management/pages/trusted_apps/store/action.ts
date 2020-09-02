@@ -5,15 +5,14 @@
  */
 
 import { ServerApiError } from '../../../../common/types';
-import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { RoutingAction } from '../../../../common/store/routing/action';
 import { AsyncDataBinding } from '../state/async_data_binding';
-import { ItemsPage } from '../state/items_page';
+import { TrustedAppsItemsPage } from '../state/trusted_apps_page_state';
 
 export interface ListDataBindingChanged {
   type: 'listDataBindingChanged';
   payload: {
-    newBinding: AsyncDataBinding<ItemsPage<TrustedApp>, ServerApiError>;
+    newBinding: AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>;
   };
 }
 

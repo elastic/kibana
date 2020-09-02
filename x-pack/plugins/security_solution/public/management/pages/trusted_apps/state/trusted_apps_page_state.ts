@@ -5,9 +5,24 @@
  */
 
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { ListViewState } from './list_view_state';
+import { ServerApiError } from '../../../../common/types';
+import { AsyncDataBinding } from './async_data_binding';
+
+export interface PageInfo {
+  index: number;
+  size: number;
+}
+
+export interface TrustedAppsItemsPage {
+  items: TrustedApp[];
+  pageInfo: PageInfo;
+  totalItemsCount: number;
+}
 
 export interface TrustedAppsPageState {
-  list: ListViewState<TrustedApp>;
+  list: {
+    currentPage: AsyncDataBinding<TrustedAppsItemsPage, ServerApiError>;
+    currentPageInfo: PageInfo;
+  };
   active: boolean;
 }
