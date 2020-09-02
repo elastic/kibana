@@ -28,7 +28,7 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ scopedClient }) => {
               const { jobsSummary } = jobServiceProvider(scopedClient);
-              jobsSummary(...args);
+              return jobsSummary(...args);
             });
         },
       };
