@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Transform } from 'stream';
 import { createReduceStream, createPromiseFromStreams, createListStream } from './index';
 
-const promiseFromEvent = (name, emitter) =>
+const promiseFromEvent = (name: string, emitter: Transform) =>
   new Promise((resolve) => emitter.on(name, () => resolve(name)));
 
 describe('reduceStream', () => {
@@ -47,7 +47,10 @@ describe('reduceStream', () => {
   });
 
   test('emits an error if an iteration fails', async () => {
-    const reduce = createReduceStream((acc, i) => expect(i).toBe(1), 0);
+    const reduce = createReduceStream((acc, i) => {
+      expect(i).toBe(1);
+      return acc;
+    }, 0);
     const errorEvent = promiseFromEvent('error', reduce);
 
     reduce.write(1);

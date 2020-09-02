@@ -39,7 +39,7 @@ describe('createMapStream()', () => {
   test('send the return value from the mapper on the output stream', async () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createMapStream((n) => n * 100),
+      createMapStream((n: number) => n * 100),
       createConcatStream([]),
     ]);
 
@@ -49,7 +49,7 @@ describe('createMapStream()', () => {
   test('supports async mappers', async () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createMapStream(async (n, i) => {
+      createMapStream(async (n: number, i: number) => {
         await delay(n);
         return n * i;
       }),

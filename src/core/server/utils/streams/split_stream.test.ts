@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Transform } from 'stream';
 import { createSplitStream, createConcatStream, createPromiseFromStreams } from './index';
 
-async function split(stream, input) {
+async function split(stream: Transform, input: Array<Buffer | string>) {
   const concat = createConcatStream();
   concat.write([]);
   stream.pipe(concat);
   const output = createPromiseFromStreams([concat]);
 
-  input.forEach((i) => {
+  input.forEach((i: any) => {
     stream.write(i);
   });
   stream.end();

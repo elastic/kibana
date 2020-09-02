@@ -19,7 +19,7 @@
 
 import { Transform } from 'stream';
 
-export function createReplaceStream(toReplace, replacement) {
+export function createReplaceStream(toReplace: string, replacement: string | Buffer) {
   if (typeof toReplace !== 'string') {
     throw new TypeError('toReplace must be a string');
   }
@@ -78,6 +78,7 @@ export function createReplaceStream(toReplace, replacement) {
         this.push(buffer);
       }
 
+      // @ts-expect-error
       buffer = null;
       callback();
     },

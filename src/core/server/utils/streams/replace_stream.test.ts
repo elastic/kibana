@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Writable, Readable } from 'stream';
 
 import {
   createReplaceStream,
@@ -25,17 +26,17 @@ import {
   createMapStream,
 } from './index';
 
-async function concatToString(streams) {
+async function concatToString(streams: [Readable, ...Writable[]]) {
   return await createPromiseFromStreams([
     ...streams,
-    createMapStream((buff) => buff.toString('utf8')),
+    createMapStream((buff: Buffer) => buff.toString('utf8')),
     createConcatStream(''),
   ]);
 }
 
 describe('replaceStream', () => {
   test('produces buffers when it receives buffers', async () => {
-    const chunks = await createPromiseFromStreams([
+    const chunks = await createPromiseFromStreams<Buffer[]>([
       createListStream([Buffer.from('foo'), Buffer.from('bar')]),
       createReplaceStream('o', '0'),
       createConcatStream([]),
@@ -47,7 +48,7 @@ describe('replaceStream', () => {
   });
 
   test('produces buffers when it receives strings', async () => {
-    const chunks = await createPromiseFromStreams([
+    const chunks = await createPromiseFromStreams<string[]>([
       createListStream(['foo', 'bar']),
       createReplaceStream('o', '0'),
       createConcatStream([]),
@@ -59,6 +60,7 @@ describe('replaceStream', () => {
   });
 
   test('expects toReplace to be a string', () => {
+    // @ts-expect-error
     expect(() => createReplaceStream(Buffer.from('foo'))).toThrowError(/be a string/);
   });
 

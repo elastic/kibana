@@ -76,14 +76,13 @@ describe('promiseFromStreams', () => {
     test('waits for writing and resolves to final value', async () => {
       let written = '';
 
-      const duplexReadQueue = [];
+      const duplexReadQueue: Array<Promise<unknown>> = [];
       const duplexItemsToPush = ['foo', 'bar', null];
       const result = await createPromiseFromStreams([
         createListStream(['a', 'b', 'c']),
         new Duplex({
           async read() {
-            const result = await duplexReadQueue.shift();
-            this.push(result);
+            this.push(await duplexReadQueue.shift());
           },
 
           write(chunk, enc, cb) {

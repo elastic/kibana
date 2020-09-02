@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import { createReduceStream } from './reduce_stream';
+import { Readable } from 'stream';
 
 /**
- *  Creates a Transform stream that consumes all provided
- *  values and concatenates them using each values `concat`
- *  method.
+ *  Create a Readable stream that provides the items
+ *  from a list as objects to subscribers
  *
- *  Concatenate strings:
- *    createListStream(['f', 'o', 'o'])
- *      .pipe(createConcatStream())
- *      .on('data', console.log)
- *      // logs "foo"
- *
- *  Concatenate values into an array:
- *    createListStream([1,2,3])
- *      .pipe(createConcatStream([]))
- *      .on('data', console.log)
- *      // logs "[1,2,3]"
- *
- *
- *  @param {any} initial The initial value that subsequent
- *                       items will concat with
- *  @return {Transform}
+ *  @param  {Array<any>} items - the list of items to provide
+ *  @return {Readable}
  */
-export function createConcatStream(initial) {
-  return createReduceStream((acc, chunk) => acc.concat(chunk), initial);
+export function createListStream<T = any>(items: T | T[] = []) {
+  const queue = Array.isArray(items) ? items : [items];
+
+  return new Readable({
+    objectMode: true,
+    read(size) {
+      queue.splice(0, size).forEach((item) => {
+        this.push(item);
+      });
+
+      if (!queue.length) {
+        this.push(null);
+      }
+    },
+  });
 }
