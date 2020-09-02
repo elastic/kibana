@@ -32,9 +32,8 @@ export const getTrustedAppsDeleteRouteHandler = (
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
-    const exceptionsListService = endpointAppContext.service.getExceptionsList();
-
     try {
+      const exceptionsListService = exceptionListClientFromContext(context);
       const { id } = req.params;
       const response = await exceptionsListService.deleteExceptionListItem({
         id,
