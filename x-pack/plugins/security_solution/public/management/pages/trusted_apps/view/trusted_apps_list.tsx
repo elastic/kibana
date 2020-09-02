@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,12 +14,15 @@ import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { getTrustedAppsListPath } from '../../../common/routing';
 
 import {
-  getCurrentError,
-  getLastPresentData,
-  isInProgressBinding,
-} from '../state/async_data_binding';
-import { PageInfo } from '../state/items_page';
-import { ListViewState } from '../state/list_view_state';
+  getListCurrentPageIndex,
+  getListCurrentPageSize,
+  getListErrorMessage,
+  getListItems,
+  getListTotalItemsCount,
+  isListLoading,
+} from '../store/selectors';
+
+import { useTrustedAppsSelector } from './hooks';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 
@@ -81,33 +84,33 @@ const COLUMN_DEFINITIONS = [
   },
 ];
 
-interface TrustedAppsListProps {
-  state: Immutable<ListViewState<TrustedApp>>;
-}
-
-export function TrustedAppsList(props: TrustedAppsListProps) {
-  const data = getLastPresentData(props.state.currentPage);
+export const TrustedAppsList = memo(() => {
   const history = useHistory();
 
   return (
     <EuiBasicTable
       columns={COLUMN_DEFINITIONS}
-      items={[...(data?.items || [])]}
-      error={getCurrentError(props.state.currentPage)?.message}
-      loading={isInProgressBinding(props.state.currentPage)}
+      items={[...useTrustedAppsSelector(getListItems)]}
+      error={useTrustedAppsSelector(getListErrorMessage)}
+      loading={useTrustedAppsSelector(isListLoading)}
       pagination={{
-        pageIndex: props.state.currentPageInfo.index - 1,
-        pageSize: props.state.currentPageInfo.size,
-        totalItemCount: data?.totalItemsCount || 0,
+        pageIndex: useTrustedAppsSelector(getListCurrentPageIndex) - 1,
+        pageSize: useTrustedAppsSelector(getListCurrentPageSize),
+        totalItemCount: useTrustedAppsSelector(getListTotalItemsCount),
       }}
-      onChange={({ page }: { page: PageInfo }) => {
-        history.push(
-          getTrustedAppsListPath({
-            page_index: page.index + 1,
-            page_size: page.size,
-          })
-        );
-      }}
+      onChange={useCallback(
+        ({ page }: { page: { index: number; size: number } }) => {
+          history.push(
+            getTrustedAppsListPath({
+              page_index: page.index + 1,
+              page_size: page.size,
+            })
+          );
+        },
+        [history]
+      )}
     />
   );
-}
+});
+
+TrustedAppsList.displayName = 'TrustedAppsList';
