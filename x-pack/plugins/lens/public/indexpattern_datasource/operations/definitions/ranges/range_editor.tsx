@@ -32,11 +32,7 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import {
-  isAutoInterval,
-  GTE_SYMBOL,
-  LT_SYMBOL,
-} from '../../../../../../../../src/plugins/data/common';
+import { isAutoInterval } from '../../../../../../../../src/plugins/data/common';
 import {
   RangeType,
   MODES,
@@ -155,7 +151,7 @@ const RangePopover = ({
   const gtePrependLabel = i18n.translate(
     'xpack.lens.indexPattern.ranges.greaterThanOrEqualPrepend',
     {
-      defaultMessage: GTE_SYMBOL,
+      defaultMessage: '\u2265', // Cannot use GTE_SYMBOL here because i18n check fails to verify it
     }
   );
   const gteTooltipContent = i18n.translate(
@@ -165,7 +161,7 @@ const RangePopover = ({
     }
   );
   const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
-    defaultMessage: LT_SYMBOL,
+    defaultMessage: '\u003c', // Cannot use LT_SYMBOL here because i18n check fails to verify it
   });
   const ltTooltipContent = i18n.translate('xpack.lens.indexPattern.ranges.lessThanTooltip', {
     defaultMessage: 'Less than',
@@ -291,7 +287,7 @@ const AdvancedRangeEditor = ({
           onClick={onToggleEditor}
           size="xs"
         >
-          {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
+          {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsRemoval', {
             defaultMessage: 'Remove custom intervals',
           })}
         </EuiButtonEmpty>

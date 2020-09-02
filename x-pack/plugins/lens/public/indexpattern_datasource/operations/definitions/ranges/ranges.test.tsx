@@ -7,14 +7,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiSwitchEvent, EuiSwitch, EuiRange } from '@elastic/eui';
+import { EuiSwitchEvent, EuiFieldNumber, EuiSwitch, EuiRange } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { rangeOperation } from '../index';
-import { MODES, autoInterval, DEFAULT_INTERVAL, RangeIndexPatternColumn } from './ranges';
-import { EuiFieldNumber } from '@elastic/eui';
+import { MODES, DEFAULT_INTERVAL, RangeIndexPatternColumn } from './ranges';
+import { autoInterval } from 'src/plugins/data/common';
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
