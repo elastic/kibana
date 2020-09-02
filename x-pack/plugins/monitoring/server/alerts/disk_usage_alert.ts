@@ -59,7 +59,6 @@ export class DiskUsageAlert extends BaseAlert {
   };
 
   protected actionVariables = [
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
     {
       name: 'nodes',
       description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.nodes', {
@@ -72,6 +71,7 @@ export class DiskUsageAlert extends BaseAlert {
         defaultMessage: 'The number of nodes reporting high disk usage.',
       }),
     },
+    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
   ];
 
   protected async fetchData(

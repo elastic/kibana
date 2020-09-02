@@ -32,11 +32,6 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
   public isLegacy = true;
 
   protected actionVariables = [
-    AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
-    AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
-    AlertingDefaults.ALERT_TYPE.context.state,
-    AlertingDefaults.ALERT_TYPE.context.action,
-    AlertingDefaults.ALERT_TYPE.context.actionPlain,
     {
       name: 'versionList',
       description: i18n.translate(
@@ -55,6 +50,11 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
         }
       ),
     },
+    AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
+    AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
+    AlertingDefaults.ALERT_TYPE.context.state,
+    AlertingDefaults.ALERT_TYPE.context.action,
+    AlertingDefaults.ALERT_TYPE.context.actionPlain,
   ];
 
   protected async fetchData(

@@ -26,12 +26,6 @@ export class AlertingDefaults {
           }
         ),
       },
-      clusterName: {
-        name: 'clusterName',
-        description: i18n.translate('xpack.monitoring.alerts.actionVariables.clusterName', {
-          defaultMessage: 'The cluster to which the nodes belong.',
-        }),
-      },
       internalFullMessage: {
         name: 'internalFullMessage',
         description: i18n.translate('xpack.monitoring.alerts.actionVariables.internalFullMessage', {
@@ -42,6 +36,12 @@ export class AlertingDefaults {
         name: 'state',
         description: i18n.translate('xpack.monitoring.alerts.actionVariables.state', {
           defaultMessage: 'The current state of the alert.',
+        }),
+      },
+      clusterName: {
+        name: 'clusterName',
+        description: i18n.translate('xpack.monitoring.alerts.actionVariables.clusterName', {
+          defaultMessage: 'The cluster to which the nodes belong.',
         }),
       },
       action: {

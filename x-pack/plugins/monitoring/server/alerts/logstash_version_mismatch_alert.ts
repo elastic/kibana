@@ -32,7 +32,6 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
   public isLegacy = true;
 
   protected actionVariables = [
-    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
     {
       name: 'versionList',
       description: i18n.translate(
@@ -42,6 +41,7 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
         }
       ),
     },
+    ...Object.values(AlertingDefaults.ALERT_TYPE.context),
   ];
 
   protected async fetchData(
