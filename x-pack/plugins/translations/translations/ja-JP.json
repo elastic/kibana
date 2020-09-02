@@ -9980,7 +9980,6 @@
     "xpack.lens.xyChart.chartTypeLegend": "チャートタイプ",
     "xpack.lens.xyChart.fittingDisabledHelpText": "この設定は折れ線グラフとエリアグラフでのみ適用されます。",
     "xpack.lens.xyChart.fittingFunction.help": "欠測値の処理方法を定義",
-    "xpack.lens.xyChart.fittingLabel": "欠測値を埋める",
     "xpack.lens.xyChart.help": "X/Y チャート",
     "xpack.lens.xyChart.isVisible.help": "判例の表示・非表示を指定します。",
     "xpack.lens.xyChart.legend.help": "チャートの凡例を構成します。",

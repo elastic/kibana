@@ -9983,7 +9983,6 @@
     "xpack.lens.xyChart.chartTypeLegend": "图表类型",
     "xpack.lens.xyChart.fittingDisabledHelpText": "此设置仅适用于折线图和非堆叠面积图。",
     "xpack.lens.xyChart.fittingFunction.help": "定义处理缺失值的方式",
-    "xpack.lens.xyChart.fittingLabel": "填充缺失值",
     "xpack.lens.xyChart.help": "X/Y 图表",
     "xpack.lens.xyChart.isVisible.help": "指定图例是否可见。",
     "xpack.lens.xyChart.legend.help": "配置图表图例。",
