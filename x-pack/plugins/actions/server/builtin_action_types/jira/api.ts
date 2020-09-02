@@ -69,7 +69,7 @@ const pushToServiceHandler = async ({
       currentIncident = await externalService.getIncident(externalId);
     } catch (ex) {
       logger.debug(
-        `Retrieving Incident by id ${externalId} from Jira was failed with exception: ${ex}`
+        `Retrieving Incident by id ${externalId} from Jira failed with exception: ${ex}`
       );
     }
   }
