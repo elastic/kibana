@@ -68,6 +68,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
             values={
               Object {
                 "rolesLink": <EuiLink
+                  data-test-subj="goToRoles"
                   href="management"
                 >
                   <FormattedMessage
