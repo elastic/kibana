@@ -48,6 +48,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
+import { HeaderActionMenu } from './header_action_menu';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -169,7 +170,7 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem border="none">
-                {/* TODO  app content goes here */}
+                <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
