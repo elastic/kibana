@@ -13,7 +13,6 @@ import {
   getDefaultState,
   numberAboveZeroValidator,
   stringValidator,
-  FormField,
 } from './use_edit_transform_flyout';
 
 const getTransformConfigMock = (): TransformPivotConfig => ({
@@ -46,62 +45,16 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
   description: 'the-description',
 });
 
-const getDescriptionFieldMock = (value = ''): FormField => ({
-  defaultValue: '',
-  errorMessages: [],
-  isOptional: true,
-  validator: 'string',
-  value,
-  valueParser: (v) => v,
-});
-
-const getDestinationIndexFieldMock = (value = ''): FormField => ({
-  defaultValue: '',
-  errorMessages: [],
-  isOptional: false,
-  validator: 'string',
-  value,
-  valueParser: (v) => v,
-});
-
-const getDestinationPipelineFieldMock = (value = ''): FormField => ({
-  defaultValue: '',
-  errorMessages: [],
-  isOptional: false,
-  validator: 'string',
-  value,
-  valueParser: (v) => v,
-});
-
-const getDocsPerSecondFieldMock = (value = ''): FormField => ({
-  defaultValue: '',
-  errorMessages: [],
-  isOptional: true,
-  validator: 'numberAboveZero',
-  value,
-  valueParser: (v) => parseInt(v, 10),
-});
-
-const getFrequencyFieldMock = (value = ''): FormField => ({
-  defaultValue: '1m',
-  errorMessages: [],
-  isOptional: true,
-  validator: 'frequency',
-  value,
-  valueParser: (v) => v,
-});
-
 describe('Transform: applyFormFieldsToTransformConfig()', () => {
   test('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock(transformConfigMock.description),
-      destinationIndex: getDestinationIndexFieldMock(transformConfigMock.dest.index),
-      destinationPipeline: getDestinationPipelineFieldMock(),
-      docsPerSecond: getDocsPerSecondFieldMock(),
-      frequency: getFrequencyFieldMock(),
-    });
+    const formState = getDefaultState(transformConfigMock);
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
 
     // This case will return an empty object. In the actual UI, this case should not happen
     // because the Update-Button will be disabled when no form field was changed.
@@ -117,13 +70,22 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
   test('should include previously nonexisting attributes', () => {
     const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock('the-new-description'),
-      destinationIndex: getDestinationIndexFieldMock('the-new-destination-index'),
-      destinationPipeline: getDestinationPipelineFieldMock(),
-      docsPerSecond: getDocsPerSecondFieldMock('10'),
-      frequency: getFrequencyFieldMock('10m'),
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-new-description',
+      dest: {
+        index: 'the-new-destination-index',
+      },
+      frequency: '10m',
+      settings: {
+        docs_per_second: 10,
+      },
     });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
 
     expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
@@ -134,13 +96,20 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 
   test('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
-    const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
-      description: getDescriptionFieldMock('the-updated-description'),
-      destinationIndex: getDestinationIndexFieldMock('the-updated-destination-index'),
-      destinationPipeline: getDestinationPipelineFieldMock(),
-      docsPerSecond: getDocsPerSecondFieldMock(),
-      frequency: getFrequencyFieldMock(),
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-updated-description',
+      dest: {
+        index: 'the-updated-destination-index',
+        pipeline: 'the-updated-destination-index',
+      },
     });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
 
     expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
