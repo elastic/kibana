@@ -34,24 +34,26 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
 
       const timefield = uiSettings['timelion:es.timefield'];
 
-      const body = {params: {
-        index: uiSettings['es.default_index'],
-        body: {
-          aggs: {
-            maxAgg: {
-              max: {
-                field: timefield,
+      const body = {
+        params: {
+          index: uiSettings['es.default_index'],
+          body: {
+            aggs: {
+              maxAgg: {
+                max: {
+                  ield: timefield,
+                },
+              },
+              minAgg: {
+                min: {
+                  field: timefield,
+                },
               },
             },
-            minAgg: {
-              min: {
-                field: timefield,
-              },
-            },
+            size: 0,
           },
-          size: 0,
         },
-      }};
+      };
 
       let resp;
       try {
