@@ -34,12 +34,13 @@ import {
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
 
-export interface EnhancementRegistryDefinition
-  extends PersistableStateDefinition<SerializableState> {
+export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
+  extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem extends PersistableState<SerializableState> {
+export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
+  extends PersistableState<P> {
   id: string;
 }
 
