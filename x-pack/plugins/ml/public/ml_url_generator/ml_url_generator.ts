@@ -48,10 +48,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     const appBasePath = this.params.appBasePath;
     switch (mlUrlGeneratorState.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
-        return createAnomalyDetectionJobManagementUrl(
-          appBasePath,
-          'pageState' in mlUrlGeneratorState ? mlUrlGeneratorState.pageState : undefined
-        );
+        return createAnomalyDetectionJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_EXPLORER:
         return createExplorerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
@@ -62,10 +59,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
-        return createDataFrameAnalyticsJobManagementUrl(
-          appBasePath,
-          'pageState' in mlUrlGeneratorState ? mlUrlGeneratorState.pageState : undefined
-        );
+        return createDataFrameAnalyticsJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_VISUALIZER:

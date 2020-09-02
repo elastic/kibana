@@ -7,6 +7,7 @@
 import isEmpty from 'lodash/isEmpty';
 import {
   AnomalyDetectionQueryState,
+  AnomalyDetectionUrlState,
   ExplorerAppState,
   ExplorerGlobalState,
   ExplorerUrlState,
@@ -23,7 +24,7 @@ import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public
  */
 export function createAnomalyDetectionJobManagementUrl(
   appBasePath: string,
-  params: AnomalyDetectionQueryState | undefined
+  params: AnomalyDetectionUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`;
   if (!params || isEmpty(params)) {

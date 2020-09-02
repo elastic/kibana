@@ -8,9 +8,13 @@ import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/comm
 import { JobId } from '../../../reporting/common/types';
 import { ML_PAGES } from '../constants/ml_url_generator';
 
-export type MLPageState<PageType, PageState = undefined> = PageState extends undefined
-  ? { page: PageType }
-  : { page: PageType; pageState: PageState };
+type OptionalPageState = object | undefined;
+
+export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
+  ? { page: PageType; pageState?: PageState }
+  : PageState extends object
+  ? { page: PageType; pageState: PageState }
+  : { page: PageType };
 
 export const ANALYSIS_CONFIG_TYPE = {
   OUTLIER_DETECTION: 'outlier_detection',
