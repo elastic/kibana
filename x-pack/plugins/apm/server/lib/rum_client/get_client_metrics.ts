@@ -12,8 +12,8 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import {
-  TRANS_DOM_INTERACTIVE,
-  TRANS_TIME_TO_FIRST_BYTE,
+  TRANSACTION_DOM_INTERACTIVE,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getClientMetrics({
@@ -35,7 +35,7 @@ export async function getClientMetrics({
         pageViews: { value_count: { field: 'transaction.type' } },
         backEnd: {
           percentiles: {
-            field: TRANS_TIME_TO_FIRST_BYTE,
+            field: TRANSACTION_TIME_TO_FIRST_BYTE,
             percents: [50],
             hdr: {
               number_of_significant_value_digits: 3,
@@ -44,7 +44,7 @@ export async function getClientMetrics({
         },
         domInteractive: {
           percentiles: {
-            field: TRANS_DOM_INTERACTIVE,
+            field: TRANSACTION_DOM_INTERACTIVE,
             percents: [50],
             hdr: {
               number_of_significant_value_digits: 3,
