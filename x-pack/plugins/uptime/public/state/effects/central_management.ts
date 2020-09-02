@@ -138,7 +138,8 @@ export function* fetchMonitorCmDetails() {
   yield takeLatest(String(getMonitorCmData), function* (action: Action<string>) {
     try {
       // TODO: store the data from the API in the store?
-      const getResult = yield call(getMonitorCmDetails, action.payload);
+      // const getResult = yield call(getMonitorCmDetails, action.payload);
+      yield call(getMonitorCmDetails, action.payload);
       yield put(putMonitorCmData(action.payload));
     } catch (e) {
       if (e.body.statusCode === 404) {

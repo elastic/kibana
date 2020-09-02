@@ -54,9 +54,9 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-const H1Text = styled.h1`
-  white-space: nowrap;
-`;
+// const H1Text = styled.h1`
+//   white-space: nowrap;
+// `;
 
 export const PageHeader: React.FC<PageHeaderProps> = (props) => {
   const dispatch = useDispatch();
@@ -71,15 +71,13 @@ export const PageHeader: React.FC<PageHeaderProps> = (props) => {
   return <PageHeaderComponent {...props} toggleCentralManagement={to} />;
 };
 
-export const PageHeaderComponent: React.MemoExoticComponent<React.FC<
-  PageHeaderComponentProps
->> = React.memo(
+export const PageHeaderComponent = React.memo(
   ({
     toggleCentralManagement,
     headingText,
     extraLinks = false,
     datePicker = true,
-  }: PageHeaderProps) => {
+  }: PageHeaderComponentProps) => {
     const DatePickerComponent = () =>
       datePicker ? (
         <StyledPicker grow={false} style={{ flexBasis: 485 }}>

@@ -24,7 +24,7 @@ export const EditMonitor: React.FC = () => {
 export const EditMonitorComponent: React.FC<EditMonitorComponentProps> = ({
   onClick,
 }: EditMonitorComponentProps) => {
-  const [isCentrallyManaged, setIsCentrallyManaged] = useState<boolean>(true);
+  const [isCentrallyManaged] = useState<boolean>(true);
   // TODO: translate
   const button = (
     <EuiButtonEmpty isDisabled={!isCentrallyManaged} onClick={onClick}>

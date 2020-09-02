@@ -10,6 +10,16 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('state selectors', () => {
   const state: AppState = {
+    centralManagement: {
+      agentPolicyPage: {
+        items: [],
+      },
+      isEditFlyoutVisible: false,
+      loadingAgentPolicies: false,
+      loadingAgentPolicyDetail: false,
+      managedIdList: [],
+      savingConfiguration: false,
+    },
     overviewFilters: {
       filters: {
         locations: [],
@@ -109,6 +119,11 @@ describe('state selectors', () => {
       },
     },
     selectedFilters: null,
+    tags: {
+      loading: false,
+      tags: [],
+      errors: [],
+    },
     alerts: {
       alertDeletion: { data: null, loading: false },
       anomalyAlert: { data: null, loading: false },

@@ -39,18 +39,18 @@ import {
 } from '../state/actions/central_management';
 import { CentralManagementState } from '../state/reducers/central_management';
 import { CENTRAL_CONFIG } from '../../common/constants';
-import { AgentPolicy } from '../../../ingest_manager/common';
+import { AgentPolicy, PackagePolicy } from '../../../ingest_manager/common';
 import { MonitorSummary } from '../../common/runtime_types';
 
 interface EditMonitorFlyoutComponentProps {
   centralManagement: CentralManagementState;
-  monitorToEdit: MonitorSummary;
   onClose: () => void;
   onSubmit: () => void;
   postMonitorConfig: (params: PostPackagePolicyParams) => void;
   scheduleUnit?: 's' | 'm' | 'h';
   tags: string[];
   updateAgentPolicyDetails: (policyId: string) => void;
+  monitorToEdit?: MonitorSummary;
 }
 
 const DEFAULT_UNIT_VALUE = 's';
@@ -114,10 +114,20 @@ const getDefaultPackageName = (existingNames?: string[]) => {
   return packageName;
 };
 
-const checkPackageName = (packageName: string | undefined, agentPolicy?: AgentPolicy): boolean =>
-  !!packageName &&
-  !!agentPolicy &&
-  !!agentPolicy.package_policies.find((policy) => policy.name === packageName);
+function isPackagePolicyList(list: string[] | PackagePolicy[]): list is PackagePolicy[] {
+  if (list.length === 0) return false;
+  const first = list[0];
+  return (first as PackagePolicy).name !== undefined;
+}
+
+const checkPackageName = (packageName: string | undefined, agentPolicy?: AgentPolicy): boolean => {
+  if (!packageName || !agentPolicy) return false;
+  const { package_policies: policies } = agentPolicy;
+  if (isPackagePolicyList(policies)) {
+    return policies.find((policy) => policy.name === packageName) !== undefined;
+  }
+  return policies.find((policy) => policy === packageName) !== undefined;
+};
 
 export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProps> = (props) => {
   const { centralManagement } = props;
@@ -132,7 +142,7 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<Array<EuiComboBoxOptionOption<unknown>>>([]);
   const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<string | undefined>(undefined);
-  const [packagePolicyName, setPackagePolicyName] = useState<string | undefined>();
+  const [packagePolicyName, setPackagePolicyName] = useState<string>('');
   const isNameInvalid = checkName(name);
   const isUrlInvalid = checkUrl(url);
   const isPeriodCountInvalid = checkPeriodCount(periodCount);
@@ -148,9 +158,15 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
   // and React outputs a warning
   useEffect(() => {
     if (!packagePolicyName && agentPolicyDetail) {
-      setPackagePolicyName(
-        getDefaultPackageName(agentPolicyDetail.package_policies.map(({ name }) => name))
-      );
+      let packagePolicyNames: string[] = [];
+      if (isPackagePolicyList(agentPolicyDetail.package_policies)) {
+        packagePolicyNames = agentPolicyDetail.package_policies.map(
+          ({ name: policyName }) => policyName
+        );
+      } else {
+        packagePolicyNames = agentPolicyDetail.package_policies;
+      }
+      setPackagePolicyName(getDefaultPackageName(packagePolicyNames));
     }
   }, [agentPolicyDetail, packagePolicyName, setPackagePolicyName]);
 
@@ -203,8 +219,8 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
               </EuiFlexGroup>
             </EuiFormRow>
             <EuiFormRow fullWidth={true} label="Tags">
-              {/* TODO: add the output of this component to the params we ship to IM */}
               <EuiComboBox
+                // TODO: add the output of this component to the params we ship to IM
                 customOptionText="Add {searchValue} as a new tag."
                 fullWidth={true}
                 options={customTags.concat(props.tags).map((tag) => ({ label: tag }))}
@@ -260,7 +276,7 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
                 onClick={() =>
                   props.postMonitorConfig({
                     agentPolicyId: selectedAgentPolicy!,
-                    packagePolicyName,
+                    packagePolicyName: packagePolicyName!,
                     name,
                     schedule: periodCount + periodUnit,
                     tags: selectedTags.map((tag) => tag.label),

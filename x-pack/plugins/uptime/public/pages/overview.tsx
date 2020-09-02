@@ -21,7 +21,6 @@ import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../compo
 import { StatusPanel } from '../components/overview/status_panel';
 import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
 import { useInitApp } from '../hooks/use_init_app';
-import { EditMonitorFlyout } from '../apps/edit_monitor_flyout';
 
 interface Props {
   loading: boolean;
