@@ -77,6 +77,8 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
+      case ML_PAGES.FILTER_LISTS_EDIT:
+      case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
       case ML_PAGES.ACCESS_DENIED:
         return `${appBasePath}/${mlUrlGeneratorState.page}`;

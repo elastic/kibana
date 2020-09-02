@@ -49,6 +49,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
+  | typeof ML_PAGES.FILTER_LISTS_EDIT
+  | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
   | typeof ML_PAGES.ACCESS_DENIED,
   MlGenericUrlPageState | undefined

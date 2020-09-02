@@ -23,7 +23,7 @@ export const TimeseriesexplorerNoJobsFound = () => {
     const path = await mlUrlGenerator.createUrl({
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     });
-    await navigateToPath(path, true); // set preserve search to true
+    await navigateToPath(path, true);
   };
 
   return (
