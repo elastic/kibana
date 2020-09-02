@@ -61,7 +61,7 @@ const createStartContract = (): Start => {
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
-      SearchBar: jest.fn(),
+      SearchBar: jest.fn().mockReturnValue(null),
     },
     indexPatterns: ({
       createField: jest.fn(() => {}),

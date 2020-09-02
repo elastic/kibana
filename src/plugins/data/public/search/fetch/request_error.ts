@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { KbnError } from '../../../../kibana_utils/common';
-import { SearchError, SearchResponse } from './types';
+import { SearchError } from './types';
 
 /**
  * Request Failure - When an entire multi request fails
@@ -26,8 +27,8 @@ import { SearchError, SearchResponse } from './types';
  * @param {Object} resp - optional HTTP response
  */
 export class RequestFailure extends KbnError {
-  public resp: SearchResponse;
-  constructor(err: SearchError | null = null, resp?: SearchResponse) {
+  public resp?: SearchResponse<any>;
+  constructor(err: SearchError | null = null, resp?: SearchResponse<any>) {
     super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err?.message)}`);
 
     this.resp = resp;

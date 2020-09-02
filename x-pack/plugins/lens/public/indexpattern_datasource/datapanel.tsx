@@ -59,7 +59,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.Funct
 >;
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
+  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
 const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
@@ -126,6 +126,7 @@ export function IndexPatternDataPanel({
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
       fields: indexPatterns[id].fields,
+      hasRestrictions: indexPatterns[id].hasRestrictions,
     }));
 
   const dslQuery = buildSafeEsQuery(
@@ -323,7 +324,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       fieldGroup.filter((field) => {
         if (
           localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
         ) {
           return false;
         }
@@ -420,6 +422,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       charts.theme,
     ]
   );
+
+  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -567,7 +571,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 initialIsOpen={localState.isAvailableAccordionOpen}
                 id="lnsIndexPatternAvailableFields"
                 label={
-                  existenceFetchFailed
+                  fieldInfoUnavailable
                     ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
                         defaultMessage: 'All fields',
                       })
@@ -576,6 +580,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       })
                 }
                 exists={true}
+                hideDetails={fieldInfoUnavailable}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={filteredFieldGroups.availableFields.length}
                 isFiltered={
@@ -608,7 +613,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               />
               <EuiSpacer size="m" />
-              {!existenceFetchFailed && (
+              {!fieldInfoUnavailable && (
                 <FieldsAccordion
                   initialIsOpen={localState.isEmptyAccordionOpen}
                   isFiltered={

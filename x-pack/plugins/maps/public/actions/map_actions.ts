@@ -54,7 +54,7 @@ import {
   MapRefreshConfig,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds } from '../../common/elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -271,7 +271,7 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateDrawState(drawState: DrawState) {
+export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way

@@ -14,7 +14,7 @@ import { getMigrationStatusStep, getSecurityStep } from '../common_instructions'
 export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
   const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-configuration.html`
+    `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/configuring-howto-metricbeat.html`
   );
 
   const installMetricbeatStep = {
@@ -28,7 +28,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
       <EuiText>
         <p>
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`}
             target="_blank"
           >
             <FormattedMessage

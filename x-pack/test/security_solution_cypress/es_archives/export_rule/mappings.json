@@ -970,7 +970,7 @@
             "agent_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "data": {
@@ -1004,7 +1004,7 @@
             "active": {
               "type": "boolean"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "config_revision": {
@@ -1072,7 +1072,7 @@
             "api_key_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1240,7 +1240,7 @@
             "namespace": {
               "type": "keyword"
             },
-            "package_configs": {
+            "package_policies": {
               "type": "keyword"
             },
             "revision": {
@@ -1288,7 +1288,7 @@
         },
         "ingest-package-policies": {
           "properties": {
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {

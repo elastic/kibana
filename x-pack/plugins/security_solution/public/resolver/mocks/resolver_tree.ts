@@ -177,7 +177,7 @@ export function mockTreeWithNoAncestorsAnd2Children({
   const origin: ResolverEvent = mockEndpointEvent({
     pid: 0,
     entityID: originID,
-    name: 'c',
+    name: 'c.ext',
     parentEntityId: 'none',
     timestamp: 0,
   });

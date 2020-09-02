@@ -5,8 +5,8 @@
  */
 
 export * from './agent';
-export * from './agent_config';
-export * from './package_config';
+export * from './agent_policy';
+export * from './package_policy';
 export * from './data_stream';
 export * from './output';
 export * from './epm';

@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommon } from './common';
+import { MlCommonUI } from './common_ui';
 
 export function MachineLearningDataVisualizerFileBasedProvider(
   { getService, getPageObjects }: FtrProviderContext,
-  mlCommon: MlCommon
+  mlCommonUI: MlCommonUI
 ) {
   const log = getService('log');
   const retry = getService('retry');
@@ -75,7 +75,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setIndexName(indexName: string) {
-      await mlCommon.setValueWithChecks('mlFileDataVisIndexNameInput', indexName, {
+      await mlCommonUI.setValueWithChecks('mlFileDataVisIndexNameInput', indexName, {
         clearWithKeyboard: true,
       });
       await this.assertIndexNameValue(indexName);

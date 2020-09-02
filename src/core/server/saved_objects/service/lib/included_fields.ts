@@ -42,5 +42,6 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
     .concat('references')
     .concat('migrationVersion')
     .concat('updated_at')
+    .concat('originId')
     .concat(fields); // v5 compatibility
 }
