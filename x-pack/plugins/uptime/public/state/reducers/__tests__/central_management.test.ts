@@ -36,7 +36,6 @@ describe('centralManagementReducer', () => {
         "managedIdList": Array [
           "a-test-id",
         ],
-        "mode": "create",
         "savingConfiguration": false,
       }
     `);
@@ -54,7 +53,6 @@ describe('centralManagementReducer', () => {
         "loadingAgentPolicies": false,
         "loadingAgentPolicyDetail": false,
         "managedIdList": Array [],
-        "mode": "create",
         "savingConfiguration": false,
       }
     `);
