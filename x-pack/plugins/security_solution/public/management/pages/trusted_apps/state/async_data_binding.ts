@@ -67,11 +67,15 @@ export const getLastPresentDataBinding = <T, E>(
   }
 };
 
-export const getLastPresentData = <T, E>(binding: Immutable<AsyncDataBinding<T, E>>) => {
+export const getLastPresentData = <T, E>(
+  binding: Immutable<AsyncDataBinding<T, E>>
+): Immutable<T> | undefined => {
   return getLastPresentDataBinding(binding)?.data;
 };
 
-export const getCurrentError = <T, E>(binding: Immutable<AsyncDataBinding<T, E>>) => {
+export const getCurrentError = <T, E>(
+  binding: Immutable<AsyncDataBinding<T, E>>
+): Immutable<E> | undefined => {
   return isFailedAsyncBinding(binding) ? binding.error : undefined;
 };
 

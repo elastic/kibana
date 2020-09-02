@@ -15,5 +15,5 @@ export interface ItemsPage<T> {
   totalItemsCount: number;
 }
 
-export const pageInfosEqual = (pageInfo1: PageInfo, pageInfo2: PageInfo) =>
+export const pageInfosEqual = (pageInfo1: PageInfo, pageInfo2: PageInfo): boolean =>
   pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;

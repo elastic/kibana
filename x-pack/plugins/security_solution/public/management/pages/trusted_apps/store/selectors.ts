@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
 import { TrustedAppsPageState } from '../state/trusted_apps_page_state';
 import { pageInfosEqual } from '../state/items_page';
@@ -15,7 +15,7 @@ import {
   isOutdatedBinding,
 } from '../state/async_data_binding';
 
-export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>) => {
+export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>): boolean => {
   const currentPageInfo = state.list.currentPageInfo;
   const currentPage = state.list.currentPage;
 
@@ -25,30 +25,26 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsPageState>) =
   );
 };
 
-export const getListItems = (state: Immutable<TrustedAppsPageState>) => {
+export const getListItems = (state: Immutable<TrustedAppsPageState>): Immutable<TrustedApp[]> => {
   return getLastPresentData(state.list.currentPage)?.items || [];
 };
 
-export const getListCurrentPageIndex = (state: Immutable<TrustedAppsPageState>) => {
+export const getListCurrentPageIndex = (state: Immutable<TrustedAppsPageState>): number => {
   return state.list.currentPageInfo.index;
 };
 
-export const getListCurrentPageSize = (state: Immutable<TrustedAppsPageState>) => {
+export const getListCurrentPageSize = (state: Immutable<TrustedAppsPageState>): number => {
   return state.list.currentPageInfo.size;
 };
 
-export const getListTotalItemsCount = (state: Immutable<TrustedAppsPageState>) => {
+export const getListTotalItemsCount = (state: Immutable<TrustedAppsPageState>): number => {
   return getLastPresentData(state.list.currentPage)?.totalItemsCount || 0;
 };
 
-export const getListErrorMessage = (state: Immutable<TrustedAppsPageState>) => {
+export const getListErrorMessage = (state: Immutable<TrustedAppsPageState>): string | undefined => {
   return getCurrentError(state.list.currentPage)?.message;
 };
 
-export const isListLoading = (state: Immutable<TrustedAppsPageState>) => {
+export const isListLoading = (state: Immutable<TrustedAppsPageState>): boolean => {
   return isInProgressBinding(state.list.currentPage);
-};
-
-export const getListViewState = (state: Immutable<TrustedAppsPageState>) => {
-  return state.list;
 };

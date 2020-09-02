@@ -15,7 +15,7 @@ import {
 
 import { TrustedAppsPageState } from '../state/trusted_apps_page_state';
 
-export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsPageState) => R) {
+export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsPageState) => R): R {
   return useSelector((state: State) =>
     selector(state[GLOBAL_NS][TRUSTED_APPS_NS] as TrustedAppsPageState)
   );
