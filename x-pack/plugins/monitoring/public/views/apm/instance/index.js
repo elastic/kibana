@@ -37,7 +37,6 @@ uiRoutes.when('/apm/instances/:uuid', {
       $scope.cluster = find($route.current.locals.clusters, {
         cluster_uuid: globalState.cluster_uuid,
       });
-
       super({
         title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
@@ -55,6 +54,14 @@ uiRoutes.when('/apm/instances/:uuid', {
       $scope.$watch(
         () => this.data,
         (data) => {
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.apm.instance.pageTitle', {
+              defaultMessage: 'APM instance: {instanceName}',
+              values: {
+                instanceName: get(data, 'apmSummary.name'),
+              },
+            })
+          );
           title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
           this.renderReact(data);
         }

@@ -73,6 +73,9 @@ uiRoutes.when('/elasticsearch/nodes', {
         title: i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
           defaultMessage: 'Elasticsearch - Nodes',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.nodes.pageTitle', {
+          defaultMessage: 'Elasticsearch nodes',
+        }),
         storageKey: 'elasticsearch.nodes',
         reactNodeId: 'elasticsearchNodesReact',
         defaultData: {},

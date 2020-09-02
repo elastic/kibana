@@ -99,6 +99,15 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
             })
           );
 
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pipelines.pageTitle', {
+              defaultMessage: 'Logstash node pipelines: {nodeName}',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
           const pagination = {
             ...this.pagination,
             totalItemCount: data.totalPipelineCount,

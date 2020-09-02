@@ -66,6 +66,12 @@ uiRoutes.when('/elasticsearch/indices/:index', {
             indexName,
           },
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.indices.overview.pageTitle', {
+          defaultMessage: 'Index: {indexName}',
+          values: {
+            indexName,
+          },
+        }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchIndexApp',

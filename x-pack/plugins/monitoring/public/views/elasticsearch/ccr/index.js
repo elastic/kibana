@@ -30,6 +30,9 @@ uiRoutes.when('/elasticsearch/ccr', {
         title: i18n.translate('xpack.monitoring.elasticsearch.ccr.routeTitle', {
           defaultMessage: 'Elasticsearch - Ccr',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.ccr.pageTitle', {
+          defaultMessage: 'Elasticsearch Ccr',
+        }),
         reactNodeId: 'elasticsearchCcrReact',
         getPageData,
         $scope,

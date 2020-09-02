@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
@@ -31,6 +32,9 @@ uiRoutes.when('/apm', {
 
       super({
         title: 'APM',
+        pageTitle: i18n.translate('xpack.monitoring.apm.overview.pageTitle', {
+          defaultMessage: 'APM overview',
+        }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},
         reactNodeId: 'apmOverviewReact',

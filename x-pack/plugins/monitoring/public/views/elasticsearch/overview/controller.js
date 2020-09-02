@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from '../../../components';
@@ -20,6 +21,9 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
 
     super({
       title: 'Elasticsearch',
+      pageTitle: i18n.translate('xpack.monitoring.elasticsearch.overview.pageTitle', {
+        defaultMessage: 'Elasticsearch overview',
+      }),
       api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch`,
       defaultData: {
         clusterStatus: { status: '' },
