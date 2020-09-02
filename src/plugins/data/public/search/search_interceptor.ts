@@ -22,8 +22,12 @@ import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observab
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
-import { ISearchOptions } from './types';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ISearchOptions,
+  ES_SEARCH_STRATEGY,
+} from '../../common/search';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
 

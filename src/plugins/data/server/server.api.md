@@ -676,8 +676,7 @@ export class IndexPatternsFetcher {
 //
 // @public (undocumented)
 export interface ISearchOptions {
-    signal?: AbortSignal;
-    // (undocumented)
+    abortSignal?: AbortSignal;
     strategy?: string;
 }
 

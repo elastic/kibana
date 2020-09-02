@@ -84,12 +84,18 @@ import {
   SearchRequest,
 } from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  UI_SETTINGS,
+  ISearchOptions,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
-import { ISearchStartLegacy, ISearchOptions } from '../types';
+import { ISearchStartLegacy } from '../types';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
