@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useTestPipelineContext, usePipelineProcessorsContext } from '../../context';
-import { DocumentsDropdown } from '../documents_dropdown';
+import { DocumentsDropdown } from './documents_dropdown';
 import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
 import { AddDocumentsButton } from './add_documents_button';
 import { TestOutputButton } from './test_output_button';

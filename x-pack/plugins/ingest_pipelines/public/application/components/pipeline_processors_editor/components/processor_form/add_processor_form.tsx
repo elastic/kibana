@@ -79,7 +79,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   );
 
   return (
-    <Form data-test-subj="processorSettingsForm" form={form} onSubmit={handleSubmit}>
+    <Form data-test-subj="addProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout size="m" maxWidth={720} onClose={closeFlyout}>
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">

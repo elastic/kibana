@@ -45,12 +45,12 @@ export interface Props {
 }
 
 const updateButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
+  'xpack.ingestPipelines.processorFormFlyout.updateButtonLabel',
   { defaultMessage: 'Update' }
 );
 
 const cancelButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.cancelButtonLabel',
+  'xpack.ingestPipelines.processorFormFlyout.cancelButtonLabel',
   { defaultMessage: 'Cancel' }
 );
 
@@ -158,7 +158,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   }
 
   return (
-    <Form data-test-subj="processorSettingsForm" form={form} onSubmit={handleSubmit}>
+    <Form data-test-subj="editProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout
         size="m"
         maxWidth={720}

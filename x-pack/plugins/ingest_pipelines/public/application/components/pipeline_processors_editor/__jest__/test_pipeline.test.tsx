@@ -231,7 +231,7 @@ describe('Test pipeline', () => {
         // Click processor to open manage flyout
         await actions.clickProcessor('processors>0');
         // Verify flyout opened
-        expect(exists('processorSettingsForm')).toBe(true);
+        expect(exists('editProcessorForm')).toBe(true);
 
         // Navigate to "Output" tab
         await actions.clickProcessorOutputTab();

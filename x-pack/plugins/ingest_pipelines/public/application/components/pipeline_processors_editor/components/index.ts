@@ -18,6 +18,4 @@ export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
 
 export { TestPipelineActions } from './test_pipeline';
 
-export { DocumentsDropdown } from './documents_dropdown';
-
 export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';

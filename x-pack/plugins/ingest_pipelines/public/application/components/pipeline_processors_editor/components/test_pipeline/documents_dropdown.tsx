@@ -23,20 +23,23 @@ import { TestPipelineFlyoutTab } from '../test_pipeline/test_pipeline_flyout_tab
 
 const i18nTexts = {
   dropdownLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsdropdownLabel',
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsdropdown.dropdownLabel',
     {
       defaultMessage: 'Documents:',
     }
   ),
   addDocumentsButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel',
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.buttonLabel',
     {
       defaultMessage: 'Add documents',
     }
   ),
-  popoverTitle: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.popoverTitle', {
-    defaultMessage: 'Test documents',
-  }),
+  popoverTitle: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsDropdown.popoverTitle',
+    {
+      defaultMessage: 'Test documents',
+    }
+  ),
 };
 
 interface Props {
@@ -116,7 +119,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
           <EuiButton
             size="s"
             onClick={() => {
-              openFlyout!('documents');
+              openFlyout('documents');
               setShowPopover(false);
             }}
             data-test-subj="addDocumentsButton"

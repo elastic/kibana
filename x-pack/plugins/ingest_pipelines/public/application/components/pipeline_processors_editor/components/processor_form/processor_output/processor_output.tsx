@@ -47,6 +47,12 @@ const i18nTexts = {
   droppedCalloutTitle: i18n.translate('xpack.ingestPipelines.processorOutput.droppedCalloutTitle', {
     defaultMessage: 'The document was dropped.',
   }),
+  noOutputCalloutTitle: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.noOutputCalloutTitle',
+    {
+      defaultMessage: 'Output is not available for this processor.',
+    }
+  ),
   processorOutputLabel: i18n.translate(
     'xpack.ingestPipelines.processorOutput.processorOutputCodeBlockLabel',
     {
@@ -105,6 +111,10 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
     status,
   } = processorOutput!;
 
+  const NoOutputCallOut: FunctionComponent = () => (
+    <EuiCallOut title={i18nTexts.noOutputCalloutTitle} iconType="pin" />
+  );
+
   const getOutputContent = () => {
     switch (status) {
       case 'skipped':
@@ -112,11 +122,15 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
       case 'dropped':
         return <EuiCallOut title={i18nTexts.droppedCalloutTitle} iconType="indexClose" />;
       case 'success':
-        return (
-          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-            {JSON.stringify(currentResult, null, 2)}
-          </EuiCodeBlock>
-        );
+        if (currentResult) {
+          return (
+            <EuiCodeBlock paddingSize="s" language="json" isCopyable>
+              {JSON.stringify(currentResult, null, 2)}
+            </EuiCodeBlock>
+          );
+        }
+
+        return <NoOutputCallOut />;
       case 'error':
         return (
           <EuiCallOut iconType={ErrorIcon} title={i18nTexts.processorErrorTitle} color="danger">
@@ -124,6 +138,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
               language="json"
               paddingSize="none"
               className="processorOutput__callOutCodeBlock"
+              transparentBackground
             >
               {JSON.stringify(error, null, 2)}
             </EuiCodeBlock>
@@ -140,13 +155,14 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
               className="processorOutput__callOutCodeBlock"
               language="json"
               paddingSize="none"
+              transparentBackground
             >
               {JSON.stringify(ignoredError, null, 2)}
             </EuiCodeBlock>
           </EuiCallOut>
         );
       default:
-      // TODO
+        return NoOutputCallout;
     }
   };
 
