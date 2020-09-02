@@ -130,6 +130,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
         currentStep={currentStep}
         maxCompletedStep={maxCompletedStep}
         updateCurrentStep={updateCurrentStep}
+        isFormValid={validation.isValid}
       />
       <EuiSpacer size="l" />
       <EuiForm>
