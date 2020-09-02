@@ -61,19 +61,16 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     coreMock.createStart()
   );
 
-  const field = new IndexPatternField(
-    {
-      name: 'bytes',
-      type: 'number',
-      esTypes: ['long'],
-      count: 10,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    },
-    'bytes'
-  );
+  const field = new IndexPatternField({
+    name: 'bytes',
+    type: 'number',
+    esTypes: ['long'],
+    count: 10,
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  });
 
   const props = {
     indexPattern,

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { FieldSpec } from '../../../../../../plugins/data/public';
 
-export interface IndexedFieldItem extends IFieldType {
+export interface IndexedFieldItem extends FieldSpec {
   info: string[];
   excluded: boolean;
+  formatTitle: string;
 }

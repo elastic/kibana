@@ -241,7 +241,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         'data-test-subj': 'indexedFieldType',
       },
       {
-        field: 'format',
+        field: 'formatTitle',
         name: formatHeader,
         dataType: 'string',
         sortable: true,

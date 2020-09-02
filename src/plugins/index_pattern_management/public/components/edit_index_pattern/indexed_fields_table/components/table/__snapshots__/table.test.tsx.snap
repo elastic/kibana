@@ -99,7 +99,6 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "Elastic",
         "excluded": false,
-        "format": "",
         "info": Array [],
         "name": "Elastic",
         "searchable": true,
@@ -108,7 +107,6 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "timestamp",
         "excluded": false,
-        "format": "YYYY-MM-DD",
         "info": Array [],
         "name": "timestamp",
         "type": "date",
@@ -116,7 +114,6 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "conflictingField",
         "excluded": false,
-        "format": "",
         "info": Array [],
         "name": "conflictingField",
         "type": "conflict",

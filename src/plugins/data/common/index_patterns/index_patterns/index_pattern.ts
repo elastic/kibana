@@ -126,7 +126,7 @@ export class IndexPattern implements IIndexPattern {
 
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
-    this.fields = fieldList([], this.shortDotsEnable);
+    this.fields = fieldList([]);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);

@@ -20,9 +20,8 @@
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec, SpecOptions } from '../types';
 import { IndexPattern } from '../index_patterns';
-import { shortenDottedString } from '../../utils';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
@@ -31,27 +30,23 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   getAll(): IndexPatternField[];
   getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
   getByType(type: IndexPatternField['type']): IndexPatternField[];
-  remove(field: IFieldType): void;
+  remove(field: IFieldType | FieldSpec): void;
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
-  toSpec(options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }): FieldSpec[];
+  toSpec(options?: SpecOptions): FieldSpec[];
 }
 
 export type CreateIndexPatternFieldList = (
   indexPattern: IndexPattern,
   specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
+  shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
 
 // extending the array class and using a constructor doesn't work well
 // when calling filter and similar so wrapping in a callback.
 // to be removed in the future
-export const fieldList = (
-  specs: FieldSpec[] = [],
-  shortDotsEnable = false
-): IIndexPatternFieldList => {
+export const fieldList = (specs: FieldSpec[] = []): IIndexPatternFieldList => {
   class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
@@ -62,9 +57,8 @@ export const fieldList = (
       }
       this.groups.get(field.type)!.set(field.name, field);
     };
-    private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
-    private calcDisplayName = (name: string) =>
-      shortDotsEnable ? shortenDottedString(name) : name;
+    private removeByGroup = (field: IFieldType | FieldSpec) =>
+      this.groups.get(field.type)!.delete(field.name);
     constructor() {
       super();
       specs.map((field) => this.add(field));
@@ -76,13 +70,13 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec) => {
-      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      const newField = new IndexPatternField(field);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
     };
 
-    public readonly remove = (field: IFieldType) => {
+    public readonly remove = (field: IFieldType | FieldSpec) => {
       this.removeByGroup(field);
       this.byName.delete(field.name);
 
@@ -91,7 +85,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      const newField = new IndexPatternField(field);
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);

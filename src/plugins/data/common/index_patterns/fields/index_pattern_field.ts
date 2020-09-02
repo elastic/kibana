@@ -21,19 +21,17 @@ import { i18n } from '@kbn/i18n';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
-import { FieldSpec, IndexPattern } from '../..';
+import { FieldSpec, SpecOptions } from '../..';
 import { FieldTypeUnknownError } from '../errors';
+import { shortenDottedString } from '../../utils';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(spec: FieldSpec, displayName: string) {
+  constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
-    this.displayName = displayName;
-
     this.kbnFieldType = getKbnFieldType(spec.type);
     if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
       const msg = i18n.translate('data.indexPatterns.unknownFieldTypeErrorMsg', {
@@ -80,6 +78,10 @@ export class IndexPatternField implements IFieldType {
   // read only attrs
   public get name() {
     return this.spec.name;
+  }
+
+  public get displayName() {
+    return this.spec.shortDotsEnable ? shortenDottedString(this.spec.name) : this.spec.name;
   }
 
   public get type() {
@@ -148,11 +150,7 @@ export class IndexPatternField implements IFieldType {
     };
   }
 
-  public toSpec({
-    getFormatterForField,
-  }: {
-    getFormatterForField?: IndexPattern['getFormatterForField'];
-  } = {}) {
+  public toSpec({ getFormatterForField }: SpecOptions = {}) {
     return {
       count: this.count,
       script: this.script,
@@ -167,6 +165,8 @@ export class IndexPatternField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
+      // format: this.format.toJSON(),
+      shortDotsEnable: this.spec.shortDotsEnable,
     };
   }
 }

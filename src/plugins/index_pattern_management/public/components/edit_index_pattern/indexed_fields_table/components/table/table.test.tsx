@@ -30,28 +30,30 @@ const indexPattern = {
 const items: IndexedFieldItem[] = [
   {
     name: 'Elastic',
-    displayName: 'Elastic',
     searchable: true,
+    aggregatable: true,
     info: [],
     type: 'name',
     excluded: false,
-    format: '',
+    formatTitle: '',
   },
   {
     name: 'timestamp',
-    displayName: 'timestamp',
+    searchable: false,
+    aggregatable: false,
     type: 'date',
     info: [],
     excluded: false,
-    format: 'YYYY-MM-DD',
+    formatTitle: 'YYYY-MM-DD',
   },
   {
     name: 'conflictingField',
-    displayName: 'conflictingField',
+    searchable: false,
+    aggregatable: false,
     type: 'conflict',
     info: [],
     excluded: false,
-    format: '',
+    formatTitle: '',
   },
 ];
 

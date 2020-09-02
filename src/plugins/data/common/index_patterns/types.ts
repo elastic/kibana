@@ -23,6 +23,7 @@ import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES } from '..';
+import { IndexPattern } from '..';
 
 export interface IIndexPattern {
   [key: string]: any;
@@ -164,6 +165,7 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+  shortDotsEnable?: boolean;
 }
 
 export interface IndexPatternSpec {
@@ -179,4 +181,8 @@ export interface IndexPatternSpec {
 
 export interface SourceFilter {
   value: string;
+}
+
+export interface SpecOptions {
+  getFormatterForField?: IndexPattern['getFormatterForField'];
 }
