@@ -138,6 +138,18 @@ export const extractErrorProperties = (
       statusCode = error.body.attributes.body?.status;
     }
 
+    if (
+      'attributes' in error.body &&
+      typeof error.body.attributes === 'object' &&
+      error.body.attributes.body?.status !== undefined &&
+      error.body.attributes.body?.error?.reason !== undefined
+    ) {
+      return {
+        message: error.body.attributes.body?.error?.reason,
+        statusCode: error.body.attributes.body?.status,
+      };
+    }
+
     if (typeof error.body.message === 'string') {
       return {
         message: error.body.message,
