@@ -56,10 +56,10 @@ describe('Common schemas', () => {
       // also update the operatorEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
-      const keys = Object.keys(operator.keys);
-      const enumKeys = Object.keys(OperatorEnum);
+      const keys = Object.keys(operator.keys).sort().join(',').toLowerCase();
+      const enumKeys = Object.keys(OperatorEnum).sort().join(',').toLowerCase();
 
-      expect(keys.length).toEqual(enumKeys.length);
+      expect(keys).toEqual(enumKeys);
     });
   });
 
@@ -88,10 +88,10 @@ describe('Common schemas', () => {
       // also update the ExceptionListTypeEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
-      const keys = Object.keys(exceptionListType.keys);
-      const enumKeys = Object.keys(ExceptionListTypeEnum);
+      const keys = Object.keys(exceptionListType.keys).sort().join(',').toLowerCase();
+      const enumKeys = Object.keys(ExceptionListTypeEnum).sort().join(',').toLowerCase();
 
-      expect(keys.length).toEqual(enumKeys.length);
+      expect(keys).toEqual(enumKeys);
     });
   });
 
