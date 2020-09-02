@@ -79,12 +79,11 @@ function getLayoutOptions(
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
-    // @ts-ignore DefinitelyTyped is incorrect here. Roots can be an Array
+    // @ts-expect-error DefinitelyTyped is incorrect here. Roots can be an Array
     roots: selectedRoots.length ? selectedRoots : undefined,
     fit: true,
     padding: nodeHeight,
     spacingFactor: 1.2,
-    // @ts-ignore
     // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
     // The extra 5° achieves the effect of separating overlapping taxi-styled edges.
     transform: (node: any, pos: cytoscape.Position) => rotatePoint(pos, -95),
