@@ -121,10 +121,13 @@ export class Server {
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any NP plugin
+      // 1) Can access context from any KP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
+      pluginDependencies: new Map([
+        ...pluginTree.asOpaqueIds,
+        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
+      ]),
     });
 
     const auditTrailSetup = this.auditTrail.setup();
@@ -154,6 +157,12 @@ export class Server {
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
+      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy can access plugin status from
+      // any KP plugin
+      pluginDependencies: new Map([
+        ...pluginTree.asNames,
+        ['legacy', [...pluginTree.asNames.keys()]],
+      ]),
       savedObjects: savedObjectsSetup,
     });
 

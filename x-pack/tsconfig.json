@@ -14,8 +14,7 @@
     "test/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
-    "plugins/apm/scripts/**/*",
-    "**/typespec_tests.ts"
+    "plugins/apm/scripts/**/*"
   ],
   "compilerOptions": {
     "outDir": ".",
