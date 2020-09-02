@@ -22,6 +22,7 @@ import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
+import { MountPoint } from '../types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
@@ -90,6 +91,11 @@ interface AppUpdaterWrapper {
   updater: AppUpdater;
 }
 
+interface AppInternalState {
+  leaveHandler?: AppLeaveHandler;
+  actionMenu?: MountPoint;
+}
+
 /**
  * Service that is responsible for registering new applications.
  * @internal
@@ -98,8 +104,9 @@ export class ApplicationService {
   private readonly apps = new Map<string, App<any> | LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
-  private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
+  private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject();
@@ -293,11 +300,13 @@ export class ApplicationService {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        this.appLeaveHandlers.delete(this.currentAppId$.value!);
+        this.appInternalStates.delete(this.currentAppId$.value!);
         this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
     };
+
+    this.currentAppId$.subscribe(() => this.refreshCurrentActionMenu());
 
     return {
       applications$: applications$.pipe(
@@ -307,6 +316,10 @@ export class ApplicationService {
       capabilities,
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
+      currentActionMenu$: this.currentActionMenu$.pipe(
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
@@ -338,6 +351,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
+            setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
@@ -346,7 +360,24 @@ export class ApplicationService {
   }
 
   private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
-    this.appLeaveHandlers.set(appId, handler);
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      leaveHandler: handler,
+    });
+  };
+
+  private setAppActionMenu = (appId: string, mount: MountPoint | undefined) => {
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      actionMenu: mount,
+    });
+    this.refreshCurrentActionMenu();
+  };
+
+  private refreshCurrentActionMenu = () => {
+    const appId = this.currentAppId$.getValue();
+    const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
+    this.currentActionMenu$.next(currentActionMenu);
   };
 
   private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
@@ -354,7 +385,7 @@ export class ApplicationService {
     if (currentAppId === undefined) {
       return true;
     }
-    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
@@ -372,7 +403,7 @@ export class ApplicationService {
     if (currentAppId === undefined) {
       return;
     }
-    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
     if (isConfirmAction(action)) {
       event.preventDefault();
       // some browsers accept a string return value being the message displayed
@@ -383,6 +414,7 @@ export class ApplicationService {
   public stop() {
     this.stop$.next();
     this.currentAppId$.complete();
+    this.currentActionMenu$.complete();
     this.statusUpdaters$.complete();
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);

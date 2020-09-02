@@ -73,6 +73,15 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
   });
 
+  it('makes TooManyRequests a SavedObjectsClient/tooManyRequests error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 429 })
+    );
+    expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(false);
+    expect(decorateEsError(error)).toBe(error);
+    expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(true);
+  });
+
   it('makes NotAuthorized a SavedObjectsClient/NotAuthorized error', () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({ statusCode: 401 })

@@ -9,10 +9,15 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { useTimelineDetails } from '../../../../containers/details';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
-import { DetailItem } from '../../../../../../common/search_strategy/timeline';
+import {
+  TimelineItem,
+  TimelineNonEcsData,
+  DetailItem,
+} from '../../../../../../common/search_strategy/timeline';
+import { Ecs } from '../../../../../../common/ecs';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -34,7 +39,7 @@ import { getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
-import { StoreState } from '../../../../../common/store';
+import { inputsModel, StoreState } from '../../../../../common/store';
 
 interface Props {
   actionsColumnWidth: number;
@@ -56,6 +61,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
+  refetch: inputsModel.Refetch;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -122,6 +128,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   onRowSelected,
   onUnPinEvent,
   onUpdateColumns,
+  refetch,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -131,9 +138,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const timeline = useSelector<StoreState, TimelineModel>((state) => {
-    return state.timeline.timelineById['timeline-1'];
-  });
+  const { status: timelineStatus } = useSelector<StoreState, TimelineModel>(
+    (state) => state.timeline.timelineById[TimelineId.active]
+  );
   const divElement = useRef<HTMLDivElement | null>(null);
   const [loading, detailsData] = useTimelineDetails({
     docValueFields,
@@ -205,6 +212,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                 onPinEvent={onPinEvent}
                 onRowSelected={onRowSelected}
                 onUnPinEvent={onUnPinEvent}
+                refetch={refetch}
                 selectedEventIds={selectedEventIds}
                 showCheckboxes={showCheckboxes}
                 showNotes={!!showNotes[event._id]}
@@ -225,13 +233,13 @@ const StatefulEventComponent: React.FC<Props> = ({
                     getNotesByIds={getNotesByIds}
                     noteIds={eventIdToNoteIds[event._id] || emptyNotes}
                     showAddNote={!!showNotes[event._id]}
-                    status={timeline.status}
+                    status={timelineStatus}
                     toggleShowAddNote={onToggleShowNotes}
                     updateNote={updateNote}
                   />
                 </EventsTrSupplement>
 
-                {getRowRenderer(event.ecs, rowRenderers).renderRow({
+                {getRowRenderer<Ecs>(event.ecs, rowRenderers).renderRow({
                   browserFields,
                   data: event.ecs,
                   timelineId,

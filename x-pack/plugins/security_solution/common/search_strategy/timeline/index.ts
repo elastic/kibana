@@ -6,6 +6,7 @@
 
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
+import { Ecs } from '../../ecs';
 import {
   TimelineDetailsQueries,
   TimelineDetailsRequestOptions,
@@ -40,6 +41,23 @@ export enum Direction {
 export interface SortField {
   field: string;
   direction: Direction;
+}
+
+export interface TimelineEdges {
+  node: TimelineItem;
+  cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+  _index?: Maybe<string>;
+  data: TimelineNonEcsData[];
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+  value?: Maybe<string[] | string>;
 }
 
 export interface TimerangeInput {

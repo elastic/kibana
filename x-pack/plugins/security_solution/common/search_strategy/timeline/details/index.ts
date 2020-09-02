@@ -5,7 +5,6 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-
 import { Inspect, Maybe, RequestOptionsPaginated } from '..';
 
 export enum TimelineDetailsQueries {
@@ -14,9 +13,7 @@ export enum TimelineDetailsQueries {
 
 export interface DetailItem {
   field: string;
-
   values?: Maybe<string[]>;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   originalValue?: Maybe<any>;
 }
