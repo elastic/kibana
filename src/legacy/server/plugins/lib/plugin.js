@@ -79,12 +79,7 @@ export class Plugin {
         );
       }
 
-      // Many of the plugins are simply adding static assets to the server and we don't need
-      // to track their "status". Since plugins must have an init() function to even set its status
-      // we shouldn't even create a status unless the plugin can use it.
       if (this.externalInit) {
-        this.status = kbnServer.status.createForPlugin(this);
-        server.expose('status', this.status);
         await this.externalInit(server, options);
       }
     };
@@ -93,12 +88,6 @@ export class Plugin {
       plugin: { register, name: id, version },
       options: config.has(configPrefix) ? config.get(configPrefix) : null,
     });
-
-    // Only change the plugin status to green if the
-    // initial status has not been changed
-    if (this.status && this.status.state === 'uninitialized') {
-      this.status.green('Ready');
-    }
   }
 
   async postInit() {

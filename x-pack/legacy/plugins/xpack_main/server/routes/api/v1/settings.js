@@ -5,8 +5,16 @@
  */
 
 import { boomify } from 'boom';
-import { get } from 'lodash';
+import { first } from 'rxjs/operators';
+import { ServiceStatusLevels } from '../../../../../../../../src/core/server';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../../../plugins/monitoring/common/constants';
+
+const ServiceStatusToLegacyState = {
+  [ServiceStatusLevels.critical.toString()]: 'red',
+  [ServiceStatusLevels.unavailable.toString()]: 'red',
+  [ServiceStatusLevels.degraded.toString()]: 'yellow',
+  [ServiceStatusLevels.available.toString()]: 'green',
+};
 
 const getClusterUuid = async (callCluster) => {
   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
@@ -23,6 +31,7 @@ export function settingsRoute(server, kbnServer) {
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
 
       try {
+        const { status: coreStatus } = server.newPlatform.setup.core;
         const { usageCollection } = server.newPlatform.setup.plugins;
         const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
@@ -34,7 +43,7 @@ export function settingsRoute(server, kbnServer) {
 
         const snapshotRegex = /-snapshot/i;
         const config = server.config();
-        const status = kbnServer.status.toJSON();
+        const status = await coreStatus.overall$.pipe(first()).toPromise();
         const kibana = {
           uuid: config.get('server.uuid'),
           name: config.get('server.name'),
@@ -45,7 +54,7 @@ export function settingsRoute(server, kbnServer) {
           transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
           version: kbnServer.version.replace(snapshotRegex, ''),
           snapshot: snapshotRegex.test(kbnServer.version),
-          status: get(status, 'overall.state'),
+          status: ServiceStatusToLegacyState[status.level.toString()],
         };
 
         return {

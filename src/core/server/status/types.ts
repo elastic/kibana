@@ -217,11 +217,17 @@ export interface StatusServiceSetup {
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
+
+  /**
+   * Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is
+   * present.
+   */
+  isStatusPageAnonymous: () => boolean;
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'core$' | 'overall$'> {
-  isStatusPageAnonymous: () => boolean;
+export interface InternalStatusServiceSetup
+  extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

@@ -302,6 +302,10 @@ export class LegacyService implements CoreService {
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
+      metrics: {
+        collectionInterval: setupDeps.core.metrics.collectionInterval,
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
@@ -309,6 +313,7 @@ export class LegacyService implements CoreService {
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       status: {
+        isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
         set: () => {

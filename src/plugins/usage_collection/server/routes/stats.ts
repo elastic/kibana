@@ -1,0 +1,204 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import defaultsDeep from 'lodash/defaultsDeep';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+
+import {
+  AuthStatus,
+  GetAuthState,
+  IRouter,
+  LegacyAPICaller,
+  MetricsServiceSetup,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../core/server';
+import { CollectorSet } from '../collector';
+
+const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMessage', {
+  defaultMessage: 'Stats are not ready yet. Please try again later.',
+});
+
+const SNAPSHOT_REGEX = /-snapshot/i;
+
+export function registerStatsRoute({
+  router,
+  config,
+  collectorSet,
+  metrics,
+  overallStatus$,
+  getAuthState,
+}: {
+  router: IRouter;
+  config: {
+    allowAnonymous: boolean;
+    kibanaIndex: string;
+    kibanaVersion: string;
+    uuid: string;
+    server: {
+      name: string;
+      hostname: string;
+      port: number;
+    };
+  };
+  collectorSet: CollectorSet;
+  metrics: MetricsServiceSetup;
+  overallStatus$: Observable<ServiceStatus>;
+  getAuthState: GetAuthState;
+}) {
+  const getUsage = async (callCluster: LegacyAPICaller): Promise<any> => {
+    const usage = await collectorSet.bulkFetchUsage(callCluster);
+    return collectorSet.toObject(usage);
+  };
+
+  const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
+    return uuid;
+  };
+
+  router.get(
+    {
+      path: '/api/stats',
+      options: {
+        // Even when allowAnonymous is true, we attempt to authenticate in order to deny anonymous users access to
+        // extended stats.
+        authRequired: config.allowAnonymous ? 'optional' : true,
+        tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
+      },
+      validate: {
+        query: schema.object({
+          extended: schema.maybe(
+            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
+          ),
+          legacy: schema.maybe(
+            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
+          ),
+          exclude_usage: schema.maybe(
+            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
+          ),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const isExtended = req.query.extended === '' || req.query.extended === 'true';
+      const isLegacy = req.query.legacy === '' || req.query.legacy === 'true';
+      const shouldGetUsage =
+        req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
+
+      let extended;
+      if (isExtended) {
+        // Unauthenticated users should never have access to these stats.
+        if (getAuthState(req).status === AuthStatus.unauthenticated) {
+          return res.unauthorized({
+            body: 'Unauthenticated for extended stats',
+          });
+        }
+
+        const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+        const collectorsReady = await collectorSet.areAllCollectorsReady();
+
+        if (shouldGetUsage && !collectorsReady) {
+          return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
+        }
+
+        const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
+        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
+
+        let modifiedUsage = usage;
+        if (isLegacy) {
+          // In an effort to make telemetry more easily augmented, we need to ensure
+          // we can passthrough the data without every part of the process needing
+          // to know about the change; however, to support legacy use cases where this
+          // wasn't true, we need to be backwards compatible with how the legacy data
+          // looked and support those use cases here.
+          modifiedUsage = Object.keys(usage).reduce((accum, usageKey) => {
+            if (usageKey === 'kibana') {
+              accum = {
+                ...accum,
+                ...usage[usageKey],
+              };
+            } else if (usageKey === 'reporting') {
+              accum = {
+                ...accum,
+                xpack: {
+                  ...accum.xpack,
+                  reporting: usage[usageKey],
+                },
+              };
+            } else {
+              // I don't think we need to it this for the above conditions, but do it for most as it will
+              // match the behavior done in monitoring/bulk_uploader
+              defaultsDeep(accum, { [usageKey]: usage[usageKey] });
+            }
+
+            return accum;
+          }, {} as any);
+
+          extended = {
+            usage: modifiedUsage,
+            clusterUuid,
+          };
+        } else {
+          extended = collectorSet.toApiFieldNames({
+            usage: modifiedUsage,
+            clusterUuid,
+          });
+        }
+      }
+
+      // Guranteed to resolve immediately due to replay effect on getOpsMetrics$
+      const lastMetrics = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+
+      const overallStatus = await overallStatus$.pipe(first()).toPromise();
+      const kibanaStats = collectorSet.toApiFieldNames({
+        ...lastMetrics,
+        kibana: {
+          uuid: config.uuid,
+          name: config.server.name,
+          index: config.kibanaIndex,
+          host: config.server.hostname,
+          locale: i18n.getLocale(),
+          transport_address: `${config.server.hostname}:${config.server.port}`,
+          version: config.kibanaVersion.replace(SNAPSHOT_REGEX, ''),
+          snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
+          status: ServiceStatusToLegacyState[overallStatus.level.toString()],
+        },
+        last_updated: lastMetrics.collected_at.toISOString(),
+        collection_interval_in_millis: metrics.collectionInterval,
+      });
+
+      return res.ok({
+        body: {
+          ...kibanaStats,
+          ...extended,
+        },
+      });
+    }
+  );
+}
+
+const ServiceStatusToLegacyState: Record<string, string> = {
+  [ServiceStatusLevels.critical.toString()]: 'red',
+  [ServiceStatusLevels.unavailable.toString()]: 'red',
+  [ServiceStatusLevels.degraded.toString()]: 'yellow',
+  [ServiceStatusLevels.available.toString()]: 'green',
+};

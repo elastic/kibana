@@ -13,33 +13,35 @@ describe('setupXPackMain()', () => {
   const sandbox = sinon.createSandbox();
 
   let mockServer;
+  let mockStatusObservable;
   let mockElasticsearchPlugin;
-  let mockXPackMainPlugin;
 
   beforeEach(() => {
     sandbox.useFakeTimers();
 
     mockElasticsearchPlugin = {
       getCluster: sinon.stub(),
-      status: sinon.stub({
-        on() {},
-      }),
     };
 
-    mockXPackMainPlugin = {
-      status: sinon.stub({
-        green() {},
-        red() {},
-      }),
-    };
+    mockStatusObservable = sinon.stub({ subscribe() {} });
 
     mockServer = sinon.stub({
       plugins: {
         elasticsearch: mockElasticsearchPlugin,
-        xpack_main: mockXPackMainPlugin,
       },
       newPlatform: {
-        setup: { plugins: { features: {}, licensing: { license$: new BehaviorSubject() } } },
+        setup: {
+          core: {
+            status: {
+              core$: {
+                pipe() {
+                  return mockStatusObservable;
+                },
+              },
+            },
+          },
+          plugins: { features: {}, licensing: { license$: new BehaviorSubject() } },
+        },
       },
       events: { on() {} },
       log() {},
@@ -61,55 +63,6 @@ describe('setupXPackMain()', () => {
     setupXPackMain(mockServer);
 
     sinon.assert.calledWithExactly(mockServer.expose, 'info', sinon.match.instanceOf(XPackInfo));
-    sinon.assert.calledWithExactly(mockElasticsearchPlugin.status.on, 'change', sinon.match.func);
-  });
-
-  describe('Elasticsearch plugin state changes cause XPackMain plugin state change.', () => {
-    let xPackInfo;
-    let onElasticsearchPluginStatusChange;
-    beforeEach(() => {
-      setupXPackMain(mockServer);
-
-      onElasticsearchPluginStatusChange = mockElasticsearchPlugin.status.on.withArgs('change')
-        .firstCall.args[1];
-      xPackInfo = mockServer.expose.firstCall.args[1];
-    });
-
-    it('if `XPackInfo` is available status will become `green`.', async () => {
-      sinon.stub(xPackInfo, 'isAvailable').returns(false);
-      // We need this to make sure the code waits for `refreshNow` to complete before it tries
-      // to access its properties.
-      sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise((resolve) => {
-          xPackInfo.isAvailable.returns(true);
-          resolve();
-        });
-      });
-
-      await onElasticsearchPluginStatusChange();
-
-      sinon.assert.calledWithExactly(mockXPackMainPlugin.status.green, 'Ready');
-      sinon.assert.notCalled(mockXPackMainPlugin.status.red);
-    });
-
-    it('if `XPackInfo` is not available status will become `red`.', async () => {
-      sinon.stub(xPackInfo, 'isAvailable').returns(true);
-      sinon.stub(xPackInfo, 'unavailableReason').returns('');
-
-      // We need this to make sure the code waits for `refreshNow` to complete before it tries
-      // to access its properties.
-      sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise((resolve) => {
-          xPackInfo.isAvailable.returns(false);
-          xPackInfo.unavailableReason.returns('Some weird error.');
-          resolve();
-        });
-      });
-
-      await onElasticsearchPluginStatusChange();
-
-      sinon.assert.calledWithExactly(mockXPackMainPlugin.status.red, 'Some weird error.');
-      sinon.assert.notCalled(mockXPackMainPlugin.status.green);
-    });
+    sinon.assert.calledWithExactly(mockStatusObservable.subscribe, sinon.match.func);
   });
 });
