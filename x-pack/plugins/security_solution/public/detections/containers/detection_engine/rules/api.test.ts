@@ -46,7 +46,7 @@ describe('Detections Rules API', () => {
       await createRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
-          '{"description":"Detecting root and admin users","name":"Query with a rule id","severity":"high","type":"query","risk_score":55,"query":"user.name: root or user.name: admin","language":"kuery","rule_id":"rule-1","actions":[],"author":[],"enabled":true,"false_positives":[],"from":"now-6m","interval":"5m","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"tags":[],"to":"now","threat":[],"throttle":null,"references":[],"version":1,"exceptions_list":[]}',
+          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -64,7 +64,7 @@ describe('Detections Rules API', () => {
       await updateRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
-          '{"description":"some description","name":"Query with a rule id","severity":"high","type":"query","risk_score":55,"query":"user.name: root or user.name: admin","language":"kuery","rule_id":"rule-1","actions":[],"author":[],"enabled":true,"false_positives":[],"from":"now-6m","interval":"5m","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"tags":[],"to":"now","threat":[],"throttle":null,"references":[],"exceptions_list":[]}',
+          '{"description":"some description","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
         method: 'PUT',
         signal: abortCtrl.signal,
       });

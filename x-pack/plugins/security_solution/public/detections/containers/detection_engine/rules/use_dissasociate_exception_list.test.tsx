@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 import * as api from './api';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema.mocks';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
   ReturnUseDissasociateExceptionList,
   UseDissasociateExceptionListProps,

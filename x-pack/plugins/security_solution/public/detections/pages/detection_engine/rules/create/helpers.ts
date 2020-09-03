@@ -237,6 +237,9 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   };
 };
 
+// Used to format form data in rule edit and
+// create flows so "T" here would likely
+// either be CreateRulesSchema or Rule
 export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
