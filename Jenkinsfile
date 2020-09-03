@@ -19,3 +19,5 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
     kibanaPipeline.sendMail()
   }
 }
+
+// noop
