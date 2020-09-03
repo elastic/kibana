@@ -33,9 +33,10 @@ export function VisitorBreakdownChart({ options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <ChartWrapper loading={false} height="220px">
+    <ChartWrapper loading={false} height="220px" maxWidth="415px">
       <Chart>
         <Settings
+          showLegend
           baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
           theme={
             darkMode
@@ -54,11 +55,18 @@ export function VisitorBreakdownChart({ options }: Props) {
           layers={[
             {
               groupByRollup: (d: Datum) => d.name,
-              nodeLabel: (d: Datum) => d,
-              // fillLabel: { textInvertible: true },
+              nodeLabel: (d: Datum) => {
+                const total =
+                  options?.reduce((prevVal, { count }) => count + prevVal, 0) ||
+                  1;
+                const item = options?.find(({ name }) => name === d);
+                return (
+                  item?.name + '  ' + ((item?.count || 0) / total) * 100 + '%'
+                );
+              },
               shape: {
                 fillColor: (d) => {
-                  const clrs = [
+                  const colors = [
                     euiLightVars.euiColorVis1_behindText,
                     euiLightVars.euiColorVis0_behindText,
                     euiLightVars.euiColorVis2_behindText,
@@ -70,23 +78,16 @@ export function VisitorBreakdownChart({ options }: Props) {
                     euiLightVars.euiColorVis8_behindText,
                     euiLightVars.euiColorVis9_behindText,
                   ];
-                  return clrs[d.sortIndex];
+                  return colors[d.sortIndex];
                 },
               },
             },
           ]}
           config={{
             partitionLayout: PartitionLayout.sunburst,
-            linkLabel: {
-              maxCount: 32,
-              fontSize: 14,
-            },
-            fontFamily: 'Arial',
+            linkLabel: { maximumSection: Infinity, maxCount: 0 },
             margin: { top: 0, bottom: 0, left: 0, right: 0 },
-            minFontSize: 1,
-            idealFontSizeJump: 1.1,
-            outerSizeRatio: 0.9, // - 0.5 * Math.random(),
-            emptySizeRatio: 0,
+            outerSizeRatio: 1, // - 0.5 * Math.random(),
             circlePadding: 4,
           }}
         />

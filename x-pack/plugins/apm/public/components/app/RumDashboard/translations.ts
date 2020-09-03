@@ -46,6 +46,15 @@ export const I18LABELS = {
   seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
     defaultMessage: 'seconds',
   }),
+  browser: i18n.translate('xpack.apm.rum.visitorBreakdown.browser', {
+    defaultMessage: 'Browser',
+  }),
+  operatingSystem: i18n.translate(
+    'xpack.apm.rum.visitorBreakdown.operatingSystem',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
