@@ -14,7 +14,6 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated } from '../../../../common/search_strategy/security_solution';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -23,7 +22,8 @@ import {
   NetworkTopCountriesEdges,
   NetworkTopCountriesRequestOptions,
   NetworkTopCountriesStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  PageInfoPaginated,
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
