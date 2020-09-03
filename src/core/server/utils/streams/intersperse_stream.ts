@@ -40,7 +40,7 @@ import { Transform } from 'stream';
  *  @param  {String|Buffer} intersperseChunk
  *  @return {Transform}
  */
-export function createIntersperseStream(intersperseChunk) {
+export function createIntersperseStream(intersperseChunk: string | Buffer) {
   let first = true;
 
   return new Transform({
@@ -55,7 +55,7 @@ export function createIntersperseStream(intersperseChunk) {
         }
 
         this.push(chunk);
-        callback(null);
+        callback();
       } catch (err) {
         callback(err);
       }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createListStream, createPromiseFromStreams, createConcatStream } from './';
+import { createListStream, createPromiseFromStreams, createConcatStream } from './index';
 
 describe('concatStream', () => {
   test('accepts an initial value', async () => {

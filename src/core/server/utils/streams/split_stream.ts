@@ -38,7 +38,7 @@ import { Transform } from 'stream';
  *  @param  {String} splitChunk
  *  @return {Transform}
  */
-export function createSplitStream(splitChunk) {
+export function createSplitStream(splitChunk: string | Uint8Array) {
   let unsplitBuffer = Buffer.alloc(0);
 
   return new Transform({
@@ -55,7 +55,7 @@ export function createSplitStream(splitChunk) {
         }
 
         unsplitBuffer = toSplit;
-        callback(null);
+        callback();
       } catch (err) {
         callback(err);
       }
@@ -65,7 +65,7 @@ export function createSplitStream(splitChunk) {
       try {
         this.push(unsplitBuffer.toString('utf8'));
 
-        callback(null);
+        callback();
       } catch (err) {
         callback(err);
       }
