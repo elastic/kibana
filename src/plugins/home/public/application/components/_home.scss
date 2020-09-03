@@ -42,17 +42,10 @@ $homePageWidth: 1200px;
   }
 }
 
-#homHeader__title {
-  @include euiBreakpoint('xs', 's') {
-    text-align: center;
-  }
-}
-
-.homHeader__actionItem {
-  @include euiBreakpoint('xs', 's') {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.homHeader__actionItem .euiButtonEmpty__content {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .homContent {
@@ -69,5 +62,18 @@ $homePageWidth: 1200px;
   & > * {
     margin-bottom: 0 !important;
     margin-top: 0 !important;
+  }
+}
+
+.homFooter {
+  // Prevent children from rendering as flex items
+  .euiFlexItem {
+    display: block;
+  }
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
   }
 }

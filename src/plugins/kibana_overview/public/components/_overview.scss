@@ -38,18 +38,10 @@ $pageWidth: 1200px;
   padding: $euiSizeXL $euiSize;
 }
 
-#kbnOverviewHeader__title {
-  @include euiBreakpoint('xs', 's') {
-    text-align: center;
-  }
-}
-
-// MICHAEL NOTE: not working? same with home? check importance
-.kbnOverviewHeader__actionItem {
-  @include euiBreakpoint('xs', 's') {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.kbnOverviewHeader__actionItem .euiButtonEmpty__content {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .kbnOverviewContent {
@@ -59,6 +51,7 @@ $pageWidth: 1200px;
   width: 100%;
 }
 
+// Prevent children from rendering as flex items
 .kbnOverviewGettingStarted__content {
   display: block;
 }
@@ -91,5 +84,18 @@ $pageWidth: 1200px;
     & > * + * {
       margin-top: $euiSizeXS;
     }
+  }
+}
+
+.kbnOverviewFooter {
+  // Prevent children from rendering as flex items
+  .euiFlexItem {
+    display: block;
+  }
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
   }
 }

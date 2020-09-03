@@ -48,9 +48,9 @@ export const PageHeader = () => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="kbnOverviewHeader__actions">
-              <EuiFlexItem className="kbnOverviewHeader__actionItem">
-                <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="indexOpen">
+            <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
+              <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
                   {i18n.translate('kibana.overview.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
@@ -58,9 +58,8 @@ export const PageHeader = () => {
               </EuiFlexItem>
 
               {stackManagement ? (
-                <EuiFlexItem className="kbnOverviewHeader__actionItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
-                    flush="right"
                     iconType="gear"
                     onClick={createAppNavigationHandler(stackManagement.path)}
                   >
@@ -72,9 +71,8 @@ export const PageHeader = () => {
               ) : null}
 
               {devTools ? (
-                <EuiFlexItem className="kbnOverviewHeader__actionItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
-                    flush="right"
                     iconType="wrench"
                     onClick={createAppNavigationHandler(devTools.path)}
                   >

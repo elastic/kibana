@@ -331,7 +331,6 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                flush="left"
                 iconType="home"
                 onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
                 size="xs"
@@ -348,7 +347,6 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 data-test-subj="allPlugins"
                 href="#/feature_directory"
                 size="xs"
-                flush="right"
                 iconType="apps"
               >
                 <FormattedMessage

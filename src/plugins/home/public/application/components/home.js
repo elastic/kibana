@@ -153,9 +153,9 @@ export class Home extends Component {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homHeader__actions">
-                  <EuiFlexItem className="homHeader__actionItem">
-                    <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="indexOpen">
+                <EuiFlexGroup className="homHeader__actions" responsive={false} wrap>
+                  <EuiFlexItem className="homHeader__actionItem" grow={false}>
+                    <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
@@ -163,9 +163,8 @@ export class Home extends Component {
                   </EuiFlexItem>
 
                   {stackManagement ? (
-                    <EuiFlexItem className="homHeader__actionItem">
+                    <EuiFlexItem className="homHeader__actionItem" grow={false}>
                       <EuiButtonEmpty
-                        flush="right"
                         iconType="gear"
                         onClick={createAppNavigationHandler(stackManagement.path)}
                       >
@@ -177,9 +176,8 @@ export class Home extends Component {
                   ) : null}
 
                   {devTools ? (
-                    <EuiFlexItem className="homHeader__actionItem">
+                    <EuiFlexItem className="homHeader__actionItem" grow={false}>
                       <EuiButtonEmpty
-                        flush="right"
                         iconType="wrench"
                         onClick={createAppNavigationHandler(devTools.path)}
                       >
@@ -221,7 +219,6 @@ export class Home extends Component {
               <EuiFlexItem grow={false}>
                 {advancedSettings && (
                   <EuiButtonEmpty
-                    flush="left"
                     iconType="home"
                     onClick={createAppNavigationHandler(
                       '/app/management/kibana/settings#defaultRoute'
@@ -241,7 +238,6 @@ export class Home extends Component {
                   data-test-subj="allPlugins"
                   href="#/feature_directory"
                   size="xs"
-                  flush="right"
                   iconType="apps"
                 >
                   <FormattedMessage
