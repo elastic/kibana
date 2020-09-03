@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ERROR_MATRIX_HISTOGRAM = i18n.translate(
-  'xpack.securitySolution.allHost.errorSearchDescription',
+  'xpack.securitySolution.matrixHistogram.errorSearchDescription',
   {
     defaultMessage: `An error has occurred on matrix histogram search`,
   }
 );
 
 export const FAIL_MATRIX_HISTOGRAM = i18n.translate(
-  'xpack.securitySolution.allHost.failSearchDescription',
+  'xpack.securitySolution.matrixHistogram.failSearchDescription',
   {
     defaultMessage: `Failed to run search on matrix histogram`,
   }
