@@ -599,7 +599,7 @@ export class IndexPattern implements IIndexPattern {
             indexPattern.version = samePattern.version;
 
             // Clear cache
-            indexPattern.patternCache.clear(v.id!);
+            indexPattern.patternCache.clear(indexPattern.id!);
 
             // Try the save again
             return indexPattern.save(indexPattern, saveAttempts);
