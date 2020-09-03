@@ -166,8 +166,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
     {
       selector: 'edge',
       style: {
-        'curve-style': 'taxi',
-        'taxi-direction': 'auto',
+        'curve-style': 'unbundled-bezier',
         'line-color': lineColor,
         'overlay-opacity': 0,
         'target-arrow-color': lineColor,
@@ -259,7 +258,6 @@ ${theme.eui.euiColorLightShade}`,
 export const getCytoscapeOptions = (
   theme: EuiTheme
 ): cytoscape.CytoscapeOptions => ({
-  autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
