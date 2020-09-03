@@ -6,15 +6,17 @@
 
 import React, { useRef, useState } from 'react';
 import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiCheckbox,
   EuiFormRow,
   EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiCheckbox,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiText,
   EuiTextArea,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { UrlDrilldownConfig, UrlDrilldownScope } from '../../types';
 import { compile } from '../../url_template';
@@ -24,7 +26,9 @@ import './index.scss';
 import {
   txtAddVariableButtonTitle,
   txtUrlPreviewHelpText,
-  txtUrlTemplateHelpLinkText,
+  txtUrlTemplateSyntaxHelpLinkText,
+  txtUrlTemplateVariablesHelpLinkText,
+  txtUrlTemplateVariablesFilterPlaceholderText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
   txtUrlTemplatePlaceholder,
@@ -84,13 +88,14 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         helpText={
           syntaxHelpDocsLink && (
             <EuiLink external target={'_blank'} href={syntaxHelpDocsLink}>
-              {txtUrlTemplateHelpLinkText}
+              {txtUrlTemplateSyntaxHelpLinkText}
             </EuiLink>
           )
         }
         labelAppend={
           <AddVariableButton
             variables={scopeVariables}
+            variablesHelpLink={syntaxHelpDocsLink}
             onSelect={(variable: string) => {
               if (textAreaRef.current) {
                 updateUrlTemplate(
@@ -154,28 +159,23 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
 function AddVariableButton({
   variables,
   onSelect,
+  variablesHelpLink,
 }: {
   variables: string[];
   onSelect: (variable: string) => void;
+  variablesHelpLink?: string;
 }) {
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  const closePopover = () => setIsVariablesPopoverOpen(false);
 
-  const renderVariables = () =>
-    variables.map((variable: string) => (
-      <EuiContextMenuItem
-        key={variable}
-        data-test-subj={`variableButton-${variable}`}
-        onClick={() => {
-          onSelect(variable);
-          setIsVariablesPopoverOpen(false);
-        }}
-      >
-        {`{{${variable}}}`}
-      </EuiContextMenuItem>
-    ));
+  const options: EuiSelectableOption[] = variables.map((variable: string) => ({
+    key: variable,
+    label: variable,
+  }));
 
   return (
     <EuiPopover
+      ownFocus={true}
       button={
         <EuiText size="xs">
           <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
@@ -184,12 +184,43 @@ function AddVariableButton({
         </EuiText>
       }
       isOpen={isVariablesPopoverOpen}
-      closePopover={() => setIsVariablesPopoverOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       withTitle
     >
-      <EuiContextMenuPanel title={txtAddVariableButtonTitle} items={renderVariables()} />
+      <EuiSelectable
+        singleSelection={true}
+        searchable
+        searchProps={{
+          placeholder: txtUrlTemplateVariablesFilterPlaceholderText,
+          compressed: true,
+        }}
+        options={options}
+        onChange={(newOptions) => {
+          const selected = newOptions.find((o) => o.checked === 'on');
+          if (!selected) return;
+          onSelect(selected.key!);
+          closePopover();
+        }}
+        listProps={{
+          showIcons: false,
+        }}
+      >
+        {(list, search) => (
+          <div style={{ width: 320 }}>
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
+            {list}
+            {variablesHelpLink && (
+              <EuiPopoverFooter className={'eui-textRight'}>
+                <EuiLink external href={variablesHelpLink} target="_blank">
+                  {txtUrlTemplateVariablesHelpLinkText}
+                </EuiLink>
+              </EuiPopoverFooter>
+            )}
+          </div>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 }

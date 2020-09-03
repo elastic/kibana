@@ -37,10 +37,24 @@ export const txtUrlTemplateLabel = i18n.translate(
   }
 );
 
-export const txtUrlTemplateHelpLinkText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateHelpLinkText',
+export const txtUrlTemplateSyntaxHelpLinkText = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxHelpLinkText',
   {
     defaultMessage: 'Syntax help',
+  }
+);
+
+export const txtUrlTemplateVariablesHelpLinkText = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
+  {
+    defaultMessage: 'Help',
+  }
+);
+
+export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
+  {
+    defaultMessage: 'Filter variables',
   }
 );
 
