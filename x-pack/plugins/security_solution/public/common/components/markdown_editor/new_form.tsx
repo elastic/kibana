@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiFormRow } from '@elastic/eui';
+import styled from 'styled-components';
+import {
+  EuiMarkdownEditor,
+  EuiMarkdownEditorProps,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
@@ -16,6 +23,12 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
 };
+
+const BottomContentWrapper = styled(EuiFlexGroup)`
+  ${({ theme }) => `
+    padding: ${theme.eui.ruleMargins.marginSmall} 0;
+  `}
+`;
 
 export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   id,
@@ -44,7 +57,11 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
           onChange={field.setValue}
           value={field.value as string}
         />
-        {bottomRightContent}
+        {bottomRightContent && (
+          <BottomContentWrapper justifyContent={'flexEnd'}>
+            <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
+          </BottomContentWrapper>
+        )}
       </>
     </EuiFormRow>
   );

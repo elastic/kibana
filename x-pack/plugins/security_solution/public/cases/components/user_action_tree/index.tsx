@@ -60,6 +60,21 @@ const MyEuiCommentList = styled(EuiCommentList)`
       margin: 0.5em;
       transition: 0.8s;
     }
+
+    & .euiComment.isEdit {
+      & .euiCommentEvent {
+        border: none;
+        box-shadow: none;
+      }
+
+      & .euiCommentEvent__body {
+        padding: 0;
+      }
+
+      & .euiCommentEvent__header {
+        display: none;
+      }
+    }
   `}
 `;
 
@@ -213,6 +228,9 @@ export const UserActionTree = React.memo(
           fullName={caseData.createdBy.fullName}
         />
       ),
+      className: classNames({
+        isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+      }),
       actions: (
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -257,6 +275,7 @@ export const UserActionTree = React.memo(
                 ),
                 className: classNames('userAction__comment', {
                   outlined: comment.id === selectedOutlineCommentId,
+                  isEdit: manageMarkdownEditIds.includes(comment.id),
                 }),
                 children: (
                   <UserActionMarkdown
@@ -410,6 +429,7 @@ export const UserActionTree = React.memo(
             fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
           />
         ),
+        className: 'isEdit',
         children: MarkdownNewComment,
       },
     ];
