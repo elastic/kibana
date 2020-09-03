@@ -5,7 +5,7 @@
  */
 
 import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
-import { DatabaseParameters } from '../../types';
+import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -17,7 +17,7 @@ interface ServerReturnedResolverData {
     /**
      * The database parameters that was used to fetch the resolver tree
      */
-    parameters: DatabaseParameters;
+    parameters: TreeFetcherParameters;
   };
 }
 
@@ -26,7 +26,7 @@ interface AppRequestedResolverData {
   /**
    * entity ID used to make the request.
    */
-  readonly payload: DatabaseParameters;
+  readonly payload: TreeFetcherParameters;
 }
 
 interface ServerFailedToReturnResolverData {
@@ -34,7 +34,7 @@ interface ServerFailedToReturnResolverData {
   /**
    * entity ID used to make the failed request
    */
-  readonly payload: DatabaseParameters;
+  readonly payload: TreeFetcherParameters;
 }
 
 interface AppAbortedResolverDataRequest {
@@ -42,7 +42,7 @@ interface AppAbortedResolverDataRequest {
   /**
    * entity ID used to make the aborted request
    */
-  readonly payload: DatabaseParameters;
+  readonly payload: TreeFetcherParameters;
 }
 
 /**

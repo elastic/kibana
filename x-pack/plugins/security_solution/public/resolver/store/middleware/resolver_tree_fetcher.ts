@@ -28,9 +28,9 @@ export function ResolverTreeFetcher(
   // if the entityID changes while
   return async () => {
     const state = api.getState();
-    const databaseParameters = selectors.databaseParameters(state);
+    const databaseParameters = selectors.treeParametersToFetch(state);
 
-    if (selectors.parametersToAbort(state) && lastRequestAbortController) {
+    if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
     } else if (databaseParameters !== null) {
