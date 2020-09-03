@@ -5,7 +5,8 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
+import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import { RequestOptionsPaginated } from '../..';
 import { FlowTargetSourceDest } from '../common';
 
 export interface TlsBuckets {

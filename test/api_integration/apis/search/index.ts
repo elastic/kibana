@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { getEsClient } from './get_es_client';
-export { LegacyApiCaller } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('search', () => {
+    loadTestFile(require.resolve('./search'));
+  });
+}
