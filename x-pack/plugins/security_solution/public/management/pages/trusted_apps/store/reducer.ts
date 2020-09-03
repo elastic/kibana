@@ -63,10 +63,7 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
       active: true,
     };
   } else {
-    return {
-      ...state,
-      active: false,
-    };
+    return initialTrustedAppsPageState;
   }
 };
 
