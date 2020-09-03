@@ -24,7 +24,7 @@ import { installTransformForDataset } from './install';
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation } from '../../packages';
-// import { saveInstalledEsRefs } from '../../packages/install';
+import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../../registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
@@ -63,7 +63,9 @@ describe('test transform install', () => {
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
-    // (saveInstalledEsRefs as jest.MockedFunction<typeof saveInstalledEsRefs>);
+    const saveInstalledEsRefsMock = saveInstalledEsRefs as jest.MockedFunction<
+      typeof saveInstalledEsRefs
+    >;
 
     await installTransformForDataset(
       ({
@@ -139,11 +141,11 @@ describe('test transform install', () => {
       ],
     ]);
 
-    /* expect(saveInstalledEsRefs.mock.calls[0][2]).toEqual([
+    expect(saveInstalledEsRefsMock.mock.calls[0][2]).toEqual([
       {
         id: 'metrics-endpoint.metadata_current-current-default-0.16.0-dev.0',
         type: 'transform',
       },
-    ]);*/
+    ]);
   });
 });
