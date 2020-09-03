@@ -22,8 +22,8 @@ export function registerPipelineSaveRoute(router: IRouter, security?: SecurityPl
           id: schema.string(),
         }),
         body: schema.object({
-          id: schema.string(),
-          description: schema.string(),
+          id: schema.maybe(schema.string()), // id might be provided when cloning pipeline
+          description: schema.maybe(schema.string()),
           pipeline: schema.string(),
           settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
