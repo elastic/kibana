@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncDataBinding } from '../state/async_data_binding';
+import { AsyncResourceState } from '../state/async_resource_state';
 import { TrustedAppsListData } from '../state/trusted_apps_list_page_state';
 
-export interface TrustedAppsListDataBindingChanged {
-  type: 'trustedAppsListDataBindingChanged';
+export interface TrustedAppsListResourceStateChanged {
+  type: 'trustedAppsListResourceStateChanged';
   payload: {
-    newBinding: AsyncDataBinding<TrustedAppsListData>;
+    newState: AsyncResourceState<TrustedAppsListData>;
   };
 }
 
-export type TrustedAppsPageAction = TrustedAppsListDataBindingChanged;
+export type TrustedAppsPageAction = TrustedAppsListResourceStateChanged;

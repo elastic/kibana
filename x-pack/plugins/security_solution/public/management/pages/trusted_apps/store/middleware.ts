@@ -8,23 +8,23 @@ import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import {
-  AsyncDataBinding,
-  StaleAsyncBinding,
-  getLastPresentDataBinding,
-} from '../state/async_data_binding';
+  AsyncResourceState,
+  StaleResourceState,
+  getLastLoadedResourceState,
+} from '../state/async_resource_state';
 import {
   TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state/trusted_apps_list_page_state';
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 import { needsRefreshOfListData } from './selectors';
-import { TrustedAppsListDataBindingChanged } from './action';
+import { TrustedAppsListResourceStateChanged } from './action';
 
-const createListDataBindingChangedAction = (
-  newBinding: Immutable<AsyncDataBinding<TrustedAppsListData>>
-): Immutable<TrustedAppsListDataBindingChanged> => ({
-  type: 'trustedAppsListDataBindingChanged',
-  payload: { newBinding },
+const createTrustedAppsListResourceStateChangedAction = (
+  newState: Immutable<AsyncResourceState<TrustedAppsListData>>
+): Immutable<TrustedAppsListResourceStateChanged> => ({
+  type: 'trustedAppsListResourceStateChanged',
+  payload: { newState },
 });
 
 const refreshList = async (
@@ -34,10 +34,10 @@ const refreshList = async (
   const list = store.getState().listView;
 
   store.dispatch(
-    createListDataBindingChangedAction({
-      type: 'InProgressAsyncBinding',
+    createTrustedAppsListResourceStateChangedAction({
+      type: 'LoadingResourceState',
       // need to think on how to avoid the casting
-      previousBinding: list.currentListData as Immutable<StaleAsyncBinding<TrustedAppsListData>>,
+      previousState: list.currentListData as Immutable<StaleResourceState<TrustedAppsListData>>,
     })
   );
 
@@ -48,8 +48,8 @@ const refreshList = async (
     });
 
     store.dispatch(
-      createListDataBindingChangedAction({
-        type: 'PresentAsyncBinding',
+      createTrustedAppsListResourceStateChangedAction({
+        type: 'LoadedResourceState',
         data: {
           items: response.data,
           paginationInfo: list.currentPaginationInfo,
@@ -59,10 +59,10 @@ const refreshList = async (
     );
   } catch (error) {
     store.dispatch(
-      createListDataBindingChangedAction({
-        type: 'FailedAsyncBinding',
+      createTrustedAppsListResourceStateChangedAction({
+        type: 'FailedResourceState',
         error,
-        lastPresentBinding: getLastPresentDataBinding(list.currentListData),
+        lastLoadedState: getLastLoadedResourceState(list.currentListData),
       })
     );
   }
@@ -76,7 +76,7 @@ export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<Truste
   return (store) => (next) => async (action) => {
     next(action);
 
-    // TODO: need to think if failed binding is a good condition to consider need for refresh
+    // TODO: need to think if failed state is a good condition to consider need for refresh
     if (action.type === 'userChangedUrl' && needsRefreshOfListData(store.getState())) {
       await refreshList(store, trustedAppsService);
     }

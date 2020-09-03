@@ -5,7 +5,7 @@
  */
 
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { AsyncDataBinding } from './async_data_binding';
+import { AsyncResourceState } from './async_resource_state';
 
 export interface PaginationInfo {
   index: number;
@@ -20,7 +20,7 @@ export interface TrustedAppsListData {
 
 export interface TrustedAppsListPageState {
   listView: {
-    currentListData: AsyncDataBinding<TrustedAppsListData>;
+    currentListData: AsyncResourceState<TrustedAppsListData>;
     currentPaginationInfo: PaginationInfo;
   };
   active: boolean;

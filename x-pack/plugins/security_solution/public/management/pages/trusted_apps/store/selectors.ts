@@ -9,11 +9,11 @@ import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 import { PaginationInfo, TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
 
 import {
-  getCurrentError,
-  getLastPresentData,
-  isInProgressBinding,
-  isOutdatedBinding,
-} from '../state/async_data_binding';
+  getCurrentResourceError,
+  getLastLoadedResourceData,
+  isLoadingResourceState,
+  isOutdatedResourceState,
+} from '../state/async_resource_state';
 
 const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
   pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;
@@ -24,14 +24,16 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
 
   return (
     state.active &&
-    isOutdatedBinding(currentPage, (data) => pageInfosEqual(currentPageInfo, data.paginationInfo))
+    isOutdatedResourceState(currentPage, (data) =>
+      pageInfosEqual(currentPageInfo, data.paginationInfo)
+    )
   );
 };
 
 export const getListItems = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<TrustedApp[]> => {
-  return getLastPresentData(state.listView.currentListData)?.items || [];
+  return getLastLoadedResourceData(state.listView.currentListData)?.items || [];
 };
 
 export const getListCurrentPageIndex = (state: Immutable<TrustedAppsListPageState>): number => {
@@ -43,15 +45,15 @@ export const getListCurrentPageSize = (state: Immutable<TrustedAppsListPageState
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
-  return getLastPresentData(state.listView.currentListData)?.totalItemsCount || 0;
+  return getLastLoadedResourceData(state.listView.currentListData)?.totalItemsCount || 0;
 };
 
 export const getListErrorMessage = (
   state: Immutable<TrustedAppsListPageState>
 ): string | undefined => {
-  return getCurrentError(state.listView.currentListData)?.message;
+  return getCurrentResourceError(state.listView.currentListData)?.message;
 };
 
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return isInProgressBinding(state.listView.currentListData);
+  return isLoadingResourceState(state.listView.currentListData);
 };
