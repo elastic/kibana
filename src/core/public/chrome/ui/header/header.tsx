@@ -65,7 +65,6 @@ export interface HeaderProps {
   forceAppSwitcherNavigation$: Observable<boolean>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
-  legacyMode: boolean;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
@@ -78,7 +77,6 @@ export interface HeaderProps {
 export function Header({
   kibanaVersion,
   kibanaDocLink,
-  legacyMode,
   application,
   basePath,
   onIsLockedUpdate,
@@ -185,7 +183,6 @@ export function Header({
           isNavOpen={isNavOpen}
           homeHref={homeHref}
           basePath={basePath}
-          legacyMode={legacyMode}
           navigateToApp={application.navigateToApp}
           onIsLockedUpdate={onIsLockedUpdate}
           closeNav={() => {
