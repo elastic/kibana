@@ -292,7 +292,7 @@ const EditRulePageComponent: FC = () => {
 
   useEffect(() => {
     if (rule?.immutable) {
-      setActiveStep(RuleStep.scheduleRule);
+      setActiveStep(RuleStep.ruleActions);
     } else {
       setActiveStep(RuleStep.defineRule);
     }
