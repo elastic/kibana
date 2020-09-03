@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PassThrough } from 'stream';
+import { Readable, PassThrough, TransformOptions } from 'stream';
 
 /**
  *  Write the data and errors from a list of stream providers
@@ -29,7 +29,10 @@ import { PassThrough } from 'stream';
  *  @param {PassThroughOptions} options options passed to the PassThrough constructor
  *  @return {WritableStream} combined stream
  */
-export function concatStreamProviders(sourceProviders, options = {}) {
+export function concatStreamProviders(
+  sourceProviders: Array<() => Readable>,
+  options?: TransformOptions
+) {
   const destination = new PassThrough(options);
   const queue = sourceProviders.slice();
 
