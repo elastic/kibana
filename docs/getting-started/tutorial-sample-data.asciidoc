@@ -127,7 +127,7 @@ To query the data:
 . To view all flights out of Rome, enter the following in the *KQL* query bar, then click *Update*:
 +
 [source,text]
-OriginCityName:Rome   
+OriginCityName: Rome
 
 . For a more complex query with AND and OR, enter:
 +
@@ -155,6 +155,5 @@ Now that you know the {kib} basics, try out the <<create-your-own-dashboard, Cre
 * Discover and explore data
 
 * Create and add panels to a dashboard
-
 
 
