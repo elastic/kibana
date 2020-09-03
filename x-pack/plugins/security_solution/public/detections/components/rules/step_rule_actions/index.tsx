@@ -91,7 +91,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields, getFormData, submit } = form;
   const [{ throttle: formThrottle }] = (useFormData({
     form,
     watch: ['throttle'],
@@ -108,11 +108,21 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.ruleActions, submit);
+      setForm(RuleStep.ruleActions, getData);
     }
-  }, [setForm, submit]);
+  }, [getData, setForm]);
 
   const throttleOptions = useMemo(() => {
     return getThrottleOptions(throttle);

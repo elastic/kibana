@@ -55,21 +55,17 @@ export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]
 ): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
   !!formData?.isValid && !!formData.data;
 
-export const isDefineStep = (
-  formData: RuleStepsFormData[keyof RuleStepsFormData]
-): formData is RuleStepsFormData[RuleStep.defineRule] => has('ruleType', formData.data);
+export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
+  has('data.ruleType', input);
 
-export const isAboutStep = (
-  formData: RuleStepsFormData[keyof RuleStepsFormData]
-): formData is RuleStepsFormData[RuleStep.aboutRule] => has('name', formData.data);
+export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
+  has('data.name', input);
 
-export const isScheduleStep = (
-  formData: RuleStepsFormData[keyof RuleStepsFormData]
-): formData is RuleStepsFormData[RuleStep.scheduleRule] => has('interval', formData.data);
+export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
+  has('data.interval', input);
 
-export const isActionsStep = (
-  formData: RuleStepsFormData[keyof RuleStepsFormData]
-): formData is RuleStepsFormData[RuleStep.ruleActions] => has('actions', formData.data);
+export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
+  has('data.actions', input);
 
 export interface RuleFields {
   anomalyThreshold: unknown;

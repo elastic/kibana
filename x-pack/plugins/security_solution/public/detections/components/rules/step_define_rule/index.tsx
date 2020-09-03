@@ -116,7 +116,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
+  const { getFields, getFormData, reset, submit } = form;
   const [{ index: formIndex, ruleType: formRuleType }] = (useFormData({
     form,
     watch: ['index', 'ruleType'],
@@ -142,11 +142,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [onSubmit]);
 
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.defineRule, submit);
+      setForm(RuleStep.defineRule, getData);
     }
-  }, [setForm, submit]);
+  }, [getData, setForm]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = getFields().index;

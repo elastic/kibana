@@ -51,6 +51,7 @@ import * as ruleI18n from '../translations';
 import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
+import { ruleStepsOrder } from '../utils';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -74,7 +75,6 @@ const EditRulePageComponent: FC = () => {
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
-  const [initForm, setInitForm] = useState(false);
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
     [RuleStep.aboutRule]: formHookNoop,
@@ -92,18 +92,20 @@ const EditRulePageComponent: FC = () => {
   const scheduleStep = stepsData.current[RuleStep.scheduleRule];
   const actionsStep = stepsData.current[RuleStep.ruleActions];
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
+  const invalidSteps = ruleStepsOrder.filter((step) => {
+    const stepData = stepsData.current[step];
+    return stepData.data != null && !stepIsValid(stepData);
+  });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
-  const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
       formHooks.current[step] = hook;
-      if (initForm && step === activeStep) {
-        setInitForm(false);
+      if (step === activeStep) {
         hook();
       }
     },
-    [initForm, activeStep]
+    [activeStep]
   );
   const setStepData = useCallback(
     <K extends keyof RuleStepsData>(step: K, data: RuleStepsData[K], isValid: boolean) => {
@@ -219,29 +221,36 @@ const EditRulePageComponent: FC = () => {
 
   const onSubmit = useCallback(async () => {
     const activeStepData = await formHooks.current[activeStep]();
-    if (activeStepData?.isValid) {
-      const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
-      const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
-      const schedule = isScheduleStep(activeStepData) ? activeStepData : scheduleStep;
-      const actions = isActionsStep(activeStepData) ? activeStepData : actionsStep;
-
-      if (
-        stepIsValid(define) &&
-        stepIsValid(about) &&
-        stepIsValid(schedule) &&
-        stepIsValid(actions)
-      ) {
-        setTabHasError([]);
-        setRule({
-          ...formatRule(define.data, about.data, schedule.data, actions.data, rule),
-          ...(ruleId ? { id: ruleId } : {}),
-        });
-      }
-    } else {
-      // we currently only allow the active step to be invalid
-      setTabHasError([activeStep]);
+    if (activeStepData?.data != null) {
+      setStepData(activeStep, activeStepData.data, activeStepData.isValid);
     }
-  }, [aboutStep, actionsStep, activeStep, defineStep, rule, ruleId, scheduleStep, setRule]);
+    const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
+    const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
+    const schedule = isScheduleStep(activeStepData) ? activeStepData : scheduleStep;
+    const actions = isActionsStep(activeStepData) ? activeStepData : actionsStep;
+
+    if (
+      stepIsValid(define) &&
+      stepIsValid(about) &&
+      stepIsValid(schedule) &&
+      stepIsValid(actions)
+    ) {
+      setRule({
+        ...formatRule(define.data, about.data, schedule.data, actions.data, rule),
+        ...(ruleId ? { id: ruleId } : {}),
+      });
+    }
+  }, [
+    aboutStep,
+    actionsStep,
+    activeStep,
+    defineStep,
+    rule,
+    ruleId,
+    scheduleStep,
+    setRule,
+    setStepData,
+  ]);
 
   useEffect(() => {
     if (rule != null) {
@@ -255,21 +264,22 @@ const EditRulePageComponent: FC = () => {
     }
   }, [rule, setStepData]);
 
+  const goToStep = useCallback(async (step: RuleStep) => {
+    setActiveStep(step);
+    await formHooks.current[step]();
+  }, []);
+
   const onTabClick = useCallback(
     async (tab: EuiTabbedContentTab) => {
       const targetStep = tab.id as RuleStep;
       const activeStepData = await formHooks.current[activeStep]();
 
-      if (activeStepData?.isValid && activeStepData.data != null) {
-        setStepData(activeStep, activeStepData.data, true);
-        setInitForm(true);
-        setTabHasError([]);
-        setActiveStep(targetStep);
-      } else {
-        setTabHasError([activeStep]);
+      if (activeStepData?.data != null) {
+        setStepData(activeStep, activeStepData.data, activeStepData.isValid);
+        goToStep(targetStep);
       }
     },
-    [activeStep, setStepData]
+    [activeStep, goToStep, setStepData]
   );
 
   const goToDetailsRule = useCallback(
@@ -321,14 +331,14 @@ const EditRulePageComponent: FC = () => {
           isLoading={isLoading}
           title={i18n.PAGE_TITLE}
         />
-        {tabHasError.length > 0 && (
+        {invalidSteps.length > 0 && (
           <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
               defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
               values={{
-                countError: tabHasError.length,
-                tabHasError: tabHasError
+                countError: invalidSteps.length,
+                tabHasError: invalidSteps
                   .map((t) => {
                     if (t === RuleStep.aboutRule) {
                       return ruleI18n.ABOUT;

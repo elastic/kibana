@@ -88,7 +88,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields, getFormData, submit } = form;
   const [{ severity: formSeverity }] = (useFormData({
     form,
     watch: ['severity'],
@@ -107,6 +107,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [formSeverity?.value, getFields, severityValue]);
 
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
       onSubmit();
@@ -115,9 +125,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.aboutRule, submit);
+      setForm(RuleStep.aboutRule, getData);
     }
-  }, [setForm, submit]);
+  }, [getData, setForm]);
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>

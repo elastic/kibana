@@ -32,15 +32,9 @@ import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
 import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
+import { ruleStepsOrder } from '../utils';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
-
-const stepsRuleOrder = [
-  RuleStep.defineRule,
-  RuleStep.aboutRule,
-  RuleStep.scheduleRule,
-  RuleStep.ruleActions,
-];
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -95,7 +89,7 @@ const CreateRulePageComponent: React.FC = () => {
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
-    stepsRuleOrder[stepsRuleOrder.indexOf(step) + 1];
+    ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
@@ -146,7 +140,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const goToStep = useCallback(
     (step: RuleStep) => {
-      if (stepsRuleOrder.indexOf(step) > stepsRuleOrder.indexOf(activeStep) && !openSteps[step]) {
+      if (ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep) && !openSteps[step]) {
         toggleStepAccordion(step);
       }
       setActiveStep(step);

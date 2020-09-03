@@ -35,13 +35,20 @@ export interface EuiBasicTableOnChange {
   sort?: EuiBasicTableSortTypes;
 }
 
+export type RuleStatusType = 'passive' | 'active' | 'valid';
+
 export enum RuleStep {
   defineRule = 'define-rule',
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
   ruleActions = 'rule-actions',
 }
-export type RuleStatusType = 'passive' | 'active' | 'valid';
+export type RuleStepsOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions
+];
 
 export interface RuleStepsData {
   [RuleStep.defineRule]: DefineStepRule;
