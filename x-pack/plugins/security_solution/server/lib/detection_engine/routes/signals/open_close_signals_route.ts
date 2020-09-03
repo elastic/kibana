@@ -53,14 +53,10 @@ export const setSignalsStatusRoute = (router: IRouter) => {
           },
         };
       }
-      let onConflict = 'abort';
-      if (conflicts != null) {
-        onConflict = conflicts;
-      }
       try {
         const result = await clusterClient.callAsCurrentUser('updateByQuery', {
           index: siemClient.getSignalsIndex(),
-          conflicts: onConflict,
+          conflicts: conflicts ?? 'abort',
           refresh: 'wait_for',
           body: {
             script: {
