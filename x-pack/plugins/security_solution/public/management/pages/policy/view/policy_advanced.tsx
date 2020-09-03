@@ -21,7 +21,7 @@ export const PolicyAdvanced = React.memo(() => {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   // console.log(policyDetailsConfig);
   const OSes: Immutable<AdvancedOSes[]> = [OS.windows, OS.linux, OS.mac];
-  const onChange = useCallback(
+  const onVerifyPeerChange = useCallback(
     (event) => {
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
@@ -37,8 +37,26 @@ export const PolicyAdvanced = React.memo(() => {
     [dispatch, OSes, policyDetailsConfig]
   );
 
-  const value =
+  const onVerifyHostnameChange = useCallback(
+    (event) => {
+      if (policyDetailsConfig) {
+        const newPayload = cloneDeep(policyDetailsConfig);
+        for (const os of OSes) {
+          newPayload[os].advanced.elasticsearch.tls.verify_hostname = event.target.value;
+        }
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload },
+        });
+      }
+    },
+    [dispatch, OSes, policyDetailsConfig]
+  );
+
+  const verifyPeerValue =
     policyDetailsConfig && policyDetailsConfig.windows.advanced.elasticsearch.tls.verify_peer;
+  const verifyHostnameValue =
+    policyDetailsConfig && policyDetailsConfig.windows.advanced.elasticsearch.tls.verify_hostname;
   const onClick = useCallback(() => {
     dispatch({
       type: 'userClickedPolicyDetailsSaveButton',
@@ -51,7 +69,8 @@ export const PolicyAdvanced = React.memo(() => {
           <FormattedMessage id="xpack.securitySolution.policyAdvanced.field" defaultMessage="hi!" />
         </h1>
       </EuiText>
-      <EuiFieldText value={value} onChange={onChange} />
+      <EuiFieldText value={verifyPeerValue} onChange={onVerifyPeerChange} />
+      <EuiFieldText value={verifyHostnameValue} onChange={onVerifyHostnameChange} />
       <EuiButton onClick={onClick}>
         <FormattedMessage
           id="xpack.securitySolution.policyAdvanced.submit"
