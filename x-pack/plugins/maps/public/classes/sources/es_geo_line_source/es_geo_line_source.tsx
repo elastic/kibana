@@ -190,15 +190,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
     }
 
     const entitiesFoundMsg = meta.areEntitiesTrimmed
-      ? i18n.translate('xpack.maps.esGeoLine.entitiesTrimmedMsg', {
-          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
+      ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
+          defaultMessage: `Results limited to first {entityCount} tracks of ~{totalEntities}.`,
           values: {
             entityCount: meta.entityCount,
             totalEntities: meta.totalEntities,
           },
         })
-      : i18n.translate('xpack.maps.esGeoLine.entitiesCountMsg', {
-          defaultMessage: `Found {entityCount} entities.`,
+      : i18n.translate('xpack.maps.esGeoLine.tracksCountMsg', {
+          defaultMessage: `Found {entityCount} tracks.`,
           values: { entityCount: meta.entityCount },
         });
     return {
