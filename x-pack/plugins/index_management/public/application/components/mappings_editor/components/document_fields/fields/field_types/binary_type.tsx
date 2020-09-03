@@ -5,14 +5,24 @@
  */
 import React from 'react';
 
-import { StoreParameter, DocValuesParameter } from '../../field_parameters';
+import { NormalizedField } from '../../../../types';
+import { StoreParameter, DocValuesParameter, MetaParameter } from '../../field_parameters';
 import { AdvancedParametersSection } from '../edit_field';
 
-export const BinaryType = () => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
+  return field[param] !== undefined && field[param] !== '';
+};
+
+interface Props {
+  field: NormalizedField;
+}
+
+export const BinaryType = ({ field }: Props) => {
   return (
     <AdvancedParametersSection>
       <DocValuesParameter configPath="doc_values_binary" />
       <StoreParameter />
+      <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
     </AdvancedParametersSection>
   );
 };

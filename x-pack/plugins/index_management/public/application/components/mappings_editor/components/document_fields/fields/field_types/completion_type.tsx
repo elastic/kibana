@@ -10,13 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
-import { AnalyzersParameter } from '../../field_parameters';
+import { AnalyzersParameter, MetaParameter } from '../../field_parameters';
 import { EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'max_input_length': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
+    }
+    case 'meta': {
+      return field[param] !== undefined && field[param] !== '';
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
@@ -88,6 +91,8 @@ export const CompletionType = ({ field }: Props) => {
         )}
         formFieldPath="preserve_position_increments"
       />
+
+      <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
     </AdvancedParametersSection>
   );
 };

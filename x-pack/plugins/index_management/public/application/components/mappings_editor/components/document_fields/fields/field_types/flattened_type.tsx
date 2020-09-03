@@ -19,6 +19,7 @@ import {
   NullValueParameter,
   SimilarityParameter,
   SplitQueriesOnWhitespaceParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
@@ -32,8 +33,9 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'similarity': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'meta':
     case 'null_value': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field[param] !== undefined && field[param] !== '';
     }
     default:
       return false;
@@ -100,6 +102,8 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         <NullValueParameter
           defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
         />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

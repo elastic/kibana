@@ -17,7 +17,7 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined;
 };
 
-export const HistogramType = React.memo(({ field }: Props) => {
+export const HistogramType = ({ field }: Props) => {
   return (
     <AdvancedParametersSection>
       <IgnoreMalformedParameter />
@@ -25,4 +25,4 @@ export const HistogramType = React.memo(({ field }: Props) => {
       <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
     </AdvancedParametersSection>
   );
-});
+};

@@ -16,6 +16,7 @@ import {
   DocValuesParameter,
   BoostParameter,
   NullValueParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -24,8 +25,9 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'meta':
     case 'null_value': {
-      return field.null_value !== undefined;
+      return field[param] !== undefined && field[param] !== '';
     }
     default:
       return false;
@@ -89,6 +91,8 @@ export const BooleanType = ({ field }: Props) => {
         </NullValueParameter>
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
