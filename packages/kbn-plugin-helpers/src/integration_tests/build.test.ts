@@ -22,7 +22,7 @@ import Fs from 'fs';
 
 import execa from 'execa';
 import { createStripAnsiSerializer, REPO_ROOT, createReplaceSerializer } from '@kbn/dev-utils';
-import decompress from 'decompress';
+import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
@@ -81,7 +81,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info compressing plugin into [fooTestPlugin-7.5.0.zip]"
   `);
 
-  await decompress(PLUGIN_ARCHIVE, TMP_DIR);
+  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));

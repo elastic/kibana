@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
 import { IAccount, IOrganization } from '../../types';
-import { IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -29,7 +28,7 @@ export interface IOverviewServerData {
 }
 
 export interface IOverviewActions {
-  setServerData(serverData: IOverviewServerData): void;
+  setServerData(serverData: IOverviewServerData): IOverviewServerData;
   initializeOverview(): void;
 }
 
@@ -37,12 +36,12 @@ export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
 }
 
-export const OverviewLogic = kea({
-  actions: (): IOverviewActions => ({
+export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+  actions: {
     setServerData: (serverData) => serverData,
     initializeOverview: () => null,
-  }),
-  reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
+  },
+  reducers: {
     organization: [
       {} as IOrganization,
       {
@@ -127,11 +126,11 @@ export const OverviewLogic = kea({
         setServerData: () => false,
       },
     ],
-  }),
-  listeners: ({ actions }): Partial<IOverviewActions> => ({
+  },
+  listeners: ({ actions }) => ({
     initializeOverview: async () => {
       const response = await HttpLogic.values.http.get('/api/workplace_search/overview');
       actions.setServerData(response);
     },
   }),
-} as IKeaParams<IOverviewValues, IOverviewActions>) as IKeaLogic<IOverviewValues, IOverviewActions>;
+});
