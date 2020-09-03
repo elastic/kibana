@@ -30,6 +30,10 @@ describe('Duration Format', () => {
         output: 'minus a minute',
       },
       {
+        input: 1,
+        output: 'a few seconds',
+      },
+      {
         input: 60,
         output: 'a minute',
       },
@@ -64,6 +68,7 @@ describe('Duration Format', () => {
     inputFormat: 'minutes',
     outputFormat: 'asHours',
     outputPrecision: undefined,
+    showSuffix: undefined,
     fixtures: [
       {
         input: -60,
@@ -84,6 +89,7 @@ describe('Duration Format', () => {
     inputFormat: 'seconds',
     outputFormat: 'asSeconds',
     outputPrecision: 0,
+    showSuffix: undefined,
     fixtures: [
       {
         input: -60,
@@ -104,6 +110,7 @@ describe('Duration Format', () => {
     inputFormat: 'seconds',
     outputFormat: 'asSeconds',
     outputPrecision: 2,
+    showSuffix: undefined,
     fixtures: [
       {
         input: -60,
@@ -124,15 +131,34 @@ describe('Duration Format', () => {
     ],
   });
 
+  testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'asSeconds',
+    outputPrecision: 0,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: -60,
+        output: '-60 Seconds',
+      },
+      {
+        input: -32.333,
+        output: '-32 Seconds',
+      },
+    ],
+  });
+
   function testCase({
     inputFormat,
     outputFormat,
     outputPrecision,
+    showSuffix,
     fixtures,
   }: {
     inputFormat: string;
     outputFormat: string;
     outputPrecision: number | undefined;
+    showSuffix: boolean | undefined;
     fixtures: any[];
   }) {
     fixtures.forEach((fixture: Record<string, any>) => {
@@ -143,7 +169,7 @@ describe('Duration Format', () => {
         outputPrecision ? `, ${outputPrecision} decimals` : ''
       }`, () => {
         const duration = new DurationFormat(
-          { inputFormat, outputFormat, outputPrecision },
+          { inputFormat, outputFormat, outputPrecision, showSuffix },
           jest.fn()
         );
         expect(duration.convert(input)).toBe(output);
