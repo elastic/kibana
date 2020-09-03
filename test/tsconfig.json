@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/test",
+    "tsBuildInfoFile": "../build/tsbuildinfo/test",
     "types": [
       "node",
       "mocha",
