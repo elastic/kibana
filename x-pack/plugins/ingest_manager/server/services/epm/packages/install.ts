@@ -189,6 +189,13 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
+  const installedTransforms = await installTransformForDataset(
+    registryPackageInfo,
+    paths,
+    callCluster,
+    savedObjectsClient
+  );
+
   // if this is an update, delete the previous version's pipelines
   if (installedPkg && !reinstall) {
     await deletePreviousPipelines(
@@ -204,12 +211,7 @@ export async function installPackage({
     type: ElasticsearchAssetType.indexTemplate,
   }));
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
-  const installedTransforms = await installTransformForDataset(
-    registryPackageInfo,
-    paths,
-    callCluster,
-    savedObjectsClient
-  );
+
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
