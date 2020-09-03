@@ -29,7 +29,7 @@ export const ConstantKeywordType: FunctionComponent<Props> = ({ field }) => {
             'xpack.idxMgmt.mappingsEditor.constantKeyword.valueFieldDescription',
             {
               defaultMessage:
-                'The value to associate with all documents in the index. If this parameter is not provided, it is set based on the first document that gets indexed.',
+                'The value of this field for all documents in the index. If not specified, defaults to the value specified in the first document indexed.',
             }
           )}
           defaultToggleValue={field.source?.value !== undefined}
