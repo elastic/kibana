@@ -71,7 +71,7 @@ export const useTimelineDetails = ({
         const searchSubscription$ = data.search
           .search<TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionTimelineSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
