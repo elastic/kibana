@@ -17,15 +17,14 @@ export const getHTTPResponseCode = (error: IngestManagerError): number => {
     return 502; // Bad Gateway
   }
   if (error instanceof PackageNotFoundError) {
-    return 404;
+    return 404; // Not Found
   }
-  if (error instanceof PackageOutdatedError) {
-    return 400;
-  } else {
-    return 400; // Bad Request
-  }
+
+  return 400; // Bad Request
 };
 
 export class RegistryError extends IngestManagerError {}
+export class RegistryConnectionError extends RegistryError {}
+export class RegistryResponseError extends RegistryError {}
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}

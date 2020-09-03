@@ -9,11 +9,11 @@ import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { RuleType } from '../../../../../common/detection_engine/types';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface SelectRuleTypeProps {
   describedByIds?: string[];
@@ -30,9 +30,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   hasValidLicense = false,
   isMlAdmin = false,
 }) => {
-  const ruleType = field.value as RuleType;
+  const ruleType = field.value as Type;
   const setType = useCallback(
-    (type: RuleType) => {
+    (type: Type) => {
       field.setValue(type);
     },
     [field]
