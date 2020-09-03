@@ -46,14 +46,6 @@ jest.mock('./components/table', () => ({
   },
 }));
 
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    scriptedFields: {
-      painless: 'painlessDocs',
-    },
-  },
-}));
-
 const helpers = {
   redirectToRoute: () => {},
   getRouteHref: () => '#',
