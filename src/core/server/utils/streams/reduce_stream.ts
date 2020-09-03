@@ -32,7 +32,10 @@ import { Transform } from 'stream';
  *                        initial value.
  *  @return {Transform}
  */
-export function createReduceStream(reducer, initial) {
+export function createReduceStream<T>(
+  reducer: (value: any, chunk: T, enc: string) => T,
+  initial?: T
+) {
   let i = -1;
   let value = initial;
 

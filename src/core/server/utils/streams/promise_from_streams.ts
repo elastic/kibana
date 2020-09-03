@@ -34,16 +34,20 @@
  *  @return {Promise<any>}
  */
 
-import { pipeline, Writable } from 'stream';
+import { pipeline, Writable, Readable } from 'stream';
 
-export async function createPromiseFromStreams(streams) {
-  let finalChunk;
+function isReadable(stream: Readable | Writable): stream is Readable {
+  return 'read' in stream && typeof stream.read === 'function';
+}
+
+export async function createPromiseFromStreams<T>(streams: [Readable, ...Writable[]]): Promise<T> {
+  let finalChunk: any;
   const last = streams[streams.length - 1];
-  if (typeof last.read !== 'function' && streams.length === 1) {
+  if (!isReadable(last) && streams.length === 1) {
     // For a nicer error than what stream.pipeline throws
     throw new Error('A minimum of 2 streams is required when a non-readable stream is given');
   }
-  if (typeof last.read === 'function') {
+  if (isReadable(last)) {
     // We are pushing a writable stream to capture the last chunk
     streams.push(
       new Writable({
@@ -57,7 +61,9 @@ export async function createPromiseFromStreams(streams) {
       })
     );
   }
+
   return new Promise((resolve, reject) => {
+    // @ts-expect-error 'pipeline' doesn't support variable length of arguments
     pipeline(...streams, (err) => {
       if (err) return reject(err);
       resolve(finalChunk);
