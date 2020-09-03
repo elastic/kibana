@@ -24,6 +24,7 @@ describe('Duration Format', () => {
     inputFormat: 'seconds',
     outputFormat: 'humanize',
     outputPrecision: undefined,
+    showSuffix: undefined,
     fixtures: [
       {
         input: -60,
@@ -48,6 +49,7 @@ describe('Duration Format', () => {
     inputFormat: 'minutes',
     outputFormat: 'humanize',
     outputPrecision: undefined,
+    showSuffix: undefined,
     fixtures: [
       {
         input: -60,
