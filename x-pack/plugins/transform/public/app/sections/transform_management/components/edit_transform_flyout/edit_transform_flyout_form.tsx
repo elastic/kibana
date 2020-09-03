@@ -63,7 +63,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         buttonContent={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormDestinationButtonContent',
           {
-            defaultMessage: 'Destination ',
+            defaultMessage: 'Destination configuration',
           }
         )}
         paddingSize="s"
