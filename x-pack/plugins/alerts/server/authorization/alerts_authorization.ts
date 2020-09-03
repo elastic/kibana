@@ -8,12 +8,13 @@ import Boom from 'boom';
 import { map, mapValues, remove, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { ALERTS_FEATURE_ID } from '../../common';
-import { AlertTypeRegistry } from '../types';
+import { AlertTypeRegistry, RawAlert } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
+import { LEGACY_LAST_MODIFIED_VERSION } from '../saved_objects/migrations';
 
 export enum ReadOperations {
   Get = 'get',
@@ -107,6 +108,10 @@ export class AlertsAuthorization {
           })
         : {}
     );
+  }
+
+  public shouldUseLegacyAuthorization(alert: RawAlert): boolean {
+    return alert.meta?.versionLastmodified === LEGACY_LAST_MODIFIED_VERSION;
   }
 
   private shouldCheckAuthorization(): boolean {

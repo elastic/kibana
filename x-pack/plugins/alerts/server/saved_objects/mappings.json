@@ -79,7 +79,7 @@
       },
       "meta": {
         "properties": {
-          "rbac": {
+          "versionLastmodified": {
             "type": "keyword"
           }
         }

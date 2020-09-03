@@ -31,6 +31,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
+const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
@@ -46,6 +47,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
+  kibanaVersion,
 };
 
 beforeEach(() => {
@@ -424,10 +426,13 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "scheduledTaskId": "task-123",
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "meta": Object {
+          "versionLastmodified": "v7.10.0",
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -1171,6 +1176,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -1256,6 +1264,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -1421,6 +1432,9 @@ describe('disable()', () => {
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
@@ -1461,6 +1475,9 @@ describe('disable()', () => {
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
@@ -1569,6 +1586,9 @@ describe('muteAll()', () => {
 
     await alertsClient.muteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      meta: {
+        versionLastmodified: kibanaVersion,
+      },
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1654,6 +1674,9 @@ describe('unmuteAll()', () => {
 
     await alertsClient.unmuteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      meta: {
+        versionLastmodified: kibanaVersion,
+      },
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1737,6 +1760,9 @@ describe('muteInstance()', () => {
       'alert',
       '1',
       {
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
@@ -1870,6 +1896,9 @@ describe('unmuteInstance()', () => {
       'alert',
       '1',
       {
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
@@ -3111,6 +3140,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3268,6 +3300,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3419,6 +3454,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": false,
+        "meta": Object {
+          "versionLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -4046,6 +4084,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );
@@ -4082,6 +4123,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );

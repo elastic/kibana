@@ -15,3 +15,8 @@ export {
   ActionTypeDisabledReason,
   isErrorThatHandlesItsOwnResponse,
 } from './errors';
+export {
+  ActionExecutionSource,
+  asSavedObjectExecutionSource,
+  isSavedObjectExecutionSource,
+} from './action_execution_source';

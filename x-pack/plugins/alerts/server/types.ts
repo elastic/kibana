@@ -112,7 +112,7 @@ export interface RawAlertAction extends SavedObjectAttributes {
 }
 
 export interface AlertMeta extends SavedObjectAttributes {
-  rbac?: string;
+  versionLastmodified?: string;
 }
 
 export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
@@ -126,7 +126,7 @@ export interface RawAlert extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;

@@ -11,8 +11,14 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
+import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
+import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
 
-export function defineRoutes(core: CoreSetup) {
+export function defineRoutes(
+  core: CoreSetup<FixtureStartDeps>,
+  { spaces }: Partial<FixtureSetupDeps>
+) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -51,6 +57,102 @@ export function defineRoutes(core: CoreSetup) {
         includedHiddenTypes: ['alert'],
       });
       const result = await savedObjectsWithAlerts.update(type, id, attributes, options);
+      return res.ok({ body: result });
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/alerts_fixture/{id}/reschedule_task',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          runAt: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { id } = req.params;
+      const { runAt } = req.body;
+
+      const [{ savedObjects }] = await core.getStartServices();
+      const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+        includedHiddenTypes: ['task', 'alert'],
+      });
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
+      const result = await savedObjectsWithTasksAndAlerts.update<TaskInstance>(
+        'task',
+        alert.attributes.scheduledTaskId!,
+        { runAt }
+      );
+      return res.ok({ body: result });
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/alerts_fixture/swap_api_keys/from/{apiKeyFromId}/to/{apiKeyToId}',
+      validate: {
+        params: schema.object({
+          apiKeyFromId: schema.string(),
+          apiKeyToId: schema.string(),
+        }),
+        body: schema.object({
+          spaceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { apiKeyFromId, apiKeyToId } = req.params;
+
+      let namespace: string | undefined;
+      if (spaces && req.body.spaceId) {
+        namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
+      }
+      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
+      const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
+        includedHiddenTypes: ['alert'],
+      });
+      const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
+        excludedWrappers: ['security', 'spaces'],
+        includedHiddenTypes: ['alert'],
+      });
+
+      const [fromAlert, toAlert] = await Promise.all([
+        encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
+          'alert',
+          apiKeyFromId,
+          {
+            namespace,
+          }
+        ),
+        savedObjectsWithAlerts.get<RawAlert>('alert', apiKeyToId, {
+          namespace,
+        }),
+      ]);
+
+      const result = await savedObjectsWithAlerts.update<RawAlert>(
+        'alert',
+        apiKeyToId,
+        {
+          ...toAlert.attributes,
+          apiKey: fromAlert.attributes.apiKey,
+          apiKeyOwner: fromAlert.attributes.apiKeyOwner,
+        },
+        {
+          namespace,
+        }
+      );
       return res.ok({ body: result });
     }
   );

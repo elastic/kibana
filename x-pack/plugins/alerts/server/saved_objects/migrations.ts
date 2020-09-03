@@ -11,6 +11,8 @@ import {
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
+export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
@@ -51,9 +53,9 @@ function changeAlertingConsumer(
         attributes: {
           ...doc.attributes,
           consumer: mapping.get(consumer) ?? consumer,
-          // mark any alert predating 7.10 as a legacy alert in terms of RBAC support
+          // mark any alert predating 7.10 as a legacy alert
           meta: {
-            rbac: 'legacy',
+            versionLastmodified: LEGACY_LAST_MODIFIED_VERSION,
           },
         },
       };
