@@ -17,8 +17,21 @@
  * under the License.
  */
 
-import { setup } from '../../../../../core/test_helpers/http_test_setup';
+import execa from 'execa';
+import { run, ToolingLog } from '@kbn/dev-utils';
 
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
+export async function buildRefs(log: ToolingLog) {
+  try {
+    log.info('Building TypeScript projects refs...');
+    await execa(require.resolve('typescript/bin/tsc'), ['-b', 'tsconfig.refs.json']);
+  } catch (e) {
+    log.error(e);
+    process.exit(1);
+  }
+}
+
+export async function runBuildRefs() {
+  run(async ({ log }) => {
+    await buildRefs(log);
+  });
+}

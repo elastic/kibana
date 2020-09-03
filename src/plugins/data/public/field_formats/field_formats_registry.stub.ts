@@ -17,8 +17,20 @@
  * under the License.
  */
 
-import { setup } from '../../../../../core/test_helpers/http_test_setup';
+import { CoreSetup } from 'src/core/public';
+import { deserializeFieldFormat } from './utils/deserialize';
+import { baseFormattersPublic } from './constants';
+import { DataPublicPluginStart, fieldFormats } from '..';
 
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
+export const getFieldFormatsRegistry = (core: CoreSetup) => {
+  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const getConfig = core.uiSettings.get.bind(core.uiSettings);
+
+  fieldFormatsRegistry.init(getConfig, {}, baseFormattersPublic);
+
+  fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
+    fieldFormatsRegistry as DataPublicPluginStart['fieldFormats']
+  );
+
+  return fieldFormatsRegistry;
+};
