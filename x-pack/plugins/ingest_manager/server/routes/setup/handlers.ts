@@ -46,11 +46,8 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

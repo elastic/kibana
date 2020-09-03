@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import Boom from 'boom';
+import Boom, { isBoom } from 'boom';
 import {
   RequestHandlerContext,
   KibanaRequest,
@@ -13,6 +13,17 @@ import {
   KibanaResponseFactory,
 } from 'src/core/server';
 import { appContextService } from './services';
+
+type IngestErrorHandler = (
+  params: IngestErrorHandlerParams
+) => IKibanaResponse | Promise<IKibanaResponse>;
+
+interface IngestErrorHandlerParams {
+  error: IngestManagerError | Boom | Error;
+  response: KibanaResponseFactory;
+  request?: KibanaRequest;
+  context?: RequestHandlerContext;
+}
 
 export class IngestManagerError extends Error {
   constructor(message?: string) {
@@ -32,34 +43,33 @@ export const getHTTPResponseCode = (error: IngestManagerError): number => {
   return 400; // Bad Request
 };
 
-interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom | Error;
-  response: KibanaResponseFactory;
-  request?: KibanaRequest;
-  context?: RequestHandlerContext;
-}
-
-export const defaultIngestErrorHandler = async ({
+export const defaultIngestErrorHandler: IngestErrorHandler = async ({
   error,
-  request,
   response,
-  context,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
   const logger = appContextService.getLogger();
+
+  // our "expected" errors
   if (error instanceof IngestManagerError) {
+    // only log the message
     logger.error(error.message);
     return response.customError({
       statusCode: getHTTPResponseCode(error),
       body: { message: error.message },
     });
   }
-  if ('isBoom' in error) {
+
+  // handle any older Boom-based errors or the few places our app uses them
+  if (isBoom(error)) {
+    // only log the message
     logger.error(error.output.payload.message);
     return response.customError({
       statusCode: error.output.statusCode,
       body: { message: error.output.payload.message },
     });
   }
+
+  // not sure what type of error this is. log as much as possible
   logger.error(error);
   return response.customError({
     statusCode: 500,
