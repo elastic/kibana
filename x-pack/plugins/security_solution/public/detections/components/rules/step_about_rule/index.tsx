@@ -5,7 +5,7 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -73,6 +73,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
+  const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? [],
     RuleStep.aboutRule
@@ -88,18 +89,23 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, submit } = form;
-  const [{ severity }] = (useFormData<AboutStepRule>({
+  const [{ severity: formSeverity }] = (useFormData({
     form,
     watch: ['severity'],
-  }) as unknown) as [AboutStepRule];
+  }) as unknown) as [Partial<AboutStepRule>];
 
   useEffect(() => {
-    const newRiskScore = defaultRiskScoreBySeverity[severity?.value];
-    if (newRiskScore != null) {
-      const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
-      riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScore });
+    const formSeverityValue = formSeverity?.value;
+    if (formSeverityValue != null && formSeverityValue !== severityValue) {
+      setSeverityValue(formSeverityValue);
+
+      const newRiskScoreValue = defaultRiskScoreBySeverity[formSeverityValue];
+      if (newRiskScoreValue != null) {
+        const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
+        riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScoreValue });
+      }
     }
-  }, [getFields, severity?.value]);
+  }, [formSeverity?.value, getFields, severityValue]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {

@@ -162,7 +162,7 @@ describe('StepAboutRuleComponent', () => {
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: { value: 21, mapping: [], isMappingChecked: false },
+      riskScore: { value: 50, mapping: [], isMappingChecked: false },
       severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
       tags: [],
       threat: [
@@ -242,5 +242,48 @@ describe('StepAboutRuleComponent', () => {
     const result = await formHook();
     expect(result?.isValid).toEqual(true);
     expect(result?.data).toEqual(expected);
+  });
+
+  it('does not modify the provided risk score until the user changes the severity', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          setForm={setFormHook}
+          isLoading={false}
+        />
+      </ThemeProvider>
+    );
+
+    if (!formHook) {
+      throw new Error('Form hook not set, but tests depend on it');
+    }
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+
+    const result = await formHook();
+    expect(result?.isValid).toEqual(true);
+    expect(result?.data?.riskScore.value).toEqual(50);
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]')
+      .last()
+      .simulate('click');
+    wrapper.find('button#medium').simulate('click');
+
+    const result2 = await formHook();
+    expect(result2?.isValid).toEqual(true);
+    expect(result2?.data?.riskScore.value).toEqual(47);
   });
 });
