@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { NormalizedField } from '../../../../types';
+import { NormalizedField, ParameterName, Field as FieldType } from '../../../../types';
 import { StoreParameter, DocValuesParameter, MetaParameter } from '../../field_parameters';
 import { AdvancedParametersSection } from '../edit_field';
 
