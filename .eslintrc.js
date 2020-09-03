@@ -305,6 +305,8 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
+                  '!src/core/server/utils', // ts alias
+                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',

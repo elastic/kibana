@@ -63,21 +63,24 @@ export class TiledVectorLayer extends VectorLayer {
     );
     const prevDataRequest = this.getSourceDataRequest();
 
+    const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      const canSkipBecauseNoChanges =
-        data.layerName === this._source.getLayerName() &&
-        data.minSourceZoom === this._source.getMinZoom() &&
-        data.maxSourceZoom === this._source.getMaxZoom();
+      if (data) {
+        const canSkipBecauseNoChanges =
+          data.layerName === this._source.getLayerName() &&
+          data.minSourceZoom === this._source.getMinZoom() &&
+          data.maxSourceZoom === this._source.getMaxZoom() &&
+          data.urlTemplate === templateWithMeta.urlTemplate;
 
-      if (canSkipBecauseNoChanges) {
-        return null;
+        if (canSkipBecauseNoChanges) {
+          return null;
+        }
       }
     }
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      const templateWithMeta = await this._source.getUrlTemplateWithMeta();
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
@@ -158,6 +161,11 @@ export class TiledVectorLayer extends VectorLayer {
 
     if (!tiledSourceMeta) {
       return false;
+    }
+
+    if (!mbTileSource.tiles) {
+      // Expected source is not compatible, so remove.
+      return true;
     }
 
     const isSourceDifferent =
