@@ -4434,8 +4434,6 @@
     "visualizations.newVisWizard.searchSelection.savedObjectType.search": "已保存搜索",
     "visualizations.newVisWizard.selectVisType": "选择可视化类型",
     "visualizations.newVisWizard.title": "新建可视化",
-    "visualizations.newVisWizard.visTypeAliasDescription": "打开 Visualize 外部的 Kibana 应用程序。",
-    "visualizations.newVisWizard.visTypeAliasTitle": "Kibana 应用程序",
     "visualizations.savedObjectName": "可视化",
     "visualizations.visualizationTypeInvalidMessage": "无效的可视化类型“{visType}”",
     "visualize.badge.readOnly.text": "只读",
