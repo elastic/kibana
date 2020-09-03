@@ -17,6 +17,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
+
 import { TrustedAppsListResourceStateChanged } from './action';
 import { TrustedAppsListPageState } from '../state';
 
@@ -43,7 +44,7 @@ const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceSt
     ...state,
     listView: {
       ...state.listView,
-      currentListData: action.payload.newState,
+      currentListResourceState: action.payload.newState,
     },
   };
 };
@@ -70,7 +71,7 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
 
 export const initialTrustedAppsPageState: TrustedAppsListPageState = {
   listView: {
-    currentListData: { type: 'UninitialisedResourceState' },
+    currentListResourceState: { type: 'UninitialisedResourceState' },
     currentPaginationInfo: {
       index: MANAGEMENT_DEFAULT_PAGE,
       size: MANAGEMENT_DEFAULT_PAGE_SIZE,

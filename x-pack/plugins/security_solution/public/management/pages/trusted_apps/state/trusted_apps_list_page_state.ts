@@ -20,7 +20,7 @@ export interface TrustedAppsListData {
 
 export interface TrustedAppsListPageState {
   listView: {
-    currentListData: AsyncResourceState<TrustedAppsListData>;
+    currentListResourceState: AsyncResourceState<TrustedAppsListData>;
     currentPaginationInfo: PaginationInfo;
   };
   active: boolean;

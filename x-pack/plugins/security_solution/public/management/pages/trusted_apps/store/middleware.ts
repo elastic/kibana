@@ -11,15 +11,20 @@ import { AppAction } from '../../../../common/store/actions';
 import {
   AsyncResourceState,
   StaleResourceState,
-  getLastLoadedResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state';
 
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 
-import { needsRefreshOfListData } from './selectors';
 import { TrustedAppsListResourceStateChanged } from './action';
+import {
+  getCurrentListResourceState,
+  getLastLoadedListResourceState,
+  getListCurrentPageIndex,
+  getListCurrentPageSize,
+  needsRefreshOfListData,
+} from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -32,20 +37,22 @@ const refreshList = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const list = store.getState().listView;
-
   store.dispatch(
     createTrustedAppsListResourceStateChangedAction({
       type: 'LoadingResourceState',
       // need to think on how to avoid the casting
-      previousState: list.currentListData as Immutable<StaleResourceState<TrustedAppsListData>>,
+      previousState: getCurrentListResourceState(store.getState()) as Immutable<
+        StaleResourceState<TrustedAppsListData>
+      >,
     })
   );
 
   try {
+    const pageIndex = getListCurrentPageIndex(store.getState());
+    const pageSize = getListCurrentPageSize(store.getState());
     const response = await trustedAppsService.getTrustedAppsList({
-      page: list.currentPaginationInfo.index + 1,
-      per_page: list.currentPaginationInfo.size,
+      page: pageIndex + 1,
+      per_page: pageSize,
     });
 
     store.dispatch(
@@ -53,8 +60,8 @@ const refreshList = async (
         type: 'LoadedResourceState',
         data: {
           items: response.data,
-          paginationInfo: list.currentPaginationInfo,
           totalItemsCount: response.total,
+          paginationInfo: { index: pageIndex, size: pageSize },
         },
       })
     );
@@ -63,7 +70,7 @@ const refreshList = async (
       createTrustedAppsListResourceStateChangedAction({
         type: 'FailedResourceState',
         error,
-        lastLoadedState: getLastLoadedResourceState(list.currentListData),
+        lastLoadedState: getLastLoadedListResourceState(store.getState()),
       })
     );
   }

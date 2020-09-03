@@ -7,11 +7,15 @@
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
+  AsyncResourceState,
   getCurrentResourceError,
   getLastLoadedResourceData,
+  getLastLoadedResourceState,
   isLoadingResourceState,
   isOutdatedResourceState,
+  LoadedResourceState,
   PaginationInfo,
+  TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state';
 
@@ -20,7 +24,7 @@ const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): b
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const currentPageInfo = state.listView.currentPaginationInfo;
-  const currentPage = state.listView.currentListData;
+  const currentPage = state.listView.currentListResourceState;
 
   return (
     state.active &&
@@ -30,10 +34,22 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   );
 };
 
+export const getCurrentListResourceState = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<AsyncResourceState<TrustedAppsListData>> | undefined => {
+  return state.listView.currentListResourceState;
+};
+
+export const getLastLoadedListResourceState = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<LoadedResourceState<TrustedAppsListData>> | undefined => {
+  return getLastLoadedResourceState(state.listView.currentListResourceState);
+};
+
 export const getListItems = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<TrustedApp[]> => {
-  return getLastLoadedResourceData(state.listView.currentListData)?.items || [];
+  return getLastLoadedResourceData(state.listView.currentListResourceState)?.items || [];
 };
 
 export const getListCurrentPageIndex = (state: Immutable<TrustedAppsListPageState>): number => {
@@ -45,15 +61,15 @@ export const getListCurrentPageSize = (state: Immutable<TrustedAppsListPageState
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
-  return getLastLoadedResourceData(state.listView.currentListData)?.totalItemsCount || 0;
+  return getLastLoadedResourceData(state.listView.currentListResourceState)?.totalItemsCount || 0;
 };
 
 export const getListErrorMessage = (
   state: Immutable<TrustedAppsListPageState>
 ): string | undefined => {
-  return getCurrentResourceError(state.listView.currentListData)?.message;
+  return getCurrentResourceError(state.listView.currentListResourceState)?.message;
 };
 
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return isLoadingResourceState(state.listView.currentListData);
+  return isLoadingResourceState(state.listView.currentListResourceState);
 };
