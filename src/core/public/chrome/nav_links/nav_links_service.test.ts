@@ -84,7 +84,7 @@ describe('NavLinksService', () => {
       const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe((r) => emittedLinks.push(r));
-      start.update('app1', { active: true });
+      start.update('app1', { href: '/foo' });
 
       service.stop();
       expect(emittedLinks).toEqual([

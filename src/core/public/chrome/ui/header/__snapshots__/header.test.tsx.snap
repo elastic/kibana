@@ -362,7 +362,6 @@ exports[`Header renders 1`] = `
   }
   kibanaDocLink="/docs"
   kibanaVersion="1.0.0"
-  legacyMode={false}
   loadingCount$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1889,7 +1888,6 @@ exports[`Header renders 2`] = `
   }
   kibanaDocLink="/docs"
   kibanaVersion="1.0.0"
-  legacyMode={false}
   loadingCount$={
     BehaviorSubject {
       "_isScalar": false,
@@ -6110,7 +6108,6 @@ exports[`Header renders 3`] = `
   }
   kibanaDocLink="/docs"
   kibanaVersion="1.0.0"
-  legacyMode={false}
   loadingCount$={
     BehaviorSubject {
       "_isScalar": false,
@@ -10936,7 +10933,6 @@ exports[`Header renders 4`] = `
   }
   kibanaDocLink="/docs"
   kibanaVersion="1.0.0"
-  legacyMode={false}
   loadingCount$={
     BehaviorSubject {
       "_isScalar": false,

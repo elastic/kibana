@@ -50,7 +50,7 @@ export function createEuiListItem({
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { href, active, id, title, disabled, euiIconType, icon, tooltip } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
 
   return {
     label: tooltip ?? title,
@@ -70,8 +70,7 @@ export function createEuiListItem({
         navigateToApp(id);
       }
     },
-    // Legacy apps use `active` property, NP apps should match the current app
-    isActive: active || appId === id,
+    isActive: appId === id,
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {

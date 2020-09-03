@@ -90,23 +90,11 @@ export interface ChromeNavLink {
    * Hides a link from the navigation.
    */
   readonly hidden?: boolean;
-
-  /** LEGACY FIELDS */
-
-  /**
-   * Indicates whether or not this app is currently on the screen.
-   *
-   * @internalRemarks
-   * Remove this when ApplicationService is implemented and managing apps.
-   *
-   * @deprecated
-   */
-  readonly active?: boolean;
 }
 
 /** @public */
 export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'href'>
+  Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -124,7 +112,7 @@ export class NavLinkWrapper {
 
   public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'href']);
+    newProps = pick(newProps, ['disabled', 'hidden', 'url', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }
