@@ -25,8 +25,7 @@ import { run, createFlagError, createFailError, REPO_ROOT } from '@kbn/dev-utils
 
 import { FORMATS, SomeFormat } from './formats';
 import {
-  iterRelevantPullRequests,
-  getPr,
+  PrApi,
   Version,
   ClassifiedPr,
   streamFromIterable,
@@ -48,6 +47,7 @@ export function runReleaseNotesCli() {
       if (!token || typeof token !== 'string') {
         throw createFlagError('--token must be defined');
       }
+      const prApi = new PrApi(log, token);
 
       const version = Version.fromFlag(flags.version);
       if (!version) {
@@ -80,7 +80,7 @@ export function runReleaseNotesCli() {
         }
 
         const summary = new IrrelevantPrSummary(log);
-        const pr = await getPr(token, number);
+        const pr = await prApi.getPr(number);
         log.success(
           inspect(
             {
@@ -101,7 +101,7 @@ export function runReleaseNotesCli() {
 
       const summary = new IrrelevantPrSummary(log);
       const prsToReport: ClassifiedPr[] = [];
-      const prIterable = iterRelevantPullRequests(token, version, log);
+      const prIterable = prApi.iterRelevantPullRequests(version);
       for await (const pr of prIterable) {
         if (!isPrRelevant(pr, version, includeVersions, summary)) {
           continue;
