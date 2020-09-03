@@ -40,7 +40,7 @@ describe('Resolver, initially no indices', () => {
     });
   });
 
-  it(`should no nodes`, async () => {
+  it(`should retrieve no process nodes when the indices was an empty array`, async () => {
     await expect(
       simulator.map(() => ({
         processes: simulator.processNodeElements().length,
@@ -52,10 +52,11 @@ describe('Resolver, initially no indices', () => {
 
   describe('Resolver, when indices are used', () => {
     beforeEach(async () => {
+      // awesome_index is checked in the handleNoIndices function
       simulator.indices = ['awesome_index'];
     });
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
-    it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected.`, async () => {
+    it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected when the simulator has the right indices`, async () => {
       await expect(
         simulator.map(() => ({
           selectedOriginCount: simulator.selectedProcessNode(entityIDs.origin).length,
