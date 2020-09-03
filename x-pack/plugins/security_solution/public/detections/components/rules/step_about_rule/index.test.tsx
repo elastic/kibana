@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -84,8 +83,6 @@ describe('StepAboutRuleComponent', () => {
       .first()
       .simulate('change', { target: { value: 'Test name text' } });
 
-    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
-
     const result = await formHook();
     expect(result?.isValid).toEqual(false);
   });
@@ -113,8 +110,6 @@ describe('StepAboutRuleComponent', () => {
       .first()
       .simulate('change', { target: { value: 'Test description text' } });
 
-    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
-
     const result = await formHook();
     expect(result?.isValid).toEqual(false);
   });
@@ -137,18 +132,14 @@ describe('StepAboutRuleComponent', () => {
       throw new Error('Form hook not set, but tests depend on it');
     }
 
-    await act(async () => {
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
-
-      wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click');
-    });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
 
     const expected: AboutStepRule = {
       author: [],
@@ -197,23 +188,20 @@ describe('StepAboutRuleComponent', () => {
       throw new Error('Form hook not set, but tests depend on it');
     }
 
-    await act(async () => {
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
 
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
 
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
-        .first()
-        .simulate('change', { target: { value: '80' } });
-      wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
-    });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
+      .first()
+      .simulate('change', { target: { value: '80' } });
 
     const expected: AboutStepRule = {
       author: [],
