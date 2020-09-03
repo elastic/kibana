@@ -38,7 +38,11 @@ import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
 import { GenericDownloader } from '../../../../../common/components/generic_downloader';
-import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
+import {
+  AllRulesTables,
+  RulesSortingFields,
+  SortingType,
+} from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -53,12 +57,12 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
-const SORT_FIELD = 'enabled';
+export const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
     filter: '',
-    sortField: SORT_FIELD,
+    sortField: INITIAL_SORT_FIELD,
     sortOrder: 'desc',
   },
   loadingRuleIds: [],
@@ -164,8 +168,13 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      (): SortingType => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
-      [filterOptions.sortOrder]
+      (): SortingType => ({
+        sort: {
+          field: filterOptions.sortField as RulesSortingFields,
+          direction: filterOptions.sortOrder,
+        },
+      }),
+      [filterOptions]
     );
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
@@ -215,7 +224,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: SORT_FIELD, // Only enabled is supported for sorting currently
+            sortField: sort?.field ?? INITIAL_SORT_FIELD,
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },

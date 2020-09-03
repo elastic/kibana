@@ -28,9 +28,11 @@ import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
+export type RulesSortingFields = 'enabled' | 'updated_at' | 'name';
+
 export interface SortingType {
   sort: {
-    field: 'enabled';
+    field: RulesSortingFields;
     direction: Direction;
   };
 }
@@ -48,12 +50,7 @@ interface AllRulesTablesProps {
   rules: Rules;
   rulesColumns: RulesColumns[];
   rulesStatuses: RuleStatusRowItemType[];
-  sorting: {
-    sort: {
-      field: 'enabled';
-      direction: Direction;
-    };
-  };
+  sorting: SortingType;
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
   tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
   selectedTab: AllRulesTabs;

@@ -33,6 +33,7 @@ import {
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { INITIAL_SORT_FIELD } from '../../../pages/detection_engine/rules/all';
 
 /**
  * Create provided Rule
@@ -94,7 +95,7 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
+    sortField: INITIAL_SORT_FIELD,
     sortOrder: 'desc',
     showCustomRules: false,
     showElasticRules: false,
@@ -121,9 +122,12 @@ export const fetchRules = async ({
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: filterOptions.sortField,
+    sort_field:
+      filterOptions.sortField === 'name'
+        ? `${filterOptions.sortField}.keyword`
+        : filterOptions.sortField,
     sort_order: filterOptions.sortOrder,
-    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+    ...(filters.length ? { filter: filters.join(' OR ') } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(

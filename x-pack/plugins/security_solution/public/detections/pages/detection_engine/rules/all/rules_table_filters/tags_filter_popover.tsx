@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -37,12 +37,26 @@ const ScrollableDiv = styled.div`
  * @param tags to display for filtering
  * @param onSelectedTagsChanged change listener to be notified when tag selection changes
  */
-export const TagsFilterPopoverComponent = ({
+const TagsFilterPopoverComponent = ({
   tags,
   selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+
+  const tagsComponent = useMemo(() => {
+    return tags
+      .sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())) // Case insensitive
+      .map((tag, index) => (
+        <EuiFilterSelectItem
+          checked={selectedTags.includes(tag) ? 'on' : undefined}
+          key={`${index}-${tag}`}
+          onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
+        >
+          {`${tag}`}
+        </EuiFilterSelectItem>
+      ));
+  }, [onSelectedTagsChanged, selectedTags, tags]);
 
   return (
     <EuiPopover
@@ -64,17 +78,7 @@ export const TagsFilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      <ScrollableDiv>
-        {tags.map((tag, index) => (
-          <EuiFilterSelectItem
-            checked={selectedTags.includes(tag) ? 'on' : undefined}
-            key={`${index}-${tag}`}
-            onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
-          >
-            {`${tag}`}
-          </EuiFilterSelectItem>
-        ))}
-      </ScrollableDiv>
+      <ScrollableDiv>{tagsComponent}</ScrollableDiv>
       {tags.length === 0 && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
