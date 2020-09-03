@@ -10,9 +10,9 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { ButtonColor } from '@elastic/eui/src/components/button/button';
 
 interface IConfirmModalProps {
-  title?: string;
+  title: string;
   cancelButtonText?: string;
-  confirmButtonText?: string;
+  confirmButtonText: string;
   buttonColor?: ButtonColor;
   children?: React.ReactNode;
   onCancel(): void;
@@ -20,9 +20,9 @@ interface IConfirmModalProps {
 }
 
 export const ConfirmModal: React.FC<IConfirmModalProps> = ({
-  title = 'Please confirm',
+  title,
   cancelButtonText = 'Cancel',
-  confirmButtonText = 'Ok',
+  confirmButtonText,
   buttonColor = 'primary',
   children,
   onCancel,
