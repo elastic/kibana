@@ -105,6 +105,24 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
+            "over_time": Object {
+              "aggs": Object {
+                "average": Object {
+                  "avg": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
           },
           "terms": Object {
             "field": "service.name",
@@ -194,6 +212,19 @@ Array [
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "over_time": Object {
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -232,6 +263,19 @@ Array [
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "over_time": Object {
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,

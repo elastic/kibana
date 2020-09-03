@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getSeverity, Severity } from '../../../../common/anomaly_detection';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   TRANSACTION_DURATION,
   AGENT_NAME,
@@ -15,6 +17,20 @@ import {
   ServicesItemsSetup,
   ServicesItemsProjection,
 } from './get_services_items';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
+  getMLJobIds,
+  getServiceAnomalies,
+} from '../../service_map/get_service_anomalies';
+
+function getDateHistogramOpts(start: number, end: number) {
+  return {
+    field: '@timestamp',
+    fixed_interval: getBucketSize(start, end, 20).intervalString,
+    min_doc_count: 0,
+    extended_bounds: { min: start, max: end },
+  };
+}
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -30,7 +46,7 @@ export const getTransactionDurationAverages = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { apmEventClient } = setup;
+  const { apmEventClient, start, end } = setup;
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
@@ -51,6 +67,16 @@ export const getTransactionDurationAverages = async ({
                   field: TRANSACTION_DURATION,
                 },
               },
+              over_time: {
+                date_histogram: getDateHistogramOpts(start, end),
+                aggs: {
+                  average: {
+                    avg: {
+                      field: TRANSACTION_DURATION,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -66,7 +92,13 @@ export const getTransactionDurationAverages = async ({
 
   return aggregations.services.buckets.map((bucket) => ({
     serviceName: bucket.key as string,
-    avgResponseTime: bucket.average.value,
+    avgResponseTime: {
+      value: bucket.average.value,
+      over_time: bucket.over_time.buckets.map((dateBucket) => ({
+        x: dateBucket.key,
+        y: dateBucket.average.value,
+      })),
+    },
   }));
 };
 
@@ -114,7 +146,7 @@ export const getAgentNames = async ({
 
   return aggregations.services.buckets.map((bucket) => ({
     serviceName: bucket.key as string,
-    agentName: bucket.agent_name.hits.hits[0]?._source.agent.name,
+    agentName: bucket.agent_name.hits.hits[0]?._source.agent.name as AgentName,
   }));
 };
 
@@ -122,7 +154,7 @@ export const getTransactionRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { apmEventClient } = setup;
+  const { apmEventClient, start, end } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
@@ -135,6 +167,11 @@ export const getTransactionRates = async ({
             terms: {
               ...projection.body.aggs.services.terms,
               size: MAX_NUMBER_OF_SERVICES,
+            },
+            aggs: {
+              over_time: {
+                date_histogram: getDateHistogramOpts(start, end),
+              },
             },
           },
         },
@@ -154,7 +191,13 @@ export const getTransactionRates = async ({
     const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
-      transactionsPerMinute,
+      transactionsPerMinute: {
+        value: transactionsPerMinute,
+        over_time: bucket.over_time.buckets.map((dateBucket) => ({
+          x: dateBucket.key,
+          y: dateBucket.doc_count / deltaAsMinutes,
+        })),
+      },
     };
   });
 };
@@ -163,7 +206,7 @@ export const getErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { apmEventClient } = setup;
+  const { apmEventClient, start, end } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
@@ -176,6 +219,11 @@ export const getErrorRates = async ({
             terms: {
               ...projection.body.aggs.services.terms,
               size: MAX_NUMBER_OF_SERVICES,
+            },
+            aggs: {
+              over_time: {
+                date_histogram: getDateHistogramOpts(start, end),
+              },
             },
           },
         },
@@ -195,7 +243,13 @@ export const getErrorRates = async ({
     const errorsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
-      errorsPerMinute,
+      errorsPerMinute: {
+        value: errorsPerMinute,
+        over_time: bucket.over_time.buckets.map((dateBucket) => ({
+          x: dateBucket.key,
+          y: dateBucket.doc_count / deltaAsMinutes,
+        })),
+      },
     };
   });
 };
@@ -245,4 +299,39 @@ export const getEnvironments = async ({
     serviceName: bucket.key as string,
     environments: bucket.environments.buckets.map((env) => env.key as string),
   }));
+};
+
+export const getHealthStatuses = async (
+  { setup }: AggregationParams,
+  mlAnomaliesEnvironment?: string
+) => {
+  if (!setup.ml) {
+    return [];
+  }
+
+  const jobIds = await getMLJobIds(
+    setup.ml.anomalyDetectors,
+    mlAnomaliesEnvironment
+  );
+  if (!jobIds.length) {
+    return [];
+  }
+
+  const anomalies = await getServiceAnomalies({
+    setup,
+    environment: mlAnomaliesEnvironment,
+  });
+
+  return Object.keys(anomalies.serviceAnomalies).reduce<
+    Array<{ serviceName: string; severity?: Severity }>
+  >((prev, serviceName) => {
+    const stats = anomalies.serviceAnomalies[serviceName];
+
+    const severity = getSeverity(stats.anomalyScore);
+
+    return prev.concat({
+      serviceName,
+      severity,
+    });
+  }, []);
 };

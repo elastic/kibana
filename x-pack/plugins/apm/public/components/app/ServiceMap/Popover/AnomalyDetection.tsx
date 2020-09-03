@@ -18,10 +18,13 @@ import { useTheme } from '../../../../hooks/useTheme';
 import { fontSize, px } from '../../../../style/variables';
 import { asInteger, asDuration } from '../../../../utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
-import { getSeverityColor, popoverWidth } from '../cytoscapeOptions';
+import { popoverWidth } from '../cytoscapeOptions';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
-import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
-import { getSeverity } from './getSeverity';
+import {
+  getSeverity,
+  getSeverityColor,
+  ServiceAnomalyStats,
+} from '../../../../../common/anomaly_detection';
 
 const HealthStatusTitle = styled(EuiTitle)`
   display: inline;

@@ -8,9 +8,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { getSeverityColor } from '../../app/ServiceMap/cytoscapeOptions';
+import {
+  getSeverityColor,
+  Severity,
+} from '../../../../common/anomaly_detection';
 import { useTheme } from '../../../hooks/useTheme';
-import { severity as Severity } from '../../app/ServiceMap/Popover/getSeverity';
 
 type SeverityScore = 0 | 25 | 50 | 75;
 const ANOMALY_SCORES: SeverityScore[] = [0, 25, 50, 75];

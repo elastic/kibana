@@ -58,6 +58,9 @@ describe('getServiceMapServiceNodeInfo', () => {
         indices: {},
         start: 1593460053026000,
         end: 1593497863217000,
+        config: {
+          'xpack.apm.metricsInterval': 30,
+        },
       } as unknown) as Setup & SetupTimeRange;
       const environment = 'test environment';
       const serviceName = 'test service name';

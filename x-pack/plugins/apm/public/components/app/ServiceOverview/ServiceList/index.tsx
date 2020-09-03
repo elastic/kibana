@@ -4,23 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { ValuesType } from 'utility-types';
+import { orderBy } from 'lodash';
+import { useTheme } from '../../../../../../observability/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { fontSizes, truncate } from '../../../../style/variables';
+import { fontSizes, px, truncate } from '../../../../style/variables';
 import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
-import { ManagedTable } from '../../../shared/ManagedTable';
+import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
+import { AgentIcon } from '../../../shared/AgentIcon';
+import { SparkPlot } from '../../../shared/charts/SparkPlot';
+import { getEmptySeries } from '../../../shared/charts/CustomPlot/getEmptySeries';
+import {
+  getSeverityColor,
+  Severity,
+} from '../../../../../common/anomaly_detection';
 
 interface Props {
   items: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
+  displayHealthStatus: boolean;
 }
+
+type ServiceListItem = ValuesType<Props['items']>;
 
 function formatNumber(value: number) {
   if (value === 0) {
@@ -36,12 +50,111 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
+function ServiceListMetric({
+  color,
+  series,
+  valueLabel,
+}: {
+  color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
+  series?: Array<{ x: number; y: number | null }>;
+  valueLabel: React.ReactNode;
+}) {
+  const theme = useTheme();
+
+  const {
+    urlParams: { start, end },
+  } = useUrlParams();
+
+  const colorValue = theme.eui[color];
+
+  return (
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <SparkPlot
+          series={
+            series ??
+            getEmptySeries(parseFloat(start!), parseFloat(end!))[0].data
+          }
+          color={colorValue}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
+        {valueLabel}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function HealthBadge({ severity }: { severity?: Severity }) {
+  const theme = useTheme();
+
+  let label: string = '';
+
+  switch (severity) {
+    case Severity.critical:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.critical',
+        {
+          defaultMessage: 'Critical',
+        }
+      );
+      break;
+
+    case Severity.major:
+    case Severity.minor:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.warning',
+        {
+          defaultMessage: 'Warning',
+        }
+      );
+      break;
+
+    case Severity.warning:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.healthy',
+        {
+          defaultMessage: 'Healthy',
+        }
+      );
+      break;
+
+    default:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.unknown',
+        {
+          defaultMessage: 'Unknown',
+        }
+      );
+      break;
+  }
+
+  const unknownColor = theme.eui.euiColorLightShade;
+
+  return (
+    <EuiBadge color={getSeverityColor(theme, severity) ?? unknownColor}>
+      {label}
+    </EuiBadge>
+  );
+}
+
 const AppLink = styled(TransactionOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS = [
+export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
+  {
+    field: 'severity',
+    name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
+      defaultMessage: 'Health',
+    }),
+    width: px(80),
+    sortable: true,
+    render: (_, { severity }) => {
+      return <HealthBadge severity={severity} />;
+    },
+  },
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -49,9 +162,20 @@ export const SERVICE_COLUMNS = [
     }),
     width: '40%',
     sortable: true,
-    render: (serviceName: string) => (
+    render: (_, { serviceName, agentName }) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink serviceName={serviceName}>{formatString(serviceName)}</AppLink>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          {agentName && (
+            <EuiFlexItem grow={false}>
+              <AgentIcon agentName={agentName} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <AppLink serviceName={serviceName}>
+              {formatString(serviceName)}
+            </AppLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiToolTip>
     ),
   },
@@ -60,19 +184,11 @@ export const SERVICE_COLUMNS = [
     name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
       defaultMessage: 'Environment',
     }),
-    width: '20%',
+    width: px(160),
     sortable: true,
-    render: (environments: string[]) => (
-      <EnvironmentBadge environments={environments} />
+    render: (_, { environments }) => (
+      <EnvironmentBadge environments={environments ?? []} />
     ),
-  },
-  {
-    field: 'agentName',
-    name: i18n.translate('xpack.apm.servicesTable.agentColumnLabel', {
-      defaultMessage: 'Agent',
-    }),
-    sortable: true,
-    render: (agentName: string) => formatString(agentName),
   },
   {
     field: 'avgResponseTime',
@@ -81,7 +197,15 @@ export const SERVICE_COLUMNS = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) => asMillisecondDuration(time),
+    render: (_, { avgResponseTime }) => (
+      <ServiceListMetric
+        series={avgResponseTime?.over_time}
+        color="euiColorVis1"
+        valueLabel={asMillisecondDuration(avgResponseTime?.value || 0)}
+      />
+    ),
+    align: 'left',
+    width: px(160),
   },
   {
     field: 'transactionsPerMinute',
@@ -93,13 +217,22 @@ export const SERVICE_COLUMNS = [
     ),
     sortable: true,
     dataType: 'number',
-    render: (value: number) =>
-      `${formatNumber(value)} ${i18n.translate(
-        'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
-        {
-          defaultMessage: 'tpm',
-        }
-      )}`,
+    render: (_, { transactionsPerMinute }) => (
+      <ServiceListMetric
+        series={transactionsPerMinute?.over_time}
+        color="euiColorVis0"
+        valueLabel={`${formatNumber(
+          transactionsPerMinute?.value || 0
+        )} ${i18n.translate(
+          'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
+          {
+            defaultMessage: 'tpm',
+          }
+        )}`}
+      />
+    ),
+    align: 'left',
+    width: px(160),
   },
   {
     field: 'errorsPerMinute',
@@ -108,24 +241,83 @@ export const SERVICE_COLUMNS = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) =>
-      `${formatNumber(value)} ${i18n.translate(
-        'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
-        {
-          defaultMessage: 'err.',
-        }
-      )}`,
+    render: (_, { errorsPerMinute }) => (
+      <ServiceListMetric
+        series={errorsPerMinute?.over_time}
+        color="euiColorVis7"
+        valueLabel={`${formatNumber(
+          errorsPerMinute?.value || 0
+        )} ${i18n.translate(
+          'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
+          {
+            defaultMessage: 'err.',
+          }
+        )}`}
+      />
+    ),
+    align: 'left',
+    width: px(160),
   },
 ];
 
-export function ServiceList({ items, noItemsMessage }: Props) {
+const SEVERITY_ORDER = [
+  Severity.warning,
+  Severity.minor,
+  Severity.major,
+  Severity.critical,
+];
+
+export function ServiceList({
+  items,
+  displayHealthStatus,
+  noItemsMessage,
+}: Props) {
+  const columns = displayHealthStatus
+    ? SERVICE_COLUMNS
+    : SERVICE_COLUMNS.filter((column) => column.field !== 'severity');
+
   return (
     <ManagedTable
-      columns={SERVICE_COLUMNS}
+      columns={columns}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSortField="serviceName"
+      initialSortField="severity"
+      initialSortDirection="desc"
       initialPageSize={50}
+      sortFn={(itemsToSort, sortField, sortDirection) => {
+        // For severity, sort items by severity first, then by TPM
+
+        return sortField === 'severity'
+          ? orderBy(
+              itemsToSort,
+              [
+                (item) => {
+                  return item.severity
+                    ? SEVERITY_ORDER.indexOf(item.severity)
+                    : -1;
+                },
+                (item) => item.transactionsPerMinute?.value ?? 0,
+              ],
+              [sortDirection, sortDirection]
+            )
+          : orderBy(
+              itemsToSort,
+              (item) => {
+                switch (sortField) {
+                  case 'avgResponseTime':
+                    return item.avgResponseTime?.value ?? 0;
+                  case 'transactionsPerMinute':
+                    return item.transactionsPerMinute?.value ?? 0;
+                  case 'errorsPerMinute':
+                    return item.errorsPerMinute?.value ?? 0;
+
+                  default:
+                    return item[sortField as keyof typeof item];
+                }
+              },
+              sortDirection
+            );
+      }}
     />
   );
 }

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Logger } from 'kibana/server';
 import Boom from 'boom';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
@@ -27,11 +26,9 @@ export type ServiceAnomaliesResponse = PromiseReturnType<
 
 export async function getServiceAnomalies({
   setup,
-  logger,
   environment,
 }: {
   setup: Setup & SetupTimeRange;
-  logger: Logger;
   environment?: string;
 }) {
   const { ml, start, end } = setup;
@@ -41,11 +38,20 @@ export async function getServiceAnomalies({
   }
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
+
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
   const mlJobIds = await getMLJobIds(ml.anomalyDetectors, environment);
+
+  if (!mlJobIds.length) {
+    return {
+      mlJobIds: [],
+      serviceAnomalies: {},
+    };
+  }
+
   const params = {
     body: {
       size: 0,
@@ -120,7 +126,9 @@ interface ServiceAnomaliesAggResponse {
 function transformResponseToServiceAnomalies(
   response: ServiceAnomaliesAggResponse
 ): Record<string, ServiceAnomalyStats> {
-  const serviceAnomaliesMap = response.aggregations.services.buckets.reduce(
+  const serviceAnomaliesMap = (
+    response.aggregations?.services.buckets ?? []
+  ).reduce(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
       return {
         ...statsByServiceName,
@@ -153,7 +161,7 @@ export async function getMLJobIds(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );
     if (!matchingMLJob) {
-      throw new Error(`ML job Not Found for environment "${environment}".`);
+      return [];
     }
     return [matchingMLJob.job_id];
   }

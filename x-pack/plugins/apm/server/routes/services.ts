@@ -16,6 +16,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -23,8 +24,17 @@ export const servicesRoute = createRoute(() => ({
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
+    const { environment } = getParsedUiFilters({
+      uiFilters: context.params.query.uiFilters,
+      logger: context.logger,
+    });
+
     const setup = await setupRequest(context, request);
-    const services = await getServices(setup);
+
+    const services = await getServices({
+      setup,
+      mlAnomaliesEnvironment: environment,
+    });
 
     return services;
   },

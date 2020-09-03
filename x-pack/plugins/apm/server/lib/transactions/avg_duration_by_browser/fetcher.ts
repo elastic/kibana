@@ -24,7 +24,7 @@ export type ESResponse = PromiseReturnType<typeof fetcher>;
 export function fetcher(options: Options) {
   const { end, apmEventClient, start, uiFiltersES } = options.setup;
   const { serviceName, transactionName } = options;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { intervalString } = getBucketSize(start, end);
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]

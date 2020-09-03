@@ -38,7 +38,7 @@ describe('services queries', () => {
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) => getServicesItems(setup));
+    mock = await inspectSearchParams((setup) => getServicesItems({ setup }));
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);
 
