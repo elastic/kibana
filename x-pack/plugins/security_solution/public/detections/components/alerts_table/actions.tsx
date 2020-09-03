@@ -10,6 +10,7 @@ import dateMath from '@elastic/datemath';
 import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
 import {
@@ -67,7 +68,6 @@ export const getFilterAndRuleBounds = (
 export const updateAlertStatusAction = async ({
   query,
   alertIds,
-  status,
   selectedStatus,
   setEventsLoading,
   setEventsDeleted,
@@ -126,7 +126,7 @@ export const getThresholdAggregationDataProvider = (
   return [
     {
       and: [],
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-${aggregationFieldId}-${dataProviderValue}`,
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
       name: ecsData.signal?.rule?.threshold.field,
       enabled: true,
       excluded: false,
@@ -155,7 +155,7 @@ export const sendAlertToTimelineAction = async ({
 
   if (timelineId !== '' && apolloClient != null) {
     try {
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: true });
+      updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
         apolloClient.query<GetOneTimeline.Query, GetOneTimeline.Variables>({
           query: oneTimelineQuery,
@@ -236,7 +236,7 @@ export const sendAlertToTimelineAction = async ({
       }
     } catch {
       openAlertInBasicTimeline = true;
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
+      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
     }
   }
 
@@ -253,7 +253,7 @@ export const sendAlertToTimelineAction = async ({
         dataProviders: [
           {
             and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
             name: ecsData._id,
             enabled: true,
             excluded: false,
@@ -266,7 +266,7 @@ export const sendAlertToTimelineAction = async ({
           },
           ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
         ],
-        id: 'timeline-1',
+        id: TimelineId.active,
         dateRange: {
           start: from,
           end: to,
@@ -304,7 +304,7 @@ export const sendAlertToTimelineAction = async ({
         dataProviders: [
           {
             and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
             name: ecsData._id,
             enabled: true,
             excluded: false,
@@ -316,7 +316,7 @@ export const sendAlertToTimelineAction = async ({
             },
           },
         ],
-        id: 'timeline-1',
+        id: TimelineId.active,
         dateRange: {
           start: from,
           end: to,

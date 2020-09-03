@@ -140,7 +140,7 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
               body: dsl,
             },
           },
-          { signal: abortSignal }
+          { abortSignal }
         )
         .toPromise();
 

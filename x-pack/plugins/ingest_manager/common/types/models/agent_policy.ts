@@ -60,6 +60,11 @@ export interface FullAgentPolicy {
       [key: string]: any;
     };
   };
+  fleet?: {
+    kibana: {
+      hosts: string[];
+    };
+  };
   inputs: FullAgentPolicyInput[];
   revision?: number;
   agent?: {
