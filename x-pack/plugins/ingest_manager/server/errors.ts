@@ -32,7 +32,7 @@ export class IngestManagerError extends Error {
   }
 }
 
-export const getHTTPResponseCode = (error: IngestManagerError): number => {
+const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
     return 502; // Bad Gateway
   }

@@ -32,7 +32,7 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { IngestManagerError, getHTTPResponseCode, defaultIngestErrorHandler } from '../../errors';
+import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 
 export const getCategoriesHandler: RequestHandler<
@@ -150,14 +150,10 @@ export const installPackageHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (e) {
+    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
     if (e instanceof IngestManagerError) {
-      logger.error(e);
-      return response.customError({
-        statusCode: getHTTPResponseCode(e),
-        body: { message: e.message },
-      });
+      return defaultResult;
     }
-
     // if there is an unknown server error, uninstall any package assets
     try {
       const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
@@ -168,11 +164,7 @@ export const installPackageHandler: RequestHandler<
     } catch (error) {
       logger.error(`could not remove failed installation ${error}`);
     }
-    logger.error(e);
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultResult;
   }
 };
 
