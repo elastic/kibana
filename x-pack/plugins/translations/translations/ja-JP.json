@@ -8259,7 +8259,6 @@
     "xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel": "プライマリシャードの数",
     "xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel": "レプリカの数",
     "xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel": "セグメントの数",
-    "xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText": "デフォルトで、レプリカの数は同じままになります。",
     "xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel": "インデックスを縮小",
     "xpack.infra.alerting.alertFlyout.groupBy.placeholder": "なし（グループなし）",
     "xpack.infra.alerting.alertFlyout.groupByLabel": "グループ分けの条件",

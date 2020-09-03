@@ -8262,7 +8262,6 @@
     "xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel": "主分片数目",
     "xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel": "副本分片数目",
     "xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel": "段数目",
-    "xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText": "默认情况下，副本分片数目仍一样。",
     "xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel": "缩小索引",
     "xpack.infra.alerting.alertFlyout.groupBy.placeholder": "无内容（未分组）",
     "xpack.infra.alerting.alertFlyout.groupByLabel": "分组依据",
