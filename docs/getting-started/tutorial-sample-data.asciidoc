@@ -127,12 +127,12 @@ To query the data:
 . To view all flights out of Rome, enter the following in the *KQL* query bar, then click *Update*:
 +
 [source,text]
-OriginCityName:Rome   
+OriginCityName: Rome
 
 . For a more complex query with AND and OR, enter:
 +
 [source,text]
-OriginCityName:Rome AND (Carrier:JetBeats OR "Kibana Airlines")
+OriginCityName:Rome AND (Carrier:JetBeats OR Carrier:"Kibana Airlines")
 +
 The dashboard panels update to display the flights out of Rome on JetBeats and 
 {kib} Airlines.  
@@ -155,7 +155,5 @@ Now that you know the {kib} basics, try out the <<create-your-own-dashboard, Cre
 * Discover and explore data
 
 * Create and add panels to a dashboard
-
-
 
 

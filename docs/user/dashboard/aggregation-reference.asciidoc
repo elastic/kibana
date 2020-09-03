@@ -84,7 +84,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 ^| X
 ^| X
 ^| X
-^| 
+|
 ^| X
 
 |===
@@ -240,4 +240,3 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 ^| X
 
 |===
-
