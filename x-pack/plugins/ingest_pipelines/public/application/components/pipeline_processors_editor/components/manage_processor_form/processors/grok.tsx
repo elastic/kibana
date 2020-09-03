@@ -28,7 +28,7 @@ const { isJsonField } = fieldValidators;
 
 const i18nTexts = {
   addPatternLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel',
+    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsAddPatternLabel',
     { defaultMessage: 'Add pattern' }
   ),
 };
