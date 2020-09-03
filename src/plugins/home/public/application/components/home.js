@@ -155,7 +155,7 @@ export class Home extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup className="homHeader__actions">
                   <EuiFlexItem className="homHeader__actionItem">
-                    <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
+                    <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="indexOpen">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
@@ -165,8 +165,9 @@ export class Home extends Component {
                   {stackManagement ? (
                     <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(stackManagement.path)}
+                        flush="right"
                         iconType="gear"
+                        onClick={createAppNavigationHandler(stackManagement.path)}
                       >
                         {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
                           defaultMessage: 'Manage',
@@ -178,8 +179,9 @@ export class Home extends Component {
                   {devTools ? (
                     <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(devTools.path)}
+                        flush="right"
                         iconType="wrench"
+                        onClick={createAppNavigationHandler(devTools.path)}
                       >
                         {i18n.translate('home.pageHeader.devToolsButtonLabel', {
                           defaultMessage: 'Dev tools',

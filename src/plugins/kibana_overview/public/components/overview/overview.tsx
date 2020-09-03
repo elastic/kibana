@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { FC, useState, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
@@ -296,35 +297,9 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   };
 
   return (
-    <main className="kibanaOverviewWrapper" aria-labelledby="kibanaOverviewHeader__title">
-      <header className="kibanaOverviewHeader">
-        <div className="kibanaOverviewHeader__inner">
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="logoKibana" size="xxl" />
-            </EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" direction="column" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiText>Visualize & analyze</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <PageHeader
-                  title={
-                    <EuiTitle size="l">
-                      <h1 id="kibanaOverviewHeader__title">
-                        <FormattedMessage
-                          id="kibanaOverview.pageHeader.title"
-                          defaultMessage="Kibana"
-                        />
-                      </h1>
-                    </EuiTitle>
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-        </div>
-      </header>
+    <main aria-labelledby="kibanaOverviewHeader__title" className="kibanaOverviewWrapper">
+      <PageHeader />
+
       <div className="kibanaOverviewContent">
         <EuiSpacer size="l" />
 

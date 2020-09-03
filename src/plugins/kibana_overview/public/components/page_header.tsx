@@ -17,38 +17,55 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
-interface Props {
-  title: JSX.Element;
-}
-
-export const PageHeader: FC<Props> = ({ title }) => {
+export const PageHeader = () => {
   const devTools = { path: '/app/dev_tools#/console' };
   const stackManagement = { path: '/app/management' };
 
   return (
-    <div className="homPageHeaderContainer">
-      <header className="homPageHeader">
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem className="homPageHeader__titleWrapper">{title}</EuiFlexItem>
+    <header className="kibanaOverviewHeader">
+      <div className="kibanaOverviewHeader__inner">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoKibana" size="xxl" />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h1 id="kibanaOverviewHeader__title">
+                    <FormattedMessage
+                      id="kibanaOverview.pageHeader.title"
+                      defaultMessage="Kibana"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
-              <EuiFlexItem className="homPageHeader__menuItem">
-                <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
+            <EuiFlexGroup className="kibanaOverviewHeader__actions">
+              <EuiFlexItem className="kibanaOverviewHeader__actionItem">
+                <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="plusInCircle">
                   {i18n.translate('home.pageHeader.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
               {stackManagement ? (
-                <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexItem className="kibanaOverviewHeader__actionItem">
                   <EuiButtonEmpty
-                    onClick={createAppNavigationHandler(stackManagement.path)}
+                    flush="right"
                     iconType="gear"
+                    onClick={createAppNavigationHandler(stackManagement.path)}
                   >
                     {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
                       defaultMessage: 'Manage',
@@ -56,11 +73,13 @@ export const PageHeader: FC<Props> = ({ title }) => {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}
+
               {devTools ? (
-                <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexItem className="kibanaOverviewHeader__actionItem">
                   <EuiButtonEmpty
-                    onClick={createAppNavigationHandler(devTools.path)}
+                    flush="right"
                     iconType="wrench"
+                    onClick={createAppNavigationHandler(devTools.path)}
                   >
                     {i18n.translate('home.pageHeader.devToolsButtonLabel', {
                       defaultMessage: 'Dev tools',
@@ -71,7 +90,7 @@ export const PageHeader: FC<Props> = ({ title }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </header>
-    </div>
+      </div>
+    </header>
   );
 };
