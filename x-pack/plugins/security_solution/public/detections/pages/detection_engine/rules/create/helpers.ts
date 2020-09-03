@@ -10,12 +10,12 @@ import deepmerge from 'deepmerge';
 
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
 import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
+import { Type } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   AboutStepRule,
@@ -91,7 +91,7 @@ const isThresholdFields = <T>(
   fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
+export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: Type) => {
   if (isMlRule(type)) {
     const { index, queryBar, threshold, ...mlRuleFields } = fields;
     return mlRuleFields;
@@ -142,7 +142,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
+          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
 
   return {

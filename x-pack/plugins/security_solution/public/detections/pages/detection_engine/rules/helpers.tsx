@@ -10,7 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
-import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
@@ -25,7 +25,10 @@ import {
   ActionsStepRule,
   SeverityValue,
 } from './types';
-import { SeverityMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  SeverityMapping,
+  Type,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -304,7 +307,7 @@ export const redirectToDetections = (
   hasEncryptionKey === false ||
   needsListsConfiguration;
 
-const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
 
   if (isMlRule(ruleType)) {
@@ -318,7 +321,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
   return queryRuleParams;
 };
 
-export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
+export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   const commonRuleParamsKeys = [
     'id',
     'name',
@@ -346,23 +349,21 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne(
-  (ruleType: RuleType | undefined): ActionVariable[] => {
-    if (!ruleType) {
-      return [];
-    }
-    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
-
-    return [
-      { name: 'state.signals_count', description: 'state.signals_count' },
-      { name: '{context.results_link}', description: 'context.results_link' },
-      ...actionMessageRuleParams.map((param) => {
-        const extendedParam = `context.rule.${param}`;
-        return { name: extendedParam, description: extendedParam };
-      }),
-    ];
+export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariable[] => {
+  if (!ruleType) {
+    return [];
   }
-);
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return [
+    { name: 'state.signals_count', description: 'state.signals_count' },
+    { name: '{context.results_link}', description: 'context.results_link' },
+    ...actionMessageRuleParams.map((param) => {
+      const extendedParam = `context.rule.${param}`;
+      return { name: extendedParam, description: extendedParam };
+    }),
+  ];
+});
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>

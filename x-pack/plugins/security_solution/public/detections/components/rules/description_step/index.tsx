@@ -9,7 +9,6 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { RuleType } from '../../../../../common/detection_engine/types';
 import {
   IIndexPattern,
   Filter,
@@ -41,6 +40,7 @@ import {
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -210,7 +210,7 @@ export const getDescriptionItem = (
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
   } else if (field === 'ruleType') {
-    const ruleType: RuleType = get(field, data);
+    const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
     return [];
