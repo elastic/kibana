@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { getPredictionFieldName, isRegressionAnalysis } from '../../../common/util/analytics_utils';
 
 // Obtains data for the data frame analytics feature importance functionalities
 // such as baseline, decision paths, or importance summary.
 export function analyticsFeatureImportanceProvider({
-  callAsCurrentUser,
-  callAsInternalUser,
-}: ILegacyScopedClusterClient) {
+  asInternalUser,
+  asCurrentUser,
+}: IScopedClusterClient) {
   async function getRegressionAnalyticsBaseline(analyticsId: string): Promise<number | undefined> {
-    const results = await callAsInternalUser('ml.getDataFrameAnalytics', {
-      analyticsId,
+    const { body } = await asInternalUser.ml.getDataFrameAnalytics({
+      id: analyticsId,
     });
-    const jobConfig = results.data_frame_analytics[0];
+    const jobConfig = body.data_frame_analytics[0];
     if (!isRegressionAnalysis) return undefined;
     const destinationIndex = jobConfig.dest.index;
     const predictionField = getPredictionFieldName(jobConfig.analysis);
@@ -46,7 +46,7 @@ export function analyticsFeatureImportanceProvider({
       },
     };
     let baseline;
-    const aggregationResult = await callAsCurrentUser('search', params);
+    const { body: aggregationResult } = await asCurrentUser.search(params);
     if (aggregationResult) {
       baseline = aggregationResult.aggregations.featureImportanceBaseline.value;
     }

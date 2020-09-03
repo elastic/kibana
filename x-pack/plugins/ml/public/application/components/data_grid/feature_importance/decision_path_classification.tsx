@@ -8,7 +8,11 @@ import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
-import { isDecisionPathData, useDecisionPathData } from './use_classification_path_data';
+import {
+  isDecisionPathData,
+  useDecisionPathData,
+  getStringBasedClassName,
+} from './use_classification_path_data';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
@@ -20,27 +24,25 @@ interface ClassificationDecisionPathProps {
   topClasses: TopClasses;
 }
 
-// cast to 'True' | 'False' | value to match Eui display
-const getStr = (v: string | boolean): string =>
-  typeof v === 'boolean' ? (v ? 'True' : 'False') : v;
-
 export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = ({
   featureImportance,
   predictedValue,
   topClasses,
   predictionFieldName,
 }) => {
-  const [currentClass, setCurrentClass] = useState<string>(getStr(topClasses[0].class_name));
+  const [currentClass, setCurrentClass] = useState<string>(
+    getStringBasedClassName(topClasses[0].class_name)
+  );
   const { decisionPathData } = useDecisionPathData({
     featureImportance,
     predictedValue: currentClass,
   });
   const options = useMemo(() => {
-    const predictionValueStr = getStr(predictedValue);
+    const predictionValueStr = getStringBasedClassName(predictedValue);
 
     return Array.isArray(topClasses)
       ? topClasses.map((c) => {
-          const className = getStr(c.class_name);
+          const className = getStringBasedClassName(c.class_name);
           return {
             value: className,
             inputDisplay:

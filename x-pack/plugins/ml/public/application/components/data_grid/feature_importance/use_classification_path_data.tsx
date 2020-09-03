@@ -34,6 +34,21 @@ export const isDecisionPathData = (decisionPathData: any): boolean => {
     decisionPathData[0].length === 3
   );
 };
+
+// cast to 'True' | 'False' | value to match Eui display
+export const getStringBasedClassName = (v: string | boolean | undefined | number): string => {
+  if (v === undefined) {
+    return '';
+  }
+  if (typeof v === 'boolean') {
+    return v ? 'True' : 'False';
+  }
+  if (typeof v === 'number') {
+    return v.toString();
+  }
+  return v;
+};
+
 export const useDecisionPathData = ({
   baseline,
   featureImportance,
@@ -139,7 +154,7 @@ export const buildClassificationDecisionPathData = ({
     ExtendedFeatureImportance | undefined
   > = featureImportance.map((feature) => {
     const classFeatureImportance = Array.isArray(feature.classes)
-      ? feature.classes.find((c) => c.class_name === currentClass)
+      ? feature.classes.find((c) => getStringBasedClassName(c.class_name) === currentClass)
       : feature;
     if (classFeatureImportance && typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number') {
       return {
