@@ -14,7 +14,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTask(jobParams, context, request) {
+  return async function createJob(jobParams, context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;

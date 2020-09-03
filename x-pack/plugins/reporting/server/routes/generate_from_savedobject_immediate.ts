@@ -43,7 +43,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
-   *  - re-use the scheduleTask function to build up es query config
+   *  - re-use the createJob function to build up es query config
    *  - re-use the runTask function to run the scan and scroll queries and capture the entire CSV in a result object.
    */
   router.post(
@@ -67,12 +67,12 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
-      const scheduleTaskFn = createJobFnFactory(reporting, logger);
+      const createJob = createJobFnFactory(reporting, logger);
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {
-        // FIXME: no scheduleTaskFn for immediate download
-        const jobDocPayload = await scheduleTaskFn(jobParams, req.headers, context, req);
+        // FIXME: no create job for immediate download
+        const jobDocPayload = await createJob(jobParams, req.headers, context, req);
         const {
           content_type: jobOutputContentType,
           content: jobOutputContent,

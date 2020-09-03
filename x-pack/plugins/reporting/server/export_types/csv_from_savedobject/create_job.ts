@@ -45,7 +45,7 @@ export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = func
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
-  return async function scheduleTask(jobParams, headers, context, req) {
+  return async function createJob(jobParams, headers, context, req) {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 

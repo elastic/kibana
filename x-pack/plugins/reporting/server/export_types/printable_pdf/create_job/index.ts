@@ -15,7 +15,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTaskFn(
+  return async function createJob(
     { title, relativeUrls, browserTimezone, layout, objectType },
     context,
     req

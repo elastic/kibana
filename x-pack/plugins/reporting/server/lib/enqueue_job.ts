@@ -39,13 +39,13 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [scheduleTask, { store }] = await Promise.all([
+    const [createJob, { store }] = await Promise.all([
       exportType.createJobFnFactory(reporting, logger) as CreateJobFnType,
       reporting.getPluginStartDeps(),
     ]);
 
     // add encrytped headers
-    const payload = await scheduleTask(jobParams, context, request);
+    const payload = await createJob(jobParams, context, request);
 
     // store the pending report, puts it in the Reporting Management UI table
     const report = await store.addReport(exportType.jobType, user, payload);
