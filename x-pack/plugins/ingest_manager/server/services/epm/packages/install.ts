@@ -203,7 +203,16 @@ export async function installPackage({
       installedPkg.attributes.version
     );
   }
-
+  // pipelines from a different version may have installed during a failed update
+  if (installType === InstallType.rollback) {
+    await deletePreviousPipelines(
+      callCluster,
+      savedObjectsClient,
+      pkgName,
+      // @ts-ignore
+      installedPkg.attributes.install_version
+    );
+  }
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
