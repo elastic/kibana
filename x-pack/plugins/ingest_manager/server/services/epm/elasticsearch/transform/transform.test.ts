@@ -12,10 +12,8 @@ jest.mock('../../packages/install', () => {
   return { saveInstalledEsRefs: jest.fn() };
 });
 
-jest.mock('../../registry', () => {
-  const original = jest.requireActual('../../registry');
+jest.mock('./common', () => {
   return {
-    ...original,
     getAsset: jest.fn(),
   };
 });
@@ -25,7 +23,7 @@ import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/s
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { saveInstalledEsRefs } from '../../packages/install';
-import { getAsset } from '../../registry';
+import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 

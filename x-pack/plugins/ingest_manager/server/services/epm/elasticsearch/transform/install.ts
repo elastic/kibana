@@ -17,7 +17,7 @@ import {
 import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
-import { getAsset } from '../../registry';
+import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;
