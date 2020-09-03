@@ -9,7 +9,7 @@ import {
   SafeResolverEvent,
   SafeLegacyEndpointEvent,
 } from '../types';
-import { firstNonNullValue } from './ecs_safety_helpers';
+import { firstNonNullValue, values } from './ecs_safety_helpers';
 
 /*
  * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
@@ -105,14 +105,7 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
-export function eventSequence(event: ResolverEvent): number | undefined {
-  if (isLegacyEvent(event)) {
-    return firstNonNullValue(event.endgame.serial_event_id);
-  }
-  return firstNonNullValue(event.event?.sequence);
-}
-
-export function eventSequenceSafeVersion(event: SafeResolverEvent): number | undefined {
+export function eventSequence(event: SafeResolverEvent): number | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return firstNonNullValue(event.endgame.serial_event_id);
   }
@@ -156,16 +149,16 @@ export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | un
   return firstNonNullValue(event.process?.parent?.entity_id);
 }
 
-export function ancestryArray(event: ResolverEvent): string[] | undefined {
-  if (isLegacyEvent(event)) {
+export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
+  if (isLegacyEventSafeVersion(event)) {
     return undefined;
   }
   // this is to guard against the endpoint accidentally not sending the ancestry array
   // otherwise the request will fail when really we should just try using the parent entity id
-  return event.process.Ext?.ancestry;
+  return values(event.process?.Ext?.ancestry);
 }
 
-export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
+export function getAncestryAsArray(event: SafeResolverEvent | undefined): string[] {
   if (!event) {
     return [];
   }
@@ -175,7 +168,7 @@ export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
     return ancestors;
   }
 
-  const parentID = parentEntityId(event);
+  const parentID = parentEntityIDSafeVersion(event);
   if (parentID) {
     return [parentID];
   }

@@ -113,11 +113,50 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
 }
 
 /**
+ * Safe version of `ResolverChildNode`.
+ */
+export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
+  /**
+   * nextChild can have 3 different states:
+   *
+   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
+   * not have any more direct children. The node could have more direct children but to determine that, use the
+   * ResolverChildren node's nextChild.
+   *
+   * null: Indicates that we have received all the children of the node. There may be more descendants though.
+   *
+   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
+   * using this node's entity_id
+   *
+   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
+   */
+  nextChild?: string | null;
+}
+
+/**
  * The response structure for the children route. The structure is an array of nodes where each node
  * has an array of lifecycle events.
  */
 export interface ResolverChildren {
   childNodes: ResolverChildNode[];
+  /**
+   * nextChild can have 2 different states:
+   *
+   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
+   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
+   * is complete.
+   *
+   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
+   * entity_id for the request.
+   */
+  nextChild: string | null;
+}
+
+/**
+ * Safe version of `ResolverChildren`.
+ */
+export interface SafeResolverChildren {
+  childNodes: SafeResolverChildNode[];
   /**
    * nextChild can have 2 different states:
    *
@@ -149,11 +188,40 @@ export interface ResolverTree {
 }
 
 /**
+ * Safe version of `ResolverTree`.
+ */
+export interface SafeResolverTree {
+  /**
+   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
+   * process node that generated an alert.
+   */
+  entityID: string;
+  children: ResolverChildren;
+  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
+  ancestry: ResolverAncestry;
+  lifecycle: ResolverEvent[];
+  stats: ResolverNodeStats;
+}
+
+/**
  * The lifecycle events (start, end etc) for a node.
  */
 export interface ResolverLifecycleNode {
   entityID: string;
   lifecycle: ResolverEvent[];
+  /**
+   * stats are only set when the entire tree is being fetched
+   */
+  stats?: ResolverNodeStats;
+}
+
+/**
+ * Safe version of `ResolverLifecycleNode`.
+ */
+export interface SafeResolverLifecycleNode {
+  entityID: string;
+  lifecycle: SafeResolverEvent[];
   /**
    * stats are only set when the entire tree is being fetched
    */
@@ -168,6 +236,21 @@ export interface ResolverAncestry {
    * An array of ancestors with the lifecycle events grouped together
    */
   ancestors: ResolverLifecycleNode[];
+  /**
+   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
+   * ancestors when the request returned. More could have been ingested by ES after the fact though.
+   */
+  nextAncestor: string | null;
+}
+
+/**
+ * Safe version of `ResolverAncestry`.
+ */
+export interface SafeResolverAncestry {
+  /**
+   * An array of ancestors with the lifecycle events grouped together
+   */
+  ancestors: SafeResolverLifecycleNode[];
   /**
    * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
    * ancestors when the request returned. More could have been ingested by ES after the fact though.
@@ -198,7 +281,7 @@ export interface SafeResolverRelatedEvents {
  */
 export interface ResolverRelatedAlerts {
   entityID: string;
-  alerts: ResolverEvent[];
+  alerts: SafeResolverEvent[];
   nextAlert: string | null;
 }
 
@@ -578,7 +661,7 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * All mappings in Elasticsearch support arrays. They can also return null values or be missing. For example, a `keyword` mapping could return `null` or `[null]` or `[]` or `'hi'`, or `['hi', 'there']`. We need to handle these cases in order to avoid throwing an error.
  * When dealing with an value that comes from ES, wrap the underlying type in `ECSField`. For example, if you have a `keyword` or `text` value coming from ES, cast it to `ECSField<string>`.
  */
-export type ECSField<T> = T | null | Array<T | null>;
+export type ECSField<T> = T | null | undefined | Array<T | null>;
 
 /**
  * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
