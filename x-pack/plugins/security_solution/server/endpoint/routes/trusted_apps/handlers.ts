@@ -13,6 +13,35 @@ import {
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { DeleteTrustedAppsRequestParams } from './types';
+
+export const getTrustedAppsDeleteRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    const exceptionsListService = endpointAppContext.service.getExceptionsList();
+
+    try {
+      const { id } = req.params;
+      const response = await exceptionsListService.deleteExceptionListItem({
+        id,
+        itemId: undefined,
+        namespaceType: 'agnostic',
+      });
+
+      if (response === null) {
+        return res.notFound({ body: `trusted app id [${id}] not found` });
+      }
+
+      return res.ok();
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
