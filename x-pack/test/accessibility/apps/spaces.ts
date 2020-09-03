@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
@@ -49,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on space avatar to open customize space avatar', async () => {
+      await toasts.dismissAllToasts(); // must clear toasts because they are not accessible
       await PageObjects.spaceSelector.clickSpaceAcustomAvatar();
       await a11y.testAppSnapshot();
     });
@@ -207,6 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 
