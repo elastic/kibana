@@ -393,7 +393,7 @@ export class IndexPattern implements IIndexPattern {
         throw err;
       }
 
-      await this.save();
+      await this.save(this);
     }
   }
 
@@ -402,7 +402,7 @@ export class IndexPattern implements IIndexPattern {
     if (field) {
       this.fields.remove(field);
     }
-    return this.save();
+    return this.save(this);
   }
 
   async popularizeField(fieldName: string, unit = 1) {
@@ -523,37 +523,37 @@ export class IndexPattern implements IIndexPattern {
     return await _create(potentialDuplicateByTitle.id);
   }
 
-  async save(saveAttempts: number = 0): Promise<void | Error> {
-    if (!this.id) return;
-    const body = this.prepBody();
+  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+    if (!indexPattern.id) return;
+    const body = indexPattern.prepBody();
 
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== this.originalBody[key]) {
+      if (value !== indexPattern.originalBody[key]) {
         originalChangedKeys.push(key);
       }
     });
 
-    return this.savedObjectsClient
-      .update(savedObjectType, this.id, body, { version: this.version })
+    return indexPattern.savedObjectsClient
+      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
       .then((resp) => {
-        this.id = resp.id;
-        this.version = resp.version;
+        indexPattern.id = resp.id;
+        indexPattern.version = resp.version;
       })
       .catch((err) => {
         if (
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
-          const samePattern = new IndexPattern(this.id, {
-            savedObjectsClient: this.savedObjectsClient,
-            apiClient: this.apiClient,
-            patternCache: this.patternCache,
-            fieldFormats: this.fieldFormats,
-            onNotification: this.onNotification,
-            onError: this.onError,
-            shortDotsEnable: this.shortDotsEnable,
-            metaFields: this.metaFields,
+          const samePattern = new IndexPattern(indexPattern.id, {
+            savedObjectsClient: indexPattern.savedObjectsClient,
+            apiClient: indexPattern.apiClient,
+            patternCache: indexPattern.patternCache,
+            fieldFormats: indexPattern.fieldFormats,
+            onNotification: indexPattern.onNotification,
+            onError: indexPattern.onError,
+            shortDotsEnable: indexPattern.shortDotsEnable,
+            metaFields: indexPattern.metaFields,
           });
 
           return samePattern.init().then(() => {
@@ -567,7 +567,7 @@ export class IndexPattern implements IIndexPattern {
 
             const serverChangedKeys: string[] = [];
             Object.entries(updatedBody).forEach(([key, value]) => {
-              if (value !== (body as any)[key] && value !== this.originalBody[key]) {
+              if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
                 serverChangedKeys.push(key);
               }
             });
@@ -588,21 +588,21 @@ export class IndexPattern implements IIndexPattern {
                   'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
               });
 
-              this.onNotification({ title, color: 'danger' });
+              indexPattern.onNotification({ title, color: 'danger' });
               throw err;
             }
 
             // Set the updated response on this object
             serverChangedKeys.forEach((key) => {
-              (this as any)[key] = (samePattern as any)[key];
+              (indexPattern as any)[key] = (samePattern as any)[key];
             });
-            this.version = samePattern.version;
+            indexPattern.version = samePattern.version;
 
             // Clear cache
-            this.patternCache.clear(this.id!);
+            indexPattern.patternCache.clear(v.id!);
 
             // Try the save again
-            return this.save(saveAttempts);
+            return indexPattern.save(indexPattern, saveAttempts);
           });
         }
         throw err;
@@ -625,7 +625,7 @@ export class IndexPattern implements IIndexPattern {
 
   refreshFields() {
     return this._fetchFields()
-      .then(() => this.save())
+      .then(() => this.save(this))
       .catch((err) => {
         // https://github.com/elastic/kibana/issues/9224
         // This call will attempt to remap fields from the matching

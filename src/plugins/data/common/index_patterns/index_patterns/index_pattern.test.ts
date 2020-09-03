@@ -431,14 +431,14 @@ describe('IndexPattern', () => {
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
     pattern.title = 'foo2';
-    await pattern.save();
+    await pattern.save(pattern);
 
     // This should not be able to recover
     samePattern.title = 'foo3';
 
     let result;
     try {
-      await samePattern.save();
+      await samePattern.save(pattern);
     } catch (err) {
       result = err;
     }

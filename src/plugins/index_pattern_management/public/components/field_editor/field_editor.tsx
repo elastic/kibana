@@ -822,7 +822,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     return indexPattern
-      .save()
+      .save(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",

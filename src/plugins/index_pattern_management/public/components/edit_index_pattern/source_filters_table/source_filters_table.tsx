@@ -112,7 +112,7 @@ export class SourceFiltersTable extends Component<
     });
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await indexPattern.save(indexPattern);
 
     if (onAddOrRemoveFilter) {
       onAddOrRemoveFilter();
@@ -129,7 +129,7 @@ export class SourceFiltersTable extends Component<
     indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await indexPattern.save(indexPattern);
 
     if (onAddOrRemoveFilter) {
       onAddOrRemoveFilter();
@@ -155,7 +155,7 @@ export class SourceFiltersTable extends Component<
     });
 
     this.setState({ isSaving: true });
-    await indexPattern.save();
+    await indexPattern.save(indexPattern);
     this.updateFilters();
     this.setState({ isSaving: false });
   };
