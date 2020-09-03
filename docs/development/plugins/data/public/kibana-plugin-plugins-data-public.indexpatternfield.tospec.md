@@ -7,24 +7,36 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec();: {
-        number;
-        string | undefined;
-        string | undefined;
-        Record<string, string[]> | undefined;
-        string;
-        string;
-        string[] | undefined;
-        boolean;
-        boolean;
-        boolean;
-        boolean;
-        import("../types").IFieldSubType | undefined;
-        string | undefined;
-        boolean | undefined;
-        any;
-    }
+toSpec({ getFormatterForField, }?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+        format: {
+            id: any;
+            params: any;
+        } | undefined;
+        customName: string | undefined;
+        shortDotsEnable: boolean | undefined;
+    };
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  { getFormatterForField, } | <code>{</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }</code> |  |
+
 <b>Returns:</b>
 
 `{
@@ -40,8 +52,11 @@ toSpec();: {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        format: {
+            id: any;
+            params: any;
+        } | undefined;
         customName: string | undefined;
         shortDotsEnable: boolean | undefined;
-        format: any;
     }`
 

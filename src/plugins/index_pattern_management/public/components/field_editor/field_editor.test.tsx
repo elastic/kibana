@@ -140,12 +140,12 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    fieldList.push(testField as IndexPatternField);
+    fieldList.push((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as IndexPatternField;
+      return (flds[name] as unknown) as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
@@ -225,7 +225,7 @@ describe('FieldEditor', () => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as IndexPatternField;
+      return (flds[name] as unknown) as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(

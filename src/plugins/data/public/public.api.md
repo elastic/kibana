@@ -604,48 +604,11 @@ export type FieldFormatsContentType = 'html' | 'text';
 // @public (undocumented)
 export type FieldFormatsGetConfigFn = GetConfigFn;
 
-// Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "fieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], onNotification?: OnNotification);
-    // (undocumented)
-    readonly add: (field: FieldSpec) => void;
-    // (undocumented)
-    readonly getAll: () => IndexPatternField[];
-    // (undocumented)
-    readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
-    // (undocumented)
-    readonly getByType: (type: IndexPatternField['type']) => any[];
-    // (undocumented)
-    readonly remove: (field: IFieldType) => void;
-    // (undocumented)
-    readonly removeAll: () => void;
-    // (undocumented)
-    readonly replaceAll: (specs: FieldSpec[]) => void;
-    // (undocumented)
-    readonly toSpec: () => {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        customName: string | undefined;
-        shortDotsEnable: boolean | undefined;
-        format: any;
-    }[];
-    // (undocumented)
-    readonly update: (field: FieldSpec) => void;
-}
+export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean) => IIndexPatternFieldList;
 
 // @public (undocumented)
 export interface FieldMappingSpec {
@@ -872,7 +835,9 @@ export interface IFieldType {
     // (undocumented)
     subType?: IFieldSubType;
     // (undocumented)
-    toSpec?: () => FieldSpec;
+    toSpec?: (options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }) => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)
@@ -922,6 +887,10 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     removeAll(): void;
     // (undocumented)
     replaceAll(specs: FieldSpec[]): void;
+    // (undocumented)
+    toSpec(options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): FieldSpec[];
     // (undocumented)
     update(field: FieldSpec): void;
 }
@@ -1014,7 +983,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
-    init(forceFieldRefresh?: boolean): Promise<this>;
+    init(): Promise<this>;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1036,7 +1005,11 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     prepBody(): {
         attributes: {
-            fields: any;
+            fields: {
+                [key: string]: {
+                    customName: string;
+                };
+            };
         } | undefined;
         title: string;
         timeFieldName: string | undefined;
@@ -1062,11 +1035,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     title: string;
     // (undocumented)
-    toJSON(): string | undefined;
-    // (undocumented)
     toSpec(): IndexPatternSpec;
-    // (undocumented)
-    toString(): string;
     // (undocumented)
     type: string | undefined;
     // (undocumented)
@@ -1113,7 +1082,7 @@ export interface IndexPatternAttributes {
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
-    constructor(indexPattern: IndexPattern, spec: FieldSpec, onNotification: OnNotification);
+    constructor(spec: FieldSpec);
     // (undocumented)
     get aggregatable(): boolean;
     // (undocumented)
@@ -1131,10 +1100,6 @@ export class IndexPatternField implements IFieldType {
     get esTypes(): string[] | undefined;
     // (undocumented)
     get filterable(): boolean;
-    // (undocumented)
-    get format(): FieldFormat;
-    // (undocumented)
-    readonly indexPattern: IndexPattern;
     // (undocumented)
     get lang(): string | undefined;
     set lang(lang: string | undefined);
@@ -1172,7 +1137,9 @@ export class IndexPatternField implements IFieldType {
         customName: string | undefined;
     };
     // (undocumented)
-    toSpec(): {
+    toSpec({ getFormatterForField, }?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): {
         count: number;
         script: string | undefined;
         lang: string | undefined;
@@ -1185,9 +1152,12 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        format: {
+            id: any;
+            params: any;
+        } | undefined;
         customName: string | undefined;
         shortDotsEnable: boolean | undefined;
-        format: any;
     };
     // (undocumented)
     get type(): string;
@@ -1527,7 +1497,7 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "size" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;

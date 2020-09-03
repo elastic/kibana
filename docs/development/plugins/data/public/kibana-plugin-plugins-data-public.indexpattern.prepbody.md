@@ -9,7 +9,11 @@
 ```typescript
 prepBody(): {
         attributes: {
-            fields: any;
+            fields: {
+                [key: string]: {
+                    customName: string;
+                };
+            };
         } | undefined;
         title: string;
         timeFieldName: string | undefined;
@@ -25,7 +29,11 @@ prepBody(): {
 
 `{
         attributes: {
-            fields: any;
+            fields: {
+                [key: string]: {
+                    customName: string;
+                };
+            };
         } | undefined;
         title: string;
         timeFieldName: string | undefined;

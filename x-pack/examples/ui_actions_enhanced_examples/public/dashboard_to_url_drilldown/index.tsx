@@ -44,6 +44,7 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, UrlTrigger> {
   public readonly order = 8;
 
   readonly minimalLicense = 'gold'; // example of minimal license support
+  readonly licenseFeatureName = 'Sample URL Drilldown';
 
   public readonly getDisplayName = () => 'Go to URL (example)';
 

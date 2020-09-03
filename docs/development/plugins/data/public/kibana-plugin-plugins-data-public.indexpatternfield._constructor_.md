@@ -9,14 +9,12 @@ Constructs a new instance of the `IndexPatternField` class
 <b>Signature:</b>
 
 ```typescript
-constructor(indexPattern: IndexPattern, spec: FieldSpec, onNotification: OnNotification);
+constructor(spec: FieldSpec);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  indexPattern | <code>IndexPattern</code> |  |
 |  spec | <code>FieldSpec</code> |  |
-|  onNotification | <code>OnNotification</code> |  |
 
