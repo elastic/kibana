@@ -24,6 +24,7 @@ import { CaptureConfig, ConditionalHeaders } from '../../types';
 import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
+
 /*
  * Mocks
  */
