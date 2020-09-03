@@ -7,7 +7,7 @@
 import {
   AnnotationDomainTypes,
   Axis,
-  AxisConfig,
+  AxisStyle,
   Chart,
   LineAnnotation,
   LineAnnotationStyle,
@@ -44,18 +44,18 @@ const baselineStyle: LineAnnotationStyle = {
   },
 };
 
-const axes: RecursivePartial<AxisConfig> = {
-  axisLineStyle: {
+const axes: RecursivePartial<AxisStyle> = {
+  axisLine: {
     stroke: axisColor,
   },
-  tickLabelStyle: {
+  tickLabel: {
     fontSize: 10,
     fill: axisColor,
   },
-  tickLineStyle: {
+  tickLine: {
     stroke: axisColor,
   },
-  gridLineStyle: {
+  gridLine: {
     horizontal: {
       dash: [1, 2],
     },
