@@ -64,8 +64,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    describe.skip('when initially navigating to page', () => {
+    describe('when initially navigating to page', () => {
       before(async () => {
+        await deleteMetadataStream(getService);
+        await deleteMetadataCurrentStream(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -79,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 10000);
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 120000);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });

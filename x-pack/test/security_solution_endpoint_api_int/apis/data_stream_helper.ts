@@ -26,6 +26,26 @@ export async function deleteDataStream(getService: (serviceName: 'es') => Client
   );
 }
 
+export async function deleteAllDocsFromIndex(
+  getService: (serviceName: 'es') => Client,
+  index: string
+) {
+  const client = getService('es');
+  await client.deleteByQuery(
+    {
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+      index: `${index}`,
+    },
+    {
+      ignore: [404],
+    }
+  );
+}
+
 export async function deleteMetadataStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, metadataIndexPattern);
 }
@@ -33,6 +53,17 @@ export async function deleteMetadataStream(getService: (serviceName: 'es') => Cl
 export async function deleteMetadataCurrentStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, metadataCurrentIndexPattern);
 }
+
+export async function deleteAllDocsFromMetadataIndex(getService: (serviceName: 'es') => Client) {
+  await deleteAllDocsFromIndex(getService, metadataIndexPattern);
+}
+
+export async function deleteAllDocsFromMetadataCurrentIndex(
+  getService: (serviceName: 'es') => Client
+) {
+  await deleteAllDocsFromIndex(getService, metadataCurrentIndexPattern);
+}
+
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, eventsIndexPattern);
 }

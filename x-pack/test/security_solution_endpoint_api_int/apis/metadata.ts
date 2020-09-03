@@ -5,7 +5,12 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { deleteMetadataCurrentStream, deleteMetadataStream } from './data_stream_helper';
+import {
+  deleteAllDocsFromMetadataCurrentIndex,
+  deleteMetadataCurrentStream,
+  deleteAllDocsFromMetadataIndex,
+  deleteMetadataStream,
+} from './data_stream_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -17,18 +22,18 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('test metadata api', () => {
-    describe.skip('POST /api/endpoint/metadata when index is empty', () => {
+    describe('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
-        // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
-        // to do it manually
         await deleteMetadataStream(getService);
+        await deleteAllDocsFromMetadataIndex(getService);
         await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
-        expect(body.total.value).to.eql(0);
+        expect(body.total).to.eql(0);
         expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -45,7 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
       // to do it manually
       after(async () => {
         await deleteMetadataStream(getService);
+        await deleteAllDocsFromMetadataIndex(getService);
         await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
       it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
