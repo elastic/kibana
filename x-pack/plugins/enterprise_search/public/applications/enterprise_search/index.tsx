@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../shared/telemetry';
 
@@ -64,7 +66,7 @@ export const EnterpriseSearch: React.FC = () => {
                   }
                 )}
                 img={AppSearchImage}
-                buttonPath="../app_search"
+                buttonPath={APP_SEARCH_PLUGIN.URL}
               />
               <ProductCard
                 name={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
@@ -78,7 +80,7 @@ export const EnterpriseSearch: React.FC = () => {
                   }
                 )}
                 img={WorkplaceSearchImage}
-                buttonPath="../workplace_search"
+                buttonPath={WORKPLACE_SEARCH_PLUGIN.URL}
               />
             </div>
           </div>

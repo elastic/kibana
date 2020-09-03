@@ -49,6 +49,14 @@ describe('EUI & React Router Component Helpers', () => {
     expect(mockHistory.createHref).toHaveBeenCalled();
   });
 
+  it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
+    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" shouldNotCreateHref />);
+    const link = wrapper.find(EuiLink);
+
+    expect(link.prop('href')).toEqual('/foo/bar');
+    expect(mockHistory.createHref).not.toHaveBeenCalled();
+  });
+
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history', () => {
       const wrapper = mount(<EuiReactRouterLink to="/bar/baz" />);

@@ -42,7 +42,12 @@ export const ProductCard: React.FC<IProductCard> = ({ name, description, img, bu
             </h2>
           </EuiTitle>
           <p className="card__description">{description}</p>
-          <EuiButton fill to={buttonPath} data-test-subj={`Launch${formatTestSubj(name)}Button`}>
+          <EuiButton
+            fill
+            to={buttonPath}
+            shouldNotCreateHref={true}
+            data-test-subj={`Launch${formatTestSubj(name)}Button`}
+          >
             {i18n.translate('xpack.enterpriseSearch.productCard.productCardButton', {
               defaultMessage: `Launch ${name}`,
             })}
