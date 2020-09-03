@@ -67,34 +67,6 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  body {
-    overflow-y: hidden;
-  }
-
-  #kibana-body {
-    height: 100%;
-    overflow-y: hidden;
-
-    > .content {
-      height: 100%;
-
-      > .app-wrapper {
-        height: 100%;
-
-        > .app-wrapper-panel {
-          height: 100%;
-
-          > .application {
-            height: 100%;
-
-            > div {
-               height: 100%;
-            }
-          }
-        }
-      }
-    }
-  }
 
   .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {
     overflow-y: hidden;

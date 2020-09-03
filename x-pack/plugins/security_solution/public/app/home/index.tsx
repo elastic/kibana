@@ -19,6 +19,7 @@ import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useUserInfo } from '../../detections/components/user_info';
+import { useThrottledResizeObserver } from '../../common/components/utils';
 
 const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -28,7 +29,11 @@ const SecuritySolutionAppWrapper = styled.div`
 `;
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
-const Main = styled.main`
+const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
+  style: {
+    'padding-top': `${paddingTop}px`,
+  },
+}))<{ paddingTop: number }>`
   overflow: auto;
   flex: 1;
 `;
@@ -43,7 +48,7 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { signalIndexExists, signalIndexName } = useSignalIndex();
-
+  const { ref, height = 0 } = useThrottledResizeObserver(300);
   const indexToAdd = useMemo<string[] | null>(() => {
     if (signalIndexExists && signalIndexName != null) {
       return [signalIndexName];
@@ -59,9 +64,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   return (
     <SecuritySolutionAppWrapper>
-      <HeaderGlobal />
+      <HeaderGlobal ref={ref} />
 
-      <Main data-test-subj="pageContainer">
+      <Main paddingTop={height} data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
