@@ -6,6 +6,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { NewTrustedAppForm } from './components/new_trusted_app_form';
 
 export function TrustedAppsPage() {
   return (
@@ -23,6 +24,8 @@ export function TrustedAppsPage() {
           defaultMessage="View and configure trusted applications"
         />
       }
-    />
+    >
+      <NewTrustedAppForm />
+    </AdministrationListPage>
   );
 }
