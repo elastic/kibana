@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 
-const REQUEST_TIMEOUT = 'RequestTimeout';
+const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
 type ACTION_STATE = DATAFEED_STATE | JOB_STATE;
 
-export function isRequestTimeout(error: { displayName: string }) {
-  return error.displayName === REQUEST_TIMEOUT;
+export function isRequestTimeout(error: { name: string }) {
+  return error.name === REQUEST_TIMEOUT_NAME;
 }
 
 interface Results {
