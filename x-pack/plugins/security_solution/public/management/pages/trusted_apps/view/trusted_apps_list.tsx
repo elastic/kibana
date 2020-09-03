@@ -6,7 +6,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -27,7 +27,7 @@ import { useTrustedAppsSelector } from './hooks';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 
-const OS_TITLES: { [K in TrustedApp['os']]: string } = {
+const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
   windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
     defaultMessage: 'Windows',
   }),
@@ -39,7 +39,7 @@ const OS_TITLES: { [K in TrustedApp['os']]: string } = {
   }),
 };
 
-const COLUMN_TITLES: { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string } = {
+const COLUMN_TITLES: Readonly<{ [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }> = {
   name: i18n.translate('xpack.securitySolution.trustedapps.list.columns.name', {
     defaultMessage: 'Name',
   }),
@@ -54,7 +54,7 @@ const COLUMN_TITLES: { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
   }),
 };
 
-const COLUMN_DEFINITIONS = [
+const getColumnDefinitions = (): Array<EuiBasicTableColumn<Immutable<TrustedApp>>> => [
   {
     field: 'name',
     name: COLUMN_TITLES.name,
@@ -89,12 +89,13 @@ export const TrustedAppsList = memo(() => {
   const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex) - 1;
   const pageSize = useTrustedAppsSelector(getListCurrentPageSize);
   const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const listItems = useTrustedAppsSelector(getListItems);
   const history = useHistory();
 
   return (
     <EuiBasicTable
-      columns={COLUMN_DEFINITIONS}
-      items={[...useTrustedAppsSelector(getListItems)]}
+      columns={useMemo(getColumnDefinitions, [])}
+      items={useMemo(() => [...listItems], [listItems])}
       error={useTrustedAppsSelector(getListErrorMessage)}
       loading={useTrustedAppsSelector(isListLoading)}
       pagination={useMemo(
@@ -103,7 +104,7 @@ export const TrustedAppsList = memo(() => {
           pageSize,
           totalItemCount,
           hidePerPageOptions: false,
-          pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS,
+          pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
         }),
         [pageIndex, pageSize, totalItemCount]
       )}
