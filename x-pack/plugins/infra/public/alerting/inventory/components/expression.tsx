@@ -85,7 +85,7 @@ interface Props {
     nodeType: InventoryItemType;
     filterQuery?: string;
     filterQueryText?: string;
-    sourceId?: string;
+    sourceId: string;
     alertOnNoData?: boolean;
   };
   alertInterval: string;
@@ -379,7 +379,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
+        alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}

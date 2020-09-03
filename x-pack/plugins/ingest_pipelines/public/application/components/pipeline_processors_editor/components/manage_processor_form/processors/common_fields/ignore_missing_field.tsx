@@ -32,7 +32,7 @@ export const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldHelpText"
-        defaultMessage="Ignore documents with a missing {field}"
+        defaultMessage="Ignore documents with a missing {field}."
         values={{
           field: <EuiCode>{'field'}</EuiCode>,
         }}

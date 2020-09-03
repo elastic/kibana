@@ -18,11 +18,6 @@ const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 const EXPIRE_AFTER_VALUE = '5';
 const EXPIRE_AFTER_UNIT = TIME_UNITS.MINUTE;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 describe('<PolicyEdit />', () => {
   let testBed: PolicyFormTestBed;
   let testBedPolicyAdd: PolicyFormTestBed;

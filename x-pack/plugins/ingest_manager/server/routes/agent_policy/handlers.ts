@@ -49,7 +49,6 @@ export const getAgentPoliciesHandler: RequestHandler<
       total,
       page,
       perPage,
-      success: true,
     };
 
     await bluebird.map(
@@ -82,7 +81,6 @@ export const getOneAgentPolicyHandler: RequestHandler<TypeOf<
     if (agentPolicy) {
       const body: GetOneAgentPolicyResponse = {
         item: agentPolicy,
-        success: true,
       };
       return response.ok({
         body,
@@ -141,7 +139,6 @@ export const createAgentPolicyHandler: RequestHandler<
 
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
-      success: true,
     };
 
     return response.ok({
@@ -171,7 +168,7 @@ export const updateAgentPolicyHandler: RequestHandler<
         user: user || undefined,
       }
     );
-    const body: UpdateAgentPolicyResponse = { item: agentPolicy, success: true };
+    const body: UpdateAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
       body,
     });
@@ -199,7 +196,7 @@ export const copyAgentPolicyHandler: RequestHandler<
         user: user || undefined,
       }
     );
-    const body: CopyAgentPolicyResponse = { item: agentPolicy, success: true };
+    const body: CopyAgentPolicyResponse = { item: agentPolicy };
     return response.ok({
       body,
     });
@@ -248,7 +245,6 @@ export const getFullAgentPolicy: RequestHandler<
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
         item: fullAgentPolicy,
-        success: true,
       };
       return response.ok({
         body,

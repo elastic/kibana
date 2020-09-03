@@ -17,7 +17,7 @@ import { fetchMonitorDurationEffect } from './monitor_duration';
 import { fetchMLJobEffect } from './ml_anomaly';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchCertificatesEffect } from '../certificates/certificates';
-import { fetchAlertsEffect } from './alerts';
+import { fetchAlertsEffect } from '../alerts/alerts';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
