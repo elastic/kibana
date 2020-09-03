@@ -10,7 +10,8 @@ export * from './overview';
 export * from './first_last_seen';
 
 export enum HostsQueries {
+  authentications = 'authentications',
+  firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
   hostOverview = 'hostOverview',
-  firstLastSeen = 'firstLastSeen',
 }

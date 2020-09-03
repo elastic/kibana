@@ -32,13 +32,17 @@ import { ApiItem, NewsfeedItem, FetchResult, NewsfeedPluginBrowserConfig } from 
 type ApiConfig = NewsfeedPluginBrowserConfig['service'];
 
 export class NewsfeedApiDriver {
+  private readonly kibanaVersion: string;
   private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
 
   constructor(
-    private readonly kibanaVersion: string,
+    kibanaVersion: string,
     private readonly userLanguage: string,
     private readonly fetchInterval: number
-  ) {}
+  ) {
+    // The API only accepts versions in the format `X.Y.Z`, so we need to drop the `-SNAPSHOT` or any other label after it
+    this.kibanaVersion = kibanaVersion.replace(/^(\d+\.\d+\.\d+).*/, '$1');
+  }
 
   shouldFetch(): boolean {
     const lastFetchUtc: string | null = sessionStorage.getItem(NEWSFEED_LAST_FETCH_STORAGE_KEY);

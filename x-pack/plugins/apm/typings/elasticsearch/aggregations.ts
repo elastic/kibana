@@ -216,7 +216,7 @@ interface AggregationResponsePart<
     value: number;
   };
   percentiles: {
-    values: Record<string, number>;
+    values: Record<string, number | null>;
   };
   extended_stats: {
     count: number;

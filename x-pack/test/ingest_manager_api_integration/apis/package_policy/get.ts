@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -75,11 +74,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should succeed with a valid id', async function () {
-      const { body: apiResponse } = await supertest
-        .get(`/api/ingest_manager/package_policies/${packagePolicyId}`)
-        .expect(200);
-
-      expect(apiResponse.success).to.be(true);
+      await supertest.get(`/api/ingest_manager/package_policies/${packagePolicyId}`).expect(200);
     });
 
     it('should return a 404 with an invalid id', async function () {
