@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricsEditor } from './metrics_editor';
-import { AGG_TYPE } from '../../common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 
 const defaultProps = {
   metrics: [
@@ -19,15 +19,14 @@ const defaultProps = {
   fields: [],
   onChange: () => {},
   allowMultipleMetrics: true,
-  metricsFilter: () => {},
 };
 
-test('should render metrics editor', async () => {
+test('should render metrics editor', () => {
   const component = shallow(<MetricsEditor {...defaultProps} />);
   expect(component).toMatchSnapshot();
 });
 
-test('should add default count metric when metrics is empty array', async () => {
+test('should add default count metric when metrics is empty array', () => {
   const component = shallow(<MetricsEditor {...defaultProps} metrics={[]} />);
   expect(component).toMatchSnapshot();
 });
