@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
 import { ModelItemFull } from './models_list';
@@ -37,7 +36,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.ml.inference.modelsList.deleteModal.header"
-              defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}"
+              defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
               values={{
                 modelId: models[0].model_id,
                 modelsCount: models.length,
@@ -47,12 +46,6 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         </EuiModalHeader>
 
         <EuiModalBody>
-          <FormattedMessage
-            id="xpack.ml.inference.modelsList.deleteModal.warningMessage"
-            defaultMessage="Are you sure you want to delete {modelsCount, plural, one{this model} other {these models}}?"
-            values={{ modelsCount: models.length }}
-          />
-          <EuiSpacer size="m" />
           {modelsWithPipelines.length > 0 && (
             <EuiCallOut
               data-test-subj="modelsWithPipelinesWarning"

@@ -75,16 +75,7 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    /**
-     * The children will be rendered three times:
-     * - Twice for each input value that has changed
-     * - once because after updating both fields, the **form** isValid state changes (from "undefined" to "true")
-     *   causing a new "form" object to be returned and thus a re-render.
-     *
-     * When the form object will be memoized (in a future PR), te bellow call count should only be 2 as listening
-     * to form data changes should not receive updates when the "isValid" state of the form changes.
-     */
-    expect(onFormData.mock.calls.length).toBe(3);
+    expect(onFormData).toBeCalledTimes(2);
 
     const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
       OnUpdateHandler
@@ -130,7 +121,7 @@ describe('<FormDataProvider />', () => {
       find,
     } = setup() as TestBed;
 
-    expect(onFormData.mock.calls.length).toBe(0); // Not present in the DOM yet
+    expect(onFormData).toBeCalledTimes(0); // Not present in the DOM yet
 
     // Make some changes to the form fields
     await act(async () => {
@@ -188,7 +179,7 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    expect(onFormData.mock.calls.length).toBe(0);
+    expect(onFormData).toBeCalledTimes(0);
   });
 
   test('props.pathsToWatch (Array<string>): should not re-render the children when the field that changed is not in the watch list', async () => {
@@ -228,14 +219,14 @@ describe('<FormDataProvider />', () => {
     });
 
     // No re-render
-    expect(onFormData.mock.calls.length).toBe(0);
+    expect(onFormData).toBeCalledTimes(0);
 
     // Make some changes to fields in the watch list
     await act(async () => {
       setInputValue('nameField', 'updated value');
     });
 
-    expect(onFormData.mock.calls.length).toBe(1);
+    expect(onFormData).toBeCalledTimes(1);
 
     onFormData.mockReset();
 

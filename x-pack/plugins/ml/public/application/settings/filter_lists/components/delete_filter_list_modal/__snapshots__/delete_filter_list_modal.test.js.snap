@@ -110,7 +110,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
       onConfirm={[Function]}
       title={
         <FormattedMessage
-          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}"
+          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
           id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
           values={
             Object {
@@ -120,20 +120,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
           }
         />
       }
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Are you sure you want to delete
-{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
-          id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage"
-          values={
-            Object {
-              "selectedFilterListsLength": 2,
-            }
-          }
-        />
-      </p>
-    </EuiConfirmModal>
+    />
   </EuiOverlayMask>
 </div>
 `;
