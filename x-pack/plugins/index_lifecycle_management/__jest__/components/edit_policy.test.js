@@ -296,14 +296,13 @@ describe('edit policy', () => {
   describe('warm phase', () => {
     beforeEach(() => {
       server.respondImmediately = true;
-      httpRequestsMockHelpers.setNodesListResponse({});
+      http.setupNodeListResponse();
       httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
         { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
       ]);
     });
 
     test('should show number required error when trying to save empty warm phase', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -313,7 +312,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
     test('should allow 0 for phase timing', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -323,7 +321,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -333,7 +330,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required error when trying to save warm phase with -1 for index priority', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -344,7 +340,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -359,7 +354,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -374,7 +368,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -389,7 +382,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -404,7 +396,6 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show spinner for node attributes input when loading', async () => {
-      http.setupNodeListResponse();
       server.respondImmediately = false;
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -429,7 +420,6 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -442,7 +432,6 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(1);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
-      http.setupNodeListResponse();
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -466,7 +455,7 @@ describe('edit policy', () => {
   describe('cold phase', () => {
     beforeEach(() => {
       server.respondImmediately = true;
-      httpRequestsMockHelpers.setNodesListResponse({});
+      http.setupNodeListResponse();
       httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
         { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
       ]);
@@ -500,40 +489,41 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show warning instead of node attributes input when none exist', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['node1'] },
+      });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(rendered.find('.euiCallOut--warning').exists()).toBeTruthy();
+      openNodeAttributesSection(rendered, 'cold');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeTruthy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
-      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
+      openNodeAttributesSection(rendered, 'cold');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      expect(nodeAttributesSelect.find('option').length).toBe(1);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
-      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
+      openNodeAttributesSection(rendered, 'cold');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
-      expect(nodeAttributesSelect.find('option').length).toBe(2);
-      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
-      rendered.update();
       const flyoutButton = findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
       await act(async () => {
@@ -549,6 +539,100 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 1);
       setPhaseIndexPriority(rendered, 'cold', -1);
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+  });
+  describe('frozen phase', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+      http.setupNodeListResponse();
+      httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
+        { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
+      ]);
+    });
+    test('should allow 0 for phase timing', async () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      setPhaseAfter(rendered, 'frozen', 0);
+      save(rendered);
+      expectedErrorMessages(rendered, []);
+    });
+    test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      setPhaseAfter(rendered, 'frozen', -1);
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+    test('should show spinner for node attributes input when loading', async () => {
+      server.respondImmediately = false;
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
+      expect(getNodeAttributeSelect(rendered, 'frozen').exists()).toBeFalsy();
+    });
+    test('should show warning instead of node attributes input when none exist', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['node1'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      openNodeAttributesSection(rendered, 'frozen');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeTruthy();
+      expect(getNodeAttributeSelect(rendered, 'frozen').exists()).toBeFalsy();
+    });
+    test('should show node attributes input when attributes exist', async () => {
+      http.setupNodeListResponse();
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      openNodeAttributesSection(rendered, 'frozen');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
+      expect(nodeAttributesSelect.exists()).toBeTruthy();
+      expect(nodeAttributesSelect.find('option').length).toBe(1);
+    });
+    test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
+      http.setupNodeListResponse();
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      openNodeAttributesSection(rendered, 'frozen');
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
+      expect(nodeAttributesSelect.exists()).toBeTruthy();
+      const flyoutButton = findTestSubject(rendered, 'frozen-viewNodeDetailsFlyoutButton');
+      expect(flyoutButton.exists()).toBeTruthy();
+      await act(async () => {
+        await flyoutButton.simulate('click');
+      });
+      rendered.update();
+      expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
+    });
+    test('should show positive number required error when trying to save with -1 for index priority', async () => {
+      http.setupNodeListResponse();
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      setPhaseAfter(rendered, 'frozen', 1);
+      setPhaseIndexPriority(rendered, 'frozen', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
