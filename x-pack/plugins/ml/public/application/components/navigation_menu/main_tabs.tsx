@@ -70,20 +70,44 @@ interface TabData {
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
-  overview: { testSubject: 'mlMainTab overview', name: 'Overview' },
+  overview: {
+    testSubject: 'mlMainTab overview',
+    name: i18n.translate('xpack.ml.overviewTabLabel', {
+      defaultMessage: 'Overview',
+    }),
+  },
   // Note that anomaly detection jobs list is mapped to ml#/jobs.
   anomaly_detection: {
     testSubject: 'mlMainTab anomalyDetection',
-    name: 'Anomaly Detection',
+    name: i18n.translate('xpack.ml.anomalyDetectionTabLabel', {
+      defaultMessage: 'Anomaly Detection',
+    }),
     pathId: 'jobs',
   },
   data_frame_analytics: {
     testSubject: 'mlMainTab dataFrameAnalytics',
-    name: 'Data Frame Analytics',
+    name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
+      defaultMessage: 'Data Frame Analytics',
+    }),
   },
-  datavisualizer: { testSubject: 'mlMainTab dataVisualizer', name: 'Data Visualizer' },
-  settings: { testSubject: 'mlMainTab settings', name: 'Settings' },
-  'access-denied': { testSubject: 'mlMainTab overview', name: 'Access Denied' },
+  datavisualizer: {
+    testSubject: 'mlMainTab dataVisualizer',
+    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
+      defaultMessage: 'Data Visualizer',
+    }),
+  },
+  settings: {
+    testSubject: 'mlMainTab settings',
+    name: i18n.translate('xpack.ml.settingsTabLabel', {
+      defaultMessage: 'Settings',
+    }),
+  },
+  'access-denied': {
+    testSubject: 'mlMainTab overview',
+    name: i18n.translate('xpack.ml.accessDeniedTabLabel', {
+      defaultMessage: 'Access Denied',
+    }),
+  },
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
