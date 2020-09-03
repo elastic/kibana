@@ -24,7 +24,7 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../test_utils/kbn_server';
+} from '../../../../test_helpers/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { httpServerMock } from '../../../http/http_server.mocks';

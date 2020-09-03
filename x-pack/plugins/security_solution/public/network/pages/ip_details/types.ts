@@ -8,7 +8,10 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
-import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+} from '../../../../common/search_strategy/security_solution/network';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
