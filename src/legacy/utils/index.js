@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
 export { deepCloneWithBuffers } from './deep_clone_with_buffers';
 export { unset } from './unset';
 export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
