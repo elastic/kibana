@@ -73,10 +73,6 @@ declare module 'hapi' {
     ) => void;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
-    addMemoizedFactoryToRequest: (
-      name: string,
-      factoryFn: (request: Request) => Record<string, any>
-    ) => void;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
   }

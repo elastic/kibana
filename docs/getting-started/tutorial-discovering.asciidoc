@@ -1,9 +1,8 @@
-[[tutorial-discovering]]
-=== Discover your data
+[[explore-your-data]]
+=== Explore your data
 
-Using *Discover*, enter
-an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
-query] to search your data and filter the results.
+With *Discover*, you use {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
+queries] to explore your data and narrow the results with filters.
 
 . Open the menu, then go to *Discover*.
 +
@@ -13,7 +12,7 @@ The `shakes*` index pattern appears.
 +
 By default, all fields are shown for each matching document.
 
-. In the *Search* field, enter the following:
+. In the *Search* field, enter the following, then click *Update*:
 +
 [source,text]
 account_number<100 AND balance>47500
@@ -32,3 +31,5 @@ account numbers.
 +
 [role="screenshot"]
 image::images/tutorial-discover-3.png[]
+
+Now that you know what your documents contain, it's time to gain insight into your data with visualizations.
