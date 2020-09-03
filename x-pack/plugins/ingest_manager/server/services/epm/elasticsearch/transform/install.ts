@@ -149,7 +149,7 @@ async function installTransform({
     query: 'defer_validation=true',
     body: transform.content,
   };
-  
+
   await callCluster('transport.request', {
     method: 'DELETE',
     query: 'force=true',
