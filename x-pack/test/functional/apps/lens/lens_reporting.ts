@@ -12,10 +12,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const security = getService('security');
 
+  // https://github.com/elastic/kibana/issues/76709
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
+      await security.testUser.setRoles([
+        'global_dashboard_read',
+        'test_logstash_reader',
+        'reporting_user',
+      ]);
     });
 
     after(async () => {
@@ -25,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: true,
         body: { query: { match_all: {} } },
       });
+      await security.testUser.restoreDefaults();
     });
 
     it('should not cause PDF reports to fail', async () => {
