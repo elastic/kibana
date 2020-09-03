@@ -8,12 +8,7 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
-import {
-  FIELD_ORIGIN,
-  SOURCE_TYPES,
-  DEFAULT_MAX_BUCKETS_LIMIT,
-  VECTOR_SHAPE_TYPE,
-} from '../../../../common/constants';
+import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -24,6 +19,8 @@ import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { SourceEditorArgs } from '../source';
+
+const MAX_TRACKS = 100;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -134,10 +131,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
-    const termsAgg = {
-      size: DEFAULT_MAX_BUCKETS_LIMIT,
-      shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
-    };
+    const termsAgg = { size: MAX_TRACKS };
     searchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, splitField),
@@ -170,11 +164,48 @@ export class ESGeoLineSource extends AbstractESAggSource {
       }),
     });
 
+    const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
+    const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
+    const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
     return {
       data: convertToGeoJson(resp, this._descriptor.splitField).featureCollection,
       meta: {
-        areResultsTrimmed: false,
+        areResultsTrimmed: areEntitiesTrimmed,
+        areEntitiesTrimmed,
+        entityCount: entityBuckets.length,
+        totalEntities,
       },
+    };
+  }
+
+  getSourceTooltipContent(sourceDataRequest) {
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    if (!featureCollection || !meta) {
+      // no tooltip content needed when there is no feature collection or meta
+      return {
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
+    const entitiesFoundMsg = meta.areEntitiesTrimmed
+      ? i18n.translate('xpack.maps.esGeoLine.entitiesTrimmedMsg', {
+          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
+          values: {
+            entityCount: meta.entityCount,
+            totalEntities: meta.totalEntities,
+          },
+        })
+      : i18n.translate('xpack.maps.esGeoLine.entitiesCountMsg', {
+          defaultMessage: `Found {entityCount} entities.`,
+          values: { entityCount: meta.entityCount },
+        });
+    return {
+      tooltipContent: entitiesFoundMsg,
+      // Used to show trimmed icon in legend
+      // user only needs to be notified of trimmed results when entities are trimmed
+      areResultsTrimmed: meta.areEntitiesTrimmed,
     };
   }
 
