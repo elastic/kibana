@@ -189,4 +189,4 @@ Now that you have the basics, you're ready to start exploring your own system da
 
 * To create maps that you can add to your dashboards, refer to <<maps,Maps>>.
 
-* To create presentations of your live data, refer to <canvas,Canvas>>.
+* To create presentations of your live data, refer to <<canvas,Canvas>>.
