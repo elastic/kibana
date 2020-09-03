@@ -87,7 +87,9 @@ const setup = (
     actions,
   });
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
-    getLicenseInfo,
+    getLicense: getLicenseInfo,
+    featureUsageSetup: licensingMock.createSetup().featureUsage,
+    getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
   });
   const manager = new DynamicActionManager({
     isCompatible,
@@ -671,11 +673,13 @@ describe('DynamicActionManager', () => {
     const basicActionFactory: ActionFactoryDefinition = {
       ...actionFactoryDefinition1,
       minimalLicense: 'basic',
+      licenseFeatureName: 'Feature 1',
     };
 
     const goldActionFactory: ActionFactoryDefinition = {
       ...actionFactoryDefinition2,
       minimalLicense: 'gold',
+      licenseFeatureName: 'Feature 2',
     };
 
     uiActions.registerActionFactory(basicActionFactory);
