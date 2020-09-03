@@ -191,11 +191,13 @@ const GraphOverlayComponent = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      <StyledResolver
-        databaseDocumentID={graphEventId ?? ''}
-        resolverComponentInstanceID={currentTimeline.id}
-        indices={indices}
-      />
+      {graphEventId !== undefined && (
+        <StyledResolver
+          databaseDocumentID={graphEventId}
+          resolverComponentInstanceID={currentTimeline.id}
+          indices={indices}
+        />
+      )}
       <AllCasesModal />
     </OverlayContainer>
   );

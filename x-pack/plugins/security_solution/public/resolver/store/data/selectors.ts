@@ -15,7 +15,7 @@ import {
   AABB,
   VisibleEntites,
   SectionData,
-  DatabaseParameters,
+  TreeFetcherParameters,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -35,24 +35,27 @@ import {
   LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
-import * as databaseParametersModel from '../../models/database_parameters';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 import { formatDate } from '../../view/panels/panel_content_utilities';
 
 /**
- * Returns the indices the backend will use to find the origin document for resolver.
+ * If there is currently a request.
  */
-export function indices(state: DataState): string[] | undefined {
-  return state.indices;
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree.pendingRequestParameters !== undefined;
 }
 
 /**
- * If there is currently a request.
+ * If a request was made and it threw an error or returned a failure response code.
  */
-export function isLoading(state: DataState): boolean {
-  return state.pendingRequestParameters !== undefined;
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree.lastResponse) {
+    return !state.tree.lastResponse.successful;
+  }
+  return false;
 }
 
 /**
@@ -63,26 +66,11 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * If a request was made and it threw an error or returned a failure response code.
- */
-export function hasError(state: DataState): boolean {
-  if (state.lastResponse && state.lastResponse.successful === false) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
  * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
-  if (state.lastResponse && state.lastResponse.successful) {
-    return state.lastResponse.result;
-  } else {
-    return undefined;
-  }
+  return state.tree.lastResponse?.successful ? state.tree.lastResponse.result : undefined;
 };
 
 /**
@@ -447,19 +435,24 @@ export const relatedEventInfoByEntityId: (
 );
 
 /**
- * If we need to fetch, this is the ID to fetch.
+ * If the tree resource needs to be fetched then these are the parameters that should be used.
  */
-export function databaseParameters(state: DataState): DatabaseParameters | null {
-  // If there is a parameters object, it must match either the version used in the last request,
-  // or the version used in the pending request.
-  // Otherwise, we need to fetch it
-  // NB: this technique will not allow for refreshing of data.
+export function treeParametersToFetch(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
+   */
   if (
-    state.currentParameters !== undefined &&
-    !databaseParametersModel.equal(state.currentParameters, state.lastResponse?.parameters) &&
-    !databaseParametersModel.equal(state.currentParameters, state.pendingRequestParameters)
+    state.tree.currentParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.lastResponse?.parameters
+    ) &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.pendingRequestParameters
+    )
   ) {
-    return state.currentParameters;
+    return state.tree.currentParameters;
   } else {
     return null;
   }
@@ -682,15 +675,18 @@ export const nodesAndEdgelines: (
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */
-export function parametersToAbort(state: DataState): DatabaseParameters | null {
+export function treeRequestParametersToAbort(state: DataState): TreeFetcherParameters | null {
   /**
    * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.pendingRequestParameters !== undefined &&
-    !databaseParametersModel.equal(state.pendingRequestParameters, state.currentParameters)
+    state.tree.pendingRequestParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.pendingRequestParameters,
+      state.tree.currentParameters
+    )
   ) {
-    return state.pendingRequestParameters;
+    return state.tree.pendingRequestParameters;
   } else {
     return null;
   }

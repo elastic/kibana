@@ -18,6 +18,7 @@ import {
 } from '../../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 describe('data state', () => {
   let actions: ResolverAction[] = [];
@@ -39,18 +40,21 @@ describe('data state', () => {
    */
   const viewAsAString = (dataState: DataState) => {
     return [
-      ['is loading', selectors.isLoading(dataState)],
-      ['has an error', selectors.hasError(dataState)],
+      ['is loading', selectors.isTreeLoading(dataState)],
+      ['has an error', selectors.hadErrorLoadingTree(dataState)],
       ['has more children', selectors.hasMoreChildren(dataState)],
       ['has more ancestors', selectors.hasMoreAncestors(dataState)],
-      ['parameters to fetch', selectors.databaseParameters(dataState)],
-      ['requires a pending request to be aborted', selectors.parametersToAbort(dataState)],
+      ['parameters to fetch', selectors.treeParametersToFetch(dataState)],
+      [
+        'requires a pending request to be aborted',
+        selectors.treeRequestParametersToAbort(dataState),
+      ],
     ]
       .map(([message, value]) => `${message}: ${JSON.stringify(value)}`)
       .join('\n');
   };
 
-  it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a document to fetch, or have a pending request that needs to be aborted.`, () => {
+  it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a request to make, or have a pending request that needs to be aborted.`, () => {
     expect(viewAsAString(state())).toMatchInlineSnapshot(`
       "is loading: false
       has an error: false
@@ -61,7 +65,7 @@ describe('data state', () => {
     `);
   });
 
-  describe('when there is a databaseDocumentID but no pending request', () => {
+  describe('when there are parameters to fetch but no pending request', () => {
     const databaseDocumentID = 'databaseDocumentID';
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
@@ -79,8 +83,8 @@ describe('data state', () => {
         },
       ];
     });
-    it('should need to fetch the databaseDocumentID', () => {
-      expect(selectors.databaseParameters(state())?.databaseDocumentID).toBe(databaseDocumentID);
+    it('should need to request the tree', () => {
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(databaseDocumentID);
     });
     it('should not be loading, have an error, have more children or ancestors, or have a pending request that needs to be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -93,7 +97,7 @@ describe('data state', () => {
       `);
     });
   });
-  describe('when there is a pending request but no databaseDocumentID', () => {
+  describe('when there is a pending request but no current tree fetching parameters', () => {
     const databaseDocumentID = 'databaseDocumentID';
     beforeEach(() => {
       actions = [
@@ -104,12 +108,14 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should have a request to abort', () => {
-      expect(selectors.parametersToAbort(state())?.databaseDocumentID).toBe(databaseDocumentID);
+      expect(selectors.treeRequestParametersToAbort(state())?.databaseDocumentID).toBe(
+        databaseDocumentID
+      );
     });
-    it('should not have an error, more children, more ancestors, or a document to fetch.', () => {
+    it('should not have an error, more children, more ancestors, or request to make.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
@@ -120,7 +126,7 @@ describe('data state', () => {
       `);
     });
   });
-  describe('when there is a pending request for the current databaseDocumentID', () => {
+  describe('when there is a pending request that was made using the current parameters', () => {
     const databaseDocumentID = 'databaseDocumentID';
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
@@ -143,12 +149,12 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should not have a request to abort', () => {
-      expect(selectors.parametersToAbort(state())).toBe(null);
+      expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
     });
-    it('should not have an error, more children, more ancestors, a document to begin fetching, or a pending request that should be aborted.', () => {
+    it('should not have an error, more children, more ancestors, a request to make, or a pending request that should be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
@@ -166,12 +172,12 @@ describe('data state', () => {
         });
       });
       it('should not be loading', () => {
-        expect(selectors.isLoading(state())).toBe(false);
+        expect(selectors.isTreeLoading(state())).toBe(false);
       });
       it('should have an error', () => {
-        expect(selectors.hasError(state())).toBe(true);
+        expect(selectors.hadErrorLoadingTree(state())).toBe(true);
       });
-      it('should not be loading, have more children, have more ancestors, have a document to fetch, or have a pending request that needs to be aborted.', () => {
+      it('should not be loading, have more children, have more ancestors, have a request to make, or have a pending request that needs to be aborted.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
           "is loading: false
           has an error: true
@@ -183,7 +189,7 @@ describe('data state', () => {
       });
     });
   });
-  describe('when there is a pending request for a different databaseDocumentID than the current one', () => {
+  describe('when there is a pending request that was made with parameters that are different than the current tree fetching parameters', () => {
     const firstDatabaseDocumentID = 'first databaseDocumentID';
     const secondDatabaseDocumentID = 'second databaseDocumentID';
     const resolverComponentInstanceID1 = 'resolverComponentInstanceID1';
@@ -220,15 +226,15 @@ describe('data state', () => {
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
-    it('should need to fetch the second databaseDocumentID', () => {
-      expect(selectors.databaseParameters(state())?.databaseDocumentID).toBe(
+    it('should need to request the tree using the second set of parameters', () => {
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
         secondDatabaseDocumentID
       );
     });
     it('should need to abort the request for the databaseDocumentID', () => {
-      expect(selectors.databaseParameters(state())?.databaseDocumentID).toBe(
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
         secondDatabaseDocumentID
       );
     });
@@ -253,15 +259,15 @@ describe('data state', () => {
         });
       });
       it('should not require a pending request to be aborted', () => {
-        expect(selectors.parametersToAbort(state())).toBe(null);
+        expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
       });
       it('should have a document to fetch', () => {
-        expect(selectors.databaseParameters(state())?.databaseDocumentID).toBe(
+        expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
           secondDatabaseDocumentID
         );
       });
       it('should not be loading', () => {
-        expect(selectors.isLoading(state())).toBe(false);
+        expect(selectors.isTreeLoading(state())).toBe(false);
       });
       it('should not have an error, more children, or more ancestors.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -281,10 +287,10 @@ describe('data state', () => {
           });
         });
         it('should not have a document ID to fetch', () => {
-          expect(selectors.databaseParameters(state())).toBe(null);
+          expect(selectors.treeParametersToFetch(state())).toBe(null);
         });
         it('should be loading', () => {
-          expect(selectors.isLoading(state())).toBe(true);
+          expect(selectors.isTreeLoading(state())).toBe(true);
         });
         it('should not have an error, more children, more ancestors, or a pending request that needs to be aborted.', () => {
           expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -313,7 +319,7 @@ describe('data state', () => {
             secondAncestorID,
           }),
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });
@@ -341,7 +347,7 @@ describe('data state', () => {
             secondAncestorID,
           }),
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });
@@ -365,7 +371,7 @@ describe('data state', () => {
         payload: {
           result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });
@@ -396,7 +402,7 @@ describe('data state', () => {
         payload: {
           result: tree,
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });
@@ -427,7 +433,7 @@ describe('data state', () => {
         payload: {
           result: tree,
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });
@@ -443,7 +449,7 @@ describe('data state', () => {
         payload: {
           result: tree,
           // this value doesn't matter
-          parameters: { databaseDocumentID: '', indices: [] },
+          parameters: mockTreeFetcherParameters(),
         },
       });
     });

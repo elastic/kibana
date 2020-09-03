@@ -81,19 +81,17 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
   dataSelectors.layout
 );
 
-export const databaseIndices = composeSelectors(dataStateSelector, dataSelectors.indices);
-
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseParameters = composeSelectors(
+export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseParameters
+  dataSelectors.treeParametersToFetch
 );
 
-export const parametersToAbort = composeSelectors(
+export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.parametersToAbort
+  dataSelectors.treeRequestParametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(
@@ -197,12 +195,15 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+export const hadErrorLoadingTree = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingTree
+);
 
 /**
  * True if the children cursor is not null

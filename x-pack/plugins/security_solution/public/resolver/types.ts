@@ -194,11 +194,15 @@ export interface VisibleEntites {
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
-export interface DatabaseParameters {
+export interface TreeFetcherParameters {
   /**
    * The `_id` for an ES document. Used to select a process that we'll show the graph for.
    */
   databaseDocumentID: string;
+
+  /**
+   * The indices that the backend will use to search for the document ID.
+   */
   indices: string[];
 }
 
@@ -209,53 +213,49 @@ export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
 
-  /**
-   * The parameters passed from the resolver properties
-   */
-  readonly currentParameters?: DatabaseParameters;
+  readonly tree: {
+    /**
+     * The parameters passed from the resolver properties
+     */
+    readonly currentParameters?: TreeFetcherParameters;
 
-  /**
-   * The id used for the pending request, if there is one.
-   */
-  readonly pendingRequestParameters?: DatabaseParameters;
+    /**
+     * The id used for the pending request, if there is one.
+     */
+    readonly pendingRequestParameters?: TreeFetcherParameters;
+    /**
+     * The parameters and response from the last successful request.
+     */
+    readonly lastResponse?: {
+      /**
+       * The id used in the request.
+       */
+      readonly parameters: TreeFetcherParameters;
+    } & (
+      | {
+          /**
+           * If a response with a success code was received, this is `true`.
+           */
+          readonly successful: true;
+          /**
+           * The ResolverTree parsed from the response.
+           */
+          readonly result: ResolverTree;
+        }
+      | {
+          /**
+           * If the request threw an exception or the response had a failure code, this will be false.
+           */
+          readonly successful: false;
+        }
+    );
+  };
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
-
-  /**
-   * The indices that the backend will use to search for the document ID.
-   */
-  readonly indices?: string[];
-
-  /**
-   * The parameters and response from the last successful request.
-   */
-  readonly lastResponse?: {
-    /**
-     * The id used in the request.
-     */
-    readonly parameters: DatabaseParameters;
-  } & (
-    | {
-        /**
-         * If a response with a success code was received, this is `true`.
-         */
-        readonly successful: true;
-        /**
-         * The ResolverTree parsed from the response.
-         */
-        readonly result: ResolverTree;
-      }
-    | {
-        /**
-         * If the request threw an exception or the response had a failure code, this will be false.
-         */
-        readonly successful: false;
-      }
-  );
 }
 
 /**
