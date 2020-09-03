@@ -28,22 +28,19 @@ export const PageHeader = () => {
   const stackManagement = { path: '/app/management' };
 
   return (
-    <header className="kibanaOverviewHeader">
-      <div className="kibanaOverviewHeader__inner">
+    <header className="kbnOverviewHeader">
+      <div className="kbnOverviewHeader__inner">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="logoKibana" size="xxl" />
+                <EuiIcon size="xxl" type="logoKibana" />
               </EuiFlexItem>
 
               <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h1 id="kibanaOverviewHeader__title">
-                    <FormattedMessage
-                      id="kibanaOverview.pageHeader.title"
-                      defaultMessage="Kibana"
-                    />
+                  <h1 id="kbnOverviewHeader__title">
+                    <FormattedMessage id="kibana.overview.header.title" defaultMessage="Kibana" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
@@ -51,23 +48,23 @@ export const PageHeader = () => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="kibanaOverviewHeader__actions">
-              <EuiFlexItem className="kibanaOverviewHeader__actionItem">
-                <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="plusInCircle">
-                  {i18n.translate('home.pageHeader.addDataButtonLabel', {
+            <EuiFlexGroup className="kbnOverviewHeader__actions">
+              <EuiFlexItem className="kbnOverviewHeader__actionItem">
+                <EuiButtonEmpty flush="right" href="#/tutorial_directory" iconType="indexOpen">
+                  {i18n.translate('kibana.overview.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
 
               {stackManagement ? (
-                <EuiFlexItem className="kibanaOverviewHeader__actionItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem">
                   <EuiButtonEmpty
                     flush="right"
                     iconType="gear"
                     onClick={createAppNavigationHandler(stackManagement.path)}
                   >
-                    {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
+                    {i18n.translate('kibana.overview.stackManagementButtonLabel', {
                       defaultMessage: 'Manage',
                     })}
                   </EuiButtonEmpty>
@@ -75,13 +72,13 @@ export const PageHeader = () => {
               ) : null}
 
               {devTools ? (
-                <EuiFlexItem className="kibanaOverviewHeader__actionItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem">
                   <EuiButtonEmpty
                     flush="right"
                     iconType="wrench"
                     onClick={createAppNavigationHandler(devTools.path)}
                   >
-                    {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                    {i18n.translate('kibana.overview.devToolsButtonLabel', {
                       defaultMessage: 'Dev tools',
                     })}
                   </EuiButtonEmpty>

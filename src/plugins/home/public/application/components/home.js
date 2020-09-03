@@ -147,7 +147,7 @@ export class Home extends Component {
               <EuiFlexItem>
                 <EuiTitle size="m">
                   <h1 id="homHeader__title">
-                    <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
+                    <FormattedMessage id="home.header.title" defaultMessage="Home" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
@@ -229,7 +229,7 @@ export class Home extends Component {
                     size="xs"
                   >
                     <FormattedMessage
-                      id="home.changeHomeRouteLink"
+                      id="home.footer.changeHomeRouteLink"
                       defaultMessage="Display a different page on log in"
                     />
                   </EuiButtonEmpty>
@@ -245,7 +245,7 @@ export class Home extends Component {
                   iconType="apps"
                 >
                   <FormattedMessage
-                    id="home.appDirectory.appDirectoryButtonLabel"
+                    id="home.footer.appDirectoryButtonLabel"
                     defaultMessage="View app directory"
                   />
                 </EuiButtonEmpty>

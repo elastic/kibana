@@ -20,41 +20,49 @@
 // Local page variables
 $pageWidth: 1200px;
 
-.kibanaOverviewWrapper {
+.kbnOverviewWrapper {
   background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.kibanaOverviewHeader {
+.kbnOverviewHeader {
   background-color: $euiPageBackgroundColor;
   border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
-.kibanaOverviewHeader__inner {
+.kbnOverviewHeader__inner {
   margin: 0 auto;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
 }
 
-#kibanaOverviewHeader__title {
+#kbnOverviewHeader__title {
   @include euiBreakpoint('xs', 's') {
     text-align: center;
   }
 }
 
-//not working? same with home? check importance
-.kibanaOverviewHeader__actionItem {
+// MICHAEL NOTE: not working? same with home? check importance
+.kbnOverviewHeader__actionItem {
   @include euiBreakpoint('xs', 's') {
     margin-bottom: 0 !important;
     margin-top: 0 !important;
   }
 }
 
-.kibanaOverviewContent {
+.kbnOverviewContent {
   margin: 0 auto;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
   width: 100%;
+}
+
+.kbnOverviewGettingStarted__content {
+  display: block;
+}
+
+.kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
+  fill: $euiColorDarkestShade;
 }
