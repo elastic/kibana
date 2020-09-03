@@ -129,14 +129,15 @@ export const useAuthentications = ({
   const authenticationsSearch = useCallback(
     (request: AuthenticationsRequestOptions) => {
       let didCancel = false;
-      const asyncSearch = async () => {
+      const async
+      = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
           .search<AuthenticationsRequestOptions, AuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
