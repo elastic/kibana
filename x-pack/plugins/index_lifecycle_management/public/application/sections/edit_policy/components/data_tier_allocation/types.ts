@@ -12,7 +12,7 @@ export interface SharedProps<T extends PhaseWithAllocationAction> {
   phase: keyof Phases & string;
   errors?: PhaseValidationErrors<T>;
   phaseData: T;
-  setPhaseData: (dataKey: keyof T & string, value: string | undefined) => void;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
   isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
 }
