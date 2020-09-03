@@ -21,31 +21,27 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { JsonEditor } from '../../../../src/plugins/es_ui_shared/public';
 
-export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
-  const input = JSON.stringify(props.input, null, 4);
-  const [value, setValue] = React.useState(input);
-  const isValid = (() => {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-  React.useEffect(() => {
-    setValue(input);
-  }, [input]);
+export const InputEditor = <T extends object>(props: {
+  input: T;
+  onSubmit: (value: T) => void;
+}) => {
+  const getJsonData = React.useRef(() => props.input);
+  const [isValid, setIsValid] = React.useState(true);
+
   return (
     <>
-      <JsonEditor
-        value={value}
-        onUpdate={(v) => setValue(v.data.raw)}
+      <JsonEditor<T>
+        defaultValue={props.input}
+        onUpdate={(jsonState) => {
+          getJsonData.current = jsonState.data.format;
+          setIsValid(jsonState.isValid);
+        }}
         euiCodeEditorProps={{
           'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
         }}
       />
       <EuiButton
-        onClick={() => props.onSubmit(JSON.parse(value))}
+        onClick={() => props.onSubmit(getJsonData.current())}
         disabled={!isValid}
         data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
       >
