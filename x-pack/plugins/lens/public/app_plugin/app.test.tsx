@@ -135,6 +135,7 @@ describe('Lens App', () => {
     redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     history: History;
     getAppNameFromId?: (appId: string) => string | undefined;
   }> {
@@ -175,6 +176,7 @@ describe('Lens App', () => {
       },
       redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
       onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
       history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
@@ -187,6 +189,7 @@ describe('Lens App', () => {
       redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
+      setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
       history: History;
       getAppNameFromId?: (appId: string) => string | undefined;
     }>;

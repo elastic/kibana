@@ -89,6 +89,7 @@ export async function mountApp(
         originatingApp={originatingApp}
         getAppNameFromId={stateTransfer.getAppNameFromId}
         onAppLeave={params.onAppLeave}
+        setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
       />
     );
