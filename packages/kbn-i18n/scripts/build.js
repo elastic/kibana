@@ -69,7 +69,6 @@ run(
         proc.run(padRight(10, 'tsc'), {
           cmd: 'tsc',
           args: [
-            '--emitDeclarationOnly',
             ...(flags.watch ? ['--watch', '--preserveWatchOutput', 'true'] : []),
             ...(flags['source-maps'] ? ['--declarationMap', 'true'] : []),
           ],
