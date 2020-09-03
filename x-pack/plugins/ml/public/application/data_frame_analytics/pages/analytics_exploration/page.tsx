@@ -42,7 +42,7 @@ export const Page: FC<{
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierExploration jobId={jobId} />
           )}

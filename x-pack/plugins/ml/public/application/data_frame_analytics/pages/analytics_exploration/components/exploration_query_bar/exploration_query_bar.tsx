@@ -6,7 +6,7 @@
 
 import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 
-import { EuiCode, EuiInputPopover } from '@elastic/eui';
+import { EuiButton, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -84,41 +84,48 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   };
 
   return (
-    <EuiInputPopover
-      style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
-      input={
-        <QueryStringInput
-          bubbleSubmitEvent={true}
-          query={searchInput}
-          indexPatterns={[indexPattern]}
-          onChange={searchChangeHandler}
-          onSubmit={searchSubmitHandler}
-          placeholder={
-            searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
-              ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
-                  defaultMessage: 'e.g. {example}',
-                  values: { example: 'method : "GET" or status : "404"' },
-                })
-              : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
-                  defaultMessage: 'e.g. {example}',
-                  values: { example: 'method:GET OR status:404' },
-                })
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiInputPopover
+          style={{ maxWidth: '100%' }}
+          closePopover={() => setErrorMessage(undefined)}
+          input={
+            <QueryStringInput
+              bubbleSubmitEvent={true}
+              query={searchInput}
+              indexPatterns={[indexPattern]}
+              onChange={searchChangeHandler}
+              onSubmit={searchSubmitHandler}
+              placeholder={
+                searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
+                  ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
+                      defaultMessage: 'e.g. {example}',
+                      values: { example: 'method : "GET" or status : "404"' },
+                    })
+                  : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
+                      defaultMessage: 'e.g. {example}',
+                      values: { example: 'method:GET OR status:404' },
+                    })
+              }
+              disableAutoFocus={true}
+              dataTestSubj="transformQueryInput"
+              languageSwitcherPopoverAnchorPosition="rightDown"
+            />
           }
-          disableAutoFocus={true}
-          dataTestSubj="transformQueryInput"
-          languageSwitcherPopoverAnchorPosition="rightDown"
-        />
-      }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
-    >
-      <EuiCode>
-        {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
-          defaultMessage: 'Invalid Query',
-        })}
-        {': '}
-        {errorMessage?.message.split('\n')[0]}
-      </EuiCode>
-    </EuiInputPopover>
+          isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+        >
+          <EuiCode>
+            {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
+              defaultMessage: 'Invalid Query',
+            })}
+            {': '}
+            {errorMessage?.message.split('\n')[0]}
+          </EuiCode>
+        </EuiInputPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton>Refresh</EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
