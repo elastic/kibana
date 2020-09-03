@@ -28,12 +28,12 @@ import {
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
-import { PolicyFromES } from '../../application/services/policies/types';
+import { Index, PolicyFromES } from '../../application/services/policies/types';
 
 interface Props {
   indexName: string;
   closeModal: () => void;
-  index: any;
+  index: Index;
   reloadIndices: () => void;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
@@ -42,7 +42,7 @@ interface State {
   selectedPolicyName: string;
   selectedAlias: string;
   policies: PolicyFromES[];
-  policyError?: string;
+  policyErrorMessage?: string;
 }
 
 export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
@@ -59,7 +59,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     const { selectedPolicyName, selectedAlias } = this.state;
     if (!selectedPolicyName) {
       this.setState({
-        policyError: i18n.translate(
+        policyErrorMessage: i18n.translate(
           'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPolicySelectedErrorMessage',
           { defaultMessage: 'You must select a policy.' }
         ),
@@ -135,7 +135,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         </Fragment>
       );
     }
-    const aliasOptions = aliases.map((alias: string) => {
+    const aliasOptions = (aliases as string[]).map((alias: string) => {
       return {
         text: alias,
         value: alias,
@@ -170,7 +170,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     );
   };
   renderForm() {
-    const { policies, selectedPolicyName, policyError } = this.state;
+    const { policies, selectedPolicyName, policyErrorMessage } = this.state;
     const selectedPolicy = selectedPolicyName
       ? policies.find((policy) => policy.name === selectedPolicyName)
       : undefined;
@@ -193,8 +193,8 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     return (
       <EuiForm>
         <EuiFormRow
-          isInvalid={!!policyError}
-          error={policyError}
+          isInvalid={!!policyErrorMessage}
+          error={policyErrorMessage}
           label={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.choosePolicyLabel"
@@ -206,7 +206,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
             options={options}
             value={selectedPolicyName}
             onChange={(e) => {
-              this.setState({ policyError: undefined, selectedPolicyName: e.target.value });
+              this.setState({ policyErrorMessage: undefined, selectedPolicyName: e.target.value });
             }}
           />
         </EuiFormRow>

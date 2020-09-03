@@ -26,51 +26,60 @@ import {
 
 import { ApplicationStart } from 'kibana/public';
 import { getPolicyPath } from '../../application/services/navigation';
+import { Index, IndexLifecyclePolicy } from '../../application/services/policies/types';
 
-interface Headers {
-  policy: string;
-  phase: string;
-  action: string;
-  action_time_millis: string;
-  failed_step: string;
-}
-const getHeaders = (): Headers => {
-  return {
-    policy: i18n.translate(
-      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader',
-      {
-        defaultMessage: 'Lifecycle policy',
-      }
-    ),
-    phase: i18n.translate(
-      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader',
-      {
-        defaultMessage: 'Current phase',
-      }
-    ),
-    action: i18n.translate(
-      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader',
-      {
-        defaultMessage: 'Current action',
-      }
-    ),
-    action_time_millis: i18n.translate(
-      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader',
-      {
-        defaultMessage: 'Current action time',
-      }
-    ),
-    failed_step: i18n.translate(
-      'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader',
-      {
-        defaultMessage: 'Failed step',
-      }
-    ),
-  };
+const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
+  return [
+    [
+      'policy',
+      i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader',
+        {
+          defaultMessage: 'Lifecycle policy',
+        }
+      ),
+    ],
+    [
+      'phase',
+      i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader',
+        {
+          defaultMessage: 'Current phase',
+        }
+      ),
+    ],
+    [
+      'action',
+      i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader',
+        {
+          defaultMessage: 'Current action',
+        }
+      ),
+    ],
+    [
+      'action_time_millis',
+      i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader',
+        {
+          defaultMessage: 'Current action time',
+        }
+      ),
+    ],
+    [
+      'failed_step',
+      i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader',
+        {
+          defaultMessage: 'Failed step',
+        }
+      ),
+    ],
+  ];
 };
 
 interface Props {
-  index: any;
+  index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 interface State {
@@ -98,8 +107,8 @@ export class IndexLifecycleSummary extends Component<Props, State> {
   closePhaseExecutionPopover = () => {
     this.setState({ showPhaseExecutionPopover: false });
   };
-  renderStackPopoverButton(ilm: any) {
-    if (!ilm.stack_trace) {
+  renderStackPopoverButton(ilm: IndexLifecyclePolicy) {
+    if (!ilm.step_info!.stack_trace) {
       return null;
     }
     const button = (
@@ -118,12 +127,12 @@ export class IndexLifecycleSummary extends Component<Props, State> {
         closePopover={this.closeStackPopover}
       >
         <div style={{ maxHeight: '400px', width: '900px', overflowY: 'scroll' }}>
-          <pre>{ilm.step_info.stack_trace}</pre>
+          <pre>{ilm.step_info!.stack_trace}</pre>
         </div>
       </EuiPopover>
     );
   }
-  renderPhaseExecutionPopoverButton(ilm: any) {
+  renderPhaseExecutionPopoverButton(ilm: IndexLifecyclePolicy) {
     const button = (
       <EuiLink onClick={this.togglePhaseExecutionPopover}>
         <FormattedMessage
@@ -165,7 +174,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
   }
   buildRows() {
     const {
-      index: { ilm = {} },
+      index: { ilm },
     } = this.props;
     const headers = getHeaders();
     const rows: {
@@ -175,8 +184,8 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       left: [],
       right: [],
     };
-    Object.entries(headers).forEach(([fieldName, label], arrayIndex) => {
-      const value = ilm[fieldName];
+    headers.forEach(([fieldName, label], arrayIndex) => {
+      const value: any = ilm[fieldName];
       let content;
       if (fieldName === 'action_time_millis') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
@@ -195,14 +204,14 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       }
       content = content || '-';
       const cell = (
-        <Fragment>
+        <>
           <EuiDescriptionListTitle key={fieldName}>
             <strong>{label}</strong>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription key={fieldName + '_desc'}>
             {content}
           </EuiDescriptionListDescription>
-        </Fragment>
+        </>
       );
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);
@@ -218,14 +227,14 @@ export class IndexLifecycleSummary extends Component<Props, State> {
 
   render() {
     const {
-      index: { ilm = {} },
+      index: { ilm },
     } = this.props;
     if (!ilm.managed) {
       return null;
     }
     const { left, right } = this.buildRows();
     return (
-      <Fragment>
+      <>
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
@@ -235,7 +244,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
           </h3>
         </EuiTitle>
         {ilm.step_info && ilm.step_info.type ? (
-          <Fragment>
+          <>
             <EuiSpacer size="s" />
             <EuiCallOut
               color="danger"
@@ -251,10 +260,10 @@ export class IndexLifecycleSummary extends Component<Props, State> {
               <EuiSpacer size="s" />
               {this.renderStackPopoverButton(ilm)}
             </EuiCallOut>
-          </Fragment>
+          </>
         ) : null}
-        {ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
-          <Fragment>
+        {ilm.step_info && ilm.step_info!.message && !ilm.step_info!.stack_trace ? (
+          <>
             <EuiSpacer size="s" />
             <EuiCallOut
               color="primary"
@@ -265,9 +274,9 @@ export class IndexLifecycleSummary extends Component<Props, State> {
                 />
               }
             >
-              {ilm.step_info.message}
+              {ilm.step_info!.message}
             </EuiCallOut>
-          </Fragment>
+          </>
         ) : null}
         <EuiSpacer size="m" />
         <EuiFlexGroup>
@@ -278,7 +287,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
             <EuiDescriptionList type="column">{right}</EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </Fragment>
+      </>
     );
   }
 }
