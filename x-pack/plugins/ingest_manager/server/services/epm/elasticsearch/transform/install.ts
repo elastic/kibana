@@ -149,15 +149,7 @@ async function installTransform({
     query: 'defer_validation=true',
     body: transform.content,
   };
-  /* if (pipeline.extension === 'yml') {
-      callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
-    }*/
-
-  // This uses the catch-all endpoint 'transport.request' because we have to explicitly
-  // set the Content-Type header above for sending yml data. Setting the headers is not
-  // exposed in the convenience endpoint 'ingest.putPipeline' of elasticsearch-js-legacy
-  // which we could otherwise use.
-  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+  
   await callCluster('transport.request', {
     method: 'DELETE',
     query: 'force=true',
