@@ -9,18 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
-import {
-  FIELD_TYPES,
-  UseField,
-  Field,
-  ComboBoxField,
-  ToggleField,
-} from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
+import { PropertiesField } from './common_fields/properties_field';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
@@ -39,21 +34,6 @@ const fieldsConfig: FieldsConfig = {
           ingestGeoIP: <EuiCode inline>{'ingest-geoip'}</EuiCode>,
         }}
       />
-    ),
-  },
-
-  properties: {
-    type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.propertiesFieldLabel', {
-      defaultMessage: 'Properties (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.geoIPForm.propertiesFieldHelpText',
-      {
-        defaultMessage:
-          'Properties added to the target field. Valid properties depend on the database file used.',
-      }
     ),
   },
 
@@ -95,10 +75,14 @@ export const GeoIP: FunctionComponent = () => {
 
       <UseField component={Field} config={fieldsConfig.database_file} path="fields.database_file" />
 
-      <UseField
-        component={ComboBoxField}
-        config={fieldsConfig.properties}
-        path="fields.properties"
+      <PropertiesField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.geoIPForm.propertiesFieldHelpText',
+          {
+            defaultMessage:
+              'Properties added to the target field. Valid properties depend on the database file used.',
+          }
+        )}
       />
 
       <UseField component={ToggleField} config={fieldsConfig.first_only} path="fields.first_only" />

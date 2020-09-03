@@ -28,6 +28,10 @@ import {
   Inference,
   Join,
   Json,
+  Trim,
+  Uppercase,
+  UrlDecode,
+  UserAgent,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -249,28 +253,28 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   trim: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Trim,
     docLinkPath: '/trim-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
   },
   uppercase: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Uppercase,
     docLinkPath: '/uppercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
     }),
   },
   urldecode: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: UrlDecode,
     docLinkPath: '/urldecode-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
   },
   user_agent: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: UserAgent,
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
