@@ -51,10 +51,8 @@ async function getSettingsFromFile(log: ToolingLog, path: string, settingOverrid
     await cache.get(configProvider)!
   );
 
-  const logDeprecation = (error: string | Error) => log.error(error);
-
   if (get(settingsWithDefaults, 'servers.webdriver') !== undefined) {
-    logDeprecation('servers.webdriver is deprecated and is no longer used');
+    log.error('servers.webdriver is deprecated and is no longer used');
     unset(settingsWithDefaults, 'servers.webdriver');
   }
 
