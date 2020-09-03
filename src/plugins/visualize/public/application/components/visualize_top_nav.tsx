@@ -61,6 +61,7 @@ const TopNav = ({
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
+  const { setHeaderActionMenu } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
@@ -151,6 +152,7 @@ const TopNav = ({
     <TopNavMenu
       appName={APP_NAME}
       config={config}
+      setMenuMountPoint={setHeaderActionMenu}
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
@@ -171,6 +173,7 @@ const TopNav = ({
      */
     <TopNavMenu
       appName={APP_NAME}
+      setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : undefined}
       showSearchBar
       showSaveQuery={false}

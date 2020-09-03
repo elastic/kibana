@@ -196,12 +196,14 @@ export class VisualizePlugin
           scopedHistory: params.history,
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
+          setHeaderActionMenu: params.setHeaderActionMenu,
         };
 
         params.element.classList.add('visAppWrapper');
         const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('visAppWrapper');
           unlistenParentHistory();
           unmount();
           appUnMounted();
