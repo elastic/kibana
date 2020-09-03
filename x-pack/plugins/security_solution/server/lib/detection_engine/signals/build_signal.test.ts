@@ -5,12 +5,7 @@
  */
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
-import {
-  buildSignal,
-  buildParent,
-  buildAncestorsSignal,
-  additionalSignalFields,
-} from './build_signal';
+import { buildSignal, buildParent, buildAncestors, additionalSignalFields } from './build_signal';
 import { Signal, Ancestor } from './types';
 import { getPartialRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
@@ -215,7 +210,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const signal = buildAncestorsSignal(doc);
+    const signal = buildAncestors(doc);
     const expected: Ancestor[] = [
       {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -255,7 +250,7 @@ describe('buildSignal', () => {
       },
       depth: 1,
     };
-    const signal = buildAncestorsSignal(doc);
+    const signal = buildAncestors(doc);
     const expected: Ancestor[] = [
       {
         id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',

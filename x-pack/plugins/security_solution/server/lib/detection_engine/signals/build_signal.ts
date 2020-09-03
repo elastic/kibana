@@ -38,7 +38,7 @@ export const buildParent = (doc: SignalSourceHit): Ancestor => {
  * creating an array of N+1 ancestors.
  * @param doc The parent signal/event for which to extend the ancestry.
  */
-export const buildAncestorsSignal = (doc: SignalSourceHit): Signal['ancestors'] => {
+export const buildAncestors = (doc: SignalSourceHit): Signal['ancestors'] => {
   const newAncestor = buildParent(doc);
   const existingAncestors = doc._source.signal?.ancestors;
   if (existingAncestors != null) {
@@ -56,10 +56,7 @@ export const buildAncestorsSignal = (doc: SignalSourceHit): Signal['ancestors'] 
 export const buildSignal = (docs: SignalSourceHit[], rule: Partial<RulesSchema>): Signal => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
-  const ancestors = docs.reduce(
-    (acc: Ancestor[], doc) => acc.concat(buildAncestorsSignal(doc)),
-    []
-  );
+  const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
   return {
     parents,
     ancestors,
