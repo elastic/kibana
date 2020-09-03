@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { GetConfigFn } from '../../../common';
-import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../fetch';
+import { CoreSetup } from 'src/core/public';
+import { deserializeFieldFormat } from './utils/deserialize';
+import { baseFormattersPublic } from './constants';
+import { DataPublicPluginStart, fieldFormats } from '..';
 
-export function getMSearchParams(getConfig: GetConfigFn) {
-  return {
-    rest_total_hits_as_int: true,
-    ignore_throttled: getIgnoreThrottled(getConfig),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(getConfig),
-  };
-}
+export const getFieldFormatsRegistry = (core: CoreSetup) => {
+  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const getConfig = core.uiSettings.get.bind(core.uiSettings);
+
+  fieldFormatsRegistry.init(getConfig, {}, baseFormattersPublic);
+
+  fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
+    fieldFormatsRegistry as DataPublicPluginStart['fieldFormats']
+  );
+
+  return fieldFormatsRegistry;
+};

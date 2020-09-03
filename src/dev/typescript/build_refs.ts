@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export { getEsClient } from './get_es_client';
-export { LegacyApiCaller } from './types';
+import execa from 'execa';
+import { run, ToolingLog } from '@kbn/dev-utils';
+
+export async function buildRefs(log: ToolingLog) {
+  try {
+    log.info('Building TypeScript projects refs...');
+    await execa(require.resolve('typescript/bin/tsc'), ['-b', 'tsconfig.refs.json']);
+  } catch (e) {
+    log.error(e);
+    process.exit(1);
+  }
+}
+
+export async function runBuildRefs() {
+  run(async ({ log }) => {
+    await buildRefs(log);
+  });
+}
