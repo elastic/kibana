@@ -95,12 +95,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/es_ui_shared/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
@@ -126,20 +120,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/index_management/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -324,6 +305,8 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
+                  '!src/core/server/utils', // ts alias
+                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
