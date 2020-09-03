@@ -29,7 +29,7 @@ export const deleteTransforms = async (
       method: 'DELETE',
       query: 'force=true',
       path: `_transform/${transformId}`,
-      ignore: [404, 400],
+      ignore: [404],
     });
   }
 };
