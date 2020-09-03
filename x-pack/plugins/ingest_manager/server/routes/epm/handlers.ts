@@ -21,6 +21,7 @@ import {
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
+  InstallType,
 } from '../../types';
 import {
   getCategories,
@@ -34,6 +35,7 @@ import {
 } from '../../services/epm/packages';
 import { IngestManagerError, getHTTPResponseCode } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
+import { getInstallType } from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -153,6 +155,8 @@ export const installPackageHandler: RequestHandler<
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installType = getInstallType({ pkgVersion, installedPkg });
   try {
     const res = await installPackage({
       savedObjectsClient,
@@ -173,15 +177,20 @@ export const installPackageHandler: RequestHandler<
       });
     }
 
-    // if there is an unknown server error, uninstall any package assets
+    // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
     try {
-      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-      const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-      if (!isUpdate) {
+      if (!installedPkg) throw new Error('no installation exists');
+      if (installType === InstallType.install || installType === InstallType.reinstall) {
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+      } else {
+        await installPackage({
+          savedObjectsClient,
+          pkgkey: `${pkgName}-${installedPkg.attributes.version}`,
+          callCluster,
+        });
       }
     } catch (error) {
-      logger.error(`could not remove failed installation ${error}`);
+      logger.error(`failed to uninstall or rollback package ${error}`);
     }
     logger.error(e);
     return response.customError({
