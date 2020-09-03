@@ -17,20 +17,28 @@
  * under the License.
  */
 
-import { Transform } from 'stream';
+import { createListStream } from './index';
 
-export function createMapStream(fn) {
-  let i = 0;
+describe('listStream', () => {
+  test('provides the values in the initial list', async () => {
+    const str = createListStream([1, 2, 3, 4]);
+    const onData = jest.fn();
+    str.on('data', onData);
 
-  return new Transform({
-    objectMode: true,
-    async transform(value, enc, done) {
-      try {
-        this.push(await fn(value, i++));
-        done();
-      } catch (err) {
-        done(err);
-      }
-    },
+    await new Promise((resolve) => str.on('end', resolve));
+
+    expect(onData).toHaveBeenCalledTimes(4);
+    expect(onData.mock.calls[0]).toEqual([1]);
+    expect(onData.mock.calls[1]).toEqual([2]);
+    expect(onData.mock.calls[2]).toEqual([3]);
+    expect(onData.mock.calls[3]).toEqual([4]);
   });
-}
+
+  test('does not modify the list passed', async () => {
+    const list = [1, 2, 3, 4];
+    const str = createListStream(list);
+    str.resume();
+    await new Promise((resolve) => str.on('end', resolve));
+    expect(list).toEqual([1, 2, 3, 4]);
+  });
+});
