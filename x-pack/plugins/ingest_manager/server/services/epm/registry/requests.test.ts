@@ -99,7 +99,6 @@ describe('setupIngestManager', () => {
           ok: false,
           status: 404,
           statusText: 'Not Found',
-          type: 'error',
           url: 'https://example.com',
         }));
         const promise = fetchUrl('');
@@ -115,7 +114,6 @@ describe('setupIngestManager', () => {
           ok: false,
           status: 429,
           statusText: 'Too Many Requests',
-          type: 'error',
           url: 'https://example.com',
         }));
         const promise = fetchUrl('');
@@ -131,13 +129,43 @@ describe('setupIngestManager', () => {
           ok: false,
           status: 500,
           statusText: 'Internal Server Error',
-          type: 'error',
           url: 'https://example.com',
         }));
         const promise = fetchUrl('');
         await expect(promise).rejects.toThrow(RegistryResponseError);
         await expect(promise).rejects.toThrow(
           `'500 Internal Server Error' error response from package registry at https://example.com`
+        );
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('url in RegistryResponseError message is response.url || requested_url', () => {
+      it('given response.url, use that', async () => {
+        fetchMock.mockImplementationOnce(() => ({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+          url: 'https://example.com/?from_response=true',
+        }));
+        const promise = fetchUrl('https://example.com/?requested=true');
+        await expect(promise).rejects.toThrow(RegistryResponseError);
+        await expect(promise).rejects.toThrow(
+          `'404 Not Found' error response from package registry at https://example.com/?from_response=true`
+        );
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('no response.url, use requested url', async () => {
+        fetchMock.mockImplementationOnce(() => ({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found',
+        }));
+        const promise = fetchUrl('https://example.com/?requested=true');
+        await expect(promise).rejects.toThrow(RegistryResponseError);
+        await expect(promise).rejects.toThrow(
+          `'404 Not Found' error response from package registry at https://example.com/?requested=true`
         );
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });

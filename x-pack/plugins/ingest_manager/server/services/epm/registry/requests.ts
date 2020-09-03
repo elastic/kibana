@@ -20,7 +20,9 @@ async function registryFetch(url: string) {
   } else {
     // 4xx & 5xx responses
     const { status, statusText, url: resUrl } = response;
-    const message = `'${status} ${statusText}' error response from package registry at ${resUrl}`;
+    const message = `'${status} ${statusText}' error response from package registry at ${
+      resUrl || url
+    }`;
     const responseError = new RegistryResponseError(message);
 
     throw new pRetry.AbortError(responseError);
