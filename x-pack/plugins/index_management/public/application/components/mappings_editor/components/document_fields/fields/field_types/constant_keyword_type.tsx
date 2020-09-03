@@ -47,7 +47,7 @@ export const ConstantKeywordType: FunctionComponent<Props> = ({ field }) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.constantKeyword.metaFieldDescription',
             {
-              defaultMessage: 'Metadata about the field.',
+              defaultMessage: 'Arbitrary information about the field. Specify as JSON key-value pairs.',
             }
           )}
           defaultToggleValue={field.source?.meta !== undefined}
