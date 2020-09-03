@@ -76,8 +76,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
-        console.log(NewNodeDataStyle[i]);
-        console.log(NewNodeDataStyle[i].top);
         expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].top)
         );
