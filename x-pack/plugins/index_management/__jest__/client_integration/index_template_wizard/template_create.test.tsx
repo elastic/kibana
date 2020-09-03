@@ -7,14 +7,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, nextTick } from '../helpers';
+import { setupEnvironment } from '../helpers';
 
 import {
   TEMPLATE_NAME,
-  SETTINGS,
-  MAPPINGS,
-  ALIASES,
-  INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
+  // SETTINGS,
+  // MAPPINGS,
+  // ALIASES,
+  // INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
@@ -46,36 +46,39 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const TEXT_MAPPING_FIELD = {
-  name: 'text_datatype',
-  type: 'text',
-};
+// const TEXT_MAPPING_FIELD = {
+//   name: 'text_datatype',
+//   type: 'text',
+// };
 
-const BOOLEAN_MAPPING_FIELD = {
-  name: 'boolean_datatype',
-  type: 'boolean',
-};
+// const BOOLEAN_MAPPING_FIELD = {
+//   name: 'boolean_datatype',
+//   type: 'boolean',
+// };
 
-const KEYWORD_MAPPING_FIELD = {
-  name: 'keyword_datatype',
-  type: 'keyword',
-};
+// const KEYWORD_MAPPING_FIELD = {
+//   name: 'keyword_datatype',
+//   type: 'keyword',
+// };
 
-// FLAKY: https://github.com/elastic/kibana/issues/67833
-describe.skip('<TemplateCreate />', () => {
+describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
     server.restore();
+    jest.useRealTimers();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
-        await testBed.waitFor('templateForm');
       });
     });
 
@@ -93,308 +96,339 @@ describe.skip('<TemplateCreate />', () => {
 
       await act(async () => {
         actions.clickNextButton();
-        await nextTick();
-        component.update();
       });
+      component.update();
 
       expect(find('nextButton').props().disabled).toEqual(true);
     });
   });
 
   describe('form validation', () => {
+    const componentTemplate1 = {
+      name: 'test_component_template_1',
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: [],
+      isManaged: false,
+    };
+
+    const componentTemplate2 = {
+      name: 'test_component_template_2',
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: ['test_index_template_1'],
+      isManaged: false,
+    };
+
+    const componentTemplates = [componentTemplate1, componentTemplate2];
+
+    httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
+
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
-        await testBed.waitFor('templateForm');
       });
+      testBed.component.update();
     });
 
-    describe('index settings (step 2)', () => {
+    describe('component templates (step 2)', () => {
       beforeEach(async () => {
         const { actions } = testBed;
-
-        await act(async () => {
-          // Complete step 1 (logistics)
-          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-        });
+        await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
       });
 
-      it('should set the correct page title', () => {
+      it('should set the correct page title', async () => {
         const { exists, find } = testBed;
 
-        expect(exists('stepSettings')).toBe(true);
-        expect(find('stepTitle').text()).toEqual('Index settings (optional)');
+        expect(exists('stepComponents')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Component templates (optional)');
       });
 
-      it('should not allow invalid json', async () => {
-        const { form, actions } = testBed;
-
-        await act(async () => {
-          actions.completeStepTwo('{ invalidJsonString ');
-        });
-
-        expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-      });
+      // TODO add tests for component templates selector
     });
 
-    describe('mappings (step 3)', () => {
-      beforeEach(async () => {
-        const { actions } = testBed;
+    // describe('index settings (step 3)', () => {
+    //   beforeEach(async () => {
+    //     const { actions } = testBed;
+    //     await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+    //   });
 
-        await act(async () => {
-          // Complete step 1 (logistics)
-          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+    //   it('should set the correct page title', async () => {
+    //     const { exists, find } = testBed;
 
-          // Complete step 2 (index settings)
-          await actions.completeStepTwo('{}');
-        });
-      });
+    //     expect(exists('stepSettings')).toBe(true);
+    //     expect(find('stepTitle').text()).toEqual('Index settings (optional)');
+    //   });
 
-      it('should set the correct page title', () => {
-        const { exists, find } = testBed;
+    //   it('should not allow invalid json', async () => {
+    //     const { form, actions } = testBed;
 
-        expect(exists('stepMappings')).toBe(true);
-        expect(find('stepTitle').text()).toEqual('Mappings (optional)');
-      });
+    //     await act(async () => {
+    //       actions.completeStepTwo('{ invalidJsonString ');
+    //     });
 
-      it('should allow the user to define document fields for a mapping', async () => {
-        const { actions, find } = testBed;
+    //     expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+    //   });
+    // });
 
-        await act(async () => {
-          await actions.addMappingField('field_1', 'text');
-          await actions.addMappingField('field_2', 'text');
-          await actions.addMappingField('field_3', 'text');
-        });
+    // describe('mappings (step 4)', () => {
+    //   beforeEach(async () => {
+    //     const { actions } = testBed;
 
-        expect(find('fieldsListItem').length).toBe(3);
-      });
+    //     await act(async () => {
+    //       // Complete step 1 (logistics)
+    //       await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
 
-      it('should allow the user to remove a document field from a mapping', async () => {
-        const { actions, find } = testBed;
+    //       // Complete step 2 (index settings)
+    //       await actions.completeStepTwo('{}');
+    //     });
+    //   });
 
-        await act(async () => {
-          await actions.addMappingField('field_1', 'text');
-          await actions.addMappingField('field_2', 'text');
-        });
+    //   it('should set the correct page title', () => {
+    //     const { exists, find } = testBed;
 
-        expect(find('fieldsListItem').length).toBe(2);
+    //     expect(exists('stepMappings')).toBe(true);
+    //     expect(find('stepTitle').text()).toEqual('Mappings (optional)');
+    //   });
 
-        actions.clickCancelCreateFieldButton();
-        // Remove first field
-        actions.deleteMappingsFieldAt(0);
+    //   it('should allow the user to define document fields for a mapping', async () => {
+    //     const { actions, find } = testBed;
 
-        expect(find('fieldsListItem').length).toBe(1);
-      });
-    });
+    //     await act(async () => {
+    //       await actions.addMappingField('field_1', 'text');
+    //       await actions.addMappingField('field_2', 'text');
+    //       await actions.addMappingField('field_3', 'text');
+    //     });
 
-    describe('aliases (step 4)', () => {
-      beforeEach(async () => {
-        const { actions } = testBed;
+    //     expect(find('fieldsListItem').length).toBe(3);
+    //   });
 
-        await act(async () => {
-          // Complete step 1 (logistics)
-          await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+    //   it('should allow the user to remove a document field from a mapping', async () => {
+    //     const { actions, find } = testBed;
 
-          // Complete step 2 (index settings)
-          await actions.completeStepTwo('{}');
+    //     await act(async () => {
+    //       await actions.addMappingField('field_1', 'text');
+    //       await actions.addMappingField('field_2', 'text');
+    //     });
 
-          // Complete step 3 (mappings)
-          await actions.completeStepThree();
-        });
-      });
+    //     expect(find('fieldsListItem').length).toBe(2);
 
-      it('should set the correct page title', () => {
-        const { exists, find } = testBed;
+    //     actions.clickCancelCreateFieldButton();
+    //     // Remove first field
+    //     actions.deleteMappingsFieldAt(0);
 
-        expect(exists('stepAliases')).toBe(true);
-        expect(find('stepTitle').text()).toEqual('Aliases (optional)');
-      });
+    //     expect(find('fieldsListItem').length).toBe(1);
+    //   });
+    // });
 
-      it('should not allow invalid json', async () => {
-        const { actions, form } = testBed;
+    // describe('aliases (step 5)', () => {
+    //   beforeEach(async () => {
+    //     const { actions } = testBed;
 
-        await act(async () => {
-          // Complete step 4 (aliases) with invalid json
-          await actions.completeStepFour('{ invalidJsonString ', false);
-        });
+    //     await act(async () => {
+    //       // Complete step 1 (logistics)
+    //       await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
 
-        expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-      });
-    });
+    //       // Complete step 2 (index settings)
+    //       await actions.completeStepTwo('{}');
+
+    //       // Complete step 3 (mappings)
+    //       await actions.completeStepThree();
+    //     });
+    //   });
+
+    //   it('should set the correct page title', () => {
+    //     const { exists, find } = testBed;
+
+    //     expect(exists('stepAliases')).toBe(true);
+    //     expect(find('stepTitle').text()).toEqual('Aliases (optional)');
+    //   });
+
+    //   it('should not allow invalid json', async () => {
+    //     const { actions, form } = testBed;
+
+    //     await act(async () => {
+    //       // Complete step 4 (aliases) with invalid json
+    //       await actions.completeStepFour('{ invalidJsonString ', false);
+    //     });
+
+    //     expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+    //   });
+    // });
   });
 
-  describe('review (step 5)', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup();
-        await testBed.waitFor('templateForm');
+  // describe('review (step 6)', () => {
+  //   beforeEach(async () => {
+  //     await act(async () => {
+  //       testBed = await setup();
+  //       // await testBed.waitFor('templateForm');
 
-        const { actions } = testBed;
+  //       const { actions } = testBed;
 
-        // Complete step 1 (logistics)
-        await actions.completeStepOne({
-          name: TEMPLATE_NAME,
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-        });
+  //       // Complete step 1 (logistics)
+  //       await actions.completeStepOne({
+  //         name: TEMPLATE_NAME,
+  //         indexPatterns: DEFAULT_INDEX_PATTERNS,
+  //       });
 
-        // Complete step 2 (index settings)
-        await actions.completeStepTwo(JSON.stringify(SETTINGS));
+  //       // Complete step 2 (index settings)
+  //       await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
-        // Complete step 3 (mappings)
-        await actions.completeStepThree();
+  //       // Complete step 3 (mappings)
+  //       await actions.completeStepThree();
 
-        // Complete step 4 (aliases)
-        await actions.completeStepFour(JSON.stringify(ALIASES));
-      });
-    });
+  //       // Complete step 4 (aliases)
+  //       await actions.completeStepFour(JSON.stringify(ALIASES));
+  //     });
+  //   });
 
-    it('should set the correct step title', () => {
-      const { find, exists } = testBed;
-      expect(exists('stepSummary')).toBe(true);
-      expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
-    });
+  //   it('should set the correct step title', () => {
+  //     const { find, exists } = testBed;
+  //     expect(exists('stepSummary')).toBe(true);
+  //     expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
+  //   });
 
-    describe('tabs', () => {
-      test('should have 2 tabs', () => {
-        const { find } = testBed;
+  //   describe('tabs', () => {
+  //     test('should have 2 tabs', () => {
+  //       const { find } = testBed;
 
-        expect(find('summaryTabContent').find('.euiTab').length).toBe(2);
-        expect(
-          find('summaryTabContent')
-            .find('.euiTab')
-            .map((t) => t.text())
-        ).toEqual(['Summary', 'Request']);
-      });
+  //       expect(find('summaryTabContent').find('.euiTab').length).toBe(2);
+  //       expect(
+  //         find('summaryTabContent')
+  //           .find('.euiTab')
+  //           .map((t) => t.text())
+  //       ).toEqual(['Summary', 'Request']);
+  //     });
 
-      test('should navigate to the Request tab', async () => {
-        const { exists, actions } = testBed;
+  //     test('should navigate to the Request tab', async () => {
+  //       const { exists, actions } = testBed;
 
-        expect(exists('summaryTab')).toBe(true);
-        expect(exists('requestTab')).toBe(false);
+  //       expect(exists('summaryTab')).toBe(true);
+  //       expect(exists('requestTab')).toBe(false);
 
-        actions.selectSummaryTab('request');
+  //       actions.selectSummaryTab('request');
 
-        expect(exists('summaryTab')).toBe(false);
-        expect(exists('requestTab')).toBe(true);
-      });
-    });
+  //       expect(exists('summaryTab')).toBe(false);
+  //       expect(exists('requestTab')).toBe(true);
+  //     });
+  //   });
 
-    it('should render a warning message if a wildcard is used as an index pattern', async () => {
-      await act(async () => {
-        testBed = await setup();
-        await testBed.waitFor('templateForm');
+  //   it('should render a warning message if a wildcard is used as an index pattern', async () => {
+  //     await act(async () => {
+  //       testBed = await setup();
+  //       // await testBed.waitFor('templateForm');
 
-        const { actions } = testBed;
-        // Complete step 1 (logistics)
-        await actions.completeStepOne({
-          name: TEMPLATE_NAME,
-          indexPatterns: ['*'], // Set wildcard index pattern
-        });
+  //       const { actions } = testBed;
+  //       // Complete step 1 (logistics)
+  //       await actions.completeStepOne({
+  //         name: TEMPLATE_NAME,
+  //         indexPatterns: ['*'], // Set wildcard index pattern
+  //       });
 
-        // Complete step 2 (index settings)
-        await actions.completeStepTwo(JSON.stringify({}));
+  //       // Complete step 2 (index settings)
+  //       await actions.completeStepTwo(JSON.stringify({}));
 
-        // Complete step 3 (mappings)
-        await actions.completeStepThree();
+  //       // Complete step 3 (mappings)
+  //       await actions.completeStepThree();
 
-        // Complete step 4 (aliases)
-        await actions.completeStepFour(JSON.stringify({}));
-      });
+  //       // Complete step 4 (aliases)
+  //       await actions.completeStepFour(JSON.stringify({}));
+  //     });
 
-      const { exists, find } = testBed;
+  //     const { exists, find } = testBed;
 
-      expect(exists('indexPatternsWarning')).toBe(true);
-      expect(find('indexPatternsWarningDescription').text()).toEqual(
-        'All new indices that you create will use this template. Edit index patterns.'
-      );
-    });
-  });
+  //     expect(exists('indexPatternsWarning')).toBe(true);
+  //     expect(find('indexPatternsWarningDescription').text()).toEqual(
+  //       'All new indices that you create will use this template. Edit index patterns.'
+  //     );
+  //   });
+  // });
 
-  describe('form payload & api errors', () => {
-    beforeEach(async () => {
-      const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
+  // describe('form payload & api errors', () => {
+  //   beforeEach(async () => {
+  //     const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
-      await act(async () => {
-        testBed = await setup();
-        await testBed.waitFor('templateForm');
+  //     await act(async () => {
+  //       testBed = await setup();
+  //       // await testBed.waitFor('templateForm');
 
-        const { actions } = testBed;
-        // Complete step 1 (logistics)
-        await actions.completeStepOne({
-          name: TEMPLATE_NAME,
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-        });
+  //       const { actions } = testBed;
+  //       // Complete step 1 (logistics)
+  //       await actions.completeStepOne({
+  //         name: TEMPLATE_NAME,
+  //         indexPatterns: DEFAULT_INDEX_PATTERNS,
+  //       });
 
-        // Complete step 2 (index settings)
-        await actions.completeStepTwo(JSON.stringify(SETTINGS));
+  //       // Complete step 2 (index settings)
+  //       await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
-        // Complete step 3 (mappings)
-        await actions.completeStepThree(MAPPING_FIELDS);
+  //       // Complete step 3 (mappings)
+  //       await actions.completeStepThree(MAPPING_FIELDS);
 
-        // Complete step 4 (aliases)
-        await actions.completeStepFour(JSON.stringify(ALIASES));
-      });
-    });
+  //       // Complete step 4 (aliases)
+  //       await actions.completeStepFour(JSON.stringify(ALIASES));
+  //     });
+  //   });
 
-    it('should send the correct payload', async () => {
-      const { actions } = testBed;
+  //   it('should send the correct payload', async () => {
+  //     const { actions } = testBed;
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
-      });
+  //     await act(async () => {
+  //       actions.clickSubmitButton();
+  //     });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+  //     const latestRequest = server.requests[server.requests.length - 1];
 
-      const expected = {
-        name: TEMPLATE_NAME,
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
-        template: {
-          settings: SETTINGS,
-          mappings: {
-            ...MAPPINGS,
-            properties: {
-              [BOOLEAN_MAPPING_FIELD.name]: {
-                type: BOOLEAN_MAPPING_FIELD.type,
-              },
-              [TEXT_MAPPING_FIELD.name]: {
-                type: TEXT_MAPPING_FIELD.type,
-              },
-              [KEYWORD_MAPPING_FIELD.name]: {
-                type: KEYWORD_MAPPING_FIELD.type,
-              },
-            },
-          },
-          aliases: ALIASES,
-        },
-        _kbnMeta: {
-          type: 'default',
-          isLegacy: false,
-        },
-      };
+  //     const expected = {
+  //       name: TEMPLATE_NAME,
+  //       indexPatterns: DEFAULT_INDEX_PATTERNS,
+  //       template: {
+  //         settings: SETTINGS,
+  //         mappings: {
+  //           ...MAPPINGS,
+  //           properties: {
+  //             [BOOLEAN_MAPPING_FIELD.name]: {
+  //               type: BOOLEAN_MAPPING_FIELD.type,
+  //             },
+  //             [TEXT_MAPPING_FIELD.name]: {
+  //               type: TEXT_MAPPING_FIELD.type,
+  //             },
+  //             [KEYWORD_MAPPING_FIELD.name]: {
+  //               type: KEYWORD_MAPPING_FIELD.type,
+  //             },
+  //           },
+  //         },
+  //         aliases: ALIASES,
+  //       },
+  //       _kbnMeta: {
+  //         type: 'default',
+  //         isLegacy: false,
+  //       },
+  //     };
 
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
-    });
+  //     expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+  //   });
 
-    it('should surface the API errors from the put HTTP request', async () => {
-      const { component, actions, find, exists } = testBed;
+  //   it('should surface the API errors from the put HTTP request', async () => {
+  //     const { component, actions, find, exists } = testBed;
 
-      const error = {
-        status: 409,
-        error: 'Conflict',
-        message: `There is already a template with name '${TEMPLATE_NAME}'`,
-      };
+  //     const error = {
+  //       status: 409,
+  //       error: 'Conflict',
+  //       message: `There is already a template with name '${TEMPLATE_NAME}'`,
+  //     };
 
-      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
+  //     httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
-        component.update();
-      });
+  //     await act(async () => {
+  //       actions.clickSubmitButton();
+  //     });
+  //     component.update();
 
-      expect(exists('saveTemplateError')).toBe(true);
-      expect(find('saveTemplateError').text()).toContain(error.message);
-    });
-  });
+  //     expect(exists('saveTemplateError')).toBe(true);
+  //     expect(find('saveTemplateError').text()).toContain(error.message);
+  //   });
+  // });
 });

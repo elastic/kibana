@@ -24,7 +24,11 @@ import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
 import { setExtensionsService } from '../../../public/application/store/selectors';
-import { MappingsEditorProvider } from '../../../public/application/components';
+import {
+  MappingsEditorProvider,
+  ComponentTemplatesProvider,
+} from '../../../public/application/components';
+import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
 import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
@@ -34,9 +38,11 @@ export const services = {
   extensionsService: new ExtensionsService(),
   uiMetricService: new UiMetricService('index_management'),
 };
+
 services.uiMetricService.setup({ reportUiStats() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
+
 const appDependencies = {
   services,
   core: { getUrlForApp: () => {} },
@@ -66,9 +72,11 @@ export const WithAppDependencies = (Comp: any, overridingDependencies: any = {})
   return (
     <AppContextProvider value={mergedDependencies}>
       <MappingsEditorProvider>
-        <GlobalFlyoutProvider>
-          <Comp {...props} />
-        </GlobalFlyoutProvider>
+        <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </ComponentTemplatesProvider>
       </MappingsEditorProvider>
     </AppContextProvider>
   );

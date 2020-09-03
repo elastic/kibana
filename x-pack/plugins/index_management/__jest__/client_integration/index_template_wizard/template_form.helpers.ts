@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { TemplateDeserialized } from '../../../common';
@@ -58,10 +59,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     version,
   }: Partial<TemplateDeserialized> = {}) => {
-    const { form, find, waitFor } = testBed;
+    const { component, form, find } = testBed;
 
     if (name) {
-      form.setInputValue('nameField.input', name);
+      act(() => {
+        form.setInputValue('nameField.input', name);
+      });
     }
 
     if (indexPatterns) {
@@ -70,20 +73,24 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         value: pattern,
       }));
 
-      find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
-      await nextTick();
+      act(() => {
+        find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
+      });
     }
 
-    if (order) {
-      form.setInputValue('orderField.input', JSON.stringify(order));
-    }
+    await act(async () => {
+      if (order) {
+        form.setInputValue('orderField.input', JSON.stringify(order));
+      }
 
-    if (version) {
-      form.setInputValue('versionField.input', JSON.stringify(version));
-    }
+      if (version) {
+        form.setInputValue('versionField.input', JSON.stringify(version));
+      }
 
-    clickNextButton();
-    await waitFor('stepSettings');
+      clickNextButton();
+    });
+
+    component.update();
   };
 
   const completeStepTwo = async (settings?: string) => {
@@ -215,6 +222,7 @@ export type TestSubjects =
   | 'saveTemplateError'
   | 'settingsEditor'
   | 'systemTemplateEditCallout'
+  | 'stepComponents'
   | 'stepAliases'
   | 'stepMappings'
   | 'stepSettings'
