@@ -55,7 +55,7 @@ image::getting-started/images/tutorial-sample-discover2.png[]
 === View and analyze the data
 
 A _dashboard_ is a collection of panels that provide you with an overview of your data that you can 
-use to analyze your data. Panels contain everythng you need, including visualizations, 
+use to analyze your data. Panels contain everything you need, including visualizations, 
 interactive controls, Markdown, and more.
 
 To open the *Global Flight* dashboard, open the menu, then go to *Dashboard*.
