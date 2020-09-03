@@ -104,6 +104,7 @@ image::images/tutorial-visualize-pie-3.png[Final pie chart]
 . Click *Save*, then enter `Pie Example` in the *Title* field.
 
 [float]
+[role="xpack"]
 [[visualize-geographic-information]]
 === Visualize geographic information
 
@@ -115,7 +116,7 @@ To visualize geographic information in the log file data, use <<maps,Maps>>.
 
 .. Set the *Start date* to `May 18, 2015 @ 12:00:00.000`.
 
-.. Set the *End date* to May 20, 2015.
+.. Set the *End date* to `May 20, 2015 @ 12:00:00.000`.
 +
 [role="screenshot"]
 image::images/gs_maps_time_filter.png[Time filter for Maps tutorial]
