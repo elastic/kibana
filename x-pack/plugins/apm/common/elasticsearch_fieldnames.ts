@@ -74,6 +74,12 @@ export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
+export const METRIC_CGROUP_MEMORY_LIMIT_BYTES =
+  'system.process.cgroup.memory.mem.limit.bytes';
+export const METRIC_CGROUP_MEMORY_USAGE_BYTES =
+  'system.process.cgroup.memory.mem.usage.bytes';
+export const METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES =
+  'system.process.cgroup.memory.stats.inactive_file.bytes';
 
 export const METRIC_JAVA_HEAP_MEMORY_MAX = 'jvm.memory.heap.max';
 export const METRIC_JAVA_HEAP_MEMORY_COMMITTED = 'jvm.memory.heap.committed';
