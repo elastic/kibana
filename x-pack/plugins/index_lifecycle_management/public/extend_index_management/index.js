@@ -177,6 +177,12 @@ export const ilmFilterExtension = (indices) => {
             }),
           },
           {
+            value: 'frozen',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.frozenLabel', {
+              defaultMessage: 'Frozen',
+            }),
+          },
+          {
             value: 'cold',
             view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
               defaultMessage: 'Cold',

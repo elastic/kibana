@@ -30,13 +30,21 @@ import {
   SimpleSavedObject,
   I18nStart,
   NotificationsStart,
+  OverlayStart,
 } from '../../../../core/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
   OnSaveProps,
   SaveResult,
+  checkForDuplicateTitle,
 } from '../../../saved_objects/public';
+import {
+  EmbeddableStart,
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
+  Container,
+} from '../../../embeddable/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -49,12 +57,22 @@ export class AttributeService<
   ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput
 > {
+  private embeddableFactory: EmbeddableFactory;
+
   constructor(
     private type: string,
     private savedObjectsClient: SavedObjectsClientContract,
+    private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
-    private toasts: NotificationsStart['toasts']
-  ) {}
+    private toasts: NotificationsStart['toasts'],
+    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+  ) {
+    const factory = getEmbeddableFactory(this.type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(this.type);
+    }
+    this.embeddableFactory = factory;
+  }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
     if (this.inputIsRefType(input)) {
@@ -105,6 +123,15 @@ export class AttributeService<
     return isSavedObjectEmbeddableInput(input);
   };
 
+  public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
+    return embeddable.getRoot() &&
+      (embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput
+      ? ((embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput as
+          | ValType
+          | RefType)
+      : (embeddable.getInput() as ValType | RefType);
+  }
+
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {
       return input;
@@ -124,16 +151,31 @@ export class AttributeService<
     if (this.inputIsRefType(input)) {
       return input;
     }
-
     return new Promise<RefType>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+        await checkForDuplicateTitle(
+          {
+            title: props.newTitle,
+            copyOnSave: false,
+            lastSavedTitle: '',
+            getEsType: () => this.type,
+            getDisplayName: this.embeddableFactory.getDisplayName,
+          },
+          props.isTitleDuplicateConfirmed,
+          props.onTitleDuplicate,
+          {
+            savedObjectsClient: this.savedObjectsClient,
+            overlays: this.overlays,
+          }
+        );
         try {
-          input.attributes.title = props.newTitle;
-          const wrappedInput = (await this.wrapAttributes(input.attributes, true)) as RefType;
+          const newAttributes = { ...input.attributes };
+          newAttributes.title = props.newTitle;
+          const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
           resolve(wrappedInput);
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
-          reject();
+          reject(error);
           return { error };
         }
       };

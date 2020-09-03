@@ -23,7 +23,7 @@ import { esSearchStrategyProvider } from './es_search_strategy';
 
 describe('ES search strategy', () => {
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
   const mockApiCaller = jest.fn().mockResolvedValue({
     body: {

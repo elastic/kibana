@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
 
@@ -34,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should work with valid values', async function () {
       if (server.enabled) {
-        const { body: apiResponse } = await supertest
+        await supertest
           .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -52,8 +51,31 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
 
-        expect(apiResponse.success).to.be(true);
+    it('should return a 400 with an empty namespace', async function () {
+      if (server.enabled) {
+        await supertest
+          .post(`/api/ingest_manager/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: '',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
       } else {
         warnAndSkipTest(this, log);
       }
@@ -67,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: 'filetest-1',
             description: '',
-            namespace: '',
+            namespace: 'InvalidNamespace',
             policy_id: agentPolicyId,
             enabled: true,
             output_id: '',

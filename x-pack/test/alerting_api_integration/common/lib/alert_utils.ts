@@ -219,10 +219,10 @@ export class AlertUtils {
       .set('kbn-xsrf', 'foo')
       .auth(user.username, user.password);
 
-    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
-    delete alertBody.alertTypeId;
-    delete alertBody.enabled;
-    delete alertBody.consumer;
+    const { alertTypeId, enabled, consumer, ...alertBody } = getDefaultAlwaysFiringAlertData(
+      reference,
+      actionId
+    );
 
     const response = await request.send({ ...alertBody, ...overwrites });
     return response;

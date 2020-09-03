@@ -19,11 +19,10 @@ import {
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
-  ISearchOptions,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
-import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
+import { ISearchOptions, IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
 
 function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
   return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');
@@ -39,7 +38,7 @@ export const enhancedEsSearchStrategyProvider = (
     request: IEnhancedEsSearchRequest,
     options?: ISearchOptions
   ) => {
-    logger.info(`search ${JSON.stringify(request.params) || request.id}`);
+    logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
     const client = context.core.elasticsearch.client.asCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
@@ -70,7 +69,7 @@ export const enhancedEsSearchStrategyProvider = (
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
-    logger.info(`cancel ${id}`);
+    logger.debug(`cancel ${id}`);
     await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'DELETE',
       path: encodeURI(`/_async_search/${id}`),

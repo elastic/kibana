@@ -8,6 +8,8 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,17 +46,25 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             />
           </h2>
         </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ingestManager.agentEnrollment.agentDescription"
+            defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollFleetTabLabel"
-              defaultMessage="Enroll with Fleet"
+              defaultMessage="Enroll in Fleet"
             />
           </EuiTab>
           <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel"
-              defaultMessage="Standalone mode"
+              defaultMessage="Run standalone"
             />
           </EuiTab>
         </EuiTabs>

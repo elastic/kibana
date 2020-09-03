@@ -190,3 +190,52 @@ export const TOTAL_ITEMS_FETCH_ERROR = i18n.translate(
     defaultMessage: 'Error getting exception item totals',
   }
 );
+
+export const CLEAR_EXCEPTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.clearExceptionsLabel',
+  {
+    defaultMessage: 'Remove Exception List',
+  }
+);
+
+export const ADD_EXCEPTION_FETCH_404_ERROR = (listId: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.fetch404Error', {
+    values: { listId },
+    defaultMessage:
+      'The associated exception list ({listId}) no longer exists. Please remove the missing exception list to add additional exceptions to the detection rule.',
+  });
+
+export const ADD_EXCEPTION_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.fetchError',
+  {
+    defaultMessage: 'Error fetching exception list',
+  }
+);
+
+export const ERROR = i18n.translate('xpack.securitySolution.exceptions.errorLabel', {
+  defaultMessage: 'Error',
+});
+
+export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.cancelLabel', {
+  defaultMessage: 'Cancel',
+});
+
+export const MODAL_ERROR_ACCORDION_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptions.modalErrorAccordionText',
+  {
+    defaultMessage: 'Show rule reference information:',
+  }
+);
+
+export const DISSASOCIATE_LIST_SUCCESS = (id: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.dissasociateListSuccessText', {
+    values: { id },
+    defaultMessage: 'Exception list ({id}) has successfully been removed',
+  });
+
+export const DISSASOCIATE_EXCEPTION_LIST_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.dissasociateExceptionListError',
+  {
+    defaultMessage: 'Failed to remove exception list',
+  }
+);

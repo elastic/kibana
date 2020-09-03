@@ -54,7 +54,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(enrollmentResponse.success).to.eql(true);
 
       agentAccessAPIKey = enrollmentResponse.item.access_api_key;
     });

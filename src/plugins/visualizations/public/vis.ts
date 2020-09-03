@@ -202,8 +202,8 @@ export class Vis {
     };
   }
 
-  toAST() {
-    return this.type.toAST(this.params);
+  toExpressionAst() {
+    return this.type.toExpressionAst(this.params);
   }
 
   // deprecated

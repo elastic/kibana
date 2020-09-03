@@ -15,12 +15,13 @@ import {
   EuiFlexGroup,
   EuiCodeBlock,
   EuiCopy,
+  EuiLink,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
-import { useCore, sendGetOneAgentPolicyFull } from '../../../../hooks';
+import { useCore, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
@@ -31,6 +32,7 @@ interface Props {
 const RUN_INSTRUCTIONS = './elastic-agent run';
 
 export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+  const { getHref } = useLink();
   const core = useCore();
   const { notifications } = core;
 
@@ -81,7 +83,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this policy and put it into a file named {fileName} on the system where the Elastic Agent is installed. Don’t forget to modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the policy file so that it uses your actual Elasticsearch credentials."
+              defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
@@ -129,7 +131,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepRunAgentDescription"
-              defaultMessage="From the agent’s directory, run the following command to start the agent."
+              defaultMessage="From the agent directory, run these commands to enroll and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{RUN_INSTRUCTIONS}</EuiCodeBlock>
@@ -157,7 +159,17 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepCheckForDataDescription"
-              defaultMessage="After starting the agent, the agent should begin sending data. You can view this data on Ingest Manager’s datasets page."
+              defaultMessage="The agent should begin sending data. Go to {link} to view your data."
+              values={{
+                link: (
+                  <EuiLink href={getHref('data_streams')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentEnrollment.goToDataStreamsLink"
+                      defaultMessage="data streams"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </EuiText>
         </>
@@ -170,7 +182,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.standaloneDescription"
-          defaultMessage="Agents running in standalone mode need to be updated manually if you ever wish to make changes to their policy. Follow the instructions below to download and setup an Elastic Agent in standalone mode."
+          defaultMessage="Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
         />
       </EuiText>
       <EuiSpacer size="l" />
