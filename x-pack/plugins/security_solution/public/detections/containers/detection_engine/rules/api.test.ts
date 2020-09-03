@@ -27,7 +27,6 @@ import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import { buildEsQuery } from 'src/plugins/data/common';
-import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');

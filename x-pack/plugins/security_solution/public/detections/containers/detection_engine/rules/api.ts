@@ -33,7 +33,6 @@ import {
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 /**
  * Create provided Rule
