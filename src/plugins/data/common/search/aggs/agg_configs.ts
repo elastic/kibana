@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
-import { FetchOptions, ISearchSource } from 'src/plugins/data/public';
+import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
@@ -300,7 +300,7 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: ISearchOptions) {
     return Promise.all(
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))

@@ -42,7 +42,7 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
     async (context, request, res) => {
       const searchRequest = request.body;
       const { strategy, id } = request.params;
-      const signal = getRequestAbortedSignal(request.events.aborted$);
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       const [, , selfStart] = await core.getStartServices();
 
@@ -51,7 +51,7 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
           context,
           { ...searchRequest, id },
           {
-            signal,
+            abortSignal,
             strategy,
           }
         );

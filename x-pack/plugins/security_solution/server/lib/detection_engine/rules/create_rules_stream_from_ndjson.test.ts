@@ -5,7 +5,7 @@
  */
 import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
-import { createPromiseFromStreams } from 'src/legacy/utils/streams';
+import { createPromiseFromStreams } from 'src/core/server/utils';
 import { BadRequestError } from '../errors/bad_request_error';
 import { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 
