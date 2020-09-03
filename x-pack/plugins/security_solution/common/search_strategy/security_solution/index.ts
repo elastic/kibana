@@ -30,6 +30,7 @@ import {
 
 export * from './hosts';
 export * from './network';
+export * from './common';
 export type Maybe<T> = T | null;
 
 export type FactoryQueryTypes = HostsQueries | NetworkQueries;
@@ -190,26 +191,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : never;
 
 export type StringOrNumber = string | number;
-
-export interface TotalHit {
-  value: number;
-  relation: string;
-}
-
-export interface Hit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number | null;
-}
-
-export interface Hits<T, U> {
-  hits: {
-    total: T;
-    max_score: number | null;
-    hits: U[];
-  };
-}
 
 export interface GenericBuckets {
   key: string;

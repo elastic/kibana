@@ -129,7 +129,7 @@ export const useUncommonProcesses = ({
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
-              signal: abortCtrl.current.signal,
+              abortSignal: abortCtrl.current.signal,
             }
           )
           .subscribe({
