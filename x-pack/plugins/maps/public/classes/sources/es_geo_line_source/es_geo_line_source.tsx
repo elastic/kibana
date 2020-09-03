@@ -22,6 +22,8 @@ import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
 import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
+import { UpdateSourceEditor } from './update_source_editor';
+import { SourceEditorArgs } from '../source';
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -44,8 +46,16 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  renderSourceSettingsEditor({ onChange }) {
-    return null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+    return (
+      <UpdateSourceEditor
+        indexPatternId={this.getIndexPatternId()}
+        onChange={onChange}
+        metrics={this._descriptor.metrics}
+        splitField={this._descriptor.splitField}
+        sortField={this._descriptor.sortField}
+      />
+    );
   }
 
   getSyncMeta() {
@@ -138,6 +148,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
               },
             },
           },
+          ...this.getValueAggsDsl(indexPattern),
         },
       },
     });

@@ -36,6 +36,7 @@ export function GeoLineForm(props: Props) {
           value={props.splitField}
           onChange={props.onSplitFieldChange}
           fields={getTermsFields(props.indexPattern.fields)}
+          isClearable={false}
         />
       </EuiFormRow>
 
@@ -53,6 +54,7 @@ export function GeoLineForm(props: Props) {
           fields={props.indexPattern.fields.filter(
             (field) => field.sortable && !indexPatterns.isNestedField(field)
           )}
+          isClearable={false}
         />
       </EuiFormRow>
     </>
