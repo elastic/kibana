@@ -449,7 +449,7 @@ def allCiTasks() {
     // tasks.functionalOss()
     // tasks.functionalXpack()
     task {
-      kibanaPipeline.buildXpack(20)
+      buildXpack(20)
       xpackCiGroupProcess(5)()
     }
   }
