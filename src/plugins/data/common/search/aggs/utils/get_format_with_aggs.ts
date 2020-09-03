@@ -53,7 +53,7 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             id: nestedFormatter.id,
             params: nestedFormatter.params,
           });
-          const get = '\u2265';
+          const gte = '\u2265';
           const lt = '\u003c';
           return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
             defaultMessage: '{gte} {from} and {lt} {to}',
