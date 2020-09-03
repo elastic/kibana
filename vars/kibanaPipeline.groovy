@@ -443,11 +443,15 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 
 def allCiTasks() {
   withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
+    // tasks.check()
+    // tasks.lint()
+    // tasks.test()
+    // tasks.functionalOss()
+    // tasks.functionalXpack()
+    task {
+      kibanaPipeline.buildXpack(20)
+      xpackCiGroupProcess(5)()
+    }
   }
 }
 
