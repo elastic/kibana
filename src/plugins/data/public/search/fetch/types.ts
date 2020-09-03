@@ -29,11 +29,6 @@ import { ISearchStartLegacy } from '../types';
  */
 export type SearchRequest = Record<string, any>;
 
-export interface FetchOptions {
-  abortSignal?: AbortSignal;
-  searchStrategyId?: string;
-}
-
 export interface FetchHandlers {
   legacySearchService: ISearchStartLegacy;
   config: { get: GetConfigFn };
