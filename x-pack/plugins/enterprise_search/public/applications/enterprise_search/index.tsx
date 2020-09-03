@@ -10,8 +10,11 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
   EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,23 +31,23 @@ import './index.scss';
 
 export const EnterpriseSearch: React.FC = () => {
   return (
-    <EuiPage restrictWidth>
+    <EuiPage restrictWidth className="enterpriseSearchOverview">
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>
         <EuiPageHeader>
-          <EuiPageHeaderSection>
+          <EuiPageHeaderSection className="enterpriseSearchOverview__header">
             <EuiTitle size="l">
-              <h1>
+              <h1 className="enterpriseSearchOverview__heading">
                 {i18n.translate('xpack.enterpriseSearch.overview.heading', {
                   defaultMessage: 'Welcome to Elastic Enterprise Search',
                 })}
               </h1>
             </EuiTitle>
             <EuiTitle size="s">
-              <p>
-                {i18n.translate('xpack.enterpriseSearch.overview.subHeading', {
+              <p className="enterpriseSearchOverview__subheading">
+                {i18n.translate('xpack.enterpriseSearch.overview.subheading', {
                   defaultMessage: 'Select a product to get started',
                 })}
               </p>
@@ -52,8 +55,8 @@ export const EnterpriseSearch: React.FC = () => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContentBody>
-          <div className="enterprise-search-home__content-wrapper">
-            <div className="product-cards">
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
               <ProductCard
                 name={i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
                   defaultMessage: 'App Search',
@@ -68,6 +71,8 @@ export const EnterpriseSearch: React.FC = () => {
                 img={AppSearchImage}
                 buttonPath={APP_SEARCH_PLUGIN.URL}
               />
+            </EuiFlexItem>
+            <EuiFlexItem>
               <ProductCard
                 name={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
                   defaultMessage: 'Workplace Search',
@@ -82,8 +87,9 @@ export const EnterpriseSearch: React.FC = () => {
                 img={WorkplaceSearchImage}
                 buttonPath={WORKPLACE_SEARCH_PLUGIN.URL}
               />
-            </div>
-          </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>

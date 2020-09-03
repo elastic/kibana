@@ -6,12 +6,13 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiPanel } from '@elastic/eui';
-
+import { EuiCard, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { formatTestSubj } from '../../../shared/format_test_subj';
 import { EuiButton } from '../../../shared/react_router_helpers';
+
+import './product_card.scss';
 
 interface IProductCard {
   name: string;
@@ -22,38 +23,41 @@ interface IProductCard {
 
 export const ProductCard: React.FC<IProductCard> = ({ name, description, img, buttonPath }) => {
   return (
-    <EuiPanel className="card product-card" paddingSize="none">
-      <div className="product-card__image-container">
-        <img
-          className="product-card__image"
-          alt={i18n.translate('xpack.enterpriseSearch.productCard.productCardImage', {
-            defaultMessage: `${name} Dashboard`,
-          })}
-          src={img}
-        />
-      </div>
-      <div className="product-card__content">
-        <div className="product-card__inner-content">
-          <EuiTitle size="m">
-            <h2 className="card__title">
-              {i18n.translate('xpack.enterpriseSearch.productCard.productCardHeading', {
-                defaultMessage: `Elastic ${name}`,
-              })}
-            </h2>
-          </EuiTitle>
-          <p className="card__description">{description}</p>
-          <EuiButton
-            fill
-            to={buttonPath}
-            shouldNotCreateHref={true}
-            data-test-subj={`Launch${formatTestSubj(name)}Button`}
-          >
-            {i18n.translate('xpack.enterpriseSearch.productCard.productCardButton', {
-              defaultMessage: `Launch ${name}`,
+    <EuiCard
+      className="productCard"
+      titleElement="h2"
+      title={i18n.translate('xpack.enterpriseSearch.productCard.productCardHeading', {
+        defaultMessage: `Elastic ${name}`,
+      })}
+      image={
+        <div className="productCard__imageContainer">
+          <img
+            className="productCard__image"
+            alt={i18n.translate('xpack.enterpriseSearch.productCard.productCardImage', {
+              defaultMessage: `${name} Dashboard`,
             })}
-          </EuiButton>
+            src={img}
+          />
         </div>
-      </div>
-    </EuiPanel>
+      }
+      paddingSize="l"
+      description={
+        <EuiTextColor color="subdued">
+          <p>{description}</p>
+        </EuiTextColor>
+      }
+      footer={
+        <EuiButton
+          fill
+          to={buttonPath}
+          shouldNotCreateHref={true}
+          data-test-subj={`Launch${formatTestSubj(name)}Button`}
+        >
+          {i18n.translate('xpack.enterpriseSearch.productCard.productCardButton', {
+            defaultMessage: `Launch ${name}`,
+          })}
+        </EuiButton>
+      }
+    />
   );
 };
