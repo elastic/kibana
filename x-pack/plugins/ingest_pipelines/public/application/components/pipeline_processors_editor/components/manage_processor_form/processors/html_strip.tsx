@@ -23,15 +23,7 @@ export const HtmlStrip: FunctionComponent = () => {
         )}
       />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldHelpText"
-            defaultMessage="Field used to contain stripped text. Defaults to {field}."
-            values={{ field: <EuiCode>{'field'}</EuiCode> }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

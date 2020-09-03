@@ -87,17 +87,7 @@ export const Gsub: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.replacement} component={Field} path="fields.replacement" />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText"
-            defaultMessage="Field used to contain updated text. Defaults to {field}."
-            values={{
-              field: <EuiCode>{'field'}</EuiCode>,
-            }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>
