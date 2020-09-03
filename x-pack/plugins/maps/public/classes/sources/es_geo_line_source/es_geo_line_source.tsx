@@ -93,6 +93,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
     ];
   }
 
+  _createSplitField() {
+    return new ESDocField({
+      fieldName: this._descriptor.splitField,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+      canReadFromGeoJson: true,
+    });
+  }
+
   getFieldNames() {
     return [
       ...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
@@ -102,15 +111,13 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   async getFields() {
-    return [
-      ...this.getMetricFields(),
-      new ESDocField({
-        fieldName: this._descriptor.splitField,
-        source: this,
-        origin: FIELD_ORIGIN.SOURCE,
-        canReadFromGeoJson: true,
-      }),
-    ];
+    return [...this.getMetricFields(), this._createSplitField()];
+  }
+
+  getFieldByName(name: string) {
+    return name === this._descriptor.splitField
+      ? this._createSplitField()
+      : this.getMetricFieldForName(name);
   }
 
   isGeoGridPrecisionAware() {
