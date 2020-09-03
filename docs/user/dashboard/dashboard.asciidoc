@@ -8,7 +8,7 @@ A _dashboard_ is a collection of panels that you use to analyze your data. On a 
 you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations, 
 interactive controls, markdown, and more.  
 
-With *Dashboard*, you can:
+With *Dashboard*s, you can:
 
 * Add multiple panels to see many aspects and views of your data in one place.
 
