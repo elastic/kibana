@@ -61,6 +61,40 @@ describe('7.10.0', () => {
   });
 });
 
+describe('7.10.0 migrates with failure', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockRejectedValueOnce(
+      new Error(`Can't migrate!`) as never
+    );
+  });
+
+  test('should show the proper exception', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'alerting',
+    });
+    const res = migration710(alert, { log });
+    expect(res).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+      },
+    });
+    expect(log.error).toHaveBeenCalledWith(
+      `encryptedSavedObject migration failed for alert ${alert.id} with error: migrationFunc is not a function`,
+      {
+        alertDocument: {
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+          },
+        },
+      }
+    );
+  });
+});
+
 function getMockData(
   overwrites: Record<string, unknown> = {}
 ): SavedObjectUnsanitizedDoc<RawAlert> {
