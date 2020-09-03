@@ -14,6 +14,8 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '.';
 import { PLUGIN } from '../../common/constants/plugin';
 
+const EMPTY_QUERY = '?';
+
 export const makeBaseBreadcrumb = (
   href: string,
   navigateToHref?: (url: string) => Promise<void>,
@@ -25,7 +27,8 @@ export const makeBaseBreadcrumb = (
     // values in dateRangeStart are better for a URL.
     delete crumbParams.absoluteDateRangeStart;
     delete crumbParams.absoluteDateRangeEnd;
-    href += stringifyUrlParams(crumbParams, true);
+    const query = stringifyUrlParams(crumbParams, true);
+    href += query === EMPTY_QUERY ? '' : query;
   }
   return {
     text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
