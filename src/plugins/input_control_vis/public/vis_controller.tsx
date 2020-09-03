@@ -21,6 +21,7 @@ import React from 'react';
 import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { merge, Subscription } from 'rxjs';
 import { I18nStart } from 'kibana/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -41,6 +42,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     queryBarUpdateHandler: () => void;
     filterManager: FilterManager;
     updateSubsciption: any;
+    timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
     constructor(public el: Element, public vis: Vis) {
@@ -52,6 +54,13 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       this.updateSubsciption = this.filterManager
         .getUpdates$()
         .subscribe(this.queryBarUpdateHandler);
+      this.timeFilterSubscription = deps.data.query.timefilter.timefilter
+        .getTimeUpdate$()
+        .subscribe(() => {
+          if (this.visParams?.useTimeFilter) {
+            this.isLoaded = false;
+          }
+        });
     }
 
     async render(visData: any, visParams: VisParams) {
@@ -68,6 +77,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
     destroy() {
       this.updateSubsciption.unsubscribe();
+      this.timeFilterSubscription.unsubscribe();
       unmountComponentAtNode(this.el);
       this.controls.forEach((control) => control.destroy());
     }
