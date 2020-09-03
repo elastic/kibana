@@ -84,7 +84,7 @@ visualization or saved search from the panel is still available in Kibana.
 [[clone-panels]]
 === Clone panels
 
-To duplicate a panel and its configured functionality, clone the panel. Panels support all of the original functionality, 
+To duplicate a panel and its configured functionality, clone the panel. Cloned panels support all of the original functionality, 
 including renaming, editing, and cloning. 
 
 . Put the dashboard in *Edit* mode. 
@@ -112,4 +112,3 @@ time range are controlled by the
 
 [role="screenshot"]
 image:images/time_range_per_panel.gif[Time range per dashboard panel]
-
