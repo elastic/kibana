@@ -150,6 +150,8 @@ export const installPackageHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (e) {
+    // could have also done `return defaultIngestErrorHandler({ error: e, response })` at each of the returns,
+    // but doing it this way will log the outer/install errors before any inner/rollback errors
     const defaultResult = await defaultIngestErrorHandler({ error: e, response });
     if (e instanceof IngestManagerError) {
       return defaultResult;
