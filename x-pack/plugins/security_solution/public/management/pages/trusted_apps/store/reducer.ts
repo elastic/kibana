@@ -10,17 +10,18 @@ import { matchPath } from 'react-router-dom';
 import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { AppAction } from '../../../../common/store/actions';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
-import { TrustedAppsListDataBindingChanged, TrustedAppsPageAction } from './action';
+import { TrustedAppsListDataBindingChanged } from './action';
 import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
 
-type StateReducer = ImmutableReducer<TrustedAppsListPageState, TrustedAppsPageAction>;
-type CaseReducer<T extends TrustedAppsPageAction> = (
+type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
+type CaseReducer<T extends AppAction> = (
   state: Immutable<TrustedAppsListPageState>,
   action: Immutable<T>
 ) => Immutable<TrustedAppsListPageState>;
