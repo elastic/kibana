@@ -15,7 +15,6 @@ export interface ChromeNavLink
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [active](./kibana-plugin-core-public.chromenavlink.active.md) | <code>boolean</code> | Indicates whether or not this app is currently on the screen. |
 |  [baseUrl](./kibana-plugin-core-public.chromenavlink.baseurl.md) | <code>string</code> | The base route used to open the root of an application. |
 |  [category](./kibana-plugin-core-public.chromenavlink.category.md) | <code>AppCategory</code> | The category the app lives in |
 |  [disabled](./kibana-plugin-core-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable. |

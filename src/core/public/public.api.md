@@ -282,8 +282,6 @@ export interface ChromeNavControls {
 
 // @public (undocumented)
 export interface ChromeNavLink {
-    // @deprecated
-    readonly active?: boolean;
     readonly baseUrl: string;
     readonly category?: AppCategory;
     readonly disabled?: boolean;
@@ -315,7 +313,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'href'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
