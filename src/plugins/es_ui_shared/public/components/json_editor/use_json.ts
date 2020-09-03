@@ -22,19 +22,23 @@ import { i18n } from '@kbn/i18n';
 
 import { isJSON } from '../../../static/validators/string';
 
-export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (arg: {
+export interface JsonEditorState<T = { [key: string]: any }> {
   data: {
     raw: string;
     format(): T;
   };
   validate(): boolean;
-  isValid: boolean | undefined;
-}) => void;
+  isValid: boolean;
+}
+
+export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (
+  arg: JsonEditorState<T>
+) => void;
 
 interface Parameters<T extends object> {
   onUpdate: OnJsonEditorUpdateHandler<T>;
   defaultValue?: T;
-  isControlled?: boolean;
+  value?: string;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
@@ -43,10 +47,13 @@ const stringifyJson = (json: { [key: string]: any }) =>
 export const useJson = <T extends object = { [key: string]: any }>({
   defaultValue = {} as T,
   onUpdate,
-  isControlled = false,
+  value,
 }: Parameters<T>) => {
+  const isControlled = value !== undefined;
   const isMounted = useRef(false);
-  const [content, setContent] = useState<string>(stringifyJson(defaultValue));
+  const [content, setContent] = useState<string>(
+    isControlled ? value! : stringifyJson(defaultValue)
+  );
   const [error, setError] = useState<string | null>(null);
 
   const validate = useCallback(() => {
@@ -75,7 +82,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
       return;
     }
 
-    const isValid = isControlled ? undefined : validate();
+    const isValid = validate();
 
     onUpdate({
       data: {
@@ -85,7 +92,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
       validate,
       isValid,
     });
-  }, [onUpdate, content, isControlled, formatContent, validate]);
+  }, [onUpdate, content, formatContent, validate]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -99,5 +106,6 @@ export const useJson = <T extends object = { [key: string]: any }>({
     content,
     setContent,
     error,
+    isControlled,
   };
 };
