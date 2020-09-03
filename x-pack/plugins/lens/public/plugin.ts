@@ -7,7 +7,7 @@
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { DashboardStart, AttributeService } from 'src/plugins/dashboard/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -34,11 +34,6 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import {
-  LensSavedObjectAttributes,
-  LensByValueInput,
-  LensByReferenceInput,
-} from './editor_frame_service/embeddable/embeddable';
 import { getLensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
@@ -62,11 +57,7 @@ export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
   private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
-  private attributeService: AttributeService<
-    LensSavedObjectAttributes,
-    LensByValueInput,
-    LensByReferenceInput
-  > | null = null;
+  private attributeService: LensAttributeService | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;

@@ -18,7 +18,7 @@ import {
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 
 import { Subscription } from 'rxjs';
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -40,30 +40,24 @@ import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
-import { IBasePath, SavedObject } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
+import { IBasePath } from '../../../../../../src/core/public';
+import { LensAttributeService } from '../../lens_attribute_service';
 
 export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
-} & LensInheritedInput;
+} & EmbeddableInput;
 
-export type LensByReferenceInput = SavedObjectEmbeddableInput & LensInheritedInput;
+export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
-
-export interface LensInheritedInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  query?: Query;
-  filters?: Filter[];
-}
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
 }
 
 export interface LensEmbeddableDeps {
-  attributeService: AttributeService<LensSavedObjectAttributes>;
+  attributeService: LensAttributeService;
   documentToExpression: (doc: Document) => Promise<Ast | null>;
   toExpressionString: (astObj: Ast, type?: string) => string;
   editable: boolean;

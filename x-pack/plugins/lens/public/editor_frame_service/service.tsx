@@ -92,14 +92,12 @@ export class EditorFrameService {
       return {
         attributeService: getAttributeService(),
         capabilities: coreStart.application.capabilities,
-        savedObjectsClient: coreStart.savedObjects.client,
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         documentToExpression: this.documentToExpression.bind(this),
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
-        dashboard: deps.dashboard,
       };
     };
 

@@ -43,21 +43,19 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 import {
-  LensByValueInput,
   LensEmbeddableInput,
-  LensByReferenceInput,
+  LensSavedObjectAttributes,
 } from '../editor_frame_service/embeddable/embeddable';
+import { LensAttributeService } from '../lens_attribute_service';
+import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
 interface LensAppState {
   indicateNoData: boolean;
   isLoading: boolean;
-  isByValueMode: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
-  originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
-  embeddableId?: string;
 
   // Properties needed to interface with TopNav
   dateRange: {
@@ -75,59 +73,44 @@ export interface LensAppProps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   core: AppMountContext['core'];
+  attributeService: LensAttributeService;
   storage: IStorageWrapper;
-  savedObjectId?: string;
-  docStorage: SavedObjectStore;
-  redirectTo: (savedObjectId?: string) => void;
-  redirectToOrigin?: (input?: Optional<LensEmbeddableInput, 'id'>) => void;
-  embeddableEditorIncomingState?: EmbeddableEditorState;
-  onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
-  featureFlagConfig: DashboardFeatureFlagConfig;
-  getAppNameFromId?: (appId: string) => string | undefined;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  redirectTo: (savedObjectId?: string) => void;
+  redirectToOrigin?: (input?: LensEmbeddableInput) => void;
+  initialInput?: LensEmbeddableInput;
 }
 
 export function App({
   editorFrame,
+  attributeService,
   data,
   core,
   storage,
-  savedObjectId,
-  docStorage,
   redirectTo,
   redirectToOrigin,
-  embeddableEditorIncomingState,
   navigation,
   onAppLeave,
   history,
-  featureFlagConfig,
-  getAppNameFromId,
+  initialInput,
 }: LensAppProps) {
   const [state, setState] = useState<LensAppState>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
-      isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
+      isLoading: !!initialInput,
       isSaveModalVisible: false,
-      isByValueMode:
-        featureFlagConfig.allowByValueEmbeddables &&
-        !!embeddableEditorIncomingState?.originatingApp &&
-        (!!embeddableEditorIncomingState?.valueInput ||
-          !embeddableEditorIncomingState?.embeddableId),
       indexPatternsForTopNav: [],
       query: data.query.queryString.getDefaultQuery(),
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      originatingApp: embeddableEditorIncomingState?.originatingApp,
       filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
       isSaveable: false,
     };
   });
-
-  const editFromContainerMode =
-    !!state.originatingApp && (!!savedObjectId || !!embeddableEditorIncomingState?.valueInput);
 
   const showNoDataPopover = useCallback(() => {
     setState((prevState) => ({ ...prevState, indicateNoData: true }));
@@ -219,6 +202,36 @@ export function App({
     [lastKnownDoc]
   );
 
+  const setActiveDocument = useCallback(
+    (doc: Document) => {
+      getAllIndexPatterns(
+        _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
+        data.indexPatterns,
+        core.notifications
+      )
+        .then((indexPatterns) => {
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(
+            injectFilterReferences(doc.state.filters, doc.references)
+          );
+          setState((s) => ({
+            ...s,
+            isLoading: false,
+            persistedDoc: doc,
+            lastKnownDoc: doc,
+            query: doc.state.query,
+            indexPatternsForTopNav: indexPatterns,
+          }));
+        })
+        .catch((e) => {
+          setState((s) => ({ ...s, isLoading: false }));
+
+          redirectTo();
+        });
+    },
+    [core.notifications, data.indexPatterns, data.query.filterManager, redirectTo]
+  );
+
   useEffect(() => {
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
@@ -250,121 +263,66 @@ export function App({
   ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
+  // useEffect(() => {
+  //   core.chrome.setBreadcrumbs([
+  //     ...(state.originatingApp && getAppNameFromId
+  //       ? [
+  //           {
+  //             onClick: () => {
+  //               core.application.navigateToApp(state.originatingApp!);
+  //             },
+  //             text: getAppNameFromId(state.originatingApp),
+  //           },
+  //         ]
+  //       : []),
+  //     ...(!state.isByValueMode
+  //       ? [
+  //           {
+  //             href: core.http.basePath.prepend(`/app/visualize#/`),
+  //             onClick: (e) => {
+  //               core.application.navigateToApp('visualize', { path: '/' });
+  //               e.preventDefault();
+  //             },
+  //             text: i18n.translate('xpack.lens.breadcrumbsTitle', {
+  //               defaultMessage: 'Visualize',
+  //             }),
+  //           } as EuiBreadcrumb,
+  //         ]
+  //       : []),
+  //     {
+  //       text: state.persistedDoc
+  //         ? state.isByValueMode
+  //           ? i18n.translate('xpack.lens.breadcrumbsByValue', {
+  //               defaultMessage: 'Edit Visualization',
+  //             })
+  //           : state.persistedDoc.title
+  //         : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
+  //     },
+  //   ]);
+  // }, [
+  //   core.application,
+  //   core.chrome,
+  //   core.http.basePath,
+  //   state.persistedDoc,
+  //   state.originatingApp,
+  //   state.isByValueMode,
+  //   redirectTo,
+  //   getAppNameFromId,
+  // ]);
+
   useEffect(() => {
-    core.chrome.setBreadcrumbs([
-      ...(state.originatingApp && getAppNameFromId
-        ? [
-            {
-              onClick: () => {
-                core.application.navigateToApp(state.originatingApp!);
-              },
-              text: getAppNameFromId(state.originatingApp),
-            },
-          ]
-        : []),
-      ...(!state.isByValueMode
-        ? [
-            {
-              href: core.http.basePath.prepend(`/app/visualize#/`),
-              onClick: (e) => {
-                core.application.navigateToApp('visualize', { path: '/' });
-                e.preventDefault();
-              },
-              text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-                defaultMessage: 'Visualize',
-              }),
-            } as EuiBreadcrumb,
-          ]
-        : []),
-      {
-        text: state.persistedDoc
-          ? state.isByValueMode
-            ? i18n.translate('xpack.lens.breadcrumbsByValue', {
-                defaultMessage: 'Edit Visualization',
-              })
-            : state.persistedDoc.title
-          : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
-      },
-    ]);
-  }, [
-    core.application,
-    core.chrome,
-    core.http.basePath,
-    state.persistedDoc,
-    state.originatingApp,
-    state.isByValueMode,
-    redirectTo,
-    getAppNameFromId,
-  ]);
+    if (!initialInput) {
+      return;
+    }
+    attributeService
+      .unwrapAttributes(initialInput)
+      .then((attributes) => setActiveDocument(documentFromAttributes(attributes)));
+  }, [initialInput, attributeService, setActiveDocument]);
 
-  useEffect(
-    () => {
-      if (
-        savedObjectId &&
-        (!state.persistedDoc || state.persistedDoc.savedObjectId !== savedObjectId)
-      ) {
-        setState((s) => ({ ...s, isLoading: true }));
-        docStorage
-          .load(savedObjectId)
-          .then((doc) => setActiveDocument(doc))
-          .catch(() => {
-            setState((s) => ({ ...s, isLoading: false }));
-
-            core.notifications.toasts.addDanger(
-              i18n.translate('xpack.lens.app.docLoadingError', {
-                defaultMessage: 'Error loading saved document',
-              })
-            );
-
-            redirectTo();
-          });
-      } else if (state.isByValueMode && !!embeddableEditorIncomingState?.valueInput) {
-        const doc: Document = {
-          ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
-        };
-        setActiveDocument(doc);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      core.notifications,
-      data.indexPatterns,
-      data.query.filterManager,
-      savedObjectId,
-      // TODO: These dependencies are changing too often
-      // state.byValueMode,
-      // docStorage,
-      // redirectTo,
-      // state.persistedDoc,
-    ]
-  );
-
-  const setActiveDocument = (doc: Document) => {
-    getAllIndexPatterns(
-      _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
-      data.indexPatterns,
-      core.notifications
-    )
-      .then((indexPatterns) => {
-        // Don't overwrite any pinned filters
-        data.query.filterManager.setAppFilters(
-          injectFilterReferences(doc.state.filters, doc.references)
-        );
-        setState((s) => ({
-          ...s,
-          isLoading: false,
-          persistedDoc: doc,
-          lastKnownDoc: doc,
-          query: doc.state.query,
-          indexPatternsForTopNav: indexPatterns,
-        }));
-      })
-      .catch((e) => {
-        setState((s) => ({ ...s, isLoading: false }));
-
-        redirectTo();
-      });
-  };
+  const documentFromAttributes = (attributes: LensSavedObjectAttributes) => ({
+    ...attributes,
+    type: LENS_EMBEDDABLE_TYPE,
+  });
 
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -374,88 +332,83 @@ export function App({
     },
     saveToLibrary: boolean = false
   ) => {
-    if (!lastKnownDoc) {
-      return;
-    }
-
-    if (saveProps.newCopyOnSave && !state.isByValueMode) {
-      if (embeddableEditorIncomingState?.embeddableId) {
-        embeddableEditorIncomingState.embeddableId = undefined;
-      }
-    }
-
-    const doc = {
-      ...getLastKnownDocWithoutPinnedFilters()!,
-      description: saveProps.newDescription,
-      savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
-      title: saveProps.newTitle,
-    };
-
-    const addedToLibrary = state.isByValueMode && saveToLibrary;
-
-    const newlyCreated =
-      saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.isByValueMode);
-
-    if (state.isByValueMode && !saveToLibrary && redirectToOrigin) {
-      await setState((s: LensAppState) => ({ ...s, persistedDoc: doc }));
-      const { savedObjectId: id, type, ...attributes } = doc;
-      redirectToOrigin({ attributes } as LensByValueInput);
-    } else {
-      await checkForDuplicateTitle(
-        {
-          ...doc,
-          copyOnSave: saveProps.newCopyOnSave,
-          lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
-        },
-        saveProps.isTitleDuplicateConfirmed,
-        saveProps.onTitleDuplicate,
-        {
-          savedObjectsClient: core.savedObjects.client,
-          overlays: core.overlays,
-        }
-      );
-      docStorage
-        .save(doc)
-        .then(({ savedObjectId: newSavedObjectId }) => {
-          // Prevents unnecessary network request and disables save button
-          const newDoc: Document = { ...doc, savedObjectId: newSavedObjectId };
-          const currentOriginatingApp = state.originatingApp;
-          setState((s) => ({
-            ...s,
-            isByValueMode: false,
-            isSaveModalVisible: false,
-            originatingApp:
-              newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
-            persistedDoc: newDoc,
-            lastKnownDoc: newDoc,
-          }));
-          if (saveProps.returnToOrigin && redirectToOrigin) {
-            redirectToOrigin(
-              newlyCreated
-                ? ({ savedObjectId: newSavedObjectId } as LensByReferenceInput)
-                : undefined
-            );
-          } else if (savedObjectId !== newSavedObjectId) {
-            redirectTo(newSavedObjectId);
-          }
-        })
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.dir(e);
-          trackUiEvent('save_failed');
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docSavingError', {
-              defaultMessage: 'Error saving document',
-            })
-          );
-          setState((s) => ({ ...s, isSaveModalVisible: false }));
-        });
-    }
+    // if (!lastKnownDoc) {
+    //   return;
+    // }
+    // if (saveProps.newCopyOnSave && !state.isByValueMode) {
+    //   if (embeddableEditorIncomingState?.embeddableId) {
+    //     embeddableEditorIncomingState.embeddableId = undefined;
+    //   }
+    // }
+    // const doc = {
+    //   ...getLastKnownDocWithoutPinnedFilters()!,
+    //   description: saveProps.newDescription,
+    //   savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
+    //   title: saveProps.newTitle,
+    // };
+    // const addedToLibrary = state.isByValueMode && saveToLibrary;
+    // const newlyCreated =
+    //   saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.isByValueMode);
+    // if (state.isByValueMode && !saveToLibrary && redirectToOrigin) {
+    //   await setState((s: LensAppState) => ({ ...s, persistedDoc: doc }));
+    //   const { savedObjectId: id, type, ...attributes } = doc;
+    //   redirectToOrigin({ attributes } as LensByValueInput);
+    // } else {
+    //   await checkForDuplicateTitle(
+    //     {
+    //       ...doc,
+    //       copyOnSave: saveProps.newCopyOnSave,
+    //       lastSavedTitle: lastKnownDoc.title,
+    //       getEsType: () => 'lens',
+    //       getDisplayName: () =>
+    //         i18n.translate('xpack.lens.app.saveModalType', {
+    //           defaultMessage: 'Lens visualization',
+    //         }),
+    //     },
+    //     saveProps.isTitleDuplicateConfirmed,
+    //     saveProps.onTitleDuplicate,
+    //     {
+    //       savedObjectsClient: core.savedObjects.client,
+    //       overlays: core.overlays,
+    //     }
+    //   );
+    //   docStorage
+    //     .save(doc)
+    //     .then(({ savedObjectId: newSavedObjectId }) => {
+    //       // Prevents unnecessary network request and disables save button
+    //       const newDoc: Document = { ...doc, savedObjectId: newSavedObjectId };
+    //       const currentOriginatingApp = state.originatingApp;
+    //       setState((s) => ({
+    //         ...s,
+    //         isByValueMode: false,
+    //         isSaveModalVisible: false,
+    //         originatingApp:
+    //           newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
+    //         persistedDoc: newDoc,
+    //         lastKnownDoc: newDoc,
+    //       }));
+    //       if (saveProps.returnToOrigin && redirectToOrigin) {
+    //         redirectToOrigin(
+    //           newlyCreated
+    //             ? ({ savedObjectId: newSavedObjectId } as LensByReferenceInput)
+    //             : undefined
+    //         );
+    //       } else if (savedObjectId !== newSavedObjectId) {
+    //         redirectTo(newSavedObjectId);
+    //       }
+    //     })
+    //     .catch((e) => {
+    //       // eslint-disable-next-line no-console
+    //       console.dir(e);
+    //       trackUiEvent('save_failed');
+    //       core.notifications.toasts.addDanger(
+    //         i18n.translate('xpack.lens.app.docSavingError', {
+    //           defaultMessage: 'Error saving document',
+    //         })
+    //       );
+    //       setState((s) => ({ ...s, isSaveModalVisible: false }));
+    //     });
+    // }
   };
 
   const onError = useCallback(
@@ -470,16 +423,16 @@ export function App({
 
   return (
     <I18nProvider>
-      <KibanaContextProvider
+      {/* <KibanaContextProvider
         services={{
           appName: 'lens',
           data,
           storage,
           ...core,
         }}
-      >
-        <div className="lnsApp">
-          <div className="lnsApp__header">
+      > */}
+      <div className="lnsApp">
+        {/* <div className="lnsApp__header">
             <TopNavMenu
               config={[
                 ...(editFromContainerMode || state.isByValueMode
@@ -603,52 +556,52 @@ export function App({
               dateRangeTo={state.dateRange.toDate}
               indicateNoData={state.indicateNoData}
             />
-          </div>
+          </div> */}
 
-          {(!state.isLoading || state.persistedDoc) && (
-            <NativeRenderer
-              className="lnsApp__frame"
-              render={editorFrame.mount}
-              nativeProps={{
-                dateRange: state.dateRange,
-                query: state.query,
-                filters: state.filters,
-                savedQuery: state.savedQuery,
-                doc: state.persistedDoc,
-                onError,
-                showNoDataPopover,
-                onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
-                  if (isSaveable !== state.isSaveable) {
-                    setState((s) => ({ ...s, isSaveable }));
-                  }
-                  if (!_.isEqual(state.persistedDoc, doc)) {
-                    setState((s) => ({ ...s, lastKnownDoc: doc }));
-                  }
+        {(!state.isLoading || state.persistedDoc) && (
+          <NativeRenderer
+            className="lnsApp__frame"
+            render={editorFrame.mount}
+            nativeProps={{
+              dateRange: state.dateRange,
+              query: state.query,
+              filters: state.filters,
+              savedQuery: state.savedQuery,
+              doc: state.persistedDoc,
+              onError,
+              showNoDataPopover,
+              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+                if (isSaveable !== state.isSaveable) {
+                  setState((s) => ({ ...s, isSaveable }));
+                }
+                if (!_.isEqual(state.persistedDoc, doc)) {
+                  setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
 
-                  // Update the cached index patterns if the user made a change to any of them
-                  if (
-                    state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-                    filterableIndexPatterns.some(
-                      (id) =>
-                        !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-                    )
-                  ) {
-                    getAllIndexPatterns(
-                      filterableIndexPatterns,
-                      data.indexPatterns,
-                      core.notifications
-                    ).then((indexPatterns) => {
-                      if (indexPatterns) {
-                        setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                      }
-                    });
-                  }
-                },
-              }}
-            />
-          )}
-        </div>
-        {lastKnownDoc && state.isSaveModalVisible && (
+                // Update the cached index patterns if the user made a change to any of them
+                if (
+                  state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+                  filterableIndexPatterns.some(
+                    (id) =>
+                      !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+                  )
+                ) {
+                  getAllIndexPatterns(
+                    filterableIndexPatterns,
+                    data.indexPatterns,
+                    core.notifications
+                  ).then((indexPatterns) => {
+                    if (indexPatterns) {
+                      setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+                    }
+                  });
+                }
+              },
+            }}
+          />
+        )}
+      </div>
+      {/* {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props, true)}
@@ -664,8 +617,7 @@ export function App({
             })}
             data-test-subj="lnsApp_saveModalOrigin"
           />
-        )}
-      </KibanaContextProvider>
+        )} */}
     </I18nProvider>
   );
 }

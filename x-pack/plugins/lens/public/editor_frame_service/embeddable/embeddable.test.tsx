@@ -26,7 +26,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizatio
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
