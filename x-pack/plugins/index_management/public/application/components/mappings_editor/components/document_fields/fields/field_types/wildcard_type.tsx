@@ -5,17 +5,16 @@
  */
 import React from 'react';
 
-import { UseField, Field } from '../../../../shared_imports';
-import { NormalizedField } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { IgnoreAboveParameter } from '../../field_parameters';
-import { AdvancedParametersSection, EditFieldFormRow } from '../edit_field';
+import { AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
 }
 
-const getDefaultToggleValue = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
