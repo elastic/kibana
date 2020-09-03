@@ -21,7 +21,7 @@ import React from 'react';
 import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { merge, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { I18nStart } from 'kibana/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
