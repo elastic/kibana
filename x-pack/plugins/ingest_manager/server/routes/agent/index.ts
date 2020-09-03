@@ -44,6 +44,7 @@ import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentsUnenrollHandler } from './unenroll_handler';
+import { IngestManagerConfigType } from '../..';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -68,7 +69,7 @@ function makeValidator(jsonSchema: any) {
   };
 }
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Get one
   router.get(
     {
@@ -106,6 +107,7 @@ export const registerRoutes = (router: IRouter) => {
     getAgentsHandler
   );
 
+  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {
@@ -114,7 +116,16 @@ export const registerRoutes = (router: IRouter) => {
         params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
         body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
       },
-      options: { tags: [] },
+      options: {
+        tags: [],
+        ...(pollingRequestTimeout
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
     },
     postAgentCheckinHandler
   );
