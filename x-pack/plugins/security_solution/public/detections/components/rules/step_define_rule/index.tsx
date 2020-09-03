@@ -117,10 +117,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, reset, submit } = form;
-  const [{ index, ruleType }] = (useFormData<DefineStepRule>({
+  const [{ index: formIndex, ruleType: formRuleType }] = (useFormData({
     form,
     watch: ['index', 'ruleType'],
-  }) as unknown) as [DefineStepRule];
+  }) as unknown) as [Partial<DefineStepRule>];
+  const index = formIndex || initialState.index;
+  const ruleType = formRuleType || initialState.ruleType;
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
   ] = useFetchIndexPatterns(index, RuleStep.defineRule);
