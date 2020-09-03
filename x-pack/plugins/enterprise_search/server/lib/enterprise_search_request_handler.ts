@@ -7,6 +7,7 @@
 import fetch from 'node-fetch';
 import querystring from 'querystring';
 import {
+  RequestHandler,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -14,56 +15,90 @@ import {
 } from 'src/core/server';
 import { ConfigType } from '../index';
 
-interface IEnterpriseSearchRequestParams<ResponseBody> {
+interface IConstructorDependencies {
   config: ConfigType;
   log: Logger;
+}
+interface IRequestParams<ResponseBody> {
   path: string;
+  params?: object;
   hasValidData?: (body?: ResponseBody) => boolean;
+}
+export interface IEnterpriseSearchRequestHandler {
+  createRequest(requestParams?: object): RequestHandler<unknown, Readonly<{}>, unknown>;
 }
 
 /**
- * This helper function creates a single standard DRY way of handling
+ * This helper lib creates a single standard DRY way of handling
  * Enterprise Search API requests.
  *
  * This handler assumes that it will essentially just proxy the
  * Enterprise Search API request, so the request body and request
  * parameters are simply passed through.
  */
-export function createEnterpriseSearchRequestHandler<ResponseBody>({
-  config,
-  log,
-  path,
-  hasValidData = () => true,
-}: IEnterpriseSearchRequestParams<ResponseBody>) {
-  return async (
-    _context: RequestHandlerContext,
-    request: KibanaRequest<unknown, Readonly<{}>, unknown>,
-    response: KibanaResponseFactory
-  ) => {
-    try {
-      const enterpriseSearchUrl = config.host as string;
-      const params = request.query ? `?${querystring.stringify(request.query)}` : '';
-      const url = `${encodeURI(enterpriseSearchUrl)}${path}${params}`;
+export class EnterpriseSearchRequestHandler {
+  private enterpriseSearchUrl: string;
+  private log: Logger;
 
-      const apiResponse = await fetch(url, {
-        headers: { Authorization: request.headers.authorization as string },
-      });
+  constructor({ config, log }: IConstructorDependencies) {
+    this.log = log;
+    this.enterpriseSearchUrl = config.host as string;
+  }
 
-      const body = await apiResponse.json();
+  createRequest<ResponseBody>({
+    path,
+    params = {},
+    hasValidData = () => true,
+  }: IRequestParams<ResponseBody>) {
+    return async (
+      _context: RequestHandlerContext,
+      request: KibanaRequest<unknown, Readonly<{}>, unknown>,
+      response: KibanaResponseFactory
+    ) => {
+      try {
+        // Set up API URL
+        const queryParams = { ...request.query, ...params };
+        const queryString = !this.isEmptyObj(queryParams)
+          ? `?${querystring.stringify(queryParams)}`
+          : '';
+        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
 
-      if (hasValidData(body)) {
-        return response.ok({ body });
-      } else {
-        throw new Error(`Invalid data received: ${JSON.stringify(body)}`);
+        // Set up API options
+        const { method } = request.route;
+        const headers = { Authorization: request.headers.authorization as string };
+        const body = !this.isEmptyObj(request.body as object)
+          ? JSON.stringify(request.body)
+          : undefined;
+
+        // Call the Enterprise Search API and pass back response to the front-end
+        const apiResponse = await fetch(url, { method, headers, body });
+
+        if (apiResponse.url.endsWith('/login')) {
+          throw new Error('Cannot authenticate Enterprise Search user');
+        }
+
+        const { status } = apiResponse;
+        const json = await apiResponse.json();
+
+        if (hasValidData(json)) {
+          return response.custom({ statusCode: status, body: json });
+        } else {
+          this.log.debug(`Invalid data received from <${url}>: ${JSON.stringify(json)}`);
+          throw new Error('Invalid data received');
+        }
+      } catch (e) {
+        const errorMessage = `Error connecting to Enterprise Search: ${e?.message || e.toString()}`;
+
+        this.log.error(errorMessage);
+        if (e instanceof Error) this.log.debug(e.stack as string);
+
+        return response.customError({ statusCode: 502, body: errorMessage });
       }
-    } catch (e) {
-      log.error(`Cannot connect to Enterprise Search: ${e.toString()}`);
-      if (e instanceof Error) log.debug(e.stack as string);
+    };
+  }
 
-      return response.customError({
-        statusCode: 502,
-        body: 'Error connecting or fetching data from Enterprise Search',
-      });
-    }
-  };
+  // Small helper
+  isEmptyObj(obj: object) {
+    return Object.keys(obj).length === 0;
+  }
 }

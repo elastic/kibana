@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Location } from 'history';
-import { getSections } from '../sections';
+import { IBasePath } from 'kibana/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
+import { getSections } from '../sections';
 
 describe('Transaction action menu', () => {
   const basePath = ({
     prepend: (url: string) => {
       return `some-basepath${url}`;
     },
-  } as unknown) as AppMountContextBasePath;
+  } as unknown) as IBasePath;
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 

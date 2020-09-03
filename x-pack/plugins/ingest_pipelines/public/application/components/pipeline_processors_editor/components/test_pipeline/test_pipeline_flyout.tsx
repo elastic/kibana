@@ -182,6 +182,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
               }
               color="danger"
               iconType="alert"
+              data-test-subj="pipelineExecutionError"
             >
               <p>{testingError.message}</p>
             </EuiCallOut>

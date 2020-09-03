@@ -98,7 +98,11 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       context,
       request,
     }),
-    ml: getMlSetup(context, request),
+    ml: getMlSetup(
+      context.plugins.ml,
+      context.core.savedObjects.client,
+      request
+    ),
     config,
   };
 
@@ -110,20 +114,18 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   } as InferSetup<TParams>;
 }
 
-function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
-  if (!context.plugins.ml) {
+function getMlSetup(
+  ml: APMRequestHandlerContext['plugins']['ml'],
+  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  request: KibanaRequest
+) {
+  if (!ml) {
     return;
   }
-  const ml = context.plugins.ml;
-  const mlClient = ml.mlClient.asScoped(request);
+
   return {
-    mlSystem: ml.mlSystemProvider(mlClient, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
-    modules: ml.modulesProvider(
-      mlClient,
-      request,
-      context.core.savedObjects.client
-    ),
-    mlClient,
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }
