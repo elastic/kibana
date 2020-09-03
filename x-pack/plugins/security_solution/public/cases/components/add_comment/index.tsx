@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { CommentRequest } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../../../common/components/markdown_editor/form';
+import { MarkdownEditorForm } from '../../../common/components/markdown_editor/new_form';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';

@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiMarkdownFormat,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
@@ -14,7 +20,7 @@ import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 import { schema, Content } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
+import { MarkdownEditorForm } from '../../../common/components//markdown_editor/new_form';
 import { useTimelineClick } from '../utils/use_timeline_click';
 
 const ContentWrapper = styled.div`
@@ -105,29 +111,19 @@ export const UserActionMarkdown = ({
         path={fieldName}
         component={MarkdownEditorForm}
         componentProps={{
+          'aria-label': 'Cases markdown editor',
+          value: content,
+          id,
           bottomRightContent: renderButtons({
             cancelAction: handleCancelAction,
             saveAction: handleSaveAction,
           }),
-          onClickTimeline: handleTimelineClick,
-          onCursorPositionUpdate: handleCursorChange,
-          topRightContent: (
-            <InsertTimelinePopover
-              hideUntitled={true}
-              isDisabled={false}
-              onTimelineChange={handleOnTimelineChange}
-            />
-          ),
         }}
       />
     </Form>
   ) : (
-    <ContentWrapper>
-      <Markdown
-        onClickTimeline={handleTimelineClick}
-        raw={content}
-        data-test-subj="user-action-markdown"
-      />
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
     </ContentWrapper>
   );
 };
