@@ -9,6 +9,7 @@ import { apiService } from './utils';
 const IM_API_PATH = '/api/ingest_manager';
 const AGENT_POLICIES_PATH = '/agent_policies';
 const PACKAGE_POLICIES_PATH = '/package_policies';
+const DELETE_PACKAGE_POLICY_PATH = '/package_policies/delete';
 
 const agentPolicies = (policyId: string) => `/agent_policies/${policyId}`;
 
@@ -30,4 +31,12 @@ export const postMonitorConfig = async (payload: any) => {
 
 export const getMonitorCmDetails = async (monitorId: string) => {
   return await apiService.get(IM_API_PATH + PACKAGE_POLICIES_PATH + `/${monitorId}`);
+};
+
+interface DeleteMonitorPayload {
+  packagePolicyIds: string[];
+}
+
+export const deleteMonitor = async (payload: DeleteMonitorPayload) => {
+  return await apiService.post(IM_API_PATH + DELETE_PACKAGE_POLICY_PATH, payload);
 };

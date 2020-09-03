@@ -58,3 +58,5 @@ export const getMonitorCmData = createAction<string>('GET CM MONITOR DATA');
 export const putMonitorCmData = createAction<any>('PUT CM MONITOR DATA');
 
 export const monitorCmDataNotFound = createAction<any>('MONITOR CM DATA NOT FOUND');
+
+export const deleteMonitor = createAction<string>('DELETE MONITOR');

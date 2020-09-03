@@ -6,6 +6,7 @@
 
 import { fork } from 'redux-saga/effects';
 import {
+  deleteMonitorEffect,
   performImTasks,
   performMonitorConfigPost,
   fetchMonitorCmDetails,
@@ -25,6 +26,7 @@ import { fetchCertificatesEffect } from '../certificates/certificates';
 import { fetchAlertsEffect } from '../alerts/alerts';
 
 export function* rootEffect() {
+  yield fork(deleteMonitorEffect);
   yield fork(performImTasks);
   yield fork(performMonitorConfigPost);
   yield fork(fetchMonitorDetailsEffect);
