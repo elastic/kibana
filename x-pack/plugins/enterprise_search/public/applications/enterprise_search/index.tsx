@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { IInitialAppData } from '../../../common/types';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
@@ -29,7 +30,9 @@ import AppSearchImage from './assets/app_search.png';
 import WorkplaceSearchImage from './assets/workplace_search.png';
 import './index.scss';
 
-export const EnterpriseSearch: React.FC = () => {
+export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
+  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
+
   return (
     <EuiPage restrictWidth className="enterpriseSearchOverview">
       <SetPageChrome isRoot />
@@ -55,13 +58,17 @@ export const EnterpriseSearch: React.FC = () => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContentBody>
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="center" gutterSize="xl">
+            {hasAppSearchAccess && (
+              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+                <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
+              </EuiFlexItem>
+            )}
+            {hasWorkplaceSearchAccess && (
+              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+                <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer />
         </EuiPageContentBody>
