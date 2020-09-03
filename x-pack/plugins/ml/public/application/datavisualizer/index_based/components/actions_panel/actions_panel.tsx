@@ -13,6 +13,7 @@ import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
+import { getBasePath } from '../../../../util/dependency_cache';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -20,6 +21,7 @@ interface Props {
 
 export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const basePath = getBasePath();
 
   const recognizerResults = {
     count: 0,
@@ -31,7 +33,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(`#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
+    window.open(`${basePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
   }
 
   // Note we use display:none for the DataRecognizer section as it needs to be
@@ -86,7 +88,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
-        href={`#/jobs/new_job/advanced?index=${indexPattern}`}
+        href={`${basePath.get()}/app/ml/jobs/new_job/advanced?index=${indexPattern.id}`}
         data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
       />
     </div>
