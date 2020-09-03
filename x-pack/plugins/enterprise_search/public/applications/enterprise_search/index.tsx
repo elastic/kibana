@@ -23,10 +23,10 @@ import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/cons
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../shared/telemetry';
 
-import AppSearchImage from './assets/app_search.png';
-import WorkplaceSearchImage from './assets/workplace_search.png';
 import { ProductCard } from './components/product_card';
 
+import AppSearchImage from './assets/app_search.png';
+import WorkplaceSearchImage from './assets/workplace_search.png';
 import './index.scss';
 
 export const EnterpriseSearch: React.FC = () => {
@@ -57,36 +57,10 @@ export const EnterpriseSearch: React.FC = () => {
         <EuiPageContentBody>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <ProductCard
-                name={i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
-                  defaultMessage: 'App Search',
-                })}
-                description={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.productCardDescription',
-                  {
-                    defaultMessage:
-                      'Elastic App Search provides user-friendly tools to design and deploy a powerful search to your websites or web/mobile applications.',
-                  }
-                )}
-                img={AppSearchImage}
-                buttonPath={APP_SEARCH_PLUGIN.URL}
-              />
+              <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <ProductCard
-                name={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
-                  defaultMessage: 'Workplace Search',
-                })}
-                description={i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
-                  {
-                    defaultMessage:
-                      "Unify all your team's content in one place, with instant connectivity to popular productivity and collaboration tools.",
-                  }
-                )}
-                img={WorkplaceSearchImage}
-                buttonPath={WORKPLACE_SEARCH_PLUGIN.URL}
-              />
+              <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

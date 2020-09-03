@@ -40,6 +40,10 @@ export const APP_SEARCH_PLUGIN = {
     defaultMessage:
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
   }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
+    defaultMessage:
+      'Elastic App Search provides user-friendly tools to design and deploy a powerful search to your websites or web/mobile applications.',
+  }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
 };
@@ -53,6 +57,13 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     defaultMessage:
       'Search all documents, files, and sources available across your virtual workplace.',
   }),
+  CARD_DESCRIPTION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
+    {
+      defaultMessage:
+        "Unify all your team's content in one place, with instant connectivity to popular productivity and collaboration tools.",
+    }
+  ),
   URL: '/app/enterprise_search/workplace_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };

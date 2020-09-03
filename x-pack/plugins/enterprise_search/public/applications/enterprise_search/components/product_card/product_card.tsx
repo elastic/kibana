@@ -5,56 +5,49 @@
  */
 
 import React from 'react';
-
-import { EuiCard, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { formatTestSubj } from '../../../shared/format_test_subj';
+import { EuiCard, EuiTextColor } from '@elastic/eui';
 import { EuiButton } from '../../../shared/react_router_helpers';
 
 import './product_card.scss';
 
 interface IProductCard {
-  name: string;
-  description: string;
-  img: string;
-  buttonPath: string;
+  // Expects product plugin constants (@see common/constants.ts)
+  product: {
+    ID: string;
+    NAME: string;
+    CARD_DESCRIPTION: string;
+    URL: string;
+  };
+  image: string;
 }
 
-export const ProductCard: React.FC<IProductCard> = ({ name, description, img, buttonPath }) => {
+export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
   return (
     <EuiCard
       className="productCard"
       titleElement="h2"
-      title={i18n.translate('xpack.enterpriseSearch.productCard.productCardHeading', {
-        defaultMessage: `Elastic ${name}`,
+      title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
+        defaultMessage: `Elastic {productName}`,
+        values: { productName: product.NAME },
       })}
       image={
         <div className="productCard__imageContainer">
-          <img
-            className="productCard__image"
-            alt={i18n.translate('xpack.enterpriseSearch.productCard.productCardImage', {
-              defaultMessage: `${name} Dashboard`,
-            })}
-            src={img}
-          />
+          <img src={image} className="productCard__image" alt="" role="presentation" />
         </div>
       }
       paddingSize="l"
-      description={
-        <EuiTextColor color="subdued">
-          <p>{description}</p>
-        </EuiTextColor>
-      }
+      description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={
         <EuiButton
           fill
-          to={buttonPath}
+          to={product.URL}
           shouldNotCreateHref={true}
-          data-test-subj={`Launch${formatTestSubj(name)}Button`}
+          data-test-subj={`${product.ID}LaunchButton`}
         >
-          {i18n.translate('xpack.enterpriseSearch.productCard.productCardButton', {
-            defaultMessage: `Launch ${name}`,
+          {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
+            defaultMessage: `Launch {productName}`,
+            values: { productName: product.NAME },
           })}
         </EuiButton>
       }
