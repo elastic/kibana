@@ -30,7 +30,7 @@ import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_
 import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
-import { useUserInfo } from '../../components/user_info';
+import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
@@ -55,15 +55,17 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const { globalFullScreen } = useFullScreen();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated: isUserAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    signalIndexName,
-    hasIndexWrite,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated: isUserAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      signalIndexName,
+      hasIndexWrite,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
