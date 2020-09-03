@@ -21,7 +21,6 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 
 import { UiApp } from '../ui_app';
-import { UiNavLink } from '../../ui_nav_links';
 
 function createStubUiAppSpec(extraParams) {
   return {
@@ -80,7 +79,7 @@ describe('ui apps / UiApp', () => {
       });
 
       it('has a navLink', () => {
-        expect(app.getNavLink()).to.be.a(UiNavLink);
+        expect(app.getNavLink()).to.be.a('hidden');
       });
 
       it('has no main module', () => {

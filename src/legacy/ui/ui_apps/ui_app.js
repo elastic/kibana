@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { UiNavLink } from '../ui_nav_links';
-
 export class UiApp {
   constructor(kbnServer, spec) {
     const {
@@ -64,17 +62,7 @@ export class UiApp {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
       // if the app is also listed. This means that all apps in the kibanaPayload will
       // have a navLink property since that list includes all normally accessible apps
-      this._navLink = new UiNavLink({
-        id: this._id,
-        title: this._title,
-        order: this._order,
-        icon: this._icon,
-        euiIconType: this._euiIconType,
-        url: this._url,
-        linkToLastSubUrl: this._linkToLastSubUrl,
-        disableSubUrlTracking: this._disableSubUrlTracking,
-        category: this._category,
-      });
+      this._navLink = 'hidden';
     }
   }
 
