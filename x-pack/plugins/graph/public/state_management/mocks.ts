@@ -17,8 +17,6 @@ import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } fro
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
-jest.mock('ui/new_platform');
-
 export interface MockedGraphEnvironment {
   store: GraphStore;
   mockedDeps: jest.Mocked<GraphStoreDependencies>;

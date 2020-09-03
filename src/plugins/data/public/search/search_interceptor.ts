@@ -22,8 +22,12 @@ import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observab
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
-import { ISearchOptions } from './types';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ISearchOptions,
+  ES_SEARCH_STRATEGY,
+} from '../../common/search';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
 
@@ -128,7 +132,7 @@ export class SearchInterceptor {
   ): Observable<IEsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
-      if (options?.signal?.aborted) {
+      if (options?.abortSignal?.aborted) {
         return throwError(new AbortError());
       }
 
@@ -164,7 +168,7 @@ export class SearchInterceptor {
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      ...(options?.signal ? [options.signal] : []),
+      ...(options?.abortSignal ? [options.abortSignal] : []),
     ];
 
     const combinedSignal = getCombinedSignal(signals);

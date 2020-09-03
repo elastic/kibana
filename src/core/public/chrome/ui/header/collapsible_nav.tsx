@@ -81,7 +81,6 @@ interface Props {
   isLocked: boolean;
   isOpen: boolean;
   homeHref: string;
-  legacyMode: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
@@ -97,7 +96,6 @@ export function CollapsibleNav({
   isLocked,
   isOpen,
   homeHref,
-  legacyMode,
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
@@ -116,7 +114,6 @@ export function CollapsibleNav({
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
-      legacyMode,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
       navigateToApp,
@@ -148,7 +145,6 @@ export function CollapsibleNav({
                 listItems={[
                   createEuiListItem({
                     link: customNavLink,
-                    legacyMode,
                     basePath,
                     navigateToApp,
                     dataTestSubj: 'collapsibleNavCustomNavLink',

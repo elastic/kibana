@@ -21,7 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const supertest = getService('supertest');
 
-  describe('Home page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75724
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
