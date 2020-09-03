@@ -17,6 +17,7 @@ import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parame
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -80,19 +81,47 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
     }
   );
   const pushToQueryParams = useReplaceBreadcrumbParameters();
+  const eventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+
+  const eventLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: eventsHref!,
+  });
+
+  const processDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const processDetailNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: processDetailHref!,
+  });
+
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeDetailHref!,
+  });
   const crumbs = useMemo(() => {
     return [
       {
         text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...eventLinkNavProps,
       },
       {
         text: processName,
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...processDetailNavProps,
       },
       {
         text: (
@@ -104,12 +133,17 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
             />
           </>
         ),
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...nodeDetailNavProps,
       },
     ];
-  }, [processName, totalCount, processEntityId, pushToQueryParams, eventsString]);
+  }, [
+    processName,
+    totalCount,
+    eventsString,
+    eventLinkNavProps,
+    nodeDetailNavProps,
+    processDetailNavProps,
+  ]);
   const rows = useMemo(() => {
     return Object.entries(relatedEventsState.stats).map(
       ([eventType, count]): EventCountsTableView => {

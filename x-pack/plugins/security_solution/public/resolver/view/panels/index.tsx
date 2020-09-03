@@ -33,7 +33,7 @@ import { PanelViewAndParameters } from '../../types';
  */
 export const PanelRouter = memo(function () {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
-
+  console.log(params.panelView);
   if (params.panelView === 'nodeDetail') {
     return <NodeDetail nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEvents') {

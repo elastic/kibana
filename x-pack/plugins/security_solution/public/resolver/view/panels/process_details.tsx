@@ -126,13 +126,13 @@ const ProcessDetails = memo(function ProcessDetails({
     return processDescriptionListData;
   }, [processEvent]);
 
-  const eventsHref = useSelector((state: ResolverState) =>
+  const nodesHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({ panelView: 'nodes' })
   );
 
-  const eventLinkNavProps = useNavigateOrReplace({
+  const nodesLinkNavProps = useNavigateOrReplace({
     // TODO no !
-    search: eventsHref!,
+    search: nodesHref!,
   });
 
   const crumbs = useMemo(() => {
@@ -145,7 +145,7 @@ const ProcessDetails = memo(function ProcessDetails({
           }
         ),
         'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
-        ...eventLinkNavProps,
+        ...nodesLinkNavProps,
       },
       {
         text: (
@@ -160,7 +160,7 @@ const ProcessDetails = memo(function ProcessDetails({
         onClick: () => {},
       },
     ];
-  }, [processName, eventLinkNavProps]);
+  }, [processName, nodesLinkNavProps]);
   const { cubeAssetsForNode } = useResolverTheme();
   const { descriptionText } = useMemo(() => {
     if (!processEvent) {

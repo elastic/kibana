@@ -19,7 +19,13 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 import { EuiSelectableOption } from '@elastic/eui';
+import * as selectors from '../store/selectors';
+import { useResolverDispatch } from './use_resolver_dispatch';
+import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
+import { ResolverNodeStats, ResolverState } from '../../../common/endpoint/types';
+import { useNavigateOrReplace } from './use_navigate_or_replace';
 import { Matrix3 } from '../types';
 
 /**
@@ -134,10 +140,10 @@ const NodeSubMenuComponents = React.memo(
     buttonBorderColor,
     menuTitle,
     menuAction,
-    optionsWithActions,
     className,
     projectionMatrix,
     nodeID,
+    relatedEventStats,
   }: {
     menuTitle: string;
     className?: string;
@@ -150,8 +156,7 @@ const NodeSubMenuComponents = React.memo(
      */
     projectionMatrix: Matrix3;
     nodeID: string;
-  } & {
-    optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
+    relatedEventStats: ResolverNodeStats | undefined;
   }) => {
     // keep a ref to the popover so we can call its reposition method
     const popoverRef = useRef<EuiPopover>(null);
@@ -180,10 +185,29 @@ const NodeSubMenuComponents = React.memo(
     const closePopover = useCallback(() => setMenuOpen(false), []);
     const popoverId = idGenerator('submenu-popover');
 
-    const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
+    const pushToQueryParams = useReplaceBreadcrumbParameters();
+
+    const isMenuLoading = !relatedEventStats;
+    const dispatch = useResolverDispatch();
 
     // The last projection matrix that was used to position the popover
     const projectionMatrixAtLastRender = useRef<Matrix3>();
+
+    const relatedEventOptions = useMemo(() => {
+      if (relatedEventStats === undefined) {
+        return [];
+      } else {
+        return Object.entries(relatedEventStats.events.byCategory).map(([category, total]) => {
+          return {
+            prefix: <EuiI18nNumber value={total || 0} />,
+            optionTitle: category,
+            action: () => {
+              pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
+            },
+          };
+        });
+      }
+    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
 
     useLayoutEffect(() => {
       if (
@@ -204,7 +228,7 @@ const NodeSubMenuComponents = React.memo(
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
 
-    if (!optionsWithActions) {
+    if (relatedEventStats === undefined) {
       /**
        * When called with a `menuAction`
        * Render without dropdown and call the supplied action when host button is clicked
@@ -230,7 +254,7 @@ const NodeSubMenuComponents = React.memo(
     const submenuPopoverButton = (
       <EuiButton
         onClick={
-          typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
+          typeof relatedEventOptions === 'object' ? handleMenuOpenClick : handleMenuActionClick
         }
         color={buttonBorderColor}
         size="s"
@@ -255,8 +279,8 @@ const NodeSubMenuComponents = React.memo(
           repositionOnScroll
           ref={popoverRef}
         >
-          {menuIsOpen && typeof optionsWithActions === 'object' && (
-            <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
+          {menuIsOpen && typeof relatedEventOptions === 'object' && (
+            <OptionList isLoading={isMenuLoading} subMenuOptions={relatedEventOptions} />
           )}
         </EuiPopover>
       </div>

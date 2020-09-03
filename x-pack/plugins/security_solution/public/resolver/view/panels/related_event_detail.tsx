@@ -19,6 +19,8 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
 import { ResolverState } from '../../types';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { RelatedEventCategory } from 'x-pack/plugins/security_solution/common/endpoint/generate_data';
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
@@ -176,19 +178,55 @@ const RelatedEventDetail = memo(function ({
   const { subject = '', descriptor = '' } = relatedEventToShowDetailsFor
     ? event.descriptiveName(relatedEventToShowDetailsFor)
     : {};
+
+  const nodesHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+  const nodesLinkNavProps = useNavigateOrReplace({
+    search: nodesHref!,
+  });
+
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+  const nodeDetailLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeDetailHref!,
+  });
+
+  const nodeEventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+  const nodeEventsLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeEventsHref!,
+  });
+
+  const nodeEventsOfTypeHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEventsOfType',
+      panelParameters: { nodeID: processEntityId, eventType: relatedEventCategory },
+    })
+  );
+  const nodeEventsOfTypeLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeEventsOfTypeHref!,
+  });
   const crumbs = useMemo(() => {
     return [
       {
         text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...nodesLinkNavProps,
       },
       {
         text: processName,
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId!, crumbEvent: '' });
-        },
+        ...nodeDetailLinkNavProps,
       },
       {
         text: (
@@ -200,9 +238,7 @@ const RelatedEventDetail = memo(function ({
             />
           </>
         ),
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId!, crumbEvent: 'all' });
-        },
+        ...nodeEventsLinkNavProps,
       },
       {
         text: (
@@ -214,12 +250,7 @@ const RelatedEventDetail = memo(function ({
             />
           </>
         ),
-        onClick: () => {
-          pushToQueryParams({
-            crumbId: processEntityId!,
-            crumbEvent: relatedEventCategory || 'all',
-          });
-        },
+        ...nodeEventsOfTypeLinkNavProps,
       },
       {
         text: relatedEventToShowDetailsFor ? (
@@ -236,9 +267,7 @@ const RelatedEventDetail = memo(function ({
     ];
   }, [
     processName,
-    processEntityId,
     eventsString,
-    pushToQueryParams,
     totalCount,
     countBySameCategory,
     naString,
@@ -246,6 +275,10 @@ const RelatedEventDetail = memo(function ({
     relatedEventToShowDetailsFor,
     subject,
     descriptor,
+    nodeEventsOfTypeLinkNavProps,
+    nodeEventsLinkNavProps,
+    nodeDetailLinkNavProps,
+    nodesLinkNavProps,
   ]);
 
   /**

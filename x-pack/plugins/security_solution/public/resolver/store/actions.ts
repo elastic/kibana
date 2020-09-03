@@ -89,19 +89,6 @@ interface UserSelectedResolverNode {
 }
 
 /**
- * This action should dispatch to indicate that the user chose to
- * focus on examining the related events of a particular ResolverEvent.
- * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
- */
-interface UserSelectedRelatedEventCategory {
-  readonly type: 'userSelectedRelatedEventCategory';
-  readonly payload: {
-    subject: SafeResolverEvent;
-    category?: string;
-  };
-}
-
-/**
  * Used by `useStateSyncingActions` hook.
  * This is dispatched when external sources provide new parameters for Resolver.
  * When the component receives a new 'databaseDocumentID' prop, this is fired.

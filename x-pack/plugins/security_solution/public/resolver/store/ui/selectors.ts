@@ -76,6 +76,26 @@ export const relativeHref: (
   }
 );
 
+export const relatedEventsRelativeHrefs: (
+  state: ResolverUIState
+) => (categories: string[], nodeID: string) => string[] = createSelector(
+  relativeHref,
+  (relativeHref) => {
+    return (categories: string[], nodeID: string) => {
+      return categories.map((category) => {
+        const categoryPanelParams: PanelViewAndParameters = {
+          panelView: 'nodeEventsOfType',
+          panelParameters: {
+            nodeID,
+            eventType: category,
+          },
+        };
+        return relativeHref(categoryPanelParams);
+      });
+    };
+  }
+);
+
 /**
  * The parameter name that we use to read/write state to the query string
  */

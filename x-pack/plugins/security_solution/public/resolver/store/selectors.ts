@@ -308,6 +308,11 @@ export const panelViewAndParameters = composeSelectors(
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
 
+export const relatedEventsRelativeHrefs = composeSelectors(
+  uiStateSelector,
+  uiSelectors.relatedEventsRelativeHrefs
+);
+
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.

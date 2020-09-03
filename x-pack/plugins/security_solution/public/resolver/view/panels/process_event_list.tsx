@@ -19,6 +19,7 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 import { ResolverState } from '../../types';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -64,7 +65,11 @@ const DisplayList = memo(function DisplayList({
   eventType,
   processEntityId,
 }: {
-  crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
+  crumbs: Array<{
+    text: string | JSX.Element;
+    onClick: (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => void;
+    href?: string;
+  }>;
   matchingEventEntries: MatchingEventEntry[];
   eventType: string;
   processEntityId: string;
@@ -228,19 +233,47 @@ const ProcessEventList = memo(function ProcessEventList({
     return relateds;
   }, [relatedByCategory, eventType, processEntityId, pushToQueryParams]);
 
+  const nodesHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+
+  const nodesLinkNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodesHref!,
+  });
+
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeDetailHref!,
+  });
+
+  const nodeEventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeEventsNavProps = useNavigateOrReplace({
+    // TODO no !
+    search: nodeEventsHref!,
+  });
   const crumbs = useMemo(() => {
     return [
       {
         text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...nodesLinkNavProps,
       },
       {
         text: processName,
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...nodeDetailNavProps,
       },
       {
         text: (
@@ -252,9 +285,7 @@ const ProcessEventList = memo(function ProcessEventList({
             />
           </>
         ),
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: 'all' });
-        },
+        ...nodeEventsNavProps,
       },
       {
         text: (
@@ -273,10 +304,11 @@ const ProcessEventList = memo(function ProcessEventList({
     eventType,
     eventsString,
     matchingEventEntries.length,
-    processEntityId,
     processName,
-    pushToQueryParams,
     totalCount,
+    nodeDetailNavProps,
+    nodesLinkNavProps,
+    nodeEventsNavProps,
   ]);
 
   /**

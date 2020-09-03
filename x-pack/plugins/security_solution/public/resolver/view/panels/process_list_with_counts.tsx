@@ -50,7 +50,7 @@ interface ProcessTableView {
   name?: string;
   timestamp?: Date;
   event: SafeResolverEvent;
-  href: string | null;
+  href: string | undefined;
 }
 
 /**
@@ -131,7 +131,7 @@ export const ProcessListWithCounts = memo(() => {
           name,
           timestamp: event.timestampAsDateSafeVersion(processEvent),
           event: processEvent,
-          href: nodeHrefs.get(processEvent) ?? null,
+          href: nodeHrefs.get(processEvent) ?? undefined,
         };
       }),
     [processNodePositions, nodeHrefs]
@@ -175,8 +175,7 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
     entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
   );
   return (
-    // TODO don't use !
-    <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href! })}>
+    <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href })}>
       {name === '' ? (
         <EuiBadge color="warning">
           {i18n.translate(
