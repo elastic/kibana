@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { FunctionComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiFieldNumber,
   EuiDescribedFormGroup,
   EuiSwitch,
   EuiTextColor,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { ColdPhase as ColdPhaseInterface, Phases } from '../../../services/policies/types';
@@ -27,9 +25,12 @@ import {
   PhaseErrorMessage,
   OptionalLabel,
   ErrableFormRow,
-  MinAgeInput,
-  NodeAllocation,
   SetPriorityInput,
+  MinAgeInput,
+  DataTierAllocation,
+  DescribedFormField,
+  NodesDataProvider,
+  DefaultAllocationWarning,
 } from '../components';
 
 const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
@@ -46,64 +47,63 @@ interface Props {
   errors?: PhaseValidationErrors<ColdPhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
 }
-export class ColdPhase extends PureComponent<Props> {
-  render() {
-    const {
-      setPhaseData,
-      phaseData,
-      errors,
-      isShowingErrors,
-      hotPhaseRolloverEnabled,
-    } = this.props;
-
-    return (
-      <div id="coldPhaseContent" aria-live="polite" role="region">
-        <EuiDescribedFormGroup
-          title={
-            <div>
-              <h2 className="eui-displayInlineBlock eui-alignMiddle">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
-                  defaultMessage="Cold phase"
-                />
-              </h2>{' '}
-              {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
-              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
-            </div>
-          }
-          titleSize="s"
-          description={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
-                  defaultMessage="You are querying your index less frequently, so you can allocate shards
+export const ColdPhase: FunctionComponent<Props> = ({
+  setPhaseData,
+  phaseData,
+  errors,
+  isShowingErrors,
+  hotPhaseRolloverEnabled,
+}) => {
+  return (
+    <div id="coldPhaseContent" aria-live="polite" role="region">
+      <NodesDataProvider>
+        {(nodesData) => (
+          <>
+            {/* Section title group; containing min age */}
+            <EuiDescribedFormGroup
+              title={
+                <div>
+                  <h2 className="eui-displayInlineBlock eui-alignMiddle">
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
+                      defaultMessage="Cold phase"
+                    />
+                  </h2>{' '}
+                  {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
+                  <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+                </div>
+              }
+              titleSize="s"
+              description={
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
+                      defaultMessage="You are querying your index less frequently, so you can allocate shards
                   on significantly less performant hardware.
                   Because your queries are slower, you can reduce the number of replicas."
-                />
-              </p>
-              <EuiSwitch
-                data-test-subj="enablePhaseSwitch-cold"
-                label={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
-                    defaultMessage="Activate cold phase"
+                    />
+                  </p>
+                  <EuiSwitch
+                    data-test-subj="enablePhaseSwitch-cold"
+                    label={
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
+                        defaultMessage="Activate cold phase"
+                      />
+                    }
+                    id={`${coldProperty}-${phaseProperty('phaseEnabled')}`}
+                    checked={phaseData.phaseEnabled}
+                    onChange={(e) => {
+                      setPhaseData(phaseProperty('phaseEnabled'), e.target.checked);
+                    }}
+                    aria-controls="coldPhaseContent"
                   />
-                }
-                id={`${coldProperty}-${phaseProperty('phaseEnabled')}`}
-                checked={phaseData.phaseEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('phaseEnabled'), e.target.checked);
-                }}
-                aria-controls="coldPhaseContent"
-              />
-            </Fragment>
-          }
-          fullWidth
-        >
-          <Fragment>
-            {phaseData.phaseEnabled ? (
-              <Fragment>
+                </Fragment>
+              }
+              fullWidth
+            >
+              {phaseData.phaseEnabled ? (
                 <MinAgeInput<ColdPhaseInterface>
                   errors={errors}
                   phaseData={phaseData}
@@ -112,99 +112,153 @@ export class ColdPhase extends PureComponent<Props> {
                   setPhaseData={setPhaseData}
                   rolloverEnabled={hotPhaseRolloverEnabled}
                 />
-                <EuiSpacer />
-
-                <NodeAllocation<ColdPhaseInterface>
-                  phase={coldProperty}
-                  setPhaseData={setPhaseData}
+              ) : null}
+            </EuiDescribedFormGroup>
+            {phaseData.phaseEnabled ? (
+              <Fragment>
+                {/* Data tier allocation section */}
+                <EuiDescribedFormGroup
+                  title={
+                    <h3>
+                      {i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationTitle',
+                        { defaultMessage: 'Data tier allocation' }
+                      )}
+                    </h3>
+                  }
+                  description={
+                    <>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationDescription"
+                        defaultMessage="Allocate cold phase data to nodes in the cluster."
+                      />
+                      {
+                        <DefaultAllocationWarning
+                          phase={coldProperty}
+                          nodesByRoles={nodesData.nodesByRoles}
+                          currentAllocationType={phaseData.dataTierAllocationType}
+                        />
+                      }
+                    </>
+                  }
+                  fullWidth
+                >
+                  <EuiFormRow>
+                    <DataTierAllocation
+                      phase={coldProperty}
+                      setPhaseData={setPhaseData}
+                      errors={errors}
+                      phaseData={phaseData}
+                      isShowingErrors={isShowingErrors}
+                      nodes={nodesData.nodesByAttributes}
+                    />
+                  </EuiFormRow>
+                </EuiDescribedFormGroup>
+                {/* Replicas section */}
+                <DescribedFormField
+                  title={
+                    <h3>
+                      {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
+                        defaultMessage: 'Replicas',
+                      })}
+                    </h3>
+                  }
+                  description={i18n.translate(
+                    'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
+                    {
+                      defaultMessage:
+                        'Set the number of replicas. By default, the number of replicas remains the same.',
+                    }
+                  )}
+                  switchProps={{
+                    label: i18n.translate(
+                      'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
+                      { defaultMessage: 'Set replicas' }
+                    ),
+                    initialValue: Boolean(phaseData.selectedReplicaCount),
+                    onChange: (v) => {
+                      if (!v) {
+                        setPhaseData('selectedReplicaCount', '');
+                      }
+                    },
+                  }}
+                  fullWidth
+                >
+                  <ErrableFormRow
+                    id={`${coldProperty}-${phaseProperty('selectedReplicaCount')}`}
+                    label={
+                      <Fragment>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
+                          defaultMessage="Number of replicas"
+                        />
+                        <OptionalLabel />
+                      </Fragment>
+                    }
+                    isShowingErrors={isShowingErrors}
+                    errors={errors?.selectedReplicaCount}
+                    helpText={i18n.translate(
+                      'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                      {
+                        defaultMessage: 'By default, the number of replicas remains the same.',
+                      }
+                    )}
+                  >
+                    <EuiFieldNumber
+                      id={`${coldProperty}-${phaseProperty('selectedReplicaCount')}`}
+                      value={phaseData.selectedReplicaCount}
+                      onChange={(e) => {
+                        setPhaseData(phaseProperty('selectedReplicaCount'), e.target.value);
+                      }}
+                      min={0}
+                    />
+                  </ErrableFormRow>
+                </DescribedFormField>
+                {/* Freeze section */}
+                <EuiDescribedFormGroup
+                  title={
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                        defaultMessage="Freeze"
+                      />
+                    </h3>
+                  }
+                  description={
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                        defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
+                    You can search a frozen index, but expect queries to be slower."
+                      />{' '}
+                      <LearnMoreLink docPath="frozen-indices.html" />
+                    </EuiTextColor>
+                  }
+                  fullWidth
+                  titleSize="xs"
+                >
+                  <EuiSwitch
+                    data-test-subj="freezeSwitch"
+                    checked={phaseData.freezeEnabled}
+                    onChange={(e) => {
+                      setPhaseData(phaseProperty('freezeEnabled'), e.target.checked);
+                    }}
+                    label={freezeLabel}
+                    aria-label={freezeLabel}
+                  />
+                </EuiDescribedFormGroup>
+                <SetPriorityInput<ColdPhaseInterface>
                   errors={errors}
                   phaseData={phaseData}
+                  phase={coldProperty}
                   isShowingErrors={isShowingErrors}
+                  setPhaseData={setPhaseData}
                 />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                    <ErrableFormRow
-                      id={`${coldProperty}-${phaseProperty('freezeEnabled')}`}
-                      label={
-                        <Fragment>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
-                            defaultMessage="Number of replicas"
-                          />
-                          <OptionalLabel />
-                        </Fragment>
-                      }
-                      isShowingErrors={isShowingErrors}
-                      errors={errors?.freezeEnabled}
-                      helpText={i18n.translate(
-                        'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
-                        {
-                          defaultMessage: 'By default, the number of replicas remains the same.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        id={`${coldProperty}-${phaseProperty('selectedReplicaCount')}`}
-                        value={phaseData.selectedReplicaCount}
-                        onChange={(e) => {
-                          setPhaseData(phaseProperty('selectedReplicaCount'), e.target.value);
-                        }}
-                        min={0}
-                      />
-                    </ErrableFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
               </Fragment>
-            ) : (
-              <div />
-            )}
-          </Fragment>
-        </EuiDescribedFormGroup>
-        {phaseData.phaseEnabled ? (
-          <Fragment>
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                    defaultMessage="Freeze"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
-                    You can search a frozen index, but expect queries to be slower."
-                  />{' '}
-                  <LearnMoreLink docPath="frozen-indices.html" />
-                </EuiTextColor>
-              }
-              fullWidth
-              titleSize="xs"
-            >
-              <EuiSwitch
-                data-test-subj="freezeSwitch"
-                checked={phaseData.freezeEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('freezeEnabled'), e.target.checked);
-                }}
-                label={freezeLabel}
-                aria-label={freezeLabel}
-              />
-            </EuiDescribedFormGroup>
-            <SetPriorityInput<ColdPhaseInterface>
-              errors={errors}
-              phaseData={phaseData}
-              phase={coldProperty}
-              isShowingErrors={isShowingErrors}
-              setPhaseData={setPhaseData}
-            />
-          </Fragment>
-        ) : null}
-      </div>
-    );
-  }
-}
+            ) : null}
+          </>
+        )}
+      </NodesDataProvider>
+    </div>
+  );
+};
