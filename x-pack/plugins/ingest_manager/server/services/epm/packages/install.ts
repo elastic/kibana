@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
@@ -16,6 +16,7 @@ import {
   KibanaAssetReference,
   EsAssetReference,
   ElasticsearchAssetType,
+  InstallType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -110,11 +111,15 @@ export async function installPackage({
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const reinstall = pkgVersion === installedPkg?.attributes.version;
-  const reupdate = pkgVersion === installedPkg?.attributes.install_version;
 
-  // let the user install if using the force flag or this is a reinstall or reupdate due to intallation interruption
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !reinstall && !reupdate) {
+  const installType = getInstallType({ pkgVersion, installedPkg });
+
+  // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+  const installOutOfDateVersionOk =
+    installType === InstallType.reinstall ||
+    installType === InstallType.reupdate ||
+    installType === InstallType.rollback;
+  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
@@ -188,12 +193,13 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
-  // if this is an update, delete the previous version's pipelines
-  if (installedPkg && !reinstall) {
+  // if this is an update or retrying an update, delete the previous version's pipelines
+  if (installType === InstallType.update || installType === InstallType.reupdate) {
     await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
+      // @ts-ignore
       installedPkg.attributes.version
     );
   }
@@ -325,4 +331,33 @@ export async function ensurePackagesCompletedInstall(
   }, []);
   await Promise.all(installingPromises);
   return installingPackages;
+}
+
+export function getInstallType({
+  pkgVersion,
+  installedPkg,
+}: {
+  pkgVersion: string;
+  installedPkg: SavedObject<Installation> | undefined;
+}): InstallType | undefined {
+  const isInstalledPkg = !!installedPkg;
+  const currentPkgVersion = installedPkg?.attributes.version;
+  const lastStartedInstallVersion = installedPkg?.attributes.install_version;
+  if (installedPkg && pkgVersion === currentPkgVersion && pkgVersion !== lastStartedInstallVersion)
+    return InstallType.rollback;
+  if (isInstalledPkg && pkgVersion === currentPkgVersion) return InstallType.reinstall;
+  if (
+    isInstalledPkg &&
+    pkgVersion === lastStartedInstallVersion &&
+    pkgVersion !== currentPkgVersion
+  )
+    return InstallType.reupdate;
+  if (
+    isInstalledPkg &&
+    pkgVersion !== lastStartedInstallVersion &&
+    pkgVersion !== currentPkgVersion
+  )
+    return InstallType.update;
+
+  if (!installedPkg) return InstallType.install;
 }

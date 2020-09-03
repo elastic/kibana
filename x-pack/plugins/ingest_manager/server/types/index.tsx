@@ -63,6 +63,7 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  InstallType,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
