@@ -83,7 +83,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
-          defaultMessage="Constant keyword fields support the same queries and aggregations as {keyword} fields, but take advantage of the fact that all documents have the same value per index."
+          defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
           values={{
             keyword: <EuiCode inline>{'keyword'}</EuiCode>,
           }}

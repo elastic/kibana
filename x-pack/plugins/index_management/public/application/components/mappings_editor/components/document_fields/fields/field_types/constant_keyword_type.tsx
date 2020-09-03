@@ -42,18 +42,19 @@ export const ConstantKeywordType: FunctionComponent<Props> = ({ field }) => {
         {/* Meta field */}
         <EditFieldFormRow
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.constantKeyword.metaFieldTitle', {
-            defaultMessage: 'Set meta',
+            defaultMessage: 'Set metadata',
           })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.constantKeyword.metaFieldDescription',
             {
-              defaultMessage: 'Arbitrary information about the field. Specify as JSON key-value pairs.',
+              defaultMessage:
+                'Arbitrary information about the field. Specify as JSON key-value pairs.',
             }
           )}
           defaultToggleValue={field.source?.meta !== undefined}
           docLink={{
             text: i18n.translate('xpack.idxMgmt.mappingsEditor.constantKeyword.metaDocLinkText', {
-              defaultMessage: 'Meta documentation',
+              defaultMessage: 'Metadata documentation',
             }),
             href: documentationService.getMetaLink(),
           }}
@@ -68,7 +69,7 @@ export const ConstantKeywordType: FunctionComponent<Props> = ({ field }) => {
                 'aria-label': i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.constantKeyword.metaFieldAriaLabel',
                   {
-                    defaultMessage: '_meta field data editor',
+                    defaultMessage: 'metadata field data editor',
                   }
                 ),
               },

@@ -418,7 +418,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '',
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaLabel', {
-        defaultMessage: 'Meta',
+        defaultMessage: 'Metadata',
       }),
       helpText: (
         <FormattedMessage
@@ -433,7 +433,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         {
           validator: isJsonField(
             i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorJsonError', {
-              defaultMessage: 'The meta JSON is not valid.',
+              defaultMessage: 'Invalid JSON.',
             }),
             { allowEmptyString: true }
           ),
