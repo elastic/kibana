@@ -161,21 +161,6 @@ describe('Saved Objects Mixin', () => {
     };
   });
 
-  describe('no kibana plugin', () => {
-    it('should not try to create anything', () => {
-      mockKbnServer.pluginSpecs.some = () => false;
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.log).toHaveBeenCalledWith(expect.any(Array), expect.any(String));
-      expect(mockServer.decorate).toHaveBeenCalledWith(
-        'server',
-        'kibanaMigrator',
-        expect.any(Object)
-      );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
-      expect(mockServer.route).not.toHaveBeenCalled();
-    });
-  });
-
   describe('Saved object service', () => {
     let service;
 
