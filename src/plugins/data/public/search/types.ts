@@ -28,14 +28,10 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchOptions,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-
-export interface ISearchOptions {
-  signal?: AbortSignal;
-  strategy?: string;
-}
 
 export type ISearch = (
   request: IKibanaSearchRequest,

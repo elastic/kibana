@@ -43,7 +43,7 @@ export function registerSearchRoute(
     async (context, request, res) => {
       const searchRequest = request.body;
       const { strategy, id } = request.params;
-      const signal = getRequestAbortedSignal(request.events.aborted$);
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       const [, , selfStart] = await getStartServices();
 
@@ -52,7 +52,7 @@ export function registerSearchRoute(
           context,
           { ...searchRequest, id },
           {
-            signal,
+            abortSignal,
             strategy,
           }
         );

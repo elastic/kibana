@@ -17,22 +17,14 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { RequestHandlerContext } from '../../../../core/server';
+import { IKibanaSearchResponse, IKibanaSearchRequest, ISearchOptions } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
-}
-
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  signal?: AbortSignal;
-  strategy?: string;
 }
 
 export interface ISearchSetup {

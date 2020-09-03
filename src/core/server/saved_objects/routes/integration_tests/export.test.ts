@@ -22,7 +22,7 @@ jest.mock('../../export', () => ({
 }));
 
 import * as exportMock from '../../export';
-import { createListStream } from '../../../../../legacy/utils/streams';
+import { createListStream } from '../../../utils/streams';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectConfig } from '../../saved_objects_config';
