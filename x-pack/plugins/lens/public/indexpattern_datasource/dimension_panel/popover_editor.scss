@@ -24,6 +24,14 @@
   width: $euiSize * 50;
 }
 
+.lnsIndexPatternDimensionEditor__queryInput--invalid {
+  textarea {
+    // sass-lint:disable-block no-important
+    background-image: linear-gradient(to top, $euiColorDanger, $euiColorDanger 2px, transparent 2px, transparent 100%) !important;
+    background-size: 100%;
+  }
+}
+
 // todo: remove after closing https://github.com/elastic/eui/issues/3548
 .lnsDimensionPanel__fixTranslateDnd {
   // sass-lint:disable-block no-important

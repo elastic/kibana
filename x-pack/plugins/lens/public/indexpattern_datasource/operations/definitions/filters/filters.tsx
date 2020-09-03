@@ -5,8 +5,8 @@
  */
 
 import React, { MouseEventHandler, useState } from 'react';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Query } from 'src/plugins/data/public';
 import {
   EuiDragDropContext,
   EuiDraggable,
@@ -22,11 +22,17 @@ import {
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
+  htmlIdGenerator,
 } from '@elastic/eui';
+
+import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
+import { IUiSettingsClient } from 'kibana/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { updateColumnParam } from '../../../state_helpers';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
+import { IndexPattern } from '../../../types';
 import { DataType } from '../../../../types';
 
 export enum SEARCH_QUERY_LANGUAGE {
@@ -34,18 +40,17 @@ export enum SEARCH_QUERY_LANGUAGE {
   LUCENE = 'lucene',
 }
 
+const generateId = htmlIdGenerator();
+
 export interface Filter {
   input: Query;
-  label?: string;
+  label: string;
 }
-
-export const emptyFilter: Filter = {
-  input: {
-    query: '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
-  },
-  label: '',
-};
+export interface FilterValue {
+  input: Query;
+  label: string;
+  id: string;
+}
 
 const searchQueryLabel = i18n.translate('xpack.lens.indexPattern.searchQuery', {
   defaultMessage: 'Search query',
@@ -59,23 +64,6 @@ const defaultSearchQuery: Filter = {
   label: i18n.translate('xpack.lens.indexPattern.searchQueryDefault', {
     defaultMessage: 'All records',
   }),
-};
-
-const countDuplicates = (filterArr: Filter[], filter: Filter) =>
-  filterArr.filter(
-    (f) =>
-      JSON.stringify(f.input.query.trim()) === JSON.stringify(filter.input.query.trim()) &&
-      f.label === filter.label
-  ).length;
-
-const makeUniqueLabel = (filterArr: Filter[], filter: Filter) => {
-  let label = '';
-  let count = 0;
-  do {
-    count++;
-    label = `${filter.input.query} [${count}]`;
-  } while (filterArr.find((f) => f.label === label));
-  return label;
 };
 
 interface DraggableLocation {
@@ -104,10 +92,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     }
   },
   isTransferable: () => false,
+  onFieldChange: (oldColumn, indexPattern, field) => null,
   buildColumn({ suggestedPriority, field }) {
     return {
       label: searchQueryLabel,
-      dataType: field.type as DataType,
+      dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
       suggestedPriority,
@@ -166,7 +155,43 @@ const FilterList = ({
   setFilters: Function;
   indexPattern: IndexPattern;
 }) => {
-  const [isLastOpen, setIsLastOpen] = useState(false);
+  const [isOpenByCreation, setIsOpenByCreation] = useState(false);
+  const [localFilters, setLocalFilters] = useState(() =>
+    filters.map((filter) => ({ ...filter, id: generateId() }))
+  );
+
+  const { services } = useKibana<{ uiSettings: IUiSettingsClient; data: DataPublicPluginStart }>();
+
+  const updateFilters = (updatedFilters: FilterValue[]) => {
+    // do not set internal id parameter into saved object
+    setFilters(updatedFilters.map((filter) => omit(filter, 'id') as FilterValue));
+    setLocalFilters(updatedFilters);
+  };
+
+  const onAddFilter = () =>
+    updateFilters([
+      ...localFilters,
+      {
+        input: services.data.query.queryString.getDefaultQuery(),
+        label: '',
+        id: generateId(),
+      },
+    ]);
+  const onRemoveFilter = (id: string) =>
+    updateFilters(localFilters.filter((filter) => filter.id !== id));
+
+  const onChangeValue = (id: string, query: Query, label: string) =>
+    updateFilters(
+      localFilters.map((filter) =>
+        filter.id === id
+          ? {
+              ...filter,
+              input: query,
+              label,
+            }
+          : filter
+      )
+    );
 
   const onDragEnd = ({
     source,
@@ -176,30 +201,29 @@ const FilterList = ({
     destination?: DraggableLocation;
   }) => {
     if (source && destination) {
-      const items = euiDragDropReorder(filters, source.index, destination.index);
-      setFilters(items);
+      const items = euiDragDropReorder(localFilters, source.index, destination.index);
+      updateFilters(items);
     }
   };
   return (
     <div>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
-          {filters?.map((filter: Filter, idx: number) => {
-            const { input, label } = filter;
-            const id = `${JSON.stringify(input.query)}_${label}`;
+          {localFilters?.map((filter: FilterValue, idx: number) => {
+            const { input, label, id } = filter;
             return (
               <EuiDraggable
                 spacing="m"
                 key={id}
                 index={idx}
                 draggableId={id}
-                customDragHandle={true}
+                disableInteractiveElementBlocking
               >
                 {(provided) => (
                   <EuiPanel paddingSize="none">
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <div {...provided.dragHandleProps} className="lnsLayerPanel__dndGrab">
+                        <div className="lnsLayerPanel__dndGrab">
                           <EuiIcon
                             type="grab"
                             aria-label={i18n.translate('xpack.lens.indexPattern.filters.grabIcon', {
@@ -213,8 +237,8 @@ const FilterList = ({
                         data-test-subj="indexPattern-filters-existingFilterContainer"
                       >
                         <FilterPopover
-                          isLastOpen={idx === filters.length - 1 && isLastOpen}
-                          setIsLastOpen={setIsLastOpen}
+                          isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
+                          setIsOpenByCreation={setIsOpenByCreation}
                           indexPattern={indexPattern}
                           filter={filter}
                           Button={({ onClick }: { onClick: MouseEventHandler }) => (
@@ -225,15 +249,12 @@ const FilterList = ({
                               data-test-subj="indexPattern-filters-existingFilterTrigger"
                             >
                               <EuiText size="s" textAlign="left">
-                                {label ? label : input.query}
+                                {label || input.query || defaultSearchQuery.label}
                               </EuiText>
                             </EuiLink>
                           )}
-                          setFilter={(newFilter: Filter) => {
-                            if (countDuplicates(filters, newFilter) > 0) {
-                              newFilter.label = makeUniqueLabel(filters, newFilter);
-                            }
-                            setFilters(filters.map((f: Filter) => (f === filter ? newFilter : f)));
+                          setFilter={(f: FilterValue) => {
+                            onChangeValue(f.id, f.input, f.label);
                           }}
                         />
                       </EuiFlexItem>
@@ -244,7 +265,7 @@ const FilterList = ({
                           color="danger"
                           data-test-subj="indexPattern-filters-existingFilterDelete"
                           onClick={() => {
-                            setFilters(filters.filter((f: Filter) => f !== filter));
+                            onRemoveFilter(filter.id);
                           }}
                           aria-label={i18n.translate(
                             'xpack.lens.indexPattern.filters.deleteSearchQuery',
@@ -266,12 +287,8 @@ const FilterList = ({
       <EuiButtonEmpty
         iconType="plusInCircle"
         onClick={() => {
-          const newFilter = { ...emptyFilter };
-          if (countDuplicates(filters, newFilter) > 0) {
-            newFilter.label = makeUniqueLabel(filters, newFilter);
-          }
-          setFilters(filters.concat(newFilter));
-          setIsLastOpen(true);
+          onAddFilter();
+          setIsOpenByCreation(true);
         }}
       >
         {i18n.translate('xpack.lens.indexPattern.filters.addSearchQuery', {

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEventHandler, useState, useRef } from 'react';
-import { EuiPopover, EuiFieldText, EuiForm, EuiFormRow, keys } from '@elastic/eui';
+import React, { MouseEventHandler, useState } from 'react';
+import { EuiPopover, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Filter, emptyFilter, SEARCH_QUERY_LANGUAGE } from '.';
+import { debounce } from 'lodash';
+import { FilterValue, SEARCH_QUERY_LANGUAGE } from '.';
 import { IndexPattern } from '../../../types';
 
 import {
@@ -30,42 +31,36 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
-  isLastOpen,
-  setIsLastOpen,
+  isOpenByCreation,
+  setIsOpenByCreation,
 }: {
-  filter: Filter;
+  filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isLastOpen: boolean;
-  setIsLastOpen: Function;
+  isOpenByCreation: boolean;
+  setIsOpenByCreation: Function;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const setPopoverOpen = (isOpen: boolean) => {
     setIsPopoverOpen(isOpen);
-    setIsLastOpen(isOpen);
+    setIsOpenByCreation(isOpen);
   };
-  const [tempFilter, setTempFilter] = useState(filter);
 
-  const inputRef = useRef<HTMLInputElement>();
-  const onQueryChange = (input: Query) => setTempFilter({ ...tempFilter, input });
-  const onLabelChange = (label: string) => setTempFilter({ ...tempFilter, label: label.trim() });
-  const onSubmit = (input: Query) => {
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const setFilterLabel = (label: string) => setFilter({ ...filter, label });
+  const setFilterQuery = (input: Query) => {
+    setErrorMessage('');
     try {
       if (input.language === SEARCH_QUERY_LANGUAGE.KUERY) {
         esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(input.query), indexPattern);
       } else if (input.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
         esQuery.luceneStringToDsl(input.query);
       }
-      if (input.query.length) {
-        if (tempFilter.label) {
-          setFilter(tempFilter);
-          setPopoverOpen(false);
-        } else {
-          if (inputRef.current) inputRef.current.focus();
-        }
-      }
+      setFilter({ ...filter, input });
     } catch (e) {
+      setErrorMessage(`Invalid syntax: ${JSON.stringify(e, null, 2)}`);
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
     }
   };
@@ -74,81 +69,126 @@ export const FilterPopover = ({
     <EuiPopover
       anchorClassName="lnsLayerPanel__anchor"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+      isOpen={isOpenByCreation || isPopoverOpen}
       ownFocus
-      isOpen={isLastOpen || isPopoverOpen}
       closePopover={() => {
         setPopoverOpen(false);
-        setTempFilter(filter);
       }}
       button={
         <Button
           onClick={() => {
             setIsPopoverOpen((open) => !open);
-            setIsLastOpen(false);
+            setIsOpenByCreation(false);
           }}
         />
       }
     >
       <EuiForm>
         <EuiFormRow fullWidth>
-          <QueryStringInput
-            bubbleSubmitEvent={false}
-            indexPatterns={[indexPattern]}
-            query={tempFilter.input}
-            onChange={onQueryChange}
-            onSubmit={onSubmit}
-            placeholder={
-              tempFilter.input.language === SEARCH_QUERY_LANGUAGE.KUERY
-                ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
-                    defaultMessage: 'Example: {example}',
-                    values: { example: 'method : "GET" or status : "404"' },
-                  })
-                : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
-                    defaultMessage: 'Example: {example}',
-                    values: { example: 'method:GET OR status:404' },
-                  })
-            }
-            dataTestSubj="transformQueryInput"
-            languageSwitcherPopoverAnchorPosition="rightDown"
+          <QueryInput
+            isInvalid={!!errorMessage}
+            value={filter.input}
+            onChange={setFilterQuery}
+            indexPattern={indexPattern}
           />
         </EuiFormRow>
         <EuiFormRow fullWidth>
-          <EuiFieldText
-            data-test-subj="indexPattern-filters-label"
-            inputRef={(node) => {
-              if (node) {
-                inputRef.current = node;
-              }
-            }}
-            value={tempFilter.label || ''}
-            onChange={(e) => onLabelChange(e.target.value)}
-            onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
-              if (keys.ENTER === key) {
-                if (tempFilter.input.query.length) {
-                  setFilter(tempFilter);
-                  setPopoverOpen(false);
-                  setTempFilter(emptyFilter);
-                }
-              }
-              if (keys.ESCAPE === key) {
-                setPopoverOpen(false);
-              }
-            }}
-            fullWidth
-            placeholder={
-              tempFilter.input.query.length
-                ? (tempFilter.input.query as string)
-                : defaultPlaceholderMessage
-            }
-            prepend={i18n.translate('xpack.lens.indexPattern.filters.label', {
-              defaultMessage: 'Label',
-            })}
-            aria-label={i18n.translate('xpack.lens.indexPattern.filters.label.aria-message', {
-              defaultMessage: 'Label for your filter',
-            })}
+          <LabelInput
+            value={filter.label || ''}
+            onChange={setFilterLabel}
+            placeholder={filter.input.query || defaultPlaceholderMessage}
           />
         </EuiFormRow>
       </EuiForm>
     </EuiPopover>
+  );
+};
+
+const QueryInput = ({
+  value,
+  onChange,
+  indexPattern,
+  isInvalid,
+}: {
+  value: Query;
+  onChange: (input: Query) => void;
+  indexPattern: IndexPattern;
+  isInvalid: boolean;
+}) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  React.useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
+
+  const onChangeDebounced = React.useMemo(() => debounce(onChange, 256), [onChange]);
+
+  const handleInputChange = (input: Query) => {
+    setInputValue(input);
+    onChangeDebounced(input);
+  };
+
+  return (
+    <QueryStringInput
+      className={isInvalid ? 'lnsIndexPatternDimensionEditor__queryInput--invalid' : ''}
+      bubbleSubmitEvent={false}
+      indexPatterns={[indexPattern]}
+      query={inputValue}
+      onChange={handleInputChange}
+      placeholder={
+        inputValue.language === SEARCH_QUERY_LANGUAGE.KUERY
+          ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
+              defaultMessage: 'Example: {example}',
+              values: { example: 'method : "GET" or status : "404"' },
+            })
+          : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
+              defaultMessage: 'Example: {example}',
+              values: { example: 'method:GET OR status:404' },
+            })
+      }
+      dataTestSubj="transformQueryInput"
+      languageSwitcherPopoverAnchorPosition="rightDown"
+    />
+  );
+};
+
+const LabelInput = ({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  React.useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
+
+  const onChangeDebounced = React.useMemo(() => debounce(onChange, 256), [onChange]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = String(e.target.value);
+    setInputValue(val);
+    onChangeDebounced(val);
+  };
+
+  return (
+    <EuiFieldText
+      compressed
+      data-test-subj="indexPattern-filters-label"
+      value={inputValue}
+      onChange={handleInputChange}
+      fullWidth
+      placeholder={placeholder}
+      prepend={i18n.translate('xpack.lens.indexPattern.filters.label', {
+        defaultMessage: 'Label',
+      })}
+      aria-label={i18n.translate('xpack.lens.indexPattern.filters.label.aria-message', {
+        defaultMessage: 'Label for your filter',
+      })}
+    />
   );
 };
