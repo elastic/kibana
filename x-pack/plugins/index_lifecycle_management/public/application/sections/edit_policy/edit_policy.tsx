@@ -44,7 +44,7 @@ import {
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
 import { ColdPhase, DeletePhase, FrozenPhase, HotPhase, WarmPhase } from './phases';
 
-interface Props {
+export interface Props {
   policies: PolicyFromES[];
   policyName: string;
   getUrlForApp: (

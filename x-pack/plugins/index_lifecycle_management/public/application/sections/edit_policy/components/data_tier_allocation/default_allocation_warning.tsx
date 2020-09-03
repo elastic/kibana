@@ -44,7 +44,12 @@ export const DefaultAllocationWarning: FunctionComponent<Props> = ({
   return currentAllocationType === 'default' && !isCompatible ? (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut title={i18nTexts.notAvailable.title} iconType="alert" color="warning">
+      <EuiCallOut
+        data-test-subj="defaultAllocationWarning"
+        title={i18nTexts.notAvailable.title}
+        iconType="alert"
+        color="warning"
+      >
         {i18nTexts.notAvailable.body}
       </EuiCallOut>
     </>

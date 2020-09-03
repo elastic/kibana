@@ -70,6 +70,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
     return (
       <Fragment>
         <EuiCallOut
+          data-test-subj="noNodeAttributesWarning"
           style={{ maxWidth: 400 }}
           title={
             <FormattedMessage

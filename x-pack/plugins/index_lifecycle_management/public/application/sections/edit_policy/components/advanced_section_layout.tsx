@@ -22,11 +22,14 @@ export const AdvancedSectionLayout: FunctionComponent = ({ children }) => {
   return (
     <>
       <EuiButtonEmpty
+        data-test-subj="advancedAllocationSettingsButton"
         flush="left"
         size="s"
         iconSide="right"
         iconType={isShowingSection ? 'arrowDown' : 'arrowRight'}
-        onClick={() => setIsShowingSection((v) => !v)}
+        onClick={() => {
+          setIsShowingSection((v) => !v);
+        }}
       >
         <EuiText size="s">
           {isShowingSection ? i18nTexts.hideAdvancedLabel : i18nTexts.showAdvancedLabel}

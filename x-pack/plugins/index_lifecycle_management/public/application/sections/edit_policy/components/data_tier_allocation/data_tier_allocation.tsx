@@ -23,13 +23,13 @@ const i18nTexts = {
 export const DataTierAllocation = <T extends any>(
   props: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>
 ) => {
-  const { phaseData, setPhaseData } = props;
+  const { phaseData, setPhaseData, phase } = props;
 
   const isUsingDataTierAllocation =
     phaseData.dataTierAllocationType === 'custom' || phaseData.dataTierAllocationType === 'default';
 
   return (
-    <>
+    <div data-test-subj={`${phase}-dataTierAllocationControls`}>
       <EuiSwitch
         label={i18nTexts.useDataTierAllocation}
         checked={isUsingDataTierAllocation}
@@ -46,6 +46,7 @@ export const DataTierAllocation = <T extends any>(
         <AdvancedSectionLayout>
           <div style={{ paddingLeft: 24 }}>
             <EuiSwitch
+              data-test-subj="useCustomAllocationSwitch"
               label="Use custom data tier allocation."
               checked={phaseData.dataTierAllocationType === 'custom'}
               onChange={(e) => {
@@ -63,6 +64,6 @@ export const DataTierAllocation = <T extends any>(
           </div>
         </AdvancedSectionLayout>
       ) : null}
-    </>
+    </div>
   );
 };
