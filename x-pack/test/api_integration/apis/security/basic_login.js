@@ -148,10 +148,6 @@ export default function ({ getService }) {
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
       expect(apiResponse.body.authentication_provider).to.eql('__http__');
-      expect(apiResponse.body.authentication_realm).to.eql({
-        name: 'reserved',
-        type: 'reserved',
-      });
       expect(apiResponse.body.authentication_type).to.be('realm');
     });
 
