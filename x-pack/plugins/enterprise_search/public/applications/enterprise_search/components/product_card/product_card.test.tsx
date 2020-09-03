@@ -11,9 +11,18 @@ import { EuiCard } from '@elastic/eui';
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 
+jest.mock('../../../shared/telemetry', () => ({
+  sendTelemetry: jest.fn(),
+}));
+import { sendTelemetry } from '../../../shared/telemetry';
+
 import { ProductCard } from './';
 
 describe('ProductCard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders an App Search card', () => {
     const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} image="as.jpg" />);
     const card = wrapper.find(EuiCard).dive().shallow();
@@ -23,7 +32,10 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
-    expect(button.prop('data-test-subj')).toEqual('appSearchLaunchButton');
+    expect(button.prop('data-test-subj')).toEqual('LaunchAppSearchButton');
+
+    button.simulate('click');
+    expect(sendTelemetry).toHaveBeenCalledWith(expect.objectContaining({ metric: 'app_search' }));
   });
 
   it('renders a Workplace Search card', () => {
@@ -35,6 +47,11 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButton);
     expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
-    expect(button.prop('data-test-subj')).toEqual('workplaceSearchLaunchButton');
+    expect(button.prop('data-test-subj')).toEqual('LaunchWorkplaceSearchButton');
+
+    button.simulate('click');
+    expect(sendTelemetry).toHaveBeenCalledWith(
+      expect.objectContaining({ metric: 'workplace_search' })
+    );
   });
 });

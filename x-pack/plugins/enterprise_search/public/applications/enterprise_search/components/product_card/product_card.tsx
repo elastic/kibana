@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import upperFirst from 'lodash/upperFirst';
+import snakeCase from 'lodash/snakeCase';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
+
 import { EuiButton } from '../../../shared/react_router_helpers';
+import { sendTelemetry } from '../../../shared/telemetry';
+import { KibanaContext, IKibanaContext } from '../../../index';
 
 import './product_card.scss';
 
@@ -23,6 +28,8 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
+  const { http } = useContext(KibanaContext) as IKibanaContext;
+
   return (
     <EuiCard
       className="productCard"
@@ -43,7 +50,15 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
           fill
           to={product.URL}
           shouldNotCreateHref={true}
-          data-test-subj={`${product.ID}LaunchButton`}
+          onClick={() =>
+            sendTelemetry({
+              http,
+              product: 'enterprise_search',
+              action: 'clicked',
+              metric: snakeCase(product.ID),
+            })
+          }
+          data-test-subj={`Launch${upperFirst(product.ID)}Button`}
         >
           {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
             defaultMessage: `Launch {productName}`,
