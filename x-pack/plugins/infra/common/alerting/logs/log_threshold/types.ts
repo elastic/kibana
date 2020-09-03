@@ -156,6 +156,23 @@ export const AlertParamsRT = rt.intersection([
 
 export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
 
+export const isRatioAlert = (criteria: AlertParams['criteria']) => {
+  return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
+};
+
+export const getNumerator = (criteria: RatioCriteria) => {
+  return criteria[0];
+};
+
+export const getDenominator = (criteria: RatioCriteria) => {
+  return criteria[1];
+};
+
+export const hasGroupBy = (alertParams: AlertParams) => {
+  const { groupBy } = alertParams;
+  return groupBy && groupBy.length > 0 ? true : false;
+};
+
 // Chart previews //
 const chartPreviewHistogramBucket = rt.type({
   key: rt.number,

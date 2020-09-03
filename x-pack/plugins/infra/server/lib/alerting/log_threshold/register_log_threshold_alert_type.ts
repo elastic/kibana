@@ -34,6 +34,27 @@ const groupByActionVariableDescription = i18n.translate(
   }
 );
 
+const ratioActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.ratioActionVariableDescription',
+  {
+    defaultMessage: 'The ratio value of the two sets of criteria',
+  }
+);
+
+const numeratorConditionsActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.numeratorConditionsActionVariableDescription',
+  {
+    defaultMessage: 'The conditions that the numerator of the ratio needed to fulfill',
+  }
+);
+
+const denominatorConditionsActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.denominatorConditionsActionVariableDescription',
+  {
+    defaultMessage: 'The conditions that the denominator of the ratio needed to fulfill',
+  }
+);
+
 export async function registerLogThresholdAlertType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -60,6 +81,13 @@ export async function registerLogThresholdAlertType(
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },
+        // Ratio alerts
+        { name: 'ratio', description: ratioActionVariableDescription },
+        { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
+        {
+          name: 'denominatorConditions',
+          description: denominatorConditionsActionVariableDescription,
+        },
       ],
     },
     producer: 'logs',
