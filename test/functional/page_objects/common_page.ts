@@ -332,12 +332,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
-    async clickConfirmOnModal() {
+    async clickConfirmOnModal(ensureHidden = true) {
       log.debug('Clicking modal confirm');
       // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
       await testSubjects.exists('confirmModalTitleText');
       await testSubjects.click('confirmModalConfirmButton');
-      await this.ensureModalOverlayHidden();
+      if (ensureHidden) {
+        await this.ensureModalOverlayHidden();
+      }
     }
 
     async pressEnterKey() {
