@@ -116,6 +116,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on "show" button to open customize feature display', async () => {
+      await retry.waitFor(
+        'show button is visible',
+        async () => await testSubjects.exists('show-hide-section-link')
+      );
       await PageObjects.spaceSelector.clickShowFeatures();
       await a11y.testAppSnapshot();
     });
