@@ -86,7 +86,7 @@ const getColumnDefinitions = (): Array<EuiBasicTableColumn<Immutable<TrustedApp>
 ];
 
 export const TrustedAppsList = memo(() => {
-  const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex) - 1;
+  const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex);
   const pageSize = useTrustedAppsSelector(getListCurrentPageSize);
   const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
   const listItems = useTrustedAppsSelector(getListItems);
