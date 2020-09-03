@@ -186,7 +186,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 
 [float]
 [[lens]]
-=== Create visualization panels with Lens
+=== Create panels with Lens
 
 *Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields 
 as you want onto the visualization builder pane, and *Lens* uses heuristics to decide how to apply each field to the visualization.
