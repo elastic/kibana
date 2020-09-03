@@ -130,7 +130,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const onError = useCallback(
-    (error: Error) => {
+    (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
       onCancel();
     },
@@ -138,7 +138,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const onSuccess = useCallback(
-    (updated: number, conflicts: number) => {
+    (updated: number, conflicts: number): void => {
       addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
       onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
       if (conflicts > 0) {
@@ -164,7 +164,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       exceptionItems,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-    }) => {
+    }): void => {
       setExceptionItemsToAdd(exceptionItems);
     },
     [setExceptionItemsToAdd]
@@ -197,7 +197,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const handleFetchOrCreateExceptionListError = useCallback(
-    (error: Error, statusCode: number | null, message: string | null) => {
+    (error: Error, statusCode: number | null, message: string | null): void => {
       setFetchOrCreateListError({
         reason: error.message,
         code: statusCode,
@@ -216,7 +216,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onSuccess: handleRuleChange,
   });
 
-  const initialExceptionItems = useMemo(() => {
+  const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
     if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
       return defaultEndpointExceptionItems(
         exceptionListType,
@@ -229,7 +229,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
@@ -245,34 +245,34 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     signalIndexPatterns,
   ]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (shouldDisableBulkClose === true) {
       setShouldBulkCloseAlert(false);
     }
   }, [shouldDisableBulkClose]);
 
   const onCommentChange = useCallback(
-    (value: string) => {
+    (value: string): void => {
       setComment(value);
     },
     [setComment]
   );
 
   const onCloseAlertCheckboxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
       setShouldCloseAlert(event.currentTarget.checked);
     },
     [setShouldCloseAlert]
   );
 
   const onBulkCloseAlertCheckboxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
       setShouldBulkCloseAlert(event.currentTarget.checked);
     },
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback(() => {
+  const retrieveAlertOsTypes = useCallback((): string[] => {
     const osDefaults = ['windows', 'macos'];
     if (alertData) {
       const osTypes = getMappedNonEcsValue({
@@ -287,7 +287,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return osDefaults;
   }, [alertData]);
 
-  const enrichExceptionItems = useCallback(() => {
+  const enrichExceptionItems = useCallback((): Array<
+    ExceptionListItemSchema | CreateExceptionListItemSchema
+  > => {
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
       comment !== ''
@@ -300,7 +302,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
-  const onAddExceptionConfirm = useCallback(() => {
+  const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems !== null) {
       const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
       const bulkCloseIndex =
@@ -317,7 +319,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   ]);
 
   const isSubmitButtonDisabled = useMemo(
-    () =>
+    (): boolean =>
       fetchOrCreateListError != null ||
       exceptionItemsToAdd.every((item) => item.entries.length === 0),
     [fetchOrCreateListError, exceptionItemsToAdd]
