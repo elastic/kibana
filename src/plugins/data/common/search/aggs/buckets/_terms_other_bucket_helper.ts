@@ -140,7 +140,7 @@ export const buildOtherBucketAgg = (
   const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
-  const indexPattern = aggWithOtherBucket.params.field.indexPattern;
+  const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;
 
   // create filters aggregation
   const filterAgg = aggConfigs.createAggConfig(
@@ -211,7 +211,7 @@ export const buildOtherBucketAgg = (
       filters.push(
         buildExistsFilter(
           aggWithOtherBucket.params.field,
-          aggWithOtherBucket.params.field.indexPattern
+          aggWithOtherBucket.aggConfigs.indexPattern
         )
       );
     }
@@ -264,7 +264,7 @@ export const mergeOtherBucketAggResponse = (
     const phraseFilter = buildPhrasesFilter(
       otherAgg.params.field,
       requestFilterTerms,
-      otherAgg.params.field.indexPattern
+      otherAgg.aggConfigs.indexPattern
     );
     phraseFilter.meta.negate = true;
     bucket.filters = [phraseFilter];
@@ -276,7 +276,7 @@ export const mergeOtherBucketAggResponse = (
       )
     ) {
       bucket.filters.push(
-        buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
+        buildExistsFilter(otherAgg.params.field, otherAgg.aggConfigs.indexPattern)
       );
     }
     aggResultBuckets.push(bucket);
