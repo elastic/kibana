@@ -147,7 +147,7 @@ export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) =>
     titleSize="xs"
     actions={
       <EuiButton
-        href={`${basePath}/app/ml#//jobs/new_job/step/index_or_search`}
+        href={`${basePath}/app/ml#/jobs/new_job/step/index_or_search`}
         iconType="popout"
         iconSide="right"
         size="s"
