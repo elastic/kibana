@@ -39,7 +39,7 @@ function convertStatsIntoList(
       const dataRoles = nodeStats.roles.filter((r) => r.startsWith('data')) as NodeRole[];
       for (const role of dataRoles) {
         accum.nodesByRoles[role as NodeRole] = accum.nodesByRoles[role] ?? [];
-        accum.nodesByRoles[role as NodeRole].push(nodeId);
+        accum.nodesByRoles[role as NodeRole]!.push(nodeId);
       }
       return accum;
     },
