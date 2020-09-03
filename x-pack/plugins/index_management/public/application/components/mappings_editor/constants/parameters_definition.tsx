@@ -425,7 +425,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           id="xpack.idxMgmt.mappingsEditor.parameters.metaHelpText"
           defaultMessage="Use JSON format: {code}"
           values={{
-            code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+            code: <EuiCode>{JSON.stringify({ arbitrary_key: 'anything_goes' })}</EuiCode>,
           }}
         />
       ),
