@@ -255,7 +255,7 @@ export function createConfig(
     type: keyof ProvidersConfigType;
     name: string;
     order: number;
-    accessAgreement: boolean;
+    hasAccessAgreement: boolean;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
@@ -266,7 +266,7 @@ export function createConfig(
           type: type as any,
           name,
           order,
-          accessAgreement: !!accessAgreement?.message,
+          hasAccessAgreement: !!accessAgreement?.message,
         });
       }
     }

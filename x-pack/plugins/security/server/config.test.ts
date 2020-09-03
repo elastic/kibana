@@ -904,13 +904,13 @@ describe('createConfig()', () => {
         },
         "sortedProviders": Array [
           Object {
-            "accessAgreement": false,
+            "hasAccessAgreement": false,
             "name": "saml",
             "order": 0,
             "type": "saml",
           },
           Object {
-            "accessAgreement": false,
+            "hasAccessAgreement": false,
             "name": "basic",
             "order": 1,
             "type": "basic",
@@ -1008,31 +1008,31 @@ describe('createConfig()', () => {
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "accessAgreement": true,
+          "hasAccessAgreement": true,
           "name": "oidc1",
           "order": 0,
           "type": "oidc",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "saml2",
           "order": 1,
           "type": "saml",
         },
         Object {
-          "accessAgreement": true,
+          "hasAccessAgreement": true,
           "name": "saml1",
           "order": 2,
           "type": "saml",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "basic1",
           "order": 3,
           "type": "basic",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "oidc2",
           "order": 4,
           "type": "oidc",
@@ -1059,31 +1059,31 @@ describe('createConfig()', () => {
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "oidc1",
           "order": 0,
           "type": "oidc",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "saml2",
           "order": 1,
           "type": "saml",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "saml1",
           "order": 2,
           "type": "saml",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "basic1",
           "order": 3,
           "type": "basic",
         },
         Object {
-          "accessAgreement": false,
+          "hasAccessAgreement": false,
           "name": "oidc2",
           "order": 4,
           "type": "oidc",
