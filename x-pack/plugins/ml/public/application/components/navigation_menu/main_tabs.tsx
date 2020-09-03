@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,16 +65,24 @@ function getTabs(disableLinks: boolean): Tab[] {
 interface TabData {
   testSubject: string;
   pathId?: MlUrlGeneratorState['page'];
+  name: string;
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
-  overview: { testSubject: 'mlMainTab overview' },
+  overview: { testSubject: 'mlMainTab overview', name: 'Overview' },
   // Note that anomaly detection jobs list is mapped to ml#/jobs.
-  anomaly_detection: { testSubject: 'mlMainTab anomalyDetection', pathId: 'jobs' },
-  data_frame_analytics: { testSubject: 'mlMainTab dataFrameAnalytics' },
-  datavisualizer: { testSubject: 'mlMainTab dataVisualizer' },
-  settings: { testSubject: 'mlMainTab settings' },
-  'access-denied': { testSubject: 'mlMainTab overview' },
+  anomaly_detection: {
+    testSubject: 'mlMainTab anomalyDetection',
+    name: 'Anomaly Detection',
+    pathId: 'jobs',
+  },
+  data_frame_analytics: {
+    testSubject: 'mlMainTab dataFrameAnalytics',
+    name: 'Data Frame Analytics',
+  },
+  datavisualizer: { testSubject: 'mlMainTab dataVisualizer', name: 'Data Visualizer' },
+  settings: { testSubject: 'mlMainTab settings', name: 'Settings' },
+  'access-denied': { testSubject: 'mlMainTab overview', name: 'Access Denied' },
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
@@ -91,8 +99,13 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
     });
+
     await navigateToPath(path, true); // set preserve search to true
   };
+
+  useEffect(() => {
+    document.title = `ML - ${TAB_DATA[selectedTabId].name} - Kibana`;
+  }, [selectedTabId]);
 
   return (
     <EuiTabs display="condensed">
