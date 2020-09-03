@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
+import { RequestHandlerContext } from 'src/core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+
+export interface SearchEnhancements {
+  defaultStrategy: string;
+}
 
 export interface ISearchOptions {
   /**
@@ -49,6 +53,11 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
+
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
 export interface ISearchStart<

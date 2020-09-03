@@ -72,6 +72,8 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
+import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -90,7 +92,6 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
-import { ISearchStartLegacy } from '../types';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -111,8 +112,8 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies {
   getConfig: GetConfigFn;
   search: ISearchGeneric;
-  legacySearch: ISearchStartLegacy;
-  esShardTimeout: number;
+  http: HttpStart;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 /** @public **/
@@ -226,10 +227,9 @@ export class SearchSource {
    * @return {Observable<SearchResponse<unknown>>}
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
-    const { search, esShardTimeout, getConfig } = this.dependencies;
+    const { search, getConfig } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
-      esShardTimeout,
       getConfig,
     });
 
@@ -243,7 +243,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { esShardTimeout, legacySearch, getConfig } = this.dependencies;
+    const { http, getConfig, loadingCount$ } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -252,9 +252,9 @@ export class SearchSource {
         ...options,
       },
       {
-        legacySearchService: legacySearch,
+        http,
         config: { get: getConfig },
-        esShardTimeout,
+        loadingCount$,
       }
     );
   }

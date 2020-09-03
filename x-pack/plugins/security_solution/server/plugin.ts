@@ -44,7 +44,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
-  APP_ICON,
   SERVER_APP_ID,
   SecurityPageName,
   SIGNALS_ID,
@@ -60,6 +59,7 @@ import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
+import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 
 export interface SetupPlugins {
@@ -167,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
     plugins.features.registerFeature({
@@ -175,7 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: APP_ICON,
+      icon: 'logoSecurity',
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
@@ -306,6 +307,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager?.agentService,
+      exceptionsListService: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
       logger: this.logger,
       manifestManager,
       registerIngestCallback,

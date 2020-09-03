@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { debounce } from 'lodash';
 import {
@@ -14,17 +14,28 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
-import { IAsyncSearchRequest } from '../../common';
+import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private uiSettingsSub: Subscription;
+  private searchTimeout: number;
+
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param deps `SearchInterceptorDeps`
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @internal
    */
-  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
-    super(deps, requestTimeout);
+  constructor(deps: SearchInterceptorDeps) {
+    super(deps);
+    this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+
+    this.uiSettingsSub = deps.uiSettings
+      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
+      .subscribe((timeout: number) => {
+        this.searchTimeout = timeout;
+      });
+  }
+
+  public stop() {
+    this.uiSettingsSub.unsubscribe();
   }
 
   /**
@@ -42,17 +53,16 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    request.params = {
-      ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-      ...request.params,
-    };
-
-    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const { combinedSignal, cleanup } = this.setupAbortSignal({
+      abortSignal: options.signal,
+      timeout: this.searchTimeout,
+    });
     const aborted$ = from(toPromise(combinedSignal));
+    const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+    return this.runSearch(request, combinedSignal, strategy).pipe(
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
         if (!response || (!response.isRunning && response.isPartial)) {
@@ -69,7 +79,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ ...request, id }, combinedSignal, options?.strategy);
+            return this.runSearch({ ...request, id }, combinedSignal, strategy);
           })
         );
       }),
@@ -80,7 +90,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/es/${id}`);
+            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
           }
         },
       }),

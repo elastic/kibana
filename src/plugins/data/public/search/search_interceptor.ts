@@ -78,10 +78,7 @@ export class SearchInterceptor {
    * @param application  The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(
-    protected readonly deps: SearchInterceptorDeps,
-    protected readonly requestTimeout?: number
-  ) {
+  constructor(protected readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
@@ -89,6 +86,9 @@ export class SearchInterceptor {
     });
   }
 
+  /**
+   * @internal
+   */
   protected runSearch(
     request: IEsSearchRequest,
     signal: AbortSignal,
@@ -122,7 +122,9 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupTimers(options);
+      const { combinedSignal, cleanup } = this.setupAbortSignal({
+        abortSignal: options?.signal,
+      });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
@@ -140,11 +142,20 @@ export class SearchInterceptor {
     });
   }
 
-  protected setupTimers(options?: ISearchOptions) {
+  /**
+   * @internal
+   */
+  protected setupAbortSignal({
+    abortSignal,
+    timeout,
+  }: {
+    abortSignal?: AbortSignal;
+    timeout?: number;
+  }) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = (this.requestTimeout ?? 0) > 0 ? timer(this.requestTimeout) : NEVER;
+    const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
       this.showTimeoutError(new AbortError());
@@ -158,7 +169,7 @@ export class SearchInterceptor {
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      ...(options?.signal ? [options.signal] : []),
+      ...(abortSignal ? [abortSignal] : []),
     ];
 
     const combinedSignal = getCombinedSignal(signals);

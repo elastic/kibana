@@ -123,6 +123,15 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
+ * Returns a function that returns the information needed to display related event details based on
+ * the related event's entityID and its own ID.
+ */
+export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventDisplayInfoByEntityAndSelfID
+);
+
+/**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  */
@@ -290,6 +299,15 @@ export const ariaFlowtoNodeID: (
       };
     });
   }
+);
+
+/**
+ * The legacy `crumbEvent` and `crumbId` parameters.
+ * @deprecated
+ */
+export const breadcrumbParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.breadcrumbParameters
 );
 
 /**

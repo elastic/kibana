@@ -32,7 +32,12 @@ export const config = {
       pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
       maxConcurrentConnections: schema.number({ defaultValue: 0 }),
       kibana: schema.object({
-        host: schema.maybe(schema.string()),
+        host: schema.maybe(
+          schema.oneOf([
+            schema.uri({ scheme: ['http', 'https'] }),
+            schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+          ])
+        ),
         ca_sha256: schema.maybe(schema.string()),
       }),
       elasticsearch: schema.object({
