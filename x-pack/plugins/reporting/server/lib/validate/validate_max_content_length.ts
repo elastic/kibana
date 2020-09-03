@@ -28,6 +28,7 @@ export async function validateMaxContentLength(
   const elasticClusterSettings = defaults({}, persistent, transient, defaultSettings);
 
   const elasticSearchMaxContent = get(elasticClusterSettings, 'http.max_content_length', '100mb');
+  // TODO: use ByteSizeValue.parse instead of numeral
   const elasticSearchMaxContentBytes = new ByteSizeValue(
     numeral().unformat(elasticSearchMaxContent.toUpperCase())
   );
