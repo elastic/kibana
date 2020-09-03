@@ -20,19 +20,21 @@ import { createFilter } from '../../../common/containers/helpers';
 
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  UncommonProcessesRequestOptions,
-  UncommonProcessesStrategyResponse,
+  HostUncommonProcessesRequestOptions,
+  HostUncommonProcessesStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { HostsQueries } from '../../../../common/search_strategy/security_solution/hosts';
 import * as i18n from './translations';
 import { DocValueFields, SortField } from '../../../../common/search_strategy/security_solution';
 import { ESTermQuery } from '../../../../common/typed_json';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 
 const ID = 'uncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -68,7 +70,7 @@ export const useUncommonProcesses = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [uncommonProcessesRequest, setUncommonProcessesRequest] = useState<
-    UncommonProcessesRequestOptions
+    HostUncommonProcessesRequestOptions
   >({
     defaultIndex,
     docValueFields: docValueFields ?? [],
@@ -116,17 +118,20 @@ export const useUncommonProcesses = ({
   );
 
   const uncommonProcessesSearch = useCallback(
-    (request: UncommonProcessesRequestOptions) => {
+    (request: HostUncommonProcessesRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<UncommonProcessesRequestOptions, UncommonProcessesStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
-          })
+          .search<HostUncommonProcessesRequestOptions, HostUncommonProcessesStrategyResponse>(
+            request,
+            {
+              strategy: 'securitySolutionSearchStrategy',
+              signal: abortCtrl.current.signal,
+            }
+          )
           .subscribe({
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
@@ -135,7 +140,7 @@ export const useUncommonProcesses = ({
                   setUncommonProcessesResponse((prevResponse) => ({
                     ...prevResponse,
                     uncommonProcesses: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,

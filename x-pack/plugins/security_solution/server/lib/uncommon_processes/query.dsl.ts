@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../../../common/ecs/ecs_fields';
-
 import { createQueryFilterClauses } from '../../utils/build_query';
+import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { RequestOptionsPaginated } from '../framework';
 

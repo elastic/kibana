@@ -20,12 +20,12 @@ import {
   Hits,
 } from '../../';
 
-export interface UncommonProcessesRequestOptions extends RequestOptionsPaginated {
+export interface HostUncommonProcessesRequestOptions extends RequestOptionsPaginated {
   sort: SortField;
   defaultIndex: string[];
 }
 
-export interface UncommonProcessesStrategyResponse extends IEsSearchResponse {
+export interface HostUncommonProcessesStrategyResponse extends IEsSearchResponse {
   edges: UncommonProcessesEdges[];
 
   totalCount: number;

@@ -8,6 +8,7 @@ import { get, getOr } from 'lodash/fp';
 
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
+import { processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { HostHits, TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -18,7 +19,6 @@ import {
   UncommonProcessesAdapter,
   UncommonProcessHit,
 } from './types';
-import { processFieldsMap, userFieldsMap } from '../../../common/ecs/ecs_fields';
 
 export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
