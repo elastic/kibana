@@ -136,6 +136,7 @@ custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
 instead be assigned the `kibana_admin` role to maintain their current
 access level.
 
+[float]
 === `kibana_dashboard_only_user` role has been removed.
 
 *Details:* The `kibana_dashboard_only_user` role has been removed.
