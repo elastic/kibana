@@ -68,7 +68,6 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  search,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -305,17 +304,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-
-  $scope.$watch(
-    () => uiCapabilities.discover.saveQuery,
-    (newCapability) => {
-      $scope.showSaveQuery = newCapability;
-    }
-  );
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -510,8 +500,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       },
     ]);
   }
-
-  $scope.screenTitle = savedSearch.title;
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -866,9 +854,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         tabifiedData,
         getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
-      if ($scope.vis.data.aggs.aggs[1]) {
-        $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
-      }
       $scope.updateTime();
     }
 

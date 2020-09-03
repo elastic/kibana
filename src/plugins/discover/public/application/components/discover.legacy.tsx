@@ -33,11 +33,11 @@ import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
+import { search } from '../../../../data/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 export function DiscoverLegacy({
   addColumn,
-  bucketInterval,
-  config,
   fetch,
   fetchError,
   fetchCounter,
@@ -46,8 +46,6 @@ export function DiscoverLegacy({
   histogramData,
   hits,
   indexPattern,
-  indexPatternList,
-  intervalOptions,
   minimumVisibleRows,
   onAddFilter,
   onChangeInterval,
@@ -59,11 +57,8 @@ export function DiscoverLegacy({
   resetQuery,
   resultState,
   rows,
-  screenTitle,
   searchSource,
   setIndexPattern,
-  showTimeCol,
-  showSaveQuery,
   state,
   timefilterUpdateHandler,
   timeRange,
@@ -72,20 +67,25 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
 }: any) {
+  const uiCapabilities = useKibana().services.application?.capabilities?.discover;
+
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const toMoment = function (datetime: string) {
     if (!datetime) {
       return '';
     }
-    return moment(datetime).format(config.get('dateFormat'));
+    return moment(datetime).format(opts.config.get('dateFormat'));
   };
   const { TopNavMenu } = getServices().navigation.ui;
-  const { savedSearch } = opts;
+  const { savedSearch, indexPatternList } = opts;
+
+  const bucketInterval =
+    vis && vis.data.aggs.aggs[1] ? $scope.vis.data.aggs.aggs[1].buckets.getInterval() : null;
 
   return (
     <I18nProvider>
       <div className="app-container" data-fetch-counter={fetchCounter}>
-        <h1 className="euiScreenReaderOnly">{screenTitle}</h1>
+        <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
@@ -96,7 +96,7 @@ export function DiscoverLegacy({
           savedQueryId={state.savedQuery}
           screenTitle={screenTitle}
           showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={showSaveQuery}
+          showSaveQuery={uiCapabilities?.saveQuery}
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
@@ -166,7 +166,7 @@ export function DiscoverLegacy({
                     <TimechartHeader
                       from={toMoment(timeRange.from)}
                       to={toMoment(timeRange.to)}
-                      options={intervalOptions}
+                      options={search.aggs.intervalOptions}
                       onChangeInterval={onChangeInterval}
                       stateInterval={state.interval}
                       showScaledInfo={bucketInterval.scaled}
@@ -213,7 +213,7 @@ export function DiscoverLegacy({
                             sampleSize={opts.sampleSize}
                             searchDescription={opts.savedSearch.description}
                             searchTitle={opts.savedSearch.lastSavedTitle}
-                            showTimeCol={showTimeCol}
+                            showTimeCol={opts.timefield}
                             getContextAppHref={getContextAppHref}
                             onAddColumn={addColumn}
                             onFilter={onAddFilter}
