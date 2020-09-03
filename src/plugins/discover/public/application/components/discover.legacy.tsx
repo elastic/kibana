@@ -80,7 +80,7 @@ export function DiscoverLegacy({
   const { savedSearch, indexPatternList } = opts;
 
   const bucketInterval =
-    vis && vis.data.aggs.aggs[1] ? $scope.vis.data.aggs.aggs[1].buckets.getInterval() : null;
+    vis && vis.data.aggs.aggs[1] ? vis.data.aggs.aggs[1].buckets.getInterval() : null;
 
   return (
     <I18nProvider>
@@ -94,9 +94,9 @@ export function DiscoverLegacy({
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
           savedQueryId={state.savedQuery}
-          screenTitle={screenTitle}
+          screenTitle={savedSearch.title}
           showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={uiCapabilities?.saveQuery}
+          showSaveQuery={!!uiCapabilities?.saveQuery}
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
