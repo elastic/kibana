@@ -36,7 +36,6 @@ import {
 
 export * from './hosts';
 export * from './network';
-export * from '../common';
 
 export type FactoryQueryTypes = HostsQueries | NetworkQueries;
 
