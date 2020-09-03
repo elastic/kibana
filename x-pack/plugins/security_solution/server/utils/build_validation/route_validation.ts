@@ -42,7 +42,7 @@ export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
   );
 
 export const buildRouteValidationWithExcess = <
-  T extends rt.InterfaceType<rt.Props> | GenericIntersectionC,
+  T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
   A = rt.TypeOf<T>
 >(
   schema: T
