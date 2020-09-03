@@ -650,12 +650,4 @@ export class IndexPattern implements IIndexPattern {
         });
       });
   }
-
-  toJSON() {
-    return this.id;
-  }
-
-  toString() {
-    return '' + this.toJSON();
-  }
 }

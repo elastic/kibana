@@ -189,7 +189,7 @@ describe('EnhancedSearchInterceptor', () => {
       const abortController = new AbortController();
       abortController.abort();
 
-      const response = searchInterceptor.search({}, { signal: abortController.signal });
+      const response = searchInterceptor.search({}, { abortSignal: abortController.signal });
       response.subscribe({ next, error });
 
       await timeTravel(500);
@@ -225,7 +225,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       const response = searchInterceptor.search(
         {},
-        { signal: abortController.signal, pollInterval: 0 }
+        { abortSignal: abortController.signal, pollInterval: 0 }
       );
       response.subscribe({ next, error });
 

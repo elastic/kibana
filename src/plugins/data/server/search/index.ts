@@ -17,13 +17,7 @@
  * under the License.
  */
 
-export {
-  ISearchStrategy,
-  ISearchOptions,
-  ISearchSetup,
-  ISearchStart,
-  SearchEnhancements,
-} from './types';
+export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 export { getDefaultSearchParams, getTotalLoaded } from './es_search';
 
