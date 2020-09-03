@@ -34,7 +34,6 @@ export const postNewAgentActionHandlerBuilder = function (
       });
 
       const body: PostNewAgentActionResponse = {
-        success: true,
         item: savedAgentAction,
       };
 
