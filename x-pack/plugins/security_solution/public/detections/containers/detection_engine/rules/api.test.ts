@@ -59,7 +59,7 @@ describe('Detections Rules API', () => {
       fetchMock.mockResolvedValue(getRulesSchemaMock());
     });
 
-    test('POSTs rule', async () => {
+    test('PUTs rule', async () => {
       const payload = getUpdateRulesSchemaMock();
       await updateRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
