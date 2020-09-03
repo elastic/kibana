@@ -19,8 +19,6 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
-
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
   getDataFrameAnalyticsProgressPhase,
@@ -136,9 +134,6 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow, basePath: string) => (
-  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id, basePath)}>{item.id}</EuiLink>
-);
 export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
   const [href, setHref] = useState<string | undefined>(undefined);
   const mlUrlGenerator = useMlUrlGenerator();
