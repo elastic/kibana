@@ -8,7 +8,7 @@ import React from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
-import { NetworkTopCountriesQuery } from '../../containers/network_top_countries';
+import { useNetworkTopCountries } from '../../containers/network_top_countries';
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
@@ -23,46 +23,38 @@ export const NetworkTopCountriesQueryTable = ({
   startDate,
   type,
   indexPattern,
-}: NetworkWithIndexComponentsQueryTableProps) => (
-  <NetworkTopCountriesQuery
-    endDate={endDate}
-    flowTarget={flowTarget}
-    filterQuery={filterQuery}
-    ip={ip}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={type}
-  >
-    {({
-      id,
-      inspect,
-      isInspected,
-      loading,
-      loadPage,
-      networkTopCountries,
-      pageInfo,
-      refetch,
-      totalCount,
-    }) => (
-      <NetworkTopCountriesTableManage
-        data={networkTopCountries}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        flowTargeted={flowTarget}
-        id={id}
-        indexPattern={indexPattern}
-        inspect={inspect}
-        isInspect={isInspected}
-        loading={loading}
-        loadPage={loadPage}
-        refetch={refetch}
-        setQuery={setQuery}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        totalCount={totalCount}
-        type={type}
-      />
-    )}
-  </NetworkTopCountriesQuery>
-);
+}: NetworkWithIndexComponentsQueryTableProps) => {
+  const [
+    loading,
+    { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
+  ] = useNetworkTopCountries({
+    endDate,
+    flowTarget,
+    filterQuery,
+    ip,
+    skip,
+    startDate,
+    type,
+  });
+
+  return (
+    <NetworkTopCountriesTableManage
+      data={networkTopCountries}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      flowTargeted={flowTarget}
+      id={id}
+      indexPattern={indexPattern}
+      inspect={inspect}
+      isInspect={isInspected}
+      loading={loading}
+      loadPage={loadPage}
+      refetch={refetch}
+      setQuery={setQuery}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      totalCount={totalCount}
+      type={type}
+    />
+  );
+};
 
 NetworkTopCountriesQueryTable.displayName = 'NetworkTopCountriesQueryTable';

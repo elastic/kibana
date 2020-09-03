@@ -76,9 +76,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
     }
   }
   const SavedVis = createSavedVisClass(services);
-  return new SavedObjectLoaderVisualize(
-    SavedVis,
-    savedObjectsClient,
-    services.chrome
-  ) as SavedObjectLoader & { findListItems: (search: string, size: number) => any };
+  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient) as SavedObjectLoader & {
+    findListItems: (search: string, size: number) => any;
+  };
 }

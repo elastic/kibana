@@ -41,7 +41,7 @@ interface Options {
  * into the repository.
  */
 export async function generateNoticeFromSource({ productName, directory, log }: Options) {
-  const globs = ['**/*.{js,less,css,ts}'];
+  const globs = ['**/*.{js,less,css,ts,tsx}'];
 
   const options = {
     cwd: directory,
