@@ -23,15 +23,3 @@ export { deepCloneWithBuffers } from './deep_clone_with_buffers';
 export { unset } from './unset';
 export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
 export { IS_KIBANA_RELEASE } from './artifact_type';
-
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';

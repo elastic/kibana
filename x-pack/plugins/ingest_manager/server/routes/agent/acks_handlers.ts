@@ -46,7 +46,6 @@ export const postAgentAcksHandlerBuilder = function (
 
       const body: PostAgentAcksResponse = {
         action: 'acks',
-        success: true,
       };
 
       return response.ok({ body });
