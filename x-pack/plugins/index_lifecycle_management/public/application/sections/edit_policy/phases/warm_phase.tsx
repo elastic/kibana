@@ -194,7 +194,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                 <DescribedFormField
                   title={
                     <h3>
-                      {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
+                      {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
                         defaultMessage: 'Replicas',
                       })}
                     </h3>
