@@ -1,12 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
     "./index.d.ts",
     "./src/**/*.ts",
-    "./dist/*.d.ts",
+    "./dist/*.d.ts"
   ],
   "exclude": [],
   "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-pm",
     "types": [
       "jest",
       "node"
