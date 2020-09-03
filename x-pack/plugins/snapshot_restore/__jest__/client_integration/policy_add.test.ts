@@ -17,11 +17,6 @@ import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const { setup } = pageHelpers.policyAdd;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 // mock for EuiSelectable's virtualization
 jest.mock('react-virtualized-auto-sizer', () => {
   return ({
