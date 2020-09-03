@@ -6,8 +6,8 @@
 
 import * as t from 'io-ts';
 
-import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
 import {
+  SortOrder,
   author,
   building_block_type,
   license,
@@ -16,7 +16,7 @@ import {
   severity_mapping,
   timestamp_override,
   threshold,
-  SortOrder,
+  type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { listArray } from '../../../../../common/detection_engine/schemas/types';
 import {
@@ -84,7 +84,7 @@ export const RuleSchema = t.intersection([
     severity: t.string,
     severity_mapping,
     tags: t.array(t.string),
-    type: RuleTypeSchema,
+    type,
     to: t.string,
     threat: t.array(t.unknown),
     updated_at: t.string,
