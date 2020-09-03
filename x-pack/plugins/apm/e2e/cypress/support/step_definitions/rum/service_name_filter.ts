@@ -6,6 +6,7 @@
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from '../apm';
+import { verifyClientMetrics } from './client_metrics_helper';
 
 When('a user changes the selected service name', (filterName) => {
   // wait for all loading to finish
@@ -16,15 +17,7 @@ When('a user changes the selected service name', (filterName) => {
 });
 
 Then(`it displays relevant client metrics`, () => {
-  const clientMetrics = '[data-cy=client-metrics] .euiStat__title';
+  const metrics = ['0.01 sec', '0.07 sec', '7 '];
 
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
-
-  cy.get(clientMetrics).eq(2).should('have.text', '7 ');
-
-  cy.get(clientMetrics).eq(1).should('have.text', '0.07 sec');
-
-  cy.get(clientMetrics).eq(0).should('have.text', '0.01 sec');
+  verifyClientMetrics(metrics, false);
 });

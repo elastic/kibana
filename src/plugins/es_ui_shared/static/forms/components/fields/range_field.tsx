@@ -39,6 +39,8 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       }>;
       field.onChange(event);
     },
+    // https://github.com/elastic/kibana/issues/73972
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [field.onChange]
   );
 
