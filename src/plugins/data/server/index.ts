@@ -198,6 +198,7 @@ export {
   OptionedValueProp,
   ParsedInterval,
   // search
+  ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
   // tabify
@@ -208,7 +209,6 @@ export {
 
 export {
   ISearchStrategy,
-  ISearchOptions,
   ISearchSetup,
   ISearchStart,
   getDefaultSearchParams,

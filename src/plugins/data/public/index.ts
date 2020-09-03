@@ -342,7 +342,6 @@ export {
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
   extractSearchSourceReferences,
-  FetchOptions,
   getEsPreference,
   getSearchParamsFromRequest,
   IEsSearchRequest,
@@ -352,7 +351,6 @@ export {
   injectSearchSourceReferences,
   ISearch,
   ISearchGeneric,
-  ISearchOptions,
   ISearchSource,
   parseSearchSourceJSON,
   RequestTimeoutError,
@@ -366,6 +364,8 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
 } from './search';
+
+export { ISearchOptions } from '../common';
 
 // Search namespace
 export const search = {
