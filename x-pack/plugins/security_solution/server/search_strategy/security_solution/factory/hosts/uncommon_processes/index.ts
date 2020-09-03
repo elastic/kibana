@@ -16,7 +16,6 @@ import {
   HostUncommonProcessesStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 
-// TO DO need to move all this types in common
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 import { SecuritySolutionFactory } from '../../types';
