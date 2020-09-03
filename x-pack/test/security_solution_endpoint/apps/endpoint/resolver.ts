@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('Endpoint Event Resolver', function () {
-
     before(async () => {
       await esArchiver.load('endpoint/resolver_tree/api_feature', { useCreate: true });
       await pageObjects.hosts.navigateToSecurityHostsPage();
@@ -43,8 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const text = await value._webElement.getText();
         TableData.push(text.split('\n')[0]);
       }
-
-      await testSubjects.click('resolver:graph-controls:zoom-out');
+      await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
       const Nodes = await testSubjects.findAll('resolver:node:primary-button');
       for (const value of Nodes) {
         nodeData.push(await value._webElement.getText());
@@ -53,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(TableData[i]).to.eql(nodeData[i]);
       }
       expect(nodeData.length).to.eql(TableData.length);
-      await testSubjects.click('resolver:graph-controls:zoom-in');
+      await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
     });
 
     it('resolver Nodes navigation Up', async () => {
@@ -74,10 +72,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('resolver Nodes navigation Down', async () => {
       const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
-      await testSubjects.click('resolver:graph-controls:south-button');
+      await (await testSubjects.find('resolver:graph-controls:south-button')).click();
 
       const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
+        console.log(NewNodeDataStyle[i]);
+        console.log(NewNodeDataStyle[i].top);
         expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].top)
         );
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('resolver Nodes navigation Left', async () => {
       const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
-      await testSubjects.click('resolver:graph-controls:east-button');
+      await (await testSubjects.find('resolver:graph-controls:east-button')).click();
 
       const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
@@ -121,8 +121,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('resolver Nodes navigation Center', async () => {
       const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
-      await testSubjects.click('resolver:graph-controls:east-button');
-      await testSubjects.click('resolver:graph-controls:south-button');
+      await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+      await (await testSubjects.find('resolver:graph-controls:south-button')).click();
 
       const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
@@ -148,7 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('resolver Nodes navigation zoom in', async () => {
       const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
-      await testSubjects.click('resolver:graph-controls:zoom-in');
+      await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
 
       const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 1; i < NewNodeDataStyle.length; i++) {
@@ -164,13 +164,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(parseFloat(OriginalNodeDataStyle[i].height)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].height)
         );
-        await testSubjects.click('resolver:graph-controls:zoom-out');
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
       }
     });
 
     it('resolver Nodes navigation zoom out', async () => {
       const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
-      await testSubjects.click('resolver:graph-controls:zoom-out');
+      await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
       const NewNodeDataStyle1 = await pageObjects.hosts.parseStyles();
       for (let i = 1; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
@@ -186,7 +186,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(OriginalNodeDataStyle[i].height)
         );
       }
-      await testSubjects.click('resolver:graph-controls:zoom-in');
+      await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
     });
 
     after(async () => {

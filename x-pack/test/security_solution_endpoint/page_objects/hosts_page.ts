@@ -10,6 +10,7 @@ import { deleteAlertsStream } from '../../security_solution_endpoint_api_int/api
 import { deleteMetadataStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deletePolicyStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deleteTelemetryStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
+export interface DataStyle {left: string; top: string; width: string; height: string;}
 
 export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
@@ -22,7 +23,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
    * @param {string} styles
    * @returns {Object}
    */
-  const parseStyle = (styles: string): object =>
+  const parseStyle = (styles: string): {left?: string; top?: string; width?: string; height?: string;} =>
     styles
       .split(';')
       .filter((style: string) => style.split(':')[0] && style.split(':')[1])
@@ -34,7 +35,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         style.split(':').slice(1).join(':').trim(),
       ])
       .reduce(
-        (styleObj: any, style: any) => ({
+        (styleObj: {}, style: string[]) => ({
           ...styleObj,
           [style[0]]: style[1],
         }),
@@ -71,10 +72,15 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      */
     async parseStyles() {
       const tableData = await this.getEndpointEventResolverNodeData('resolver:node', 'style');
-      const styles = [];
+      const styles: DataStyle[] = [];
       for (let i = 1; i < tableData.length; i++) {
         const eachStyle = parseStyle(tableData[i]);
-        styles.push(eachStyle);
+        styles.push({
+          top: eachStyle.top ?? '',
+          height: eachStyle.height ?? '',
+          left: eachStyle.left ?? '',
+          width: eachStyle.width ?? '',
+        });
       }
       return styles;
     },
