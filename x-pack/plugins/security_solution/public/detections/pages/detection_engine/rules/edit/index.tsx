@@ -26,7 +26,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../../../../../shared_imports';
 import { StepPanel } from '../../../../components/rules/step_panel';
@@ -72,13 +72,15 @@ interface ActionsStepRuleForm extends StepRuleForm {
 const EditRulePageComponent: FC = () => {
   const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,

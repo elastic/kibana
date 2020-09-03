@@ -7,7 +7,6 @@ import { Output } from '../models';
 
 export interface GetOneOutputResponse {
   item: Output;
-  success: boolean;
 }
 
 export interface GetOneOutputRequest {
@@ -28,7 +27,6 @@ export interface PutOutputRequest {
 
 export interface PutOutputResponse {
   item: Output;
-  success: boolean;
 }
 
 export interface GetOutputsResponse {
@@ -36,5 +34,4 @@ export interface GetOutputsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
