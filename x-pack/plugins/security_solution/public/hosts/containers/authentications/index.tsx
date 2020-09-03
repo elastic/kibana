@@ -129,8 +129,7 @@ export const useAuthentications = ({
   const authenticationsSearch = useCallback(
     (request: AuthenticationsRequestOptions) => {
       let didCancel = false;
-      const async
-      = async () => {
+      const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
