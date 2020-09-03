@@ -127,7 +127,7 @@ export const useNetworkTopCountries = ({
         const searchSubscription$ = data.search
           .search<NetworkTopCountriesRequestOptions, NetworkTopCountriesStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
