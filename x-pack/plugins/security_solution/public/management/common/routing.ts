@@ -110,7 +110,7 @@ const normalizeListPaginationParams = (
 const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
   const value = query[key];
 
-  return Array.isArray(value) ? value[0] : value;
+  return Array.isArray(value) ? value[value.length - 1] : value;
 };
 
 const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
