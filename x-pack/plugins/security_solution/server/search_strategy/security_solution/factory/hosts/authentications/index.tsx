@@ -9,13 +9,13 @@ import { getOr } from 'lodash/fp';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import {
+  HostsQueries,
   AuthenticationsEdges,
   HostAuthenticationsRequestOptions,
   HostAuthenticationsStrategyResponse,
   AuthenticationHit,
-} from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
+} from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';

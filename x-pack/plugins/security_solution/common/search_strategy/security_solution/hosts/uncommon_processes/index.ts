@@ -18,7 +18,7 @@ import {
   TotalHit,
   StringOrNumber,
   Hits,
-} from '../../';
+} from '../../..';
 
 export interface HostUncommonProcessesRequestOptions extends RequestOptionsPaginated {
   sort: SortField;

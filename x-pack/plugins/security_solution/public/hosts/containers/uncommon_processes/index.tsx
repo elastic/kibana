@@ -24,8 +24,9 @@ import {
   HostUncommonProcessesStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { HostsQueries } from '../../../../common/search_strategy/security_solution/hosts';
+import { DocValueFields, SortField } from '../../../../common/search_strategy';
+
 import * as i18n from './translations';
-import { DocValueFields, SortField } from '../../../../common/search_strategy/security_solution';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';

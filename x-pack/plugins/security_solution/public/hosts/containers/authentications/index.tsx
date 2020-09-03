@@ -12,18 +12,15 @@ import deepEqual from 'fast-deep-equal';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  Direction,
-  DocValueFields,
-  HostPolicyResponseActionStatus,
-  HostsQueries,
-  PageInfoPaginated,
-} from '../../../../common/search_strategy/security_solution';
+import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
   HostAuthenticationsRequestOptions,
   HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
-} from '../../../../common/search_strategy/security_solution/hosts/authentications';
+  PageInfoPaginated,
+  DocValueFields,
+  SortField,
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { inputsModel, State } from '../../../common/store';
@@ -89,10 +86,7 @@ export const useAuthentications = ({
       from: startDate,
       to: endDate,
     },
-    sort: {
-      direction: Direction.desc,
-      field: HostPolicyResponseActionStatus.success,
-    },
+    sort: {} as SortField,
   });
 
   const wrappedLoadMore = useCallback(

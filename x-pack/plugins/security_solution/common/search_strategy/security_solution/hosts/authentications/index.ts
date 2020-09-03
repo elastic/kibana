@@ -13,11 +13,11 @@ import {
   Inspect,
   Maybe,
   PageInfoPaginated,
-  RequestOptionsPaginated,
   StringOrNumber,
   Hit,
   TotalHit,
-} from '../../';
+} from '../../../common';
+import { RequestOptionsPaginated } from '../../';
 
 export interface HostAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];

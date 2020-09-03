@@ -6,8 +6,6 @@
 import { get, getOr } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
-import { HostHits } from '../../../../../../common/search_strategy/security_solution';
-
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import {
   ProcessHits,
@@ -15,6 +13,7 @@ import {
   UncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { toArray } from '../../../../helpers/to_array';
+import { HostHits } from '../../../../../../common/search_strategy';
 
 export const uncommonProcessesFields = [
   '_id',
