@@ -27,11 +27,7 @@ import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import { buildEsQuery } from 'src/plugins/data/common';
-import {
-  UpdateRulesSchema,
-  CreateRulesSchema,
-  PatchRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request';
+import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
@@ -56,41 +52,6 @@ describe('Detections Rules API', () => {
         signal: abortCtrl.signal,
       });
     });
-
-    it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
-      const payload: Partial<CreateRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        interval: '5m',
-        index: ['index-1'],
-      };
-
-      await expect(
-        createRule({
-          rule: (payload as unknown) as CreateRulesSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "risk_score"'));
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects with an error if response payload is invalid', async () => {
-      const payload: CreateRulesSchema = getCreateRulesSchemaMock();
-      const badResponse = { ...getRulesSchemaMock(), id: undefined };
-      fetchMock.mockResolvedValue(badResponse);
-
-      await expect(
-        createRule({
-          rule: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
-    });
   });
 
   describe('updateRule', () => {
@@ -109,33 +70,6 @@ describe('Detections Rules API', () => {
         signal: abortCtrl.signal,
       });
     });
-
-    it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
-      const payload: Omit<UpdateRulesSchema, 'note'> & {
-        note: number;
-      } = { ...getUpdateRulesSchemaMock(), note: 23 };
-
-      await expect(
-        updateRule({
-          rule: (payload as unknown) as UpdateRulesSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "23" supplied to "note"'));
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects with an error if response payload is invalid', async () => {
-      const payload: UpdateRulesSchema = getUpdateRulesSchemaMock();
-      const badResponse = { ...getRulesSchemaMock(), id: undefined };
-      fetchMock.mockResolvedValue(badResponse);
-
-      await expect(
-        updateRule({
-          rule: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
-    });
   });
 
   describe('patchRule', () => {
@@ -152,33 +86,6 @@ describe('Detections Rules API', () => {
         method: 'PATCH',
         signal: abortCtrl.signal,
       });
-    });
-
-    it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
-      const payload: Omit<PatchRulesSchema, 'note'> & {
-        note: number;
-      } = { ...getPatchRulesSchemaMock(), note: 3 };
-
-      await expect(
-        patchRule({
-          ruleProperties: (payload as unknown) as PatchRulesSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "3" supplied to "note"'));
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects with an error if response payload is invalid', async () => {
-      const payload: PatchRulesSchema = getPatchRulesSchemaMock();
-      const badResponse = { ...getRulesSchemaMock(), id: undefined };
-      fetchMock.mockResolvedValue(badResponse);
-
-      await expect(
-        patchRule({
-          ruleProperties: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 

@@ -34,4 +34,3 @@ export {
   Pagination,
   UseExceptionListSuccess,
 } from './exceptions/types';
-export { toPromise, toError } from '../common/fp_utils';

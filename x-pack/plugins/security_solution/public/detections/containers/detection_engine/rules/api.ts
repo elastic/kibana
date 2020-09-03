@@ -3,10 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -36,13 +32,8 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { RulesSchema, rulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { validateEither } from '../../../../../common';
-import {
-  createRulesSchema,
-  updateRulesSchema,
-  patchRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { toError, toPromise } from '../../../../../common/shared_imports';
 
 /**
@@ -53,23 +44,12 @@ import { toError, toPromise } from '../../../../../common/shared_imports';
  *
  * @throws An error if response is not OK
  */
-const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,
   });
-
-const createRuleWithValidation = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
-  pipe(
-    rule,
-    (body) => fromEither(validateEither(createRulesSchema, body)),
-    chain((payload) => tryCatch(() => createRule({ signal, rule: { ...payload } }), toError)),
-    chain((response) => fromEither(validateEither(rulesSchema, response))),
-    flow(toPromise)
-  );
-
-export { createRuleWithValidation as createRule };
 
 /**
  * Update provided Rule using PUT
@@ -79,23 +59,12 @@ export { createRuleWithValidation as createRule };
  *
  * @throws An error if response is not OK
  */
-const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
   });
-
-const updateRuleWithValidation = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
-  pipe(
-    rule,
-    (body) => fromEither(validateEither(updateRulesSchema, body)),
-    chain((payload) => tryCatch(() => updateRule({ signal, rule: { ...payload } }), toError)),
-    chain((response) => fromEither(validateEither(rulesSchema, response))),
-    flow(toPromise)
-  );
-
-export { updateRuleWithValidation as updateRule };
 
 /**
  * Patch provided rule
@@ -108,28 +77,12 @@ export { updateRuleWithValidation as updateRule };
  *
  * @throws An error if response is not OK
  */
-const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
+export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,
   });
-
-const patchRuleWithValidation = async ({
-  ruleProperties,
-  signal,
-}: PatchRuleProps): Promise<RulesSchema> =>
-  pipe(
-    ruleProperties,
-    (body) => fromEither(validateEither(patchRulesSchema, body)),
-    chain((payload) =>
-      tryCatch(() => patchRule({ signal, ruleProperties: { ...payload } }), toError)
-    ),
-    chain((response) => fromEither(validateEither(rulesSchema, response))),
-    flow(toPromise)
-  );
-
-export { patchRuleWithValidation as patchRule };
 
 /**
  * Fetches all rules from the Detection Engine API

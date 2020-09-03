@@ -45,5 +45,3 @@ export {
 } from './schemas';
 
 export { ENDPOINT_LIST_ID } from './constants';
-
-export { toPromise, toError } from './fp_utils';
