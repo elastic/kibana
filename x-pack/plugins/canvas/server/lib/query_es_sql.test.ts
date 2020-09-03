@@ -53,7 +53,11 @@ describe('query_es_sql', () => {
 
     const result = await queryEsSQL(api, baseArgs);
 
-    const expectedColumns = response.columns.map((c) => ({ name: c.name, type: 'string' }));
+    const expectedColumns = response.columns.map((c) => ({
+      id: c.name,
+      name: c.name,
+      meta: { type: 'string' },
+    }));
     const columnNames = expectedColumns.map((c) => c.name);
     const expectedRows = response.rows.map((r) => zipObject(columnNames, r));
 

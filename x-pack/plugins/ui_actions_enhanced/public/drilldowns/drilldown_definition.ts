@@ -37,10 +37,17 @@ export interface DrilldownDefinition<
   id: string;
 
   /**
-   * Minimal licence level
+   * Minimal license level
    * Empty means no restrictions
    */
   minimalLicense?: LicenseType;
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.
@@ -105,6 +112,15 @@ export interface DrilldownDefinition<
    * displayed to the user.
    */
   getDisplayName: () => string;
+
+  /**
+   * isCompatible during execution
+   * Could be used to prevent drilldown from execution
+   */
+  isCompatible?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<boolean>;
 
   /**
    * Implements the "navigation" action of the drilldown. This happens when

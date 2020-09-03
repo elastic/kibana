@@ -11,6 +11,7 @@ import { Results, Anomaly } from '../../../../../common/results_loader';
 import { LineChartPoint } from '../../../../../common/chart_loader';
 import { EventRateChart } from '../../../charts/event_rate_chart';
 import { TopCategories } from './top_categories';
+import { CategoryStoppedPartitions } from './category_stopped_partitions';
 
 const DTR_IDX = 0;
 
@@ -73,6 +74,7 @@ export const CategorizationDetectorsSummary: FC = () => {
         fadeChart={jobIsRunning}
       />
       <TopCategories />
+      <CategoryStoppedPartitions />
     </>
   );
 };

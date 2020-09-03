@@ -10,7 +10,7 @@ import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/p
 import { ActionWizard } from './action_wizard';
 import { ActionFactory, ActionFactoryDefinition } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
-import { licenseMock } from '../../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../../licensing/public/mocks';
 import {
   APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
@@ -116,9 +116,10 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   },
 };
 
-export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, () =>
-  licenseMock.createLicense()
-);
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
 
 interface UrlDrilldownConfig {
   url: string;
@@ -176,9 +177,10 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   },
 };
 
-export const urlFactory = new ActionFactory(urlDrilldownActionFactory, () =>
-  licenseMock.createLicense()
-);
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
 
 export const mockSupportedTriggers: TriggerId[] = [
   VALUE_CLICK_TRIGGER,
@@ -220,7 +222,9 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
 
     setState({
       currentActionFactory: newActionFactory,
-      config: newActionFactory.createConfig(),
+      config: newActionFactory.createConfig({
+        triggers: state.selectedTriggers ?? [],
+      }),
     });
   }
 
@@ -255,7 +259,11 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>
       <div>
         Is config valid:{' '}
-        {JSON.stringify(state.currentActionFactory?.isConfigValid(state.config!) ?? false)}
+        {JSON.stringify(
+          state.currentActionFactory?.isConfigValid(state.config!, {
+            triggers: state.selectedTriggers ?? [],
+          }) ?? false
+        )}
       </div>
       <div>Picked trigger: {state.selectedTriggers?.[0]}</div>
     </>

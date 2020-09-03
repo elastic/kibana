@@ -6,127 +6,127 @@
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  GetPackageConfigsRequest,
+  GetPackagePoliciesRequest,
   GetAgentStatusResponse,
-  DeletePackageConfigsResponse,
-  DeletePackageConfigsRequest,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  DeletePackagePoliciesResponse,
+  DeletePackagePoliciesRequest,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
-  GetAgentConfigsRequest,
-  GetAgentConfigsResponse,
+  GetAgentPoliciesRequest,
+  GetAgentPoliciesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_configs`;
-export const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;
+export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
+export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-const INGEST_API_DELETE_PACKAGE_CONFIG = `${INGEST_API_PACKAGE_CONFIGS}/delete`;
+const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 
 /**
- * Retrieves a list of endpoint specific package configs (those created with a `package.name` of
+ * Retrieves a list of endpoint specific package policies (those created with a `package.name` of
  * `endpoint`) from Ingest
  * @param http
  * @param options
  */
-export const sendGetEndpointSpecificPackageConfigs = (
+export const sendGetEndpointSpecificPackagePolicies = (
   http: HttpStart,
-  options: HttpFetchOptions & Partial<GetPackageConfigsRequest> = {}
+  options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
 ): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_CONFIGS, {
+  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
     ...options,
     query: {
       ...options.query,
       kuery: `${
         options?.query?.kuery ? `${options.query.kuery} and ` : ''
-      }${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };
 
 /**
- * Retrieves a single package config based on ID from ingest
+ * Retrieves a single package policy based on ID from ingest
  * @param http
- * @param packageConfigId
+ * @param packagePolicyId
  * @param options
  */
-export const sendGetPackageConfig = (
+export const sendGetPackagePolicy = (
   http: HttpStart,
-  packageConfigId: string,
+  packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_CONFIGS}/${packageConfigId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
 };
 
 /**
- * Retrieves a single package config based on ID from ingest
+ * Retrieves a single package policy based on ID from ingest
  * @param http
  * @param body
  * @param options
  */
-export const sendDeletePackageConfig = (
+export const sendDeletePackagePolicy = (
   http: HttpStart,
-  body: DeletePackageConfigsRequest,
+  body: DeletePackagePoliciesRequest,
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeletePackageConfigsResponse>(INGEST_API_DELETE_PACKAGE_CONFIG, {
+  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_POLICY, {
     ...options,
     body: JSON.stringify(body.body),
   });
 };
 
 /**
- * Retrieve a list of Agent Configurations
+ * Retrieve a list of Agent Policies
  * @param http
  * @param options
  */
-export const sendGetAgentConfigList = (
+export const sendGetAgentPolicyList = (
   http: HttpStart,
-  options: HttpFetchOptions & GetAgentConfigsRequest
+  options: HttpFetchOptions & GetAgentPoliciesRequest
 ) => {
-  return http.get<GetAgentConfigsResponse>(INGEST_API_AGENT_CONFIGS, options);
+  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
 };
 
 /**
- * Updates a package config
+ * Updates a package policy
  *
  * @param http
- * @param packageConfigId
- * @param packageConfig
+ * @param packagePolicyId
+ * @param packagePolicy
  * @param options
  */
-export const sendPutPackageConfig = (
+export const sendPutPackagePolicy = (
   http: HttpStart,
-  packageConfigId: string,
-  packageConfig: NewPolicyData,
+  packagePolicyId: string,
+  packagePolicy: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
 ): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_PACKAGE_CONFIGS}/${packageConfigId}`, {
+  return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
-    body: JSON.stringify(packageConfig),
+    body: JSON.stringify(packagePolicy),
   });
 };
 
 /**
- * Get a status summary for all Agents that are currently assigned to a given agent configuration
+ * Get a status summary for all Agents that are currently assigned to a given agent policy
  *
  * @param http
- * @param configId
+ * @param policyId
  * @param options
  */
-export const sendGetFleetAgentStatusForConfig = (
+export const sendGetFleetAgentStatusForPolicy = (
   http: HttpStart,
-  /** the Agent (fleet) configuration id */
-  configId: string,
+  /** the Agent (fleet) policy id */
+  policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
     query: {
-      configId,
+      policyId,
     },
   });
 };

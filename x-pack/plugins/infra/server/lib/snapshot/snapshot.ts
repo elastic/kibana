@@ -27,6 +27,8 @@ import { InfraSnapshotRequestOptions } from './types';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { SnapshotNode } from '../../../common/http_api/snapshot_api';
 
+type NamedSnapshotNode = SnapshotNode & { name: string };
+
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
   options: CallWithRequestParams
 ) => Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
@@ -34,7 +36,7 @@ export class InfraSnapshot {
   public async getNodes(
     client: ESSearchClient,
     options: InfraSnapshotRequestOptions
-  ): Promise<{ nodes: SnapshotNode[]; interval: string }> {
+  ): Promise<{ nodes: NamedSnapshotNode[]; interval: string }> {
     // Both requestGroupedNodes and requestNodeMetrics may send several requests to elasticsearch
     // in order to page through the results of their respective composite aggregations.
     // Both chains of requests are supposed to run in parallel, and their results be merged
@@ -184,11 +186,12 @@ const mergeNodeBuckets = (
   nodeGroupByBuckets: InfraSnapshotNodeGroupByBucket[],
   nodeMetricsBuckets: InfraSnapshotNodeMetricsBucket[],
   options: InfraSnapshotRequestOptions
-): SnapshotNode[] => {
+): NamedSnapshotNode[] => {
   const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
 
   return nodeGroupByBuckets.map((node) => {
     return {
+      name: node.key.name || node.key.id, // For type safety; name can be derived from getNodePath but not in a TS-friendly way
       path: getNodePath(node, options),
       metrics: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };

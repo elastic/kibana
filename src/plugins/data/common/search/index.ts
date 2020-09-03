@@ -23,12 +23,10 @@ export * from './expressions';
 export * from './tabify';
 export * from './types';
 
-import { ES_SEARCH_STRATEGY } from './es_search';
-export const DEFAULT_SEARCH_STRATEGY = ES_SEARCH_STRATEGY;
-
 export {
   IEsSearchRequest,
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
   ISearchRequestParams,
+  ISearchOptions,
 } from './es_search';

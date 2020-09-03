@@ -17,7 +17,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { CMBeat } from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ChildRoutes } from '../../components/navigation/child_routes';

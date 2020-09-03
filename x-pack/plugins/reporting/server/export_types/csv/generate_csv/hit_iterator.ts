@@ -68,11 +68,17 @@ export function createHitIterator(logger: LevelLogger) {
       );
     }
 
-    function clearScroll(scrollId: string | undefined) {
+    async function clearScroll(scrollId: string | undefined) {
       logger.debug('executing clearScroll request');
-      return callEndpoint('clearScroll', {
-        scrollId: [scrollId],
-      });
+      try {
+        await callEndpoint('clearScroll', {
+          scrollId: [scrollId],
+        });
+      } catch (err) {
+        // Do not throw the error, as the job can still be completed successfully
+        logger.warn('Scroll context can not be cleared!');
+        logger.error(err);
+      }
     }
 
     try {
@@ -86,7 +92,7 @@ export function createHitIterator(logger: LevelLogger) {
           ({ scrollId, hits } = await scroll(scrollId));
 
           if (cancellationToken.isCancelled()) {
-            logger.warning(
+            logger.warn(
               'Any remaining scrolling searches have been cancelled by the cancellation token.'
             );
           }

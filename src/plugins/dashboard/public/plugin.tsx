@@ -40,6 +40,7 @@ import {
   EmbeddableStart,
   SavedObjectEmbeddableInput,
   EmbeddableInput,
+  PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
@@ -80,6 +81,15 @@ import {
   RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryActionContext,
+  UnlinkFromLibraryAction,
+  ACTION_ADD_TO_LIBRARY,
+  AddToLibraryActionContext,
+  AddToLibraryAction,
+  ACTION_LIBRARY_NOTIFICATION,
+  LibraryNotificationActionContext,
+  LibraryNotificationAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -152,6 +162,9 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
+    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
+    [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
   }
 }
 
@@ -163,6 +176,7 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -170,6 +184,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
   ): Setup {
+    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
+      DashboardFeatureFlagConfig
+    >();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -370,7 +387,7 @@ export class DashboardPlugin
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
@@ -398,6 +415,7 @@ export class DashboardPlugin
     const {
       uiActions,
       data: { indexPatterns, search },
+      embeddable,
     } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
@@ -415,6 +433,19 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
+    if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+      const addToLibraryAction = new AddToLibraryAction();
+      uiActions.registerAction(addToLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+      uiActions.registerAction(unlinkFromLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+
+      const libraryNotificationAction = new LibraryNotificationAction();
+      uiActions.registerAction(libraryNotificationAction);
+      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+    }
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
@@ -430,7 +461,7 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
-      dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
+      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
@@ -438,8 +469,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           core.savedObjects.client,
+          core.overlays,
           core.i18n.Context,
-          core.notifications.toasts
+          core.notifications.toasts,
+          embeddable.getEmbeddableFactory
         ),
     };
   }

@@ -190,7 +190,9 @@ export class ListControl extends Control<PhraseFilterManager> {
       return;
     }
 
-    this.partialResults = resp.terminated_early || resp.timed_out;
+    // TODO: terminated_early is missing from response definition.
+    // https://github.com/elastic/elasticsearch-js/issues/1289
+    this.partialResults = (resp as any).terminated_early || resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';

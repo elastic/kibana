@@ -11,6 +11,7 @@ import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../p
 import { RangeSelectContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/public';
 import { SELECT_RANGE_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { BaseActionFactoryContext } from '../../../../plugins/ui_actions_enhanced/public/dynamic_actions';
 
 export interface Config {
   name: string;
@@ -52,9 +53,23 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
     name: '',
   });
 
-  public readonly isConfigValid = (config: Config): config is Config => {
+  public readonly isConfigValid = (
+    config: Config,
+    context: BaseActionFactoryContext<typeof SELECT_RANGE_TRIGGER>
+  ): config is Config => {
+    // eslint-disable-next-line no-console
+    console.log('Showcasing, that can access action factory context:', context);
+
     return !!config.name;
   };
+
+  /**
+   * Showcase isCompatible. Disabled drilldown action in case if range.length === 0
+   */
+  isCompatible(config: Config, context: RangeSelectContext): Promise<boolean> {
+    if (context.data.range.length === 0) return Promise.resolve(false);
+    return Promise.resolve(true);
+  }
 
   public readonly execute = async (config: Config, context: RangeSelectContext) => {
     alert(`Hello, ${config.name}, your selected range: ${JSON.stringify(context.data.range)}`);

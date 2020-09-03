@@ -102,6 +102,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginsSetup, TelemetryP
       config$,
       currentKibanaVersion,
       isDev,
+      logger: this.logger,
       router,
       telemetryCollectionManager,
     });

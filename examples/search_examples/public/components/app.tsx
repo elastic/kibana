@@ -47,7 +47,6 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import {
   PLUGIN_ID,
   PLUGIN_NAME,
-  IMyStrategyRequest,
   IMyStrategyResponse,
   SERVER_SEARCH_ROUTE_PATH,
 } from '../../common';
@@ -134,12 +133,9 @@ export const SearchExamplesApp = ({
           query,
         },
       },
-    };
-
-    if (strategy) {
       // Add a custom request parameter to be consumed by `MyStrategy`.
-      (request as IMyStrategyRequest).get_cool = getCool;
-    }
+      ...(strategy ? { get_cool: getCool } : {}),
+    };
 
     // Submit the search request using the `data.search` service.
     const searchSubscription$ = data.search

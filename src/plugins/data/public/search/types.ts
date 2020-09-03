@@ -29,24 +29,23 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchOptions,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-
-export interface ISearchOptions {
-  signal?: AbortSignal;
-  strategy?: string;
-}
 
 export type ISearch = (
   request: IKibanaSearchRequest,
   options?: ISearchOptions
 ) => Observable<IKibanaSearchResponse>;
 
-export type ISearchGeneric = (
-  request: IEsSearchRequest,
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
   options?: ISearchOptions
-) => Observable<IEsSearchResponse>;
+) => Observable<SearchStrategyResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;

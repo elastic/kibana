@@ -21,18 +21,18 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
+import { AgentPolicy } from '../../../../types';
 import { useInput, useCore, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
 function useCreateApiKeyForm(
-  configDefaultValue: string | undefined,
+  policyIdDefaultValue: string | undefined,
   onSuccess: (keyId: string) => void
 ) {
   const { notifications } = useCore();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
-  const configIdInput = useInput(configDefaultValue);
+  const policyIdInput = useInput(policyIdDefaultValue);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,10 +43,10 @@ function useCreateApiKeyForm(
         path: enrollmentAPIKeyRouteService.getCreatePath(),
         body: JSON.stringify({
           name: apiKeyNameInput.value,
-          config_id: configIdInput.value,
+          policy_id: policyIdInput.value,
         }),
       });
-      configIdInput.clear();
+      policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);
       onSuccess(res.data.item.id);
@@ -66,22 +66,22 @@ function useCreateApiKeyForm(
   return {
     isLoading,
     onSubmit,
-    configIdInput,
+    policyIdInput,
     apiKeyNameInput,
   };
 }
 
 interface Props {
   onClose: () => void;
-  agentConfigs: AgentConfig[];
+  agentPolicies: AgentPolicy[];
 }
 
 export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agentConfigs = [],
+  agentPolicies = [],
 }) => {
-  const configDefaultValue = agentConfigs.find((config) => config.is_default)?.id;
-  const form = useCreateApiKeyForm(configDefaultValue, () => {
+  const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
+  const form = useCreateApiKeyForm(policyIdDefaultValue, () => {
     onClose();
   });
 
@@ -102,15 +102,18 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.newEnrollmentKey.configLabel', {
-            defaultMessage: 'Configuration',
+          label={i18n.translate('xpack.ingestManager.newEnrollmentKey.policyLabel', {
+            defaultMessage: 'Policy',
           })}
         >
           <EuiSelect
             required={true}
-            defaultValue={configDefaultValue}
-            {...form.configIdInput.props}
-            options={agentConfigs.map((config) => ({ value: config.id, text: config.name }))}
+            defaultValue={policyIdDefaultValue}
+            {...form.policyIdInput.props}
+            options={agentPolicies.map((agentPolicy) => ({
+              value: agentPolicy.id,
+              text: agentPolicy.name,
+            }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>

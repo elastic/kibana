@@ -1,5 +1,5 @@
 {
-  "id": "beats_management",
+  "id": "beatsManagement",
   "configPath": ["xpack", "beats_management"],
   "ui": true,
   "server": true,

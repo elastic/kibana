@@ -29,7 +29,7 @@ import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { KibanaMigrator } from '../../migrations';
 import {
@@ -43,6 +43,8 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -52,7 +54,9 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -220,6 +224,8 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
+      originId,
+      version,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -246,6 +252,7 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      originId,
       attributes,
       migrationVersion,
       updated_at: time,
@@ -259,6 +266,7 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       body: raw._source,
+      ...(overwrite && version ? decodeRequestVersion(version) : {}),
     };
 
     const { body } =
@@ -296,14 +304,13 @@ export class SavedObjectsRepository {
           error: {
             id: object.id,
             type: object.type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type)),
           },
         };
       }
 
       const method = object.id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck =
-        method === 'index' && this._registry.isMultiNamespace(object.type);
+      const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
       if (object.id == null) object.id = uuid.v1();
 
@@ -345,7 +352,12 @@ export class SavedObjectsRepository {
 
       let savedObjectNamespace;
       let savedObjectNamespaces;
-      const { esRequestIndex, object, method } = expectedBulkGetResult.value;
+      let versionProperties;
+      const {
+        esRequestIndex,
+        object: { version, ...object },
+        method,
+      } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
@@ -357,17 +369,22 @@ export class SavedObjectsRepository {
             error: {
               id,
               type,
-              error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+              error: {
+                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+                metadata: { isNotOverwritable: true },
+              },
             },
           };
         }
         savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
+        versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = getSavedObjectNamespaces(namespace);
         }
+        versionProperties = getExpectedVersionProperties(version);
       }
 
       const expectedResult = {
@@ -383,6 +400,7 @@ export class SavedObjectsRepository {
             ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
             updated_at: time,
             references: object.references || [],
+            originId: object.originId,
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -392,6 +410,7 @@ export class SavedObjectsRepository {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
+            ...(overwrite && versionProperties),
           },
         },
         expectedResult.rawMigratedDoc._source
@@ -435,6 +454,87 @@ export class SavedObjectsRepository {
         });
       }),
     };
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    if (objects.length === 0) {
+      return { errors: [] };
+    }
+
+    const { namespace } = options;
+
+    let bulkGetRequestIndexCounter = 0;
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
+      const { type, id } = object;
+
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+          },
+        };
+      }
+
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          type,
+          id,
+          esRequestIndex: bulkGetRequestIndexCounter++,
+        },
+      };
+    });
+
+    const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
+      _id: this._serializer.generateRawId(namespace, type, id),
+      _index: this.getIndexForType(type),
+      _source: ['type', 'namespaces'],
+    }));
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
+          },
+          { ignore: [404] }
+        )
+      : undefined;
+
+    const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
+    expectedBulkGetResults.forEach((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        errors.push(expectedResult.error as any);
+        return;
+      }
+
+      const { type, id, esRequestIndex } = expectedResult.value;
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      if (doc.found) {
+        errors.push({
+          id,
+          type,
+          error: {
+            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+            ...(!this.rawDocExistsInNamespace(doc, namespace) && {
+              metadata: { isNotOverwritable: true },
+            }),
+          },
+        });
+      }
+    });
+
+    return { errors };
   }
 
   /**
@@ -594,6 +694,7 @@ export class SavedObjectsRepository {
     search,
     defaultSearchOperator = 'OR',
     searchFields,
+    rootSearchFields,
     hasReference,
     page = 1,
     perPage = 20,
@@ -657,6 +758,7 @@ export class SavedObjectsRepository {
           search,
           defaultSearchOperator,
           searchFields,
+          rootSearchFields,
           type: allowedTypes,
           sortField,
           sortOrder,
@@ -728,7 +830,7 @@ export class SavedObjectsRepository {
           error: {
             id,
             type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
           },
         };
       }
@@ -775,12 +877,11 @@ export class SavedObjectsRepository {
           return ({
             id,
             type,
-            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
           } as any) as SavedObject<T>;
         }
 
-        const time = doc._source.updated_at;
-
+        const { originId, updated_at: updatedAt } = doc._source;
         let namespaces = [];
         if (!this._registry.isNamespaceAgnostic(type)) {
           namespaces = doc._source.namespaces ?? [getNamespaceString(doc._source.namespace)];
@@ -790,7 +891,8 @@ export class SavedObjectsRepository {
           id,
           type,
           namespaces,
-          ...(time && { updated_at: time }),
+          ...(originId && { originId }),
+          ...(updatedAt && { updated_at: updatedAt }),
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
           references: doc._source.references || [],
@@ -835,7 +937,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { updated_at: updatedAt } = body._source;
+    const { originId, updated_at: updatedAt } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -846,6 +948,7 @@ export class SavedObjectsRepository {
       id,
       type,
       namespaces,
+      ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
@@ -900,7 +1003,7 @@ export class SavedObjectsRepository {
         body: {
           doc,
         },
-        _source_includes: ['namespace', 'namespaces'],
+        _source_includes: ['namespace', 'namespaces', 'originId'],
       },
       { ignore: [404] }
     );
@@ -910,6 +1013,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    const { originId } = body.get._source;
     let namespaces = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
       namespaces = body.get._source.namespaces ?? [getNamespaceString(body.get._source.namespace)];
@@ -922,6 +1026,7 @@ export class SavedObjectsRepository {
       // @ts-expect-error update doesn't have _seq_no, _primary_term as Record<string, any> / any in LP
       version: encodeHitVersion(body),
       namespaces,
+      ...(originId && { originId }),
       references,
       attributes,
     };
@@ -937,7 +1042,7 @@ export class SavedObjectsRepository {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -986,7 +1091,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {};
+    return { namespaces: doc.namespaces };
   }
 
   /**
@@ -999,7 +1104,7 @@ export class SavedObjectsRepository {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -1053,7 +1158,7 @@ export class SavedObjectsRepository {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return {};
+      return { namespaces: doc.namespaces };
     } else {
       // if there are no namespaces remaining, delete the saved object
       const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
@@ -1070,7 +1175,7 @@ export class SavedObjectsRepository {
 
       const deleted = body.result === 'deleted';
       if (deleted) {
-        return {};
+        return { namespaces: [] };
       }
 
       const deleteDocNotFound = body.result === 'not_found';
@@ -1115,7 +1220,7 @@ export class SavedObjectsRepository {
           error: {
             id,
             type,
-            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
           },
         };
       }
@@ -1184,7 +1289,7 @@ export class SavedObjectsRepository {
               error: {
                 id,
                 type,
-                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+                error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
               },
             };
           }
@@ -1227,6 +1332,7 @@ export class SavedObjectsRepository {
       ? await this.client.bulk({
           refresh,
           body: bulkUpdateParams,
+          _source_includes: ['originId'],
         })
       : undefined;
 
@@ -1238,7 +1344,9 @@ export class SavedObjectsRepository {
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
         const response = bulkUpdateResponse?.body.items[esRequestIndex];
-        const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
+        // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
+        // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
+        const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
           response
         )[0] as any;
 
@@ -1251,10 +1359,13 @@ export class SavedObjectsRepository {
             error: getBulkOperationError(error, type, id),
           };
         }
+
+        const { originId } = get._source;
         return {
           id,
           type,
           ...(namespaces && { namespaces }),
+          ...(originId && { originId }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -1279,7 +1390,7 @@ export class SavedObjectsRepository {
     id: string,
     counterFieldName: string,
     options: SavedObjectsIncrementCounterOptions = {}
-  ) {
+  ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
@@ -1342,9 +1453,12 @@ export class SavedObjectsRepository {
       },
     });
 
+    const { originId } = body.get._source;
     return {
       id,
       type,
+      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      ...(originId && { originId }),
       updated_at: time,
       references: body.get._source.references,
       // @ts-expect-error
@@ -1481,9 +1595,9 @@ export class SavedObjectsRepository {
 function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
-      return SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
+      return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
     case 'document_missing_exception':
-      return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+      return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
     default:
       return {
         message: error.reason || JSON.stringify(error),
@@ -1534,5 +1648,10 @@ function getSavedObjectNamespaces(
   }
   return [getNamespaceString(namespace)];
 }
+
+/**
+ * Extracts the contents of a decorated error to return the attributes for bulk operations.
+ */
+const errorContent = (error: DecoratedError) => error.output.payload;
 
 const unique = (array: string[]) => [...new Set(array)];
