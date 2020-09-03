@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
@@ -122,16 +123,16 @@ export const useAddOrUpdateException = ({
     ) => {
       try {
         setIsLoading(true);
-        if (alertIdToClose !== null && alertIdToClose !== undefined) {
-          await updateAlertStatus({
+        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
+        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        if (alertIdToClose != null) {
+          alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
             status: 'closed',
             signal: abortCtrl.signal,
           });
         }
 
-        let conflicts = 0;
-        let updated = 0;
         if (bulkCloseIndex != null) {
           const filter = getQueryFilter(
             '',
@@ -142,18 +143,25 @@ export const useAddOrUpdateException = ({
             false
           );
 
-          const response = await updateAlertStatus({
+          bulkResponse = await updateAlertStatus({
             query: {
               query: filter,
             },
             status: 'closed',
             signal: abortCtrl.signal,
           });
-          conflicts = response.version_conflicts;
-          updated = response.updated;
         }
 
         await addOrUpdateItems(exceptionItemsToAddOrUpdate);
+
+        // NOTE: there could be some overlap here... it's possible that the first response had conflicts
+        // but that the alert was closed in the second call. In this case, a conflict will be reported even
+        // though it was already resolved. I'm not sure that there's an easy way to solve this, but it should
+        // have minimal impact on the user... they'd see a warning that indicates a possible conflict, but the
+        // state of the alerts and their representation in the UI would be consistent.
+        const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
+        const conflicts =
+          alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
 
         if (isSubscribed) {
           setIsLoading(false);
