@@ -26,6 +26,7 @@ type DataFrameAnalyticsType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
+  refreshInterval?: RefreshInterval;
 }
 export interface MlCommonAppState {
   [key: string]: any;
@@ -52,13 +53,17 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.FILTER_LISTS_EDIT
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
-  | typeof ML_PAGES.ACCESS_DENIED,
+  | typeof ML_PAGES.ACCESS_DENIED
+  | typeof ML_PAGES.DATA_VISUALIZER
+  | typeof ML_PAGES.DATA_VISUALIZER_FILE
+  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
   MlGenericUrlPageState | undefined
 >;
 
 export interface AnomalyDetectionQueryState {
   jobId?: JobId;
   groupIds?: string[];
+  globalState?: MlCommonGlobalState;
 }
 
 export type AnomalyDetectionUrlState = MLPageState<
@@ -152,6 +157,7 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 export interface DataFrameAnalyticsQueryState {
   jobId?: JobId | JobId[];
   groupIds?: string[];
+  globalState?: MlCommonGlobalState;
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
@@ -159,17 +165,11 @@ export type DataFrameAnalyticsUrlState = MLPageState<
   DataFrameAnalyticsQueryState | undefined
 >;
 
-export interface DataVisualizerUrlState {
-  page:
-    | typeof ML_PAGES.DATA_VISUALIZER
-    | typeof ML_PAGES.DATA_VISUALIZER_FILE
-    | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT;
-}
-
 export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
     analysisType: DataFrameAnalyticsType;
+    globalState?: MlCommonGlobalState;
   };
 }
 
@@ -178,6 +178,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
   {
     jobId: JobId;
     analysisType: DataFrameAnalyticsType;
+    globalState?: MlCommonGlobalState;
   }
 >;
 
@@ -190,5 +191,4 @@ export type MlUrlGeneratorState =
   | TimeSeriesExplorerUrlState
   | DataFrameAnalyticsUrlState
   | DataFrameAnalyticsExplorationUrlState
-  | DataVisualizerUrlState
   | MlGenericUrlState;

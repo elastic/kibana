@@ -19,7 +19,7 @@ export function extractParams<UrlState>(urlState: UrlState) {
  * Creates generic index based search ML url
  * e.g. `jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a`
  */
-export function createIndexBasedMlUrl(
+export function createGenericMlUrl(
   appBasePath: string,
   page: MlGenericUrlState['page'],
   pageState: MlGenericUrlState['pageState']

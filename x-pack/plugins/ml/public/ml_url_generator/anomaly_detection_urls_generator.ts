@@ -11,13 +11,14 @@ import {
   ExplorerAppState,
   ExplorerGlobalState,
   ExplorerUrlState,
+  MlCommonGlobalState,
   MlGenericUrlState,
   TimeSeriesExplorerAppState,
   TimeSeriesExplorerGlobalState,
   TimeSeriesExplorerUrlState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
-import { createIndexBasedMlUrl } from './common';
+import { createGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 /**
  * Creates URL to the Anomaly Detection Job management page
@@ -30,18 +31,29 @@ export function createAnomalyDetectionJobManagementUrl(
   if (!params || isEmpty(params)) {
     return url;
   }
-  const { jobId, groupIds } = params;
-  const queryState: AnomalyDetectionQueryState = {
-    jobId,
-    groupIds,
-  };
+  const { jobId, groupIds, globalState } = params;
+  if (jobId || groupIds) {
+    const queryState: AnomalyDetectionQueryState = {
+      jobId,
+      groupIds,
+    };
 
-  url = setStateToKbnUrl<AnomalyDetectionQueryState>(
-    'mlManagement',
-    queryState,
-    { useHash: false, storeInHashQuery: false },
-    url
-  );
+    url = setStateToKbnUrl<AnomalyDetectionQueryState>(
+      'mlManagement',
+      queryState,
+      { useHash: false, storeInHashQuery: false },
+      url
+    );
+  }
+
+  if (globalState) {
+    url = setStateToKbnUrl<Partial<MlCommonGlobalState>>(
+      '_g',
+      globalState,
+      { useHash: false, storeInHashQuery: false },
+      url
+    );
+  }
   return url;
 }
 
@@ -49,7 +61,7 @@ export function createAnomalyDetectionCreateJobSelectType(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return createIndexBasedMlUrl(
+  return createGenericMlUrl(
     appBasePath,
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
     pageState
@@ -60,7 +72,7 @@ export function createAnomalyDetectionCreateJobSelectIndex(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return createIndexBasedMlUrl(
+  return createGenericMlUrl(
     appBasePath,
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
     pageState

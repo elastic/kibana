@@ -24,10 +24,7 @@ import {
   createDataFrameAnalyticsJobManagementUrl,
   createDataFrameAnalyticsExplorationUrl,
 } from './data_frame_analytics_urls_generator';
-import {
-  createIndexDataVisualizerUrl,
-  createDataVisualizerUrl,
-} from './data_visualizer_urls_generator';
+import { createGenericMlUrl } from './common';
 
 declare module '../../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
@@ -70,10 +67,8 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
-      case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
-        return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
-        return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
@@ -81,7 +76,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
       case ML_PAGES.ACCESS_DENIED:
-        return `${appBasePath}/${mlUrlGeneratorState.page}`;
+        return createGenericMlUrl(
+          appBasePath,
+          mlUrlGeneratorState.page,
+          mlUrlGeneratorState.pageState
+        );
       default:
         throw new Error('Page type is not provided or unknown');
     }

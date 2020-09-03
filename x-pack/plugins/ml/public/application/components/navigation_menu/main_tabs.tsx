@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
 import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
 import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
+import { useUrlState } from '../../util/url_state';
 
 export interface Tab {
   id: TabId;
@@ -86,6 +87,7 @@ const TAB_DATA: Record<TabId, TabData> = {
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
+  const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: TabId) {
     setSelectedTabId(id);
@@ -96,11 +98,13 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const navigateToPath = useNavigateToPath();
 
   const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+    // @ts-ignore
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
+      pageState: { globalState },
     });
 
-    await navigateToPath(path, true); // set preserve search to true
+    await navigateToPath(path, false); // set preserve search to true
   };
 
   useEffect(() => {
