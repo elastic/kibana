@@ -32,4 +32,4 @@ account numbers.
 [role="screenshot"]
 image::images/tutorial-discover-3.png[]
 
-Now that you know what your data incudes, its time to gain insight into your data with visualizations.
+Now that you know what your documents contain, it's time to gain insight into your data with visualizations.
