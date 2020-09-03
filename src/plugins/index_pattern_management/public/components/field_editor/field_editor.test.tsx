@@ -163,19 +163,19 @@ describe('FieldEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should display and update a customLabel correctly', async () => {
+  it('should display and update a customName correctly', async () => {
     const testField = {
       name: 'test',
       format: new Format(),
       lang: undefined,
       type: 'string',
     };
-    fieldList.push(testField as IndexPatternField);
+    fieldList.push((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as IndexPatternField;
+      return (flds[name] as unknown) as IndexPatternField;
     };
     indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
     indexPattern.fieldFormatMap = { test: field };
