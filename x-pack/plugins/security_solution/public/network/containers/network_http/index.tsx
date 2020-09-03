@@ -21,16 +21,19 @@ import {
   NetworkQueries,
   NetworkHttpRequestOptions,
   NetworkHttpStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  SortField,
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
+import { InspectResponse } from '../../../types';
+import { getInspectResponse } from '../../../helpers';
 
 const ID = 'networkHttpQuery';
 
 export interface NetworkHttpArgs {
   id: string;
   ip?: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   networkHttp: NetworkHttpEdges[];
@@ -58,8 +61,6 @@ export const useNetworkHttp = ({
   startDate,
   type,
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getHttpSelector = networkSelectors.httpSelector();
   const { activePage, limit, sort } = useSelector(
     (state: State) => getHttpSelector(state, type),
@@ -75,10 +76,9 @@ export const useNetworkHttp = ({
     defaultIndex,
     factoryQueryType: NetworkQueries.http,
     filterQuery: createFilter(filterQuery),
-    // inspect: isInspected,
     ip,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkHttpSort: sort,
+    sort: sort as SortField,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -126,7 +126,7 @@ export const useNetworkHttp = ({
         const searchSubscription$ = data.search
           .search<NetworkHttpRequestOptions, NetworkHttpStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -136,7 +136,7 @@ export const useNetworkHttp = ({
                   setNetworkHttpResponse((prevResponse) => ({
                     ...prevResponse,
                     networkHttp: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
@@ -174,24 +174,20 @@ export const useNetworkHttp = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
+        sort: sort as SortField,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        networkHttpSort: sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

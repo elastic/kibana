@@ -15,7 +15,7 @@ import {
   urlDrilldownActionFactory,
 } from './test_data';
 import { ActionFactory } from '../../dynamic_actions';
-import { licenseMock } from '../../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../../licensing/public/mocks';
 
 // TODO: afterEach is not available for it globally during setup
 // https://github.com/elastic/kibana/issues/59469
@@ -68,8 +68,12 @@ test('If not enough license, button is disabled', () => {
     {
       ...urlDrilldownActionFactory,
       minimalLicense: 'gold',
+      licenseFeatureName: 'Url Drilldown',
     },
-    () => licenseMock.createLicense()
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
   );
   const screen = render(<Demo actionFactories={[dashboardFactory, urlWithGoldLicense]} />);
 

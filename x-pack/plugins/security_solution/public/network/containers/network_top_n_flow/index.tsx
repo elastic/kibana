@@ -14,7 +14,6 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated } from '../../../../common/search_strategy/security_solution';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -23,15 +22,18 @@ import {
   NetworkTopNFlowEdges,
   NetworkTopNFlowRequestOptions,
   NetworkTopNFlowStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  PageInfoPaginated,
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
 const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -60,8 +62,6 @@ export const useNetworkTopNFlow = ({
   startDate,
   type,
 }: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getTopNFlowSelector = networkSelectors.topNFlowSelector();
   const { activePage, limit, sort } = useSelector(
     (state: State) => getTopNFlowSelector(state, type, flowTarget),
@@ -78,9 +78,8 @@ export const useNetworkTopNFlow = ({
     factoryQueryType: NetworkQueries.topNFlow,
     filterQuery: createFilter(filterQuery),
     flowTarget,
-    // inspect: isInspected,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkTopNFlowSort: sort,
+    sort,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -126,7 +125,7 @@ export const useNetworkTopNFlow = ({
         const searchSubscription$ = data.search
           .search<NetworkTopNFlowRequestOptions, NetworkTopNFlowStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -136,7 +135,7 @@ export const useNetworkTopNFlow = ({
                   setNetworkTopNFlowResponse((prevResponse) => ({
                     ...prevResponse,
                     networkTopNFlow: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
@@ -174,10 +173,6 @@ export const useNetworkTopNFlow = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
@@ -189,9 +184,9 @@ export const useNetworkTopNFlow = ({
           from: startDate,
           to: endDate,
         },
-        networkTopNFlowSort: sort,
+        sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

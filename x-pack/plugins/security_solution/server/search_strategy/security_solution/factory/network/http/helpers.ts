@@ -13,7 +13,7 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const getHttpEdges = (response: IEsSearchResponse<unknown>): NetworkHttpEdges[] =>
-  formatHttpEdges(getOr([], `aggregations.url.buckets`, response));
+  formatHttpEdges(getOr([], `aggregations.url.buckets`, response.rawResponse));
 
 const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
   buckets.map((bucket: NetworkHttpBuckets) => ({

@@ -12,7 +12,7 @@ import { TlsQueryTabBodyProps } from './types';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-export const TlsQueryTabBody = ({
+const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -21,7 +21,7 @@ export const TlsQueryTabBody = ({
   skip,
   startDate,
   type,
-}: TlsQueryTabBodyProps) => {
+}) => {
   const [
     loading,
     { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch },
@@ -52,3 +52,7 @@ export const TlsQueryTabBody = ({
     />
   );
 };
+
+TlsQueryTabBodyComponent.displayName = 'TlsQueryTabBodyComponent';
+
+export const TlsQueryTabBody = React.memo(TlsQueryTabBodyComponent);
