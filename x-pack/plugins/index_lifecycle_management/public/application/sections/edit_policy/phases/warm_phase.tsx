@@ -73,7 +73,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
       <NodesDataProvider>
-        {(data) => (
+        {(nodesData) => (
           <>
             <EuiDescribedFormGroup
               title={
@@ -172,7 +172,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                       {
                         <DefaultAllocationWarning
                           phase={warmProperty}
-                          nodesByRoles={data.nodesByRoles}
+                          nodesByRoles={nodesData.nodesByRoles}
                           currentAllocationType={phaseData.dataTierAllocationType}
                         />
                       }
@@ -187,7 +187,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                       errors={errors}
                       phaseData={phaseData}
                       isShowingErrors={isShowingErrors}
-                      nodes={data.nodesByAttributes}
+                      nodes={nodesData.nodesByAttributes}
                     />
                   </EuiFormRow>
                 </EuiDescribedFormGroup>
@@ -208,7 +208,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                   )}
                   switchProps={{
                     label: i18n.translate(
-                      'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicase.switchLabel',
+                      'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                       { defaultMessage: 'Set replicas' }
                     ),
                     initialValue: Boolean(phaseData.selectedReplicaCount),
