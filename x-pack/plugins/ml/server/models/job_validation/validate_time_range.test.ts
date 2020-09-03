@@ -6,7 +6,7 @@
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -21,16 +21,15 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const mlClusterClientFactory = (resp: any): ILegacyScopedClusterClient => {
-  const callAs = (path: string) => {
-    return new Promise((resolve) => {
-      resolve(resp[path]);
-    }) as Promise<any>;
+const mlClusterClientFactory = (response: any): IScopedClusterClient => {
+  const callAs = {
+    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
+    search: () => Promise.resolve({ body: response.search }),
   };
-  return {
-    callAsCurrentUser: callAs,
-    callAsInternalUser: callAs,
-  };
+  return ({
+    asCurrentUser: callAs,
+    asInternalUser: callAs,
+  } as unknown) as IScopedClusterClient;
 };
 
 function getMinimalValidJob() {

@@ -59,7 +59,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
         agentPolicyId: agentPolicy!,
       });
 
-      if (data?.success) {
+      if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.ingestManager.deleteAgentPolicy.successSingleNotificationTitle', {
             defaultMessage: "Deleted agent policy '{id}'",
@@ -69,9 +69,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
         if (onSuccessCallback.current) {
           onSuccessCallback.current(agentPolicy!);
         }
-      }
-
-      if (!data?.success) {
+      } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.ingestManager.deleteAgentPolicy.failureSingleNotificationTitle', {
             defaultMessage: "Error deleting agent policy '{id}'",

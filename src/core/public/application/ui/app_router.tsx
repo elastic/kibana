@@ -23,6 +23,7 @@ import { History } from 'history';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';
@@ -32,6 +33,7 @@ interface Props {
   history: History;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
 }
 
@@ -43,6 +45,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   history,
   mounters,
   setAppLeaveHandler,
+  setAppActionMenu,
   appStatuses$,
   setIsMounting,
 }) => {
@@ -65,12 +68,12 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appPath={path}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
+                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
               />
             )}
           />
         ))}
-        {/* catch-all handler to display 404 page on not existing /app/appId apps*/}
+        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
         <Route
           path="/app/:appId"
           render={({
@@ -87,8 +90,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                mounter={mounter}
-                {...{ setAppLeaveHandler, setIsMounting }}
+                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
               />
             );
           }}

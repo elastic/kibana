@@ -29,6 +29,7 @@ import {
 
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
+import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
@@ -72,6 +73,9 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               </Route>
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
+              </Route>
+              <Route>
+                <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
             </Switch>
           )}

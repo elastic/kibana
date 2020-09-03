@@ -5,7 +5,10 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { GetTrustedAppsRequestSchema } from '../schema/trusted_apps';
+import {
+  GetTrustedAppsRequestSchema,
+  PostTrustedAppCreateRequestSchema,
+} from '../schema/trusted_apps';
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
@@ -14,6 +17,12 @@ export interface GetTrustedListAppsResponse {
   page: number;
   total: number;
   data: TrustedApp[];
+}
+
+/** API Request body for creating a new Trusted App entry */
+export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body>;
+export interface PostTrustedAppCreateResponse {
+  data: TrustedApp;
 }
 
 interface MacosLinuxConditionEntry {

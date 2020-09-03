@@ -29,6 +29,7 @@ import { ScopedHistory } from '../scoped_history';
 describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
+  const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
 
   beforeEach(() => {
@@ -75,6 +76,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -115,6 +117,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.accessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -156,6 +159,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.accessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location

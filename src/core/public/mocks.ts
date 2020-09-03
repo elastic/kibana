@@ -165,6 +165,7 @@ function createAppMountParametersMock(appBasePath = '') {
     element: document.createElement('div'),
     history,
     onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
   };
 
   return params;
