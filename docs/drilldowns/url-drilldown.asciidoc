@@ -1,10 +1,6 @@
 [[url-drilldown]]
 == URL Drilldown
 
-++++
-<titleabbrev>URL drilldown</titleabbrev>
-++++
-
 The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
 The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
 
@@ -15,9 +11,12 @@ Refer to the <<try-it, Try it section>> for instructions on how to create this d
 [role="screenshot"]
 image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
 
-URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
+NOTE: URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
 
-TODO: TOC
+* <<try-it, Try it: Create a URL drilldown>>
+* <<trigger-picker, Picking a trigger for a URL drilldown>>
+* <<templating, URL templating language>>
+* <<variables, URL template variables>>
 
 [float]
 [[try-it]]
