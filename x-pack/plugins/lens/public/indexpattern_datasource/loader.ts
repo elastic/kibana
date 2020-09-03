@@ -49,10 +49,33 @@ export async function loadIndexPatterns({
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
-      const newFields = (indexPattern.fields as IndexPatternField[])
+      const newFields = indexPattern.fields
         .filter(
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
+        )
+        .map(
+          (field): IndexPatternField => {
+            // Convert the getters on the index pattern service into plain JSON
+            const base = {
+              name: field.name,
+              displayName: field.displayName,
+              type: field.type,
+              aggregatable: field.aggregatable,
+              searchable: field.searchable,
+              esTypes: field.esTypes,
+              scripted: field.scripted,
+            };
+
+            // Simplifies tests by hiding optional properties instead of undefined
+            return base.scripted
+              ? {
+                  ...base,
+                  lang: field.lang,
+                  script: field.script,
+                }
+              : base;
+          }
         )
         .concat(documentField);
 
