@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerApiError } from '../../../../common/types';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -22,7 +21,7 @@ import { needsRefreshOfListData } from './selectors';
 import { TrustedAppsListDataBindingChanged } from './action';
 
 const createListDataBindingChangedAction = (
-  newBinding: Immutable<AsyncDataBinding<TrustedAppsListData, ServerApiError>>
+  newBinding: Immutable<AsyncDataBinding<TrustedAppsListData>>
 ): Immutable<TrustedAppsListDataBindingChanged> => ({
   type: 'trustedAppsListDataBindingChanged',
   payload: { newBinding },
@@ -38,9 +37,7 @@ const refreshList = async (
     createListDataBindingChangedAction({
       type: 'InProgressAsyncBinding',
       // need to think on how to avoid the casting
-      previousBinding: list.currentListData as Immutable<
-        StaleAsyncBinding<TrustedAppsListData, ServerApiError>
-      >,
+      previousBinding: list.currentListData as Immutable<StaleAsyncBinding<TrustedAppsListData>>,
     })
   );
 

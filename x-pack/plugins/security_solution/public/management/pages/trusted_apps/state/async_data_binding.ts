@@ -5,12 +5,13 @@
  */
 
 import { Immutable } from '../../../../../common/endpoint/types';
+import { ServerApiError } from '../../../../common/types';
 
 export interface UninitialisedAsyncBinding {
   type: 'UninitialisedAsyncBinding';
 }
 
-export interface InProgressAsyncBinding<T, E> {
+export interface InProgressAsyncBinding<T, E = ServerApiError> {
   type: 'InProgressAsyncBinding';
   previousBinding: StaleAsyncBinding<T, E>;
 }
@@ -20,18 +21,18 @@ export interface PresentAsyncBinding<T> {
   data: T;
 }
 
-export interface FailedAsyncBinding<T, E> {
+export interface FailedAsyncBinding<T, E = ServerApiError> {
   type: 'FailedAsyncBinding';
   error: E;
   lastPresentBinding?: PresentAsyncBinding<T>;
 }
 
-export type StaleAsyncBinding<T, E> =
+export type StaleAsyncBinding<T, E = ServerApiError> =
   | UninitialisedAsyncBinding
   | PresentAsyncBinding<T>
   | FailedAsyncBinding<T, E>;
 
-export type AsyncDataBinding<T, E> =
+export type AsyncDataBinding<T, E = ServerApiError> =
   | UninitialisedAsyncBinding
   | InProgressAsyncBinding<T, E>
   | PresentAsyncBinding<T>
