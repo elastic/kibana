@@ -221,6 +221,7 @@ export class Home extends Component {
               <EuiFlexItem grow={false}>
                 {advancedSettings && (
                   <EuiButtonEmpty
+                    flush="left"
                     iconType="home"
                     onClick={createAppNavigationHandler(
                       '/app/management/kibana/settings#defaultRoute'

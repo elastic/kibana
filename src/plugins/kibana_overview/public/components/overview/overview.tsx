@@ -301,21 +301,15 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
       <PageHeader />
 
       <div className="kibanaOverviewContent">
-        <EuiSpacer size="l" />
-
         {isNewKibanaInstance ? renderGettingStarted() : renderNormal()}
 
-        <footer>
-          <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <EuiFlexGroup
-            className="kibanaOverviewPageFooter"
-            alignItems="center"
-            gutterSize="s"
-            justifyContent="spaceBetween"
-          >
+        <footer className="kibanaOverviewFooter">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                flush="left"
                 iconType="home"
                 onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
                 size="xs"
@@ -326,6 +320,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="allPlugins"

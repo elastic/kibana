@@ -44,6 +44,7 @@ $pageWidth: 1200px;
   }
 }
 
+//not working? same with home? check importance
 .kibanaOverviewHeader__actionItem {
   @include euiBreakpoint('xs', 's') {
     margin-bottom: 0 !important;
@@ -56,14 +57,4 @@ $pageWidth: 1200px;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
   width: 100%;
-}
-
-.kibanaOverviewData--expanded {
-  flex-direction: column;
-
-  &,
-  & > * {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
 }
