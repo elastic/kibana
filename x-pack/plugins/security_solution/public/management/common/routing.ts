@@ -116,7 +116,7 @@ const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string):
 const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
   const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
 
-  return !Number.isFinite(pageIndex) || pageIndex < 0 ? pageIndex : MANAGEMENT_DEFAULT_PAGE;
+  return !Number.isFinite(pageIndex) || pageIndex < 0 ? MANAGEMENT_DEFAULT_PAGE : pageIndex;
 };
 
 const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
