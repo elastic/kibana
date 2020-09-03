@@ -19,15 +19,15 @@ interface Props {
 
 export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
   <EditFieldFormRow
-    title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldTitle', {
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterTitle', {
       defaultMessage: 'Set metadata',
     })}
-    description={i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldDescription', {
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDescription', {
       defaultMessage: 'Arbitrary information about the field. Specify as JSON key-value pairs.',
     })}
     defaultToggleValue={defaultToggleValue}
     docLink={{
-      text: i18n.translate('xpack.idxMgmt.mappingsEditor.metaDocLinkText', {
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDocLinkText', {
         defaultMessage: 'Metadata documentation',
       }),
       href: documentationService.getMetaLink(),
@@ -40,7 +40,7 @@ export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) 
       componentProps={{
         euiCodeEditorProps: {
           height: '300px',
-          'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldAriaLabel', {
+          'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterAriaLabel', {
             defaultMessage: 'metadata field data editor',
           }),
         },
