@@ -459,7 +459,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   prepBody() {
-    const attribFields = {} as any;
+    const attribFields = {} as { [key: string]: { customName: string } };
     for (const field of this.fields) {
       if (field.customName) {
         attribFields[field.name] = { customName: field.customName };

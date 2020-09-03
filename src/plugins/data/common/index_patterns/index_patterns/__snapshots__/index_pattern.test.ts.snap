@@ -7,7 +7,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 10,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "long",
       ],
@@ -31,7 +31,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 20,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "boolean",
       ],
@@ -50,7 +50,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -69,7 +69,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -88,7 +88,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -107,7 +107,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -126,7 +126,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "integer",
       ],
@@ -145,7 +145,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "ip",
       ],
@@ -164,7 +164,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "attachment",
       ],
@@ -183,7 +183,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "geo_point",
       ],
@@ -202,7 +202,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "geo_shape",
       ],
@@ -221,7 +221,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "murmur3",
       ],
@@ -240,7 +240,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "geo_point",
       ],
@@ -259,7 +259,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -278,7 +278,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -301,7 +301,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -320,7 +320,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -343,7 +343,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "keyword",
       ],
@@ -362,7 +362,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "_id",
       ],
@@ -381,7 +381,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "_type",
       ],
@@ -400,7 +400,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "_source",
       ],
@@ -419,7 +419,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -438,7 +438,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -457,7 +457,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "conflict",
       ],
@@ -476,7 +476,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "text",
       ],
@@ -495,7 +495,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "long",
       ],
@@ -514,7 +514,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "date",
       ],
@@ -533,7 +533,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
-      "customLabel": undefined,
+      "customName": undefined,
       "esTypes": Array [
         "murmur3",
       ],
