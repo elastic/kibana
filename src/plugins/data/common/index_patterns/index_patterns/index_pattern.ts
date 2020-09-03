@@ -609,14 +609,18 @@ export class IndexPattern implements IIndexPattern {
       });
   }
 
-  async _fetchFields() {
-    const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields().map((field) => field.spec);
+  async _fetchFields(indexPattern: IndexPattern) {
+    const fields = await indexPattern.fieldsFetcher.fetch(indexPattern);
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
     try {
-      this.fields.replaceAll([...fields, ...scripted]);
+      indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
       if (err instanceof FieldTypeUnknownError) {
-        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+        indexPattern.unknownFieldErrorNotification(
+          err.fieldSpec.name,
+          err.fieldSpec.type,
+          indexPattern.title
+        );
       } else {
         throw err;
       }
@@ -624,7 +628,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   refreshFields() {
-    return this._fetchFields()
+    return this._fetchFields(this)
       .then(() => this.save())
       .catch((err) => {
         // https://github.com/elastic/kibana/issues/9224
