@@ -89,7 +89,7 @@ export const useHostOverview = ({
         const searchSubscription$ = data.search
           .search<HostOverviewRequestOptions, HostOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {

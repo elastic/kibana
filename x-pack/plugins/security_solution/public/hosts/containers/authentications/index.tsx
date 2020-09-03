@@ -136,7 +136,7 @@ export const useAuthentications = ({
         const searchSubscription$ = data.search
           .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
