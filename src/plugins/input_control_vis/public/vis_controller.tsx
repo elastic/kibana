@@ -34,6 +34,7 @@ import { VisParams, Vis } from '../../visualizations/public';
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
+    private isLoaded = false;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
@@ -53,10 +54,14 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     }
 
     async render(visData: any, visParams: VisParams) {
-      this.visParams = visParams;
-      this.controls = await this.initControls();
-      const [{ i18n }] = await deps.core.getStartServices();
-      this.I18nContext = i18n.Context;
+      if (!this.isLoaded) {
+        this.visParams = visParams;
+        this.controls = [];
+        this.controls = await this.initControls();
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
+        this.isLoaded = true;
+      }
       this.drawVis();
     }
 
@@ -105,12 +110,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 
       const getControl = (controlId: string) => {
-        const control = controls.find(({ id }) => id === controlId);
-        const lastControl = this.controls.find(({ id }) => id === controlId);
-        if (control && lastControl) {
-          control.value = lastControl.value;
-        }
-        return control;
+        return controls.find(({ id }) => id === controlId);
       };
 
       const controlInitPromises: Array<Promise<void>> = [];
