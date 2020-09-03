@@ -26,12 +26,18 @@ import {
   NetworkHttpStrategyResponse,
   NetworkHttpRequestOptions,
 } from './network';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+} from './matrix_histogram';
 
 export * from './hosts';
+export * from './matrix_histogram';
 export * from './network';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
 
 export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
@@ -168,6 +174,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
   ? NetworkHttpStrategyResponse
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -182,6 +190,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http
   ? NetworkHttpRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
   : never;
 
 export type StringOrNumber = string | number;

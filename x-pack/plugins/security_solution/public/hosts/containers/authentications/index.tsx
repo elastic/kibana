@@ -57,6 +57,7 @@ interface UseAuthentications {
   endDate: string;
   startDate: string;
   type: hostsModel.HostsType;
+  skip: boolean;
 }
 
 export const useAuthentications = ({
@@ -65,6 +66,7 @@ export const useAuthentications = ({
   endDate,
   startDate,
   type,
+  skip,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
   const { activePage, limit } = useSelector(
@@ -196,12 +198,12 @@ export const useAuthentications = ({
           to: endDate,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, startDate]);
+  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

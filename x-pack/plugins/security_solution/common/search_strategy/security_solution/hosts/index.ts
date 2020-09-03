@@ -5,6 +5,7 @@
  */
 
 export * from './all';
+export * from './authentications';
 export * from './common';
 export * from './overview';
 export * from './first_last_seen';
