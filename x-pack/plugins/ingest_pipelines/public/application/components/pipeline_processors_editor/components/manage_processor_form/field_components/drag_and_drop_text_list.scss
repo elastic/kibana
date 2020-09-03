@@ -1,9 +1,19 @@
 .pipelineProcessorsEditor__form__dragAndDropList {
+  &__panel {
+    box-shadow: none;
+  }
+
   &__grabIcon {
     margin-right: $euiSizeS;
   }
 
   &__removeButton {
     margin-left: $euiSizeS;
+  }
+
+  &__item {
+    padding-top: $euiSizeM;
+    padding-bottom: $euiSizeM;
+    border-bottom: $euiBorderThin;
   }
 }

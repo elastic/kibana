@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { UseField, ArrayItem } from '../../../../../../shared_imports';
@@ -49,54 +50,57 @@ function DragAndDropTextListComponent({
     [onMove]
   );
   return (
-    <>
+    <EuiPanel
+      className="pipelineProcessorsEditor__form__dragAndDropList__panel"
+      hasShadow={false}
+      paddingSize="s"
+    >
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId={droppableId}>
           {value.map((item, idx) => {
             return (
-              <EuiDraggable spacing="m" draggableId={String(item.id)} index={idx} key={item.id}>
+              <EuiDraggable spacing="none" draggableId={String(item.id)} index={idx} key={item.id}>
                 {(provided) => {
                   return (
-                    <EuiPanel hasShadow={false} paddingSize="s">
-                      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
-                        <EuiFlexItem grow={false}>
-                          <div {...provided.dragHandleProps}>
-                            <EuiIcon
-                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                              type="grab"
+                    <EuiFlexGroup
+                      className="pipelineProcessorsEditor__form__dragAndDropList__item"
+                      justifyContent="center"
+                      alignItems="center"
+                      gutterSize="none"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <div {...provided.dragHandleProps}>
+                          <EuiIcon
+                            className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
+                            type="grab"
+                          />
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <UseField<string>
+                          path={item.path}
+                          componentProps={{ euiFieldProps: { compressed: true } }}
+                          readDefaultValueOnForm={!item.isNew}
+                        >
+                          {(patternField) => (
+                            <EuiFieldText
+                              value={patternField.value}
+                              onChange={(e) => patternField.setValue(e.target.value)}
+                              compressed
+                              fullWidth
                             />
-                          </div>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiFlexGroup alignItems="center" key={item.id} gutterSize="none">
-                            <EuiFlexItem>
-                              <UseField<string>
-                                path={item.path}
-                                componentProps={{ euiFieldProps: { compressed: true } }}
-                                readDefaultValueOnForm={!item.isNew}
-                              >
-                                {(patternField) => (
-                                  <EuiFieldText
-                                    value={patternField.value}
-                                    onChange={(e) => patternField.setValue(e.target.value)}
-                                    compressed
-                                    fullWidth
-                                  />
-                                )}
-                              </UseField>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
-                                iconType="minusInCircle"
-                                color="danger"
-                                onClick={() => onRemove(item.id)}
-                              />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
+                          )}
+                        </UseField>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
+                          iconType="minusInCircle"
+                          color="danger"
+                          onClick={() => onRemove(item.id)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   );
                 }}
               </EuiDraggable>
@@ -104,10 +108,11 @@ function DragAndDropTextListComponent({
           })}
         </EuiDroppable>
       </EuiDragDropContext>
+      {value.length ? <EuiSpacer size="s" /> : null}
       <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd}>
         {addLabel}
       </EuiButtonEmpty>
-    </>
+    </EuiPanel>
   );
 }
 
