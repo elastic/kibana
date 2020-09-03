@@ -168,9 +168,8 @@ export function disableUICapabilitiesFactory(
       const isCatalogueFeature = featureId === 'catalogue';
       const isManagementFeature = featureId === 'management';
 
-      let hasRequiredKibanaPrivileges = false;
       if (!isElasticsearchFeature) {
-        hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
+        const hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
           (x) => x.privilege === action && x.authorized === true
         );
 

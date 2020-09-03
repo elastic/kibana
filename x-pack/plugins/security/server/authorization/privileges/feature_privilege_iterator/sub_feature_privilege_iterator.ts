@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SubFeaturePrivilegeConfig } from '../../../../../features/common';
-import { KibanaFeature } from '../../../../../features/server';
+import { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
 
 export function* subFeaturePrivilegeIterator(
   feature: KibanaFeature
