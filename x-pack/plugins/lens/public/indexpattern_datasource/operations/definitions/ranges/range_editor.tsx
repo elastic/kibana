@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
   EuiDroppable,
   EuiDragDropContext,
   euiDragDropReorder,
@@ -30,7 +29,6 @@ import {
   EuiForm,
   EuiSwitch,
   EuiToolTip,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { isAutoInterval } from '../../../../../../../../src/plugins/data/common';
 import {
@@ -76,52 +74,59 @@ const BaseRangeEditor = ({
   onMaxBarsChange: (newMaxBars: number) => void;
   onIntervalChange: (newInterval: number) => void;
 }) => {
-  const sectionLabel = autoIntervalEnabled
-    ? i18n.translate('xpack.lens.indexPattern.ranges.maxBars', {
-        defaultMessage: 'Max bars',
-      })
-    : i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-        defaultMessage: 'Interval size',
-      });
+  const sectionLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
+    defaultMessage: 'Granularity',
+  });
 
   return (
     <>
-      <EuiSwitch
-        label={i18n.translate('xpack.lens.indexPattern.ranges.autoInterval', {
-          defaultMessage: 'Auto interval',
-        })}
-        checked={autoIntervalEnabled}
-        onChange={(e) => toggleAutoInterval(e.target.checked)}
-        data-test-subj="indexPattern-ranges-auto-interval"
-      />
-      <EuiSpacer />
-      <EuiFormRow label={sectionLabel} data-test-subj="indexPattern-ranges-section-label">
+      <EuiFormRow
+        label={sectionLabel}
+        data-test-subj="indexPattern-ranges-section-label"
+        labelAppend={
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.ranges.autoInterval', {
+              defaultMessage: 'Auto interval',
+            })}
+            checked={autoIntervalEnabled}
+            onChange={(e) => toggleAutoInterval(e.target.checked)}
+            data-test-subj="indexPattern-ranges-auto-interval"
+            compressed
+          />
+        }
+      >
         <>
-          {autoIntervalEnabled ? (
-            <EuiRange
-              id={htmlIdGenerator()()}
-              min={1}
-              max={HISTOGRAM_MAX_BARS}
-              step={1}
-              value={maxBars}
-              onChange={({ target }) => onMaxBarsChange(Number(get(target, 'value', 100)))}
-              showLabels
-            />
-          ) : (
-            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-              <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem>
+              {autoIntervalEnabled ? (
+                <EuiRange
+                  min={1}
+                  max={HISTOGRAM_MAX_BARS}
+                  step={1}
+                  value={maxBars}
+                  onChange={({ target }) =>
+                    onMaxBarsChange(Number(get(target, 'value', HISTOGRAM_MAX_BARS)))
+                  }
+                  showLabels
+                  showInput="inputWithPopover"
+                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
+                    defaultMessage: 'Num intervals',
+                  })}
+                />
+              ) : (
                 <EuiFieldNumber
                   data-test-subj="lens-range-interval-field"
                   value={interval}
                   onChange={({ target }) => onIntervalChange(Number(target.value))}
                   prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                    defaultMessage: 'Min',
+                    defaultMessage: 'Min Interval',
                   })}
                   min={0}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiButtonEmpty iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
             {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
               defaultMessage: 'Create custom intervals',
@@ -148,12 +153,9 @@ const RangePopover = ({
 
   const safeLabel = getSafeLabel(tempRange);
 
-  const gtePrependLabel = i18n.translate(
-    'xpack.lens.indexPattern.ranges.greaterThanOrEqualPrepend',
-    {
-      defaultMessage: '\u2265', // Cannot use GTE_SYMBOL here because i18n check fails to verify it
-    }
-  );
+  const gteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.greaterThanOrEqualAppend', {
+    defaultMessage: '\u2264',
+  });
   const gteTooltipContent = i18n.translate(
     'xpack.lens.indexPattern.ranges.greaterThanOrEqualTooltip',
     {
@@ -161,7 +163,7 @@ const RangePopover = ({
     }
   );
   const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
-    defaultMessage: '\u003c', // Cannot use LT_SYMBOL here because i18n check fails to verify it
+    defaultMessage: '\u003c',
   });
   const ltTooltipContent = i18n.translate('xpack.lens.indexPattern.ranges.lessThanTooltip', {
     defaultMessage: 'Less than',
@@ -194,9 +196,9 @@ const RangePopover = ({
                     from: target.value ? Number(target.value) : -Infinity,
                   })
                 }
-                prepend={
+                append={
                   <EuiToolTip content={gteTooltipContent}>
-                    <EuiText size="s">{gtePrependLabel}</EuiText>
+                    <EuiText size="s">{gteAppendLabel}</EuiText>
                   </EuiToolTip>
                 }
                 fullWidth={true}
