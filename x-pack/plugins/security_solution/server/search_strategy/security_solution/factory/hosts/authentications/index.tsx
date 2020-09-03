@@ -42,7 +42,6 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
       formatAuthenticationData(hit, auditdFieldsMap)
     );
-
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
