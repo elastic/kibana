@@ -53,14 +53,8 @@ const ajv = new Ajv({
   nullable: true,
 });
 
-function schemaErrorsText(errors: any, dataVar: any) {
-  let text = '';
-  const separator = ', ';
-  for (let i = 0; i < errors.length; i++) {
-    const e = errors[i];
-    text += dataVar + (e.dataPath || '') + ' ' + e.message + separator;
-  }
-  return text.slice(0, -separator.length);
+function schemaErrorsText(errors: Ajv.ErrorObject[], dataVar: any) {
+  return errors.map((e) => `${dataVar + (e.dataPath || '')} ${e.message}`).join(', ');
 }
 
 function makeValidator(jsonSchema: any) {
@@ -70,7 +64,7 @@ function makeValidator(jsonSchema: any) {
       return r.ok(data);
     }
 
-    return r.badRequest(schemaErrorsText(validator.errors, data));
+    return r.badRequest(schemaErrorsText(validator.errors || [], data));
   };
 }
 
