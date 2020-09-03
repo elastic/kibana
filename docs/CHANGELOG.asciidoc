@@ -76,8 +76,6 @@ this way via Console with "Config error" states in the watches table. This chang
 the UI accepts watches that are configured with index actions without a defined index name {kibana-pull}74684[#74684]
 * Fixes a bug in the index template wizard, which resulted in the UI crashing when the user tries to save an index template without visiting the "Mappings" step first {kibana-pull}75511[#75511]
 * Fixes an issue in the mappings editor when trying to clear the "Field type" select dropdown {kibana-pull}76263[#76263]
-* Fixes an issue in Snapshot and Restore UI where creating a policy, repository or snapshot with a special character, 
-like a colon, in the name would result in a 404 when viewing details or editing any of the aforementioned {kibana-pull}76278[#76278]
 Maps::
 * Fixes TMS not loaded in legacy maps {kibana-pull}73570[#73570]
 * Fixes drawing shapes {kibana-pull}74689[#74689]
