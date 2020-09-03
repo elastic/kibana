@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -13,6 +21,8 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiFieldSearch,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../translations';
@@ -42,21 +52,37 @@ const TagsFilterPopoverComponent = ({
   selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
+  const sortedTags = useMemo(() => {
+    return tags.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())); // Case insensitive
+  }, [tags]);
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [filterTags, setFilterTags] = useState(sortedTags);
 
   const tagsComponent = useMemo(() => {
-    return tags
-      .sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())) // Case insensitive
-      .map((tag, index) => (
-        <EuiFilterSelectItem
-          checked={selectedTags.includes(tag) ? 'on' : undefined}
-          key={`${index}-${tag}`}
-          onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
-        >
-          {`${tag}`}
-        </EuiFilterSelectItem>
-      ));
-  }, [onSelectedTagsChanged, selectedTags, tags]);
+    return filterTags.map((tag, index) => (
+      <EuiFilterSelectItem
+        checked={selectedTags.includes(tag) ? 'on' : undefined}
+        key={`${index}-${tag}`}
+        onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
+      >
+        {`${tag}`}
+      </EuiFilterSelectItem>
+    ));
+  }, [onSelectedTagsChanged, selectedTags, filterTags]);
+
+  const onSearchInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value);
+  }, []);
+
+  useEffect(() => {
+    if (searchInput === '') {
+      setFilterTags(sortedTags);
+    }
+    setFilterTags(
+      sortedTags.filter((tag) => tag.toLowerCase().includes(searchInput.toLowerCase()))
+    );
+  }, [sortedTags, searchInput]);
 
   return (
     <EuiPopover
@@ -78,8 +104,17 @@ const TagsFilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
+      <EuiPopoverTitle>
+        <EuiFieldSearch
+          placeholder="Search tags"
+          value={searchInput}
+          onChange={onSearchInputChange}
+          isClearable
+          aria-label="Rules tag search"
+        />
+      </EuiPopoverTitle>
       <ScrollableDiv>{tagsComponent}</ScrollableDiv>
-      {tags.length === 0 && (
+      {filterTags.length === 0 && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
             <EuiPanel>
