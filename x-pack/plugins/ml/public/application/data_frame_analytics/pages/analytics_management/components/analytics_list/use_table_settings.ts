@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
 import sortBy from 'lodash/sortBy';
 import get from 'lodash/get';
-import { DataFrameAnalyticsListColumn, DataFrameAnalyticsListRow } from './common';
+import { DataFrameAnalyticsListRow } from './common';
+import { ModelItem } from '../models_management/models_list';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -29,15 +30,15 @@ interface AnalyticsBasicTableSettings {
 }
 
 interface UseTableSettingsReturnValue {
-  onTableChange: EuiBasicTableProps<DataFrameAnalyticsListRow>['onChange'];
-  pageOfItems: DataFrameAnalyticsListRow[];
+  onTableChange: EuiBasicTableProps<DataFrameAnalyticsListRow | ModelItem>['onChange'];
+  pageOfItems: DataFrameAnalyticsListRow[] | ModelItem[];
   pagination: EuiBasicTableProps<DataFrameAnalyticsListRow>['pagination'];
   sorting: EuiTableSortingType<any>;
 }
 
 export function useTableSettings(
   sortByField: string,
-  items: DataFrameAnalyticsListRow[]
+  items: DataFrameAnalyticsListRow[] | ModelItem[]
 ): UseTableSettingsReturnValue {
   const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings>({
     pageIndex: 0,

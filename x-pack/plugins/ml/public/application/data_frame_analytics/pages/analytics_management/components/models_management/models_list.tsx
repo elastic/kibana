@@ -8,14 +8,13 @@ import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  Direction,
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiButton,
   EuiSearchBar,
-  EuiSearchBarProps,
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
@@ -403,64 +402,31 @@ export const ModelsList: FC = () => {
     filteredModels.active ? filteredModels.items : items
   );
 
-  const search: EuiSearchBarProps = {
-    query: searchQueryText,
-    onChange: (searchChange) => {
-      if (searchChange.error !== null) {
-        return false;
-      }
-      setSearchQueryText(searchChange.queryText);
-      return true;
-    },
-    box: {
-      incremental: true,
-    },
-    ...(inferenceTypesOptions && inferenceTypesOptions.length > 0
-      ? {
-          filters: [
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-                defaultMessage: 'Type',
-              }),
-              multiSelect: 'or',
-              options: inferenceTypesOptions,
-            },
-          ],
-        }
-      : {}),
-    ...(selectedModels.length > 0
-      ? {
-          toolsLeft: (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.inference.modelsList.selectedModelsMessage"
-                      defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
-                      values={{ modelsCount: selectedModels.length }}
-                    />
-                  </h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  color="danger"
-                  onClick={prepareModelsForDeletion.bind(null, selectedModels)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
-                    defaultMessage="Delete"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        }
-      : {}),
-  };
+  const toolsLeft = (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h5>
+              <FormattedMessage
+                id="xpack.ml.inference.modelsList.selectedModelsMessage"
+                defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
+                values={{ modelsCount: selectedModels.length }}
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+            <FormattedMessage
+              id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
+              defaultMessage="Delete"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
 
   const isSelectionAllowed = canDeleteDataFrameAnalytics;
 
@@ -494,22 +460,29 @@ export const ModelsList: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <AnalyticsSearchBar
-          filters={filters}
-          searchQueryText={searchQueryText}
-          setSearchQueryText={setSearchQueryText}
-        />
+        <EuiFlexGroup alignItems="center">
+          {selectedModels.length > 0 && toolsLeft}
+          <EuiFlexItem>
+            <AnalyticsSearchBar
+              // @ts-ignore TODO
+              filters={filters}
+              searchQueryText={searchQueryText}
+              setSearchQueryText={setSearchQueryText}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <EuiBasicTable
+        <EuiBasicTable<ModelItem>
           columns={columns}
           hasActions={true}
           isExpandable={true}
           isSelectable={false}
-          items={pageOfItems}
+          items={pageOfItems as ModelItem[]}
           itemId={ModelsTableToConfigMapping.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onChange={onTableChange}
+          onChange={onTableChange as EuiBasicTableProps<ModelItem>['onChange']}
+          selection={selection}
           pagination={pagination!}
           sorting={sorting}
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}

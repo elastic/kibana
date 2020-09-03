@@ -20,9 +20,10 @@ import {
   Value,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
+import { ModelItem } from '../models_management/models_list';
 
 export function filterAnalyticsModels(
-  items: DataFrameAnalyticsListRow[],
+  items: ModelItem[],
   clauses: Array<TermClause | FieldClause>
 ) {
   if (clauses.length === 0) {
@@ -33,7 +34,7 @@ export function filterAnalyticsModels(
   // we only want to return items which match all clauses, i.e. each search term is ANDed
   const matches: Record<string, any> = items.reduce((p: Record<string, any>, c) => {
     p[c.model_id] = {
-      job: c,
+      model: c,
       count: 0,
     };
     return p;
@@ -42,42 +43,42 @@ export function filterAnalyticsModels(
   clauses.forEach((c) => {
     // the search term could be negated with a minus, e.g. -bananas
     const bool = c.match === 'must';
-    let js = [];
+    let ms = [];
 
     if (c.type === 'term') {
       // filter term based clauses, e.g. bananas
       // match on model_id and type
       // if the term has been negated, AND the matches
       if (bool === true) {
-        js = items.filter(
+        ms = items.filter(
           (item) =>
             stringMatch(item.model_id, c.value) === bool || stringMatch(item.type, c.value) === bool
         );
       } else {
-        js = items.filter(
+        ms = items.filter(
           (item) =>
             stringMatch(item.model_id, c.value) === bool && stringMatch(item.type, c.value) === bool
         );
       }
     } else {
-      // filter other clauses, i.e. the filters for type and status
+      // filter other clauses, i.e. the filters for type
       if (Array.isArray(c.value)) {
-        // job type value and status value are an array of string(s) e.g. c.value => ['failed', 'stopped']
-        js = items.filter((item) =>
-          (c.value as Value[]).includes(item[c.field as keyof Pick<typeof item, 'type'>])
-        );
+        // type value is an array of string(s) e.g. c.value => ['classification']
+        ms = items.filter((item) => {
+          return item.type !== undefined && (c.value as Value[]).includes(item.type);
+        });
       } else {
-        js = items.filter((item) => item[c.field as keyof Pick<typeof item, 'type'>] === c.value);
+        ms = items.filter((item) => item[c.field as keyof typeof item] === c.value);
       }
     }
 
-    js.forEach((j) => matches[j.model_id].count++);
+    ms.forEach((j) => matches[j.model_id].count++);
   });
 
   // loop through the matches and return only those items which have match all the clauses
   const filtered = Object.values(matches)
     .filter((m) => (m && m.count) >= clauses.length)
-    .map((m) => m.job);
+    .map((m) => m.model);
 
   return filtered;
 }
