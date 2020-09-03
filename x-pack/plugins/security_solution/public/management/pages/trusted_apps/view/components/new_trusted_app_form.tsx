@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -15,8 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
+import { LogicalConditionBuilder } from './logical_condition';
 
 export const NewTrustedAppForm = memo(() => {
+  const handleAndClick = useCallback(() => {}, []);
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
       return {
@@ -43,7 +45,7 @@ export const NewTrustedAppForm = memo(() => {
         <EuiSuperSelect name="os" options={osOptions} />
       </EuiFormRow>
       <EuiFormRow>
-        <div>{'conditions UI goes here'}</div>
+        <LogicalConditionBuilder entries={[]} os={'windows'} onAndClicked={handleAndClick} />
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
