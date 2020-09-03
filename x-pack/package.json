@@ -305,6 +305,7 @@
     "concat-stream": "1.6.2",
     "content-disposition": "0.5.3",
     "cytoscape": "^3.10.0",
+    "cytoscape-dagre": "^2.2.2",
     "d3-array": "1.2.4",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
