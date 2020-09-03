@@ -103,7 +103,7 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
       await testSubjects.missingOrFail('mlModalForecast');
     },
 
-    async assertForeCastModalRunButtonEnabled(expectedValue: boolean) {
+    async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
       expect(isEnabled).to.eql(
         expectedValue,

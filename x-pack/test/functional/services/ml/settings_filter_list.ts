@@ -112,7 +112,7 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
     },
 
     async assertDeleteFilterListButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListsButtonDelete');
+      const isEnabled = await testSubjects.isEnabled('mlFilterListsDeleteButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete filter list" button to be '${

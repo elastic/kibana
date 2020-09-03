@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.singleMetricViewer.assertEntityInputSelection('airline', []);
             await ml.singleMetricViewer.selectEntityValue('airline', 'AAL');
 
-            await ml.testExecution.logTestStep('should displays the chart');
+            await ml.testExecution.logTestStep('should display the chart');
             await ml.singleMetricViewer.assertChartExsist();
 
             await ml.testExecution.logTestStep('should display the annotations section');
@@ -221,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.singleMetricViewer.assertForecastButtonExists();
             await ml.singleMetricViewer.assertForecastButtonEnabled(true);
             await ml.singleMetricViewer.openForecastModal();
-            await ml.singleMetricViewer.assertForeCastModalRunButtonEnabled(true);
+            await ml.singleMetricViewer.assertForecastModalRunButtonEnabled(true);
             await ml.singleMetricViewer.closeForecastModal();
           });
 
@@ -237,14 +237,14 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.anomalyExplorer.assertInfluencerListExists();
             await ml.anomalyExplorer.assertInfluencerFieldListNotEmpty('airline');
 
-            await ml.testExecution.logTestStep('should display the swimlanes');
+            await ml.testExecution.logTestStep('should display the swim lanes');
             await ml.anomalyExplorer.assertOverallSwimlaneExists();
             await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
             await ml.testExecution.logTestStep('should display the annotations panel');
             await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
 
-            await ml.testExecution.logTestStep('displays the anomalies table with entries');
+            await ml.testExecution.logTestStep('should display the anomalies table with entries');
             await ml.anomaliesTable.assertTableExists();
             await ml.anomaliesTable.assertTableNotEmpty();
 
@@ -409,7 +409,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the event in the list');
             await ml.settingsCalendar.assertEventRowExists(eventDescription);
 
-            await ml.testExecution.logTestStep('should display enbabled delete event button');
+            await ml.testExecution.logTestStep('should display enabled delete event button');
             await ml.settingsCalendar.assertDeleteEventButtonEnabled(eventDescription, true);
           });
 
