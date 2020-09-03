@@ -27,6 +27,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.exists('investigate-in-resolver-button', { timeout: 4000 });
     });
 
+    after(async () => {
+      await pageObjects.hosts.deleteDataStreams();
+    });
+
     it('check that Resolver and Data table is loaded', async () => {
       await testSubjects.existOrFail('resolver:graph');
       await testSubjects.existOrFail('tableHeaderCell_name_0');
@@ -185,10 +189,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       }
       await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
-    });
-
-    after(async () => {
-      await pageObjects.hosts.deleteDataStreams();
     });
   });
 }
