@@ -7,6 +7,8 @@ import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
 
+export const MAX_AGG_PRECISION = 40000;
+
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
   statusAgentIDs?: string[];
@@ -40,6 +42,7 @@ export async function kibanaRequestToMetadataListESQuery(
         total: {
           cardinality: {
             field: 'host.id',
+            precision_threshold: MAX_AGG_PRECISION,
           },
         },
       },

@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import {
+  kibanaRequestToMetadataListESQuery,
+  getESQueryHostMetadataByID,
+  MAX_AGG_PRECISION,
+} from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
@@ -41,6 +45,7 @@ describe('query builder', () => {
             total: {
               cardinality: {
                 field: 'host.id',
+                precision_threshold: MAX_AGG_PRECISION,
               },
             },
           },
@@ -103,6 +108,7 @@ describe('query builder', () => {
               total: {
                 cardinality: {
                   field: 'host.id',
+                  precision_threshold: MAX_AGG_PRECISION,
                 },
               },
             },
@@ -176,6 +182,7 @@ describe('query builder', () => {
             total: {
               cardinality: {
                 field: 'host.id',
+                precision_threshold: MAX_AGG_PRECISION,
               },
             },
           },
@@ -262,6 +269,7 @@ describe('query builder', () => {
               total: {
                 cardinality: {
                   field: 'host.id',
+                  precision_threshold: MAX_AGG_PRECISION,
                 },
               },
             },
