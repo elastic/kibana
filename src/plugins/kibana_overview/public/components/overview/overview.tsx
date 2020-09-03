@@ -214,34 +214,47 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   };
 
   const renderFeedItem = ({ title, description, link, publishOn }) => (
-    <div key={title}>
-      <EuiTitle size="xs">
-        <EuiLink href={link}>{title}</EuiLink>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>{publishOn.format('MMM DD, YYYY')}</p>
-      </EuiText>
+    <article key={title}>
+      <header>
+        <EuiTitle size="xs">
+          <h3>
+            <a href={link} target="_blank">
+              {title}
+            </a>
+          </h3>
+        </EuiTitle>
+
+        <EuiText size="xs" color="subdued">
+          <p>
+            <time dateTime={publishOn.format('YYYY-MM-DD')}>
+              {publishOn.format('MMM DD, YYYY')}
+            </time>
+          </p>
+        </EuiText>
+      </header>
+
       <EuiText size="xs">
         <p>{description}</p>
       </EuiText>
-    </div>
+    </article>
   );
 
   const renderAppCard = (appId: string) => {
     const app = apps[appId];
+
     return (
-      <EuiFlexItem key={appId}>
+      <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
         <EuiCard
-          title={app.title}
-          titleSize="s"
           description={app.description}
+          href={addBasePath(app.path)}
           image={addBasePath(
             `/plugins/home/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}_2x.png`
           )}
           // isDisabled={!Boolean(directory)} TODO: should apps be hidden or disabled?
-          href={addBasePath(app.path)}
           onClick={createAppNavigationHandler(app.path)}
+          title={app.title}
           titleElement="h3"
+          titleSize="s"
         />
       </EuiFlexItem>
     );
@@ -253,44 +266,59 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
 
     return (
       <>
-        <section aria-labelledby="kibanaOveview__appsSectionTitle">
+        <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
           <EuiScreenReaderOnly>
-            <EuiTitle>
-              <h2 id="kibanaOveview__appsSectionTitle">
-                <FormattedMessage
-                  id="kibana.overview.apps.title"
-                  defaultMessage="Explore these apps"
-                />
-              </h2>
-            </EuiTitle>
+            <h2 id="kbnOverviewApps__title">
+              <FormattedMessage
+                id="kibana.overview.apps.title"
+                defaultMessage="Explore these apps"
+              />
+            </h2>
           </EuiScreenReaderOnly>
-          <EuiFlexGroup>{mainApps.map(renderAppCard)}</EuiFlexGroup>
+
+          <EuiFlexGroup
+            className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+            justifyContent="center"
+          >
+            {mainApps.map(renderAppCard)}
+          </EuiFlexGroup>
+
           <EuiSpacer size="l" />
-          <EuiFlexGroup>{otherApps.map(renderAppCard)}</EuiFlexGroup>
+
+          <EuiFlexGroup
+            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+            justifyContent="center"
+          >
+            {otherApps.map(renderAppCard)}
+          </EuiFlexGroup>
         </section>
 
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
-            <section aria-labelledby="kibanaOverview__kibanaNewsSectionTitle">
+            <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
               <EuiTitle size="s">
-                <h2 className="kibanaOverview__kibanaNewsSectionTitle">
+                <h2 id="kbnOverviewNews__title">
                   <FormattedMessage id="kibana.overview.news.title" defaultMessage="Kibana news" />
                 </h2>
               </EuiTitle>
-              {newsFetchResult
-                ? newsFetchResult.feedItems
-                    .slice(0, 3)
-                    .map(renderFeedItem)
-                    .reduce(addSpacersBetweenElementsReducer, [])
-                : null}
+
+              <div className="kbnOverviewNews__content">
+                {newsFetchResult
+                  ? newsFetchResult.feedItems
+                      .slice(0, 3)
+                      .map(renderFeedItem)
+                      .reduce(addSpacersBetweenElementsReducer, [])
+                  : null}
+              </div>
             </section>
           </EuiFlexItem>
+
           <EuiFlexItem grow={3}>
-            <section aria-labelledby="kibanaOverview__doMoreSectionTitle">
+            <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
               <EuiTitle size="s">
-                <h2 className="kibanaOverview__doMoreSectionTitle">
+                <h2 id="kbnOverviewMore__title">
                   <FormattedMessage
                     id="kibana.overview.more.title"
                     defaultMessage="Do more with Elastic"

@@ -66,3 +66,20 @@ $pageWidth: 1200px;
 .kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
   fill: $euiColorDarkestShade;
 }
+
+.kbnOverviewApps__item {
+  .kbnOverviewApps__group--primary & {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      max-width: calc(50% - #{$euiSizeM * 2});
+    }
+  }
+
+  .kbnOverviewApps__group--secondary & {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      max-width: calc(25% - #{$euiSizeM * 2});
+    }
+  }
+}
+
+// .kbnOverviewNews__content article {
+// }

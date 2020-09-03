@@ -30,10 +30,12 @@
 }
 
 .homSolutions__group {
-  max-width: 50%;
+  @include euiBreakpoint('l') {
+    max-width: calc(75% - #{$euiSizeM * 2});
+  }
 
-  @include euiBreakpoint('xs', 's') {
-    max-width: none;
+  @include euiBreakpoint('xl') {
+    max-width: calc(50% - #{$euiSizeM * 2});
   }
 }
 
