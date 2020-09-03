@@ -92,7 +92,7 @@ describe('test transform install', () => {
       legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
-    
+
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
       [
         'transport.request',
