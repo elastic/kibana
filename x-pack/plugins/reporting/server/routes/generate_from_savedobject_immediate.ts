@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
-import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/create_job';
+import { createJobFnFactory } from '../export_types/csv_from_savedobject/create_job';
 import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
 import { JobParamsPostPayloadPanelCsv } from '../export_types/csv_from_savedobject/types';
 import { LevelLogger as Logger } from '../lib';
@@ -67,7 +67,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
-      const scheduleTaskFn = scheduleTaskFnFactory(reporting, logger);
+      const scheduleTaskFn = createJobFnFactory(reporting, logger);
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {

@@ -30,7 +30,7 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<ScheduledTaskParamsType>,
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueRunTaskFn<TaskPayloadType>,
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]

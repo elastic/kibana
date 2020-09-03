@@ -48,7 +48,7 @@ export interface JobParamPostPayload {
 }
 
 // the pre-processed, encrypted data ready for storage
-export interface ScheduledTaskParams<JobParamsType> {
+export interface BasePayload<JobParamsType> {
   headers: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
@@ -61,7 +61,7 @@ export interface JobSource<JobParamsType> {
   _source: {
     jobtype: string;
     output: TaskRunResult;
-    payload: ScheduledTaskParams<JobParamsType>;
+    payload: BasePayload<JobParamsType>;
     status: JobStatus;
   };
 }
@@ -169,34 +169,33 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export interface CreateJobBaseParams {
+export interface BaseParams {
   browserTimezone: string;
   layout?: LayoutInstance; // for screenshot type reports
   objectType: string;
 }
 
-export interface CreateJobBaseParamsEncryptedFields extends CreateJobBaseParams {
+export interface BaseParamsEncryptedFields extends BaseParams {
   basePath?: string; // for screenshot type reports
   headers: string; // encrypted headers
 }
 
-export type CreateJobFn<JobParamsType extends CreateJobBaseParams> = (
+export type CreateJobFn<JobParamsType extends BaseParams> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
   request: KibanaRequest
-) => Promise<JobParamsType & CreateJobBaseParamsEncryptedFields>;
+) => Promise<JobParamsType & BaseParamsEncryptedFields>;
 
-// rename me
-export type WorkerExecuteFn<ScheduledTaskParamsType> = (
+export type RunTaskFn<TaskPayloadType> = (
   jobId: string,
-  job: ScheduledTaskParamsType,
+  job: TaskPayloadType,
   cancellationToken: CancellationToken
 ) => Promise<TaskRunResult>;
 
-export type ScheduleTaskFnFactory<ScheduleTaskFnType> = (
+export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => ScheduleTaskFnType;
+) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
@@ -205,7 +204,7 @@ export type RunTaskFnFactory<RunTaskFnType> = (
 
 export interface ExportTypeDefinition<
   JobParamsType,
-  ScheduleTaskFnType,
+  CreateJobFnType,
   JobPayloadType,
   RunTaskFnType
 > {
@@ -214,7 +213,7 @@ export interface ExportTypeDefinition<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  scheduleTaskFnFactory: ScheduleTaskFnFactory<ScheduleTaskFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }

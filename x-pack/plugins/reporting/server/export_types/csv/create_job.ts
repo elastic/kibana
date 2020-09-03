@@ -5,10 +5,10 @@
  */
 
 import { cryptoFactory } from '../../lib';
-import { CreateJobFn, ScheduleTaskFnFactory } from '../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsDiscoverCsv } from './types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsDiscoverCsv
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();

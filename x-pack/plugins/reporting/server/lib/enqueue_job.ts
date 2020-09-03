@@ -6,13 +6,13 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { ReportingCore } from '../';
-import { CreateJobBaseParams, CreateJobFn, ReportingUser } from '../types';
+import { BaseParams, CreateJobFn, ReportingUser } from '../types';
 import { LevelLogger } from './';
 import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: CreateJobBaseParams,
+  jobParams: BaseParams,
   user: ReportingUser,
   context: RequestHandlerContext,
   request: KibanaRequest
@@ -26,12 +26,12 @@ export function enqueueJobFactory(
 
   return async function enqueueJob(
     exportTypeId: string,
-    jobParams: CreateJobBaseParams,
+    jobParams: BaseParams,
     user: ReportingUser,
     context: RequestHandlerContext,
     request: KibanaRequest
   ) {
-    type ScheduleTaskFnType = CreateJobFn<CreateJobBaseParams>;
+    type CreateJobFnType = CreateJobFn<BaseParams>;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -40,7 +40,7 @@ export function enqueueJobFactory(
     }
 
     const [scheduleTask, { store }] = await Promise.all([
-      exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType,
+      exportType.createJobFnFactory(reporting, logger) as CreateJobFnType,
       reporting.getPluginStartDeps(),
     ]);
 

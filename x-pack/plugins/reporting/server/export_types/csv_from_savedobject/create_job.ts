@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
-import { ScheduleTaskFnFactory, TimeRangeParams } from '../../types';
+import { CreateJobFnFactory, TimeRangeParams } from '../../types';
 import {
   JobParamsPanelCsv,
   SavedObject,
@@ -37,7 +37,7 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
+export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
   reporting,
   parentLogger
 ) {
