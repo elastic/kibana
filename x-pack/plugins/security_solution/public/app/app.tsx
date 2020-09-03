@@ -15,6 +15,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
@@ -28,6 +29,7 @@ import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { ManageSource } from '../common/containers/sourcerer';
+
 interface StartAppComponent extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
@@ -57,7 +59,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
                   <ManageSource>
                     <ThemeProvider theme={theme}>
                       <MlCapabilitiesProvider>
-                        <PageRouter history={history}>{children}</PageRouter>
+                        <ManageUserInfo>
+                          <PageRouter history={history}>{children}</PageRouter>
+                        </ManageUserInfo>
                       </MlCapabilitiesProvider>
                     </ThemeProvider>
                   </ManageSource>
