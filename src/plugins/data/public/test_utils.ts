@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { setup } from '../../../../../core/test_helpers/http_test_setup';
-
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
+export { getFieldFormatsRegistry } from './field_formats/field_formats_registry.stub';
