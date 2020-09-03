@@ -27,7 +27,10 @@ import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
 export let goToSpecifiedPath;
 export let kbnUrlStateStorage;
 
-export async function renderApp(context, { appBasePath, element, history, onAppLeave }) {
+export async function renderApp(
+  context,
+  { appBasePath, element, history, onAppLeave, setHeaderActionMenu }
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -35,14 +38,22 @@ export async function renderApp(context, { appBasePath, element, history, onAppL
     ...withNotifyOnErrors(getToasts()),
   });
 
-  render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
+  render(
+    <App
+      history={history}
+      appBasePath={appBasePath}
+      onAppLeave={onAppLeave}
+      setHeaderActionMenu={setHeaderActionMenu}
+    />,
+    element
+  );
 
   return () => {
     unmountComponentAtNode(element);
   };
 }
 
-const App = ({ history, appBasePath, onAppLeave }) => {
+const App = ({ history, appBasePath, onAppLeave, setHeaderActionMenu }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
@@ -74,6 +85,7 @@ const App = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />
@@ -85,6 +97,7 @@ const App = ({ history, appBasePath, onAppLeave }) => {
               render={() => (
                 <LoadMapAndRender
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />

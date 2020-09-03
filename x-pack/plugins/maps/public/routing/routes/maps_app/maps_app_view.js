@@ -311,6 +311,7 @@ export class MapsAppView extends React.Component {
     const { TopNavMenu } = getNavigation().ui;
     return (
       <TopNavMenu
+        setMenuMountPoint={this.props.setHeaderActionMenu}
         appName="maps"
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
