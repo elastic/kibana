@@ -28,7 +28,7 @@ export interface JsonEditorState<T = { [key: string]: any }> {
     format(): T;
   };
   validate(): boolean;
-  isValid: boolean;
+  isValid: boolean | undefined;
 }
 
 export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (
@@ -78,7 +78,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
   }, [validate, content]);
 
   useEffect(() => {
-    if (!isMounted.current) {
+    if (!isMounted.current || isControlled) {
       return;
     }
 
@@ -92,7 +92,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
       validate,
       isValid,
     });
-  }, [onUpdate, content, formatContent, validate]);
+  }, [onUpdate, content, formatContent, validate, isControlled]);
 
   useEffect(() => {
     isMounted.current = true;

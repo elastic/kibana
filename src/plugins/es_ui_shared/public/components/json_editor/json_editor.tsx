@@ -58,12 +58,26 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   const onEuiCodeEditorChange = useCallback(
     (updated: string) => {
       if (isControlled) {
-        setContent(updated);
+        onUpdate({
+          data: {
+            raw: updated,
+            format: () => JSON.parse(updated),
+          },
+          validate: () => {
+            try {
+              JSON.parse(updated);
+              return true;
+            } catch (e) {
+              return false;
+            }
+          },
+          isValid: undefined,
+        });
       } else {
         debouncedSetContent(updated);
       }
     },
-    [isControlled, setContent, debouncedSetContent]
+    [isControlled, debouncedSetContent, onUpdate]
   );
 
   return (
