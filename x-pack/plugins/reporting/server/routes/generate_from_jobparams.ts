@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import rison from 'rison-node';
 import { schema } from '@kbn/config-schema';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
-import { HandlerErrorFunction, HandlerFunction } from './types';
+import rison from 'rison-node';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { BaseParams } from '../types';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 

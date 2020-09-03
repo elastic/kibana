@@ -14,9 +14,9 @@ import {
 } from '../../../common/constants';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../constants';
 import { ExportTypeDefinition } from '../../types';
-import { metadata } from './metadata';
-import { ImmediateCreateJobFn, createJobFnFactory } from './create_job';
+import { createJobFnFactory, ImmediateCreateJobFn } from './create_job';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
+import { metadata } from './metadata';
 import { JobParamsPanelCsv } from './types';
 
 /*

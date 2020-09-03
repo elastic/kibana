@@ -5,7 +5,7 @@
  */
 
 import { BaseParams, BasePayload } from '../../../server/types';
-import { LayoutInstance, LayoutParams } from '../../lib/layouts';
+import { LayoutParams } from '../../lib/layouts';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNG extends BaseParams {

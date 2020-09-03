@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, BasePayload, TimeRangeParams } from '../../types';
+import { JobParamPostPayload, TimeRangeParams } from '../../types';
 
 export interface FakeRequest {
   headers: Record<string, unknown>;

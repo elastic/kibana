@@ -11,8 +11,8 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { CONTENT_TYPE_CSV, CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../lib';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
-import { TaskPayloadCSV } from './types';
 import { createGenerateCsv } from './generate_csv';
+import { TaskPayloadCSV } from './types';
 
 const getRequest = async (headers: string | undefined, crypto: Crypto, logger: LevelLogger) => {
   const decryptHeaders = async () => {

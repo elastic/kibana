@@ -12,7 +12,7 @@ import {
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { CreateJobFn, RunTaskFn, ExportTypeDefinition } from '../../types';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

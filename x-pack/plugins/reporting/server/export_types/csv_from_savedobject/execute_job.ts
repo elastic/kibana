@@ -7,10 +7,10 @@
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { RunTaskFnFactory, BasePayload, TaskRunResult } from '../../types';
+import { BasePayload, RunTaskFnFactory, TaskRunResult } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
-import { JobParamsPanelCsv, SearchPanel } from './types';
 import { getGenerateCsvParams } from './lib/get_csv_job';
+import { JobParamsPanelCsv, SearchPanel } from './types';
 
 /*
  * The run function receives the full request which provides the un-encrypted
