@@ -96,19 +96,6 @@ interface Props {
   newsfeed$: Observable<FetchResult | null | void>;
 }
 
-const addSpacersBetweenElementsReducer = (
-  acc: JSX.Element[],
-  element: JSX.Element,
-  index: number,
-  elements: JSX.Element[]
-) => {
-  acc.push(element);
-  if (index < elements.length - 1) {
-    acc.push(<EuiSpacer key={`homeSolutionsPanel__UseCaseSpacer${index}`} size="m" />);
-  }
-  return acc;
-};
-
 export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
@@ -216,18 +203,18 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const renderFeedItem = ({ title, description, link, publishOn }) => (
     <article key={title}>
       <header>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h3>
-            <a href={link} target="_blank">
+            <EuiLink href={link} target="_blank">
               {title}
-            </a>
+            </EuiLink>
           </h3>
         </EuiTitle>
 
         <EuiText size="xs" color="subdued">
           <p>
             <time dateTime={publishOn.format('YYYY-MM-DD')}>
-              {publishOn.format('MMM DD, YYYY')}
+              {publishOn.format('DD MMMM YYYY')}
             </time>
           </p>
         </EuiText>
@@ -304,13 +291,10 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 </h2>
               </EuiTitle>
 
+              <EuiSpacer size="m" />
+
               <div className="kbnOverviewNews__content">
-                {newsFetchResult
-                  ? newsFetchResult.feedItems
-                      .slice(0, 3)
-                      .map(renderFeedItem)
-                      .reduce(addSpacersBetweenElementsReducer, [])
-                  : null}
+                {newsFetchResult ? newsFetchResult.feedItems.slice(0, 3).map(renderFeedItem) : null}
               </div>
             </section>
           </EuiFlexItem>
@@ -325,6 +309,8 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                   />
                 </h2>
               </EuiTitle>
+
+              <EuiSpacer size="m" />
             </section>
           </EuiFlexItem>
         </EuiFlexGroup>

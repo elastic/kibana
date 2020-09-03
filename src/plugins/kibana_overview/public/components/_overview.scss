@@ -81,5 +81,15 @@ $pageWidth: 1200px;
   }
 }
 
-// .kbnOverviewNews__content article {
-// }
+.kbnOverviewNews__content article {
+  & + article {
+    margin-top: $euiSizeL;
+  }
+
+  &,
+  header {
+    & > * + * {
+      margin-top: $euiSizeXS;
+    }
+  }
+}
