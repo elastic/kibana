@@ -36,6 +36,7 @@ export const defaultNewWarmPhase: WarmPhase = {
   selectedReplicaCount: '',
   warmPhaseOnRollover: true,
   phaseIndexPriority: '50',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewColdPhase: ColdPhase = {
@@ -46,6 +47,7 @@ export const defaultNewColdPhase: ColdPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '0',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewFrozenPhase: FrozenPhase = {
@@ -56,6 +58,7 @@ export const defaultNewFrozenPhase: FrozenPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '0',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewDeletePhase: DeletePhase = {
