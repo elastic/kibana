@@ -50,7 +50,6 @@ function mockProps() {
     forceAppSwitcherNavigation$: new BehaviorSubject(false),
     helpExtension$: new BehaviorSubject(undefined),
     helpSupportUrl$: new BehaviorSubject(''),
-    legacyMode: false,
     navControlsLeft$: new BehaviorSubject([]),
     navControlsRight$: new BehaviorSubject([]),
     basePath: http.basePath,
