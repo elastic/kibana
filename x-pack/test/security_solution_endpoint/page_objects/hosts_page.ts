@@ -10,7 +10,12 @@ import { deleteAlertsStream } from '../../security_solution_endpoint_api_int/api
 import { deleteMetadataStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deletePolicyStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deleteTelemetryStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
-export interface DataStyle { left: string, top: string, width: string, height: string }
+export interface DataStyle {
+  left: string,
+  top: string,
+  width: string,
+  height: string
+}
 
 export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
@@ -23,7 +28,12 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
    * @param {string} styles
    * @returns {Object}
    */
-  const parseStyle = (styles: string): {left?: string, top?: string, width?: string, height?: string} =>
+  const parseStyle = (styles: string): {
+    left?: string,
+    top?: string,
+    width?: string,
+    height?: string
+  } =>
     styles
       .split(';')
       .filter((style: string) => style.split(':')[0] && style.split(':')[1])
