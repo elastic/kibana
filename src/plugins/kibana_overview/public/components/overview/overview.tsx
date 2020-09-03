@@ -20,23 +20,23 @@
 import React, { FC, useState, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCard,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiFlexGrid,
-  EuiCard,
-  EuiButton,
-  EuiIcon,
-  EuiSpacer,
   EuiHorizontalRule,
-  EuiScreenReaderOnly,
-  EuiButtonEmpty,
+  EuiIcon,
+  EuiImage,
   EuiLink,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 import { PageHeader } from '../page_header';
@@ -44,7 +44,7 @@ import { PageHeader } from '../page_header';
 const apps = {
   dashboard: {
     title: 'Dashboard',
-    description: i18n.translate('home.kibana.featureCatalogueDescription1', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription1', {
       defaultMessage: 'Analyze data in dashboards.',
     }),
     icon: 'dashboardApp',
@@ -52,7 +52,7 @@ const apps = {
   },
   discover: {
     title: 'Discover',
-    description: i18n.translate('home.kibana.featureCatalogueDescription2', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription2', {
       defaultMessage: 'Search and find insights.',
     }),
     icon: 'search',
@@ -60,7 +60,7 @@ const apps = {
   },
   canvas: {
     title: 'Canvas',
-    description: i18n.translate('home.kibana.featureCatalogueDescription3', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription3', {
       defaultMessage: 'Design pixel-perfect reports.',
     }),
     icon: 'canvasApp',
@@ -68,7 +68,7 @@ const apps = {
   },
   maps: {
     title: 'Maps',
-    description: i18n.translate('home.kibana.featureCatalogueDescription4', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription4', {
       defaultMessage: 'Plot geographic data.',
     }),
     icon: 'gisApp',
@@ -76,7 +76,7 @@ const apps = {
   },
   ml: {
     title: 'Machine Learning',
-    description: i18n.translate('home.kibana.featureCatalogueDescription5', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription5', {
       defaultMessage: 'Model, predict, and detect.',
     }),
     icon: 'compute',
@@ -84,7 +84,7 @@ const apps = {
   },
   graph: {
     title: 'Graph',
-    description: i18n.translate('home.kibana.featureCatalogueDescription6', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription6', {
       defaultMessage: 'Reveal patterns and relationships.',
     }),
     icon: 'graphApp',
@@ -336,7 +336,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 size="xs"
               >
                 <FormattedMessage
-                  id="kibana.overview.changeHomeRouteLink"
+                  id="kibana.overview.footer.changeHomeRouteLink"
                   defaultMessage="Display a different page on log in"
                 />
               </EuiButtonEmpty>
@@ -350,7 +350,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 iconType="apps"
               >
                 <FormattedMessage
-                  id="kibana.overview.appDirectoryButtonLabel"
+                  id="kibana.overview.footer.appDirectoryButtonLabel"
                   defaultMessage="View app directory"
                 />
               </EuiButtonEmpty>
