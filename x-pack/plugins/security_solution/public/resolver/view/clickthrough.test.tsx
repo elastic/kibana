@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleNoIndices } from '../data_access_layer/mocks/no_indices_two_children';
+import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -20,10 +20,13 @@ let entityIDs: { origin: string; firstChild: string; secondChild: string };
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe('Resolver, initially no indices', () => {
+describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
   beforeEach(async () => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = handleNoIndices();
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildenInIndexCalledAwesomeIndex();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
@@ -40,7 +43,7 @@ describe('Resolver, initially no indices', () => {
     });
   });
 
-  it(`should retrieve no process nodes when the indices was an empty array`, async () => {
+  it('should render no processes', async () => {
     await expect(
       simulator.map(() => ({
         processes: simulator.processNodeElements().length,
@@ -50,9 +53,8 @@ describe('Resolver, initially no indices', () => {
     });
   });
 
-  describe('Resolver, when indices are used', () => {
+  describe("when rerendered with the `indices` prop set to `['awesome_index'`]", () => {
     beforeEach(async () => {
-      // awesome_index is checked in the handleNoIndices function
       simulator.indices = ['awesome_index'];
     });
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.

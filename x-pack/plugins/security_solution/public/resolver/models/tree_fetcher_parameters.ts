@@ -20,10 +20,10 @@ export function equal(param1: TreeFetcherParameters, param2?: TreeFetcherParamet
   if (param1.databaseDocumentID !== param2.databaseDocumentID) {
     return false;
   }
-  return arrayEqual(param1.indices, param2.indices);
+  return arraysContainTheSameElements(param1.indices, param2.indices);
 }
 
-function arrayEqual(first: unknown[], second: unknown[]): boolean {
+function arraysContainTheSameElements(first: unknown[], second: unknown[]): boolean {
   if (first === second) {
     return true;
   }
