@@ -179,7 +179,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     description: () => (
       <FormattedMessage
         id="xpack.ingestPipelines.processors.description.grok"
-        defaultMessage="Uses {grokLink} expressions to extract matches from a field.."
+        defaultMessage="Uses {grokLink} expressions to extract matches from a field."
         values={{
           grokLink: (
             <EuiLink external target="_blank" href={esDocUrl + '/grok-processor.html'}>
