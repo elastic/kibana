@@ -63,7 +63,7 @@ export interface AddExceptionModalBaseProps {
 
 export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
   onCancel: () => void;
-  onConfirm: (didCloseAlert: boolean) => void;
+  onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   onRuleChange?: () => void;
   alertStatus?: Status;
 }
@@ -137,8 +137,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
   const onSuccess = useCallback(() => {
     addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
-    onConfirm(shouldCloseAlert);
-  }, [addSuccess, onConfirm, shouldCloseAlert]);
+    onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
+  }, [addSuccess, onConfirm, shouldBulkCloseAlert, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {

@@ -30,6 +30,7 @@ export interface FormHook<T extends FormData = FormData> {
   readonly isValid: boolean | undefined;
   readonly id: string;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  validate: () => Promise<boolean>;
   subscribe: (handler: OnUpdateHandler<T>) => Subscription;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
@@ -147,6 +148,7 @@ export interface ValidationError<T = string> {
   message: string;
   code?: T;
   validationType?: string;
+  __isBlocking__?: boolean;
   [key: string]: any;
 }
 
@@ -185,5 +187,11 @@ type FieldValue = unknown;
 export interface ValidationConfig<T extends FormData = any> {
   validator: ValidationFunc<T>;
   type?: string;
+  /**
+   * By default all validation are blockers, which means that if they fail, the field is invalid.
+   * In some cases, like when trying to add an item to the ComboBox, if the item is not valid we want
+   * to show a validation error. But this validation is **not** blocking. Simply, the item has not been added.
+   */
+  isBlocking?: boolean;
   exitOnFail?: boolean;
 }
