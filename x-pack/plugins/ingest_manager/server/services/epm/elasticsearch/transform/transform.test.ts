@@ -4,75 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { installTransformForDataset } from './install';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CallESAsCurrentUser, Installation } from '../../../../types';
-import Packages from '../../packages';
-import Install from '../../packages/install';
-import Common from './common';
-
-jest.mock('../../packages', () => {
-  return {
-    Packages: jest.fn().mockImplementation(() => {
-      return { getInstallation: jest.fn() };
-    }),
-  };
+jest.mock('../../packages/get', () => {
+  return { getInstallation: jest.fn() };
 });
 
 jest.mock('../../packages/install', () => {
+  return { saveInstalledEsRefs: jest.fn() };
+});
+
+jest.mock('../../registry', () => {
+  const original = jest.requireActual('../../registry');
   return {
-    Install: jest.fn().mockImplementation(() => {
-      return { saveInstalledEsRefs: jest.fn() };
-    }),
+    ...original,
+    getAsset: jest.fn(),
   };
 });
 
-jest.mock('./common', () => {
-  return {
-    Common: jest.fn().mockImplementation(() => {
-      return {
-        getAsset: jest.fn(),
-      };
-    }),
-  };
-});
+import { installTransformForDataset } from './install';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
+import { getInstallation } from '../../packages';
+import { saveInstalledEsRefs } from '../../packages/install';
+import { getAsset } from '../../registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 
 describe('test transform install', () => {
   beforeEach(() => {});
   afterEach(() => {});
   test('can install new version and removes older version', async () => {
-    const callAsCurrentUser: jest.Mocked<CallESAsCurrentUser> = jest.fn();
-    const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = {
-      update: jest.fn(),
+    const legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient> = {
+      callAsInternalUser: jest.fn(),
+      callAsCurrentUser: jest.fn(),
     };
-    const previousInstallation: Installation = {
+    getAsset();
+    const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = savedObjectsClientMock.create();
+    const previousInstallation: Installation = ({
       installed_es: [
         {
           id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
-          type: 'transform',
+          type: ElasticsearchAssetType.transform,
         },
       ],
-    };
+    } as unknown) as Installation;
 
-    const currentInstallation: Installation = {
+    const currentInstallation: Installation = ({
       installed_es: [
         {
           id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
-          type: 'transform',
+          type: ElasticsearchAssetType.transform,
         },
       ],
-    };
-    Common.getAsset = jest.fn().mockReturnValue('{"content": "data"}');
-
-    Packages.getInstallation = jest
-      .fn()
+    } as unknown) as Installation;
+    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
+      Buffer.from('{"content": "data"}', 'utf8')
+    );
+    (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(previousInstallation)
       .mockReturnValueOnce(currentInstallation);
 
-    Install.saveInstalledEsRefs = jest.fn();
+    (saveInstalledEsRefs as jest.MockedFunction<typeof saveInstalledEsRefs>).mockClear();
 
     await installTransformForDataset(
-      {
+      ({
         name: 'endpoint',
         version: '0.16.0-dev.0',
         datasets: [
@@ -82,6 +76,7 @@ describe('test transform install', () => {
             title: 'Endpoint Metadata',
             release: 'experimental',
             package: 'endpoint',
+            ingest_pipeline: 'default',
             elasticsearch: {
               'index_template.mappings': {
                 dynamic: false,
@@ -90,15 +85,15 @@ describe('test transform install', () => {
             path: 'metadata_current',
           },
         ],
-      },
+      } as unknown) as RegistryPackage,
       [
         'endpoint-0.16.0-dev.0/dataset/metadata_current/elasticsearch/transform/current-default.json',
       ],
-      callAsCurrentUser,
+      legacyScopedClusterClient.callAsCurrentUser,
       savedObjectsClient
     );
-
-    expect(callAsCurrentUser.mock.calls).toEqual([
+    
+    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
       [
         'transport.request',
         {
@@ -144,7 +139,7 @@ describe('test transform install', () => {
       ],
     ]);
 
-    expect(Install.saveInstalledEsRefs.mock.calls[0][2]).toEqual([
+    expect(saveInstalledEsRefs.mock.calls[0][2]).toEqual([
       {
         id: 'metrics-endpoint.metadata_current-current-default-0.16.0-dev.0',
         type: 'transform',
