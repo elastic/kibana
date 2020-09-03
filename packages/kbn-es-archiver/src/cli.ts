@@ -125,6 +125,7 @@ export function runCli() {
         string: ['query'],
         help: `
           --raw              don't gzip the archives
+          --query            query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
       async run({ flags, esArchiver }) {
