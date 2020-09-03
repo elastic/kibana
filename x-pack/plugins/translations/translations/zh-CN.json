@@ -9686,7 +9686,6 @@
     "xpack.ingestPipelines.pipelineEditor.removeProcessorModal.cancelButtonLabel": "取消",
     "xpack.ingestPipelines.pipelineEditor.removeProcessorModal.confirmationButtonLabel": "删除处理器",
     "xpack.ingestPipelines.pipelineEditor.removeProcessorModal.titleText": "删除 {type} 处理器",
-    "xpack.ingestPipelines.pipelineEditor.setForm.fieldRequiredError": "字段值必填。",
     "xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldLabel": "覆盖",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel": "值",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError": "需要设置值。",
