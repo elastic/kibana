@@ -103,7 +103,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
       if (isMlEnabled(license)) {
         // add ML to home page
         if (pluginsSetup.home) {
@@ -120,10 +120,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {
-          registerManagementSection(pluginsSetup.management, core);
+          registerUrlGenerator(pluginsSetup.share, core);
+          registerManagementSection(pluginsSetup.management, core, pluginsStart.share);
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
-          registerUrlGenerator(pluginsSetup.share, core);
         }
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana

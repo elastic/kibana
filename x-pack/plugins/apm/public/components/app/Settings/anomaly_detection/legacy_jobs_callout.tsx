@@ -30,7 +30,7 @@ export function LegacyJobsCallout() {
       </p>
       <EuiButton
         href={core.http.basePath.prepend(
-          '/app/ml#/jobs?mlManagement=(jobId:high_mean_response_time)'
+          '/app/ml/jobs?mlManagement=(jobId:high_mean_response_time)'
         )}
       >
         {i18n.translate(

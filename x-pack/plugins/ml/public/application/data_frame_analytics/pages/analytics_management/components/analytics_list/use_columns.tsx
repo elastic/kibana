@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -32,6 +32,8 @@ import {
   DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
+import { useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -134,9 +136,26 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id)}>{item.id}</EuiLink>
+export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow, basePath: string) => (
+  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id, basePath)}>{item.id}</EuiLink>
 );
+export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
+  const [href, setHref] = useState<string | undefined>(undefined);
+  const mlUrlGenerator = useMlUrlGenerator();
+
+  const generateUrl = async () => {
+    const url = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+      pageState: { jobId: item.id },
+    });
+    setHref(url);
+  };
+  useEffect(() => {
+    generateUrl();
+  }, []);
+
+  return href ? <EuiLink href={href}>{item.id}</EuiLink> : <>{item.id}</>;
+};
 
 export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
@@ -145,7 +164,6 @@ export const useColumns = (
   isMlEnabledInSpace: boolean = true
 ) => {
   const { actions, modals } = useActions(isManagementTable);
-
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
     if (index !== -1) {
@@ -200,7 +218,7 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
       render: (item: DataFrameAnalyticsListRow) =>
-        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
+        isManagementTable ? <DFAnalyticsJobIdLink item={item} /> : item.id,
     },
     {
       field: DataFrameAnalyticsListColumn.description,
