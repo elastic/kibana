@@ -88,6 +88,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       )!;
     });
 
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createListRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
     it('should create the Trusted Apps List first', async () => {
       const request = createListRequest();
       await routeHandler(context, request, response);
@@ -167,6 +173,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
           ...newExceptionItem,
         } as unknown) as ExceptionListItemSchema;
       });
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createPostRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
     });
 
     it('should create trusted app list first', async () => {
@@ -250,6 +262,11 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         path: TRUSTED_APPS_DELETE_API.replace('{id}', '123'),
         method: 'delete',
       });
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
     });
 
     it('should return 200 on successful delete', async () => {
