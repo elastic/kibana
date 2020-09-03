@@ -4,23 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostOverviewStrategyResponse,
   HostOverviewRequestOptions,
+  HostFirstLastSeenStrategyResponse,
+  HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
+import {
+  AuthenticationsRequestOptions,
+  AuthenticationsStrategyResponse,
+} from './hosts/authentications';
+import {
+  NetworkQueries,
+  NetworkTlsStrategyResponse,
+  NetworkTlsRequestOptions,
+  NetworkHttpStrategyResponse,
+  NetworkHttpRequestOptions,
+  NetworkTopCountriesStrategyResponse,
+  NetworkTopCountriesRequestOptions,
+} from './network';
+
 export * from './hosts';
+export * from './network';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+
+export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
+
+export interface TotalValue {
+  value: number;
+  relation: string;
+}
 
 export interface Inspect {
   dsl: string[];
-  response: string[];
 }
 
 export interface PageInfoPaginated {
@@ -39,8 +62,8 @@ export enum Direction {
   desc = 'desc',
 }
 
-export interface SortField {
-  field: 'lastSeen' | 'hostName';
+export interface SortField<Field = string> {
+  field: Field;
   direction: Direction;
 }
 
@@ -78,6 +101,43 @@ export interface DocValueFields {
   format: string;
 }
 
+export interface Explanation {
+  value: number;
+  description: string;
+  details: Explanation[];
+}
+
+export interface TotalValue {
+  value: number;
+  relation: string;
+}
+export interface ShardsResponse {
+  total: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+}
+
+export interface TotalHit {
+  value: number;
+  relation: string;
+}
+
+export interface Hit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+}
+
+export interface Hits<T, U> {
+  hits: {
+    total: T;
+    max_score: number | null;
+    hits: U[];
+  };
+}
+
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
@@ -86,24 +146,53 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
 }
 
-export interface RequestOptions extends RequestBasicOptions {
+/** A mapping of semantic fields to their document counterparts */
+
+export interface RequestOptions<Field = string> extends RequestBasicOptions {
   pagination: PaginationInput;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
-export interface RequestOptionsPaginated extends RequestBasicOptions {
+export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
+  : T extends HostsQueries.authentications
+  ? AuthenticationsStrategyResponse
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenStrategyResponse
+  : T extends NetworkQueries.tls
+  ? NetworkTlsStrategyResponse
+  : T extends NetworkQueries.http
+  ? NetworkHttpStrategyResponse
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
+  : T extends HostsQueries.authentications
+  ? AuthenticationsRequestOptions
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenRequestOptions
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesRequestOptions
   : never;
+
+export type StringOrNumber = string | number;
+
+export interface GenericBuckets {
+  key: string;
+  doc_count: number;
+}

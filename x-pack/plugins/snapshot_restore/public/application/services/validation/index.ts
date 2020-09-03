@@ -12,4 +12,4 @@ export {
 
 export { RestoreValidation, validateRestore } from './validate_restore';
 
-export { PolicyValidation, validatePolicy } from './validate_policy';
+export { PolicyValidation, validatePolicy, ValidatePolicyHelperData } from './validate_policy';
