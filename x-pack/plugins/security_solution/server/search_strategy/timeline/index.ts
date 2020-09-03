@@ -6,16 +6,16 @@
 
 import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
 import {
-  FactoryQueryTypes,
-  StrategyResponseType,
-  StrategyRequestType,
+  TimelineFactoryQueryTypes,
+  TimelineStrategyResponseType,
+  TimelineStrategyRequestType,
 } from '../../../common/search_strategy/timeline';
 import { securitySolutionTimelineFactory } from './factory';
 import { SecuritySolutionTimelineFactory } from './factory/types';
 
-export const securitySolutionTimelineSearchStrategyProvider = <T extends FactoryQueryTypes>(
+export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart
-): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
+): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy('es');
 
   return {

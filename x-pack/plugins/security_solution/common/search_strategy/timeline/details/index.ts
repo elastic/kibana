@@ -5,11 +5,8 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe, RequestOptionsPaginated } from '..';
-
-export enum TimelineDetailsQueries {
-  timelineDetails = 'timelineDetails',
-}
+import { Inspect, Maybe } from '../../common';
+import { TimelineRequestOptionsPaginated } from '..';
 
 export interface DetailItem {
   field: string;
@@ -20,11 +17,10 @@ export interface DetailItem {
 
 export interface TimelineDetailsStrategyResponse extends IEsSearchResponse {
   data?: Maybe<DetailItem[]>;
-
   inspect?: Maybe<Inspect>;
 }
 
-export interface TimelineDetailsRequestOptions extends Partial<RequestOptionsPaginated> {
+export interface TimelineDetailsRequestOptions extends Partial<TimelineRequestOptionsPaginated> {
   defaultIndex: string[];
   executeQuery: boolean;
   indexName: string;

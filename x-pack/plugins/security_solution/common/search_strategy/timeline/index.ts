@@ -8,40 +8,23 @@ import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import { Ecs } from '../../ecs';
 import {
-  TimelineDetailsQueries,
-  TimelineDetailsRequestOptions,
-  TimelineDetailsStrategyResponse,
-} from './details';
+  CursorType,
+  Maybe,
+  TimerangeInput,
+  DocValueFields,
+  PaginationInput,
+  PaginationInputPaginated,
+  SortField,
+} from '../common';
+import { TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse } from './details';
+
 export * from './details';
-export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = TimelineDetailsQueries;
-
-export interface Inspect {
-  dsl: string[];
-  response: string[];
+export enum TimelineQueries {
+  details = 'details',
 }
 
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
-}
-
-export interface CursorType {
-  value?: Maybe<string>;
-  tiebreaker?: Maybe<string>;
-}
-
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
-
-export interface SortField {
-  field: string;
-  direction: Direction;
-}
+export type TimelineFactoryQueryTypes = TimelineQueries;
 
 export interface TimelineEdges {
   node: TimelineItem;
@@ -60,62 +43,28 @@ export interface TimelineNonEcsData {
   value?: Maybe<string[] | string>;
 }
 
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: string;
-  /** The beginning of the timerange */
-  from: string;
-}
-
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
-export interface PaginationInputPaginated {
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: number;
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: number;
-  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount: number;
-  /** The querySize parameter is the number of items to be returned */
-  querySize: number;
-}
-
-export interface DocValueFields {
-  field: string;
-  format: string;
-}
-
-export interface RequestBasicOptions extends IEsSearchRequest {
+export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
-  factoryQueryType?: FactoryQueryTypes;
+  factoryQueryType?: TimelineFactoryQueryTypes;
 }
 
-export interface RequestOptions extends RequestBasicOptions {
+export interface TimelineRequestOptions extends TimelineRequestBasicOptions {
   pagination: PaginationInput;
   sortField?: SortField;
 }
 
-export interface RequestOptionsPaginated extends RequestBasicOptions {
+export interface TimelineRequestOptionsPaginated extends TimelineRequestBasicOptions {
   pagination: PaginationInputPaginated;
   sortField?: SortField;
 }
 
-export type StrategyResponseType<
-  T extends FactoryQueryTypes
-> = T extends TimelineDetailsQueries.timelineDetails ? TimelineDetailsStrategyResponse : never;
+export type TimelineStrategyResponseType<
+  T extends TimelineFactoryQueryTypes
+> = T extends TimelineQueries.details ? TimelineDetailsStrategyResponse : never;
 
-export type StrategyRequestType<
-  T extends FactoryQueryTypes
-> = T extends TimelineDetailsQueries.timelineDetails ? TimelineDetailsRequestOptions : never;
+export type TimelineStrategyRequestType<
+  T extends TimelineFactoryQueryTypes
+> = T extends TimelineQueries.details ? TimelineDetailsRequestOptions : never;

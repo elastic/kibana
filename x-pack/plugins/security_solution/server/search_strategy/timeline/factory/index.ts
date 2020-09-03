@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FactoryQueryTypes } from '../../../../common/search_strategy/timeline';
+import {
+  TimelineFactoryQueryTypes,
+  TimelineQueries,
+} from '../../../../common/search_strategy/timeline';
 
-import { timelineDetailsFactory } from './details';
+import { timelineDetails } from './details';
 import { SecuritySolutionTimelineFactory } from './types';
 
 export const securitySolutionTimelineFactory: Record<
-  FactoryQueryTypes,
-  SecuritySolutionTimelineFactory<FactoryQueryTypes>
+  TimelineFactoryQueryTypes,
+  SecuritySolutionTimelineFactory<TimelineFactoryQueryTypes>
 > = {
-  ...timelineDetailsFactory,
+  [TimelineQueries.details]: timelineDetails,
 };

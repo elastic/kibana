@@ -6,15 +6,15 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import {
-  FactoryQueryTypes,
-  StrategyRequestType,
-  StrategyResponseType,
+  TimelineFactoryQueryTypes,
+  TimelineStrategyRequestType,
+  TimelineStrategyResponseType,
 } from '../../../../common/search_strategy/timeline';
 
-export interface SecuritySolutionTimelineFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => unknown;
+export interface SecuritySolutionTimelineFactory<T extends TimelineFactoryQueryTypes> {
+  buildDsl: (options: TimelineStrategyRequestType<T>) => unknown;
   parse: (
-    options: StrategyRequestType<T>,
+    options: TimelineStrategyRequestType<T>,
     response: IEsSearchResponse
-  ) => Promise<StrategyResponseType<T>>;
+  ) => Promise<TimelineStrategyResponseType<T>>;
 }

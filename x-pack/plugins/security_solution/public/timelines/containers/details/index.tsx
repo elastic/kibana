@@ -15,10 +15,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
   DetailItem,
-  TimelineDetailsQueries,
+  TimelineQueries,
   TimelineDetailsRequestOptions,
   TimelineDetailsStrategyResponse,
-} from '../../../../common/search_strategy/timeline';
+} from '../../../../common/search_strategy';
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
   loading: boolean;
@@ -54,7 +54,7 @@ export const useTimelineDetails = ({
     executeQuery,
     indexName,
     eventId,
-    factoryQueryType: TimelineDetailsQueries.timelineDetails,
+    factoryQueryType: TimelineQueries.details,
   });
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(

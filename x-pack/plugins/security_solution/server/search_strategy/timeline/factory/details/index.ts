@@ -7,20 +7,17 @@
 import { getOr, merge } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-
 import {
-  FactoryQueryTypes,
+  TimelineQueries,
   TimelineDetailsStrategyResponse,
-  TimelineDetailsQueries,
   TimelineDetailsRequestOptions,
 } from '../../../../../common/search_strategy/timeline';
-
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../types';
-import { buildTimelineDetailsQuery } from './dsl/query.timeline_details.dsl';
+import { buildTimelineDetailsQuery } from './query.timeline_details.dsl';
 import { getDataFromHits } from './helpers';
 
-export const timelineDetails: SecuritySolutionTimelineFactory<TimelineDetailsQueries.timelineDetails> = {
+export const timelineDetails: SecuritySolutionTimelineFactory<TimelineQueries.details> = {
   buildDsl: (options: TimelineDetailsRequestOptions) => {
     const { indexName, eventId, docValueFields = [] } = options;
     return buildTimelineDetailsQuery(indexName, eventId, docValueFields);
@@ -35,7 +32,6 @@ export const timelineDetails: SecuritySolutionTimelineFactory<TimelineDetailsQue
     delete hitsData._source;
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
-      response: [inspectStringifyObject(response.rawResponse)],
     };
     const data = getDataFromHits(merge(sourceData, hitsData));
 
@@ -45,11 +41,4 @@ export const timelineDetails: SecuritySolutionTimelineFactory<TimelineDetailsQue
       inspect,
     };
   },
-};
-
-export const timelineDetailsFactory: Record<
-  TimelineDetailsQueries,
-  SecuritySolutionTimelineFactory<FactoryQueryTypes>
-> = {
-  [TimelineDetailsQueries.timelineDetails]: timelineDetails,
 };

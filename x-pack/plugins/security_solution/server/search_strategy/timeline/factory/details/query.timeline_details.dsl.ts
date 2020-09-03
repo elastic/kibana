@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocValueFieldsInput } from '../../../../../graphql/types';
+import { DocValueFields } from '../../../../../common/search_strategy';
 
 export const buildTimelineDetailsQuery = (
   indexName: string,
   id: string,
-  docValueFields: DocValueFieldsInput[]
+  docValueFields: DocValueFields[]
 ) => ({
   allowNoIndices: true,
   index: indexName,
