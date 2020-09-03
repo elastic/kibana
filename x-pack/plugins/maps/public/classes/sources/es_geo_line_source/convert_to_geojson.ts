@@ -18,9 +18,9 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
     const feature = bucket.path as Feature;
     feature.id = bucket.key;
     feature.properties = {
+      [entitySplitFieldName]: bucket.key,
       ...feature.properties,
       ...extractPropertiesFromBucket(bucket, KEYS_TO_IGNORE),
-      [entitySplitFieldName]: bucket.key,
     };
     features.push(feature);
   });

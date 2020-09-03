@@ -179,10 +179,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return true;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
-
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPE.LINE];
   }

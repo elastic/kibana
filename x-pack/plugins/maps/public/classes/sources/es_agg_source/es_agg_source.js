@@ -92,8 +92,8 @@ export class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-    const metricFields = this.getMetricFields();
+  async filterAndFormatPropertiesToHtml(properties) {
+    const metricFields = await this.getFields();
     const tooltipPropertiesPromises = [];
     metricFields.forEach((metricField) => {
       let value;
