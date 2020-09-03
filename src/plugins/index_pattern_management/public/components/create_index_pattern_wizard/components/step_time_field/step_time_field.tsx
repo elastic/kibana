@@ -113,7 +113,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
-      indexPattern.fieldsFetcher.fetchForWildcard(pattern, getFetchForWildcardOptions())
+      indexPattern.fieldsFetcher.fetchForWildcard(pattern, {
+        metaFields: indexPattern.metaFields,
+        ...getFetchForWildcardOptions(),
+      })
     );
     const timeFields = extractTimeFields(fields);
 
