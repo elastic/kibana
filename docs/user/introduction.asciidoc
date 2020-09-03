@@ -83,12 +83,6 @@ image::images/intro-dashboard.png[]
 
 {kib} also offers these visualization features:
 
-* <<visualize, Visualize>> allows you to display your data in
-charts, graphs, and tables
-(just to name a few). It's also home to Lens.
-Visualize supports the ability to add interactive
-controls to your dashboard, filter dashboard content in real time, and add your own images and logos for your brand.
-
 * <<canvas, Canvas>> gives you the ability to present your data in a
 visually compelling, pixel-perfect report. Give your data the “wow” factor
 needed to impress your CEO or to captivate coworkers with a big-screen display.
@@ -98,7 +92,7 @@ questions of your location-based data. Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<TSVB, TSVB>> allows you to combine
+* <<tsvb, TSVB>> allows you to combine
 an infinite number of aggregations to display complex data.
 With TSVB, you can analyze multiple index patterns and customize
 every aspect of your visualization. Choose your own date format and color
@@ -161,6 +155,6 @@ and start exploring data in minutes.
 You can also <<install, install {kib} on your own>> &mdash; no code, no additional
 infrastructure required.
 
-Our <<tutorial-build-dashboard, Getting Started>> and in-product guidance can
+Our <<create-your-own-dashboard, Getting Started>> and in-product guidance can
 help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[]
 in the top navigation bar for help with questions or to provide feedback.
