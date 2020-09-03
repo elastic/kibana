@@ -11,7 +11,7 @@ export function getInitialTimeFilters({
   mapStateJSON,
   globalState,
 }: {
-  mapStateJSON: string;
+  mapStateJSON?: string;
   globalState: QueryState;
 }) {
   if (mapStateJSON) {

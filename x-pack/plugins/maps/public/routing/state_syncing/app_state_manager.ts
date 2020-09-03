@@ -5,29 +5,29 @@
  */
 
 import { Subject } from 'rxjs';
-import { Filter, SavedQuery, Query } from 'src/plugins/data/public';
+import { Filter, Query } from 'src/plugins/data/public';
 
 export class AppStateManager {
   _query: string | { [key: string]: any } = '';
-  _savedQuery: SavedQuery | string = '';
+  _savedQueryId: string = '';
   _filters: Filter[] = [];
 
   _updated$ = new Subject();
 
   setQueryAndFilters({
     query,
-    savedQuery,
+    savedQueryId,
     filters,
   }: {
     query?: Query;
     filters?: Filter[];
-    savedQuery?: SavedQuery | string;
+    savedQueryId?: string;
   }) {
     if (query && this._query !== query) {
       this._query = query;
     }
-    if (savedQuery && this._savedQuery !== savedQuery) {
-      this._savedQuery = savedQuery;
+    if (savedQueryId && this._savedQueryId !== savedQueryId) {
+      this._savedQueryId = savedQueryId;
     }
     if (filters && this._filters !== filters) {
       this._filters = filters;
@@ -46,7 +46,7 @@ export class AppStateManager {
   getAppState() {
     return {
       query: this._query,
-      savedQuery: this._savedQuery,
+      savedQuery: this._savedQueryId,
       filters: this._filters,
     };
   }

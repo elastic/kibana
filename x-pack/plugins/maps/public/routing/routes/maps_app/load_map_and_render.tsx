@@ -12,18 +12,24 @@ import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { MapsAppView } from '.';
+import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
 interface Props {
-  savedMapId?: Record<string, unknown>;
+  savedMapId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
 }
 
-export const LoadMapAndRender = class extends React.Component<Props> {
+interface State {
+  savedMap?: ISavedGisMap;
+  failedToLoad: boolean;
+}
+
+export const LoadMapAndRender = class extends React.Component<Props, State> {
   _isMounted!: boolean;
   state = {
-    savedMap: null,
+    savedMap: undefined,
     failedToLoad: false,
   };
 
@@ -68,7 +74,7 @@ export const LoadMapAndRender = class extends React.Component<Props> {
 
     return savedMap ? (
       <MapsAppView
-        savedMap={savedMap}
+        savedMap={savedMap!}
         onAppLeave={this.props.onAppLeave}
         stateTransfer={this.props.stateTransfer}
         originatingApp={this.props.originatingApp}

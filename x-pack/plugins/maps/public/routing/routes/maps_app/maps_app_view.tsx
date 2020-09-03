@@ -50,19 +50,20 @@ import {
   MapQuery,
 } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
+import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
 interface Props {
-  savedMap: any;
+  savedMap: ISavedGisMap;
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
-  layerListConfigOnly: unknown;
-  replaceLayerList: (layerList: LayerDescriptor[]) => any;
+  layerListConfigOnly: LayerDescriptor[];
+  replaceLayerList: (layerList: LayerDescriptor[]) => void;
   filters: Filter[];
   isFullScreen: boolean;
   isOpenSettingsDisabled: boolean;
-  enableFullScreen: () => any;
-  openMapSettings: () => any;
+  enableFullScreen: () => void;
+  openMapSettings: () => void;
   inspectorAdapters: Adapters;
   nextIndexPatternIds: string[];
   dispatchSetQuery: ({
@@ -78,21 +79,21 @@ interface Props {
   }) => void;
   timeFilters: TimeRange;
   refreshConfig: MapRefreshConfig;
-  setRefreshConfig: (refreshConfig: MapRefreshConfig) => any;
+  setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
   clearUi: () => void;
-  setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => any;
-  setMapSettings: (mapSettings: MapSettings) => any;
-  setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => any;
-  setOpenTOCDetails: (openTOCDetails: string[]) => any;
+  setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => void;
+  setMapSettings: (mapSettings: MapSettings) => void;
+  setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
+  setOpenTOCDetails: (openTOCDetails: string[]) => void;
   query: MapQuery | undefined;
 }
 
 interface State {
   initialized: boolean;
-  initialLayerListConfig: any;
+  initialLayerListConfig?: LayerDescriptor[];
   indexPatterns: IndexPattern[];
-  savedQuery: SavedQuery | string;
+  savedQuery?: SavedQuery;
   originatingApp?: string;
 }
 
@@ -109,8 +110,6 @@ export class MapsAppView extends React.Component<Props, State> {
     this.state = {
       indexPatterns: [],
       initialized: false,
-      savedQuery: '',
-      initialLayerListConfig: null,
       // tracking originatingApp in state so the connection can be broken by users
       originatingApp: props.originatingApp,
     };
@@ -125,10 +124,11 @@ export class MapsAppView extends React.Component<Props, State> {
       this._updateFromGlobalState
     );
 
-    const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
-    if (initialSavedQuery) {
-      this._updateStateFromSavedQuery(initialSavedQuery as SavedQuery);
-    }
+    // savedQuery must be fetched from savedQueryId
+    // const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
+    // if (initialSavedQuery) {
+    //   this._updateStateFromSavedQuery(initialSavedQuery as SavedQuery);
+    // }
 
     this._initMap();
 
@@ -324,7 +324,7 @@ export class MapsAppView extends React.Component<Props, State> {
 
   _updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
     this.setState({ savedQuery: { ...savedQuery } });
-    this._appStateManager.setQueryAndFilters({ savedQuery });
+    this._appStateManager.setQueryAndFilters({ savedQueryId: savedQuery.id });
 
     const { filterManager } = getData().query;
     const savedQueryFilters = savedQuery.attributes.filters || [];
@@ -433,8 +433,8 @@ export class MapsAppView extends React.Component<Props, State> {
         onSavedQueryUpdated={this._updateStateFromSavedQuery}
         onClearSavedQuery={() => {
           const { filterManager, queryString } = getData().query;
-          this.setState({ savedQuery: '' });
-          this._appStateManager.setQueryAndFilters({ savedQuery: '' });
+          this.setState({ savedQuery: undefined });
+          this._appStateManager.setQueryAndFilters({ savedQueryId: '' });
           this._onQueryChange({
             filters: filterManager.getGlobalFilters(),
             query: queryString.getDefaultQuery(),
