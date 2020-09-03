@@ -2,11 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target",
+    "composite": true,
+    "emitDeclarationOnly": true,
     "declaration": true,
-    "sourceMap": true,
-    "target": "ES2019"
+    "declarationMap": true
   },
   "include": [
-    "src/**/*"
+    "public/**/*"
+  ],
+  "exclude": [
+    "target"
   ]
 }
