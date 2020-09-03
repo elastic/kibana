@@ -54,6 +54,7 @@ describe('captureURLApp', () => {
       element: document.createElement('div'),
       appBasePath: '',
       onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     });
 

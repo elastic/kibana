@@ -35,7 +35,7 @@ import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;
-  percentiles: Record<string, number> | undefined;
+  percentiles: Record<string, number | null> | undefined;
   minDuration: number;
   maxDuration: number;
 }

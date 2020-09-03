@@ -64,6 +64,93 @@ describe('<UseField />', () => {
     });
   });
 
+  describe('validation', () => {
+    let formHook: FormHook | null = null;
+
+    beforeEach(() => {
+      formHook = null;
+    });
+
+    const onFormHook = (form: FormHook) => {
+      formHook = form;
+    };
+
+    const getTestComp = (fieldConfig: FieldConfig) => {
+      const TestComp = ({ onForm }: { onForm: (form: FormHook) => void }) => {
+        const { form } = useForm<any>();
+
+        useEffect(() => {
+          onForm(form);
+        }, [onForm, form]);
+
+        return (
+          <Form form={form}>
+            <UseField path="name" config={fieldConfig} data-test-subj="myField" />
+          </Form>
+        );
+      };
+      return TestComp;
+    };
+
+    const setup = (fieldConfig: FieldConfig) => {
+      return registerTestBed(getTestComp(fieldConfig), {
+        memoryRouter: { wrapComponent: false },
+        defaultProps: { onForm: onFormHook },
+      })() as TestBed;
+    };
+
+    test('should update the form validity whenever the field value changes', async () => {
+      const fieldConfig: FieldConfig = {
+        defaultValue: '', // empty string, which is not valid
+        validations: [
+          {
+            validator: ({ value }) => {
+              // Validate that string is not empty
+              if ((value as string).trim() === '') {
+                return { message: 'Error: field is empty.' };
+              }
+            },
+          },
+        ],
+      };
+
+      // Mount our TestComponent
+      const {
+        form: { setInputValue },
+      } = setup(fieldConfig);
+
+      if (formHook === null) {
+        throw new Error('FormHook object has not been set.');
+      }
+
+      let { isValid } = formHook;
+      expect(isValid).toBeUndefined(); // Initially the form validity is undefined...
+
+      await act(async () => {
+        await formHook!.validate(); // ...until we validate the form
+      });
+
+      ({ isValid } = formHook);
+      expect(isValid).toBe(false);
+
+      // Change to a non empty string to pass validation
+      await act(async () => {
+        setInputValue('myField', 'changedValue');
+      });
+
+      ({ isValid } = formHook);
+      expect(isValid).toBe(true);
+
+      // Change back to an empty string to fail validation
+      await act(async () => {
+        setInputValue('myField', '');
+      });
+
+      ({ isValid } = formHook);
+      expect(isValid).toBe(false);
+    });
+  });
+
   describe('serializer(), deserializer(), formatter()', () => {
     interface MyForm {
       name: string;
