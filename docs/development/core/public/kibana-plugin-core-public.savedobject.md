@@ -15,10 +15,11 @@ export interface SavedObject<T = unknown>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-core-public.savedobject.attributes.md) | <code>T</code> | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
-|  [error](./kibana-plugin-core-public.savedobject.error.md) | <code>{</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
+|  [error](./kibana-plugin-core-public.savedobject.error.md) | <code>SavedObjectError</code> |  |
 |  [id](./kibana-plugin-core-public.savedobject.id.md) | <code>string</code> | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
 |  [migrationVersion](./kibana-plugin-core-public.savedobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [namespaces](./kibana-plugin-core-public.savedobject.namespaces.md) | <code>string[]</code> | Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. |
+|  [originId](./kibana-plugin-core-public.savedobject.originid.md) | <code>string</code> | The ID of the saved object this originated from. This is set if this object's <code>id</code> was regenerated; that can happen during migration from a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import to ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given space. |
 |  [references](./kibana-plugin-core-public.savedobject.references.md) | <code>SavedObjectReference[]</code> | A reference to another saved object. |
 |  [type](./kibana-plugin-core-public.savedobject.type.md) | <code>string</code> | The type of Saved Object. Each plugin can define it's own custom Saved Object types. |
 |  [updated\_at](./kibana-plugin-core-public.savedobject.updated_at.md) | <code>string</code> | Timestamp of the last time this document had been updated. |

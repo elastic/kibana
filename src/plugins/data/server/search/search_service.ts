@@ -37,7 +37,7 @@ import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common';
 
 type StrategyMap<
   SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
@@ -102,11 +102,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private search(
     context: RequestHandlerContext,
     searchRequest: IEsSearchRequest,
-    options: Record<string, any>
+    options: ISearchOptions
   ) {
-    return this.getSearchStrategy(
-      options.strategy || this.defaultSearchStrategyName
-    ).search(context, searchRequest, { signal: options.signal });
+    return this.getSearchStrategy(options.strategy || this.defaultSearchStrategyName).search(
+      context,
+      searchRequest,
+      options
+    );
   }
 
   public start(

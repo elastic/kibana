@@ -11,8 +11,6 @@ import _ from 'lodash';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 
-jest.mock('ui/new_platform');
-
 const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [
   {

@@ -26,6 +26,8 @@ import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 
 const ID = 'hostsQuery';
 
@@ -34,7 +36,7 @@ export interface HostsArgs {
   endDate: string;
   hosts: HostsEdges[];
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: LoadPage;
   pageInfo: PageInfoPaginated;
@@ -47,6 +49,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
@@ -55,6 +58,7 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
+  skip = false,
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
@@ -127,7 +131,7 @@ export const useAllHost = ({
         const searchSubscription$ = data.search
           .search<HostsRequestOptions, HostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -137,7 +141,7 @@ export const useAllHost = ({
                   setHostsResponse((prevResponse) => ({
                     ...prevResponse,
                     hosts: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
@@ -189,7 +193,7 @@ export const useAllHost = ({
           field: sortField,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
@@ -202,6 +206,7 @@ export const useAllHost = ({
     endDate,
     filterQuery,
     limit,
+    skip,
     startDate,
     sortField,
   ]);
