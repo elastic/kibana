@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from 'kibana/public';
@@ -54,7 +55,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     }
 
     async render(visData: any, visParams: VisParams) {
-      if (!this.isLoaded) {
+      if (!this.isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
         this.controls = await this.initControls();
