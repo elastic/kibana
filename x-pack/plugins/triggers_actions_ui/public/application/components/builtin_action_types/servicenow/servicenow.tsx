@@ -48,7 +48,6 @@ export function getActionType(): ActionTypeModel<
     id: connectorConfiguration.id,
     iconClass: logo,
     selectMessage: i18n.SERVICENOW_DESC,
-    consumerSelectedMessage: i18n.SERVICENOW_CASE_DESC,
     actionTypeTitle: connectorConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),

@@ -24,7 +24,7 @@ export const ActionTypeMenu = ({
   actionTypes,
   setHasActionsUpgradeableByTrial,
 }: Props) => {
-  const { http, toastNotifications, actionTypeRegistry, consumer } = useActionsConnectorsContext();
+  const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
@@ -64,16 +64,9 @@ export const ActionTypeMenu = ({
     .filter(([id, details]) => actionTypeRegistry.has(id) && details.enabledInConfig === true)
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
-      let actionDescription = '';
-      if (actionTypeModel) {
-        actionDescription =
-          consumer && actionTypeModel.consumerSelectedMessage
-            ? actionTypeModel.consumerSelectedMessage
-            : actionTypeModel.selectMessage;
-      }
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
-        selectMessage: actionDescription,
+        selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
         typeName: id.replace('.', ''),
