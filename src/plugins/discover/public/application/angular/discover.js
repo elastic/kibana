@@ -41,6 +41,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getHeaderActionMenuMounter,
   getUrlTracker,
   unhashUrl,
   subscribeWithScope,
@@ -470,6 +471,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     ];
   };
   $scope.topNavMenu = getTopNavLinks();
+  $scope.setHeaderActionMenu = getHeaderActionMenuMounter();
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)

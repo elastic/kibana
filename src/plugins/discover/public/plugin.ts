@@ -53,6 +53,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
@@ -248,6 +249,7 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
         const {
@@ -261,6 +263,7 @@ export class DiscoverPlugin
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
+          params.element.classList.remove('dscAppWrapper');
           unmount();
           appUnMounted();
         };

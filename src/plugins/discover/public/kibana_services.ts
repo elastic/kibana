@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, AppMountParameters } from 'kibana/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
@@ -57,6 +57,10 @@ export function setServices(newServices: any) {
 
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;
+
+export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGetterSetter<
+  AppMountParameters['setHeaderActionMenu']
+>('headerActionMenuMounter');
 
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
