@@ -141,13 +141,12 @@ const GraphOverlayComponent = ({
 
   const { signalIndexName } = useSignalIndex();
   const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const indices: string[] = useMemo(() => {
-    const allIndices = [...siemDefaultIndices];
-
-    if (signalIndexName !== null) {
-      allIndices.push(signalIndexName);
+  const indices: string[] | null = useMemo(() => {
+    if (signalIndexName === null) {
+      return null;
+    } else {
+      return [...siemDefaultIndices, signalIndexName];
     }
-    return allIndices;
   }, [signalIndexName, siemDefaultIndices]);
 
   return (
@@ -191,7 +190,7 @@ const GraphOverlayComponent = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      {graphEventId !== undefined && (
+      {graphEventId !== undefined && indices !== null && (
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={currentTimeline.id}
