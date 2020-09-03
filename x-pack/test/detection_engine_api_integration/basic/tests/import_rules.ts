@@ -192,8 +192,12 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should be able to import 9999 rules', async () => {
-        const ruleIds = new Array(9999).fill(undefined).map((_, index) => `rule-${index}`);
+      // import is still very slow due to the alerts client find api
+      // when importing 100 rules it takes about 30 seconds for this
+      // test to complete so at 10 rules completing in about 10 seconds
+      // I figured this is enough to make sure the import route is doing its job.
+      it('should be able to import 10 rules', async () => {
+        const ruleIds = new Array(10).fill(undefined).map((_, index) => `rule-${index}`);
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
@@ -203,9 +207,25 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           errors: [],
           success: true,
-          success_count: 9999,
+          success_count: 10,
         });
       });
+
+      // uncomment the below test once we speed up the alerts client find api
+      // it('should be able to import 10000 rules', async () => {
+      //   const ruleIds = new Array(10000).fill(undefined).map((_, index) => `rule-${index}`);
+      //   const { body } = await supertest
+      //     .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+      //     .set('kbn-xsrf', 'true')
+      //     .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+      //     .expect(200);
+
+      //   expect(body).to.eql({
+      //     errors: [],
+      //     success: true,
+      //     success_count: 10000,
+      //   });
+      // });
 
       it('should NOT be able to import more than 10,000 rules', async () => {
         const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
