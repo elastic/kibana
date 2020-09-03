@@ -171,6 +171,26 @@ export const relatedEventsStats: (
 );
 
 /**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: DataState
+) => (entityId: string) => number = createSelector(relatedEventsStats, (relatedStats) => {
+  return (entityId) => {
+    const statsForEntity = relatedStats(entityId);
+    if (statsForEntity === undefined) {
+      return 0;
+    }
+    return Object.values(statsForEntity?.events?.byCategory || {}).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+  };
+});
+
+/**
  * returns a map of entity_ids to related event data.
  */
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {

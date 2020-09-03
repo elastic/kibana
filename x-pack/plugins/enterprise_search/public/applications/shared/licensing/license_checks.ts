@@ -7,5 +7,11 @@
 import { ILicense } from '../../../../../licensing/public';
 
 export const hasPlatinumLicense = (license?: ILicense) => {
-  return license?.isActive && ['platinum', 'enterprise', 'trial'].includes(license?.type as string);
+  const qualifyingLicenses = ['platinum', 'enterprise', 'trial'];
+  return license?.isActive && qualifyingLicenses.includes(license?.type as string);
+};
+
+export const hasGoldLicense = (license?: ILicense) => {
+  const qualifyingLicenses = ['gold', 'platinum', 'enterprise', 'trial'];
+  return license?.isActive && qualifyingLicenses.includes(license?.type as string);
 };
