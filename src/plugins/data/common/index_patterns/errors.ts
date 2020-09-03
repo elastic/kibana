@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export * from './fields';
-export * from './types';
-export { IndexPatternsService } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
-export * from './errors';
+import { FieldSpec } from './types';
+
+export class FieldTypeUnknownError extends Error {
+  public readonly fieldSpec: FieldSpec;
+  constructor(message: string, spec: FieldSpec) {
+    super(message);
+    this.name = 'FieldTypeUnknownError';
+    this.fieldSpec = spec;
+  }
+}
