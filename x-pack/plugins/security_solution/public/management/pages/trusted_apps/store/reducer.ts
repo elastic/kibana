@@ -18,7 +18,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
 import { TrustedAppsListResourceStateChanged } from './action';
-import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
+import { TrustedAppsListPageState } from '../state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (

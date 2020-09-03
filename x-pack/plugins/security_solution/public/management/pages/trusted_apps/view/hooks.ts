@@ -13,7 +13,7 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE as GLOBAL_NS,
 } from '../../../common/constants';
 
-import { TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
+import { TrustedAppsListPageState } from '../state';
 
 export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageState) => R): R {
   return useSelector((state: State) =>

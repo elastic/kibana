@@ -6,14 +6,14 @@
 
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
-import { PaginationInfo, TrustedAppsListPageState } from '../state/trusted_apps_list_page_state';
-
 import {
   getCurrentResourceError,
   getLastLoadedResourceData,
   isLoadingResourceState,
   isOutdatedResourceState,
-} from '../state/async_resource_state';
+  PaginationInfo,
+  TrustedAppsListPageState,
+} from '../state';
 
 const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
   pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;

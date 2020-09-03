@@ -5,7 +5,7 @@
  */
 
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { AsyncResourceState } from './async_resource_state';
+import { AsyncResourceState } from '.';
 
 export interface PaginationInfo {
   index: number;

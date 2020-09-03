@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResourceState } from '../state/async_resource_state';
-import { TrustedAppsListData } from '../state/trusted_apps_list_page_state';
+import { AsyncResourceState, TrustedAppsListData } from '../state';
 
 export interface TrustedAppsListResourceStateChanged {
   type: 'trustedAppsListResourceStateChanged';

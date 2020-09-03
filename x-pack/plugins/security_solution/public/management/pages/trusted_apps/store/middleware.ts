@@ -7,16 +7,17 @@
 import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
+
 import {
   AsyncResourceState,
   StaleResourceState,
   getLastLoadedResourceState,
-} from '../state/async_resource_state';
-import {
   TrustedAppsListData,
   TrustedAppsListPageState,
-} from '../state/trusted_apps_list_page_state';
+} from '../state';
+
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
+
 import { needsRefreshOfListData } from './selectors';
 import { TrustedAppsListResourceStateChanged } from './action';
 
