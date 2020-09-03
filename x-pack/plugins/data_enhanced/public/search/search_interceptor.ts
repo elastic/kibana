@@ -81,7 +81,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     let { id } = request;
 
     const { combinedSignal, cleanup } = this.setupAbortSignal({
-      abortSignal: options.signal,
+      abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
     const aborted$ = from(toPromise(combinedSignal));
