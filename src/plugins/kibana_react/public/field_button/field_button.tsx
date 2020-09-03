@@ -100,7 +100,16 @@ export function FieldButton({
 
   return (
     <div className={classes} {...rest}>
-      <button onClick={onClick} {...buttonProps} className={buttonClasses}>
+      <button
+        onClick={(e) => {
+          if (e.type === 'click') {
+            e.currentTarget.focus();
+          }
+          onClick();
+        }}
+        {...buttonProps}
+        className={buttonClasses}
+      >
         {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
         {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
         {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
