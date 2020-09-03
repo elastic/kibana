@@ -79,7 +79,8 @@ export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<Truste
   return (store) => (next) => async (action) => {
     next(action);
 
-    if (needsRefreshOfListData(store.getState())) {
+    // TODO: need to think if failed binding is a good condition to consider need for refresh
+    if (action.type === 'userChangedUrl' && needsRefreshOfListData(store.getState())) {
       await refreshList(store, trustedAppsService);
     }
   };
