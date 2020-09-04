@@ -55,6 +55,34 @@ describe('KibanaRequest', () => {
     });
   });
 
+  describe('uuid property', () => {
+    it('uses the request.app.requestUuid property if present', () => {
+      const request = httpServerMock.createRawRequest({
+        app: { requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.uuid).toEqual('123e4567-e89b-12d3-a456-426614174000');
+    });
+
+    it('generates a new UUID if request.app property is not present', () => {
+      // Undefined app property
+      const request = httpServerMock.createRawRequest({
+        app: undefined,
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+
+    it('generates a new UUID if request.app.requestUuid property is not present', () => {
+      // Undefined app.requestUuid property
+      const request = httpServerMock.createRawRequest({
+        app: {},
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+  });
+
   describe('get all headers', () => {
     it('returns all headers', () => {
       const request = httpServerMock.createRawRequest({
