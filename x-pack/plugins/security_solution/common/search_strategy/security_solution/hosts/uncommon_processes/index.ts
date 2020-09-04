@@ -27,65 +27,45 @@ export interface HostUncommonProcessesRequestOptions extends RequestOptionsPagin
 
 export interface HostUncommonProcessesStrategyResponse extends IEsSearchResponse {
   edges: UncommonProcessesEdges[];
-
   totalCount: number;
-
   pageInfo: PageInfoPaginated;
-
   inspect?: Maybe<Inspect>;
 }
 
 export interface UncommonProcessesEdges {
   node: UncommonProcessItem;
-
   cursor: CursorType;
 }
 
 export interface UncommonProcessItem {
   _id: string;
-
   instances: number;
-
   process: ProcessEcsFields;
-
   hosts: HostEcs[];
-
   user?: Maybe<UserEcs>;
 }
 
 export interface ProcessEcsFields {
   hash?: Maybe<ProcessHashData>;
-
   pid?: Maybe<number[]>;
-
   name?: Maybe<string[]>;
-
   ppid?: Maybe<number[]>;
-
   args?: Maybe<string[]>;
-
   entity_id?: Maybe<string[]>;
-
   executable?: Maybe<string[]>;
-
   title?: Maybe<string[]>;
-
   thread?: Maybe<Thread>;
-
   working_directory?: Maybe<string[]>;
 }
 
 export interface ProcessHashData {
   md5?: Maybe<string[]>;
-
   sha1?: Maybe<string[]>;
-
   sha256?: Maybe<string[]>;
 }
 
 export interface Thread {
   id?: Maybe<number[]>;
-
   start?: Maybe<string[]>;
 }
 
