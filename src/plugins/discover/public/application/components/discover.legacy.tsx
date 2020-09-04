@@ -34,7 +34,6 @@ import { DiscoverFetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import { search } from '../../../../data/public';
-import { useKibana } from '../../../../kibana_react/public';
 
 export function DiscoverLegacy({
   addColumn,
@@ -59,6 +58,7 @@ export function DiscoverLegacy({
   rows,
   searchSource,
   setIndexPattern,
+  showSaveQuery,
   state,
   timefilterUpdateHandler,
   timeRange,
@@ -67,8 +67,6 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
 }: any) {
-  const uiCapabilities = useKibana().services.application?.capabilities?.discover;
-
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const toMoment = function (datetime: string) {
     if (!datetime) {
@@ -96,7 +94,7 @@ export function DiscoverLegacy({
           savedQueryId={state.savedQuery}
           screenTitle={savedSearch.title}
           showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={!!uiCapabilities?.saveQuery}
+          showSaveQuery={showSaveQuery}
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
