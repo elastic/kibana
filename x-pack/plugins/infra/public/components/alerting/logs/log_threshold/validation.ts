@@ -64,7 +64,7 @@ export function validateExpression({
   if (!isNumber(count?.value) && !isFinite(count?.value)) {
     errors.threshold.value.push(
       i18n.translate('xpack.infra.logs.alertFlyout.error.thresholdRequired', {
-        defaultMessage: 'Threshold value is Required.',
+        defaultMessage: 'Numeric threshold value is Required.',
       })
     );
   }
@@ -103,7 +103,7 @@ export function validateExpression({
             })
           );
         }
-        if (!criterion.value) {
+        if (criterion.value === undefined || criterion.value === null) {
           _errors[idx].value.push(
             i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
               defaultMessage: 'Value is required.',

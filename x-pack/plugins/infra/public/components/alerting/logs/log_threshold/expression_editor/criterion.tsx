@@ -18,6 +18,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isNumber, isFinite } from 'lodash';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
@@ -233,8 +234,10 @@ export const Criterion: React.FC<Props> = ({
                           compressed
                           value={criterion.value as number | undefined}
                           onChange={(e) => {
-                            const number = parseInt(e.target.value, 10);
-                            updateCriterion(idx, { value: number ? number : undefined });
+                            const number = parseFloat(e.target.value);
+                            updateCriterion(idx, {
+                              value: isNumber(number) && isFinite(number) ? number : undefined,
+                            });
                           }}
                         />
                       ) : (

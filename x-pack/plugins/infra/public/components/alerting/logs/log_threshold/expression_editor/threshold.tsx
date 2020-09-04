@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isNumber, isFinite } from 'lodash';
 import {
   EuiPopoverTitle,
   EuiFlexItem,
@@ -93,8 +94,10 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
                     compressed
                     value={value}
                     onChange={(e) => {
-                      const number = parseInt(e.target.value, 10);
-                      updateThreshold({ value: number ? number : undefined });
+                      const number = parseFloat(e.target.value);
+                      updateThreshold({
+                        value: isNumber(number) && isFinite(number) ? number : undefined,
+                      });
                     }}
                   />
                 </EuiFormRow>
