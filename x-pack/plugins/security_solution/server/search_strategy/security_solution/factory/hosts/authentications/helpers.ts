@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import {
@@ -33,10 +33,11 @@ export const authenticationFields = [
 ];
 
 export const formatAuthenticationData = (
+  fields: readonly string[] = authenticationFields,
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>
-  authenticationFields.reduce<AuthenticationsEdges>(
+  fields.reduce<AuthenticationsEdges>(
     (flattenedFields, fieldName) => {
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
@@ -53,8 +54,11 @@ export const formatAuthenticationData = (
       const mergedResult = mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
       const fieldPath = `node.${fieldName}`;
       const fieldValue = get(fieldPath, mergedResult);
-
-      return set(fieldPath, toArray(fieldValue), mergedResult);
+      if (!isEmpty(fieldValue)) {
+        return set(fieldPath, toArray(fieldValue), mergedResult);
+      } else {
+        return mergedResult;
+      }
     },
     {
       node: {
