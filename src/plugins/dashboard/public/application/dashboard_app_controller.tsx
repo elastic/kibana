@@ -425,12 +425,14 @@ export class DashboardAppController {
               dashboardContainer.getOutput$(),
               // plus output of dashboard container children,
               // children may change, so make sure we subscribe/unsubscribe with switchMap
-              dashboardContainer.getInput$().pipe(
+              dashboardContainer.getOutput$().pipe(
                 map(() => dashboardContainer!.getChildIds()),
                 distinctUntilChanged(deepEqual),
                 switchMap((newChildIds: string[]) =>
                   merge(
-                    newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$())
+                    ...newChildIds.map((childId) =>
+                      dashboardContainer!.getChild(childId).getOutput$()
+                    )
                   )
                 )
               )
