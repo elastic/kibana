@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { AuthenticationsQuery } from '../../containers/authentications';
+import { useAuthentications } from '../../containers/authentications';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../store';
 import {
@@ -77,6 +77,11 @@ export const AuthenticationsQueryTabBody = ({
     };
   }, [deleteQuery]);
 
+  const [
+    loading,
+    { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
+  ] = useAuthentications({ docValueFields, endDate, filterQuery, startDate, type });
+
   return (
     <>
       <MatrixHistogramContainer
@@ -89,43 +94,22 @@ export const AuthenticationsQueryTabBody = ({
         type={hostsModel.HostsType.page}
         {...histogramConfigs}
       />
-      <AuthenticationsQuery
-        docValueFields={docValueFields}
-        endDate={endDate}
-        filterQuery={filterQuery}
-        skip={skip}
-        sourceId="default"
-        startDate={startDate}
+
+      <AuthenticationTableManage
+        data={authentications}
+        deleteQuery={deleteQuery}
+        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+        id={id}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading}
+        loadPage={loadPage}
+        refetch={refetch}
+        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+        setQuery={setQuery}
+        totalCount={totalCount}
         type={type}
-      >
-        {({
-          authentications,
-          totalCount,
-          loading,
-          pageInfo,
-          loadPage,
-          id,
-          inspect,
-          isInspected,
-          refetch,
-        }) => (
-          <AuthenticationTableManage
-            data={authentications}
-            deleteQuery={deleteQuery}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-            id={id}
-            inspect={inspect}
-            isInspect={isInspected}
-            loading={loading}
-            loadPage={loadPage}
-            refetch={refetch}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-            setQuery={setQuery}
-            totalCount={totalCount}
-            type={type}
-          />
-        )}
-      </AuthenticationsQuery>
+      />
     </>
   );
 };

@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Not found',
         };
         const id = `${jobId}_invalid`;
-        const message = `[resource_not_found_exception] No known data frame analytics with id [${id}]`;
+        const message = 'resource_not_found_exception';
 
         const { body } = await supertest
           .post(`/api/ml/data_frame/analytics/${id}/_update`)

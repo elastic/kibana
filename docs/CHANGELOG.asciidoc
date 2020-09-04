@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.9.1>>
 * <<release-notes-7.9.0>>
 * <<release-notes-7.8.1>>
 * <<release-notes-7.8.0>>
@@ -40,10 +41,60 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.9.1]]
+== {kib} 7.9.1
+
+See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+
+[float]
+[[bug-v7.9.1]]
+=== Bug fixes
+APM::
+* Pluralizes for occurrences vs occurrence {kibana-pull}74564[#74564]
+* User can't navigate back home using browser nav when clicking link {kibana-pull}75755[#75755]
+Dashboard::
+* Loses OriginatingApp Connection on Save After Create new {kibana-pull}74420[#74420]
+* Don't Explore data action in dashboard_only mode {kibana-pull}73010[#73010]
+Discover::
+* Don't show actions if Discover app is disabled {kibana-pull}73017[#73017]
+* Fixes visualize a field through discover app {kibana-pull}73652[#73652]
+* Fixes issue with query bar not taking full width in safari when selected {kibana-pull}74987[#74987]
+Lens and visualizations::
+* Shows 'No data for this field' for empty field in accordion {kibana-pull}73772[#73772]
+* Fixes performance degradation after lodash@4 upgrade {kibana-pull}75850[#75850]
+Machine Learning::
+* Fixes file import button on basic license {kibana-pull}75458[#75458]
+* Adds date picker back onto index based data visualizer page {kibana-pull}75658[#75658]
+* Adds authorization header to data frame analytics job update request {kibana-pull}75899[#75899]
+* Removes encoding for scheduled events labels  {kibana-pull}75973[#75973]
+* Anomaly Explorer / Single Metric Viewer: Fix error reporting for annotations {kibana-pull}74953[#74953]
+Management::
+* The watch API considers an index action without a defined index name to be valid, but the Watcher UI 
+didn't validate accordingly. This resulted in a bug manifested as the UI rejecting attempts to create 
+Advanced Watches and Threshold Watches with this configuration, and as displaying watches configured 
+this way via Console with "Config error" states in the watches table. This change fixes the bug so that 
+the UI accepts watches that are configured with index actions without a defined index name {kibana-pull}74684[#74684]
+* Fixes a bug in the index template wizard, which resulted in the UI crashing when the user tries to save an index template without visiting the "Mappings" step first {kibana-pull}75511[#75511]
+* Fixes an issue in the mappings editor when trying to clear the "Field type" select dropdown {kibana-pull}76263[#76263]
+Maps::
+* Fixes TMS not loaded in legacy maps {kibana-pull}73570[#73570]
+* Fixes drawing shapes {kibana-pull}74689[#74689]
+* Fixes layer sorting issue with hidden layers at map load {kibana-pull}76007[#76007]
+Monitoring::
+* Fixes bug where Kibana crashes with collection disabled {kibana-pull}75335[#75335]
+* Swallows errors in opt-in remote notification from the server {kibana-pull}75641[#75641]
+Operations::
+* Adds map configurations to docker list {kibana-pull}75035[#75035]
+* Fixes bug in keystore read process where it was trying to read the path.data directory instead of the keystore file {kibana-pull}75659[#75659]
+Security::
+* Improves login selector UI to display more detailed error messages {kibana-pull}75642[#75642]
+Uptime::
+* Fixes alerting false positives {kibana-pull}75577[#75577]
+
 [[release-notes-7.9.0]]
 == {kib} 7.9.0
 
-//See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also <<breaking-changes-7.9,breaking changes in 7.9>>.
 
 Operations::
 * Moves kibana-keystore from data/ to config/ {kibana-pull}57856[#57856]
