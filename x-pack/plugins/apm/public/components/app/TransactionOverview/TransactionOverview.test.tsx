@@ -86,6 +86,7 @@ describe('TransactionOverview', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
+        urlParams: {},
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({

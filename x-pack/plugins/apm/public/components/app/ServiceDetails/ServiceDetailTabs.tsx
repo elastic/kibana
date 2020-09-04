@@ -10,7 +10,6 @@ import React from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
