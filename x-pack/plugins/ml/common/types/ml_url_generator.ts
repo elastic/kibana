@@ -5,8 +5,9 @@
  */
 
 import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
-import { JobId } from '../../../reporting/common/types';
+import { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
+import { DataFrameAnalyticsType } from './data_frame_analytics';
 
 type OptionalPageState = object | undefined;
 
@@ -15,14 +16,6 @@ export type MLPageState<PageType, PageState> = PageState extends OptionalPageSta
   : PageState extends object
   ? { page: PageType; pageState: PageState }
   : { page: PageType };
-
-export const ANALYSIS_CONFIG_TYPE = {
-  OUTLIER_DETECTION: 'outlier_detection',
-  REGRESSION: 'regression',
-  CLASSIFICATION: 'classification',
-} as const;
-
-type DataFrameAnalyticsType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
 export interface MlCommonGlobalState {
   time?: TimeRange;

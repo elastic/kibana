@@ -64,14 +64,14 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
     const path = await mlUrlGenerator.createUrl({
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     });
-    await navigateToPath(path, true); // set preserve search to true
+    await navigateToPath(path, true);
   };
 
   const redirectToCreateJobSelectIndexPage = async () => {
     const path = await mlUrlGenerator.createUrl({
       page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
     });
-    await navigateToPath(path, true); // set preserve search to true
+    await navigateToPath(path, true);
   };
 
   const [isLoading, setIsLoading] = useState(false);

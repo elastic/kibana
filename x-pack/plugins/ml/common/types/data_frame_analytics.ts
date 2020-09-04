@@ -5,6 +5,7 @@
  */
 
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
+import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -79,3 +80,5 @@ export interface DataFrameAnalyticsConfig {
   version: string;
   allow_lazy_start?: boolean;
 }
+
+export type DataFrameAnalyticsType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];

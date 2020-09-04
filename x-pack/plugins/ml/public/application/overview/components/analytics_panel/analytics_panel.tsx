@@ -44,7 +44,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
     const path = await mlUrlGenerator.createUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
     });
-    await navigateToPath(path, true); // set preserve search to true
+    await navigateToPath(path, true);
   };
 
   const getAnalytics = getAnalyticsFactory(

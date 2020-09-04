@@ -122,13 +122,14 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const navigateToPath = useNavigateToPath();
 
   const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+    // TODO: fix ts
     // @ts-ignore
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
       pageState: { globalState },
     });
 
-    await navigateToPath(path, false); // set preserve search to true
+    await navigateToPath(path, false);
   };
 
   useEffect(() => {
