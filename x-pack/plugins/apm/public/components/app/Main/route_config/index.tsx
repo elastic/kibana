@@ -7,23 +7,22 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import { APMRouteDefinition } from '../../../../application/routes';
+import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
+import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
-import { ServiceDetails } from '../../ServiceDetails';
-import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../../Home';
-import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
-import { RouteName } from './route_names';
+import { ServiceDetails } from '../../ServiceDetails';
+import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { Settings } from '../../Settings';
 import { AgentConfigurations } from '../../Settings/AgentConfigurations';
-import { ApmIndices } from '../../Settings/ApmIndices';
-import { toQuery } from '../../../shared/Links/url_helpers';
-import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
-import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
-import { TraceLink } from '../../TraceLink';
-import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { AnomalyDetection } from '../../Settings/anomaly_detection';
+import { ApmIndices } from '../../Settings/ApmIndices';
+import { CustomizeUI } from '../../Settings/CustomizeUI';
+import { TraceLink } from '../../TraceLink';
+import { TransactionDetails } from '../../TransactionDetails';
 import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
@@ -62,13 +61,12 @@ export const renderAsRedirectTo = (to: string) => {
   };
 };
 
-export const routes: BreadcrumbRoute[] = [
+export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
-    name: RouteName.HOME,
   },
   {
     exact: true,
@@ -77,7 +75,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
       defaultMessage: 'Services',
     }),
-    name: RouteName.SERVICES,
   },
   {
     exact: true,
@@ -86,7 +83,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
       defaultMessage: 'Traces',
     }),
-    name: RouteName.TRACES,
   },
   {
     exact: true,
@@ -95,7 +91,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings',
     }),
-    name: RouteName.SETTINGS,
   },
   {
     exact: true,
@@ -108,7 +103,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.indicesTitle', {
       defaultMessage: 'Indices',
     }),
-    name: RouteName.INDICES,
   },
   {
     exact: true,
@@ -122,7 +116,6 @@ export const routes: BreadcrumbRoute[] = [
       'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
       { defaultMessage: 'Agent Configuration' }
     ),
-    name: RouteName.AGENT_CONFIGURATION,
   },
 
   {
@@ -132,7 +125,6 @@ export const routes: BreadcrumbRoute[] = [
       'xpack.apm.breadcrumb.settings.createAgentConfigurationTitle',
       { defaultMessage: 'Create Agent Configuration' }
     ),
-    name: RouteName.AGENT_CONFIGURATION_CREATE,
     component: () => <CreateAgentConfigurationRouteHandler />,
   },
   {
@@ -142,7 +134,6 @@ export const routes: BreadcrumbRoute[] = [
       'xpack.apm.breadcrumb.settings.editAgentConfigurationTitle',
       { defaultMessage: 'Edit Agent Configuration' }
     ),
-    name: RouteName.AGENT_CONFIGURATION_EDIT,
     component: () => <EditAgentConfigurationRouteHandler />,
   },
   {
@@ -153,7 +144,6 @@ export const routes: BreadcrumbRoute[] = [
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),
-    name: RouteName.SERVICE,
   },
   // errors
   {
@@ -161,7 +151,6 @@ export const routes: BreadcrumbRoute[] = [
     path: '/services/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
     breadcrumb: ({ match }) => match.params.groupId,
-    name: RouteName.ERROR,
   },
   {
     exact: true,
@@ -170,7 +159,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors',
     }),
-    name: RouteName.ERRORS,
   },
   // transactions
   {
@@ -180,7 +168,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions',
     }),
-    name: RouteName.TRANSACTIONS,
   },
   // metrics
   {
@@ -188,7 +175,6 @@ export const routes: BreadcrumbRoute[] = [
     path: '/services/:serviceName/metrics',
     component: () => <ServiceDetails tab="metrics" />,
     breadcrumb: metricsBreadcrumb,
-    name: RouteName.METRICS,
   },
   // service nodes, only enabled for java agents for now
   {
@@ -198,7 +184,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
       defaultMessage: 'JVMs',
     }),
-    name: RouteName.SERVICE_NODES,
   },
   // node metrics
   {
@@ -214,7 +199,6 @@ export const routes: BreadcrumbRoute[] = [
 
       return serviceNodeName || '';
     },
-    name: RouteName.SERVICE_NODE_METRICS,
   },
   {
     exact: true,
@@ -224,14 +208,12 @@ export const routes: BreadcrumbRoute[] = [
       const query = toQuery(location.search);
       return query.transactionName as string;
     },
-    name: RouteName.TRANSACTION_NAME,
   },
   {
     exact: true,
     path: '/link-to/trace/:traceId',
     component: TraceLink,
     breadcrumb: null,
-    name: RouteName.LINK_TO_TRACE,
   },
 
   {
@@ -241,7 +223,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
       defaultMessage: 'Service Map',
     }),
-    name: RouteName.SERVICE_MAP,
   },
   {
     exact: true,
@@ -250,7 +231,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
       defaultMessage: 'Service Map',
     }),
-    name: RouteName.SINGLE_SERVICE_MAP,
   },
   {
     exact: true,
@@ -263,7 +243,6 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.customizeUI', {
       defaultMessage: 'Customize UI',
     }),
-    name: RouteName.CUSTOMIZE_UI,
   },
   {
     exact: true,
@@ -279,6 +258,5 @@ export const routes: BreadcrumbRoute[] = [
         defaultMessage: 'Anomaly detection',
       }
     ),
-    name: RouteName.ANOMALY_DETECTION,
   },
 ];

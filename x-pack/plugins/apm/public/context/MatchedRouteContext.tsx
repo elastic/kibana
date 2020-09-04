@@ -3,16 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, ReactChild } from 'react';
+import React, { ReactChild, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
+import { APMRouteDefinition } from '../application/routes';
 import { useLocation } from '../hooks/useLocation';
-import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
 
-export const MatchedRouteContext = React.createContext<BreadcrumbRoute[]>([]);
+export const MatchedRouteContext = React.createContext<APMRouteDefinition[]>(
+  []
+);
 
 interface MatchedRouteProviderProps {
   children: ReactChild;
-  routes: BreadcrumbRoute[];
+  routes: APMRouteDefinition[];
 }
 export function MatchedRouteProvider({
   children,
