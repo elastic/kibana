@@ -6,19 +6,20 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { cryptoFactory } from '../../../lib';
-import { CreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF } from '../types';
 // @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const compatibilityShim = compatibilityShimFactory(logger);
 
+  // 7.x and below only
   return compatibilityShim(async function createJobFn(
     { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
     context: RequestHandlerContext,

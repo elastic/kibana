@@ -12,7 +12,7 @@ import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { ScheduledTaskParamsPDF } from '../types';
+import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
 
 let mockReporting: ReportingCore;
@@ -36,7 +36,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsPDF;
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
   const kbnConfig = {
@@ -83,7 +83,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const browserTimezone = 'UTC';
   await runTask(
     'pdfJobId',
-    getScheduledTaskParams({
+    getBasePayload({
       title: 'PDF Params Timezone Test',
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
