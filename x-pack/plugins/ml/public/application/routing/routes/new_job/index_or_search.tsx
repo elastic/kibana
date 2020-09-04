@@ -71,12 +71,14 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   const {
     services: {
       http: { basePath },
+      application: { navigateToUrl },
     },
   } = useMlKibana();
 
   const newJobResolvers = {
     ...basicResolvers(deps),
-    preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns, basePath.get()),
+    preConfiguredJobRedirect: () =>
+      preConfiguredJobRedirect(deps.indexPatterns, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
