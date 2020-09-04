@@ -84,6 +84,7 @@ export class AddItemPopover extends Component {
         iconSide="right"
         onClick={this.onButtonClick}
         isDisabled={this.props.canCreateFilter === false}
+        data-test-subj="mlFilterListAddItemButton"
       >
         <FormattedMessage
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"

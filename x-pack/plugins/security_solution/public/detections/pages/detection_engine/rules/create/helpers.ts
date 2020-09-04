@@ -14,7 +14,7 @@ import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { Type } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
@@ -237,16 +237,19 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   };
 };
 
-export const formatRule = (
+// Used to format form data in rule edit and
+// create flows so "T" here would likely
+// either be CreateRulesSchema or Rule
+export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
   rule?: Rule | null
-): NewRule =>
-  deepmerge.all([
+): T =>
+  (deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as NewRule;
+  ]) as unknown) as T;
