@@ -41,6 +41,7 @@ import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { IndexPatternsService } from '..';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -50,6 +51,7 @@ interface IndexPatternDeps {
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
+  indexPatternsService: IndexPatternsService;
   onNotification: OnNotification;
   onError: OnError;
   shortDotsEnable: boolean;
@@ -76,6 +78,7 @@ export class IndexPattern implements IIndexPattern {
   public sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
+  private indexPatternsService: IndexPatternsService;
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
@@ -111,6 +114,7 @@ export class IndexPattern implements IIndexPattern {
       apiClient,
       patternCache,
       fieldFormats,
+      indexPatternsService,
       onNotification,
       onError,
       shortDotsEnable = false,
@@ -121,6 +125,7 @@ export class IndexPattern implements IIndexPattern {
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
+    this.indexPatternsService = indexPatternsService;
     this.onNotification = onNotification;
     this.onError = onError;
 
@@ -194,6 +199,7 @@ export class IndexPattern implements IIndexPattern {
     }
 
     if (this.isFieldRefreshRequired(specs)) {
+      // address when field list loaded
       await this.refreshFields();
     } else {
       if (specs) {
@@ -551,6 +557,7 @@ export class IndexPattern implements IIndexPattern {
             apiClient: this.apiClient,
             patternCache: this.patternCache,
             fieldFormats: this.fieldFormats,
+            indexPatternsService: this.indexPatternsService,
             onNotification: this.onNotification,
             onError: this.onError,
             shortDotsEnable: this.shortDotsEnable,
@@ -610,6 +617,7 @@ export class IndexPattern implements IIndexPattern {
       });
   }
 
+  /*
   async _fetchFields(indexPattern: IndexPattern) {
     // const fields = await indexPattern.fieldsFetcher.fetch(indexPattern);
     const fields = await indexPattern.fieldsFetcher.fetchForWildcard(indexPattern.title, {
@@ -632,11 +640,18 @@ export class IndexPattern implements IIndexPattern {
       }
     }
   }
+  */
 
   refreshFields() {
-    return this._fetchFields(this)
+    // return this._fetchFields(this)
+    return this.indexPatternsService
+      .refreshFields(this)
       .then(() => this.save())
       .catch((err) => {
+        if (err instanceof FieldTypeUnknownError) {
+          this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+        }
+
         // https://github.com/elastic/kibana/issues/9224
         // This call will attempt to remap fields from the matching
         // ES index which may not actually exist. In that scenario,
