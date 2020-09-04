@@ -7,7 +7,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiFormRow } from '@elastic/eui';
 
 import { ListNodesRouteResponse } from '../../../../../../common/types';
 import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
@@ -39,7 +39,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
 
   useEffect(() => {
     const attrs = Object.keys(nodes);
-    if (attrs?.length) {
+    if (attrs.length) {
       const [first] = attrs;
       setPhaseData('selectedNodeAttrs', first);
     }
@@ -54,7 +54,9 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
 
   if (!nodeOptions.length) {
     return (
-      <Fragment>
+      // Wrap in form row so that margins are consistent with when we can render
+      // form controls.
+      <EuiFormRow>
         <EuiCallOut
           data-test-subj="noNodeAttributesWarning"
           style={{ maxWidth: 400 }}
@@ -71,7 +73,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
             defaultMessage="You can't control shard allocation without node attributes."
           />
         </EuiCallOut>
-      </Fragment>
+      </EuiFormRow>
     );
   }
 

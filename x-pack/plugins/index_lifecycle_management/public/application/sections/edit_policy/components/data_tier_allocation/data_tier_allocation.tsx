@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSwitch, EuiHorizontalRule, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiSwitch, EuiText, EuiFormRow } from '@elastic/eui';
 
 import { PhaseWithAllocationAction } from '../../../../services/policies/types';
 import { AdvancedSectionLayout } from '../advanced_section_layout';
@@ -89,9 +89,7 @@ export const DataTierAllocation = <T extends any>(
               />
             </EuiFormRow>
             {props.phaseData.dataTierAllocationType === 'custom' ? (
-              <>
-                <NodeAllocation {...props} />
-              </>
+              <NodeAllocation {...props} />
             ) : null}
           </div>
         </AdvancedSectionLayout>
