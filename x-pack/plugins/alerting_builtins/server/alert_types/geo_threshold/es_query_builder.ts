@@ -115,7 +115,7 @@ export async function executeEsQueryFactory(
               },
               {
                 range: {
-                  date: {
+                  [dateField]: {
                     ...(gteDateTime ? { gte: gteDateTime } : {}),
                     lt: ltDateTime,
                     format: 'strict_date_optional_time',
