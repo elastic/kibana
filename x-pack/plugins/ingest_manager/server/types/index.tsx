@@ -63,6 +63,9 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  // Agent Request types
+  PostAgentEnrollRequest,
+  PostAgentCheckinRequest,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
