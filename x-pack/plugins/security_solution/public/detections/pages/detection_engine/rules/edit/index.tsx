@@ -17,7 +17,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import {
@@ -96,7 +97,7 @@ const EditRulePageComponent: FC = () => {
     const stepData = stepsData.current[step];
     return stepData.data != null && !stepIsValid(stepData);
   });
-  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [{ isLoading, isSaved }, setRule] = useUpdateRule();
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
@@ -236,7 +237,13 @@ const EditRulePageComponent: FC = () => {
       stepIsValid(actions)
     ) {
       setRule({
-        ...formatRule(define.data, about.data, schedule.data, actions.data, rule),
+        ...formatRule<UpdateRulesSchema>(
+          define.data,
+          about.data,
+          schedule.data,
+          actions.data,
+          rule
+        ),
         ...(ruleId ? { id: ruleId } : {}),
       });
     }

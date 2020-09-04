@@ -11,7 +11,6 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -24,18 +23,9 @@ export async function getPageViewTrends({
   const projection = getRumOverviewProjection({
     setup,
   });
-  const breakdownAggs: AggregationInputMap = {};
+  let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
-    const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
-    breakdownList.forEach(({ name, type, fieldName }) => {
-      breakdownAggs[name] = {
-        terms: {
-          field: fieldName,
-          size: 9,
-          missing: 'Other',
-        },
-      };
-    });
+    breakdownItem = JSON.parse(breakdowns);
   }
 
   const params = mergeProjection(projection, {
@@ -50,7 +40,17 @@ export async function getPageViewTrends({
             field: '@timestamp',
             buckets: 50,
           },
-          aggs: breakdownAggs,
+          aggs: breakdownItem
+            ? {
+                breakdown: {
+                  terms: {
+                    field: breakdownItem.fieldName,
+                    size: 9,
+                    missing: 'Other',
+                  },
+                },
+              }
+            : undefined,
         },
       },
     },
@@ -68,19 +68,18 @@ export async function getPageViewTrends({
       x: xVal,
       y: bCount,
     };
-
-    Object.keys(breakdownAggs).forEach((bKey) => {
-      const categoryBuckets = (bucket[bKey] as any).buckets;
+    if (breakdownItem) {
+      const categoryBuckets = (bucket.breakdown as any).buckets;
       categoryBuckets.forEach(
         ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
           if (key === 'Other') {
-            res[key + `(${bKey})`] = docCount;
+            res[key + `(${breakdownItem?.name})`] = docCount;
           } else {
             res[key] = docCount;
           }
         }
       );
-    });
+    }
 
     return res;
   });

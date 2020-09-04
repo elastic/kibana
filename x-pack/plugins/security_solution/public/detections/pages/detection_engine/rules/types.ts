@@ -17,6 +17,7 @@ import {
   RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
+  SortOrder,
   TimestampOverride,
   Type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -24,7 +25,7 @@ import { List } from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: SortOrder;
 }
 
 export interface EuiBasicTableOnChange {

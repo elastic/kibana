@@ -57,13 +57,13 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
     },
     execute: async ({ embeddable }: ActionContext) => {
       const { openModal, getAttributeService } = await getStartServices();
-      const attributeService = getAttributeService<
-        BookSavedObjectAttributes,
-        BookByValueInput,
-        BookByReferenceInput
-      >(BOOK_SAVED_OBJECT);
+      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT);
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
-        const newInput = await attributeService.wrapAttributes(attributes, useRefType, embeddable);
+        const newInput = await attributeService.wrapAttributes(
+          attributes,
+          useRefType,
+          attributeService.getExplicitInputFromEmbeddable(embeddable)
+        );
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
           // Set the saved object ID to null so that update input will remove the existing savedObjectId...
           (newInput as BookByValueInput & { savedObjectId: unknown }).savedObjectId = null;

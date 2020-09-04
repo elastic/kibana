@@ -9,7 +9,8 @@ import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
-import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useCreateRule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -124,7 +125,7 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
   });
-  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [{ isLoading, isSaved }, setRule] = useCreateRule();
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
@@ -197,7 +198,12 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(actionsStep)
           ) {
             setRule(
-              formatRule(defineStep.data, aboutStep.data, scheduleStep.data, actionsStep.data)
+              formatRule<CreateRulesSchema>(
+                defineStep.data,
+                aboutStep.data,
+                scheduleStep.data,
+                actionsStep.data
+              )
             );
           }
         }
