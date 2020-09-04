@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { ResponseObject, Server } from 'hapi';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { Server } from 'hapi';
 
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   ConfigService,
   CoreSetup,
@@ -44,8 +42,6 @@ import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/serve
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
-import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { HomeServerPluginSetup } from '../../plugins/home/server';
 
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
@@ -76,9 +72,6 @@ declare module 'hapi' {
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 
 export interface PluginsSetup {
-  usageCollection: UsageCollectionSetup;
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
-  home: HomeServerPluginSetup;
   [key: string]: object;
 }
 

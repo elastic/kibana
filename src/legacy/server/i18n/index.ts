@@ -21,6 +21,7 @@ import { i18n, i18nLoader } from '@kbn/i18n';
 import { basename } from 'path';
 import { Server } from 'hapi';
 import { fromRoot } from '../../../core/server/utils';
+import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
 import KbnServer, { KibanaConfig } from '../kbn_server';
@@ -64,7 +65,10 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
   server.decorate('server', 'getTranslationsFilePaths', getTranslationsFilePaths);
 
   if (kbnServer.newPlatform.setup.plugins.usageCollection) {
-    registerLocalizationUsageCollector(kbnServer.newPlatform.setup.plugins.usageCollection, {
+    const { usageCollection } = kbnServer.newPlatform.setup.plugins as {
+      usageCollection: UsageCollectionSetup;
+    };
+    registerLocalizationUsageCollector(usageCollection, {
       getLocale: () => config.get('i18n.locale') as string,
       getTranslationsFilePaths,
     });
