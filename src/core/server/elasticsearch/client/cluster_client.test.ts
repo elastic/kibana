@@ -206,7 +206,7 @@ describe('ClusterClient', () => {
 
       const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
-        kibanaRequestState: { requestId: 'my-fake-id' },
+        kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
       });
 
       clusterClient.asScoped(request);
@@ -284,7 +284,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
-        kibanaRequestState: { requestId: 'from request' },
+        kibanaRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
       });
 
       clusterClient.asScoped(request);

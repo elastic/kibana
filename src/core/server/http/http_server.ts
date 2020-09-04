@@ -19,6 +19,7 @@
 import { Server } from 'hapi';
 import HapiStaticFiles from 'inert';
 import url from 'url';
+import uuid from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -315,6 +316,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
+        requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
     });
