@@ -266,7 +266,7 @@ export const UserActionTree = React.memo(
                     fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
                   />
                 ),
-                'data-test-subj': 'comment-create-action',
+                'data-test-subj': `comment-create-action-${comment.id}`,
                 timestamp: (
                   <UserActionTimestamp
                     createdAt={comment.createdAt}
@@ -359,6 +359,7 @@ export const UserActionTree = React.memo(
                 type: 'update',
                 event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
                 timelineIcon: 'sortUp',
+                'data-test-subj': 'top-footer',
               },
             ];
           }
@@ -371,6 +372,7 @@ export const UserActionTree = React.memo(
                 type: 'update',
                 event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
                 timelineIcon: 'sortDown',
+                'data-test-subj': 'bottom-footer',
               },
             ];
           }
@@ -386,7 +388,7 @@ export const UserActionTree = React.memo(
               ),
               type: 'update',
               event: labelTitle,
-              'data-test-subj': `${action.actionField[0]}-${action.action}-action`,
+              'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
               timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
               timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
               actions: (
@@ -438,7 +440,7 @@ export const UserActionTree = React.memo(
 
     return (
       <>
-        <MyEuiCommentList comments={comments} />
+        <MyEuiCommentList comments={comments} data-test-subj="user-actions" />
         {(isLoadingUserActions || isLoadingIds.includes(NEW_ID)) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>

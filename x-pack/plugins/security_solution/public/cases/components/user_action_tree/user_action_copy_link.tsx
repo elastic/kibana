@@ -32,7 +32,7 @@ const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>
       <EuiButtonIcon
         aria-label={i18n.COPY_REFERENCE_LINK}
-        data-test-subj={`copy-link`}
+        data-test-subj={`copy-link-${id}`}
         onClick={handleAnchorLink}
         iconType="link"
         id={`${id}-permLink`}

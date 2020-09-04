@@ -26,7 +26,7 @@ const UserActionMoveToReferenceComponent = ({
     <EuiToolTip position="top" content={<p>{i18n.MOVE_TO_ORIGINAL_COMMENT}</p>}>
       <EuiButtonIcon
         aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
-        data-test-subj={`move-to-link`}
+        data-test-subj={`move-to-link-${id}`}
         onClick={handleMoveToLink}
         iconType="arrowUp"
       />

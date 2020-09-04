@@ -24,7 +24,7 @@ export const TimelineMarkDownRendererComponent: React.FC<
   ]);
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>
-      <EuiLink onClick={onClickTimeline} data-test-subj="markdown-timeline-link">
+      <EuiLink onClick={onClickTimeline} data-test-subj={`markdown-timeline-link-${id}`}>
         {title}
       </EuiLink>
     </EuiToolTip>
