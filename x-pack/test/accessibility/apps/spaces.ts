@@ -183,6 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 
