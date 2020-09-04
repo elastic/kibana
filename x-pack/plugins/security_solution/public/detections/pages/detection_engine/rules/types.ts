@@ -20,6 +20,7 @@ import {
   SortOrder,
   TimestampOverride,
   Type,
+  Severity,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { List } from '../../../../../common/detection_engine/schemas/types';
 
@@ -103,10 +104,8 @@ export interface AboutStepRuleDetails {
   description: string;
 }
 
-export type SeverityValue = 'low' | 'medium' | 'high' | 'critical';
-
 export interface AboutStepSeverity {
-  value: SeverityValue;
+  value: Severity;
   mapping: SeverityMapping;
   isMappingChecked: boolean;
 }

@@ -8,11 +8,12 @@ import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import { SeverityValue } from '../../../pages/detection_engine/rules/types';
+
+import { Severity } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as I18n from './translations';
 
 export interface SeverityOptionItem {
-  value: SeverityValue;
+  value: Severity;
   inputDisplay: React.ReactElement;
 }
 
@@ -43,7 +44,7 @@ export const severityOptions: SeverityOptionItem[] = [
   },
 ];
 
-export const defaultRiskScoreBySeverity: Record<SeverityValue, number> = {
+export const defaultRiskScoreBySeverity: Record<Severity, number> = {
   low: 21,
   medium: 47,
   high: 73,
