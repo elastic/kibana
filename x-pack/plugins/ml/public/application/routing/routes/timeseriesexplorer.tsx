@@ -91,6 +91,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -114,6 +115,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -300,6 +304,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         tableSeverity: tableSeverity.val,
         timefilter,
         zoom: zoomProp,
+        invalidTimeRangeError,
       }}
     />
   );

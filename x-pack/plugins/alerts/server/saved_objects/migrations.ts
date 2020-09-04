@@ -7,6 +7,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -16,33 +17,50 @@ export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
+  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
+
+  const infrastructureMigration = changeAlertingConsumer(
+    encryptedSavedObjects,
+    'metrics',
+    'infrastructure'
+  );
+
   return {
-    /**
-     * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
-     * prior to that we were using `alerting` and we need to keep these in sync for RBAC to work in 7.10.
-     * In v7.10.0 we changed the Matrics plugin so it uses the `consumer` value of `infrastructure`
-     * prior to that we were using `metrics` and we need to keep these in sync for RBAC to work in 7.10.
-     */
-    '7.10.0': changeAlertingConsumer(
-      encryptedSavedObjects,
-      new Map(
-        Object.entries({
-          alerting: 'alerts',
-          metrics: 'infrastructure',
-        })
-      )
-    ),
+    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+      if (doc.attributes.consumer === 'alerting') {
+        return executeMigration(doc, context, alertsMigration);
+      } else if (doc.attributes.consumer === 'metrics') {
+        return executeMigration(doc, context, infrastructureMigration);
+      }
+      return executeMigration(doc, context, markAsLegacyAlert);
+    },
   };
+}
+
+function executeMigration(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  context: SavedObjectMigrationContext,
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
+) {
+  try {
+    return migrationFunc(doc, context);
+  } catch (ex) {
+    context.log.error(
+      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
+      { alertDocument: doc }
+    );
+  }
+  return doc;
 }
 
 function changeAlertingConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  mapping: Map<string, string>
+  from: string,
+  to: string
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      // migrate all documents in 7.10 in order to add the "meta" RBAC field
-      return true;
+      return doc.attributes.consumer === from;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -52,7 +70,29 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: mapping.get(consumer) ?? consumer,
+          consumer: consumer === from ? to : consumer,
+          // mark any alert predating 7.10 as a legacy alert
+          meta: {
+            versionLastmodified: LEGACY_LAST_MODIFIED_VERSION,
+          },
+        },
+      };
+    }
+  );
+}
+
+function markAsLegacyAlert(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+): SavedObjectMigrationFn<RawAlert, RawAlert> {
+  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+      return true;
+    },
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
           // mark any alert predating 7.10 as a legacy alert
           meta: {
             versionLastmodified: LEGACY_LAST_MODIFIED_VERSION,
