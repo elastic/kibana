@@ -38,9 +38,13 @@ interface Metadata {
 }
 
 /**
- * A simple mock dataAccessLayer possible that returns a tree with 0 ancestors and 2 direct children. 1 related event is returned. The parameter to `entities` is ignored.
+ * A mock DataAccessLayer that will return an origin in two children. The `entity` response will be empty unless
+ * `awesome_index` is passed in the indices array.
  */
-export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; metadata: Metadata } {
+export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
+  dataAccessLayer: DataAccessLayer;
+  metadata: Metadata;
+} {
   const metadata: Metadata = {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
@@ -81,8 +85,12 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       /**
        * Get entities matching a document.
        */
-      entities(): Promise<ResolverEntityIndex> {
-        return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+      entities({ indices }): Promise<ResolverEntityIndex> {
+        // Only return values if the `indices` array contains exactly `'awesome_index'`
+        if (indices.length === 1 && indices[0] === 'awesome_index') {
+          return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+        }
+        return Promise.resolve([]);
       },
     },
   };
