@@ -147,13 +147,14 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
-          defaultMessage: 'Values',
+          defaultMessage: 'Labels',
         })}
-        icon="visText"
+        type="values"
+        groupPosition="left"
       >
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-            defaultMessage: 'Label position',
+            defaultMessage: 'Position',
           })}
           fullWidth
           display="columnCompressed"
@@ -172,7 +173,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-            defaultMessage: 'Label values',
+            defaultMessage: 'Values',
           })}
           fullWidth
           display="columnCompressed"
@@ -196,7 +197,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             defaultMessage: 'Decimal places for percent',
           })}
           fullWidth
-          display="columnCompressed"
+          display="rowCompressed"
         >
           <EuiRange
             data-test-subj="indexPattern-dimension-formatDecimals"
@@ -218,7 +219,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.legendLabel', {
           defaultMessage: 'Legend',
         })}
-        icon="copy"
+        type="legend"
+        groupPosition="right"
       >
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {

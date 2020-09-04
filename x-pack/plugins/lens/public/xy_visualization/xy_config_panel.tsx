@@ -36,6 +36,12 @@ import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_h
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover } from '../toolbar_popover';
+// @ts-ignore
+import { EuiIconAxisBottom } from '../assets/axis_bottom';
+// @ts-ignore
+import { EuiIconAxisLeft } from '../assets/axis_left';
+// @ts-ignore
+import { EuiIconAxisRight } from '../assets/axis_right';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -54,21 +60,21 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     id: `xy_legend_auto`,
     value: 'auto',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
-      defaultMessage: 'auto',
+      defaultMessage: 'Auto',
     }),
   },
   {
     id: `xy_legend_show`,
     value: 'show',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
-      defaultMessage: 'show',
+      defaultMessage: 'Show',
     }),
   },
   {
     id: `xy_legend_hide`,
     value: 'hide',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
-      defaultMessage: 'hide',
+      defaultMessage: 'Hide',
     }),
   },
 ];
@@ -278,22 +284,23 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <EuiToolTip
-            anchorClassName="eui-displayBlock"
             content={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
               defaultMessage: 'This setting only applies to line and area charts.',
             })}
+            delay="long"
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
               isDisabled={!hasNonBarSeries}
-              icon="visText"
+              type="values"
+              groupPosition="left"
             >
               <EuiFormRow
                 display="columnCompressed"
                 label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                  defaultMessage: 'Missing Values',
+                  defaultMessage: 'Missing values',
                 })}
               >
                 <EuiSuperSelect
@@ -324,7 +331,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             title={i18n.translate('xpack.lens.xyChart.legendLabel', {
               defaultMessage: 'Legend',
             })}
-            icon="copy"
+            type="legend"
+            groupPosition="right"
           >
             <EuiFormRow
               display="columnCompressed"
@@ -392,17 +400,18 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <ToolbarPopover
             title={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
-              defaultMessage: 'Left Axis',
+              defaultMessage: 'Left axis',
             })}
             handlePopoverState={setPopoversOpenState}
-            icon="sortLeft"
+            type={EuiIconAxisLeft}
+            groupPosition="left"
           >
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <h4>
                     {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                      defaultMessage: 'Axis Name',
+                      defaultMessage: 'Axis name',
                     })}
                   </h4>
                 </EuiText>
@@ -426,13 +435,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               data-test-subj="lnsYLeftAxisTitle"
               compressed
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
-                defaultMessage: 'Overwrite Left Y-axis title',
+                defaultMessage: 'Overwrite left y-axis title',
               })}
               value={yLeftAxisTitle || ''}
               disabled={state && 'showYLeftAxisTitle' in state ? !state.showYLeftAxisTitle : false}
               onChange={({ target }) => onYLeftTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
-                defaultMessage: 'Overwrite Left Y-axis title',
+                defaultMessage: 'Overwrite left y-axis title',
               })}
             />
             <EuiSpacer size="m" />
@@ -458,17 +467,18 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           </ToolbarPopover>
           <ToolbarPopover
             title={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
-              defaultMessage: 'Bottom Axis',
+              defaultMessage: 'Bottom axis',
             })}
             handlePopoverState={setPopoversOpenState}
-            icon="sortDown"
+            type={EuiIconAxisBottom}
+            groupPosition="center"
           >
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <h4>
                     {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                      defaultMessage: 'Axis Name',
+                      defaultMessage: 'Axis name',
                     })}
                   </h4>
                 </EuiText>
@@ -490,13 +500,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               data-test-subj="lnsXAxisTitle"
               compressed
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-                defaultMessage: 'Overwrite X-axis title',
+                defaultMessage: 'Overwrite x-axis title',
               })}
               value={xAxisTitle || ''}
               disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
               onChange={({ target }) => onXTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-                defaultMessage: 'Overwrite X-axis title',
+                defaultMessage: 'Overwrite x-axis title',
               })}
             />
             <EuiSpacer size="m" />
@@ -525,21 +535,23 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             content={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
               defaultMessage: 'This setting only applies when right axis is enabled.',
             })}
+            delay="long"
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
-                defaultMessage: 'Right Axis',
+                defaultMessage: 'Right axis',
               })}
               handlePopoverState={setPopoversOpenState}
               isDisabled={rightAxisLayer?.length === 0 ?? true}
-              icon="sortRight"
+              type={EuiIconAxisRight}
+              groupPosition="right"
             >
               <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
                     <h4>
                       {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                        defaultMessage: 'Axis Name',
+                        defaultMessage: 'Axis name',
                       })}
                     </h4>
                   </EuiText>
@@ -563,7 +575,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 data-test-subj="lnsYRightAxisTitle"
                 compressed
                 placeholder={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
-                  defaultMessage: 'Overwrite Right Y-axis title',
+                  defaultMessage: 'Overwrite right y-axis title',
                 })}
                 value={yRightAxisTitle || ''}
                 disabled={
@@ -571,7 +583,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 }
                 onChange={({ target }) => onYRightTitleChange(target.value)}
                 aria-label={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
-                  defaultMessage: 'Overwrite Right Y-axis title',
+                  defaultMessage: 'Overwrite right y-axis title',
                 })}
               />
               <EuiSpacer size="m" />

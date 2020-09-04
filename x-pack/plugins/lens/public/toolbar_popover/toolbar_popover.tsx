@@ -5,8 +5,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle } from '@elastic/eui';
-import { ToolbarButton } from '../toolbar_button';
+import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
+import { EuiIconLegend } from '../assets/legend';
+
+const typeToIconMap = {
+  legend: EuiIconLegend as IconType,
+  values: 'visText',
+};
 
 export interface ToolbarPopoverProps {
   /**
@@ -16,7 +22,7 @@ export interface ToolbarPopoverProps {
   /**
    * Determines the button icon
    */
-  icon: string;
+  type: 'legend' | 'values' | IconType;
   /**
    * Determines if the popover is disabled
    */
@@ -25,14 +31,16 @@ export interface ToolbarPopoverProps {
    * Is used to pass the popover state to the parent component
    */
   handlePopoverState?: (open: boolean) => void;
+  groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   children,
   title,
-  icon,
+  type,
   isDisabled = false,
   handlePopoverState,
+  groupPosition,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -41,6 +49,8 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
       handlePopoverState(open);
     }
   }, [open, handlePopoverState]);
+
+  const iconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
   return (
     <EuiFlexItem grow={false}>
@@ -55,8 +65,9 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
             }}
             hasArrow={false}
             isDisabled={isDisabled}
+            groupPosition={groupPosition}
           >
-            <EuiIcon type={icon} />
+            <EuiIcon type={iconType} />
           </ToolbarButton>
         }
         isOpen={open}

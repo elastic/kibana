@@ -9,6 +9,13 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
+const groupPositionToClassMap = {
+  none: null,
+  left: 'lnsToolbarButton--groupLeft',
+  center: 'lnsToolbarButton--groupCenter',
+  right: 'lnsToolbarButton--groupRight',
+};
+
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Determines prominence
@@ -22,6 +29,10 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
    * Determines if the button will have a down arrow or not
    */
   hasArrow?: boolean;
+  /**
+   * Adjusts the borders for groupings
+   */
+  groupPosition?: 'none' | 'left' | 'center' | 'right';
 };
 
 export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
@@ -30,10 +41,12 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   fontWeight = 'normal',
   size = 'm',
   hasArrow = true,
+  groupPosition = 'none',
   ...rest
 }) => {
   const classes = classNames(
     'lnsToolbarButton',
+    groupPositionToClassMap[groupPosition],
     [`lnsToolbarButton--${fontWeight}`, `lnsToolbarButton--${size}`],
     className
   );
