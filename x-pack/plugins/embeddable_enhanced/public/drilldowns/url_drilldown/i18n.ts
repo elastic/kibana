@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { join } from 'path';
+import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'ui_actions_enhanced',
-  storyGlobs: [join(__dirname, '..', 'public', '**', '*.story.tsx')],
-});
+export const txtUrlDrilldownDisplayName = i18n.translate(
+  'xpack.embeddableEnhanced.drilldowns.urlDrilldownDisplayName',
+  {
+    defaultMessage: 'Go to URL',
+  }
+);
