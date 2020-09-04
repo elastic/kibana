@@ -804,7 +804,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway } = this.props.services;
+    const { redirectAway, saveIndexPattern } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
@@ -822,8 +822,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
-    return indexPattern
-      .save(indexPattern)
+    return saveIndexPattern(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",
