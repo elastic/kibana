@@ -74,5 +74,5 @@ For a comparison of the Elastic subscription levels,
 see https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
-include::{kib-repo-dir}/drilldowns/dashboard-drilldown.asciidoc[]
-include::{kib-repo-dir}/drilldowns/url-drilldown.asciidoc[]
+include::dashboard-drilldown.asciidoc[]
+include::url-drilldown.asciidoc[]
