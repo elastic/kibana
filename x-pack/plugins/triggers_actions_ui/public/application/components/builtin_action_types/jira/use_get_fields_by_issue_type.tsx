@@ -23,8 +23,8 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  actionConnector: ActionConnector;
   issueType: string;
+  actionConnector?: ActionConnector;
 }
 
 export interface UseGetFieldsByIssueType {
@@ -45,7 +45,7 @@ export const useGetFieldsByIssueType = ({
   useEffect(() => {
     let didCancel = false;
     const fetchData = async () => {
-      if (!issueType) {
+      if (!actionConnector || !issueType) {
         setIsLoading(false);
         return;
       }

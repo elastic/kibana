@@ -13,14 +13,6 @@ describe('SlackParamsFields renders', () => {
     const actionParams = {
       message: 'test message',
     };
-    const connector = {
-      secrets: {},
-      config: {},
-      id: 'test',
-      actionTypeId: '.test',
-      name: 'Test',
-      isPreconfigured: false,
-    };
     const wrapper = mountWithIntl(
       <SlackParamsFields
         actionParams={actionParams}
@@ -28,7 +20,6 @@ describe('SlackParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

@@ -13,14 +13,6 @@ describe('WebhookParamsFields renders', () => {
     const actionParams = {
       body: 'test message',
     };
-    const connector = {
-      secrets: {},
-      config: {},
-      id: 'test',
-      actionTypeId: '.test',
-      name: 'Test',
-      isPreconfigured: false,
-    };
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}
@@ -28,7 +20,6 @@ describe('WebhookParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

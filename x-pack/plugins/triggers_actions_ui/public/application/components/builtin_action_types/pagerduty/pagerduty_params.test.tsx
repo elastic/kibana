@@ -22,14 +22,6 @@ describe('PagerDutyParamsFields renders', () => {
       group: 'group',
       class: 'test class',
     };
-    const connector = {
-      secrets: {},
-      config: {},
-      id: 'test',
-      actionTypeId: '.test',
-      name: 'Test',
-      isPreconfigured: false,
-    };
     const wrapper = mountWithIntl(
       <PagerDutyParamsFields
         actionParams={actionParams}
@@ -37,7 +29,6 @@ describe('PagerDutyParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();

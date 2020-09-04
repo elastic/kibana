@@ -18,7 +18,7 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  actionConnector: ActionConnector;
+  actionConnector?: ActionConnector;
 }
 
 export interface UseGetIssueTypes {
@@ -38,6 +38,11 @@ export const useGetIssueTypes = ({
   useEffect(() => {
     let didCancel = false;
     const fetchData = async () => {
+      if (!actionConnector) {
+        setIsLoading(false);
+        return;
+      }
+
       abortCtrl.current = new AbortController();
       setIsLoading(true);
 
