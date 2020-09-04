@@ -127,3 +127,7 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   height: ${(props) => props.height};
 `;
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default LogStream;
