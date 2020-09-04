@@ -7,7 +7,7 @@
 import { PIN_EVENT } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import { pinFirstEvent, populateTimeline, unpinFirstEvent } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
@@ -15,7 +15,7 @@ import { HOSTS_URL } from '../urls/navigation';
 describe('timeline events', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
-    openTimeline();
+    openTimelineUsingToggle();
     populateTimeline();
   });
 

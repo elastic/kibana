@@ -376,7 +376,11 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
         )}
         {size === 'l' && showNotes ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
+            <EuiModal
+              data-test-subj="notesModal"
+              maxWidth={NOTES_PANEL_WIDTH}
+              onClose={toggleShowNotes}
+            >
               <Notes
                 associateNote={associateNote}
                 getNewNoteId={getNewNoteId}

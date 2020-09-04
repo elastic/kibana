@@ -5,29 +5,30 @@
  */
 
 import {
-  BULK_ACTIONS,
+  ADD_NOTE_BUTTON,
   CLOSE_TIMELINE_BTN,
+  CLOSE_NOTES_BTN,
   CREATE_NEW_TIMELINE,
-  EXPORT_TIMELINE_ACTION,
-  TIMELINE_CHECKBOX,
   HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
+  NOTES_BUTTON,
+  NOTES_TEXT_AREA,
   PIN_EVENT,
+  REMOVE_COLUMN,
+  RESET_FIELDS,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
+  STAR_ICON,
   TIMELINE_CHANGES_IN_PROGRESS,
   TIMELINE_DESCRIPTION,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
-  TIMELINES_TABLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
-  REMOVE_COLUMN,
-  RESET_FIELDS,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -44,12 +45,22 @@ export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
 };
 
+export const addNotesToTimeline = (notes: string) => {
+  cy.get(NOTES_BUTTON).click();
+  cy.get(NOTES_TEXT_AREA).type(notes);
+  cy.get(ADD_NOTE_BUTTON).click();
+};
+
 export const checkIdToggleField = () => {
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
   cy.get(ID_TOGGLE_FIELD).check({
     force: true,
   });
+};
+
+export const closeNotes = () => {
+  cy.get(CLOSE_NOTES_BTN).click();
 };
 
 export const closeTimeline = () => {
@@ -70,10 +81,8 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const exportTimeline = (timelineId: string) => {
-  cy.get(TIMELINE_CHECKBOX(timelineId)).click({ force: true });
-  cy.get(BULK_ACTIONS).click({ force: true });
-  cy.get(EXPORT_TIMELINE_ACTION).click();
+export const markAsFavorite = () => {
+  cy.get(STAR_ICON).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -130,10 +139,6 @@ export const removeColumn = (column: number) => {
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
-};
-
-export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(TIMELINES_TABLE).should('exist');
 };
 
 export const waitForTimelineChanges = () => {

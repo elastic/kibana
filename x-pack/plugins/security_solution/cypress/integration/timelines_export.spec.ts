@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timeline';
+import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timelines';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
