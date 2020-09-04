@@ -47,8 +47,10 @@ export function DocViewTable({
       <tbody>
         {Object.keys(flattened)
           .sort((fieldA, fieldB) => {
-            const nameA = !mapping(fieldA) ? fieldA : mapping(fieldA)?.displayName;
-            const nameB = !mapping(fieldB) ? fieldB : mapping(fieldB)?.displayName;
+            const mappingA = mapping(fieldA);
+            const mappingB = mapping(fieldB);
+            const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+            const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
             return nameA.localeCompare(nameB);
           })
           .map((field) => {
