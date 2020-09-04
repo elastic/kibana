@@ -21,21 +21,21 @@ import { useSignalIndex } from '../../detections/containers/detection_engine/ale
 import { useUserInfo } from '../../detections/components/user_info';
 import { useThrottledResizeObserver } from '../../common/components/utils';
 
-const SecuritySolutionAppWrapper = styled.div`
+export const SecuritySolutionAppWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1 1 auto;
   width: 100%;
 `;
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
-    'padding-top': `${paddingTop}px`,
+    paddingTop: `${paddingTop}px`,
   },
 }))<{ paddingTop: number }>`
   overflow: auto;
-  flex: 1;
+  flex: 1 1 auto;
 `;
 
 Main.displayName = 'Main';

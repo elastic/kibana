@@ -11,24 +11,24 @@ import {
   FULL_SCREEN_TOGGLED_CLASS_NAME,
   SCROLLING_DISABLED_CLASS_NAME,
 } from '../../../../common/constants';
-
+import { SecuritySolutionAppWrapper } from '../../../app/home';
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-  /* dirty hack to fix draggables with tooltip on FF */
-  body#siem-app {
-    position: static;
-  }
-  /* end of dirty hack to fix draggables with tooltip on FF */
-
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
 
   div.application {
     background-color: rgba(0,0,0,0);
+
+    // Security App wrapper
+    > div {
+      display: flex;
+      flex: 1 1 auto;
+    }
   }
 
   .euiPopover__panel.euiPopover__panel-isOpen {
@@ -67,9 +67,8 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-
-  .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {
-    overflow-y: hidden;
+  .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
+    max-height: calc(100vh - 49px);
   }
 `;
 
