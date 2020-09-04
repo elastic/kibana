@@ -9,6 +9,20 @@ import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
+export const AlertAttributesExcludedFromAAD = [
+  'scheduledTaskId',
+  'muteAll',
+  'mutedInstanceIds',
+  'updatedBy',
+];
+
+// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
+export type AlertAttributesExcludedFromAADType =
+  | 'scheduledTaskId'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'updatedBy';
+
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
@@ -25,11 +39,6 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set([
-      'scheduledTaskId',
-      'muteAll',
-      'mutedInstanceIds',
-      'updatedBy',
-    ]),
+    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
   });
 }

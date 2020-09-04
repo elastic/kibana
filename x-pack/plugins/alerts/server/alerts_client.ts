@@ -47,6 +47,10 @@ import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../event_log/server';
 import { parseDuration } from '../common/parse_duration';
+import {
+  AlertAttributesExcludedFromAAD,
+  AlertAttributesExcludedFromAADType,
+} from './saved_objects';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -468,7 +472,7 @@ export class AlertsClient {
 
   private async updateAlert(
     { id, data }: UpdateOptions,
-    { attributes, version }: SavedObject<RawAlert>
+    { attributes }: SavedObject<RawAlert>
   ): Promise<PartialAlert> {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
@@ -495,7 +499,6 @@ export class AlertsClient {
         updatedBy: username,
       },
       {
-        version,
         references,
       }
     );
@@ -526,7 +529,6 @@ export class AlertsClient {
   public async updateApiKey({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
-    let version: string | undefined;
 
     try {
       const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
@@ -534,16 +536,14 @@ export class AlertsClient {
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
-      version = decryptedAlert.version;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
         `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
-      // Still attempt to load the attributes and version using SOC
+      // Still attempt to load the attributes using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
-      version = alert.version;
     }
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
@@ -556,19 +556,14 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
-    await this.unsecuredSavedObjectsClient.update(
-      'alert',
-      id,
-      {
-        ...attributes,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
-        updatedBy: username,
-      },
-      { version }
-    );
+    await this.unsecuredSavedObjectsClient.update('alert', id, {
+      ...attributes,
+      ...this.apiKeyAsAlertAttributes(
+        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+        username
+      ),
+      updatedBy: username,
+    });
 
     if (apiKeyToInvalidate) {
       await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
@@ -594,7 +589,6 @@ export class AlertsClient {
   public async enable({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
-    let version: string | undefined;
 
     try {
       const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
@@ -602,16 +596,14 @@ export class AlertsClient {
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
-      version = decryptedAlert.version;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
         `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
-      // Still attempt to load the attributes and version using SOC
+      // Still attempt to load the attributes using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
-      version = alert.version;
     }
 
     await this.authorization.ensureAuthorized(
@@ -626,22 +618,15 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        id,
-        {
-          ...attributes,
-          enabled: true,
-          ...this.apiKeyAsAlertAttributes(
-            await this.createAPIKey(
-              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-            ),
-            username
-          ),
-          updatedBy: username,
-        },
-        { version }
-      );
+      await this.unsecuredSavedObjectsClient.update('alert', id, {
+        ...attributes,
+        enabled: true,
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
+        updatedBy: username,
+      });
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
@@ -655,7 +640,6 @@ export class AlertsClient {
   public async disable({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
-    let version: string | undefined;
 
     try {
       const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
@@ -663,16 +647,14 @@ export class AlertsClient {
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
-      version = decryptedAlert.version;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
         `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
-      // Still attempt to load the attributes and version using SOC
+      // Still attempt to load the attributes using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
-      version = alert.version;
     }
 
     await this.authorization.ensureAuthorized(
@@ -682,19 +664,14 @@ export class AlertsClient {
     );
 
     if (attributes.enabled === true) {
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        id,
-        {
-          ...attributes,
-          enabled: false,
-          scheduledTaskId: null,
-          apiKey: null,
-          apiKeyOwner: null,
-          updatedBy: await this.getUserName(),
-        },
-        { version }
-      );
+      await this.unsecuredSavedObjectsClient.update('alert', id, {
+        ...attributes,
+        enabled: false,
+        scheduledTaskId: null,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: await this.getUserName(),
+      });
 
       await Promise.all([
         attributes.scheduledTaskId
@@ -717,7 +694,7 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update('alert', id, {
+    await partiallyUpdateAlertSavedObject(this.unsecuredSavedObjectsClient, id, {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
@@ -736,7 +713,7 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update('alert', id, {
+    await partiallyUpdateAlertSavedObject(this.unsecuredSavedObjectsClient, id, {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
@@ -744,10 +721,7 @@ export class AlertsClient {
   }
 
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
-      'alert',
-      alertId
-    );
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Alert>('alert', alertId);
 
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
@@ -762,15 +736,10 @@ export class AlertsClient {
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        alertId,
-        {
-          mutedInstanceIds,
-          updatedBy: await this.getUserName(),
-        },
-        { version }
-      );
+      await partiallyUpdateAlertSavedObject(this.unsecuredSavedObjectsClient, alertId, {
+        mutedInstanceIds,
+        updatedBy: await this.getUserName(),
+      });
     }
   }
 
@@ -781,10 +750,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
-      'alert',
-      alertId
-    );
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Alert>('alert', alertId);
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -796,16 +762,10 @@ export class AlertsClient {
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        alertId,
-        {
-          updatedBy: await this.getUserName(),
-
-          mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        },
-        { version }
-      );
+      await partiallyUpdateAlertSavedObject(this.unsecuredSavedObjectsClient, alertId, {
+        updatedBy: await this.getUserName(),
+        mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
+      });
     }
   }
 
@@ -945,6 +905,20 @@ export class AlertsClient {
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
     return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
+}
+
+type PartiallyUpdateableAlertAttributes = Partial<
+  Pick<RawAlert, AlertAttributesExcludedFromAADType>
+>;
+
+// Specialized partial update for fields which do not contribute to AAD.
+async function partiallyUpdateAlertSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  id: string,
+  attributes: PartiallyUpdateableAlertAttributes
+): Promise<void | ReturnType<SavedObjectsClientContract['update']>> {
+  const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
+  return await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates);
 }
 
 function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
