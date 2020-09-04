@@ -28,7 +28,7 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
 } from './types';
-import { validateAlertTypeParams } from './lib';
+import { validateAlertTypeParams, alertExecutionStatusFromRaw } from './lib';
 import {
   InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -122,6 +122,7 @@ export interface CreateOptions {
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
+    | 'executionStatus'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     migrationVersion?: Record<string, string>;
@@ -228,6 +229,11 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
+      executionStatus: {
+        status: 'unknown',
+        date: new Date().toISOString(),
+        error: null,
+      },
     };
     const createdAlert = await this.unsecuredSavedObjectsClient.create(
       'alert',
@@ -961,9 +967,14 @@ export class AlertsClient {
     updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
+    const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
+      ...rawAlert,
+    };
+    delete rawAlertWithoutExecutionStatus.executionStatus;
+    const executionStatus = alertExecutionStatusFromRaw(rawAlert.executionStatus);
     return {
       id,
-      ...rawAlert,
+      ...rawAlertWithoutExecutionStatus,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
@@ -973,6 +984,7 @@ export class AlertsClient {
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
+      ...(executionStatus ? { executionStatus } : {}),
     };
   }
 

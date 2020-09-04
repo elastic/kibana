@@ -177,7 +177,7 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, { log })).toEqual({
+    expect(migration710(alert, { log })).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -196,6 +196,30 @@ describe('7.10.0', () => {
             id: 'b62ea790-5366-4abc-a7df-33db1db78410',
           },
         ],
+      },
+    });
+  });
+
+  test('creates execution status', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData();
+    const dateStart = Date.now();
+    const migratedAlert = migration710(alert, { log });
+    const dateStop = Date.now();
+    const dateExecutionStatus = Date.parse(migratedAlert.attributes.executionStatus.date);
+
+    expect(dateStart).toBeLessThanOrEqual(dateExecutionStatus);
+    expect(dateStop).toBeGreaterThanOrEqual(dateExecutionStatus);
+
+    expect(migratedAlert).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        executionStatus: {
+          date: migratedAlert.attributes.executionStatus.date,
+          status: 'unknown',
+          error: null,
+        },
       },
     });
   });
@@ -237,7 +261,7 @@ describe('7.10.0 migrates with failure', () => {
 
 function getMockData(
   overwrites: Record<string, unknown> = {}
-): SavedObjectUnsanitizedDoc<RawAlert> {
+): SavedObjectUnsanitizedDoc<Partial<RawAlert>> {
   return {
     attributes: {
       enabled: true,

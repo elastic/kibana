@@ -15,6 +15,18 @@ export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
 
+export type AlertExecutionStatuses = 'ok' | 'active' | 'error' | 'unknown';
+export type AlertExecutionStatusErrorReasons = 'read' | 'decrypt' | 'execute' | 'unknown';
+
+export interface AlertExecutionStatus {
+  status: AlertExecutionStatuses;
+  date: Date;
+  error?: {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+}
+
 export type AlertActionParams = SavedObjectAttributes;
 
 export interface AlertAction {
@@ -44,6 +56,7 @@ export interface Alert {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  executionStatus: AlertExecutionStatus;
 }
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;

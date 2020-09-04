@@ -23,6 +23,14 @@ export default function alertingApiIntegrationTests({
         if (space.id === 'default') continue;
 
         const { id, name, disabledFeatures } = space;
+
+        try {
+          await spacesService.delete(id);
+        } catch (err) {
+          // try deleting before creating, in case it already exists,
+          // but obviously it's ok if it fails (because it doesn't yet exist)
+        }
+
         await spacesService.create({ id, name, disabledFeatures });
       }
     });

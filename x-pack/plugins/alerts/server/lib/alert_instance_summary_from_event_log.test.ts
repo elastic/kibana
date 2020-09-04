@@ -511,4 +511,8 @@ const BaseAlert: SanitizedAlert = {
   createdAt: new Date(),
   updatedAt: new Date(),
   apiKeyOwner: null,
+  executionStatus: {
+    status: 'unknown',
+    date: new Date('2020-08-20T19:23:38Z'),
+  },
 };
