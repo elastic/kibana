@@ -130,6 +130,8 @@ export interface Ancestor {
 
 export interface Signal {
   rule: Partial<RulesSchema>;
+  // DEPRECATED: use parents instead of parent
+  parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];
   original_time?: string;

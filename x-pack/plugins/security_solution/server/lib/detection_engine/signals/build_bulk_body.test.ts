@@ -47,6 +47,12 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
         parents: [
           {
             id: sampleIdGuid,
@@ -151,6 +157,12 @@ describe('buildBulkBody', () => {
           kind: 'event',
           module: 'system',
         },
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
         parents: [
           {
             id: sampleIdGuid,
@@ -253,6 +265,12 @@ describe('buildBulkBody', () => {
           dataset: 'socket',
           module: 'system',
         },
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
         parents: [
           {
             id: sampleIdGuid,
@@ -347,6 +365,12 @@ describe('buildBulkBody', () => {
       signal: {
         original_event: {
           kind: 'event',
+        },
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
         },
         parents: [
           {

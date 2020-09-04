@@ -23,6 +23,12 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      parent: {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
       parents: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -87,6 +93,12 @@ describe('buildSignal', () => {
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
+      parent: {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
       parents: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -231,12 +243,14 @@ describe('buildSignal', () => {
       module: 'system',
     };
     doc._source.signal = {
-      parent: {
-        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
+      parents: [
+        {
+          id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+      ],
       ancestors: [
         {
           id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
