@@ -26,6 +26,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
+import {
+  useCreateAndNavigateToMlLink,
+  useMlUrlGenerator,
+} from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useMlKibana } from '../../../contexts/kibana';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
@@ -59,10 +65,12 @@ UsedByIcon.propTypes = {
 };
 
 function NewFilterButton({ canCreateFilter }) {
+  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+
   return (
     <EuiButton
       key="new_filter_list"
-      href="#/settings/filter_lists/new_filter_list"
+      onClick={redirectToNewFilterListPage}
       isDisabled={canCreateFilter === false}
       data-test-subj="mlFilterListsButtonCreate"
     >
@@ -74,6 +82,23 @@ function NewFilterButton({ canCreateFilter }) {
   );
 }
 
+function EditFilterLink({ filterListId }) {
+  const mlUrlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const redirectToFilterListEditPage = async () => {
+    let url = await mlUrlGenerator.createUrl({ page: ML_PAGES.FILTER_LISTS_EDIT });
+    url = `${url}/${filterListId}`;
+    await navigateToUrl(url);
+  };
+
+  return <EuiLink onClick={() => redirectToFilterListEditPage()}>{filterListId}</EuiLink>;
+}
+
 function getColumns() {
   const columns = [
     {
@@ -81,9 +106,7 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: (id) => (
-        <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>
-      ),
+      render: (id) => <EditFilterLink filterListId={id} />,
       sortable: true,
       scope: 'row',
     },

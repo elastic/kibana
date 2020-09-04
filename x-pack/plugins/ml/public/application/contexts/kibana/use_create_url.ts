@@ -35,3 +35,22 @@ export const useMlLink = (params: MlUrlGeneratorState): string | undefined => {
 
   return href;
 };
+
+export const useCreateAndNavigateToMlLink = (
+  page: MlUrlGeneratorState['page']
+): (() => Promise<void>) => {
+  const mlUrlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const redirectToMlPage = async (_page: MlUrlGeneratorState['page']) => {
+    const url = await mlUrlGenerator.createUrl({ page: _page });
+    await navigateToUrl(url);
+  };
+
+  // returns the onClick callback
+  return useCallback(() => redirectToMlPage(page), [mlUrlGenerator]);
+};
