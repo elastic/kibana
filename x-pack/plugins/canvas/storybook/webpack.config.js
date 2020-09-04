@@ -184,8 +184,6 @@ module.exports = async ({ config: storybookConfig }) => {
           __dirname,
           '../tasks/mocks/uiAbsoluteToParsedUrl'
         ),
-        ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
-        ng_mock$: path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock'),
       },
     },
   };

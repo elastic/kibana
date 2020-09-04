@@ -17,7 +17,7 @@ export function EditAgentConfigurationRouteHandler() {
 
   // typescript complains because `pageStop` does not exist in `APMQueryParams`
   // Going forward we should move away from globally declared query params and this is a first step
-  // @ts-ignore
+  // @ts-expect-error
   const { name, environment, pageStep } = toQuery(search);
 
   const res = useFetcher(
@@ -45,7 +45,7 @@ export function CreateAgentConfigurationRouteHandler() {
   const { search } = history.location;
 
   // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
-  // @ts-ignore
+  // @ts-expect-error
   const { pageStep } = toQuery(search);
 
   return (
