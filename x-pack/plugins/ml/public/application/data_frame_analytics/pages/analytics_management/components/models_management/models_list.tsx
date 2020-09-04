@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBasicTable,
-  EuiBasicTableProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -397,7 +396,7 @@ export const ModelsList: FC = () => {
         ]
       : [];
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<ModelItem>(
     ModelsTableToConfigMapping.id,
     filteredModels.active ? filteredModels.items : items
   );
@@ -477,11 +476,11 @@ export const ModelsList: FC = () => {
           hasActions={true}
           isExpandable={true}
           isSelectable={false}
-          items={pageOfItems as ModelItem[]}
+          items={pageOfItems}
           itemId={ModelsTableToConfigMapping.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onChange={onTableChange as EuiBasicTableProps<ModelItem>['onChange']}
+          onChange={onTableChange}
           selection={selection}
           pagination={pagination!}
           sorting={sorting}

@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBasicTable,
-  EuiBasicTableProps,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -193,7 +192,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isMlEnabledInSpace
   );
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<
+    DataFrameAnalyticsListRow
+  >(
     DataFrameAnalyticsListColumn.id,
     filteredAnalytics.active ? filteredAnalytics.items : analytics
   );
@@ -286,11 +287,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           hasActions={false}
           isExpandable={true}
           isSelectable={false}
-          items={pageOfItems as DataFrameAnalyticsListRow[]}
+          items={pageOfItems}
           itemId={DataFrameAnalyticsListColumn.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onChange={onTableChange as EuiBasicTableProps<DataFrameAnalyticsListRow>['onChange']}
+          onChange={onTableChange}
           pagination={pagination!}
           sorting={sorting}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
