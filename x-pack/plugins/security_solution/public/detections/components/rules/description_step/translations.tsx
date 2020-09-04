@@ -34,6 +34,13 @@ export const ML_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription',
+  {
+    defaultMessage: 'Event Correlation',
+  }
+);
+
 export const QUERY_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription',
   {

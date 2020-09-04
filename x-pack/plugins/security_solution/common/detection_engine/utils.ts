@@ -17,4 +17,6 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
+export const isEqlRule = (ruleType: Type) => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type) => ruleType === 'threshold';
+export const isQueryRule = (ruleType: Type) => ruleType === 'query';
