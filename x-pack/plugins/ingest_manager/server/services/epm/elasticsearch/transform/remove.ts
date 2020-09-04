@@ -43,9 +43,14 @@ export const deleteTransformRefs = async (
   installedEsIdToRemove: string[],
   currentInstalledEsTransformIds: string[]
 ) => {
+  const seen = new Set<string>();
   const filteredAssets = installedEsAssets.filter(({ type, id }) => {
     if (type !== ElasticsearchAssetType.transform) return true;
-    return currentInstalledEsTransformIds.includes(id) || !installedEsIdToRemove.includes(id);
+    const add =
+      (currentInstalledEsTransformIds.includes(id) || !installedEsIdToRemove.includes(id)) &&
+      !seen.has(id);
+    seen.add(id);
+    return add;
   });
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: filteredAssets,
