@@ -18,7 +18,7 @@
  */
 
 import isString from 'lodash/isString';
-import isObject from 'lodash/isObject';
+import isObjectLodash from 'lodash/isObject';
 import isPlainObject from 'lodash/isPlainObject';
 import sortBy from 'lodash/sortBy';
 import moment, { Moment } from 'moment';

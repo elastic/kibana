@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import take from 'lodash/take';
-import get from 'lodash/get';
+import getField from 'lodash/get';
 import {
   EuiFlyout,
   EuiFlyoutBody,
