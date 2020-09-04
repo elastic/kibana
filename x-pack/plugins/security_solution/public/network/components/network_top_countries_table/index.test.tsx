@@ -11,7 +11,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -76,7 +76,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
@@ -101,7 +101,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
   });
 

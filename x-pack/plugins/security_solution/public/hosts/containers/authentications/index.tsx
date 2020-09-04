@@ -18,12 +18,10 @@ import {
   HostPolicyResponseActionStatus,
   HostsQueries,
   PageInfoPaginated,
-} from '../../../../common/search_strategy/security_solution';
-import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
   AuthenticationsEdges,
-} from '../../../../common/search_strategy/security_solution/hosts/authentications';
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { inputsModel, State } from '../../../common/store';
