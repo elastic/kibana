@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlUrlGenerator } from '../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { AnomalyDetectionQueryState } from '../../../../../../common/types/ml_url_generator';
 // @ts-ignore
@@ -27,10 +27,14 @@ function isGroupIdLink(props: JobIdLink | GroupIdLink): props is GroupIdLink {
   return (props as GroupIdLink).groupId !== undefined;
 }
 export const ADJobIdLink = (props: ADJobIdLinkProps) => {
-  const [href, setHref] = useState<string | undefined>(undefined);
   const mlUrlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
-  const generateUrl = async () => {
+  const redirectToJobsManagementPage = async () => {
     const pageState: AnomalyDetectionQueryState = {};
     if (isGroupIdLink(props)) {
       pageState.groupIds = [props.groupId];
@@ -41,21 +45,15 @@ export const ADJobIdLink = (props: ADJobIdLinkProps) => {
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
       pageState,
     });
-    setHref(url);
+    await navigateToUrl(url);
   };
-  useEffect(() => {
-    generateUrl();
-  }, [props]);
-
   if (isGroupIdLink(props)) {
-    return href ? (
-      <a key={props.groupId} href={href}>
+    return (
+      <EuiLink key={props.groupId} onClick={() => redirectToJobsManagementPage()}>
         <JobGroup name={props.groupId} />
-      </a>
-    ) : (
-      <JobGroup name={props.groupId} />
+      </EuiLink>
     );
   } else {
-    return href ? <EuiLink href={href}>{props.id}</EuiLink> : <>{props.id}</>;
+    return <EuiLink onClick={() => redirectToJobsManagementPage()}>{props.id}</EuiLink>;
   }
 };

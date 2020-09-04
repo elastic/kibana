@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -30,7 +30,7 @@ import {
   DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
-import { useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 enum TASK_STATE_COLOR {
@@ -135,21 +135,21 @@ export const progressColumn = {
 };
 
 export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
-  const [href, setHref] = useState<string | undefined>(undefined);
   const mlUrlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
-  const generateUrl = async () => {
+  const redirectToAnalyticsManagementPage = async () => {
     const url = await mlUrlGenerator.createUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
       pageState: { jobId: item.id },
     });
-    setHref(url);
+    await navigateToUrl(url);
   };
-  useEffect(() => {
-    generateUrl();
-  }, []);
-
-  return href ? <EuiLink href={href}>{item.id}</EuiLink> : <>{item.id}</>;
+  return <EuiLink onClick={() => redirectToAnalyticsManagementPage()}>{item.id}</EuiLink>;
 };
 
 export const useColumns = (
