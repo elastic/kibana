@@ -35,7 +35,6 @@ const createTestCases = (spaceId: string) => {
   ];
 
   // an "object namespace" string can be specified for individual objects (to bulkUpdate across namespaces)
-  // even if the Spaces plugin is disabled, this should work, as `namespace` is handled by the Core API
   const withObjectNamespaces = [
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespace: DEFAULT_SPACE_ID },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespace: SPACE_1_ID },
