@@ -149,8 +149,6 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep, openSteps]
   );
 
-  // https://github.com/eslint/eslint/issues/12642
-  /* eslint-disable no-unused-expressions */
   const toggleStepAccordion = (step: RuleStep | null) => {
     if (step === RuleStep.defineRule) {
       defineRuleRef.current?.onToggle();
@@ -162,7 +160,6 @@ const CreateRulePageComponent: React.FC = () => {
       ruleActionsRef.current?.onToggle();
     }
   };
-  /* eslint-enable no-unused-expressions */
 
   const editStep = useCallback(
     async (step: RuleStep) => {
