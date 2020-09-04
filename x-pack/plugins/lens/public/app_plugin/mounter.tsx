@@ -28,6 +28,8 @@ import {
   LensByValueInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
+import { LensAppServices } from './types';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -40,22 +42,38 @@ export async function mountApp(
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data: dataStart, navigation, embeddable } = startDependencies;
-  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  const { data, navigation, embeddable } = startDependencies;
 
+  const instance = await createEditorFrame();
+  const storage = new Storage(localStorage);
+  const stateTransfer = embeddable?.getStateTransfer(params.history);
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
+
+  const lensServices: LensAppServices = {
+    data,
+    storage,
+    navigation,
+    attributeService,
+    http: coreStart.http,
+    chrome: coreStart.chrome,
+    uiSettings: coreStart.uiSettings,
+    application: coreStart.application,
+    notifications: coreStart.notifications,
+    incomingState: embeddableEditorIncomingState,
+
+    // Temporarily required until the 'by value' paradigm is default.
+    dashboardFeatureFlag: await getByValueFeatureFlag(),
+  };
+
+  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const stateTransfer = embeddable?.getStateTransfer(params.history);
-  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
-
-  const instance = await createEditorFrame();
-
   setReportManager(
     new LensReportManager({
-      storage: new Storage(localStorage),
       http: core.http,
+      storage,
     })
   );
 
@@ -100,12 +118,7 @@ export async function mountApp(
     trackUiEvent('loaded');
     return (
       <App
-        core={coreStart}
-        data={dataStart}
-        navigation={navigation}
         editorFrame={instance}
-        storage={new Storage(localStorage)}
-        attributeService={attributeService}
         initialInput={getInitialInput(routeProps)}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
         redirectToOrigin={redirectToOrigin}
@@ -123,14 +136,16 @@ export async function mountApp(
   params.element.classList.add('lnsAppWrapper');
   render(
     <I18nProvider>
-      <HashRouter>
-        <Switch>
-          <Route exact path="/edit/:id" render={renderEditor} />
-          <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
-          <Route exact path="/" render={renderEditor} />
-          <Route path="/" component={NotFound} />
-        </Switch>
-      </HashRouter>
+      <KibanaContextProvider services={lensServices}>
+        <HashRouter>
+          <Switch>
+            <Route exact path="/edit/:id" render={renderEditor} />
+            <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
+            <Route exact path="/" render={renderEditor} />
+            <Route path="/" component={NotFound} />
+          </Switch>
+        </HashRouter>
+      </KibanaContextProvider>
     </I18nProvider>,
     params.element
   );
