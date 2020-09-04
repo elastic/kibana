@@ -4,29 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
-import { useTheme } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { fontSizes, px, truncate } from '../../../../style/variables';
+import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 import { AgentIcon } from '../../../shared/AgentIcon';
-import { SparkPlot } from '../../../shared/charts/SparkPlot';
-import { getEmptySeries } from '../../../shared/charts/CustomPlot/getEmptySeries';
-import {
-  getSeverityColor,
-  Severity,
-} from '../../../../../common/anomaly_detection';
+import { Severity } from '../../../../../common/anomaly_detection';
+import { HealthBadge } from './HealthBadge';
+import { ServiceListMetric } from './ServiceListMetric';
 
 interface Props {
   items: ServiceListAPIResponse['items'];
@@ -50,94 +45,6 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-function ServiceListMetric({
-  color,
-  series,
-  valueLabel,
-}: {
-  color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
-  series?: Array<{ x: number; y: number | null }>;
-  valueLabel: React.ReactNode;
-}) {
-  const theme = useTheme();
-
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-
-  const colorValue = theme.eui[color];
-
-  return (
-    <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <SparkPlot
-          series={
-            series ??
-            getEmptySeries(parseFloat(start!), parseFloat(end!))[0].data
-          }
-          color={colorValue}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
-        {valueLabel}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function HealthBadge({ severity }: { severity?: Severity }) {
-  const theme = useTheme();
-
-  let label: string = '';
-
-  switch (severity) {
-    case Severity.critical:
-      label = i18n.translate(
-        'xpack.apm.servicesTable.serviceHealthStatus.critical',
-        {
-          defaultMessage: 'Critical',
-        }
-      );
-      break;
-
-    case Severity.major:
-    case Severity.minor:
-      label = i18n.translate(
-        'xpack.apm.servicesTable.serviceHealthStatus.warning',
-        {
-          defaultMessage: 'Warning',
-        }
-      );
-      break;
-
-    case Severity.warning:
-      label = i18n.translate(
-        'xpack.apm.servicesTable.serviceHealthStatus.healthy',
-        {
-          defaultMessage: 'Healthy',
-        }
-      );
-      break;
-
-    default:
-      label = i18n.translate(
-        'xpack.apm.servicesTable.serviceHealthStatus.unknown',
-        {
-          defaultMessage: 'Unknown',
-        }
-      );
-      break;
-  }
-
-  const unknownColor = theme.eui.euiColorLightShade;
-
-  return (
-    <EuiBadge color={getSeverityColor(theme, severity) ?? unknownColor}>
-      {label}
-    </EuiBadge>
-  );
-}
-
 const AppLink = styled(TransactionOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -149,7 +56,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
       defaultMessage: 'Health',
     }),
-    width: px(80),
+    width: px(unit * 6),
     sortable: true,
     render: (_, { severity }) => {
       return <HealthBadge severity={severity} />;
@@ -184,7 +91,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
       defaultMessage: 'Environment',
     }),
-    width: px(160),
+    width: px(unit * 10),
     sortable: true,
     render: (_, { environments }) => (
       <EnvironmentBadge environments={environments ?? []} />
@@ -205,7 +112,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
       />
     ),
     align: 'left',
-    width: px(160),
+    width: px(unit * 10),
   },
   {
     field: 'transactionsPerMinute',
@@ -232,7 +139,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
       />
     ),
     align: 'left',
-    width: px(160),
+    width: px(unit * 10),
   },
   {
     field: 'errorsPerMinute',
@@ -256,7 +163,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
       />
     ),
     align: 'left',
-    width: px(160),
+    width: px(unit * 10),
   },
 ];
 

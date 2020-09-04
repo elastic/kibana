@@ -141,7 +141,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      style="width: 80px;"
+      style="width: 96px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -410,7 +410,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      style="width: 80px;"
+      style="width: 96px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
