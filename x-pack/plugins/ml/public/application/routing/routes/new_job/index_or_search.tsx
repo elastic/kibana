@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../../contexts/kibana';
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -68,9 +68,15 @@ export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath)
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
+
   const newJobResolvers = {
     ...basicResolvers(deps),
-    preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns),
+    preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns, basePath.get()),
   };
   const dataVizResolvers = {
     checkBasicLicense,

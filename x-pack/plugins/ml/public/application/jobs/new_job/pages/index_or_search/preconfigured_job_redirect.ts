@@ -10,13 +10,16 @@ import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/i
 import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
-export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {
+export async function preConfiguredJobRedirect(
+  indexPatterns: IndexPatternsContract,
+  basePath: string
+) {
   const { job } = mlJobService.tempJobCloningObjects;
   if (job) {
     try {
       await loadIndexPatterns(indexPatterns);
       const redirectUrl = getWizardUrlFromCloningJob(job);
-      window.location.href = `#/${redirectUrl}`;
+      window.location.href = `${basePath}/ml/${redirectUrl}`;
       return Promise.reject();
     } catch (error) {
       return Promise.resolve();
