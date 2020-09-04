@@ -356,6 +356,7 @@ export class IndexPattern implements IIndexPattern {
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
+      type: this.type,
     };
   }
 
@@ -612,7 +613,6 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields(indexPattern: IndexPattern) {
     // const fields = await indexPattern.fieldsFetcher.fetch(indexPattern);
     const fields = await indexPattern.fieldsFetcher.fetchForWildcard(indexPattern.title, {
-      metaFields: indexPattern.metaFields,
       type: indexPattern.type,
       params: indexPattern.typeMeta && indexPattern.typeMeta.params,
     });

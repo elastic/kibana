@@ -918,7 +918,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
     // (undocumented)
-    _fetchFields(): Promise<void>;
+    _fetchFields(indexPattern: IndexPattern): Promise<void>;
     // (undocumented)
     fieldFormatMap: any;
     // (undocumented)

@@ -175,6 +175,7 @@ export interface IndexPatternSpec {
   sourceFilters?: SourceFilter[];
   fields?: FieldSpec[];
   typeMeta?: TypeMeta;
+  type?: string;
 }
 
 export interface SourceFilter {

@@ -7,8 +7,15 @@
 <b>Signature:</b>
 
 ```typescript
-_fetchFields(): Promise<void>;
+_fetchFields(indexPattern: IndexPattern): Promise<void>;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  indexPattern | <code>IndexPattern</code> |  |
+
 <b>Returns:</b>
 
 `Promise<void>`

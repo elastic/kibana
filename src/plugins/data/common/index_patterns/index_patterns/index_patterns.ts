@@ -85,6 +85,26 @@ export class IndexPatternsService {
     );
   }
 
+  getFieldsForWildcard = async (pattern: string, options: GetFieldsOptions = {}) => {
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    return this.apiClient.getFieldsForWildcard({
+      pattern,
+      metaFields,
+      type: options.type,
+      params: options.params || {},
+    });
+  };
+
+  getFieldsForIndexPattern = async (
+    indexPattern: IndexPattern | IndexPatternSpec,
+    options: GetFieldsOptions
+  ) =>
+    this.getFieldsForWildcard(indexPattern.title, {
+      ...options,
+      type: indexPattern.type,
+      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+    });
+
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
@@ -127,14 +147,6 @@ export class IndexPatternsService {
       );
       return result;
     });
-  };
-
-  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForTimePattern(options);
-  };
-
-  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForWildcard(options);
   };
 
   clearCache = (id?: string) => {

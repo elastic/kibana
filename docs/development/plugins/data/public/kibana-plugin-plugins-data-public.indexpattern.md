@@ -39,7 +39,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [\_fetchFields()](./kibana-plugin-plugins-data-public.indexpattern._fetchfields.md) |  |  |
+|  [\_fetchFields(indexPattern)](./kibana-plugin-plugins-data-public.indexpattern._fetchfields.md) |  |  |
 |  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  |  |
 |  [create(allowOverride)](./kibana-plugin-plugins-data-public.indexpattern.create.md) |  |  |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
