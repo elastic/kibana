@@ -24,17 +24,21 @@ import {
   EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
-
-import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { updateColumnParam } from '../../../state_helpers';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
+import {
+  Query,
+  esKuery,
+  esQuery,
+  DataPublicPluginStart,
+} from '../../../../../../../../src/plugins/data/public';
 
 const generateId = htmlIdGenerator();
+
+// references types from src/plugins/data/common/search/aggs/buckets/filters.ts
 export interface Filter {
   input: Query;
   label: string;
@@ -53,12 +57,27 @@ export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.labe
   defaultMessage: 'All records',
 });
 
-const defaultSearchQuery: Filter = {
-  input: {
-    query: '',
-    language: 'kuery',
-  },
+const getDefaultFilter = (data?: DataPublicPluginStart): Filter => ({
+  input: data
+    ? data.query.queryString.getDefaultQuery()
+    : {
+        query: '',
+        language: 'kuery',
+      },
   label: '',
+});
+
+export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
+  try {
+    if (input.language === 'kuery') {
+      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(input.query), indexPattern);
+    } else {
+      esQuery.luceneStringToDsl(input.query);
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 };
 
 interface DraggableLocation {
@@ -90,7 +109,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
 
   onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
 
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ suggestedPriority, field, previousColumn }) {
     return {
       label: searchQueryLabel,
       dataType: 'string',
@@ -99,25 +118,38 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       suggestedPriority,
       isBucketed: true,
       sourceField: field.name,
+      params: previousColumn?.params?.filters
+        ? previousColumn.params
+        : {
+            filters: [
+              {
+                input: getDefaultFilter(),
+                label: '',
+              },
+            ],
+          },
+    };
+  },
+
+  toEsAggsConfig: (column, columnId, indexPattern) => {
+    const validFilters = column.params.filters?.filter((f: Filter) =>
+      isQueryValid(f.input, indexPattern)
+    );
+    return {
+      id: columnId,
+      enabled: true,
+      type: 'filters',
+      schema: 'segment',
       params: {
-        filters: [],
+        filters: validFilters?.length > 0 ? validFilters : [getDefaultFilter()],
       },
     };
   },
 
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'filters',
-    schema: 'segment',
-    params: {
-      filters: column.params.filters.length > 0 ? column.params.filters : [defaultSearchQuery],
-    },
-  }),
-
-  paramEditor: ({ state, setState, currentColumn, layerId }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
     const filters = currentColumn.params.filters;
+
     const setFilters = (newFilters: Filter[]) =>
       setState(
         updateColumnParam({
@@ -136,7 +168,12 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
             defaultMessage: 'Queries',
           })}
         >
-          <FilterList filters={filters} setFilters={setFilters} indexPattern={indexPattern} />
+          <FilterList
+            filters={filters}
+            setFilters={setFilters}
+            indexPattern={indexPattern}
+            defaultQuery={getDefaultFilter(data)}
+          />
         </EuiFormRow>
       </EuiForm>
     );
@@ -147,17 +184,17 @@ export const FilterList = ({
   filters,
   setFilters,
   indexPattern,
+  defaultQuery,
 }: {
   filters: Filter[];
   setFilters: Function;
   indexPattern: IndexPattern;
+  defaultQuery: Filter;
 }) => {
   const [isOpenByCreation, setIsOpenByCreation] = useState(false);
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
-
-  const { services } = useKibana<{ uiSettings: IUiSettingsClient; data: DataPublicPluginStart }>();
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
@@ -169,8 +206,7 @@ export const FilterList = ({
     updateFilters([
       ...localFilters,
       {
-        input: services.data.query.queryString.getDefaultQuery(),
-        label: '',
+        ...defaultQuery,
         id: generateId(),
       },
     ]);
@@ -245,7 +281,11 @@ export const FilterList = ({
                               className="lnsLayerPanel__filterLink"
                               data-test-subj="indexPattern-filters-existingFilterTrigger"
                             >
-                              <EuiText size="s" textAlign="left">
+                              <EuiText
+                                size="s"
+                                textAlign="left"
+                                color={isQueryValid(input, indexPattern) ? 'default' : 'danger'}
+                              >
                                 {label || input.query || defaultLabel}
                               </EuiText>
                             </EuiLink>
