@@ -5,7 +5,9 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
+import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import { RequestOptionsPaginated } from '../..';
+import { FlowTargetSourceDest } from '../common';
 
 export interface TlsBuckets {
   key: string;
@@ -34,11 +36,6 @@ export interface TlsNode {
   subjects?: Maybe<string[]>;
   ja3?: Maybe<string[]>;
   issuers?: Maybe<string[]>;
-}
-
-export enum FlowTargetSourceDest {
-  destination = 'destination',
-  source = 'source',
 }
 
 export enum TlsFields {

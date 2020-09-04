@@ -54,6 +54,11 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
       });
     }
 
+    public async clearQuery(): Promise<void> {
+      await this.setQuery('');
+      await PageObjects.common.pressTabKey();
+    }
+
     public async submitQuery(): Promise<void> {
       log.debug('QueryBar.submitQuery');
       await testSubjects.click('queryInput');

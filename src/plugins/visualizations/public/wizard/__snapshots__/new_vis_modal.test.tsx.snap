@@ -248,7 +248,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             <li>
                               <button
                                 aria-describedby="visTypeDescription-visWithAliasUrl"
-                                class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
                                 data-test-subj="visType-visWithAliasUrl"
                                 data-vis-stage="alias"
                                 role="menuitem"
@@ -257,24 +257,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 <div
                                   class="euiKeyPadMenuItem__inner"
                                 >
-                                  <span
-                                    class="euiKeyPadMenuItem__betaBadgeWrapper"
-                                  >
-                                    <span
-                                      class="euiToolTipAnchor"
-                                    >
-                                      <span
-                                        class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                        tabindex="0"
-                                      >
-                                        <div
-                                          aria-hidden="true"
-                                          class="euiBetaBadge__icon"
-                                          data-euiicon-type="popout"
-                                        />
-                                      </span>
-                                    </span>
-                                  </span>
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
@@ -650,9 +632,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         >
                                           <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithAliasUrl"
-                                            betaBadgeIconType="popout"
-                                            betaBadgeLabel="Kibana application"
-                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-visWithAliasUrl"
                                             data-vis-stage="alias"
@@ -674,7 +653,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithAliasUrl"
-                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-visWithAliasUrl"
                                               data-vis-stage="alias"
                                               disabled={false}
@@ -689,51 +668,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               <div
                                                 className="euiKeyPadMenuItem__inner"
                                               >
-                                                <span
-                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
-                                                >
-                                                  <EuiBetaBadge
-                                                    className="euiKeyPadMenuItem__betaBadge"
-                                                    iconType="popout"
-                                                    label="Kibana application"
-                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
-                                                  >
-                                                    <EuiToolTip
-                                                      content="Opens a Kibana application that is outside of Visualize."
-                                                      delay="regular"
-                                                      position="top"
-                                                      title="Kibana application"
-                                                    >
-                                                      <span
-                                                        className="euiToolTipAnchor"
-                                                        onKeyUp={[Function]}
-                                                        onMouseOut={[Function]}
-                                                        onMouseOver={[Function]}
-                                                      >
-                                                        <span
-                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                          onBlur={[Function]}
-                                                          onFocus={[Function]}
-                                                          tabIndex={0}
-                                                        >
-                                                          <EuiIcon
-                                                            aria-hidden="true"
-                                                            className="euiBetaBadge__icon"
-                                                            size="m"
-                                                            type="popout"
-                                                          >
-                                                            <div
-                                                              aria-hidden="true"
-                                                              className="euiBetaBadge__icon"
-                                                              data-euiicon-type="popout"
-                                                              size="m"
-                                                            />
-                                                          </EuiIcon>
-                                                        </span>
-                                                      </span>
-                                                    </EuiToolTip>
-                                                  </EuiBetaBadge>
-                                                </span>
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
@@ -1243,7 +1177,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             <li>
                               <button
                                 aria-describedby="visTypeDescription-visWithAliasUrl"
-                                class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                class="euiKeyPadMenuItem visNewVisDialog__type"
                                 data-test-subj="visType-visWithAliasUrl"
                                 data-vis-stage="alias"
                                 role="menuitem"
@@ -1252,24 +1186,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                 <div
                                   class="euiKeyPadMenuItem__inner"
                                 >
-                                  <span
-                                    class="euiKeyPadMenuItem__betaBadgeWrapper"
-                                  >
-                                    <span
-                                      class="euiToolTipAnchor"
-                                    >
-                                      <span
-                                        class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                        tabindex="0"
-                                      >
-                                        <div
-                                          aria-hidden="true"
-                                          class="euiBetaBadge__icon"
-                                          data-euiicon-type="popout"
-                                        />
-                                      </span>
-                                    </span>
-                                  </span>
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
@@ -1632,9 +1548,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                         >
                                           <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithAliasUrl"
-                                            betaBadgeIconType="popout"
-                                            betaBadgeLabel="Kibana application"
-                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-visWithAliasUrl"
                                             data-vis-stage="alias"
@@ -1656,7 +1569,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithAliasUrl"
-                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-visWithAliasUrl"
                                               data-vis-stage="alias"
                                               disabled={false}
@@ -1671,51 +1584,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                               <div
                                                 className="euiKeyPadMenuItem__inner"
                                               >
-                                                <span
-                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
-                                                >
-                                                  <EuiBetaBadge
-                                                    className="euiKeyPadMenuItem__betaBadge"
-                                                    iconType="popout"
-                                                    label="Kibana application"
-                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
-                                                  >
-                                                    <EuiToolTip
-                                                      content="Opens a Kibana application that is outside of Visualize."
-                                                      delay="regular"
-                                                      position="top"
-                                                      title="Kibana application"
-                                                    >
-                                                      <span
-                                                        className="euiToolTipAnchor"
-                                                        onKeyUp={[Function]}
-                                                        onMouseOut={[Function]}
-                                                        onMouseOver={[Function]}
-                                                      >
-                                                        <span
-                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
-                                                          onBlur={[Function]}
-                                                          onFocus={[Function]}
-                                                          tabIndex={0}
-                                                        >
-                                                          <EuiIcon
-                                                            aria-hidden="true"
-                                                            className="euiBetaBadge__icon"
-                                                            size="m"
-                                                            type="popout"
-                                                          >
-                                                            <div
-                                                              aria-hidden="true"
-                                                              className="euiBetaBadge__icon"
-                                                              data-euiicon-type="popout"
-                                                              size="m"
-                                                            />
-                                                          </EuiIcon>
-                                                        </span>
-                                                      </span>
-                                                    </EuiToolTip>
-                                                  </EuiBetaBadge>
-                                                </span>
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
