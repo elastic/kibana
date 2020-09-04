@@ -8,6 +8,6 @@ import { buildAuthenticationsHistogramQuery } from './query.authentications_hist
 
 export const authenticationsMatrixHistogramConfig = {
   buildDsl: buildAuthenticationsHistogramQuery,
-  aggName: 'aggregations.anomalyActionGroup.buckets',
-  parseKey: 'anomalies.buckets',
+  aggName: 'aggregations.eventActionGroup.buckets',
+  parseKey: 'events.buckets',
 };

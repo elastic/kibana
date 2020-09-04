@@ -14,6 +14,7 @@ import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
+  MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
@@ -54,6 +55,7 @@ export const useMatrixHistogram = ({
     MatrixHistogramRequestOptions
   >({
     defaultIndex,
+    factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
     timerange: {
