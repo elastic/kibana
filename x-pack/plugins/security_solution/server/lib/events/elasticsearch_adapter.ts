@@ -27,9 +27,9 @@ import {
   TimelineEdges,
 } from '../../graphql/types';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
-import { eventFieldsMap } from '../ecs_fields';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
+import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 

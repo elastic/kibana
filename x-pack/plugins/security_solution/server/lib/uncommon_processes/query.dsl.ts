@@ -7,7 +7,6 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
-
 import { RequestOptionsPaginated } from '../framework';
 
 export const buildQuery = ({
