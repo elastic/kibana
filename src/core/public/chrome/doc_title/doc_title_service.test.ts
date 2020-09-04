@@ -64,17 +64,4 @@ describe('DocTitleService', () => {
       expect(document.title).toEqual('InitialTitle');
     });
   });
-
-  describe('#__legacy.setBaseTitle()', () => {
-    it('allows to change the baseTitle after startup', async () => {
-      const start = getStart('InitialTitle');
-      start.change('WithInitial');
-      expect(document.title).toEqual('WithInitial - InitialTitle');
-      start.__legacy.setBaseTitle('NewBaseTitle');
-      start.change('WithNew');
-      expect(document.title).toEqual('WithNew - NewBaseTitle');
-      start.reset();
-      expect(document.title).toEqual('NewBaseTitle');
-    });
-  });
 });

@@ -178,10 +178,10 @@ export function DiscoverSidebar({
                 aria-labelledby="selected_fields"
                 data-test-subj={`fieldList-selected`}
               >
-                {selectedFields.map((field: IndexPatternField, idx: number) => {
+                {selectedFields.map((field: IndexPatternField) => {
                   return (
                     <li
-                      key={`field${idx}`}
+                      key={`field${field.name}`}
                       data-attr-field={field.name}
                       className="dscSidebar__item"
                     >
@@ -252,10 +252,10 @@ export function DiscoverSidebar({
                 aria-labelledby="available_fields available_fields_popular"
                 data-test-subj={`fieldList-popular`}
               >
-                {popularFields.map((field: IndexPatternField, idx: number) => {
+                {popularFields.map((field: IndexPatternField) => {
                   return (
                     <li
-                      key={`field${idx}`}
+                      key={`field${field.name}`}
                       data-attr-field={field.name}
                       className="dscSidebar__item"
                     >
@@ -281,9 +281,13 @@ export function DiscoverSidebar({
             aria-labelledby="available_fields"
             data-test-subj={`fieldList-unpopular`}
           >
-            {unpopularFields.map((field: IndexPatternField, idx: number) => {
+            {unpopularFields.map((field: IndexPatternField) => {
               return (
-                <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
+                <li
+                  key={`field${field.name}`}
+                  data-attr-field={field.name}
+                  className="dscSidebar__item"
+                >
                   <DiscoverField
                     field={field}
                     indexPattern={selectedIndexPattern}
