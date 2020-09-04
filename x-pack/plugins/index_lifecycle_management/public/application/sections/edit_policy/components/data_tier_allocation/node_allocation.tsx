@@ -7,29 +7,15 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 
 import { ListNodesRouteResponse } from '../../../../../../common/types';
-import { LearnMoreLink } from '../learn_more_link';
-import { ErrableFormRow } from '../form_errors';
-import { NodeAttrsDetails } from './node_attrs_details';
 import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
 import { PhaseValidationErrors, propertyof } from '../../../../services/policies/policy_validation';
 
-const learnMoreLink = (
-  <Fragment>
-    <EuiSpacer size="m" />
-    <LearnMoreLink
-      text={
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
-          defaultMessage="Learn about shard allocation"
-        />
-      }
-      docPath="modules-cluster.html#cluster-shard-allocation-settings"
-    />
-  </Fragment>
-);
+import { ErrableFormRow } from '../form_errors';
+
+import { NodeAttrsDetails } from './node_attrs_details';
 
 interface Props<T extends PhaseWithAllocationAction> {
   phase: keyof Phases & string;
@@ -84,10 +70,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
             defaultMessage="You can't control shard allocation without node attributes."
           />
-          {learnMoreLink}
         </EuiCallOut>
-
-        <EuiSpacer size="xl" />
       </Fragment>
     );
   }
@@ -100,10 +83,26 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
       <ErrableFormRow
         id={`${phase}-${nodeAttrsProperty}`}
         label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
-          defaultMessage: 'Select a node attribute to control shard allocation',
+          defaultMessage: 'Select a node attribute',
         })}
         isShowingErrors={isShowingErrors}
         errors={errors?.selectedNodeAttrs}
+        helpText={
+          !!phaseData.selectedNodeAttrs ? (
+            <EuiButtonEmpty
+              size="xs"
+              style={{ maxWidth: 400 }}
+              data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
+              flush="left"
+              onClick={() => setSelectedNodeAttrsForDetails(phaseData.selectedNodeAttrs)}
+            >
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
+                defaultMessage="View a list of nodes attached to this configuration"
+              />
+            </EuiButtonEmpty>
+          ) : null
+        }
       >
         <EuiSelect
           id={`${phase}-${nodeAttrsProperty}`}
@@ -114,22 +113,6 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
           }}
         />
       </ErrableFormRow>
-      {!!phaseData.selectedNodeAttrs ? (
-        <EuiButtonEmpty
-          style={{ maxWidth: 400 }}
-          data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
-          flush="left"
-          iconType="eye"
-          onClick={() => setSelectedNodeAttrsForDetails(phaseData.selectedNodeAttrs)}
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
-            defaultMessage="View a list of nodes attached to this configuration"
-          />
-        </EuiButtonEmpty>
-      ) : null}
-      {learnMoreLink}
-      <EuiSpacer size="m" />
 
       {selectedNodeAttrsForDetails ? (
         <NodeAttrsDetails

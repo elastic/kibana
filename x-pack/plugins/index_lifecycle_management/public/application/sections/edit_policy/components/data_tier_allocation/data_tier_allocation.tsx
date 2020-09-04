@@ -6,17 +6,37 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSwitch, EuiHorizontalRule, EuiText, EuiFormRow } from '@elastic/eui';
 
 import { PhaseWithAllocationAction } from '../../../../services/policies/types';
 import { AdvancedSectionLayout } from '../advanced_section_layout';
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
+import './data_tier_allocation.scss';
+import { LearnMoreLink } from '../learn_more_link';
+
+const learnMoreLink = (
+  <LearnMoreLink
+    text={
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
+        defaultMessage="Learn about shard allocation"
+      />
+    }
+    docPath="modules-cluster.html#cluster-shard-allocation-settings"
+  />
+);
+
 const i18nTexts = {
   useDataTierAllocation: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useDataTierSwitchLabel',
     { defaultMessage: 'Enable data tier allocation' }
+  ),
+  useCustomDataTierAllocation: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useCustomDataTierSwitchLabel',
+    { defaultMessage: 'Use custom data tier allocation' }
   ),
 };
 
@@ -41,25 +61,37 @@ export const DataTierAllocation = <T extends any>(
           }
         }}
       />
-      <EuiSpacer size="s" />
       {isUsingDataTierAllocation ? (
         <AdvancedSectionLayout>
-          <div style={{ paddingLeft: 24 }}>
-            <EuiSwitch
-              data-test-subj="useCustomAllocationSwitch"
-              label="Use custom data tier allocation."
-              checked={phaseData.dataTierAllocationType === 'custom'}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setPhaseData('dataTierAllocationType', 'custom');
-                } else {
-                  setPhaseData('dataTierAllocationType', 'default');
-                }
-              }}
-            />
-            <EuiSpacer size="m" />
+          <div className="indexLifecycleManagement__phase__dataTierAllocation__advancedSection">
+            <EuiFormRow
+              helpText={
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.description"
+                    defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
+                    values={{ learnMoreLink }}
+                  />
+                </EuiText>
+              }
+            >
+              <EuiSwitch
+                data-test-subj="useCustomAllocationSwitch"
+                label={i18nTexts.useCustomDataTierAllocation}
+                checked={phaseData.dataTierAllocationType === 'custom'}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setPhaseData('dataTierAllocationType', 'custom');
+                  } else {
+                    setPhaseData('dataTierAllocationType', 'default');
+                  }
+                }}
+              />
+            </EuiFormRow>
             {props.phaseData.dataTierAllocationType === 'custom' ? (
-              <NodeAllocation {...props} />
+              <>
+                <NodeAllocation {...props} />
+              </>
             ) : null}
           </div>
         </AdvancedSectionLayout>

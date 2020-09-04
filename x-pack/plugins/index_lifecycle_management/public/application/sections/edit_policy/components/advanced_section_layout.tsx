@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
-import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 const i18nTexts = {
   showAdvancedLabel: i18n.translate('xpack.indexLifecycleMgmt.advancedSection.showSectionLabel', {
@@ -35,7 +35,6 @@ export const AdvancedSectionLayout: FunctionComponent = ({ children }) => {
           {isShowingSection ? i18nTexts.hideAdvancedLabel : i18nTexts.showAdvancedLabel}
         </EuiText>
       </EuiButtonEmpty>
-      <EuiSpacer size="m" />
       {isShowingSection ? children : null}
     </>
   );
