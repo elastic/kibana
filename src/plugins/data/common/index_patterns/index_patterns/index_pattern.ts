@@ -41,8 +41,9 @@ import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { IndexPatternsService } from '..';
 
-const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+// const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
 interface IndexPatternDeps {
@@ -50,6 +51,7 @@ interface IndexPatternDeps {
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
+  indexPatternsService: IndexPatternsService;
   onNotification: OnNotification;
   onError: OnError;
   shortDotsEnable: boolean;
@@ -70,17 +72,18 @@ export class IndexPattern implements IIndexPattern {
   public flattenHit: any;
   public metaFields: string[];
 
-  private version: string | undefined;
+  public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
   public sourceFilters?: SourceFilter[];
-  private originalBody: { [key: string]: any } = {};
+  public originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
+  private indexPatternsService: IndexPatternsService;
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
-  private apiClient: IIndexPatternsApiClient;
+  // private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -111,6 +114,7 @@ export class IndexPattern implements IIndexPattern {
       apiClient,
       patternCache,
       fieldFormats,
+      indexPatternsService,
       onNotification,
       onError,
       shortDotsEnable = false,
@@ -121,6 +125,7 @@ export class IndexPattern implements IIndexPattern {
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
+    this.indexPatternsService = indexPatternsService;
     this.onNotification = onNotification;
     this.onError = onError;
 
@@ -128,7 +133,7 @@ export class IndexPattern implements IIndexPattern {
     this.metaFields = metaFields;
     this.fields = fieldList([], this.shortDotsEnable);
 
-    this.apiClient = apiClient;
+    // this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
@@ -393,7 +398,8 @@ export class IndexPattern implements IIndexPattern {
         throw err;
       }
 
-      await this.save(this);
+      // await this.save(this);
+      await this.indexPatternsService.save(this);
     }
   }
 
@@ -402,7 +408,7 @@ export class IndexPattern implements IIndexPattern {
     if (field) {
       this.fields.remove(field);
     }
-    return this.save(this);
+    return this.indexPatternsService.save(this);
   }
 
   async popularizeField(fieldName: string, unit = 1) {
@@ -524,6 +530,8 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+    return await this.indexPatternsService.save(indexPattern, saveAttempts);
+    /*
     if (!indexPattern.id) return;
     const body = indexPattern.prepBody();
 
@@ -550,6 +558,7 @@ export class IndexPattern implements IIndexPattern {
             apiClient: indexPattern.apiClient,
             patternCache: indexPattern.patternCache,
             fieldFormats: indexPattern.fieldFormats,
+            indexPatternsService: indexPattern.indexPatternsService,
             onNotification: indexPattern.onNotification,
             onError: indexPattern.onError,
             shortDotsEnable: indexPattern.shortDotsEnable,
@@ -601,12 +610,13 @@ export class IndexPattern implements IIndexPattern {
             // Clear cache
             indexPattern.patternCache.clear(indexPattern.id!);
 
-            // Try the save again
-            return indexPattern.save(indexPattern, saveAttempts);
+            // Try the save agains
+            return this.indexPatternsService.save(indexPattern, saveAttempts);
           });
         }
         throw err;
       });
+      */
   }
 
   async _fetchFields() {
@@ -625,7 +635,7 @@ export class IndexPattern implements IIndexPattern {
 
   refreshFields() {
     return this._fetchFields()
-      .then(() => this.save(this))
+      .then(() => this.indexPatternsService.save(this))
       .catch((err) => {
         // https://github.com/elastic/kibana/issues/9224
         // This call will attempt to remap fields from the matching
