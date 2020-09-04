@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const INSERT_TIMELINE = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.insertTimelineButtonLabel',
+  {
+    defaultMessage: 'Insert timeline link',
+  }
+);
+
+export const TIMELINE_ID = (timelineId: string) =>
+  i18n.translate('xpack.securitySolution.markdownEditor.plugins.timeline.toolTip.timelineId', {
+    defaultMessage: 'Timeline id: { timelineId }',
+    values: {
+      timelineId,
+    },
+  });

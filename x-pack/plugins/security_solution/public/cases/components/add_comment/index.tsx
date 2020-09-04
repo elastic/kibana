@@ -18,7 +18,7 @@ import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
 import { schema } from './schema';
-import { useTimelineClick } from '../utils/use_timeline_click';
+import { useTimelineClick } from '../../../common/containers/use_timeline_click';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiMarkdownEditor,
@@ -12,8 +12,12 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  getDefaultEuiMarkdownParsingPlugins,
+  getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
+
+import * as timelineMarkdownPlugin from './plugins/timeline';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -30,6 +34,12 @@ const BottomContentWrapper = styled(EuiFlexGroup)`
   `}
 `;
 
+export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+parsingPlugins.push(timelineMarkdownPlugin.parser);
+
+export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+processingPlugins[1][1].components.timeline = timelineMarkdownPlugin.renderer;
+
 export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   id,
   field,
@@ -38,6 +48,10 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   bottomRightContent,
 }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
+  const onParse = useCallback((err, { messages }) => {
+    setMarkdownErrorMessages(err ? [err] : messages);
+  }, []);
 
   return (
     <EuiFormRow
@@ -56,6 +70,11 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
           editorId={id}
           onChange={field.setValue}
           value={field.value as string}
+          uiPlugins={[timelineMarkdownPlugin.plugin]}
+          parsingPluginList={parsingPlugins}
+          processingPluginList={processingPlugins}
+          onParse={onParse}
+          errors={markdownErrorMessages}
         />
         {bottomRightContent && (
           <BottomContentWrapper justifyContent={'flexEnd'}>

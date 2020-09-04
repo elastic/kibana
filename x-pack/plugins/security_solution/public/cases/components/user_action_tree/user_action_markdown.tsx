@@ -11,17 +11,17 @@ import {
   EuiButton,
   EuiMarkdownFormat,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
-import { Markdown } from '../../../common/components/markdown';
-import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
+import { Form, useForm, UseField } from '../../../shared_imports';
 import { schema, Content } from './schema';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import { MarkdownEditorForm } from '../../../common/components//markdown_editor/new_form';
-import { useTimelineClick } from '../utils/use_timeline_click';
+import {
+  MarkdownEditorForm,
+  parsingPlugins,
+  processingPlugins,
+} from '../../../common/components/markdown_editor/new_form';
 
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -49,23 +49,11 @@ export const UserActionMarkdown = ({
   });
 
   const fieldName = 'content';
-  const { submit, setFieldValue } = form;
-  const [{ content: contentFormValue }] = useFormData({ form, watch: [fieldName] });
-
-  const onContentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
-    setFieldValue,
-  ]);
-
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
-    contentFormValue,
-    onContentChange
-  );
+  const { submit } = form;
 
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
   }, [id, onChangeEditable]);
-
-  const handleTimelineClick = useTimelineClick();
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -123,7 +111,12 @@ export const UserActionMarkdown = ({
     </Form>
   ) : (
     <ContentWrapper data-test-subj="user-action-markdown">
-      <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
+      <EuiMarkdownFormat
+        parsingPluginList={parsingPlugins}
+        processingPluginList={processingPlugins}
+      >
+        {content}
+      </EuiMarkdownFormat>
     </ContentWrapper>
   );
 };
