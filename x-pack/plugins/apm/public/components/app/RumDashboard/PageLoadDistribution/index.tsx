@@ -9,6 +9,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHideFor,
+  EuiShowFor,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -18,6 +20,7 @@ import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { ResetPercentileZoom } from './ResetPercentileZoom';
 
 export interface PercentileRange {
   min?: number | null;
@@ -81,18 +84,10 @@ export function PageLoadDistribution() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="inspect"
-            size="s"
-            onClick={() => {
-              setPercentileRange({ min: null, max: null });
-            }}
-            disabled={
-              percentileRange.min === null && percentileRange.max === null
-            }
-          >
-            {I18LABELS.resetZoom}
-          </EuiButtonEmpty>
+          <ResetPercentileZoom
+            percentileRange={percentileRange}
+            setPercentileRange={setPercentileRange}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
