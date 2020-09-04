@@ -429,7 +429,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           <FormattedMessage
             id="indexPatternManagement.customNameHelpText"
-            defaultMessage="Useful when the full field name is very long."
+            defaultMessage="A short name is useful when the full field name is long."
           />
         }
       >
