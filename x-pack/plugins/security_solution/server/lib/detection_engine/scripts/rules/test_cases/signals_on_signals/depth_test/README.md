@@ -111,7 +111,7 @@ Check your `signal` section of the signal and you will see something like this:
 ],
 "depth": 1,
 "rule": {
-  "id": "ded57b36-9c4e-4ee4-805d-be4e92033e41"
+  "id": "74e0dd0c-4609-416f-b65e-90f8b2564612"
 }
 ```
 
