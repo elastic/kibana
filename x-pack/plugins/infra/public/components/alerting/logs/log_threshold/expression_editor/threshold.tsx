@@ -47,7 +47,7 @@ const getComparatorOptions = (): Array<{
 interface Props {
   comparator?: Comparator;
   value?: number;
-  updateThreshold: (params: Partial<AlertParams['threshold']>) => void;
+  updateThreshold: (params: Partial<AlertParams['count']>) => void;
   errors: IErrorObject;
 }
 

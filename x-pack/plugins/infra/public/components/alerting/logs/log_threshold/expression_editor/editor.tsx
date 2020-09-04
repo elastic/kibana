@@ -137,23 +137,13 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
 
 export const Editor: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext, sourceId } = props;
-  const [
-    hasSetDefaultsAndConvertedLegacyParams,
-    setHasSetDefaultsAndConvertedLegacyParams,
-  ] = useState<boolean>(false);
+  const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
   useMount(() => {
-    const mergedParams = { ...DEFAULT_COUNT_EXPRESSION, ...alertParams };
-    // Handle legacy case where "count" was used instead of "threshold"
-    const convertedParams = {
-      ...mergedParams,
-      threshold: mergedParams.count ? mergedParams.count : mergedParams.threshold,
-      count: undefined,
-    };
-    for (const [key, value] of Object.entries(convertedParams)) {
+    for (const [key, value] of Object.entries({ ...DEFAULT_COUNT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
     }
-    setHasSetDefaultsAndConvertedLegacyParams(true);
+    setHasSetDefaults(true);
   });
 
   const supportedFields = useMemo(() => {
@@ -180,10 +170,10 @@ export const Editor: React.FC<Props> = (props) => {
 
   const updateThreshold = useCallback(
     (thresholdParams) => {
-      const nextThresholdParams = { ...alertParams.threshold, ...thresholdParams };
-      setAlertParams('threshold', nextThresholdParams);
+      const nextThresholdParams = { ...alertParams.count, ...thresholdParams };
+      setAlertParams('count', nextThresholdParams);
     },
-    [alertParams.threshold, setAlertParams]
+    [alertParams.count, setAlertParams]
   );
 
   const updateCriteria = useCallback(
@@ -216,7 +206,6 @@ export const Editor: React.FC<Props> = (props) => {
 
   const updateType = useCallback(
     (type: ThresholdType) => {
-      // TODO: If the user has already configured some criteria, take them across
       if (type === 'count') {
         setAlertParams('criteria', DEFAULT_COUNT_EXPRESSION.criteria);
       } else {
@@ -226,12 +215,12 @@ export const Editor: React.FC<Props> = (props) => {
     [setAlertParams]
   );
 
-  // Wait until the alert param defaults have been set and legacy params have been converted
-  if (!hasSetDefaultsAndConvertedLegacyParams) return null;
+  // Wait until the alert param defaults have been set
+  if (!hasSetDefaults) return null;
 
   return (
     <>
-      <TypeSwitcher criteria={alertParams.criteria} updateType={updateType} />
+      <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
 
       <Criteria
         fields={supportedFields}
@@ -244,8 +233,8 @@ export const Editor: React.FC<Props> = (props) => {
       />
 
       <Threshold
-        comparator={alertParams.threshold?.comparator}
-        value={alertParams.threshold?.value}
+        comparator={alertParams.count?.comparator}
+        value={alertParams.count?.value}
         updateThreshold={updateThreshold}
         errors={errors.threshold}
       />

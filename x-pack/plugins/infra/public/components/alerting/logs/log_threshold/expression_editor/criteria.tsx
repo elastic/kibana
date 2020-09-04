@@ -9,8 +9,6 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiText } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
 import { Criterion } from './criterion';
 import {
   AlertParams,
@@ -19,6 +17,7 @@ import {
   Criterion as CriterionType,
   CountCriteria as CountCriteriaType,
   RatioCriteria as RatioCriteriaType,
+  isRatioAlert,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 import { AlertsContext } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
@@ -51,7 +50,7 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
 
   return (
     <div>
-      {!Array.isArray(criteria[0]) ? (
+      {!isRatioAlert(criteria) ? (
         <CountCriteria {...props} criteria={criteria as CountCriteriaType} errors={errors} />
       ) : (
         <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} errors={errors} />
@@ -70,6 +69,7 @@ interface CriteriaWrapperProps {
   errors: CriterionErrors;
   context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
+  isRatio?: boolean;
 }
 
 const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
@@ -83,6 +83,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     alertParams,
     context,
     sourceId,
+    isRatio = false,
   } = props;
 
   return (
@@ -105,6 +106,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
                 context={context}
                 chartCriterion={criterion}
                 sourceId={sourceId}
+                showThreshold={!isRatio}
               />
             </React.Fragment>
           );
@@ -165,6 +167,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         addCriterion={addNumeratorCriterion}
         removeCriterion={removeNumeratorCriterion}
         errors={errors[0]}
+        isRatio={true}
       />
 
       <EuiText color="secondary">{RATIO_SEPERATOR_TEXT.toUpperCase()}</EuiText>
@@ -176,6 +179,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         addCriterion={addDenominatorCriterion}
         removeCriterion={removeDenominatorCriterion}
         errors={errors[1]}
+        isRatio={true}
       />
     </>
   );

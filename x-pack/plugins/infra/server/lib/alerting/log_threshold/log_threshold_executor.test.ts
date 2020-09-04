@@ -56,8 +56,8 @@ const negativeCriteria: Criterion[] = [
   { ...textField, comparator: Comparator.NOT_MATCH_PHRASE },
 ];
 
-const baseAlertParams: Pick<AlertParams, 'threshold' | 'timeSize' | 'timeUnit'> = {
-  threshold: {
+const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
+  count: {
     comparator: Comparator.GT,
     value: 5,
   },

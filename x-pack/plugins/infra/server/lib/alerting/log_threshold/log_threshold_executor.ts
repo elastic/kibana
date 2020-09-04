@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { actionsAuthorizationMock } from '../../../../../actions/server/mocks';
 import {
   AlertExecutorOptions,
   AlertServices,
@@ -26,8 +25,9 @@ import {
   hasGroupBy,
   getNumerator,
   getDenominator,
-  RatioCriteria,
   Criteria,
+  CountAlertParams,
+  RatioAlertParams,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -45,22 +45,8 @@ const checkValueAgainstComparatorMap: {
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
-// Convert parameters that were created using the old "count"
-// property rather than "threshold".
-const convertLegacyParams = (params: Record<string, any>) => {
-  if (params.count && !params.threshold) {
-    return {
-      ...params,
-      threshold: params.count,
-    };
-  } else {
-    return params;
-  }
-};
-
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function ({ services, params: alertParams }: AlertExecutorOptions) {
-    const params = convertLegacyParams(alertParams);
+  async function ({ services, params }: AlertExecutorOptions) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
 
@@ -73,16 +59,16 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       const validatedParams = decodeOrThrow(AlertParamsRT)(params);
 
       if (!isRatioAlert(validatedParams.criteria)) {
-        executeAlert(
-          validatedParams,
+        await executeAlert(
+          validatedParams as CountAlertParams,
           timestampField,
           indexPattern,
           callCluster,
           alertInstanceFactory
         );
       } else {
-        executeRatioAlert(
-          validatedParams,
+        await executeRatioAlert(
+          validatedParams as RatioAlertParams,
           timestampField,
           indexPattern,
           callCluster,
@@ -99,7 +85,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   };
 
 async function executeAlert(
-  alertParams: AlertParams,
+  alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
   callCluster: AlertServices['callCluster'],
@@ -129,7 +115,7 @@ async function executeAlert(
 }
 
 async function executeRatioAlert(
-  alertParams: AlertParams,
+  alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
   callCluster: AlertServices['callCluster'],
@@ -138,12 +124,12 @@ async function executeRatioAlert(
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: AlertParams = {
     ...alertParams,
-    criteria: getNumerator(alertParams.criteria as RatioCriteria),
+    criteria: getNumerator(alertParams.criteria),
   };
 
   const denominatorParams: AlertParams = {
     ...alertParams,
-    criteria: getDenominator(alertParams.criteria as RatioCriteria),
+    criteria: getDenominator(alertParams.criteria),
   };
 
   const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern);
@@ -176,7 +162,11 @@ async function executeRatioAlert(
   }
 }
 
-const getESQuery = (alertParams: AlertParams, timestampField: string, indexPattern: string) => {
+const getESQuery = (
+  alertParams: Omit<AlertParams, 'criteria'> & { criteria: Criteria },
+  timestampField: string,
+  indexPattern: string
+) => {
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(alertParams, timestampField, indexPattern)
     : getUngroupedESQuery(alertParams, timestampField, indexPattern);
@@ -184,22 +174,22 @@ const getESQuery = (alertParams: AlertParams, timestampField: string, indexPatte
 
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
-  params: AlertParams,
+  params: CountAlertParams,
   alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
-  const { threshold, criteria } = params;
+  const { count, criteria } = params;
 
   const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
   const documentCount = results.hits.total.value;
 
-  if (checkValueAgainstComparatorMap[threshold.comparator](documentCount, threshold.value)) {
+  if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
           matchingDocuments: documentCount,
-          conditions: createConditionsMessageForCriteria(criteria as Criteria),
+          conditions: createConditionsMessageForCriteria(criteria),
           group: null,
         },
       },
@@ -212,32 +202,25 @@ export const processUngroupedResults = (
 export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
-  params: AlertParams,
+  params: RatioAlertParams,
   alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
-  const { threshold, criteria } = params;
+  const { count, criteria } = params;
 
   const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
   const ratio = getRatio(numeratorCount, denominatorCount);
 
-  if (
-    ratio !== undefined &&
-    checkValueAgainstComparatorMap[threshold.comparator](ratio, threshold.value)
-  ) {
+  if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
           ratio,
-          numeratorConditions: createConditionsMessageForCriteria(
-            getNumerator(criteria as RatioCriteria)
-          ),
-          denominatorConditions: createConditionsMessageForCriteria(
-            getDenominator(criteria as RatioCriteria)
-          ),
+          numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
+          denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
           group: null,
         },
       },
@@ -273,11 +256,11 @@ const getReducedGroupByResults = (
 
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
-  params: AlertParams,
+  params: CountAlertParams,
   alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
-  const { threshold, criteria } = params;
+  const { count, criteria } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
@@ -285,13 +268,13 @@ export const processGroupByResults = (
     const alertInstance = alertInstanceFactory(group.name);
     const documentCount = group.documentCount;
 
-    if (checkValueAgainstComparatorMap[threshold.comparator](documentCount, threshold.value)) {
+    if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
             matchingDocuments: documentCount,
-            conditions: createConditionsMessageForCriteria(criteria as Criteria),
+            conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
           },
         },
@@ -305,11 +288,11 @@ export const processGroupByResults = (
 export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
-  params: AlertParams,
+  params: RatioAlertParams,
   alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
-  const { threshold, criteria } = params;
+  const { count, criteria } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
@@ -326,19 +309,15 @@ export const processGroupByRatioResults = (
       : undefined;
     if (
       ratio !== undefined &&
-      checkValueAgainstComparatorMap[threshold.comparator](ratio, threshold.value)
+      checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
             ratio,
-            numeratorConditions: createConditionsMessageForCriteria(
-              getNumerator(criteria as RatioCriteria)
-            ),
-            denominatorConditions: createConditionsMessageForCriteria(
-              getDenominator(criteria as RatioCriteria)
-            ),
+            numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
+            denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
           },
         },
@@ -369,7 +348,7 @@ export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, 
 };
 
 export const buildFiltersFromCriteria = (
-  params: Omit<AlertParams, 'threshold'>,
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: Criteria },
   timestampField: string
 ) => {
   const { timeSize, timeUnit, criteria } = params;
@@ -420,7 +399,7 @@ export const buildFiltersFromCriteria = (
 };
 
 export const getGroupedESQuery = (
-  params: Omit<AlertParams, 'threshold'>,
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: Criteria },
   timestampField: string,
   index: string
 ): object | undefined => {
@@ -478,7 +457,7 @@ export const getGroupedESQuery = (
 };
 
 export const getUngroupedESQuery = (
-  params: Omit<AlertParams, 'threshold'>,
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: Criteria },
   timestampField: string,
   index: string
 ): object => {
@@ -512,7 +491,7 @@ type Filter = {
   [key in SupportedESQueryTypes]?: object;
 };
 
-const buildFiltersForCriteria = (criteria: AlertParams['criteria']) => {
+const buildFiltersForCriteria = (criteria: Criteria) => {
   let filters: Filter[] = [];
 
   criteria.forEach((criterion) => {

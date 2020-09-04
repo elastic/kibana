@@ -29,7 +29,7 @@ export interface Errors {
 }
 
 export function validateExpression({
-  threshold,
+  count,
   criteria,
   timeSize,
   timeUnit,
@@ -50,7 +50,7 @@ export function validateExpression({
   validationResult.errors = errors;
 
   // Threshold validation
-  if (typeof threshold?.value !== 'number') {
+  if (typeof count?.value !== 'number') {
     errors.threshold.value.push(
       i18n.translate('xpack.infra.logs.alertFlyout.error.thresholdRequired', {
         defaultMessage: 'Threshold value is Required.',

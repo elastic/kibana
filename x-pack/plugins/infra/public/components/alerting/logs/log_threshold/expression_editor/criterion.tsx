@@ -26,7 +26,6 @@ import {
   Criterion as CriterionType,
   ComparatorToi18nMap,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
-import { CriterionErrors } from '../validation';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',

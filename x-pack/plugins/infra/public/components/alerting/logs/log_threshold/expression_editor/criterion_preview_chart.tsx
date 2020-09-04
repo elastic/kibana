@@ -54,6 +54,7 @@ interface Props {
   context: AlertsContext;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
+  showThreshold: boolean;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -61,6 +62,7 @@ export const CriterionPreview: React.FC<Props> = ({
   context,
   chartCriterion,
   sourceId,
+  showThreshold,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -91,8 +93,9 @@ export const CriterionPreview: React.FC<Props> = ({
       } // Display less data for groups due to space limitations
       context={context}
       sourceId={sourceId}
-      threshold={alertParams.threshold}
+      threshold={alertParams.count}
       chartAlertParams={chartAlertParams}
+      showThreshold={showThreshold}
     />
   );
 };
@@ -103,6 +106,7 @@ interface ChartProps {
   sourceId: string;
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
+  showThreshold: boolean;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -111,6 +115,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   sourceId,
   threshold,
   chartAlertParams,
+  showThreshold,
 }) => {
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
 
@@ -141,17 +146,18 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
   const isAbove =
-    threshold && threshold.comparator
+    showThreshold && threshold && threshold.comparator
       ? [Comparator.GT, Comparator.GT_OR_EQ].includes(threshold.comparator)
       : false;
 
   const isBelow =
-    threshold && threshold.comparator
+    showThreshold && threshold && threshold.comparator
       ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold.comparator)
       : false;
 
   // For grouped scenarios we want to limit the groups displayed, for "isAbove" thresholds we'll show
   // groups with the highest doc counts. And for "isBelow" thresholds we'll show groups with the lowest doc counts.
+  // Ratio scenarios will just default to max.
   const filteredSeries = useMemo(() => {
     if (!isGrouped) {
       return series;
@@ -184,11 +190,14 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   const hasData = series.length > 0;
   const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, isStacked);
   const chartDomain = {
-    max: threshold && threshold.value ? Math.max(yMax, threshold.value) * 1.1 : yMax * 1.1, // Add 10% headroom.
-    min: threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
+    max:
+      showThreshold && threshold && threshold.value
+        ? Math.max(yMax, threshold.value) * 1.1
+        : yMax * 1.1, // Add 10% headroom.
+    min: showThreshold && threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
   };
 
-  if (threshold && threshold.value && chartDomain.min === threshold.value) {
+  if (showThreshold && threshold && threshold.value && chartDomain.min === threshold.value) {
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
@@ -230,7 +239,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
           />
-          {threshold && threshold.value ? (
+          {showThreshold && threshold && threshold.value ? (
             <LineAnnotation
               id={`threshold-line`}
               domainType={AnnotationDomainTypes.YDomain}
@@ -244,7 +253,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               }}
             />
           ) : null}
-          {threshold && threshold.value && isBelow ? (
+          {showThreshold && threshold && threshold.value && isBelow ? (
             <RectAnnotation
               id="below-threshold"
               style={{
@@ -263,7 +272,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
-          {threshold && threshold.value && isAbove ? (
+          {showThreshold && threshold && threshold.value && isAbove ? (
             <RectAnnotation
               id="above-threshold"
               style={{

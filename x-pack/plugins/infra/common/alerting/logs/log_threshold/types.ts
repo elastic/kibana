@@ -133,20 +133,18 @@ export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
 
 const RequiredAlertParamsRT = rt.type({
-  threshold: ThresholdRT,
+  count: ThresholdRT,
   timeUnit: TimeUnitRT,
   timeSize: timeSizeRT,
 });
 
 const OptionalAlertParamsRT = rt.partial({
   groupBy: groupByRT,
-  // Maintain backwards compatbility with alerts that were created using "count" rather than "threshold"
-  count: ThresholdRT,
 });
 
-export const AlertParamsRT = rt.intersection([
+export const alertParamsRT = rt.intersection([
   rt.type({
-    criteria: rt.union([countCriteriaRT, ratioCriteriaRT]),
+    criteria: countCriteriaRT,
     ...RequiredAlertParamsRT.props,
   }),
   rt.partial({
@@ -154,17 +152,32 @@ export const AlertParamsRT = rt.intersection([
   }),
 ]);
 
+export type CountAlertParams = rt.TypeOf<typeof alertParamsRT>;
+
+export const ratioAlertParamsRT = rt.intersection([
+  rt.type({
+    criteria: ratioCriteriaRT,
+    ...RequiredAlertParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalAlertParamsRT.props,
+  }),
+]);
+
+export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
+
+export const AlertParamsRT = rt.union([alertParamsRT, ratioAlertParamsRT]);
 export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
 
 export const isRatioAlert = (criteria: AlertParams['criteria']) => {
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
 };
 
-export const getNumerator = (criteria: RatioCriteria) => {
+export const getNumerator = (criteria: RatioCriteria): Criteria => {
   return criteria[0];
 };
 
-export const getDenominator = (criteria: RatioCriteria) => {
+export const getDenominator = (criteria: RatioCriteria): Criteria => {
   return criteria[1];
 };
 

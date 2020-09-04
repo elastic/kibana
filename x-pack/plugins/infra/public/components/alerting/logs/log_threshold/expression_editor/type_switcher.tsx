@@ -7,23 +7,17 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiPopoverTitle,
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiPopover,
   EuiSelect,
-  EuiFieldNumber,
   EuiExpression,
-  EuiFormRow,
 } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
 import {
-  Comparator,
-  ComparatorToi18nMap,
   AlertParams,
   ThresholdType,
+  isRatioAlert,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 
 const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {
@@ -62,7 +56,7 @@ interface Props {
 }
 
 const getThresholdType = (criteria: AlertParams['criteria']): ThresholdType => {
-  return Array.isArray(criteria[0]) ? 'ratio' : 'count';
+  return isRatioAlert(criteria) ? 'ratio' : 'count';
 };
 
 export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
