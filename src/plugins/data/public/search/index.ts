@@ -19,14 +19,7 @@
 
 export * from './expressions';
 
-export {
-  ISearch,
-  ISearchOptions,
-  ISearchGeneric,
-  ISearchSetup,
-  ISearchStart,
-  SearchEnhancements,
-} from './types';
+export { ISearch, ISearchGeneric, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
@@ -34,7 +27,7 @@ export { getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { SearchError, FetchOptions, getSearchParamsFromRequest, SearchRequest } from './fetch';
+export { SearchError, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 export {
   ISearchSource,
