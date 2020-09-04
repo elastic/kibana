@@ -99,8 +99,8 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
-            defaultMessage="Select an index:"
+            id="xpack.triggersActionsUI.sections.alertAdd.selectEntity"
+            defaultMessage="Select entity:"
           />
         </h5>
       </EuiTitle>
