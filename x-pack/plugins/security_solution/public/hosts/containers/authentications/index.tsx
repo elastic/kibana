@@ -12,15 +12,14 @@ import deepEqual from 'fast-deep-equal';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
-  Direction,
-  DocValueFields,
-  HostPolicyResponseActionStatus,
-  HostsQueries,
-  PageInfoPaginated,
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
+  PageInfoPaginated,
+  DocValueFields,
+  SortField,
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
@@ -77,7 +76,7 @@ export const useAuthentications = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] = useState<
-    AuthenticationsRequestOptions
+    HostAuthenticationsRequestOptions
   >({
     defaultIndex,
     docValueFields: docValueFields ?? [],
@@ -89,10 +88,7 @@ export const useAuthentications = ({
       from: startDate,
       to: endDate,
     },
-    sort: {
-      direction: Direction.desc,
-      field: HostPolicyResponseActionStatus.success,
-    },
+    sort: {} as SortField,
   });
 
   const wrappedLoadMore = useCallback(
@@ -127,14 +123,14 @@ export const useAuthentications = ({
   });
 
   const authenticationsSearch = useCallback(
-    (request: AuthenticationsRequestOptions) => {
+    (request: HostAuthenticationsRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<AuthenticationsRequestOptions, AuthenticationsStrategyResponse>(request, {
+          .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
