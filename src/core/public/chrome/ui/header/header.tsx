@@ -93,7 +93,7 @@ export function Header({
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
   const navId = htmlIdGenerator()();
-  const className = classnames('hide-for-sharing');
+  const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
   return (
     <>

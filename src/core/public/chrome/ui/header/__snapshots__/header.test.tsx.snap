@@ -2295,7 +2295,7 @@ exports[`Header renders 2`] = `
     </div>
   </LoadingIndicator>
   <header
-    className="hide-for-sharing"
+    className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
   >
     <div
@@ -7745,7 +7745,7 @@ exports[`Header renders 3`] = `
     </div>
   </LoadingIndicator>
   <header
-    className="hide-for-sharing"
+    className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
   >
     <div

@@ -24,6 +24,7 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   }
 
   // hide all the interface parts
+  .headerGlobalNav,
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,
   .canvasLayout__footer,
