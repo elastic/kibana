@@ -25,7 +25,7 @@ export interface MatrixHistogramOption {
 export type GetSubTitle = (count: number) => string;
 export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 
-export interface MatrixHisrogramConfigs {
+export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
   hideHistogramIfEmpty?: boolean;

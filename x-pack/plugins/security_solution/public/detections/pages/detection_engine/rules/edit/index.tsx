@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import {
@@ -26,7 +26,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../../../../../shared_imports';
 import { StepPanel } from '../../../../components/rules/step_panel';
@@ -51,6 +51,7 @@ import {
 } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
+import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 
 interface StepRuleForm {
   isValid: boolean;
@@ -72,13 +73,15 @@ interface ActionsStepRuleForm extends StepRuleForm {
 const EditRulePageComponent: FC = () => {
   const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -111,7 +114,7 @@ const EditRulePageComponent: FC = () => {
     [RuleStep.scheduleRule]: null,
     [RuleStep.ruleActions]: null,
   });
-  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [{ isLoading, isSaved }, setRule] = useUpdateRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
@@ -259,7 +262,7 @@ const EditRulePageComponent: FC = () => {
     if (invalidForms.length === 0 && activeForm != null) {
       setTabHasError([]);
       setRule({
-        ...formatRule(
+        ...formatRule<UpdateRulesSchema>(
           (activeFormId === RuleStep.defineRule
             ? activeForm.data
             : myDefineRuleForm.data) as DefineStepRule,
