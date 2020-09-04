@@ -18,7 +18,7 @@
  */
 
 // @ts-expect-error no ts
-import { esKuery } from '../../../../es_query';
+import { esKuery } from '../../../es_query';
 type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';

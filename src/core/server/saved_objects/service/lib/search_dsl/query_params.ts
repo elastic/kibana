@@ -17,7 +17,7 @@
  * under the License.
  */
 // @ts-expect-error no ts
-import { esKuery } from '../../../../es_query';
+import { esKuery } from '../../../es_query';
 type KueryNode = any;
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';

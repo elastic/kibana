@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import { esKuery } from '../../es_query';
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];

@@ -8,11 +8,11 @@
     "declarationMap": true
   },
   "include": [
-    "public",
-    "server",
-    "types",
-    "test_helpers",
-    "utils",
+    "public/**/*",
+    "server/**/*",
+    "types/**/*",
+    "test_helpers/**/*",
+    "utils/**/*",
     "index.ts",
     "typings.ts"
   ],
