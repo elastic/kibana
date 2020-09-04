@@ -32,7 +32,10 @@ import {
   getCreateCaseUrl,
   useFormatUrl,
 } from '../link_to';
-import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+} from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 import { ExternalLinkIcon } from '../external_link_icon';
