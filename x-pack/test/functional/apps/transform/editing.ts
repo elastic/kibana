@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
@@ -73,9 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should display the original transform in the transform list'
         );
         await transform.table.refreshTransformList();
-        await transform.table.filterWithSearchString(transformConfig.id);
-        const rows = await transform.table.parseTransformTable();
-        expect(rows.filter((row) => row.id === transformConfig.id)).to.have.length(1);
+        await transform.table.filterWithSearchString(transformConfig.id, 1);
 
         await transform.testExecution.logTestStep('should show the actions popover');
         await transform.table.assertTransformRowActions(false);
@@ -127,9 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should display the updated transform in the transform list'
         );
         await transform.table.refreshTransformList();
-        await transform.table.filterWithSearchString(transformConfig.id);
-        const rows = await transform.table.parseTransformTable();
-        expect(rows.filter((row) => row.id === transformConfig.id)).to.have.length(1);
+        await transform.table.filterWithSearchString(transformConfig.id, 1);
 
         await transform.testExecution.logTestStep(
           'should display the updated transform in the transform list row cells'

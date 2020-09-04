@@ -22,4 +22,5 @@ export {
   IEsSearchRequest,
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
+  ISearchOptions,
 } from './types';

@@ -184,7 +184,7 @@ export class AbstractESSource extends AbstractVectorSource {
     const minLon = esBounds.top_left.lon;
     const maxLon = esBounds.bottom_right.lon;
     return {
-      minLon: minLon > maxLon ? minLon - 360 : minLon,
+      minLon: minLon > maxLon ? minLon - 360 : minLon, //fixes an ES bbox to straddle dateline
       maxLon,
       minLat: esBounds.bottom_right.lat,
       maxLat: esBounds.top_left.lat,
@@ -281,7 +281,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    return fieldFromIndexPattern.format.getConverterFor('text');
+    return indexPattern.getFormatterForField(fieldFromIndexPattern).getConverterFor('text');
   }
 
   async loadStylePropsMeta(
