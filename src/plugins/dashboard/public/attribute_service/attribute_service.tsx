@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -108,42 +109,42 @@ export class AttributeService<
     useRefType: boolean,
     input?: ValType | RefType
   ): Promise<Omit<ValType | RefType, 'id'>> {
+    const originalInput = input ? input : {};
     const savedObjectId =
       input && this.inputIsRefType(input)
         ? (input as SavedObjectEmbeddableInput).savedObjectId
         : undefined;
     if (!useRefType) {
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
-    } else {
-      try {
-        const originalInput = input ? input : {};
-
-        if (this.options?.customSaveMethod) {
-          const savedItem = await this.options.customSaveMethod(
-            this.type,
-            newAttributes,
-            savedObjectId
-          );
-          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
-        } else if (savedObjectId) {
-          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-          return { ...originalInput, savedObjectId } as RefType;
-        } else {
-          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
-        }
-      } catch (error) {
-        this.toasts.addDanger({
-          title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
-            defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
-            values: {
-              errorMessage: error.message,
-            },
-          }),
-          'data-test-subj': 'saveDashboardFailure',
-        });
-        return Promise.reject({ error });
+    }
+    try {
+      if (this.options?.customSaveMethod) {
+        const savedItem = await this.options.customSaveMethod(
+          this.type,
+          newAttributes,
+          savedObjectId
+        );
+        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
       }
+
+      if (savedObjectId) {
+        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+        return { ...originalInput, savedObjectId } as RefType;
+      }
+
+      const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
+      return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+    } catch (error) {
+      this.toasts.addDanger({
+        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
+          defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+          values: {
+            errorMessage: error.message,
+          },
+        }),
+        'data-test-subj': 'saveDashboardFailure',
+      });
+      return Promise.reject({ error });
     }
   }
 
@@ -213,11 +214,7 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={
-              'saveModalTitle' in saveOptions && saveOptions.saveModalTitle
-                ? saveOptions.saveModalTitle
-                : input[ATTRIBUTE_SERVICE_KEY].title
-            }
+            title={get(saveOptions, 'saveModalTitle', input[ATTRIBUTE_SERVICE_KEY].title)}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}
