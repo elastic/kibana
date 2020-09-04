@@ -40,7 +40,7 @@ export const UserAgent: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.urlDecodeForm.fieldNameHelpText',
+          'xpack.ingestPipelines.pipelineEditor.userAgentForm.fieldNameHelpText',
           { defaultMessage: 'The field containing the user agent string.' }
         )}
       />
@@ -51,7 +51,7 @@ export const UserAgent: FunctionComponent = () => {
 
       <PropertiesField
         helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.urlDecodeForm.propertiesFieldHelpText',
+          'xpack.ingestPipelines.pipelineEditor.userAgentForm.propertiesFieldHelpText',
           { defaultMessage: 'Properties added to the target field.' }
         )}
       />
