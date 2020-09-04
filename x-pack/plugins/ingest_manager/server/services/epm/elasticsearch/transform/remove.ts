@@ -12,7 +12,7 @@ export const stopTransforms = async (transformIds: string[], callCluster: CallES
   for (const transformId of transformIds) {
     await callCluster('transport.request', {
       method: 'POST',
-      path: `/_transform/${transformId}/_stop`,
+      path: `_transform/${transformId}/_stop`,
       query: 'force=true',
       ignore: [404],
     });

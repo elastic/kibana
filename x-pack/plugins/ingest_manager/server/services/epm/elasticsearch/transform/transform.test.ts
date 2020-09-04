@@ -49,6 +49,10 @@ describe('test transform install', () => {
     const previousInstallation: Installation = ({
       installed_es: [
         {
+          id: 'metrics-endpoint.policy-0.16.0-dev.0',
+          type: 'ingest_pipeline',
+        },
+        {
           id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
@@ -57,6 +61,14 @@ describe('test transform install', () => {
 
     const currentInstallation: Installation = ({
       installed_es: [
+        {
+          id: 'metrics-endpoint.policy-0.16.0-dev.0',
+          type: 'ingest_pipeline',
+        },
+        {
+          id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          type: ElasticsearchAssetType.transform,
+        },
         {
           id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
@@ -107,6 +119,7 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       [
+        'endpoint-0.16.0-dev.0/dataset/policy/elasticsearch/ingest_pipeline/default.json',
         'endpoint-0.16.0-dev.0/dataset/metadata/elasticsearch/transform/default.json',
         'endpoint-0.16.0-dev.0/dataset/metadata_current/elasticsearch/transform/default.json',
       ],
@@ -119,7 +132,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -139,7 +152,7 @@ describe('test transform install', () => {
           method: 'DELETE',
           query: 'force=true',
           path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
-          ignore: [404, 400],
+          ignore: [404],
         },
       ],
       [
@@ -148,14 +161,14 @@ describe('test transform install', () => {
           method: 'DELETE',
           query: 'force=true',
           path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-          ignore: [404, 400],
+          ignore: [404],
         },
       ],
       [
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
+          path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -164,7 +177,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -173,14 +186,14 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0/_start',
+          path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0/_start',
         },
       ],
       [
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -194,6 +207,18 @@ describe('test transform install', () => {
         id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
         type: 'transform',
       },
+    ]);
+    expect(savedObjectsClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            { id: 'metrics-endpoint.policy-0.16.0-dev.0', type: 'ingest_pipeline' },
+            { id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0', type: 'transform' },
+          ],
+        },
+      ],
     ]);
   });
 
@@ -250,14 +275,14 @@ describe('test transform install', () => {
           method: 'DELETE',
           query: 'force=true',
           path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-          ignore: [404, 400],
+          ignore: [404],
         },
       ],
       [
         'transport.request',
         {
           method: 'PUT',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -266,7 +291,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -276,6 +301,108 @@ describe('test transform install', () => {
         id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
         type: 'transform',
       },
+    ]);
+
+    expect(savedObjectsClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            { id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0', type: 'transform' },
+          ],
+        },
+      ],
+    ]);
+  });
+
+  test('can removes older version when no new install in package', async () => {
+    const previousInstallation: Installation = ({
+      installed_es: [
+        {
+          id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown) as Installation;
+
+    const currentInstallation: Installation = ({
+      installed_es: [],
+    } as unknown) as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+      .mockReturnValueOnce(Promise.resolve(previousInstallation))
+      .mockReturnValueOnce(Promise.resolve(currentInstallation));
+
+    await installTransformForDataset(
+      ({
+        name: 'endpoint',
+        version: '0.16.0-dev.0',
+        datasets: [
+          {
+            type: 'metrics',
+            name: 'endpoint.metadata',
+            title: 'Endpoint Metadata',
+            release: 'experimental',
+            package: 'endpoint',
+            ingest_pipeline: 'default',
+            elasticsearch: {
+              'index_template.mappings': {
+                dynamic: false,
+              },
+            },
+            path: 'metadata',
+          },
+          {
+            type: 'metrics',
+            name: 'endpoint.metadata_current',
+            title: 'Endpoint Metadata Current',
+            release: 'experimental',
+            package: 'endpoint',
+            ingest_pipeline: 'default',
+            elasticsearch: {
+              'index_template.mappings': {
+                dynamic: false,
+              },
+            },
+            path: 'metadata_current',
+          },
+        ],
+      } as unknown) as RegistryPackage,
+      [],
+      legacyScopedClusterClient.callAsCurrentUser,
+      savedObjectsClient
+    );
+
+    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+      [
+        'transport.request',
+        {
+          ignore: [404],
+          method: 'POST',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
+          query: 'force=true',
+        },
+      ],
+      [
+        'transport.request',
+        {
+          ignore: [404],
+          method: 'DELETE',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          query: 'force=true',
+        },
+      ],
+    ]);
+    expect(saveInstalledEsRefsMock.mock.calls).toEqual([]);
+    expect(savedObjectsClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [],
+        },
+      ],
     ]);
   });
 });

@@ -54,48 +54,53 @@ export const installTransformForDataset = async (
   const installNameSuffix = `${registryPackage.version}`;
 
   const transformPaths = paths.filter((path) => isTransform(path));
-
-  const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
-    transformPaths.forEach((path) => {
-      if (isDatasetTransform(path, dataset.path)) {
-        acc.push({ path, dataset });
-      }
-    });
-    return acc;
-  }, []);
-
-  const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
-    (acc, transformPathDataset) => {
-      if (transformPathDataset) {
-        acc.push({
-          id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
-          type: ElasticsearchAssetType.transform,
-        });
-      }
+  let installedTransforms: EsAssetReference[] = [];
+  if (transformPaths.length > 0) {
+    const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
+      transformPaths.forEach((path) => {
+        if (isDatasetTransform(path, dataset.path)) {
+          acc.push({ path, dataset });
+        }
+      });
       return acc;
-    },
-    []
-  );
+    }, []);
 
-  // get and save transform refs before installing transforms
-  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
+    const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
+      (acc, transformPathDataset) => {
+        if (transformPathDataset) {
+          acc.push({
+            id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
+            type: ElasticsearchAssetType.transform,
+          });
+        }
+        return acc;
+      },
+      []
+    );
 
-  const transforms: TransformInstallation[] = transformPathDatasets.map(
-    (transformPathDataset: TransformPathDataset) => {
-      return {
-        installationName: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
-        content: getAsset(transformPathDataset.path).toString('utf-8'),
-      };
-    }
-  );
+    // get and save transform refs before installing transforms
+    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
 
-  const installationPromises = transforms.map(async (transform) => {
-    return installTransform({ callCluster, transform });
-  });
+    const transforms: TransformInstallation[] = transformPathDatasets.map(
+      (transformPathDataset: TransformPathDataset) => {
+        return {
+          installationName: getTransformNameForInstallation(
+            transformPathDataset,
+            installNameSuffix
+          ),
+          content: getAsset(transformPathDataset.path).toString('utf-8'),
+        };
+      }
+    );
 
-  const installedTransforms = await Promise.all([
-    Promise.all(installationPromises),
-  ]).then((results) => results.flat());
+    const installationPromises = transforms.map(async (transform) => {
+      return installTransform({ callCluster, transform });
+    });
+
+    installedTransforms = await Promise.all([Promise.all(installationPromises)]).then((results) =>
+      results.flat()
+    );
+  }
 
   const currentInstallation = await getInstallation({
     savedObjectsClient,
@@ -136,30 +141,24 @@ async function installTransform({
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
-  const callClusterParams: {
-    method: string;
-    path: string;
-    query: string;
-    ignore?: number[];
-    body: any;
-    headers?: any;
-  } = {
-    method: 'PUT',
-    path: `/_transform/${transform.installationName}`,
-    query: 'defer_validation=true',
-    body: transform.content,
-  };
-
   await callCluster('transport.request', {
     method: 'DELETE',
     query: 'force=true',
     path: `_transform/${transform.installationName}`,
-    ignore: [404, 400],
+    ignore: [404],
   });
-  await callCluster('transport.request', callClusterParams);
+
+  // defer validation on put if the source index is not available
+  await callCluster('transport.request', {
+    method: 'PUT',
+    path: `_transform/${transform.installationName}`,
+    query: 'defer_validation=true',
+    body: transform.content,
+  });
+
   await callCluster('transport.request', {
     method: 'POST',
-    path: `/_transform/${transform.installationName}/_start`,
+    path: `_transform/${transform.installationName}/_start`,
   });
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
