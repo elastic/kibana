@@ -143,10 +143,6 @@ export const createExternalService = (
     }
   };
 
-  const findIncidents = async (params?: Record<string, string>) => {
-    return undefined;
-  };
-
   const createIncident = async ({
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
@@ -387,7 +383,6 @@ export const createExternalService = (
     createIncident,
     updateIncident,
     createComment,
-    findIncidents,
     getCapabilities,
     getIssueTypes,
     getFieldsByIssueType,
