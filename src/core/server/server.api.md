@@ -1070,6 +1070,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // (undocumented)
     readonly socket: IKibanaSocket;
     readonly url: Url;
+    readonly uuid: string;
     }
 
 // @public
