@@ -9,19 +9,7 @@
  * Please refer to ./README.md for explanation of different scope sources
  */
 
-import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiRadioGroup,
-} from '@elastic/eui';
-import uniqBy from 'lodash/uniqBy';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   IEmbeddable,
   isRangeSelectTriggerContext,
@@ -31,8 +19,6 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
 import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
-import { OverlayStart } from '../../../../../../src/core/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
 
@@ -121,6 +107,7 @@ interface ValueClickTriggerEventScope {
   key?: string;
   value?: string | number | boolean;
   negate: boolean;
+  points: Array<{ key?: string; value: string | number | boolean }>;
 }
 interface RangeSelectTriggerEventScope {
   key: string;
@@ -128,23 +115,19 @@ interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
-export async function getEventScope(
-  eventScopeInput: EventScopeInput,
-  deps: { getOpenModal: () => Promise<OverlayStart['openModal']> },
-  opts: { allowPrompts: boolean } = { allowPrompts: false }
-): Promise<UrlDrilldownEventScope> {
+export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
   if (isRangeSelectTriggerContext(eventScopeInput)) {
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
-    return getEventScopeFromValueClickTriggerContext(eventScopeInput, deps, opts);
+    return getEventScopeFromValueClickTriggerContext(eventScopeInput);
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");
   }
 }
 
-async function getEventScopeFromRangeSelectTriggerContext(
+function getEventScopeFromRangeSelectTriggerContext(
   eventScopeInput: RangeSelectContext
-): Promise<RangeSelectTriggerEventScope> {
+): RangeSelectTriggerEventScope {
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
@@ -154,18 +137,23 @@ async function getEventScopeFromRangeSelectTriggerContext(
   });
 }
 
-async function getEventScopeFromValueClickTriggerContext(
-  eventScopeInput: ValueClickContext,
-  deps: { getOpenModal: () => Promise<OverlayStart['openModal']> },
-  opts: { allowPrompts: boolean } = { allowPrompts: false }
-): Promise<ValueClickTriggerEventScope> {
+function getEventScopeFromValueClickTriggerContext(
+  eventScopeInput: ValueClickContext
+): ValueClickTriggerEventScope {
   const negate = eventScopeInput.data.negate ?? false;
-  const point = await getSingleValue(eventScopeInput.data.data, deps, opts);
-  const { key, value } = getKeyValueFromPoint(point);
+  const points = eventScopeInput.data.data.map(({ table, value, column: columnIndex }) => {
+    const column = table.columns[columnIndex];
+    return {
+      value: toPrimitiveOrUndefined(value) as string | number | boolean,
+      key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+    };
+  });
+
   return cleanEmptyKeys({
-    key,
-    value,
+    key: points[0]?.key,
+    value: points[0]?.value,
     negate,
+    points,
   });
 }
 
@@ -182,23 +170,18 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       to: new Date().toISOString(),
     };
   } else {
+    const nPoints = 4; // number of mock points to generate
+    const points = new Array(nPoints).fill(0).map((_, index) => ({
+      key: `event.points.${index}.key`,
+      value: `event.points.${index}.value`,
+    }));
     return {
-      key: 'event.key',
-      value: 'event.value',
+      key: `event.key`,
+      value: `event.value`,
       negate: false,
+      points,
     };
   }
-}
-
-function getKeyValueFromPoint(
-  point: ValueClickContext['data']['data'][0]
-): Pick<ValueClickTriggerEventScope, 'key' | 'value'> {
-  const { table, column: columnIndex, value } = point;
-  const column = table.columns[columnIndex];
-  return {
-    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
-    value: toPrimitiveOrUndefined(value),
-  };
 }
 
 function toPrimitiveOrUndefined(v: unknown): string | number | boolean | undefined {
@@ -215,105 +198,4 @@ function cleanEmptyKeys<T extends Record<string, any>>(obj: T): T {
     }
   });
   return obj;
-}
-
-/**
- * VALUE_CLICK_TRIGGER could have multiple data points
- * Prompt user which data point to use in a drilldown
- */
-async function getSingleValue(
-  data: ValueClickContext['data']['data'],
-  deps: { getOpenModal: () => Promise<OverlayStart['openModal']> },
-  opts: { allowPrompts: boolean } = { allowPrompts: false }
-): Promise<ValueClickContext['data']['data'][0]> {
-  data = uniqBy(data.filter(Boolean), (point) => {
-    const { key, value } = getKeyValueFromPoint(point);
-    return `${key}:${value}`;
-  });
-  if (data.length === 0)
-    throw new Error(`[trigger = "VALUE_CLICK_TRIGGER"][getSingleValue] no value to pick from`);
-  if (data.length === 1) return Promise.resolve(data[0]);
-  if (!opts.allowPrompts) return Promise.resolve(data[0]);
-  return new Promise(async (resolve, reject) => {
-    const openModal = await deps.getOpenModal();
-    const overlay = openModal(
-      toMountPoint(
-        <GetSingleValuePopup
-          onCancel={() => overlay.close()}
-          onSubmit={(point) => {
-            if (point) {
-              resolve(point);
-            }
-            overlay.close();
-          }}
-          data={data}
-        />
-      )
-    );
-    overlay.onClose.then(() => reject());
-  });
-}
-
-function GetSingleValuePopup({
-  data,
-  onCancel,
-  onSubmit,
-}: {
-  data: ValueClickContext['data']['data'];
-  onCancel: () => void;
-  onSubmit: (value: ValueClickContext['data']['data'][0]) => void;
-}) {
-  const values = data
-    .map((point) => {
-      const { key, value } = getKeyValueFromPoint(point);
-      return {
-        point,
-        id: key ?? '',
-        label: `${key}:${value}`,
-      };
-    })
-    .filter((value) => Boolean(value.id));
-
-  const [selectedValueId, setSelectedValueId] = React.useState(values[0].id);
-
-  return (
-    <React.Fragment>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.embeddableEnhanced.drilldowns.pickSingleValuePopup.popupHeader"
-            defaultMessage="Select a value to drill down into"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <EuiRadioGroup
-          options={values}
-          idSelected={selectedValueId}
-          onChange={(id) => setSelectedValueId(id)}
-          name="drilldownValues"
-        />
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
-          <FormattedMessage
-            id="xpack.embeddableEnhanced.drilldowns.pickSingleValuePopup.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-        <EuiButton
-          onClick={() => onSubmit(values.find((v) => v.id === selectedValueId)?.point!)}
-          data-test-subj="applySingleValuePopoverButton"
-          fill
-        >
-          <FormattedMessage
-            id="xpack.embeddableEnhanced.drilldowns.pickSingleValuePopup.applyButtonLabel"
-            defaultMessage="Apply"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </React.Fragment>
-  );
 }
