@@ -90,7 +90,7 @@ And then you can query against that:
 GET .siem-signals-default/_search
 ```
 
-Check your signal.parents section of the signal and you will see something like this:
+Check your `signal` section of the signal and you will see something like this:
 
 ```json
 "parents" : [
@@ -108,7 +108,11 @@ Check your signal.parents section of the signal and you will see something like 
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 0
   },
-]
+],
+"depth": 1,
+"rule": {
+  "id": "ded57b36-9c4e-4ee4-805d-be4e92033e41"
+}
 ```
 
 The parents structure is defined as:
@@ -159,6 +163,7 @@ documents in the signals index. The first signal is our original (signal -> even
 "rule": {
   "id": "74e0dd0c-4609-416f-b65e-90f8b2564612"
 }
+```
 
 and the second document is a signal on top of a signal like so:
 
