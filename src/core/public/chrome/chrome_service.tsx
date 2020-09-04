@@ -238,7 +238,6 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
-          legacyMode={injectedMetadata.getLegacyMode()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}

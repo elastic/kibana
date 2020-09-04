@@ -21,6 +21,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField } = fieldValidators;
 
@@ -105,7 +106,7 @@ export const Dissect: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            height: 75,
+            height: EDITOR_PX_HEIGHT.extraSmall,
             options: { minimap: { enabled: false } },
           },
         }}
