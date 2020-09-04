@@ -22,7 +22,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await esArchiver.unload('dashboard/drilldowns');
     });
 
-    loadTestFile(require.resolve('./dashboard_drilldowns'));
+    loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));
+    loadTestFile(require.resolve('./dashboard_to_url_drilldown'));
     loadTestFile(require.resolve('./explore_data_panel_action'));
 
     // Disabled for now as it requires xpack.discoverEnhanced.actions.exploreDataInChart.enabled
