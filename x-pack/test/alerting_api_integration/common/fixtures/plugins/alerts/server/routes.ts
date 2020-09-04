@@ -17,9 +17,91 @@ import { FixtureSetupDeps, FixtureStartDeps } from './plugin';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
-  { spaces }: Partial<FixtureSetupDeps>
+  { spaces, security }: Partial<FixtureSetupDeps>
 ) {
   const router = core.http.createRouter();
+  router.put(
+    {
+      path: '/api/alerts_fixture/{id}/replace_api_key',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          spaceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { id } = req.params;
+
+      if (!security) {
+        return res.ok({
+          body: {},
+        });
+      }
+
+      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
+      const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
+        includedHiddenTypes: ['alert'],
+      });
+      const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
+        excludedWrappers: ['security', 'spaces'],
+        includedHiddenTypes: ['alert'],
+      });
+
+      let namespace: string | undefined;
+      if (spaces && req.body.spaceId) {
+        namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
+      }
+
+      const user = await security.authc.getCurrentUser(req);
+      if (!user) {
+        return res.internalError({});
+      }
+
+      // Create an API key using the new grant API - in this case the Kibana system user is creating the
+      // API key for the user, instead of having the user create it themselves, which requires api_key
+      // privileges
+      const createAPIKeyResult = await security.authc.grantAPIKeyAsInternalUser(req, {
+        name: `alert:migrated-to-7.10:${user.username}`,
+        role_descriptors: {},
+      });
+
+      if (!createAPIKeyResult) {
+        return res.internalError({});
+      }
+
+      const result = await savedObjectsWithAlerts.update<RawAlert>(
+        'alert',
+        id,
+        {
+          ...(
+            await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
+              'alert',
+              id,
+              {
+                namespace,
+              }
+            )
+          ).attributes,
+          apiKey: Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+            'base64'
+          ),
+          apiKeyOwner: user.username,
+        },
+        {
+          namespace,
+        }
+      );
+      return res.ok({ body: result });
+    }
+  );
+
   router.put(
     {
       path: '/api/alerts_fixture/saved_object/{type}/{id}',
@@ -90,68 +172,6 @@ export function defineRoutes(
         'task',
         alert.attributes.scheduledTaskId!,
         { runAt }
-      );
-      return res.ok({ body: result });
-    }
-  );
-
-  router.put(
-    {
-      path: '/api/alerts_fixture/swap_api_keys/from/{apiKeyFromId}/to/{apiKeyToId}',
-      validate: {
-        params: schema.object({
-          apiKeyFromId: schema.string(),
-          apiKeyToId: schema.string(),
-        }),
-        body: schema.object({
-          spaceId: schema.maybe(schema.string()),
-        }),
-      },
-    },
-    async (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> => {
-      const { apiKeyFromId, apiKeyToId } = req.params;
-
-      let namespace: string | undefined;
-      if (spaces && req.body.spaceId) {
-        namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
-      }
-      const [{ savedObjects }, { encryptedSavedObjects }] = await core.getStartServices();
-      const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['alert'],
-      });
-      const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
-        excludedWrappers: ['security', 'spaces'],
-        includedHiddenTypes: ['alert'],
-      });
-
-      const [fromAlert, toAlert] = await Promise.all([
-        encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
-          'alert',
-          apiKeyFromId,
-          {
-            namespace,
-          }
-        ),
-        savedObjectsWithAlerts.get<RawAlert>('alert', apiKeyToId, {
-          namespace,
-        }),
-      ]);
-
-      const result = await savedObjectsWithAlerts.update<RawAlert>(
-        'alert',
-        apiKeyToId,
-        {
-          ...toAlert.attributes,
-          apiKey: fromAlert.attributes.apiKey,
-          apiKeyOwner: fromAlert.attributes.apiKeyOwner,
-        },
-        {
-          namespace,
-        }
       );
       return res.ok({ body: result });
     }

@@ -26,6 +26,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     space_1_all_alerts_none_actions: '6ee9630a-a20e-44af-9465-217a3717d2ab',
     space_1_all_with_restricted_fixture: '5cc59319-74ee-4edc-8646-a79ea91067cd',
     space_1_all: 'd41a6abb-b93b-46df-a80a-926221ea847c',
+    global_read: '362e362b-a137-4aa2-9434-43e3d0d84a34',
     superuser: 'b384be60-ec53-4b26-857e-0253ee55b277',
   };
 
@@ -40,15 +41,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await es.indices.create({ index: authorizationIndex });
       await setupSpacesAndUsers(spacesService, securityService);
     });
-    beforeEach(async () => {});
 
     after(async () => {
-      objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
       await esArchiver.unload('alerts_legacy');
     });
-    afterEach(async () => {});
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -73,7 +71,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-            case 'global_read at space1':
               // These cases are not relevant as we're testing the migration of alerts which
               // were valid pre 7.10.0 and which become invalid after the introduction of RBAC in 7.10.0
               // these cases were invalid pre 7.10.0 and remain invalid post 7.10.0
@@ -89,14 +86,34 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
-              // console.log(
-              //   'update alert as user with privileges - so it is no longer a legacy alert'
-              // );
               // update alert as user with privileges - so it is no longer a legacy alert
               const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
               expect(updatedKeyResponse.statusCode).to.eql(204);
 
               await ensureAlertIsRunning();
+              break;
+            case 'global_read at space1':
+              await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
+
+              await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+
+              await ensureAlertIsRunning();
+
+              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+
+              // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
+              // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
+              const failedUpdateKeyDueToAlertsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
+                migratedAlertId
+              );
+
+              expect(failedUpdateKeyDueToAlertsPrivilegesResponse.statusCode).to.eql(403);
+              expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
+                error: 'Forbidden',
+                message:
+                  'Unauthorized to updateApiKey a "test.always-firing" alert for "alertsFixture"',
+                statusCode: 403,
+              });
               break;
             case 'space_1_all_alerts_none_actions at space1':
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
@@ -109,12 +126,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `execute` privilege for Actions
-              const failedUpdateKeyResponse = await alertUtils.getUpdateApiKeyRequest(
+              const failedUpdateKeyDueToActionsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
                 migratedAlertId
               );
 
-              expect(failedUpdateKeyResponse.statusCode).to.eql(403);
-              expect(failedUpdateKeyResponse.body).to.eql({
+              expect(failedUpdateKeyDueToActionsPrivilegesResponse.statusCode).to.eql(403);
+              expect(failedUpdateKeyDueToActionsPrivilegesResponse.body).to.eql({
                 error: 'Forbidden',
                 message: 'Unauthorized to execute actions',
                 statusCode: 403,
@@ -125,7 +142,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
 
           async function ensureLegacyAlertHasBeenMigrated(alertId: string) {
-            // console.log(`ensureLegacyAlertHasBeenMigrated(${alertId})`);
             const getResponse = await supertestWithoutAuth
               .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${alertId}`)
               .auth(user.username, user.password);
@@ -133,14 +149,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
 
           async function updateMigratedAlertToUseApiKeyOfCurrentUser(alertId: string) {
-            // console.log(`updateMigratedAlertToUseApiKeyOfCurrentUser(${alertId})`);
-            const createNoopAlertResponse = await alertUtils.createNoopAlert({});
-
-            // swap out api key to run as user with no Actions privileges
-            const swapResponse = await alertUtils.swapApiKeys(
-              createNoopAlertResponse.body.id,
-              alertId
-            );
+            // swap out api key to run as the current user
+            const swapResponse = await alertUtils.replaceApiKeys(alertId);
             expect(swapResponse.statusCode).to.eql(200);
             // ensure the alert is till marked as legacy despite the update of the Api key
             // this is important as proper update *should* update the legacy status of the alert
@@ -152,19 +162,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
-            const taskRescheduleResult = await supertest
+            await supertest
               .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reschedule_task`)
               .set('kbn-xsrf', 'foo')
               .send({
                 runAt: getRunAt(2000),
               })
               .expect(200);
-
-            // console.log(JSON.stringify(taskRescheduleResult.body));
           }
 
           async function ensureAlertIsRunning() {
-            // console.log(`ensureAlertIsRunning(${reference})`);
             // ensure the alert still runs and that it can schedule actions
             const numberOfAlertExecutions = (
               await esTestIndexTool.search('alert:test.always-firing', reference)
@@ -194,7 +201,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
 
           async function updateAlertSoThatItIsNoLongerLegacy(alertId: string) {
-            // console.log(`updateAlertSoThatItIsNoLongerLegacy(${alertId})`);
             // update the alert as super user (to avoid privilege limitations) so that it is no longer a legacy alert
             await alertUtils.updateAlwaysFiringAction({
               alertId,
@@ -207,14 +213,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 throttle: '2s',
               },
             });
-            // return supertest
-            //   .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${alertId}`)
-            //   .set('kbn-xsrf', 'foo')
-            //   .auth(Superuser.username, Superuser.password)
-            //   .send({
-            //     name: 'Updated Alert',
-            //   })
-            //   .expect(200);
           }
         });
       });

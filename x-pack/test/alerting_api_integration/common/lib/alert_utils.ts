@@ -271,9 +271,9 @@ export class AlertUtils {
     return response;
   }
 
-  public swapApiKeys(apiKeyFromId: string, apiKeyToId: string) {
+  public replaceApiKeys(id: string) {
     let request = this.supertestWithoutAuth
-      .put(`/api/alerts_fixture/swap_api_keys/from/${apiKeyFromId}/to/${apiKeyToId}`)
+      .put(`/api/alerts_fixture/${id}/replace_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
