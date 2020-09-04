@@ -17,43 +17,39 @@ export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationWhenRBACWasIntroduced = markAsLegacyAndChangeConsumer(
-    encryptedSavedObjects,
-    new Map(
-      Object.entries({
-        alerting: 'alerts',
-        metrics: 'infrastructure',
-      })
-    )
-  );
+  const migrationWhenRBACWasIntroduced = markAsLegacyAndChangeConsumer(encryptedSavedObjects);
 
   return {
-    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
-      return executeMigrationWithErrorHandling(doc, context, migrationWhenRBACWasIntroduced);
-    },
+    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced),
   };
 }
 
 function executeMigrationWithErrorHandling(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>,
-  context: SavedObjectMigrationContext,
   migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
 ) {
-  try {
-    return migrationFunc(doc, context);
-  } catch (ex) {
-    context.log.error(
-      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
-      { alertDocument: doc }
-    );
-  }
-  return doc;
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+    try {
+      return migrationFunc(doc, context);
+    } catch (ex) {
+      context.log.error(
+        `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
+        { alertDocument: doc }
+      );
+    }
+    return doc;
+  };
 }
 
 function markAsLegacyAndChangeConsumer(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  consumersToChange: Map<string, string>
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
+  const consumersToChange: Map<string, string> = new Map(
+    Object.entries({
+      alerting: 'alerts',
+      metrics: 'infrastructure',
+    })
+  );
+
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
       // migrate all documents in 7.10 in order to add the "meta" RBAC field
