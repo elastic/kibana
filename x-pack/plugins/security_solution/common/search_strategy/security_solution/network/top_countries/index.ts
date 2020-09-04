@@ -6,7 +6,8 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { GeoEcs } from '../../../../ecs/geo';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
+import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import { RequestOptionsPaginated } from '../..';
 import { FlowTargetSourceDest } from '../common';
 
 export enum NetworkTopTablesFields {

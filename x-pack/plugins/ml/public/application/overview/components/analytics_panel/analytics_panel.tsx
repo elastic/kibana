@@ -100,6 +100,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
               fill
               iconType="plusInCircle"
               isDisabled={jobCreationDisabled}
+              data-test-subj="mlOverviewCreateDFAJobButton"
             >
               {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
                 defaultMessage: 'Create job',
