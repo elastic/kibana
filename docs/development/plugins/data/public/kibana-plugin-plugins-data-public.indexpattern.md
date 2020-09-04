@@ -50,7 +50,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
-|  [init(forceFieldRefresh)](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
+|  [init()](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
 |  [initFromSpec(spec)](./kibana-plugin-plugins-data-public.indexpattern.initfromspec.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
@@ -61,7 +61,5 @@ export declare class IndexPattern implements IIndexPattern
 |  [refreshFields()](./kibana-plugin-plugins-data-public.indexpattern.refreshfields.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
 |  [save(saveAttempts)](./kibana-plugin-plugins-data-public.indexpattern.save.md) |  |  |
-|  [toJSON()](./kibana-plugin-plugins-data-public.indexpattern.tojson.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
-|  [toString()](./kibana-plugin-plugins-data-public.indexpattern.tostring.md) |  |  |
 

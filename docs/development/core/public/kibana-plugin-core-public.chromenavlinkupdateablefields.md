@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
+export declare type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 ```
