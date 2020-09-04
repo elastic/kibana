@@ -380,7 +380,6 @@ class AgentPolicyService {
     await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
-      success: true,
     };
   }
 

@@ -92,5 +92,5 @@ index pattern. This is useful if the index you were working with has been rename
 
 WARNING: Validation is not performed for object properties. Submitting an invalid
 change will render the object unusable. A more failsafe approach is to use
-*Discover*, *Visualize*, or *Dashboard* to create new objects instead of
+*Discover* or *Dashboard* to create new objects instead of
 directly editing an existing one.
