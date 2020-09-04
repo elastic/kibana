@@ -7,8 +7,10 @@
 const mockNamespaceIdToString = jest.fn();
 const mockNamespaceStringToId = jest.fn();
 jest.mock('../../../../../../../src/core/server', () => ({
-  namespaceIdToString: mockNamespaceIdToString,
-  namespaceStringToId: mockNamespaceStringToId,
+  SavedObjectsUtils: {
+    namespaceIdToString: mockNamespaceIdToString,
+    namespaceStringToId: mockNamespaceStringToId,
+  },
 }));
 
 export { mockNamespaceIdToString, mockNamespaceStringToId };

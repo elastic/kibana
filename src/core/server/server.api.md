@@ -1599,12 +1599,6 @@ export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulPart
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
-// @public
-export const namespaceIdToString: (namespace?: string | undefined) => string;
-
-// @public
-export const namespaceStringToId: (namespace: string) => string | undefined;
-
 // Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -2715,6 +2709,12 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
     attributes: Partial<T>;
     // (undocumented)
     references: SavedObjectReference[] | undefined;
+}
+
+// @public (undocumented)
+export class SavedObjectsUtils {
+    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceStringToId: (namespace: string) => string | undefined;
 }
 
 // @public

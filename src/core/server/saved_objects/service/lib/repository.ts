@@ -67,7 +67,7 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { namespaceIdToString, namespaceStringToId } from './namespace';
+import { SavedObjectsUtils } from './utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -563,7 +563,7 @@ export class SavedObjectsRepository {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
       const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
       const remainingNamespaces = existingNamespaces?.filter(
-        (x) => x !== namespaceIdToString(namespace)
+        (x) => x !== SavedObjectsUtils.namespaceIdToString(namespace)
       );
 
       if (remainingNamespaces?.length) {
@@ -887,7 +887,9 @@ export class SavedObjectsRepository {
         const { originId, updated_at: updatedAt } = doc._source;
         let namespaces = [];
         if (!this._registry.isNamespaceAgnostic(type)) {
-          namespaces = doc._source.namespaces ?? [namespaceIdToString(doc._source.namespace)];
+          namespaces = doc._source.namespaces ?? [
+            SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
+          ];
         }
 
         return {
@@ -944,7 +946,9 @@ export class SavedObjectsRepository {
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body._source.namespaces ?? [namespaceIdToString(body._source.namespace)];
+      namespaces = body._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(body._source.namespace),
+      ];
     }
 
     return {
@@ -1020,7 +1024,9 @@ export class SavedObjectsRepository {
     const { originId } = body.get._source;
     let namespaces = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body.get._source.namespaces ?? [namespaceIdToString(body.get._source.namespace)];
+      namespaces = body.get._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(body.get._source.namespace),
+      ];
     }
 
     return {
@@ -1257,9 +1263,11 @@ export class SavedObjectsRepository {
     });
 
     const getNamespaceId = (objectNamespace?: string) =>
-      objectNamespace !== undefined ? namespaceStringToId(objectNamespace) : namespace;
+      objectNamespace !== undefined
+        ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
+        : namespace;
     const getNamespaceString = (objectNamespace?: string) =>
-      objectNamespace ?? namespaceIdToString(namespace);
+      objectNamespace ?? SavedObjectsUtils.namespaceIdToString(namespace);
 
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
@@ -1319,7 +1327,7 @@ export class SavedObjectsRepository {
             };
           }
           namespaces = actualResult._source.namespaces ?? [
-            namespaceIdToString(actualResult._source.namespace),
+            SavedObjectsUtils.namespaceIdToString(actualResult._source.namespace),
           ];
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
@@ -1522,7 +1530,7 @@ export class SavedObjectsRepository {
     const savedObject = this._serializer.rawToSavedObject(raw);
     const { namespace, type } = savedObject;
     if (this._registry.isSingleNamespace(type)) {
-      savedObject.namespaces = [namespaceIdToString(namespace)];
+      savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
     return omit(savedObject, 'namespace') as SavedObject<T>;
   }
@@ -1545,7 +1553,7 @@ export class SavedObjectsRepository {
     }
 
     const namespaces = raw._source.namespaces;
-    return namespaces?.includes(namespaceIdToString(namespace)) ?? false;
+    return namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ?? false;
   }
 
   /**
@@ -1665,7 +1673,7 @@ function getSavedObjectNamespaces(
   if (document) {
     return document._source?.namespaces;
   }
-  return [namespaceIdToString(namespace)];
+  return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
 
 /**
@@ -1673,7 +1681,7 @@ function getSavedObjectNamespaces(
  * This allows `'default'` to be used interchangeably with `undefined`.
  */
 const normalizeNamespace = (namespace?: string) =>
-  namespace === undefined ? namespace : namespaceStringToId(namespace);
+  namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.

@@ -21,7 +21,7 @@ import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { DEFAULT_NAMESPACE_STRING } from '../namespace';
+import { DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support

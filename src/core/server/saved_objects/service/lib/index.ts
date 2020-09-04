@@ -31,4 +31,4 @@ export {
 
 export { SavedObjectsErrorHelpers } from './errors';
 
-export { namespaceIdToString, namespaceStringToId } from './namespace';
+export { SavedObjectsUtils } from './utils';

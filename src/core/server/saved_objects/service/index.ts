@@ -58,8 +58,7 @@ export {
   SavedObjectsErrorHelpers,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
-  namespaceIdToString,
-  namespaceStringToId,
+  SavedObjectsUtils,
 } from './lib';
 
 export * from './saved_objects_client';

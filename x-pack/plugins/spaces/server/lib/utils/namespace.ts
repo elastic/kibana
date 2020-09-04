@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { namespaceStringToId, namespaceIdToString } from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '../../../../../../src/core/server';
 
 /**
  * Converts a Space ID string to its namespace ID representation. Note that a Space ID string is equivalent to a namespace string.
@@ -12,7 +12,7 @@ import { namespaceStringToId, namespaceIdToString } from '../../../../../../src/
  * See also: {@link namespaceStringToId}.
  */
 export function spaceIdToNamespace(spaceId: string) {
-  return namespaceStringToId(spaceId);
+  return SavedObjectsUtils.namespaceStringToId(spaceId);
 }
 
 /**
@@ -21,5 +21,5 @@ export function spaceIdToNamespace(spaceId: string) {
  * See also: {@link namespaceIdToString}.
  */
 export function namespaceToSpaceId(namespace?: string) {
-  return namespaceIdToString(namespace);
+  return SavedObjectsUtils.namespaceIdToString(namespace);
 }
