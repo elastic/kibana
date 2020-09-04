@@ -13,14 +13,20 @@ import {
 } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
-  ANOMALY_THRESHOLD_INPUT,
+  ABOUT_EDIT_BUTTON,
+  ABOUT_EDIT_TAB,
+  ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
+  ANOMALY_THRESHOLD_INPUT,
   COMBO_BOX_INPUT,
   CREATE_AND_ACTIVATE_BTN,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
+  DEFINE_EDIT_BUTTON,
+  DEFINE_EDIT_TAB,
+  DEFINE_INDEX_INPUT,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
@@ -32,8 +38,8 @@ import {
   MITRE_TACTIC,
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
-  RISK_INPUT,
   REFERENCE_URLS_INPUT,
+  RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -41,6 +47,9 @@ import {
   RULE_NAME_OVERRIDE,
   RULE_TIMESTAMP_OVERRIDE,
   SCHEDULE_CONTINUE_BUTTON,
+  SCHEDULE_EDIT_TAB,
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
@@ -48,8 +57,7 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  DEFINE_EDIT_BUTTON,
-  ABOUT_EDIT_BUTTON,
+  TAGS_FIELD,
 } from '../screens/create_new_rule';
 import { TIMELINE } from '../screens/timeline';
 
@@ -191,6 +199,33 @@ export const expectAboutFormToRepopulateAndContinue = (rule: CustomRule) => {
   cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
 };
 
+export const expectDefineStepForm = (rule: CustomRule) => {
+  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  if (rule.index && rule.index.length > 0) {
+    cy.get(DEFINE_INDEX_INPUT).invoke('text').should('eq', rule.index.join(''));
+  }
+};
+
+export const expectAboutStepForm = (rule: CustomRule) => {
+  cy.get(RULE_NAME_INPUT).invoke('val').should('eql', rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).invoke('text').should('eql', rule.description);
+  cy.get(TAGS_FIELD).invoke('text').should('eql', rule.tags.join(''));
+
+  cy.get(SEVERITY_DROPDOWN).invoke('text').should('eql', rule.severity);
+  cy.get(RISK_INPUT).invoke('val').should('eql', rule.riskScore);
+};
+
+export const expectScheduleStepForm = (rule: CustomRule) => {
+  const intervalParts = rule.interval && rule.interval.match(/[0-9]+|[a-zA-Z]+/g);
+  if (intervalParts) {
+    const [amount, unit] = intervalParts;
+    cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
+    cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
+  } else {
+    throw new Error('Cannot assert scheduling info on a rule without an interval');
+  }
+};
+
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
@@ -218,6 +253,22 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
+};
+
+export const goToDefineStepTab = () => {
+  cy.get(DEFINE_EDIT_TAB).click({ force: true });
+};
+
+export const goToAboutStepTab = () => {
+  cy.get(ABOUT_EDIT_TAB).click({ force: true });
+};
+
+export const goToScheduleStepTab = () => {
+  cy.get(SCHEDULE_EDIT_TAB).click({ force: true });
+};
+
+export const goToActionsStepTab = () => {
+  cy.get(ACTIONS_EDIT_TAB).click({ force: true });
 };
 
 export const selectMachineLearningRuleType = () => {

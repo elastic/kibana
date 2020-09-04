@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule } from '../objects/rule';
+import { newRule, existingRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -53,6 +53,7 @@ import {
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
+  editFirstRule,
 } from '../tasks/alerts_detection_rules';
 import {
   createAndActivateRule,
@@ -60,11 +61,18 @@ import {
   fillDefineCustomRuleWithImportedQueryAndContinue,
   expectDefineFormToRepopulateAndContinue,
   expectAboutFormToRepopulateAndContinue,
+  expectDefineStepForm,
+  goToAboutStepTab,
+  expectAboutStepForm,
+  expectScheduleStepForm,
+  goToScheduleStepTab,
+  goToActionsStepTab,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+import { ACTIONS_THROTTLE_INPUT } from '../screens/create_new_rule';
 
 describe('Detection rules, custom', () => {
   before(() => {
@@ -232,5 +240,16 @@ describe('Deletes custom rules', () => {
           .invoke('text')
           .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
       });
+  });
+
+  it('Allows a rule to be edited', () => {
+    editFirstRule();
+    expectDefineStepForm(existingRule);
+    goToAboutStepTab();
+    expectAboutStepForm(existingRule);
+    goToScheduleStepTab();
+    expectScheduleStepForm(existingRule);
+    goToActionsStepTab();
+    cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
   });
 });

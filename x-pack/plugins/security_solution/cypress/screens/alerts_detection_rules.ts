@@ -14,6 +14,8 @@ export const CUSTOM_RULES_BTN = '[data-test-subj="show-custom-rules-filter-butto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
+export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
+
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="show-elastic-rules-filter-button"]';
