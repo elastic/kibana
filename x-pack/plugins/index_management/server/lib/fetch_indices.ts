@@ -5,7 +5,8 @@
  */
 import { CatIndicesParams } from 'elasticsearch';
 import { IndexDataEnricher } from '../services';
-import { Index, CallAsCurrentUser } from '../types';
+import { CallAsCurrentUser } from '../types';
+import { Index } from '../index';
 
 interface Hit {
   health: string;

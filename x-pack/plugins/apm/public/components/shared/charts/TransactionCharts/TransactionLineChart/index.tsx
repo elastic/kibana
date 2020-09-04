@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { Coordinate, TimeSeries } from '../../../../../../typings/timeseries';
 import { useChartsSync } from '../../../../../hooks/useChartsSync';
-// @ts-ignore
+// @ts-expect-error
 import CustomPlot from '../../CustomPlot';
 
 interface Props {
