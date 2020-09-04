@@ -30,7 +30,8 @@
       ],
       "influencers": [
         "host.name"
-      ]
+      ],
+      "summary_count_field_name": "doc_count"
     },
     "analysis_limits": {
       "model_memory_limit": "64mb"

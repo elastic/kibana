@@ -14,6 +14,9 @@
         ]
       }
     },
+    "indices_options": {
+      "allow_no_indices": "true"
+    },
     "aggs": {
       "host.name": {
         "terms": {
