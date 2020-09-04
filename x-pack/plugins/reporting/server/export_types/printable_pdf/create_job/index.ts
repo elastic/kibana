@@ -35,9 +35,9 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
       layout,
-      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
       title,
-      type: objectType, // Note: this changes the shape of the job params object
+      type: objectType, // 7.x only: this changes the shape of the job params object
     };
   });
 };
