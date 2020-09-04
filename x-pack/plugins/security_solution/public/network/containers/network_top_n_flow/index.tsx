@@ -50,14 +50,12 @@ interface UseNetworkTopNFlow {
   endDate: string;
   startDate: string;
   skip: boolean;
-  id?: string;
 }
 
 export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
   skip,
   startDate,
   type,
@@ -99,7 +97,7 @@ export const useNetworkTopNFlow = ({
 
   const [networkTopNFlowResponse, setNetworkTopNFlowResponse] = useState<NetworkTopNFlowArgs>({
     networkTopNFlow: [],
-    id: ID,
+    id: `${ID}-${flowTarget}`,
     inspect: {
       dsl: [],
       response: [],
