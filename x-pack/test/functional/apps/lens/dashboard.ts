@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens dashboard tests', () => {
     before(async () => {
+      await PageObjects.common.navigateToApp('dashboard');
       await security.testUser.setRoles(['global_dashboard_all', 'test_logstash_reader']);
     });
     after(async () => {
@@ -33,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('metric should be embeddable', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');
