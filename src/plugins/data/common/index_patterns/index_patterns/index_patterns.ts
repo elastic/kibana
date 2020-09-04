@@ -280,7 +280,7 @@ export class IndexPatternsService {
             indexPatternCache.clear(indexPattern.id!);
 
             // Try the save again
-            return indexPattern.save(indexPattern, saveAttempts);
+            return this.save(indexPattern, saveAttempts);
           });
         }
         throw err;

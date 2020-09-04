@@ -371,6 +371,7 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
+  // appears unused
   async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
@@ -408,7 +409,6 @@ export class IndexPattern implements IIndexPattern {
     if (field) {
       this.fields.remove(field);
     }
-    return this.indexPatternsService.save(this);
   }
 
   async popularizeField(fieldName: string, unit = 1) {
@@ -527,96 +527,6 @@ export class IndexPattern implements IIndexPattern {
     }
 
     return await _create(potentialDuplicateByTitle.id);
-  }
-
-  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
-    return await this.indexPatternsService.save(indexPattern, saveAttempts);
-    /*
-    if (!indexPattern.id) return;
-    const body = indexPattern.prepBody();
-
-    const originalChangedKeys: string[] = [];
-    Object.entries(body).forEach(([key, value]) => {
-      if (value !== indexPattern.originalBody[key]) {
-        originalChangedKeys.push(key);
-      }
-    });
-
-    return indexPattern.savedObjectsClient
-      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
-      .then((resp) => {
-        indexPattern.id = resp.id;
-        indexPattern.version = resp.version;
-      })
-      .catch((err) => {
-        if (
-          _.get(err, 'res.status') === 409 &&
-          saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
-        ) {
-          const samePattern = new IndexPattern(indexPattern.id, {
-            savedObjectsClient: indexPattern.savedObjectsClient,
-            apiClient: indexPattern.apiClient,
-            patternCache: indexPattern.patternCache,
-            fieldFormats: indexPattern.fieldFormats,
-            indexPatternsService: indexPattern.indexPatternsService,
-            onNotification: indexPattern.onNotification,
-            onError: indexPattern.onError,
-            shortDotsEnable: indexPattern.shortDotsEnable,
-            metaFields: indexPattern.metaFields,
-          });
-
-          return samePattern.init().then(() => {
-            // What keys changed from now and what the server returned
-            const updatedBody = samePattern.prepBody();
-
-            // Build a list of changed keys from the server response
-            // and ensure we ignore the key if the server response
-            // is the same as the original response (since that is expected
-            // if we made a change in that key)
-
-            const serverChangedKeys: string[] = [];
-            Object.entries(updatedBody).forEach(([key, value]) => {
-              if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
-                serverChangedKeys.push(key);
-              }
-            });
-
-            let unresolvedCollision = false;
-            for (const originalKey of originalChangedKeys) {
-              for (const serverKey of serverChangedKeys) {
-                if (originalKey === serverKey) {
-                  unresolvedCollision = true;
-                  break;
-                }
-              }
-            }
-
-            if (unresolvedCollision) {
-              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
-                defaultMessage:
-                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-              });
-
-              indexPattern.onNotification({ title, color: 'danger' });
-              throw err;
-            }
-
-            // Set the updated response on this object
-            serverChangedKeys.forEach((key) => {
-              (indexPattern as any)[key] = (samePattern as any)[key];
-            });
-            indexPattern.version = samePattern.version;
-
-            // Clear cache
-            indexPattern.patternCache.clear(indexPattern.id!);
-
-            // Try the save agains
-            return this.indexPatternsService.save(indexPattern, saveAttempts);
-          });
-        }
-        throw err;
-      });
-      */
   }
 
   async _fetchFields() {

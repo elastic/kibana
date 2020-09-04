@@ -758,23 +758,18 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   deleteField = () => {
-    const { redirectAway } = this.props.services;
+    const { redirectAway, saveIndexPattern } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
-    const remove = indexPattern.removeScriptedField(spec.name);
-
-    if (remove) {
-      remove.then(() => {
-        const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
-          defaultMessage: "Deleted '{fieldName}'",
-          values: { fieldName: spec.name },
-        });
-        this.context.services.notifications.toasts.addSuccess(message);
-        redirectAway();
+    indexPattern.removeScriptedField(spec.name);
+    saveIndexPattern(indexPattern).then(() => {
+      const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
+        defaultMessage: "Deleted '{fieldName}'",
+        values: { fieldName: spec.name },
       });
-    } else {
+      this.context.services.notifications.toasts.addSuccess(message);
       redirectAway();
-    }
+    });
   };
 
   saveField = async () => {
