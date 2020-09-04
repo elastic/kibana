@@ -346,6 +346,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await browser.pressKeys(browser.keys.ENTER);
     }
 
+    async pressTabKey() {
+      await browser.pressKeys(browser.keys.TAB);
+    }
+
     /**
      * Clicks cancel button on modal
      * @param overlayWillStay pass in true if your test will show multiple modals in succession
