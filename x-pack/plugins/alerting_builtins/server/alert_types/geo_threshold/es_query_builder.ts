@@ -12,6 +12,7 @@ async function getShapesFilters(
   boundaryIndex: string,
   boundaryType: string,
   boundaryGeoField: string,
+  geoField: string,
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger
 ) {
@@ -26,7 +27,7 @@ async function getShapesFilters(
       boundaryData.hits.hits.forEach(({ _index, _id }) => {
         filters[_id] = {
           geo_shape: {
-            coordinates: {
+            [geoField]: {
               indexed_shape: {
                 index: _index,
                 id: _id,
@@ -49,6 +50,7 @@ export async function executeEsQueryFactory(
     index,
     dateField,
     boundaryGeoField,
+    geoField,
     boundaryIndex,
     boundaryType,
   }: {
@@ -56,6 +58,7 @@ export async function executeEsQueryFactory(
     index: string;
     dateField: string;
     boundaryGeoField: string;
+    geoField: string;
     boundaryIndex: string;
     boundaryType: string;
   },
@@ -66,6 +69,7 @@ export async function executeEsQueryFactory(
     boundaryIndex,
     boundaryType,
     boundaryGeoField,
+    geoField,
     callCluster,
     log
   );
@@ -93,7 +97,7 @@ export async function executeEsQueryFactory(
                   entityHits: {
                     top_hits: {
                       size: topHitsQty,
-                      docvalue_fields: [entity, dateField],
+                      docvalue_fields: [entity, dateField, geoField],
                       _source: false,
                     },
                   },
