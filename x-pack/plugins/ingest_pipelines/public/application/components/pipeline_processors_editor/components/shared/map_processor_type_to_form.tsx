@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
 
 import {
   Append,
@@ -28,13 +27,21 @@ import {
   Inference,
   Join,
   Json,
+  Kv,
+  Lowercase,
+  Pipeline,
+  Remove,
+  Rename,
+  Script,
+  SetProcessor,
+  SetSecurityUser,
+  Split,
+  Sort,
+  FormFieldsComponent,
 } from '../processor_form/processors';
 
-// import { SetProcessor } from './processors/set';
-// import { Gsub } from './processors/gsub';
-
 interface FieldDescriptor {
-  FieldsComponent?: FunctionComponent;
+  FieldsComponent?: FormFieldsComponent;
   docLinkPath: string;
   /**
    * A sentence case label that can be displayed to users
@@ -186,63 +193,70 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   kv: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Kv,
     docLinkPath: '/kv-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.kv', {
       defaultMessage: 'KV',
     }),
   },
   lowercase: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Lowercase,
     docLinkPath: '/lowercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.lowercase', {
       defaultMessage: 'Lowercase',
     }),
   },
   pipeline: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Pipeline,
     docLinkPath: '/pipeline-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.pipeline', {
       defaultMessage: 'Pipeline',
     }),
   },
   remove: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Remove,
     docLinkPath: '/remove-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.remove', {
       defaultMessage: 'Remove',
     }),
   },
   rename: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Rename,
     docLinkPath: '/rename-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.rename', {
       defaultMessage: 'Rename',
     }),
   },
   script: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Script,
     docLinkPath: '/script-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.script', {
       defaultMessage: 'Script',
     }),
   },
+  set: {
+    FieldsComponent: SetProcessor,
+    docLinkPath: '/set-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
+      defaultMessage: 'Set',
+    }),
+  },
   set_security_user: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: SetSecurityUser,
     docLinkPath: '/ingest-node-set-security-user-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
       defaultMessage: 'Set security user',
     }),
   },
   split: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Split,
     docLinkPath: '/split-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.split', {
       defaultMessage: 'Split',
     }),
   },
   sort: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Sort,
     docLinkPath: '/sort-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.sort', {
       defaultMessage: 'Sort',
@@ -274,15 +288,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
-    }),
-  },
-
-  // --- The below processor descriptors have components implemented ---
-  set: {
-    FieldsComponent: undefined,
-    docLinkPath: '/set-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
-      defaultMessage: 'Set',
     }),
   },
 };

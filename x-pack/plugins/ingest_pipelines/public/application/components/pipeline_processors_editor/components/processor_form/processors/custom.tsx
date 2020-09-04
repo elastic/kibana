@@ -18,6 +18,7 @@ const { emptyField, isJsonField } = fieldValidators;
 
 import { XJsonEditor } from '../field_components';
 import { Fields } from '../processor_form.container';
+import { EDITOR_PX_HEIGHT } from './shared';
 
 const customConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
@@ -79,7 +80,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
       componentProps={{
         editorProps: {
           'data-test-subj': 'processorOptionsEditor',
-          height: 300,
+          height: EDITOR_PX_HEIGHT.large,
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',
             {
