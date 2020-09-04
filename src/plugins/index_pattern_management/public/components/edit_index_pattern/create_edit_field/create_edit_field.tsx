@@ -96,7 +96,7 @@ export const CreateEditField = withRouter(
                 indexPattern={indexPattern}
                 spec={spec}
                 services={{
-                  saveIndexPattern: data.indexPatterns.save.bind(data.indexPatterns.save),
+                  saveIndexPattern: data.indexPatterns.save.bind(data.indexPatterns),
                   redirectAway,
                 }}
               />
