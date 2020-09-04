@@ -107,7 +107,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
           defaultMessage="URL identifier "
         />
         <EuiLink
-          data-test-subj="clickOnCustomizeOrReset"
+          data-test-subj="CustomizeOrReset"
           onClick={this.onEditClick}
           aria-label={editLinkLabel}
         >

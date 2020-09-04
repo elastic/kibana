@@ -103,7 +103,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     async clickGoToRolesPage() {
-      await testSubjects.click('rolesManagagementPage');
+      await testSubjects.click('rolesManagementPage');
     }
 
     async clickCancelSpaceCreation() {
@@ -111,7 +111,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     async clickOnCustomizeURL() {
-      await testSubjects.click('clickOnCustomizeOrReset');
+      await testSubjects.click('CustomizeOrReset');
     }
 
     async clickOnSpaceURLDisplay() {
@@ -135,7 +135,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     async toggleFeatureVisibility(featureName: string) {
-      await testSubjects.click(`${featureName}-toggle`);
+      await testSubjects.click(`feature-${featureName}-toggle`);
     }
 
     async clickOnDescriptionOfSpace() {
