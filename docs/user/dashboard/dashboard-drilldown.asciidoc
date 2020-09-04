@@ -1,5 +1,5 @@
 [[dashboard-drilldown]]
-=== Dashboard drilldown
+=== Dashboard Drilldown
 
 The dashboard drilldown allows you to navigate from one dashboard to another dashboard.
 
