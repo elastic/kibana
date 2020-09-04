@@ -5,26 +5,30 @@
  */
 
 import { History, Location } from 'history';
-import { MouseEvent, useEffect } from 'react';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { MouseEvent, ReactNode, useEffect } from 'react';
 import {
   matchPath,
   RouteComponentProps,
   useHistory,
+  match as Match,
   useLocation,
 } from 'react-router-dom';
-import { useApmPluginContext } from './useApmPluginContext';
 import { APMRouteDefinition, BreadcrumbTitle } from '../application/routes';
+import { getAPMHref } from '../components/shared/Links/apm/APMLink';
+import { useApmPluginContext } from './useApmPluginContext';
 
-interface Breadcrumb {
-  href?: string;
-  text: string | null;
-  onClick: (event: MouseEvent<HTMLAnchorElement>) => void;
+interface BreadcrumbWithoutLink extends ChromeBreadcrumb {
+  match: Match<Record<string, string>>;
 }
 
 interface BreadcrumbFunctionArgs extends RouteComponentProps {
   breadcrumbTitle: BreadcrumbTitle;
 }
 
+/**
+ * Call the breadcrumb function if there is one, otherwise return it as a string
+ */
 function getBreadcrumbText({
   breadcrumbTitle,
   history,
@@ -37,22 +41,20 @@ function getBreadcrumbText({
 }
 
 /**
- * Convert a route definitions into a breadcrumb
+ * Convert a route definition into a breadcrumb
  */
 function getBreadcrumb({
   currentPath,
   history,
   location,
-  navigateToUrl,
   routes,
 }: {
   currentPath: string;
   history: History;
   location: Location;
-  navigateToUrl: (url: string) => Promise<void>;
   routes: APMRouteDefinition[];
 }) {
-  return routes.reduce<Breadcrumb | null>(
+  return routes.reduce<BreadcrumbWithoutLink | null>(
     (found, { breadcrumb, ...routeDefinition }) => {
       if (found) {
         return found;
@@ -68,21 +70,14 @@ function getBreadcrumb({
       );
 
       if (match) {
-        let href = '';
         return {
+          match,
           text: getBreadcrumbText({
             breadcrumbTitle: breadcrumb,
             history,
             location,
             match,
           }),
-          href: undefined,
-          onClick: (event: MouseEvent<HTMLAnchorElement>) => {
-            if (href) {
-              event.preventDefault();
-              navigateToUrl(href);
-            }
-          },
         };
       }
 
@@ -90,29 +85,57 @@ function getBreadcrumb({
     },
     null
   );
-
-  // return {
-  //   text: '',
-  //   href: undefined,
-  //  ,
-  // };
 }
 
+/**
+ * Once we have the breadcrumbs, we need to iterate through the list again to
+ * add the href and onClick, since we need to know which one is the final
+ * breadcrumb
+ */
+function addLinksToBreadcrumbs({
+  breadcrumbs,
+  navigateToUrl,
+  wrappedGetAPMHref,
+}: {
+  breadcrumbs: BreadcrumbWithoutLink[];
+  navigateToUrl: (url: string) => Promise<void>;
+  wrappedGetAPMHref: (path: string) => string;
+}) {
+  return breadcrumbs.map((breadcrumb, index) => {
+    const isLastBreadcrumbItem = index === breadcrumbs.length - 1;
+
+    // Make the link not clickable if it's the last item
+    const href = isLastBreadcrumbItem
+      ? undefined
+      : wrappedGetAPMHref(breadcrumb.match.url);
+    const onClick = !href
+      ? undefined
+      : (event: MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          navigateToUrl(href);
+        };
+
+    return {
+      ...breadcrumb,
+      match: undefined,
+      href,
+      onClick,
+    };
+  });
+}
 /**
  * Convert a list of route definitions to a list of breadcrumbs
  */
 function routeDefinitionsToBreadcrumbs({
   history,
   location,
-  navigateToUrl,
   routes,
 }: {
   history: History;
   location: Location;
-  navigateToUrl: (url: string) => Promise<void>;
   routes: APMRouteDefinition[];
 }) {
-  const breadcrumbs: Breadcrumb[] = [];
+  const breadcrumbs: BreadcrumbWithoutLink[] = [];
   const { pathname } = location;
 
   pathname
@@ -126,7 +149,6 @@ function routeDefinitionsToBreadcrumbs({
         currentPath,
         history,
         location,
-        navigateToUrl,
         routes,
       });
 
@@ -144,15 +166,15 @@ function routeDefinitionsToBreadcrumbs({
  *
  * Get an array for a page title from a list of breadcrumbs
  */
-function getTitleFromBreadcrumbs(breadcrumbs: Breadcrumb[]): string[] {
-  function removeNull(text: string | null): text is string {
-    return text !== null;
+function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
+  function removeNonStrings(item: ReactNode): item is string {
+    return typeof item === 'string';
   }
 
   return breadcrumbs
     .map(({ text }) => text)
-    .filter(removeNull)
-    .reverse();
+    .reverse()
+    .filter(removeNonStrings);
 }
 
 /**
@@ -162,22 +184,31 @@ function getTitleFromBreadcrumbs(breadcrumbs: Breadcrumb[]): string[] {
 export function useBreadcrumbs(routes: APMRouteDefinition[]) {
   const history = useHistory();
   const location = useLocation();
+  const { search } = location;
   const { core } = useApmPluginContext();
+  const { basePath } = core.http;
   const { navigateToUrl } = core.application;
-  const { setBreadcrumbs } = core.chrome;
-  const changeTitle = core.chrome.docTitle.change;
+  const { docTitle, setBreadcrumbs } = core.chrome;
+  const changeTitle = docTitle.change;
 
-  const breadcrumbs = routeDefinitionsToBreadcrumbs({
+  function wrappedGetAPMHref(path: string) {
+    return getAPMHref({ basePath, path, search });
+  }
+
+  const breadcrumbsWithoutLinks = routeDefinitionsToBreadcrumbs({
     history,
     location,
-    navigateToUrl,
     routes,
+  });
+  const breadcrumbs = addLinksToBreadcrumbs({
+    breadcrumbs: breadcrumbsWithoutLinks,
+    wrappedGetAPMHref,
+    navigateToUrl,
   });
   const title = getTitleFromBreadcrumbs(breadcrumbs);
 
   useEffect(() => {
     changeTitle(title);
-
     setBreadcrumbs(breadcrumbs);
   }, [breadcrumbs, changeTitle, location, title, setBreadcrumbs]);
 }
