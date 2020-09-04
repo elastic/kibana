@@ -27,52 +27,28 @@ import { SystemEcs } from './system';
 
 export interface Ecs {
   _id: string;
-
   _index?: string;
-
   auditd?: AuditdEcs;
-
   destination?: DestinationEcs;
-
   dns?: DnsEcs;
-
   endgame?: EndgameEcs;
-
   event?: EventEcs;
-
   geo?: GeoEcs;
-
   host?: HostEcs;
-
   network?: NetworkEcs;
-
   rule?: RuleEcs;
-
   signal?: SignalEcs;
-
   source?: SourceEcs;
-
   suricata?: SuricataEcs;
-
   tls?: TlsEcs;
-
   zeek?: ZeekEcs;
-
   http?: HttpEcs;
-
   url?: UrlEcs;
-
   timestamp?: string;
-
   message?: string[];
-
   user?: UserEcs;
-
   winlog?: WinlogEcs;
-
   process?: ProcessEcs;
-
   file?: File;
-
   system?: SystemEcs;
 }
