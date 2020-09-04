@@ -28,4 +28,5 @@ export {
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
   ISearchRequestParams,
+  ISearchOptions,
 } from './es_search';

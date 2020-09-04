@@ -13,19 +13,22 @@ import {
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
-  readonly getLicenseInfo: () => ILicense;
+  readonly getLicense: () => ILicense;
+  readonly featureUsageSetup: LicensingPluginSetup['featureUsage'];
+  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
 }
 
 export class UiActionsServiceEnhancements {
   protected readonly actionFactories: ActionFactoryRegistry;
-  protected readonly getLicenseInfo: () => ILicense;
+  protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
-  constructor({ actionFactories = new Map(), getLicenseInfo }: UiActionsServiceEnhancementsParams) {
+  constructor({ actionFactories = new Map(), ...deps }: UiActionsServiceEnhancementsParams) {
     this.actionFactories = actionFactories;
-    this.getLicenseInfo = getLicenseInfo;
+    this.deps = deps;
   }
 
   /**
@@ -51,9 +54,10 @@ export class UiActionsServiceEnhancements {
       SupportedTriggers,
       FactoryContext,
       ActionContext
-    >(definition, this.getLicenseInfo);
+    >(definition, this.deps);
 
     this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
+    this.registerFeatureUsage(definition);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
@@ -94,6 +98,7 @@ export class UiActionsServiceEnhancements {
     execute,
     getHref,
     minimalLicense,
+    licenseFeatureName,
     supportedTriggers,
     isCompatible,
   }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
@@ -105,6 +110,7 @@ export class UiActionsServiceEnhancements {
     > = {
       id: factoryId,
       minimalLicense,
+      licenseFeatureName,
       order,
       CollectConfig,
       createConfig,
@@ -127,5 +133,20 @@ export class UiActionsServiceEnhancements {
     } as ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>;
 
     this.registerActionFactory(actionFactory);
+  };
+
+  private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
+    if (!definition.minimalLicense || !definition.licenseFeatureName) return;
+
+    // Intentionally don't wait for response because
+    // happens in setup phase and has to be sync
+    this.deps.featureUsageSetup
+      .register(definition.licenseFeatureName, definition.minimalLicense)
+      .catch(() => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `ActionFactory [actionFactory.id = ${definition.id}] fail to register feature for featureUsage.`
+        );
+      });
   };
 }

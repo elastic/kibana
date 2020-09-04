@@ -9,11 +9,12 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
-import { IRouter, RequestHandler } from 'kibana/server';
+import { IRouter, KibanaRequest, RequestHandler } from 'kibana/server';
 import { httpServerMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
 import { registerTrustedAppsRoutes } from './index';
 import {
   TRUSTED_APPS_CREATE_API,
+  TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
 import {
@@ -26,6 +27,7 @@ import { EndpointAppContext } from '../../types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { DeleteTrustedAppsRequestParams } from './types';
 
 describe('when invoking endpoint trusted apps route handlers', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -215,6 +217,47 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         throw new Error('expected error for create');
       });
       const request = createPostRequest();
+      await routeHandler(context, request, response);
+      expect(response.internalError).toHaveBeenCalled();
+      expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();
+    });
+  });
+
+  describe('when deleting a trusted app', () => {
+    let routeHandler: RequestHandler<DeleteTrustedAppsRequestParams>;
+    let request: KibanaRequest<DeleteTrustedAppsRequestParams>;
+
+    beforeEach(() => {
+      [, routeHandler] = routerMock.delete.mock.calls.find(([{ path }]) =>
+        path.startsWith(TRUSTED_APPS_DELETE_API)
+      )!;
+
+      request = httpServerMock.createKibanaRequest<DeleteTrustedAppsRequestParams>({
+        path: TRUSTED_APPS_DELETE_API.replace('{id}', '123'),
+        method: 'delete',
+      });
+    });
+
+    it('should return 200 on successful delete', async () => {
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.deleteExceptionListItem).toHaveBeenCalledWith({
+        id: request.params.id,
+        itemId: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should return 404 if item does not exist', async () => {
+      exceptionsListClient.deleteExceptionListItem.mockResolvedValueOnce(null);
+      await routeHandler(context, request, response);
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('should log unexpected error if one occurs', async () => {
+      exceptionsListClient.deleteExceptionListItem.mockImplementation(() => {
+        throw new Error('expected error for delete');
+      });
       await routeHandler(context, request, response);
       expect(response.internalError).toHaveBeenCalled();
       expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();
