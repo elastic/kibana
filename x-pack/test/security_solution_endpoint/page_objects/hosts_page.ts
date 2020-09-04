@@ -11,10 +11,10 @@ import { deleteMetadataStream } from '../../security_solution_endpoint_api_int/a
 import { deletePolicyStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { deleteTelemetryStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 export interface DataStyle {
-  left: string,
-  top: string,
-  width: string,
-  height: string
+  left: string;
+  top: string;
+  width: string;
+  height: string;
 }
 
 export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -29,10 +29,10 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
    * @returns {Object}
    */
   const parseStyle = (styles: string): {
-    left?: string,
-    top?: string,
-    width?: string,
-    height?: string
+    left?: string;
+    top?: string;
+    width?: string;
+    height?: string;
   } =>
     styles
       .split(';')
