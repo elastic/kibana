@@ -4,26 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
-// axios has a $http like interface so using it to simulate $http
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { SinonFakeServer } from 'sinon';
+import { ReactWrapper } from 'enzyme';
 
 import { init as initHttpRequests } from './helpers/http_requests';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
+  injectedMetadataServiceMock,
 } from '../../../../../src/core/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { HttpService } from '../../../../../src/core/public/http';
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
+import { PolicyFromES } from '../../common/types';
 import {
   positiveNumbersAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
@@ -38,16 +41,28 @@ import {
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
 } from '../../public/application/services/policies/policy_validation';
+import { HttpResponse } from './helpers/http_requests';
+import { createMemoryHistory } from 'history';
 
-initHttp(axios.create({ adapter: axiosXhrAdapter }));
+initHttp(
+  new HttpService().setup({
+    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+  })
+);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 initNotification(
   notificationServiceMock.createSetupContract().toasts,
   fatalErrorsServiceMock.createSetupContract()
 );
 
-let server;
-let httpRequestsMockHelpers;
+const history = createMemoryHistory();
+let server: SinonFakeServer;
+let httpRequestsMockHelpers: {
+  setPoliciesResponse: (response: HttpResponse) => void;
+  setNodesListResponse: (response: HttpResponse) => void;
+  setNodesDetailsResponse: (nodeAttributes: string, response: HttpResponse) => void;
+};
 const policy = {
   phases: {
     hot: {
@@ -60,32 +75,33 @@ const policy = {
     },
   },
 };
-const policies = [];
+const policies: PolicyFromES[] = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').valueOf(),
-    linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
+    modified_date: moment().subtract(i, 'days').toISOString(),
+    linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
     name: `testy${i}`,
     policy: {
       ...policy,
+      name: `testy${i}`,
     },
   });
 }
 window.scrollTo = jest.fn();
-window.TextEncoder = null;
-let component;
-const activatePhase = async (rendered, phase) => {
+
+let component: ReactElement;
+const activatePhase = async (rendered: ReactWrapper, phase: string) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
   await act(async () => {
     await findTestSubject(rendered, testSubject).simulate('click');
   });
   rendered.update();
 };
-const expectedErrorMessages = (rendered, expectedErrorMessages) => {
+const expectedErrorMessages = (rendered: ReactWrapper, expectedMessages: string[]) => {
   const errorMessages = rendered.find('.euiFormErrorText');
-  expect(errorMessages.length).toBe(expectedErrorMessages.length);
-  expectedErrorMessages.forEach((expectedErrorMessage) => {
+  expect(errorMessages.length).toBe(expectedMessages.length);
+  expectedMessages.forEach((expectedErrorMessage) => {
     let foundErrorMessage;
     for (let i = 0; i < errorMessages.length; i++) {
       if (errorMessages.at(i).text() === expectedErrorMessage) {
@@ -95,29 +111,29 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
     expect(foundErrorMessage).toBe(true);
   });
 };
-const noRollover = (rendered) => {
+const noRollover = (rendered: ReactWrapper) => {
   findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   rendered.update();
 };
-const getNodeAttributeSelect = (rendered, phase) => {
+const getNodeAttributeSelect = (rendered: ReactWrapper, phase: string) => {
   return rendered.find(`select#${phase}-selectedNodeAttrs`);
 };
-const setPolicyName = (rendered, policyName) => {
+const setPolicyName = (rendered: ReactWrapper, policyName: string) => {
   const policyNameField = findTestSubject(rendered, 'policyNameField');
   policyNameField.simulate('change', { target: { value: policyName } });
   rendered.update();
 };
-const setPhaseAfter = (rendered, phase, after) => {
+const setPhaseAfter = (rendered: ReactWrapper, phase: string, after: string) => {
   const afterInput = rendered.find(`input#${phase}-selectedMinimumAge`);
   afterInput.simulate('change', { target: { value: after } });
   rendered.update();
 };
-const setPhaseIndexPriority = (rendered, phase, priority) => {
+const setPhaseIndexPriority = (rendered: ReactWrapper, phase: string, priority: string) => {
   const priorityInput = rendered.find(`input#${phase}-phaseIndexPriority`);
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
-const save = (rendered) => {
+const save = (rendered: ReactWrapper) => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
   saveButton.simulate('click');
   rendered.update();
@@ -125,12 +141,7 @@ const save = (rendered) => {
 describe('edit policy', () => {
   beforeEach(() => {
     component = (
-      <EditPolicy
-        history={{ push: () => {} }}
-        getUrlForApp={() => {}}
-        policies={policies}
-        policyName={''}
-      />
+      <EditPolicy history={history} getUrlForApp={jest.fn()} policies={policies} policyName={''} />
     );
     ({ server, httpRequestsMockHelpers } = initHttpRequests());
 
@@ -162,8 +173,8 @@ describe('edit policy', () => {
         <EditPolicy
           policyName={'testy0'}
           policies={policies}
-          getUrlForApp={() => {}}
-          history={{ push: () => {} }}
+          getUrlForApp={jest.fn()}
+          history={history}
         />
       );
       const rendered = mountWithIntl(component);
@@ -272,7 +283,7 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      setPhaseIndexPriority(rendered, 'hot', -1);
+      setPhaseIndexPriority(rendered, 'hot', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -300,7 +311,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', 0);
+      setPhaseAfter(rendered, 'warm', '0');
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
@@ -309,7 +320,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', -1);
+      setPhaseAfter(rendered, 'warm', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -318,8 +329,8 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', 1);
-      setPhaseIndexPriority(rendered, 'warm', -1);
+      setPhaseAfter(rendered, 'warm', '1');
+      setPhaseIndexPriority(rendered, 'warm', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -330,7 +341,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
-      setPhaseAfter(rendered, 'warm', 1);
+      setPhaseAfter(rendered, 'warm', '1');
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '0' } });
       rendered.update();
@@ -342,7 +353,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', 1);
+      setPhaseAfter(rendered, 'warm', '1');
       findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
@@ -356,7 +367,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', 1);
+      setPhaseAfter(rendered, 'warm', '1');
       findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
@@ -370,7 +381,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
-      setPhaseAfter(rendered, 'warm', 1);
+      setPhaseAfter(rendered, 'warm', '1');
       findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
@@ -446,7 +457,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfter(rendered, 'cold', 0);
+      setPhaseAfter(rendered, 'cold', '0');
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
@@ -455,7 +466,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfter(rendered, 'cold', -1);
+      setPhaseAfter(rendered, 'cold', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -517,8 +528,8 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfter(rendered, 'cold', 1);
-      setPhaseIndexPriority(rendered, 'cold', -1);
+      setPhaseAfter(rendered, 'cold', '1');
+      setPhaseIndexPriority(rendered, 'cold', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -529,7 +540,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
-      setPhaseAfter(rendered, 'delete', 0);
+      setPhaseAfter(rendered, 'delete', '0');
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
@@ -538,7 +549,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
-      setPhaseAfter(rendered, 'delete', -1);
+      setPhaseAfter(rendered, 'delete', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
