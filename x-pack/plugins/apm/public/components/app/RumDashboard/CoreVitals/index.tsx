@@ -37,13 +37,15 @@ export function CoreVitals() {
     [start, end, serviceName, uiFilters]
   );
 
+  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
+
   return (
     <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'}>
       <EuiFlexItem>
         <CoreVitalItem
           title={LCP_LABEL}
-          value={data?.lcp + 's' ?? ''}
-          ranks={data?.lcpRanks}
+          value={lcp ? lcp + 's' : '0'}
+          ranks={lcpRanks}
           loading={status !== 'success'}
           thresholds={CoreVitalsThresholds.LCP}
         />
@@ -51,8 +53,8 @@ export function CoreVitals() {
       <EuiFlexItem>
         <CoreVitalItem
           title={FID_LABEL}
-          value={data?.fid + 's' ?? ''}
-          ranks={data?.fidRanks}
+          value={fid ? fid + 's' : '0'}
+          ranks={fidRanks}
           loading={status !== 'success'}
           thresholds={CoreVitalsThresholds.FID}
         />
@@ -60,8 +62,8 @@ export function CoreVitals() {
       <EuiFlexItem>
         <CoreVitalItem
           title={CLS_LABEL}
-          value={data?.cls ?? '0'}
-          ranks={data?.clsRanks}
+          value={cls ?? '0'}
+          ranks={clsRanks}
           loading={status !== 'success'}
           thresholds={CoreVitalsThresholds.CLS}
         />

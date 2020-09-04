@@ -39,7 +39,7 @@ export function PaletteLegends({
   const palette = euiPaletteForStatus(3);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup responsive={false}>
       {palette.map((color, ind) => (
         <EuiFlexItem
           key={ind}

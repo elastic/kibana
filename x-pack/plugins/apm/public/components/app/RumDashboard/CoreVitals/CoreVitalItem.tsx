@@ -90,7 +90,8 @@ export function CoreVitalItem({
       <EuiFlexGroup
         gutterSize="none"
         alignItems="flexStart"
-        style={{ width: 340 }}
+        style={{ maxWidth: 340 }}
+        responsive={false}
       >
         {palette.map((hexCode, ind) => (
           <ColorPaletteFlexItem
