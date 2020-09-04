@@ -32,7 +32,7 @@ export function getMigrations(
       } else if (doc.attributes.consumer === 'metrics') {
         return executeMigration(doc, context, infrastructureMigration);
       }
-      return executeMigration(doc, context, markAsLegacyAlert);
+      return executeMigration(doc, context, markAsLegacyAlert(encryptedSavedObjects));
     },
   };
 }
