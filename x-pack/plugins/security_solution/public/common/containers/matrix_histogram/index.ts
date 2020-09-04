@@ -84,7 +84,7 @@ export const useMatrixHistogram = ({
         const searchSubscription$ = data.search
           .search<MatrixHistogramRequestOptions, MatrixHistogramStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {

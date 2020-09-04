@@ -6,7 +6,8 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
-import { Inspect, Maybe, RequestBasicOptions, TimerangeInput } from '../';
+import { Inspect, Maybe, TimerangeInput } from '../../common';
+import { RequestBasicOptions } from '../';
 import { AlertsGroupData } from './alerts';
 import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchHit } from '../..';
+import { SearchHit } from '../../../common';
 
 interface AnomaliesOverTimeHistogramData {
   key_as_string: string;
