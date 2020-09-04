@@ -1273,9 +1273,9 @@ module.exports = {
     {
       files: ['**/*'],
       rules: {
-        //...require('eslint-config-prettier').rules,
-        //...require('eslint-config-prettier/react').rules,
-        //...require('eslint-config-prettier/@typescript-eslint').rules,
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
 
