@@ -101,38 +101,6 @@ describe('getSummaryStatus', () => {
               s2: {
                 level: ServiceStatusLevels.unavailable,
                 summary: 'Lorem ipsum',
-                meta: {
-                  custom: { data: 'here' },
-                },
-              },
-            })
-          )
-        ).toEqual({
-          level: ServiceStatusLevels.unavailable,
-          summary: '[s2]: Lorem ipsum',
-          detail: 'See the status page for more information',
-          meta: {
-            affectedServices: {
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
-                meta: {
-                  custom: { data: 'here' },
-                },
-              },
-            },
-          },
-        });
-      });
-
-      it('allows the single service to override the detail and documentationUrl fields', () => {
-        expect(
-          getSummaryStatus(
-            Object.entries({
-              s1: degraded,
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
                 detail: 'Vivamus pulvinar sem ac luctus ultrices.',
                 documentationUrl: 'http://helpmenow.com/problem1',
                 meta: {
@@ -147,17 +115,7 @@ describe('getSummaryStatus', () => {
           detail: 'Vivamus pulvinar sem ac luctus ultrices.',
           documentationUrl: 'http://helpmenow.com/problem1',
           meta: {
-            affectedServices: {
-              s2: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Lorem ipsum',
-                detail: 'Vivamus pulvinar sem ac luctus ultrices.',
-                documentationUrl: 'http://helpmenow.com/problem1',
-                meta: {
-                  custom: { data: 'here' },
-                },
-              },
-            },
+            custom: { data: 'here' },
           },
         });
       });

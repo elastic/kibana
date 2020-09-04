@@ -219,6 +219,7 @@ export class GroupSelector extends Component {
           )}
           onClick={() => this.togglePopover()}
           disabled={this.canUpdateJob === false}
+          data-test-subj="mlADJobListMultiSelectEditJobGroupsButton"
         />
       </EuiToolTip>
     );

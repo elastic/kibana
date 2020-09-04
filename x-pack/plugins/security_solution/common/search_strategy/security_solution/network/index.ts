@@ -8,9 +8,11 @@ export * from './common';
 export * from './http';
 export * from './tls';
 export * from './top_countries';
+export * from './top_n_flow';
 
 export enum NetworkQueries {
   http = 'http',
   tls = 'tls',
   topCountries = 'topCountries',
+  topNFlow = 'topNFlow',
 }

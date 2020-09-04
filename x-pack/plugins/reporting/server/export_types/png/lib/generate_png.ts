@@ -10,7 +10,8 @@ import { map } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
-import { ConditionalHeaders, ScreenshotResults } from '../../../types';
+import { ScreenshotResults } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../types';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const getScreenshots = await reporting.getScreenshotsObservable();
