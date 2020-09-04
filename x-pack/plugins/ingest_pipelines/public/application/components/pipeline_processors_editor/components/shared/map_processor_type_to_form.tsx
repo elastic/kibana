@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { useKibana } from '../../../../../shared_imports';
 
 import {
   Append,
@@ -124,7 +125,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
-   description: function Description() {
+    description: function Description() {
       const {
         services: { documentation },
       } = useKibana();
@@ -142,7 +143,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           }}
         />
       );
-    }
+    },
   },
   fail: {
     FieldsComponent: Fail,
@@ -182,19 +183,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
       defaultMessage: 'Grok',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.ingestPipelines.processors.description.grok"
-        defaultMessage="Uses {grokLink} expressions to extract matches from a field."
-        values={{
-          grokLink: (
-            <EuiLink external target="_blank" href={esDocUrl + '/grok-processor.html'}>
-              {'grok'}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
+    description: function Description() {
+      const {
+        services: { documentation },
+      } = useKibana();
+      const esDocUrl = documentation.getEsDocsBasePath();
+      return (
+        <FormattedMessage
+          id="xpack.ingestPipelines.processors.description.grok"
+          defaultMessage="Uses {grokLink} expressions to extract matches from a field."
+          values={{
+            grokLink: (
+              <EuiLink external target="_blank" href={esDocUrl + '/grok-processor.html'}>
+                {'grok'}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
   },
   gsub: {
     FieldsComponent: Gsub,
