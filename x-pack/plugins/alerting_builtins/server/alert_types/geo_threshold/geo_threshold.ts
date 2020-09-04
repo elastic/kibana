@@ -10,15 +10,16 @@ import { AlertServices } from '../../../../alerts/server';
 import { ActionGroupId, BoundaryType, TrackingEvent } from './alert_type';
 
 // Flatten agg results and get latest locations for each entity
-function transformResults(results) {
+function transformResults(results, dateField, geoField) {
   return _.chain(results)
     .get('aggregations.shapes.buckets', {})
     .flatMap((bucket, bucketKey) => {
       const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
       return _.map(subBuckets, (subBucket) => ({
-        shapeLocation: bucketKey,
+        location: _.get(subBucket, `entityHits.hits.hits[0].fields.${geoField}`, null),
+        shapeLocationId: bucketKey,
         entityName: subBucket.key,
-        dateInShape: _.get(subBucket, 'entityHits.hits.hits[0].fields.date[0]', null),
+        dateInShape: _.get(subBucket, `entityHits.hits.hits[0].fields.${dateField}[0]`, null),
       }));
     })
     .orderBy(['entityName', 'dateInShape'], ['desc', 'desc'])
@@ -26,29 +27,44 @@ function transformResults(results) {
     .value();
 }
 
-function getMovedEntities(prevToCurrentIntervalResults, currentIntervalResults, trackingEvent) {
-  const currLocationArr = transformResults(currentIntervalResults);
-  const prevLocationArr = transformResults(prevToCurrentIntervalResults);
+function getMovedEntities(
+  prevToCurrentIntervalResults,
+  currentIntervalResults,
+  trackingEvent,
+  dateField,
+  geoField
+) {
+  const currLocationArr = transformResults(currentIntervalResults, dateField, geoField);
+  const prevLocationArr = transformResults(prevToCurrentIntervalResults, dateField, geoField);
 
+  console.log('');
+  console.log('^^^^^^^^^^^^^^^^^^^^^^^');
+  console.log('Previous locations');
+  console.log(JSON.stringify(prevLocationArr, null, 2));
+  console.log('Current locations');
+  console.log(JSON.stringify(currLocationArr, null, 2));
+  console.log('^^^^^^^^^^^^^^^^^^^^^^^');
+  console.log('');
   return (
     currLocationArr
       // Check if shape has a previous location and has moved
-      .reduce((accu, { entityName, shapeLocation, dateInShape }) => {
+      .reduce((accu, { entityName, shapeLocationId, dateInShape, location }) => {
         const prevLocationObj = prevLocationArr.find(
           (locationObj) => locationObj.entityName === entityName
         );
         if (!prevLocationObj) {
           return accu;
         }
-        if (shapeLocation !== prevLocationObj.shapeLocation) {
+        if (shapeLocationId !== prevLocationObj.shapeLocationId) {
           accu.push({
             entityName,
             currLocation: {
-              shape: shapeLocation,
+              location,
+              shapeId: shapeLocationId,
               date: dateInShape,
             },
             prevLocation: {
-              shape: prevLocationObj.shapeLocation,
+              shapeId: prevLocationObj.shapeLocation,
               date: prevLocationObj.dateInShape,
             },
           });
@@ -97,10 +113,15 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     const movedEntities = getMovedEntities(
       prevToCurrentIntervalResults,
       currentIntervalResults,
-      params.trackingEvent
+      params.trackingEvent,
+      params.dateField,
+      params.geoField
     );
+    console.log('Moved entities');
+    console.log(JSON.stringify(movedEntities));
+    console.log('');
 
-    movedEntities.forEach(({ entityName, currLocation, prevLocation }) =>
+    movedEntities.forEach(({ entityName }) =>
       services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId)
     );
   };
