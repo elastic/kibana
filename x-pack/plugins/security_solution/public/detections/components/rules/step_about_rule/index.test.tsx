@@ -153,7 +153,7 @@ describe('StepAboutRuleComponent', () => {
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: { value: 50, mapping: [], isMappingChecked: false },
+      riskScore: { value: 21, mapping: [], isMappingChecked: false },
       severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
       tags: [],
       threat: [
@@ -262,7 +262,7 @@ describe('StepAboutRuleComponent', () => {
 
     const result = await formHook();
     expect(result?.isValid).toEqual(true);
-    expect(result?.data?.riskScore.value).toEqual(50);
+    expect(result?.data?.riskScore.value).toEqual(21);
 
     wrapper
       .find('[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]')

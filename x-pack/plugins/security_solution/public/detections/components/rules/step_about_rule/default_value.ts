@@ -22,7 +22,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-  riskScore: { value: 50, mapping: [], isMappingChecked: false },
+  riskScore: { value: 21, mapping: [], isMappingChecked: false },
   references: [''],
   falsePositives: [''],
   license: '',
