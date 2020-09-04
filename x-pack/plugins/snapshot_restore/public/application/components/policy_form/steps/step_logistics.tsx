@@ -49,7 +49,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         name: undefined,
       },
     },
-    sendRequest: reloadRepositories,
+    resendRequest: reloadRepositories,
   } = useLoadRepositories();
 
   const { i18n, history } = useServices();
