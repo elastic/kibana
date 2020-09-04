@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export declare const addAllExtensions: any;
+import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { Demo } from './test_samples/demo';
+
+storiesOf('UrlDrilldownCollectConfig', module).add('default', () => <Demo />);
