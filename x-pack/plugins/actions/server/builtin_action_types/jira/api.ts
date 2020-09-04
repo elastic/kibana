@@ -14,16 +14,14 @@ import {
   Incident,
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
+  PushToServiceApiParams,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import {
-  PushToServiceResponse,
-  TransformFieldsArgs,
-  Comment,
-  EntityInformation,
-} from './case_types';
+import { TransformFieldsArgs, Comment, EntityInformation } from '../case/common_types';
+
+import { PushToServiceResponse } from './types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
@@ -138,7 +136,7 @@ export const transformFields = ({
   params,
   fields,
   currentIncident,
-}: TransformFieldsArgs): Incident => {
+}: TransformFieldsArgs<PushToServiceApiParams, ExternalServiceParams>): Incident => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {

@@ -19,8 +19,8 @@ import {
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { IncidentConfigurationSchema } from './case_schema';
-import { PushToServiceResponse, Comment } from './case_types';
+import { IncidentConfigurationSchema } from '../case/common_schema';
+import { Comment } from '../case/common_types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -144,6 +144,10 @@ export interface GetIssueTypesHandlerArgs {
 export interface GetFieldsByIssueTypeHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionGetFieldsByIssueTypeParams;
+}
+
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
 }
 
 export interface ExternalServiceApi {
