@@ -20,7 +20,7 @@ function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
   return (job as TaskPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).relativeUrls !== undefined;
+  return (job as TaskPayloadPDF).objects !== undefined; // 7.x only
 }
 
 export function getFullUrls<TaskPayloadType>({
