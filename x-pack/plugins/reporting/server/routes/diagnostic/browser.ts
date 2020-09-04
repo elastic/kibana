@@ -4,12 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { browserTest } from '../../browsers/chromium/driver_factory/test';
+import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
 import { LevelLogger as Logger } from '../../lib';
 import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+
+const logsToHelpMap = {
+  'error while loading shared libraries': i18n.translate(
+    'xpack.reporting.diagnostic.browserMissingDependency',
+    {
+      defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
+      values: {
+        url:
+          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+      },
+    }
+  ),
+
+  'Could not find the default font': i18n.translate(
+    'xpack.reporting.diagnostic.browserMissingFonts',
+    {
+      defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
+      values: {
+        url:
+          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+      },
+    }
+  ),
+
+  'cannot open shared object file': i18n.translate(
+    'xpack.reporting.diagnostic.browserMissingDependency',
+    {
+      defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
+      values: {
+        url:
+          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+      },
+    }
+  ),
+  'No usable sandbox': '',
+};
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
@@ -21,9 +58,25 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
       validate: {},
     },
     userHandler(async (user, context, req, res) => {
-      const body: DiagnosticResponse = await browserTest(reporting, logger);
+      const logs = await browserStartLogs(reporting, logger).toPromise();
+      const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
-      return res.ok({ body });
+      const boundSuccessfully = logs.includes(`DevTools listening on`);
+      const help = knownIssues.reduce((helpTexts: string[], knownIssue) => {
+        const helpText = logsToHelpMap[knownIssue];
+        if (logs.includes(knownIssue)) {
+          helpTexts.push(helpText);
+        }
+        return helpTexts;
+      }, []);
+
+      const response: DiagnosticResponse = {
+        success: boundSuccessfully && !help.length,
+        help,
+        logs,
+      };
+
+      return res.ok({ body: response });
     })
   );
 };

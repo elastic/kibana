@@ -22,6 +22,7 @@ const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
 describe('POST /diagnose/browser', () => {
+  jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = createMockLevelLogger();
 
@@ -55,11 +56,13 @@ describe('POST /diagnose/browser', () => {
       pid: 123,
       stderr: 'stderr',
       once: jest.fn(),
-      on: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
@@ -75,7 +78,8 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
@@ -96,7 +100,8 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => setTimeout(() => cb(logs), 0),
+      addEventListener: (e: string, cb: any) => setTimeout(() => cb(logs), 0),
+      removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
@@ -105,7 +110,8 @@ describe('POST /diagnose/browser', () => {
       once: (e: string, cb: any) => setTimeout(() => cb(), 0), // Invoke the exit event
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
-      on: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
     }));
 
     return supertest(httpSetup.server.listener)
@@ -117,8 +123,8 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
-            "logs": "Could not find the default font
-          ",
+            "logs": "
+          Could not find the default font",
             "success": false,
           }
         `);
@@ -131,10 +137,11 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => {
+      addEventListener: (e: string, cb: any) => {
         setTimeout(() => cb(devtoolMessage), 0);
         setTimeout(() => cb(fontNotFoundMessage), 0);
       },
+      removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
     }));
@@ -143,7 +150,8 @@ describe('POST /diagnose/browser', () => {
       once: (e: string, cb: any) => setTimeout(() => cb(), 0),
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
-      on: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
     }));
 
     return supertest(httpSetup.server.listener)
@@ -155,9 +163,9 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
-            "logs": "DevTools listening on (ws://localhost:4000)
-          Could not find the default font
-          ",
+            "logs": "
+          DevTools listening on (ws://localhost:4000)
+          Could not find the default font",
             "success": false,
           }
         `);
@@ -179,11 +187,13 @@ describe('POST /diagnose/browser', () => {
       pid: 123,
       stderr: 'stderr',
       once: jest.fn(),
-      on: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
-      on: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      removeEventListener: jest.fn(),
       removeAllListeners: createInterfaceListenersMock,
       close: createInterfaceCloseMock,
     }));
