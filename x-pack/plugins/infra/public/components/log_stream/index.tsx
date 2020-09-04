@@ -17,7 +17,7 @@ import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 
-interface LogStreamProps {
+export interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
   endTimestamp: number;
