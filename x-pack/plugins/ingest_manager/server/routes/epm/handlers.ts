@@ -21,7 +21,6 @@ import {
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
-  InstallType,
 } from '../../types';
 import {
   getCategories,
@@ -164,7 +163,7 @@ export const installPackageHandler: RequestHandler<
     // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
     try {
       if (!installedPkg) throw new Error('no installation exists');
-      if (installType === InstallType.install || installType === InstallType.reinstall) {
+      if (installType === 'install' || installType === 'reinstall') {
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       } else {
         await installPackage({

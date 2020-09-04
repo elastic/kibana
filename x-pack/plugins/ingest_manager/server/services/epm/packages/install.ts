@@ -116,9 +116,7 @@ export async function installPackage({
 
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
-    installType === InstallType.reinstall ||
-    installType === InstallType.reupdate ||
-    installType === InstallType.rollback;
+    installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
   if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
@@ -194,22 +192,22 @@ export async function installPackage({
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
   // if this is an update or retrying an update, delete the previous version's pipelines
-  if (installType === InstallType.update || installType === InstallType.reupdate) {
+  if (installType === 'update' || installType === 'reupdate') {
     await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
-      // @ts-ignore
+      // @ts-ignore installType conditions already check for existence of installedPkg
       installedPkg.attributes.version
     );
   }
   // pipelines from a different version may have installed during a failed update
-  if (installType === InstallType.rollback) {
+  if (installType === 'rollback') {
     await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
-      // @ts-ignore
+      // @ts-ignore installType conditions already check for existence of installedPkg
       installedPkg.attributes.install_version
     );
   }
@@ -352,21 +350,11 @@ export function getInstallType({
   const isInstalledPkg = !!installedPkg;
   const currentPkgVersion = installedPkg?.attributes.version;
   const lastStartedInstallVersion = installedPkg?.attributes.install_version;
-  if (installedPkg && pkgVersion === currentPkgVersion && pkgVersion !== lastStartedInstallVersion)
-    return InstallType.rollback;
-  if (isInstalledPkg && pkgVersion === currentPkgVersion) return InstallType.reinstall;
-  if (
-    isInstalledPkg &&
-    pkgVersion === lastStartedInstallVersion &&
-    pkgVersion !== currentPkgVersion
-  )
-    return InstallType.reupdate;
-  if (
-    isInstalledPkg &&
-    pkgVersion !== lastStartedInstallVersion &&
-    pkgVersion !== currentPkgVersion
-  )
-    return InstallType.update;
-
-  if (!installedPkg) return InstallType.install;
+  if (!isInstalledPkg) return 'install';
+  if (pkgVersion === currentPkgVersion && pkgVersion !== lastStartedInstallVersion)
+    return 'rollback';
+  if (pkgVersion === currentPkgVersion) return 'reinstall';
+  if (pkgVersion === lastStartedInstallVersion && pkgVersion !== currentPkgVersion)
+    return 'reupdate';
+  if (pkgVersion !== lastStartedInstallVersion && pkgVersion !== currentPkgVersion) return 'update';
 }

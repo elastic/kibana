@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchAssetType, Installation, KibanaAssetType, InstallType } from '../../../types';
+import { ElasticsearchAssetType, Installation, KibanaAssetType } from '../../../types';
 import { SavedObject } from 'src/core/server';
 import { getInstallType } from './install';
 
@@ -44,34 +44,34 @@ describe('install', () => {
   describe('getInstallType', () => {
     it('should return correct type when installing and no other version is currently installed', () => {});
     const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
-    expect(installTypeInstall).toBe(InstallType.install);
+    expect(installTypeInstall).toBe('install');
 
     it('should return correct type when installing the same version', () => {});
     const installTypeReinstall = getInstallType({
       pkgVersion: '1.0.0',
       installedPkg: mockInstallation,
     });
-    expect(installTypeReinstall).toBe(InstallType.reinstall);
+    expect(installTypeReinstall).toBe('reinstall');
 
     it('should return correct type when moving from one version to another', () => {});
     const installTypeUpdate = getInstallType({
       pkgVersion: '1.0.1',
       installedPkg: mockInstallation,
     });
-    expect(installTypeUpdate).toBe(InstallType.update);
+    expect(installTypeUpdate).toBe('update');
 
     it('should return correct type when update fails and trys again', () => {});
     const installTypeReupdate = getInstallType({
       pkgVersion: '1.0.1',
       installedPkg: mockInstallationUpdateFail,
     });
-    expect(installTypeReupdate).toBe(InstallType.reupdate);
+    expect(installTypeReupdate).toBe('reupdate');
 
     it('should return correct type when attempting to rollback from a failed update', () => {});
     const installTypeRollback = getInstallType({
       pkgVersion: '1.0.0',
       installedPkg: mockInstallationUpdateFail,
     });
-    expect(installTypeRollback).toBe(InstallType.rollback);
+    expect(installTypeRollback).toBe('rollback');
   });
 });
