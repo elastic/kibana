@@ -109,8 +109,8 @@ const BaseRangeEditor = ({
                   }
                   showLabels
                   showInput="inputWithPopover"
-                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.numIntervals', {
-                    defaultMessage: 'Num intervals',
+                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
+                    defaultMessage: 'Max intervals',
                   })}
                 />
               ) : (
