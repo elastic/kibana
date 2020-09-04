@@ -5,15 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHideFor,
-  EuiShowFor,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
