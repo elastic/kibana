@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Direction } from '@elastic/eui';
 import {
-  Criteria,
   CriteriaWithPagination,
   EuiBasicTableColumn,
 } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -52,7 +51,7 @@ function navigateToNewMap() {
     path: MAP_PATH,
   });
 }
-interface MapsListViewState {
+interface State {
   sortField?: string | number | symbol;
   sortDirection?: Direction;
   hasInitialFetchReturned: boolean;
@@ -60,12 +59,12 @@ interface MapsListViewState {
   showDeleteModal: boolean;
   showLimitError: boolean;
   filter: string;
-  items: [];
-  selectedIds: [];
+  items: SelectionItem[];
+  selectedIds: string[];
   page: number;
   perPage: number;
-  readOnly: any;
-  listingLimit: any;
+  readOnly: boolean;
+  listingLimit: number;
   totalItems?: number;
 }
 
@@ -74,8 +73,8 @@ interface SelectionItem {
 }
 
 export class MapsListView extends React.Component {
-  _isMounted?: boolean;
-  state: MapsListViewState = {
+  _isMounted: boolean = false;
+  state: State = {
     hasInitialFetchReturned: false,
     isFetchingItems: false,
     showDeleteModal: false,
@@ -107,7 +106,7 @@ export class MapsListView extends React.Component {
 
   _find = (search: string) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);
 
-  _delete = (ids: string | string[]) => getMapsSavedObjectLoader().delete(ids);
+  _delete = (ids: string[]) => getMapsSavedObjectLoader().delete(ids);
 
   debouncedFetch = _.debounce(async (filter) => {
     const response = await this._find(filter);
@@ -164,10 +163,7 @@ export class MapsListView extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  onTableChange = ({
-    page,
-    sort,
-  }: Criteria<SelectionItem> | CriteriaWithPagination<SelectionItem>) => {
+  onTableChange = ({ page, sort }: CriteriaWithPagination<SelectionItem>) => {
     const { index: pageIndex, size: pageSize } = page!;
 
     let { field: sortField, direction: sortDirection } = sort || {};

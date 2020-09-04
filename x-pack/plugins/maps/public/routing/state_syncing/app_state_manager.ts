@@ -46,7 +46,7 @@ export class AppStateManager {
   getAppState() {
     return {
       query: this._query,
-      savedQuery: this._savedQueryId,
+      savedQueryId: this._savedQueryId,
       filters: this._filters,
     };
   }

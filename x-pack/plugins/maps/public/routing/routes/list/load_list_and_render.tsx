@@ -12,7 +12,7 @@ import { getToasts } from '../../../kibana_services';
 import { MapsListView } from './maps_list_view';
 
 export class LoadListAndRender extends React.Component {
-  _isMounted?: boolean;
+  _isMounted: boolean = false;
   state = {
     mapsLoaded: false,
     hasSavedMaps: null,

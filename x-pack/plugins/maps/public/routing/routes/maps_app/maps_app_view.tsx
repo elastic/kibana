@@ -26,6 +26,7 @@ import {
   getGlobalState,
   updateGlobalState,
   startGlobalStateSyncing,
+  MapsGlobalState,
 } from '../../state_syncing/global_sync';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { startAppStateSyncing } from '../../state_syncing/app_sync';
@@ -103,7 +104,7 @@ export class MapsAppView extends React.Component<Props, State> {
   _appSyncUnsubscribe: (() => void) | null = null;
   _appStateManager = new AppStateManager();
   _prevIndexPatternIds: string[] | null = null;
-  _isMounted?: boolean;
+  _isMounted: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -246,7 +247,7 @@ export class MapsAppView extends React.Component<Props, State> {
     });
 
     // sync globalState
-    const updatedGlobalState: { filters: Filter[]; time?: TimeRange } = {
+    const updatedGlobalState: MapsGlobalState = {
       filters: filterManager.getGlobalFilters(),
     };
     if (time) {
@@ -406,29 +407,15 @@ export class MapsAppView extends React.Component<Props, State> {
             forceRefresh: true,
           });
         }}
-        onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
         dateRangeTo={this.props.timeFilters.to}
         isRefreshPaused={this.props.refreshConfig.isPaused}
         refreshInterval={this.props.refreshConfig.interval}
-        onRefreshChange={({
-          isPaused,
-          refreshInterval,
-        }: {
-          isPaused: boolean;
-          refreshInterval: number;
-        }) => {
-          this._onRefreshConfigChange({
-            isPaused,
-            interval: refreshInterval,
-          });
-        }}
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}
-        // @ts-ignore
-        showSaveQuery={getMapsCapabilities().saveQuery}
-        savedQuery={this.state.savedQuery as SavedQuery}
+        showSaveQuery={!!getMapsCapabilities().saveQuery}
+        savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}
         onSavedQueryUpdated={this._updateStateFromSavedQuery}
         onClearSavedQuery={() => {

@@ -27,7 +27,7 @@ interface State {
 }
 
 export const LoadMapAndRender = class extends React.Component<Props, State> {
-  _isMounted!: boolean;
+  _isMounted: boolean = false;
   state = {
     savedMap: undefined,
     failedToLoad: false,
