@@ -10,6 +10,6 @@ import { BaseActionFactoryContext } from '../../dynamic_actions';
  * Interface used as piece of ActionFactoryContext that is passed in from drilldown wizard component to action factories
  * Omitted values are added inside the wizard and then full {@link BaseActionFactoryContext} passed into action factory methods
  */
-export type ExtraActionFactoryContext<
+export type ActionFactoryPlaceContext<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > = Omit<ActionFactoryContext, 'triggers'>;
