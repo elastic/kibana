@@ -9,10 +9,12 @@ export * from './all';
 export * from './common';
 export * from './overview';
 export * from './first_last_seen';
+export * from './uncommon_processes';
 
 export enum HostsQueries {
   authentications = 'authentications',
   firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
   hostOverview = 'hostOverview',
+  uncommonProcesses = 'uncommonProcesses',
 }

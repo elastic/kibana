@@ -48,7 +48,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
         iconType="visTable"
         aria-label={viewJobResultsButtonText}
         className="results-button"
-        data-test-subj="mlAnalyticsJobViewButton"
+        data-test-subj="mlOverviewAnalyticsJobViewButton"
         isDisabled={disabled}
       >
         {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
