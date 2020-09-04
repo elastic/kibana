@@ -24,7 +24,9 @@ describe('AuditTrailClient', () => {
   beforeEach(() => {
     event$ = new Subject();
     client = new AuditTrailClient(
-      httpServerMock.createKibanaRequest({ kibanaRequestState: { requestId: 'request id alpha' } }),
+      httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'request id alpha', requestUuid: 'ignore-me' },
+      }),
       event$,
       deps
     );
