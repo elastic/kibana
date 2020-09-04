@@ -30,7 +30,7 @@ export const SecureSpaceMessage = (props: SecureSpaceMessageProps) => {
             values={{
               rolesLink: (
                 <EuiLink
-                  data-test-subj="rolesManagagementPage"
+                  data-test-subj="rolesManagementPage"
                   href={props.getUrlForApp('management', { path: 'security/roles' })}
                   aria-label={rolesLinkTextAriaLabel}
                 >
