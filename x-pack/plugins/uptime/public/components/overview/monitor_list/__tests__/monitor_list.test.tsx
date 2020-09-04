@@ -141,7 +141,6 @@ describe('MonitorList component', () => {
   it('shallow renders the monitor list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        editManagedMonitor={jest.fn()}
         monitorList={{ list: getMonitorList(), loading: false }}
         pageSize={10}
         setPageSize={jest.fn()}
@@ -154,7 +153,6 @@ describe('MonitorList component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        editManagedMonitor={jest.fn()}
         monitorList={{
           list: {
             summaries: [],
@@ -174,7 +172,6 @@ describe('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = renderWithRouter(
       <MonitorListComponent
-        editManagedMonitor={jest.fn()}
         monitorList={{
           list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
           loading: false,
@@ -190,7 +187,6 @@ describe('MonitorList component', () => {
   it('renders error list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        editManagedMonitor={jest.fn()}
         monitorList={{ list: getMonitorList(), error: new Error('foo message'), loading: false }}
         pageSize={10}
         setPageSize={jest.fn()}
@@ -203,7 +199,6 @@ describe('MonitorList component', () => {
   it('renders loading state', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        editManagedMonitor={jest.fn()}
         monitorList={{ list: getMonitorList(), loading: true }}
         pageSize={10}
         setPageSize={jest.fn()}
@@ -236,7 +231,6 @@ describe('MonitorList component', () => {
     it('renders the pagination', () => {
       const component = shallowWithRouter(
         <MonitorListComponent
-          editManagedMonitor={jest.fn()}
           monitorList={{
             list: {
               ...paginationResult,
@@ -254,7 +248,6 @@ describe('MonitorList component', () => {
     it('renders a no items message when no data is provided', () => {
       const component = shallowWithRouter(
         <MonitorListComponent
-          editManagedMonitor={jest.fn()}
           monitorList={{
             list: {
               summaries: [],

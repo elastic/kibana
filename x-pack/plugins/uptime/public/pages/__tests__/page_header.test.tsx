@@ -5,14 +5,18 @@
  */
 
 import React from 'react';
-import { PageHeader } from '../page_header';
+import { PageHeaderComponent } from '../page_header';
 import { renderWithRouter, MountWithReduxProvider } from '../../lib';
 
 describe('PageHeader', () => {
   it('shallow renders with the date picker', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} datePicker={true} />
+        <PageHeaderComponent
+          headingText="TestingHeading"
+          datePicker={true}
+          toggleCentralManagement={jest.fn()}
+        />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_date_picker');
@@ -21,7 +25,11 @@ describe('PageHeader', () => {
   it('shallow renders without the date picker', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} datePicker={false} />
+        <PageHeaderComponent
+          headingText="TestingHeading"
+          datePicker={false}
+          toggleCentralManagement={jest.fn()}
+        />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_no_date_picker');
@@ -30,7 +38,12 @@ describe('PageHeader', () => {
   it('shallow renders extra links', () => {
     const component = renderWithRouter(
       <MountWithReduxProvider>
-        <PageHeader headingText={'TestingHeading'} extraLinks={true} datePicker={true} />
+        <PageHeaderComponent
+          headingText="TestingHeading"
+          extraLinks={true}
+          datePicker={true}
+          toggleCentralManagement={jest.fn()}
+        />
       </MountWithReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_extra_links');

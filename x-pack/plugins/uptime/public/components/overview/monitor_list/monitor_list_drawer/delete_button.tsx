@@ -14,7 +14,7 @@ import { DeleteModal } from './delete_modal';
 
 interface DeleteButtonProps {
   monitorId: string;
-  monitorName: string;
+  monitorName?: string;
 }
 
 export const DeleteButton: React.FC<DeleteButtonProps> = ({ monitorId, monitorName }) => {
@@ -26,14 +26,14 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({ monitorId, monitorNa
       <DeleteModal
         closeModal={() => setIsModalVisible(false)}
         deleteMonitor={() => dispatch(deleteMonitor(monitorId))}
-        monitorName={monitorName}
+        monitorName={monitorName ?? monitorId}
       />
     );
   }
   return (
     <DeleteButtonComponent
       deleteModal={deleteModal}
-      monitorName={monitorName}
+      monitorName={monitorName ?? monitorId}
       setIsModalVisible={() => setIsModalVisible(true)}
     />
   );

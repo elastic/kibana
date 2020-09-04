@@ -68,7 +68,6 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   return (
     <MonitorListComponent
       {...props}
-      editManagedMonitor={(monitor: MonitorSummary) => dispatch(editManagedMonitor(monitor))}
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}

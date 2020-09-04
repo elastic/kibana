@@ -35,7 +35,6 @@ import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 
 interface Props extends MonitorListProps {
-  editManagedMonitor: (monitor: MonitorSummary) => void;
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
