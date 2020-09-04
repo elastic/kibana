@@ -4,7 +4,7 @@
 
 ## ChromeNavLink.url property
 
-The route used to open the [default path](./kibana-plugin-core-public.appbase.defaultpath.md) of an application. If unset, `baseUrl` will be used instead.
+The route used to open the  of an application. If unset, `baseUrl` will be used instead.
 
 <b>Signature:</b>
 
