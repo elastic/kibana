@@ -4447,7 +4447,6 @@
     "xpack.actions.builtin.case.connectorApiNullError": "需要指定连接器 [apiUrl]",
     "xpack.actions.builtin.case.jiraTitle": "Jira",
     "xpack.actions.builtin.case.resilientTitle": "IBM Resilient",
-    "xpack.actions.builtin.configuration.apiWhitelistError": "配置连接器操作时出错：{message}",
     "xpack.actions.builtin.email.errorSendingErrorMessage": "发送电子邮件时出错",
     "xpack.actions.builtin.emailTitle": "电子邮件",
     "xpack.actions.builtin.esIndex.errorIndexingErrorMessage": "索引文档时出错",
