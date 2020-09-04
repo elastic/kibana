@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDebounce, useEvent } from 'react-use';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 const useIfMounted = () => {
@@ -46,33 +47,35 @@ const blurEvent = new FocusEvent('blur');
 
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const ifMounted = useIfMounted();
-  const [searchValue, setSearchValue] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
   const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
-  const onSearch = useCallback(
-    (currentValue: string) => {
-      if (currentValue === searchValue) return;
-      const setOptions = (_options: GlobalSearchResult[]) => {
-        ifMounted(() =>
-          _setOptions([
-            ..._options.map((option) => ({
-              key: option.id,
-              label: option.title,
-              url: option.url,
-              ...(option.icon && { icon: { type: option.icon } }),
-              ...(option.type &&
-                option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
-            })),
-          ])
-        );
-      };
+  const setOptions = useCallback(
+    (_options: GlobalSearchResult[]) => {
+      ifMounted(() =>
+        _setOptions([
+          ..._options.map((option) => ({
+            key: option.id,
+            label: option.title,
+            url: option.url,
+            ...(option.icon && { icon: { type: option.icon } }),
+            ...(option.type &&
+              option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
+          })),
+        ])
+      );
+    },
+    [ifMounted, _setOptions]
+  );
 
+  useDebounce(
+    () => {
       let arr: GlobalSearchResult[] = [];
-      globalSearch(currentValue, {}).subscribe({
+      globalSearch(searchValue, {}).subscribe({
         next: ({ results }) => {
-          if (currentValue.length > 0) {
+          if (searchValue.length > 0) {
             arr = [...results, ...arr].sort((a, b) => {
               if (a.score < b.score) return 1;
               if (a.score > b.score) return -1;
@@ -100,15 +103,14 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           // Not doing anything on error right now because it'll either just show the previous
           // results or empty results which is basically what we want anyways
         },
-        complete: () => {
-          ifMounted(() => setSearchValue(currentValue));
-        },
+        complete: () => {},
       });
     },
-    [globalSearch, searchValue, ifMounted]
+    250,
+    [searchValue]
   );
 
-  const onWindowKeyDown = (event: KeyboardEvent) => {
+  const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
       if (searchRef) {
         event.preventDefault();
@@ -125,7 +127,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     else {
       navigateToUrl(url);
       (document.activeElement as HTMLElement).blur();
-      onSearch('');
       if (searchRef) {
         searchRef.value = '';
         searchRef.dispatchEvent(blurEvent);
@@ -133,25 +134,14 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('keydown', onWindowKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', onWindowKeyDown);
-    };
-  });
-
-  useEffect(() => {
-    onSearch('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEvent('keydown', onKeyDown);
 
   return (
     <EuiSelectableTemplateSitewide
       onChange={onChange}
       options={options}
       searchProps={{
-        onSearch,
+        onSearch: setSearchValue,
         'data-test-subj': 'header-search',
         inputRef: setSearchRef,
         compressed: true,
@@ -175,7 +165,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                 what: <EuiFlexItem grow={false}>Quickly search using:</EuiFlexItem>,
                 how: (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge>{isWindows ? 'Ctrl + S' : 'Command + S'}</EuiBadge>
+                    <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>
                   </EuiFlexItem>
                 ),
               }}

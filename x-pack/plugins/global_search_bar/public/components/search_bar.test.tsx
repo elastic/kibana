@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { wait } from '@testing-library/react';
 import { of } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import {
@@ -50,11 +49,11 @@ describe('SearchBar', () => {
   beforeEach(() => {
     searchService = globalSearchPluginMock.createStartContract();
     findSpy = jest.spyOn(searchService, 'find');
+    jest.useFakeTimers();
   });
 
   it('correctly filters and sorts results', async () => {
     const navigate = jest.fn();
-    let component: ReactWrapper;
     findSpy
       .mockReturnValueOnce(
         of(
@@ -64,29 +63,23 @@ describe('SearchBar', () => {
       )
       .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
-    act(() => {
-      component = mountWithIntl(
-        <SearchBar globalSearch={searchService.find} navigateToUrl={navigate} />
-      );
-    });
+    const component = mountWithIntl(
+      <SearchBar globalSearch={searchService.find} navigateToUrl={navigate} />
+    );
+
+    expect(findSpy).toHaveBeenCalledTimes(0);
+    component.find('input[data-test-subj="header-search"]').simulate('focus');
+    jest.runAllTimers();
+    component.update();
     expect(findSpy).toHaveBeenCalledTimes(1);
     expect(findSpy).toHaveBeenCalledWith('', {});
-    act(() => {
-      component.update();
-      expect(getSelectableProps(component).options).toMatchSnapshot(); // default list
-      component.find('input[data-test-subj="header-search"]').simulate('focus');
-    });
-    expect(findSpy).toHaveBeenCalledTimes(1);
-
-    act(() => {
-      component.update();
-      getSearchProps(component).onSearch('d');
-    });
-    act(() => {
-      component.update();
-      expect(getSelectableProps(component).options).toMatchSnapshot(); // list filtered
-    });
+    expect(getSelectableProps(component).options).toMatchSnapshot();
+    await wait(() => getSearchProps(component).onSearch('d'));
+    jest.runAllTimers();
+    component.update();
+    expect(getSelectableProps(component).options).toMatchSnapshot();
     expect(findSpy).toHaveBeenCalledTimes(2);
+    expect(findSpy).toHaveBeenCalledWith('d', {});
   });
 
   it('supports keyboard shortcuts', () => {
