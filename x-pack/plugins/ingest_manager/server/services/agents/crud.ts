@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindResult } from 'src/core/server';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -16,18 +16,32 @@ import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from 
 import { savedObjectToAgent } from './saved_objects';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-export async function listAgents(
+type ListAgentsResponse<P extends boolean> = P extends false
+  ? {
+      agents: Agent[];
+      total: number;
+    }
+  : {
+      agents: Agent[];
+      total: number;
+      page: number;
+      perPage: number;
+    };
+
+export async function listAgents<P extends boolean>(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
+    usePagination?: boolean;
     showInactive: boolean;
   }
-) {
+): Promise<ListAgentsResponse<P>> {
   const {
     page = 1,
     perPage = 20,
     sortField = 'enrolled_at',
     sortOrder = 'desc',
     kuery,
+    usePagination = true,
     showInactive = false,
   } = options;
 
@@ -51,24 +65,59 @@ export async function listAgents(
     filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
   }
 
+  let agentSOs: Array<SavedObjectsFindResult<AgentSOAttributes>> = [];
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { saved_objects, total } = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    sortField,
-    sortOrder,
-    page,
-    perPage,
-    filter: _joinFilters(filters),
-  });
+  const { saved_objects, total } = await soClient.find<AgentSOAttributes>(
+    usePagination
+      ? {
+          type: AGENT_SAVED_OBJECT_TYPE,
+          filter: _joinFilters(filters),
+          sortField,
+          sortOrder,
+          page,
+          perPage,
+        }
+      : {
+          type: AGENT_SAVED_OBJECT_TYPE,
+          filter: _joinFilters(filters),
+          page: 1,
+          perPage: 10000,
+        }
+  );
 
-  const agents: Agent[] = saved_objects.map(savedObjectToAgent);
+  agentSOs = saved_objects;
 
-  return {
-    agents,
-    total,
-    page,
-    perPage,
-  };
+  // If not using pagination and we have more than 10000 agents found, make sure to page through
+  // rest of results
+  if (!usePagination && total > 10000) {
+    const remainingPages = Math.ceil((total - 10000) / 10000);
+    for (let currentPage = 2; currentPage <= remainingPages + 1; currentPage++) {
+      const pageResult = await soClient.find<AgentSOAttributes>({
+        type: AGENT_SAVED_OBJECT_TYPE,
+        filter: _joinFilters(filters),
+        page: currentPage,
+        perPage: 10000,
+      });
+      agentSOs = [...agentSOs, ...pageResult.saved_objects];
+    }
+  }
+
+  const agents: Agent[] = agentSOs.map(savedObjectToAgent);
+
+  const response = usePagination
+    ? ({
+        agents,
+        total,
+        page,
+        perPage,
+      } as ListAgentsResponse<P>)
+    : ({
+        agents,
+        total,
+      } as ListAgentsResponse<P>);
+
+  return response;
 }
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {

@@ -273,7 +273,7 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, {
+    const { agents, total, page, perPage } = await AgentService.listAgents<true>(soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -325,25 +325,27 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     // Reassign by array of IDs
-    if (Array.isArray(request.body.agents)) {
-      const result = await AgentService.reassignAgents(
-        soClient,
-        request.body.agents,
-        request.body.policy_id
-      );
-      const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
-        return {
-          ...acc,
-          [so.id]: {
-            success: so.error ? false : true,
-            error: so.error || undefined,
-          },
-        };
-      }, {});
-      return response.ok({ body });
-    } else {
-      throw new Error('Reassign by query not implemented yet');
-    }
+    const result = Array.isArray(request.body.agents)
+      ? await AgentService.reassignAgents(
+          soClient,
+          { agentIds: request.body.agents },
+          request.body.policy_id
+        )
+      : await AgentService.reassignAgents(
+          soClient,
+          { kuery: request.body.agents },
+          request.body.policy_id
+        );
+    const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
+      return {
+        ...acc,
+        [so.id]: {
+          success: !so.error,
+          error: so.error || undefined,
+        },
+      };
+    }, {});
+    return response.ok({ body });
   } catch (e) {
     return response.customError({
       statusCode: 500,

@@ -45,6 +45,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   currentQuery: string;
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
+  refreshAgents: () => void;
 }> = ({
   totalAgents,
   selectionMode,
@@ -53,6 +54,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   shownAgents,
   selectedAgents,
   setSelectedAgents,
+  refreshAgents,
 }) => {
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -129,6 +131,7 @@ export const AgentBulkActions: React.FunctionComponent<{
             agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
             onClose={() => {
               setIsReassignFlyoutOpen(false);
+              refreshAgents();
             }}
           />
         </EuiPortal>

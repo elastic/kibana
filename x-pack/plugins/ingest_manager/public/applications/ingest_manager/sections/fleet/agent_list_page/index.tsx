@@ -529,7 +529,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         shownAgents={agents?.length || 0}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
-        currentQuery={search}
+        currentQuery={kuery}
         selectedAgents={selectedAgents}
         setSelectedAgents={(newAgents: Agent[]) => {
           if (tableRef?.current) {
@@ -537,6 +537,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setSelectionMode('manual');
           }
         }}
+        refreshAgents={() => agentsRequest.sendRequest()}
       />
       <EuiSpacer size="xs" />
       <EuiHorizontalRule margin="none" />

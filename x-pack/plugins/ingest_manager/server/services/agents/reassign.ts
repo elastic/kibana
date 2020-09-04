@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { getAgents } from './crud';
+import { getAgents, listAgents } from './crud';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -29,7 +29,13 @@ export async function reassignAgent(
 
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
-  agentIds: string[],
+  options:
+    | {
+        agentIds: string[];
+      }
+    | {
+        kuery: string;
+      },
   newAgentPolicyId: string
 ) {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
@@ -38,7 +44,16 @@ export async function reassignAgents(
   }
 
   // Filter to agents that do not already use the new agent policy ID
-  const agents = await getAgents(soClient, agentIds);
+  const agents =
+    'agentIds' in options
+      ? await getAgents(soClient, options.agentIds)
+      : (
+          await listAgents<false>(soClient, {
+            kuery: options.kuery,
+            usePagination: false,
+            showInactive: false,
+          })
+        ).agents;
   const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
 
   // Update the necessary agents
