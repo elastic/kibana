@@ -17,6 +17,17 @@
  * under the License.
  */
 
+.homDataAdd__actions {
+  // Prevent children from rendering as flex items
+  display: block;
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 .homDataAdd__content .euiIcon__fillSecondary {
   fill: $euiColorDarkestShade;
 }

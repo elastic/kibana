@@ -17,52 +17,66 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
-interface Props {
-  title: JSX.Element;
-}
-
-export const PageHeader: FC<Props> = ({ title }) => {
+export const PageHeader = () => {
   const devTools = { path: '/app/dev_tools#/console' };
   const stackManagement = { path: '/app/management' };
 
   return (
-    <div className="homPageHeaderContainer">
-      <header className="homPageHeader">
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem className="homPageHeader__titleWrapper">{title}</EuiFlexItem>
+    <header className="kbnOverviewHeader">
+      <div className="kbnOverviewHeader__inner">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xxl" type="logoKibana" />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h1 id="kbnOverviewHeader__title">
+                    <FormattedMessage defaultMessage="Kibana" id="kibana.overview.header.title" />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
-              <EuiFlexItem className="homPageHeader__menuItem">
-                <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
-                  {i18n.translate('home.pageHeader.addDataButtonLabel', {
+            <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
+              <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
+                <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
+                  {i18n.translate('kibana.overview.header.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
               {stackManagement ? (
-                <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
-                    onClick={createAppNavigationHandler(stackManagement.path)}
                     iconType="gear"
+                    onClick={createAppNavigationHandler(stackManagement.path)}
                   >
-                    {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
+                    {i18n.translate('kibana.overview.header.stackManagementButtonLabel', {
                       defaultMessage: 'Manage',
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}
+
               {devTools ? (
-                <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
-                    onClick={createAppNavigationHandler(devTools.path)}
                     iconType="wrench"
+                    onClick={createAppNavigationHandler(devTools.path)}
                   >
-                    {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                    {i18n.translate('kibana.overview.header.devToolsButtonLabel', {
                       defaultMessage: 'Dev tools',
                     })}
                   </EuiButtonEmpty>
@@ -71,7 +85,7 @@ export const PageHeader: FC<Props> = ({ title }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </header>
-    </div>
+      </div>
+    </header>
   );
 };

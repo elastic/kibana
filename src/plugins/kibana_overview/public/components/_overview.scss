@@ -20,50 +20,82 @@
 // Local page variables
 $pageWidth: 1200px;
 
-.kibanaOverviewWrapper {
+.kbnOverviewWrapper {
   background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.kibanaOverviewHeader {
+.kbnOverviewHeader {
   background-color: $euiPageBackgroundColor;
   border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
-.kibanaOverviewHeader__inner {
+.kbnOverviewHeader__inner {
   margin: 0 auto;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
 }
 
-#kibanaOverviewHeader__title {
-  @include euiBreakpoint('xs', 's') {
-    text-align: center;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.kbnOverviewHeader__actionItem .euiButtonEmpty__content {
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.kibanaOverviewHeader__actionItem {
-  @include euiBreakpoint('xs', 's') {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
-}
-
-.kibanaOverviewContent {
+.kbnOverviewContent {
   margin: 0 auto;
   max-width: $pageWidth;
   padding: $euiSizeXL $euiSize;
   width: 100%;
 }
 
-.kibanaOverviewData--expanded {
-  flex-direction: column;
+// Prevent children from rendering as flex items
+.kbnOverviewGettingStarted__content {
+  display: block;
+}
+
+.kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
+  fill: $euiColorDarkestShade;
+}
+
+.kbnOverviewApps__item {
+  .kbnOverviewApps__group--primary & {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      max-width: calc(50% - #{$euiSizeM * 2});
+    }
+  }
+
+  .kbnOverviewApps__group--secondary & {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      max-width: calc(25% - #{$euiSizeM * 2});
+    }
+  }
+}
+
+.kbnOverviewNews__content article {
+  & + article {
+    margin-top: $euiSizeL;
+  }
 
   &,
-  & > * {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
+  header {
+    & > * + * {
+      margin-top: $euiSizeXS;
+    }
+  }
+}
+
+.kbnOverviewFooter {
+  // Prevent children from rendering as flex items
+  .euiFlexItem {
+    display: block;
+  }
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
   }
 }

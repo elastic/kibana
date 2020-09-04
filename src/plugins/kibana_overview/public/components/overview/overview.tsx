@@ -16,26 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { FC, useState, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCard,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiFlexGrid,
-  EuiCard,
-  EuiButton,
-  EuiIcon,
-  EuiSpacer,
   EuiHorizontalRule,
-  EuiScreenReaderOnly,
-  EuiButtonEmpty,
+  EuiIcon,
+  EuiImage,
   EuiLink,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 import { PageHeader } from '../page_header';
@@ -43,7 +44,7 @@ import { PageHeader } from '../page_header';
 const apps = {
   dashboard: {
     title: 'Dashboard',
-    description: i18n.translate('home.kibana.featureCatalogueDescription1', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription1', {
       defaultMessage: 'Analyze data in dashboards.',
     }),
     icon: 'dashboardApp',
@@ -51,15 +52,15 @@ const apps = {
   },
   discover: {
     title: 'Discover',
-    description: i18n.translate('home.kibana.featureCatalogueDescription2', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription2', {
       defaultMessage: 'Search and find insights.',
     }),
-    icon: 'discoverApp',
+    icon: 'search',
     path: '/app/discover',
   },
   canvas: {
     title: 'Canvas',
-    description: i18n.translate('home.kibana.featureCatalogueDescription3', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription3', {
       defaultMessage: 'Design pixel-perfect reports.',
     }),
     icon: 'canvasApp',
@@ -67,7 +68,7 @@ const apps = {
   },
   maps: {
     title: 'Maps',
-    description: i18n.translate('home.kibana.featureCatalogueDescription4', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription4', {
       defaultMessage: 'Plot geographic data.',
     }),
     icon: 'gisApp',
@@ -75,15 +76,15 @@ const apps = {
   },
   ml: {
     title: 'Machine Learning',
-    description: i18n.translate('home.kibana.featureCatalogueDescription5', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription5', {
       defaultMessage: 'Model, predict, and detect.',
     }),
-    icon: 'machineLearningApp',
+    icon: 'compute',
     path: '/app/ml',
   },
   graph: {
     title: 'Graph',
-    description: i18n.translate('home.kibana.featureCatalogueDescription6', {
+    description: i18n.translate('kibana.overview.apps.featureCatalogueDescription6', {
       defaultMessage: 'Reveal patterns and relationships.',
     }),
     icon: 'graphApp',
@@ -94,19 +95,6 @@ const apps = {
 interface Props {
   newsfeed$: Observable<FetchResult | null | void>;
 }
-
-const addSpacersBetweenElementsReducer = (
-  acc: JSX.Element[],
-  element: JSX.Element,
-  index: number,
-  elements: JSX.Element[]
-) => {
-  acc.push(element);
-  if (index < elements.length - 1) {
-    acc.push(<EuiSpacer key={`homeSolutionsPanel__UseCaseSpacer${index}`} size="m" />);
-  }
-  return acc;
-};
 
 export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
@@ -142,13 +130,16 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
       : '/plugins/home/assets/kibana_montage_light_2x.png';
 
     return (
-      <section aria-labelledby="homOverview__gettingStartedTitle">
-        <EuiFlexGroup>
-          <EuiFlexItem>
+      <section
+        aria-labelledby="kbnOverviewGettingStarted__title"
+        className="kbnOverviewGettingStarted"
+      >
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem className="kbnOverviewGettingStarted__content">
             <EuiTitle size="s">
-              <h2 id="homOverview__gettingStartedTitle">
+              <h2 id="kbnOverviewGettingStarted__title">
                 <FormattedMessage
-                  id="kibanaOverview.gettingStartedTitle"
+                  id="kibana.overview.gettingStarted.title"
                   defaultMessage="Getting started with Kibana"
                 />
               </h2>
@@ -159,42 +150,50 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="kibanaOverview.gettingStartedDescription"
                   defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
+                  id="kibana.overview.gettingStarted.description"
                 />
               </p>
             </EuiText>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="xl" />
 
-            <EuiFlexGrid gutterSize="s" columns={2}>
-              {Object.values(apps).map(({ title, description, icon }) => (
+            <EuiFlexGrid className="kbnOverviewGettingStarted__apps" columns={2}>
+              {Object.values(apps).map(({ description, icon, title }) => (
                 <EuiFlexItem key={title}>
                   <EuiCard
-                    layout="horizontal"
-                    titleSize="xs"
-                    titleElement="h3"
-                    icon={<EuiIcon type={icon} size="m" />}
-                    display="plain"
-                    title={title}
                     description={description}
+                    display="plain"
+                    icon={<EuiIcon size="l" type={icon} />}
+                    layout="horizontal"
+                    paddingSize="none"
+                    title={title}
+                    titleElement="h3"
+                    titleSize="xs"
                   />
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
+
+            <EuiSpacer size="xl" />
+
             <EuiButton
               fill
-              iconType="plusInCircle"
+              iconType="indexOpen"
               onClick={createAppNavigationHandler('app/management/kibana/indexPatterns')}
             >
               <FormattedMessage
-                id="kibanaOverview.gettingStarted.addDataButtonLabel"
                 defaultMessage="Begin by adding data"
+                id="kibana.overview.gettingStarted.addDataButtonLabel"
               />
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiImage url={addBasePath(gettingStartedGraphicURL)} alt="" />
+
+          <EuiFlexItem className="kbnOverviewGettingStarted__graphic">
+            <EuiImage
+              alt="Kibana visualizations illustration"
+              url={addBasePath(gettingStartedGraphicURL)}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </section>
@@ -202,34 +201,47 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   };
 
   const renderFeedItem = ({ title, description, link, publishOn }) => (
-    <div key={title}>
-      <EuiTitle size="xs">
-        <EuiLink href={link}>{title}</EuiLink>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>{publishOn.format('MMM DD, YYYY')}</p>
-      </EuiText>
+    <article key={title}>
+      <header>
+        <EuiTitle size="xxs">
+          <h3>
+            <EuiLink href={link} target="_blank">
+              {title}
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+
+        <EuiText size="xs" color="subdued">
+          <p>
+            <time dateTime={publishOn.format('YYYY-MM-DD')}>
+              {publishOn.format('DD MMMM YYYY')}
+            </time>
+          </p>
+        </EuiText>
+      </header>
+
       <EuiText size="xs">
         <p>{description}</p>
       </EuiText>
-    </div>
+    </article>
   );
 
   const renderAppCard = (appId: string) => {
     const app = apps[appId];
+
     return (
-      <EuiFlexItem key={appId}>
+      <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
         <EuiCard
-          title={app.title}
-          titleSize="s"
           description={app.description}
+          href={addBasePath(app.path)}
           image={addBasePath(
             `/plugins/home/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}_2x.png`
           )}
           // isDisabled={!Boolean(directory)} TODO: should apps be hidden or disabled?
-          href={addBasePath(app.path)}
           onClick={createAppNavigationHandler(app.path)}
+          title={app.title}
           titleElement="h3"
+          titleSize="s"
         />
       </EuiFlexItem>
     );
@@ -241,53 +253,64 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
 
     return (
       <>
-        <section aria-labelledby="kibanaOveview__appsSectionTitle">
+        <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
           <EuiScreenReaderOnly>
-            <EuiTitle>
-              <h2 id="kibanaOveview__appsSectionTitle">
-                <FormattedMessage
-                  id="kibanaOverview.appsSection.title"
-                  defaultMessage="Explore these apps"
-                />
-              </h2>
-            </EuiTitle>
+            <h2 id="kbnOverviewApps__title">
+              <FormattedMessage
+                id="kibana.overview.apps.title"
+                defaultMessage="Explore these apps"
+              />
+            </h2>
           </EuiScreenReaderOnly>
-          <EuiFlexGroup>{mainApps.map(renderAppCard)}</EuiFlexGroup>
+
+          <EuiFlexGroup
+            className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+            justifyContent="center"
+          >
+            {mainApps.map(renderAppCard)}
+          </EuiFlexGroup>
+
           <EuiSpacer size="l" />
-          <EuiFlexGroup>{otherApps.map(renderAppCard)}</EuiFlexGroup>
+
+          <EuiFlexGroup
+            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+            justifyContent="center"
+          >
+            {otherApps.map(renderAppCard)}
+          </EuiFlexGroup>
         </section>
 
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
-            <section aria-labelledby="kibanaOverview__kibanaNewsSectionTitle">
+            <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
               <EuiTitle size="s">
-                <h2 className="kibanaOverview__kibanaNewsSectionTitle">
-                  <FormattedMessage
-                    id="kibanaOverview.kibanaNews.title"
-                    defaultMessage="Kibana news"
-                  />
+                <h2 id="kbnOverviewNews__title">
+                  <FormattedMessage id="kibana.overview.news.title" defaultMessage="Kibana news" />
                 </h2>
               </EuiTitle>
-              {newsFetchResult
-                ? newsFetchResult.feedItems
-                    .slice(0, 3)
-                    .map(renderFeedItem)
-                    .reduce(addSpacersBetweenElementsReducer, [])
-                : null}
+
+              <EuiSpacer size="m" />
+
+              <div className="kbnOverviewNews__content">
+                {newsFetchResult ? newsFetchResult.feedItems.slice(0, 3).map(renderFeedItem) : null}
+              </div>
             </section>
           </EuiFlexItem>
+
           <EuiFlexItem grow={3}>
-            <section aria-labelledby="kibanaOverview__doMoreSectionTitle">
+            <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
               <EuiTitle size="s">
-                <h2 className="kibanaOverview__doMoreSectionTitle">
+                <h2 id="kbnOverviewMore__title">
                   <FormattedMessage
-                    id="kibanaOverview.doMoreTitle"
+                    id="kibana.overview.more.title"
                     defaultMessage="Do more with Elastic"
                   />
                 </h2>
               </EuiTitle>
+
+              <EuiSpacer size="m" />
             </section>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -296,49 +319,16 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   };
 
   return (
-    <main className="kibanaOverviewWrapper" aria-labelledby="kibanaOverviewHeader__title">
-      <header className="kibanaOverviewHeader">
-        <div className="kibanaOverviewHeader__inner">
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="logoKibana" size="xxl" />
-            </EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" direction="column" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiText>Visualize & analyze</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <PageHeader
-                  title={
-                    <EuiTitle size="l">
-                      <h1 id="kibanaOverviewHeader__title">
-                        <FormattedMessage
-                          id="kibanaOverview.pageHeader.title"
-                          defaultMessage="Kibana"
-                        />
-                      </h1>
-                    </EuiTitle>
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-        </div>
-      </header>
-      <div className="kibanaOverviewContent">
-        <EuiSpacer size="l" />
+    <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
+      <PageHeader />
 
+      <div className="kbnOverviewContent">
         {isNewKibanaInstance ? renderGettingStarted() : renderNormal()}
 
-        <footer>
-          <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <EuiFlexGroup
-            className="kibanaOverviewPageFooter"
-            alignItems="center"
-            gutterSize="s"
-            justifyContent="spaceBetween"
-          >
+        <footer className="kbnOverviewFooter">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="home"
@@ -346,21 +336,21 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                 size="xs"
               >
                 <FormattedMessage
-                  id="home.changeHomeRouteLink"
+                  id="kibana.overview.footer.changeHomeRouteLink"
                   defaultMessage="Display a different page on log in"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="allPlugins"
                 href="#/feature_directory"
                 size="xs"
-                flush="right"
                 iconType="apps"
               >
                 <FormattedMessage
-                  id="home.appDirectory.appDirectoryButtonLabel"
+                  id="kibana.overview.footer.appDirectoryButtonLabel"
                   defaultMessage="View app directory"
                 />
               </EuiButtonEmpty>

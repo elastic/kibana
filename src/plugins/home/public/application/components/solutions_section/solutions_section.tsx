@@ -49,14 +49,12 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
     <>
       <section aria-labelledby="homSolutions__title" className="homSolutions">
         <EuiScreenReaderOnly>
-          <EuiTitle size="s">
-            <h2 id="homSolutions__title">
-              <FormattedMessage
-                id="home.solutionsSection.sectionTitle"
-                defaultMessage="Pick your solution"
-              />
-            </h2>
-          </EuiTitle>
+          <h2 id="homSolutions__title">
+            <FormattedMessage
+              id="home.solutionsSection.sectionTitle"
+              defaultMessage="Pick your solution"
+            />
+          </h2>
         </EuiScreenReaderOnly>
 
         <EuiFlexGroup className="homSolutions__content" justifyContent="spaceAround">

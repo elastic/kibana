@@ -147,14 +147,14 @@ export class Home extends Component {
               <EuiFlexItem>
                 <EuiTitle size="m">
                   <h1 id="homHeader__title">
-                    <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
+                    <FormattedMessage id="home.header.title" defaultMessage="Home" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homHeader__actions">
-                  <EuiFlexItem className="homHeader__actionItem">
+                <EuiFlexGroup className="homHeader__actions" responsive={false} wrap>
+                  <EuiFlexItem className="homHeader__actionItem" grow={false}>
                     <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
@@ -166,10 +166,11 @@ export class Home extends Component {
                     <EuiFlexItem
                       className="homHeader__actionItem"
                       data-test-subj="homManagementActionItem"
+                      grow={false}
                     >
                       <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
+                        onClick={createAppNavigationHandler(stackManagement.path)}
                       >
                         {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
                           defaultMessage: 'Manage',
@@ -179,10 +180,10 @@ export class Home extends Component {
                   ) : null}
 
                   {devTools ? (
-                    <EuiFlexItem className="homHeader__actionItem">
+                    <EuiFlexItem className="homHeader__actionItem" grow={false}>
                       <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(devTools.path)}
                         iconType="wrench"
+                        onClick={createAppNavigationHandler(devTools.path)}
                       >
                         {i18n.translate('home.pageHeader.devToolsButtonLabel', {
                           defaultMessage: 'Dev tools',
@@ -229,7 +230,7 @@ export class Home extends Component {
                     size="xs"
                   >
                     <FormattedMessage
-                      id="home.changeHomeRouteLink"
+                      id="home.footer.changeHomeRouteLink"
                       defaultMessage="Display a different page on log in"
                     />
                   </EuiButtonEmpty>
@@ -241,11 +242,10 @@ export class Home extends Component {
                   data-test-subj="allPlugins"
                   href="#/feature_directory"
                   size="xs"
-                  flush="right"
                   iconType="apps"
                 >
                   <FormattedMessage
-                    id="home.appDirectory.appDirectoryButtonLabel"
+                    id="home.footer.appDirectoryButtonLabel"
                     defaultMessage="View app directory"
                   />
                 </EuiButtonEmpty>
