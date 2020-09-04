@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('loads the ML pages', async () => {
-      await ml.testExecution.logTestStep('home');
+      await ml.testExecution.logTestStep('loads the ML home page');
       await ml.navigation.navigateToMl();
 
       await ml.testExecution.logTestStep('loads the overview page');
@@ -34,10 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('loads the settings page');
       await ml.navigation.navigateToSettings();
-      await ml.settings.assertSettingsManageCalendarsLinkExists();
-      await ml.settings.assertSettingsCreateCalendarLinkExists();
-      await ml.settings.assertSettingsManageFilterListsLinkExists();
-      await ml.settings.assertSettingsCreateFilterListLinkExists();
+      await ml.settings.assertManageCalendarsLinkExists();
+      await ml.settings.assertCreateCalendarLinkExists();
+      await ml.settings.assertManageFilterListsLinkExists();
+      await ml.settings.assertCreateFilterListLinkExists();
 
       await ml.testExecution.logTestStep('loads the data frame analytics page');
       await ml.navigation.navigateToDataFrameAnalytics();
