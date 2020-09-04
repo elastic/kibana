@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
+  SearchFilterConfig,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -67,13 +68,7 @@ export const ModelsList: FC = () => {
   const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
-  const [filteredModels, setFilteredModels] = useState<{
-    active: boolean;
-    items: ModelItem[];
-  }>({
-    active: false,
-    items: [],
-  });
+  const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
@@ -82,12 +77,12 @@ export const ModelsList: FC = () => {
     {}
   );
 
-  const setQueryClauses = (queryClauses: any) => {
+  const updateFilteredItems = (queryClauses: any) => {
     if (queryClauses.length) {
       const filtered = filterAnalyticsModels(items, queryClauses);
-      setFilteredModels({ active: true, items: filtered });
+      setFilteredModels(filtered);
     } else {
-      setFilteredModels({ active: false, items: [] });
+      setFilteredModels(items);
     }
   };
 
@@ -98,15 +93,15 @@ export const ModelsList: FC = () => {
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
       }
-      setQueryClauses(clauses);
+      updateFilteredItems(clauses);
     } else {
-      setQueryClauses([]);
+      updateFilteredItems([]);
     }
   };
 
   useEffect(() => {
     filterList();
-  }, [searchQueryText]);
+  }, [searchQueryText, items]);
 
   /**
    * Fetches inference trained models.
@@ -381,7 +376,7 @@ export const ModelsList: FC = () => {
     },
   ];
 
-  const filters =
+  const filters: SearchFilterConfig[] =
     inferenceTypesOptions && inferenceTypesOptions.length > 0
       ? [
           {
@@ -398,7 +393,7 @@ export const ModelsList: FC = () => {
 
   const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<ModelItem>(
     ModelsTableToConfigMapping.id,
-    filteredModels.active ? filteredModels.items : items
+    filteredModels
   );
 
   const toolsLeft = (
@@ -463,7 +458,6 @@ export const ModelsList: FC = () => {
           {selectedModels.length > 0 && toolsLeft}
           <EuiFlexItem>
             <AnalyticsSearchBar
-              // @ts-ignore TODO
               filters={filters}
               searchQueryText={searchQueryText}
               setSearchQueryText={setSearchQueryText}
