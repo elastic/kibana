@@ -90,7 +90,6 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       expect(apiResponse.action).to.be('acks');
-      expect(apiResponse.success).to.be(true);
       const { body: eventResponse } = await supertest
         .get(`/api/ingest_manager/fleet/agents/agent1/events`)
         .set('kbn-xsrf', 'xx')

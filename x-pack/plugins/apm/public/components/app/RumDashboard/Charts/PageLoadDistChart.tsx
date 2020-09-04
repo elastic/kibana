@@ -35,7 +35,7 @@ import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;
-  percentiles: Record<string, number> | undefined;
+  percentiles: Record<string, number | null> | undefined;
   minDuration: number;
   maxDuration: number;
 }
@@ -43,7 +43,7 @@ interface PageLoadData {
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
   data?: PageLoadData | null;
-  breakdowns: BreakdownItem[];
+  breakdown: BreakdownItem | null;
   percentileRange: PercentileRange;
   loading: boolean;
 }
@@ -57,7 +57,7 @@ const PageLoadChart = styled(Chart)`
 export function PageLoadDistChart({
   onPercentileChange,
   data,
-  breakdowns,
+  breakdown,
   loading,
   percentileRange,
 }: Props) {
@@ -122,17 +122,17 @@ export function PageLoadDistChart({
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_CATMULL_ROM}
           />
-          {breakdowns.map(({ name, type }) => (
+          {breakdown && (
             <BreakdownSeries
-              key={`${type}-${name}`}
-              field={type}
-              value={name}
+              key={`${breakdown.type}-${breakdown.name}`}
+              field={breakdown.type}
+              value={breakdown.name}
               percentileRange={percentileRange}
               onLoadingChange={(bLoading) => {
                 setBreakdownLoading(bLoading);
               }}
             />
-          ))}
+          )}
         </PageLoadChart>
       )}
     </ChartWrapper>

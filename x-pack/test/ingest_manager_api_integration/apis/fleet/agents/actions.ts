@@ -33,7 +33,6 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(apiResponse.success).to.be(true);
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
       expect(apiResponse.item.sent_at).to.be('2020-03-18T19:45:02.620Z');
     });

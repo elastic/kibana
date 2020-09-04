@@ -9,5 +9,5 @@ Settled state between `url`<!-- -->, `baseUrl`<!-- -->, and `active`
 <b>Signature:</b>
 
 ```typescript
-readonly href?: string;
+readonly href: string;
 ```
