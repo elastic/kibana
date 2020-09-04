@@ -18,8 +18,6 @@ import {
   uniq,
 } from 'lodash/fp';
 
-import { eventFieldsMap } from '../../../common/ecs/ecs_fields';
-
 import {
   DetailItem,
   EcsEdges,
@@ -29,6 +27,7 @@ import {
   TimelineEdges,
 } from '../../graphql/types';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
+import { eventFieldsMap } from '../ecs_fields';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';

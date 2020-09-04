@@ -6,7 +6,6 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, getOr, has, head } from 'lodash/fp';
-
 import {
   FirstLastSeenHost,
   HostItem,
@@ -16,6 +15,7 @@ import {
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { hostFieldsMap } from '../ecs_fields';
 import { TermAggregation } from '../types';
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
@@ -34,7 +34,6 @@ import {
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
 import { getHostData } from '../../endpoint/routes/metadata';
-import { hostFieldsMap } from '../../../common/ecs/ecs_fields';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
