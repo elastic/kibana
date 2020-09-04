@@ -36,7 +36,7 @@ exports[`renders without crashing 1`] = `
         />
         <EuiLink
           aria-label="Customize the URL identifier"
-          data-test-subj="clickOnCustomizeOrReset"
+          data-test-subj="CustomizeOrReset"
           onClick={[Function]}
         >
           <FormattedMessage
