@@ -24,6 +24,19 @@ const defaultProps = {
   http: {} as HttpSetup,
 };
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
 describe('filters', () => {
   let state: IndexPatternPrivateState;
   const InlineOptions = filtersOperation.paramEditor!;
@@ -110,7 +123,7 @@ describe('filters', () => {
           type: 'document',
         })
       ).toEqual({
-        dataType: 'number',
+        dataType: 'string',
         isBucketed: true,
         scale: 'ordinal',
       });
@@ -137,6 +150,65 @@ describe('filters', () => {
         return 'QueryStringInput';
       },
     }));
+
+    it('should update state when changing a filter', () => {
+      const setStateSpy = jest.fn();
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      act(() => {
+        instance.find(FilterPopover).first().prop('setFilter')!({
+          input: {
+            query: 'dest : 5',
+            language: 'lucene',
+          },
+          label: 'Dest5',
+          id: 0,
+        });
+      });
+      instance.update();
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  filters: [
+                    {
+                      input: {
+                        query: 'dest : 5',
+                        language: 'lucene',
+                      },
+                      label: 'Dest5',
+                    },
+                    {
+                      input: {
+                        language: 'kuery',
+                        query: 'src : 2',
+                      },
+                      label: '',
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
     describe('Modify search query', () => {
       it('should correctly show existing filters ', () => {
         const setStateSpy = jest.fn();
@@ -162,118 +234,6 @@ describe('filters', () => {
             .at(2)
             .text()
         ).toEqual('src : 2');
-      });
-
-      it('should update state when changing a filter', () => {
-        const setStateSpy = jest.fn();
-        const instance = mount(
-          <InlineOptions
-            {...defaultProps}
-            state={state}
-            setState={setStateSpy}
-            columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
-            layerId="first"
-          />
-        );
-
-        act(() => {
-          instance.find(FilterPopover).first().prop('setFilter')!({
-            input: {
-              query: 'dest : 5',
-              language: 'lucene',
-            },
-            label: 'Dest5',
-          });
-        });
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    filters: [
-                      {
-                        input: {
-                          query: 'dest : 5',
-                          language: 'lucene',
-                        },
-                        label: 'Dest5',
-                      },
-                      {
-                        input: {
-                          language: 'kuery',
-                          query: 'src : 2',
-                        },
-                        label: '',
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          },
-        });
-      });
-
-      it('should add label to duplicated filter', () => {
-        const setStateSpy = jest.fn();
-        const instance = mount(
-          <InlineOptions
-            {...defaultProps}
-            state={state}
-            setState={setStateSpy}
-            columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
-            layerId="first"
-          />
-        );
-
-        act(() => {
-          instance.find(FilterPopover).first().prop('setFilter')!({
-            input: {
-              language: 'kuery',
-              query: 'src : 2',
-            },
-            label: '',
-          });
-        });
-        expect(setStateSpy).toHaveBeenCalledWith({
-          ...state,
-          layers: {
-            first: {
-              ...state.layers.first,
-              columns: {
-                ...state.layers.first.columns,
-                col1: {
-                  ...state.layers.first.columns.col1,
-                  params: {
-                    filters: [
-                      {
-                        input: {
-                          language: 'kuery',
-                          query: 'src : 2',
-                        },
-                        label: 'src : 2 [1]',
-                      },
-                      {
-                        input: {
-                          language: 'kuery',
-                          query: 'src : 2',
-                        },
-                        label: '',
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          },
-        });
       });
 
       it('should remove search query', () => {

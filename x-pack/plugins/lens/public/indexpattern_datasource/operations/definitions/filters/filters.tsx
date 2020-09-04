@@ -121,12 +121,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       params: previousColumn?.params?.filters
         ? previousColumn.params
         : {
-            filters: [
-              {
-                input: getDefaultFilter(),
-                label: '',
-              },
-            ],
+            filters: [getDefaultFilter()],
           },
     };
   },
@@ -198,7 +193,7 @@ export const FilterList = ({
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
-    setFilters(updatedFilters.map((filter) => omit(filter, 'id') as FilterValue));
+    setFilters(updatedFilters.map((filter) => omit(filter, 'id')));
     setLocalFilters(updatedFilters);
   };
 
