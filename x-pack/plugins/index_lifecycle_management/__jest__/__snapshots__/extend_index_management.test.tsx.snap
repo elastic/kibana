@@ -134,6 +134,7 @@ exports[`extend index management ilm summary extension should return extension w
         },
         "step_time_millis": 1544187776208,
       },
+      "isFrozen": false,
       "name": "testy3",
       "primary": "1",
       "primary_size": "6.5kb",
@@ -326,6 +327,82 @@ exports[`extend index management ilm summary extension should return extension w
               className="euiSpacer euiSpacer--s"
             />
           </EuiSpacer>
+          <EuiPopover
+            anchorPosition="downCenter"
+            button={
+              <EuiButtonEmpty
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Stack trace"
+                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
+                  values={Object {}}
+                />
+              </EuiButtonEmpty>
+            }
+            closePopover={[Function]}
+            display="inlineBlock"
+            hasArrow={true}
+            id="stackPopover"
+            isOpen={false}
+            ownFocus={false}
+            panelPaddingSize="m"
+          >
+            <EuiOutsideClickDetector
+              isDisabled={true}
+              onOutsideClick={[Function]}
+            >
+              <div
+                className="euiPopover euiPopover--anchorDownCenter"
+                id="stackPopover"
+                onKeyDown={[Function]}
+                onMouseDown={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchStart={[Function]}
+              >
+                <div
+                  className="euiPopover__anchor"
+                >
+                  <EuiButtonEmpty
+                    onClick={[Function]}
+                  >
+                    <button
+                      className="euiButtonEmpty euiButtonEmpty--primary"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <EuiButtonContent
+                        className="euiButtonEmpty__content"
+                        iconSide="left"
+                        textProps={
+                          Object {
+                            "className": "euiButtonEmpty__text",
+                          }
+                        }
+                      >
+                        <span
+                          className="euiButtonContent euiButtonEmpty__content"
+                        >
+                          <span
+                            className="euiButtonEmpty__text"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Stack trace"
+                              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
+                              values={Object {}}
+                            >
+                              Stack trace
+                            </FormattedMessage>
+                          </span>
+                        </span>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonEmpty>
+                </div>
+              </div>
+            </EuiOutsideClickDetector>
+          </EuiPopover>
         </div>
       </EuiText>
     </div>
@@ -588,6 +665,7 @@ exports[`extend index management ilm summary extension should return extension w
         "step": "complete",
         "step_time_millis": 1544187775867,
       },
+      "isFrozen": false,
       "name": "testy3",
       "primary": "1",
       "primary_size": "6.5kb",
