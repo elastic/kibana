@@ -64,7 +64,8 @@ function getMovedEntities(
               date: dateInShape,
             },
             prevLocation: {
-              shapeId: prevLocationObj.shapeLocation,
+              location: prevLocationObj.location,
+              shapeId: prevLocationObj.shapeLocationId,
               date: prevLocationObj.dateInShape,
             },
           });
