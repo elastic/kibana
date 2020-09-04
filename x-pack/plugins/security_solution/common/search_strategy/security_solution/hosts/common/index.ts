@@ -6,7 +6,7 @@
 
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
-import { Maybe, SearchHit, TotalValue } from '../..';
+import { Maybe, SearchHit, TotalValue } from '../../../common';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',

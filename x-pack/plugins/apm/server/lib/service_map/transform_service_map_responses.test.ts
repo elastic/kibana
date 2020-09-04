@@ -72,7 +72,6 @@ describe('transformServiceMapResponses', () => {
       (element) => 'source' in element.data && 'target' in element.data
     );
 
-    // @ts-ignore
     expect(connection?.data.target).toBe('opbeans-node');
 
     expect(
@@ -149,9 +148,9 @@ describe('transformServiceMapResponses', () => {
 
     const nodejsNode = nodes.find((node) => node.data.id === '>opbeans-node');
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_SUBTYPE]).toBe('aa');
   });
 

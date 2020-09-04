@@ -68,7 +68,7 @@ export const useFirstLastSeenHost = ({
         const searchSubscription$ = data.search
           .search<HostFirstLastSeenRequestOptions, HostFirstLastSeenStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
