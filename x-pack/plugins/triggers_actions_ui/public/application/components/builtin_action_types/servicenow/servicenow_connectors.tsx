@@ -18,10 +18,13 @@ import {
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
+import { CasesConfigurationMapping } from '../case_mappings/types';
+import { FieldMapping } from '../case_mappings/field_mapping';
+import { createDefaultMapping } from '../case_mappings/utils';
+
 import * as i18n from './translations';
-import { ServiceNowActionConnector, CasesConfigurationMapping } from './types';
+import { ServiceNowActionConnector } from './types';
 import { connectorConfiguration } from './config';
-import { FieldMapping } from './case_mappings/field_mapping';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
@@ -172,7 +175,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
             <EuiFlexItem data-test-subj="case-servicenow-mappings">
               <FieldMapping
                 disabled={true}
-                connectorActionTypeId={connectorConfiguration.id}
+                connectorConfiguration={connectorConfiguration}
                 mapping={mapping as CasesConfigurationMapping[]}
                 onChangeMapping={handleOnChangeMappingConfig}
               />
@@ -183,16 +186,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
     </>
   );
 };
-
-export const createDefaultMapping = (fields: Record<string, any>): CasesConfigurationMapping[] =>
-  Object.keys(fields).map(
-    (key) =>
-      ({
-        source: fields[key].defaultSourceField,
-        target: key,
-        actionType: fields[key].defaultActionType,
-      } as CasesConfigurationMapping)
-  );
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

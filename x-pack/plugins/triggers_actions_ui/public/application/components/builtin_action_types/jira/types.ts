@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CasesConfigurationMapping } from '../case_mappings/types';
+
 export interface JiraActionConnector {
   config: JiraConfig;
   secrets: JiraSecrets;
@@ -40,8 +42,3 @@ interface JiraSecrets {
 }
 
 // to remove
-export interface CasesConfigurationMapping {
-  source: string;
-  target: string;
-  actionType: string;
-}

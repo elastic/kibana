@@ -12,7 +12,6 @@ import { EuiSelect } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
 
 import { useAppDependencies } from '../../../app_context';
 import { ActionParamsProps } from '../../../../types';
@@ -138,14 +137,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   return (
     <Fragment>
-      {/* <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.jira.title', {
-            defaultMessage: 'Issue',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" /> */}
       <>
         <EuiFormRow
           fullWidth
