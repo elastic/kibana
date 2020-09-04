@@ -692,6 +692,12 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.boolean,
   },
+  positive_score_impact: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+    schema: t.boolean,
+  },
   preserve_separators: {
     fieldConfig: {
       defaultValue: true,

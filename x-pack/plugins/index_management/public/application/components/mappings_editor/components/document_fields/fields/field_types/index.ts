@@ -28,6 +28,7 @@ import { ObjectType } from './object_type';
 import { OtherType } from './other_type';
 import { NestedType } from './nested_type';
 import { JoinType } from './join_type';
+import { RankFeatureType } from './rank_feature_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -52,6 +53,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   other: OtherType,
   nested: NestedType,
   join: JoinType,
+  rank_feature: RankFeatureType,
 };
 
 export const getParametersFormForType = (
