@@ -161,7 +161,7 @@ export default function (providerContext: FtrProviderContext) {
               type: 'ingest_pipeline',
             },
             {
-              id: 'logs-all_assets.test_logs-0.1.0',
+              id: 'logs-all_assets.test_logs-default-0.1.0',
               type: 'transform',
             },
             {
