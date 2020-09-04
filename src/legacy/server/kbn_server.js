@@ -34,7 +34,6 @@ import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
 import * as Plugins from './plugins';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
-import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { i18nMixin } from './i18n';
 
@@ -91,8 +90,6 @@ export default class KbnServer {
 
         coreMixin,
 
-        // adds methods for extending this.server
-        serverExtensionsMixin,
         loggingMixin,
         warningsMixin,
         statusMixin,

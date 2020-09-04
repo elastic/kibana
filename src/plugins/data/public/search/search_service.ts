@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
-import { getEsClient, LegacyApiCaller } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
@@ -33,9 +33,8 @@ import { ExpressionsSetup } from '../../../expressions/public';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  packageInfo: PackageInfo;
-  usageCollection?: UsageCollectionSetup;
   expressions: ExpressionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -45,27 +44,17 @@ export interface SearchServiceStartDependencies {
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
-  private esClient?: LegacyApiCaller;
   private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   public setup(
     { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
-    { expressions, packageInfo, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
     const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
-    const packageVersion = packageInfo.version;
 
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
-
-    this.esClient = getEsClient({
-      esRequestTimeout,
-      esApiVersion,
-      http,
-      packageVersion,
-    });
 
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -107,15 +96,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
-    const legacySearch = {
-      esClient: this.esClient!,
-    };
+    const loadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(loadingCount$);
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
+      // TODO: we don't need this, apply on the server
       esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
-      legacySearch,
+      http,
+      loadingCount$,
     };
 
     return {
@@ -127,7 +117,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           return new SearchSource({}, searchSourceDependencies);
         },
       },
-      __LEGACY: legacySearch,
     };
   }
 

@@ -1,8 +1,8 @@
 {
-  "extends": "./tsconfig",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
+    "outDir": "./target/types",
     "stripInternal": false,
     "emitDeclarationOnly": true,
     "declarationMap": true
