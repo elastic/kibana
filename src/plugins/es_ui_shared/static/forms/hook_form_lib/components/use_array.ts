@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { isEqual, get } from 'lodash';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
 
 import { FieldConfig, FormData, FieldHook } from '../types';
 import { useFormContext } from '../form_context';
-import { useField, useFormData } from '../hooks';
+import { useField } from '../hooks';
+import { unflattenObject } from '../lib';
 
 interface Props<T extends unknown[] = unknown[]> {
   path: string;
@@ -67,17 +69,33 @@ export const UseArray = <T extends unknown[] = unknown[]>({
   children,
 }: Props<T>) => {
   const didMountRef = useRef(false);
-  const didInitFieldRef = useRef(false);
-  const form = useFormContext();
-  const defaultValues = readDefaultValueOnForm && (form.getFieldDefaultValue(path) as any[]);
   const uniqueId = useRef(0);
 
-  const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
-    values.map((_, index) => ({
-      id: uniqueId.current++,
-      path: `${path}[${index}]`,
-      isNew: false,
-    }));
+  const form = useFormContext();
+  const defaultValues = readDefaultValueOnForm
+    ? (form.getFieldDefaultValue(path) as any[])
+    : undefined;
+  const fieldConfig: FieldConfig<any, T> & { initialValue?: T } =
+    config !== undefined
+      ? { ...config }
+      : ({
+          ...form.__readFieldConfigFromSchema(path),
+        } as Partial<FieldConfig<any, T>>);
+
+  if (defaultValues !== undefined) {
+    // update the form "defaultValue" ref object so when/if we reset the form we can go back to this value
+    form.__updateDefaultValueAt(path, defaultValues);
+
+    // Use the defaultValue prop as initial value
+    fieldConfig.initialValue = defaultValues as T;
+  } else {
+    if (readDefaultValueOnForm) {
+      // Read the field initial value from the "defaultValue" object passed to the form
+      fieldConfig.initialValue = (form.getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
+    }
+  }
+  const field = useField<T>(form, path, fieldConfig);
+  const { setValue } = field;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -88,18 +106,18 @@ export const UseArray = <T extends unknown[] = unknown[]>({
     [path]
   );
 
-  const initialState = defaultValues
-    ? getInitialItemsFromValues(defaultValues)
-    : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
+  const [items, setItems] = useState<ArrayItem[]>(() => {
+    const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
+      values.map((_, index) => ({
+        id: uniqueId.current++,
+        path: `${path}[${index}]`,
+        isNew: false,
+      }));
 
-  const [items, setItems] = useState<ArrayItem[]>(initialState);
-  const paths = useMemo<string[]>(() => {
-    return items.map((item) => item.path);
-  }, [items]);
-
-  const field = useField<T>(form, path, config);
-  const { setValue, reset } = field;
-  const [formData] = useFormData({ watch: paths });
+    return defaultValues
+      ? getInitialItemsFromValues(defaultValues)
+      : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
+  });
 
   const updatePaths = useCallback(
     (_rows: ArrayItem[]) => {
@@ -142,26 +160,29 @@ export const UseArray = <T extends unknown[] = unknown[]>({
   );
 
   useEffect(() => {
-    if (didInitFieldRef.current) {
-      setValue(
-        items.map((item) => {
-          return formData[item.path];
-        }) as T
+    const subscription = form.subscribe((update) => {
+      const currentValues = update.data.raw[path];
+      const filteredFlattenedValues = Object.entries(update.data.raw).reduce(
+        (acc, [key, value]) => {
+          if (key.startsWith(path + '[')) {
+            return {
+              ...acc,
+              [key]: value,
+            };
+          }
+          return acc;
+        },
+        {} as Record<string, any>
       );
-    }
-  }, [formData, setValue, items]);
-
-  useEffect(() => {
-    if (didMountRef.current && !didInitFieldRef.current) {
-      reset({
-        resetValue: true,
-        defaultValue: items.map((item) => {
-          return formData[item.path];
-        }) as T,
-      });
-      didInitFieldRef.current = true;
-    }
-  }, [reset, items, formData]);
+      const unflattened = unflattenObject(filteredFlattenedValues);
+      const nextValues = (get(unflattened, path) as T) ?? [];
+      const shouldUpdate = !isEqual(nextValues, currentValues);
+      if (shouldUpdate) {
+        setValue(nextValues);
+      }
+    });
+    return subscription.unsubscribe;
+  }, [setValue, form, path]);
 
   useEffect(() => {
     if (didMountRef.current) {
@@ -171,7 +192,7 @@ export const UseArray = <T extends unknown[] = unknown[]>({
     } else {
       didMountRef.current = true;
     }
-  }, [path, updatePaths, reset]);
+  }, [path, updatePaths]);
 
   return children({ field, items, addItem, removeItem, moveItem });
 };
