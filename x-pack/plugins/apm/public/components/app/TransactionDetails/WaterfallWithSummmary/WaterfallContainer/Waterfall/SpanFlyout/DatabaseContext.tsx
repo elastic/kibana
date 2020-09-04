@@ -8,13 +8,13 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tint } from 'polished';
 import React, { Fragment } from 'react';
-// @ts-ignore
+// @ts-expect-error
 import sql from 'react-syntax-highlighter/dist/languages/sql';
 import SyntaxHighlighter, {
   registerLanguage,
-  // @ts-ignore
+  // @ts-expect-error
 } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
+// @ts-expect-error
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';

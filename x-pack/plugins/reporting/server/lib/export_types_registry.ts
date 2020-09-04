@@ -11,8 +11,8 @@ import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 import { ExportTypeDefinition } from '../types';
 
-type GetCallbackFn<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> = (
-  item: ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, ScheduleTaskFnType>
+type GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType> = (
+  item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, CreateJobFnType>
 ) => boolean;
 // => ExportTypeDefinition<T, U, V, W>
 
@@ -21,8 +21,8 @@ export class ExportTypesRegistry {
 
   constructor() {}
 
-  register<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
-    item: ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>
+  register<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType>(
+    item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType>
   ): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
@@ -43,24 +43,24 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
+  getById<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType>(
     id: string
-  ): ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> {
+  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType> {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
     return this._map.get(id) as ExportTypeDefinition<
       JobParamsType,
-      ScheduleTaskFnType,
+      CreateJobFnType,
       JobPayloadType,
       RunTaskFnType
     >;
   }
 
-  get<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>(
-    findType: GetCallbackFn<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType>
-  ): ExportTypeDefinition<JobParamsType, ScheduleTaskFnType, JobPayloadType, RunTaskFnType> {
+  get<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType>(
+    findType: GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType>
+  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, RunTaskFnType> {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
@@ -68,7 +68,7 @@ export class ExportTypesRegistry {
       }
       const foundResult: ExportTypeDefinition<
         JobParamsType,
-        ScheduleTaskFnType,
+        CreateJobFnType,
         JobPayloadType,
         RunTaskFnType
       > = value;

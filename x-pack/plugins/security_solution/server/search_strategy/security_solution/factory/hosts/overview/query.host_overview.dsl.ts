@@ -5,8 +5,8 @@
  */
 
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution';
-import { cloudFieldsMap, hostFieldsMap } from '../../../../../lib/ecs_fields';
 import { buildFieldsTermAggregation } from '../../../../../lib/hosts/helpers';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_FIELDS } from './helpers';
