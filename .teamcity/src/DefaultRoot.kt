@@ -20,15 +20,9 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object DefaultRoot : GitVcsRoot({
-//  id(DslContext.projectName)
-  id("brianseeders_kibana")
+  id("kibana_master")
 
-//  name = "${DslContext.parentProjectId} (${DslContext.projectName})"
-//  url = "https://github.com/brianseeders/${DslContext.parentProjectId.toString().toLowerCase()}.git"
-//  branch = "refs/heads/${DslContext.projectName}"
-
-//  name = "kibana / teamcity"
-  name = "https://github.com/brianseeders/kibana.git"
-  url = "https://github.com/brianseeders/kibana.git"
-  branch = "refs/heads/teamcity-dev"
+  name = "kibana / master"
+  url = "https://github.com/elastic/kibana.git"
+  branch = "refs/heads/master_teamcity"
 })

@@ -49,12 +49,12 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       }
 
       feature {
-        id = "kibana-brianseeders"
+        id = "kibana"
         type = "CloudProfile"
         param("agentPushPreset", "")
-        param("profileId", "kibana-brianseeders")
+        param("profileId", "kibana")
         param("profileServerUrl", "")
-        param("name", "kibana-brianseeders")
+        param("name", "kibana")
         param("total-work-time", "")
         param("credentialsType", "key")
         param("description", "")
