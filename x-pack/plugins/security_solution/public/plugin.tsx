@@ -32,7 +32,6 @@ import {
 } from './types';
 import {
   APP_ID,
-  APP_ICON,
   APP_ICON_SOLUTION,
   APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,

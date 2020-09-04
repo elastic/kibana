@@ -11,6 +11,7 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
+  EuiSelectableMessage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,6 +42,16 @@ interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
+
+const clearField = (field: HTMLInputElement) => {
+  const nativeInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  const nativeInputValueSetter = nativeInputValue ? nativeInputValue.set : undefined;
+  if (nativeInputValueSetter) {
+    nativeInputValueSetter.call(field, '');
+  }
+
+  field.dispatchEvent(new Event('change'));
+};
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 const blurEvent = new FocusEvent('blur');
@@ -128,7 +139,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       navigateToUrl(url);
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
-        searchRef.value = '';
+        clearField(searchRef);
         searchRef.dispatchEvent(blurEvent);
       }
     }
@@ -149,6 +160,22 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           defaultMessage: 'Search Elastic',
         }),
       }}
+      emptyMessage={
+        <EuiSelectableMessage style={{ minHeight: 300 }}>
+          <p>
+            <FormattedMessage
+              id="xpack.globalSearchBar.searchBar.noResultsHeading"
+              defaultMessage="No results found"
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.globalSearchBar.searchBar.noResultsHeading"
+              defaultMessage="Try searching for applications and saved objects by name."
+            />
+          </p>
+        </EuiSelectableMessage>
+      }
       popoverFooter={
         <EuiText color="subdued" size="xs">
           <EuiFlexGroup
@@ -162,7 +189,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
               id="xpack.globalSearchBar.searchBar.shortcut"
               defaultMessage="{what}{how}"
               values={{
-                what: <EuiFlexItem grow={false}>Quickly search using:</EuiFlexItem>,
+                what: <EuiFlexItem grow={false}>Shortcut</EuiFlexItem>,
                 how: (
                   <EuiFlexItem grow={false}>
                     <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>
