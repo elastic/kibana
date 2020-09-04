@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -37,21 +37,24 @@ export function VisitorBreakdown() {
 
   return (
     <>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{I18LABELS.browser}</h4>
-          </EuiTitle>
           <VisitorBreakdownChart options={data?.browsers} />
+          <EuiSpacer />
+          <EuiTitle size="xs">
+            <h4 style={{ marginLeft: 124 }}>{I18LABELS.browser}</h4>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{I18LABELS.operatingSystem}</h4>
-          </EuiTitle>
           <VisitorBreakdownChart options={data?.os} />
+          <EuiSpacer />
+          <EuiTitle size="xs">
+            <h4 style={{ marginLeft: 107 }}>{I18LABELS.operatingSystem}</h4>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
