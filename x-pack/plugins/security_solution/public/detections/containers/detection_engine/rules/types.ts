@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 
 import {
+  SortOrder,
   author,
   building_block_type,
   license,
@@ -17,11 +18,12 @@ import {
   threshold,
   type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { listArray } from '../../../../../common/detection_engine/schemas/types';
 import {
-  listArray,
-  listArrayOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types';
-import { PatchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+  CreateRulesSchema,
+  PatchRulesSchema,
+  UpdateRulesSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -36,48 +38,13 @@ export const action = t.exact(
   })
 );
 
-export const NewRuleSchema = t.intersection([
-  t.type({
-    description: t.string,
-    enabled: t.boolean,
-    interval: t.string,
-    name: t.string,
-    risk_score: t.number,
-    severity: t.string,
-    type,
-  }),
-  t.partial({
-    actions: t.array(action),
-    anomaly_threshold: t.number,
-    created_by: t.string,
-    false_positives: t.array(t.string),
-    filters: t.array(t.unknown),
-    from: t.string,
-    id: t.string,
-    index: t.array(t.string),
-    language: t.string,
-    machine_learning_job_id: t.string,
-    max_signals: t.number,
-    query: t.string,
-    references: t.array(t.string),
-    rule_id: t.string,
-    saved_id: t.string,
-    tags: t.array(t.string),
-    threat: t.array(t.unknown),
-    threshold,
-    throttle: t.union([t.string, t.null]),
-    to: t.string,
-    updated_by: t.string,
-    note: t.string,
-    exceptions_list: listArrayOrUndefined,
-  }),
-]);
+export interface CreateRulesProps {
+  rule: CreateRulesSchema;
+  signal: AbortSignal;
+}
 
-export const NewRulesSchema = t.array(NewRuleSchema);
-export type NewRule = t.TypeOf<typeof NewRuleSchema>;
-
-export interface AddRulesProps {
-  rule: NewRule;
+export interface UpdateRulesProps {
+  rule: UpdateRulesSchema;
   signal: AbortSignal;
 }
 
@@ -185,7 +152,7 @@ export interface FetchRulesProps {
 export interface FilterOptions {
   filter: string;
   sortField: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: SortOrder;
   showCustomRules?: boolean;
   showElasticRules?: boolean;
   tags?: string[];
