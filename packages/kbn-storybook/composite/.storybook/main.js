@@ -3,13 +3,12 @@ const { storybookAliases } = require('../../../../src/dev/storybook/aliases');
 
 const m = {
   dashboard_enhanced: 'dashboard-enhanced',
-  infra: 'infra-neon',
 };
 
-const urlSuffix = 'vercel.app';
+const urlSuffix = 'nlsmith.vercel.app';
 const refs = Object.entries(storybookAliases).reduce((prev, [id, options]) => {
   if (id !== 'composite') {
-    prev[id] = { title: options.title || id, url: `https://${m[id]}.${urlSuffix}` };
+    prev[id] = { title: options.title || id, url: `https://${m[id] || id}.${urlSuffix}` };
   }
   return prev;
 }, {});
