@@ -15,12 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { ml } from './ml_api_service';
 
 import { mlMessageBarService } from '../components/messagebar';
-import { getToastNotifications } from '../util/dependency_cache';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -415,62 +413,6 @@ class JobService {
     return tempJob;
   }
 
-  updateJob(jobId, job) {
-    // return the promise chain
-    return ml
-      .updateJob({ jobId, job })
-      .then(() => {
-        return { success: true };
-      })
-      .catch((err) => {
-        // TODO - all the functions in here should just return the error and not
-        // display the toast, as currently both the component and this service display
-        // errors, so we end up with duplicate toasts.
-        const toastNotifications = getToastNotifications();
-        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
-        toastNotificationService.displayErrorToast(
-          err,
-          i18n.translate('xpack.ml.jobService.updateJobErrorTitle', {
-            defaultMessage: 'Could not update job: {jobId}',
-            values: { jobId },
-          })
-        );
-
-        console.error('update job', err);
-        return { success: false, message: err };
-      });
-  }
-
-  validateJob(obj) {
-    // return the promise chain
-    return ml
-      .validateJob(obj)
-      .then((messages) => {
-        return { success: true, messages };
-      })
-      .catch((err) => {
-        const toastNotifications = getToastNotifications();
-        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
-        toastNotificationService.displayErrorToast(
-          err,
-          i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
-            defaultMessage: 'Job Validation Error',
-          })
-        );
-
-        console.log('validate job', err);
-        return {
-          success: false,
-          messages: [
-            {
-              status: 'error',
-              text: err.message,
-            },
-          ],
-        };
-      });
-  }
-
   // find a job based on the id
   getJob(jobId) {
     const job = find(jobs, (j) => {
@@ -636,25 +578,6 @@ class JobService {
       datafeedId,
       datafeedConfig,
     });
-  }
-
-  updateDatafeed(datafeedId, datafeedConfig) {
-    return ml
-      .updateDatafeed({ datafeedId, datafeedConfig })
-      .then((resp) => {
-        console.log('update datafeed', resp);
-        return { success: true };
-      })
-      .catch((err) => {
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
-            defaultMessage: 'Could not update datafeed: {datafeedId}',
-            values: { datafeedId },
-          })
-        );
-        console.log('update datafeed', err);
-        return { success: false, message: err.message };
-      });
   }
 
   // start the datafeed for a given job

@@ -5,18 +5,19 @@
  */
 
 import { each } from 'lodash';
-import { mlMessageBarService } from '../../../components/messagebar';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 
+import { mlMessageBarService } from '../../../components/messagebar';
 import { mlJobService } from '../../../services/job_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { i18n } from '@kbn/i18n';
 import { mlCalendarService } from '../../../services/calendar_service';
+import { extractErrorMessage } from '../../../../../common/util/errors';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -176,7 +177,7 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId);
+    const job = await loadFullJob(jobId + 4);
     if (job.custom_settings && job.custom_settings.created_by) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
@@ -219,13 +220,14 @@ export async function cloneJob(jobId) {
 
     window.location.href = '#/jobs/new_job';
   } catch (error) {
-    mlMessageBarService.notify.error(error);
+    mlMessageBarService.notify.error(extractErrorMessage(error));
     const toastNotifications = getToastNotifications();
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
         defaultMessage: 'Could not clone {jobId}. Job could not be found',
         values: { jobId },
-      })
+      }),
+      error
     );
   }
 }

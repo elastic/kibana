@@ -5,22 +5,8 @@
  */
 
 import { ResponseError, ResponseHeaders } from 'kibana/server';
-import { isErrorResponse } from '../types/errors';
-
-export function getErrorMessage(error: any) {
-  if (isErrorResponse(error)) {
-    return `${error.body.error}: ${error.body.message}`;
-  }
-
-  if (typeof error === 'object' && typeof error.message === 'string') {
-    return error.message;
-  }
-
-  return JSON.stringify(error);
-}
 
 // Adding temporary types until Kibana ResponseError is updated
-
 export interface BoomResponse {
   data: any;
   isBoom: boolean;
@@ -135,9 +121,17 @@ export const extractErrorProperties = (
       typeof error.body.attributes === 'object' &&
       error.body.attributes.body?.status !== undefined
     ) {
-      statusCode = error.body.attributes.body?.status;
+      statusCode = error.body.attributes.body.status;
+
+      if (typeof error.body.attributes.body.error?.reason === 'string') {
+        return {
+          message: error.body.attributes.body.error.reason,
+          statusCode,
+        };
+      }
     }
 
+    // I DON'T THINK THESE ONES BELOW WILL BE HIT
     if (typeof error.body.message === 'string') {
       return {
         message: error.body.message,
