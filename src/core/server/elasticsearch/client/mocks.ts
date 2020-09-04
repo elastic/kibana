@@ -75,7 +75,7 @@ export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 const createClientMock = (): ElasticsearchClientMock =>
   (createInternalClientMock() as unknown) as ElasticsearchClientMock;
 
-interface ScopedClusterClientMock {
+export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
   asCurrentUser: ElasticsearchClientMock;
 }
