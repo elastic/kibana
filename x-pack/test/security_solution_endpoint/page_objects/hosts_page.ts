@@ -28,12 +28,14 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
    * @param {string} styles
    * @returns {Object}
    */
-  const parseStyle = (styles: string): {
+  const parseStyle = (
+    styles: string
+    ): {
     left?: string;
     top?: string;
     width?: string;
     height?: string;
-  } =>
+    } =>
     styles
       .split(';')
       .filter((style: string) => style.split(':')[0] && style.split(':')[1])
