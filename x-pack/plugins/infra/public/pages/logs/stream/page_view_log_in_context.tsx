@@ -70,6 +70,7 @@ export const PageViewLogInContext: React.FC = () => {
                 query={contextQuery}
                 center={contextEntry.cursor}
                 highlight={contextEntry.id}
+                height="100%"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
