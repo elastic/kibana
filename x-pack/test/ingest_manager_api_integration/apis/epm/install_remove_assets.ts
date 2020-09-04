@@ -84,6 +84,13 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSettings.statusCode).equal(200);
       });
+      it('should have installed the transform components', async function () {
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+        });
+        expect(res.statusCode).equal(200);
+      });
       it('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
           type: 'index-pattern',
@@ -236,6 +243,18 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
         expect(resPipeline2.statusCode).equal(404);
+      });
+      it('should have uninstalled the transforms', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
       });
       it('should have uninstalled the kibana assets', async function () {
         let resDashboard;

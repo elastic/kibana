@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, validBodyOutput } from 'kibana/server';
 import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 
@@ -23,15 +23,17 @@ export const deleteTransforms = async (
   callCluster: CallESAsCurrentUser,
   transformIds: string[]
 ) => {
-  for (const transformId of transformIds) {
-    await stopTransforms([transformId], callCluster);
-    await callCluster('transport.request', {
-      method: 'DELETE',
-      query: 'force=true',
-      path: `_transform/${transformId}`,
-      ignore: [404],
-    });
-  }
+  await Promise.all(
+    transformIds.map(async (transformId) => {
+      await stopTransforms([transformId], callCluster);
+      await callCluster('transport.request', {
+        method: 'DELETE',
+        query: 'force=true',
+        path: `_transform/${transformId}`,
+        ignore: [404],
+      });
+    })
+  );
 };
 
 export const deleteTransformRefs = async (
