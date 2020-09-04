@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for click on create space button', async () => {
+    it('a11y test for click on create space page', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
       await a11y.testAppSnapshot();
     });
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for describe space block', async () => {
+    it('a11y test for describe space text space', async () => {
       await PageObjects.spaceSelector.clickOnDescriptionOfSpace();
       await a11y.testAppSnapshot();
     });
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for change all option for feature visibility popover next to show(?)', async () => {
+    it('a11y test for change all option for feature visibility popover', async () => {
       await PageObjects.spaceSelector.clickFeaturesVisibilityButton();
       await a11y.testAppSnapshot();
     });
@@ -97,12 +97,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for save space button', async () => {
+    it('a11y test for space listing page', async () => {
       await PageObjects.spaceSelector.clickSaveSpaceCreation();
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for updating a space button', async () => {
+    it('a11y test for updating a space', async () => {
       await PageObjects.spaceSelector.clickSpaceEditButton('space_a');
       await a11y.testAppSnapshot();
       await PageObjects.spaceSelector.clickCancelSpaceCreation();
