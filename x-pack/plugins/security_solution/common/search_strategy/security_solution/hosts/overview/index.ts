@@ -5,9 +5,11 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe, RequestBasicOptions, SearchHit } from '../..';
+import { Inspect, Maybe, SearchHit } from '../../../common';
+import { RequestBasicOptions } from '../..';
 
 export type HostOverviewRequestOptions = RequestBasicOptions;
+
 export interface HostOverviewStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   overviewHost: {

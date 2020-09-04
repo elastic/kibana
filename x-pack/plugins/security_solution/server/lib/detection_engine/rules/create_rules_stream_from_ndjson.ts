@@ -19,7 +19,7 @@ import {
   createSplitStream,
   createMapStream,
   createConcatStream,
-} from '../../../../../../../src/legacy/utils/streams';
+} from '../../../../../../../src/core/server/utils';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
   parseNdjsonStrings,
