@@ -110,18 +110,3 @@ export type MethodKeysOf<T> = {
  *  Returns an object with public methods only.
  */
 export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
-/**
- *  TODO
- */
-export type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
-} &
-  T;
-
-/**
- *  TODO: add jest as a dependency
- */
-export type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };

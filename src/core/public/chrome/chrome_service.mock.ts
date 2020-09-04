@@ -17,7 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import type { DeeplyMockedKeys, PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ChromeBadge,
   ChromeBrand,
