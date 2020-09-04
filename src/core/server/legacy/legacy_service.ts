@@ -246,7 +246,7 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClusterManager } = require('../../../cli/cluster/cluster_manager');
+    const { ClusterManager } = require('./cluster_manager');
     return new ClusterManager(
       this.coreContext.env.cliArgs,
       config,
@@ -371,7 +371,7 @@ export class LegacyService implements CoreService {
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../cli/repl').startRepl(kbnServer);
+      require('./cli').startRepl(kbnServer);
     }
 
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
