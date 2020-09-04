@@ -59,7 +59,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct calculation for average', async () => {
-          expect(errorRateResponse.average).to.be(0.25732600732600736);
+          expect(errorRateResponse.average).to.be(0.18894993894993897);
+        });
+
+        it('has the correct error rate', async () => {
+          expect(first(errorRateResponse.erroneousTransactionsRate)?.y).to.be(0.5);
         });
       });
     });
