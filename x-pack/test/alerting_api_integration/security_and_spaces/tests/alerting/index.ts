@@ -28,5 +28,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./rbac_legacy'));
+    // loadTestFile(require.resolve('./CREATE_DATA'));
   });
 }

@@ -207,3 +207,191 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space1:alert:5cc59319-74ee-4edc-8646-a79ea91067cd",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+          {
+            "actionRef": "action_0",
+            "actionTypeId": "test.index-record",
+            "group": "default",
+            "params": {
+              "index": ".kibana-alerting-test-data",
+              "message": "alertId: {{alertId}},\nalertName: {{alertName}},\nspaceId: {{spaceId}},\ntags: {{tags}},\nalertInstanceId: {{alertInstanceId}},\ninstanceContextValue: {{context.instanceContextValue}},\ninstanceStateValue: {{state.instanceStateValue}}",
+              "reference": "alert:migrated-to-7.10:space_1_all_with_restricted_fixture"
+            }
+          }
+        ],
+        "alertTypeId": "test.always-firing",
+        "apiKey": "OFpEg7T+jq0nVoGkqHEN5W0fgcEu4LmCXCz6F5EzQ8mgxr2+270/nqv2+zSTnkef7rK2Xz2MDmQsdrRrsAFb5ItFb5YnR/zfqbq0+QBlvgqChKORE1+ggI1oQsYnjDtPWOqMwbUUNGYQXdyUZVdRqeeoYq847NgSo5UBoCJgEZ9ah1gzPA6XYvzbBtJdZ+QgCjfuXsrBSlImhQ==",
+        "apiKeyOwner": "superuser",
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-04T11:51:02.571Z",
+        "createdBy": "superuser",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "abc",
+        "params": {
+          "index": ".kibana-alerting-test-data",
+          "reference": "alert:migrated-to-7.10:space_1_all_with_restricted_fixture"
+        },
+        "schedule": {
+          "interval": "2s"
+        },
+        "scheduledTaskId": "e8885f00-eea4-11ea-a285-352ee3aecffa",
+        "tags": [
+          "tag-A",
+          "tag-B"
+        ],
+        "throttle": "2s",
+        "updatedBy": "superuser"
+      },
+      "migrationVersion": {
+        "alert": "7.9.0"
+      },
+      "namespace": "space1",
+      "references": [
+        {
+          "id": "17f38826-5a8d-4a76-975a-b496e7fffe0b",
+          "name": "action_0",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-09-04T11:51:03.175Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e8885f00-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 1,
+        "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
+        "params": "{\"alertId\":\"5cc59319-74ee-4edc-8646-a79ea91067cd\",\"spaceId\":\"space1\"}",
+        "retryAt": "2020-09-04T12:01:05.793Z",
+        "runAt": "2020-09-04T11:51:03.152Z",
+        "scheduledAt": "2020-09-04T11:51:03.152Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": "2020-09-04T11:51:05.793Z",
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "running",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.794Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space1:alert:d41a6abb-b93b-46df-a80a-926221ea847c",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+          {
+            "actionRef": "action_0",
+            "actionTypeId": "test.index-record",
+            "group": "default",
+            "params": {
+              "index": ".kibana-alerting-test-data",
+              "message": "alertId: {{alertId}},\nalertName: {{alertName}},\nspaceId: {{spaceId}},\ntags: {{tags}},\nalertInstanceId: {{alertInstanceId}},\ninstanceContextValue: {{context.instanceContextValue}},\ninstanceStateValue: {{state.instanceStateValue}}",
+              "reference": "alert:migrated-to-7.10:space_1_all"
+            }
+          }
+        ],
+        "alertTypeId": "test.always-firing",
+        "apiKey": "5qbDONVFRacd8IukMksh11NZ8OFxSN31sJRgIdRw4GHME2qKqyqczHz/CDANEjKF78M98yc5xSr8vNnco2PDOHTD7YfMdnlrl1/lOdIkJ/IM8YxGBCLZfk5hRx/dD3X84ZtSEZ2hYWjAemFKtD5GpTWtczhkx9jRgUMbPgBzrhyEmDJoHMQQSOEpIJKmQpAcpHGsE5/+SVIcGQ==",
+        "apiKeyOwner": "superuser",
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-04T11:50:58.533Z",
+        "createdBy": "superuser",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "abc",
+        "params": {
+          "index": ".kibana-alerting-test-data",
+          "reference": "alert:migrated-to-7.10:space_1_all"
+        },
+        "schedule": {
+          "interval": "2s"
+        },
+        "scheduledTaskId": "e616c2c0-eea4-11ea-a285-352ee3aecffa",
+        "tags": [
+          "tag-A",
+          "tag-B"
+        ],
+        "throttle": "2s",
+        "updatedBy": "superuser"
+      },
+      "migrationVersion": {
+        "alert": "7.9.0"
+      },
+      "namespace": "space1",
+      "references": [
+        {
+          "id": "17f38826-5a8d-4a76-975a-b496e7fffe0b",
+          "name": "action_0",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-09-04T11:50:59.083Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e616c2c0-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 1,
+        "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
+        "params": "{\"alertId\":\"d41a6abb-b93b-46df-a80a-926221ea847c\",\"spaceId\":\"space1\"}",
+        "retryAt": "2020-09-04T12:01:05.793Z",
+        "runAt": "2020-09-04T11:51:04.804Z",
+        "scheduledAt": "2020-09-04T11:50:59.052Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": "2020-09-04T11:51:05.793Z",
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "idle",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.794Z"
+    }
+  }
+}

@@ -24,8 +24,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const MIGRATED_ACTION_ID = '17f38826-5a8d-4a76-975a-b496e7fffe0b';
   const MIGRATED_ALERT_ID: Record<string, string> = {
     space_1_all_alerts_none_actions: '6ee9630a-a20e-44af-9465-217a3717d2ab',
-    // space_1_all_with_restricted_fixture: '5cc59319-74ee-4edc-8646-a79ea91067cd',
-    // space_1_all: 'd41a6abb-b93b-46df-a80a-926221ea847c',
+    space_1_all_with_restricted_fixture: '5cc59319-74ee-4edc-8646-a79ea91067cd',
+    space_1_all: 'd41a6abb-b93b-46df-a80a-926221ea847c',
     superuser: 'b384be60-ec53-4b26-857e-0253ee55b277',
   };
 
@@ -76,11 +76,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               // These cases are not relevant as we're testing the migration of alerts which
               // were valid pre 7.10.0 and which become invalid after the introduction of RBAC in 7.10.0
+              // these cases were invalid pre 7.10.0 and remain invalid post 7.10.0
               break;
             case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-              break;
             case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
