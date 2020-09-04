@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import isPlainObject from 'lodash/isPlainObject';
-
 import { GenericObject } from '../types';
 import { validateMappingsConfiguration, VALID_MAPPINGS_PARAMETERS } from './mappings_validator';
 

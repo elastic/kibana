@@ -19,7 +19,6 @@
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { migrationRetryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
 import { Logger } from '../../../logging';

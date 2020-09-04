@@ -5,7 +5,6 @@
  */
 
 import difference from 'lodash/difference';
-
 import without from 'lodash/without';
 
 import { i18n } from '@kbn/i18n';

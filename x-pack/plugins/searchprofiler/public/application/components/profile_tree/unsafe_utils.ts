@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import tinycolor from 'tinycolor2';
 import _ from 'lodash';
-
 import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
 import { IndexMap } from './types';
 import { MAX_TREE_DEPTH } from './constants';

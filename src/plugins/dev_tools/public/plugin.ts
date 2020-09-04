@@ -22,7 +22,6 @@ import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
 import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import sortBy from 'lodash/sortBy';
-
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';

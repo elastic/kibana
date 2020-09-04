@@ -18,10 +18,8 @@
  */
 
 import isFunction from 'lodash/isFunction';
-
 import omitBy from 'lodash/omitBy';
 import union from 'lodash/union';
-
 import { migrateAppState } from './migrate_app_state';
 import {
   createStateContainer,

@@ -5,7 +5,6 @@
  */
 
 import sortBy from 'lodash/sortBy';
-
 import {
   SnapshotDetails,
   SnapshotDetailsEs,

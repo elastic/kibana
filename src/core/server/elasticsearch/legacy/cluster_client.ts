@@ -18,7 +18,6 @@
  */
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
-
 import { LegacyElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, KibanaRequest, isKibanaRequest, isRealRequest } from '../../http';
 import { AuditorFactory } from '../../audit_trail';

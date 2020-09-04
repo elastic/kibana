@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { vislibColorMaps, RawColorSchema } from './color_maps';
 
 function enforceBounds(x: number) {

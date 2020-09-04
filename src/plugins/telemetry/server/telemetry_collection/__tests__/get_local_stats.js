@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { merge, omit } from 'lodash';
-
 import { TIMEOUT } from '../constants';
 import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';

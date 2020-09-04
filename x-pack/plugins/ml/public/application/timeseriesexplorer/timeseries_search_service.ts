@@ -8,7 +8,6 @@ import each from 'lodash/each';
 import find from 'lodash/find';
 import get from 'lodash/get';
 import filter from 'lodash/filter';
-
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ml } from '../services/ml_api_service';

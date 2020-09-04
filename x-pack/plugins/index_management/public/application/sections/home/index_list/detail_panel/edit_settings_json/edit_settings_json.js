@@ -22,7 +22,6 @@ import { TAB_SETTINGS } from '../../../../../constants';
 import { settingsToDisplay, readOnlySettings } from '../../../../../lib/edit_settings';
 import { createAceEditor } from '../../../../../lib/ace';
 import _ from 'lodash';
-
 import { flattenObject } from '../../../../../lib/flatten_object';
 
 export class EditSettingsJson extends React.PureComponent {

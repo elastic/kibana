@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import assign from 'lodash/assign';
 import get from 'lodash/get';
-
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';
 import { TopNSeries as topN } from './vis_types/top_n/series';

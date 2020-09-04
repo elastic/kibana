@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash/fp';
-
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { Direction } from '../../graphql/types';
 import { RequestOptions } from '../../lib/framework';

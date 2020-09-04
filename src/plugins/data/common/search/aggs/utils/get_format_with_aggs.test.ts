@@ -18,7 +18,6 @@
  */
 
 import identity from 'lodash/identity';
-
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import { FieldFormat, IFieldFormat } from '../../../../common';
 

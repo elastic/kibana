@@ -5,7 +5,6 @@
  */
 
 import get from 'lodash/get';
-
 import omit from 'lodash/omit';
 import isEqual from 'lodash/isEqual';
 import defaultsDeep from 'lodash/defaultsDeep';

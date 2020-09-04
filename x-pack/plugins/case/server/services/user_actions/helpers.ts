@@ -6,7 +6,6 @@
 
 import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
 import { get } from 'lodash';
-
 import {
   CaseUserActionAttributes,
   UserAction,

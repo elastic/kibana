@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-
 import { seedColors } from './seed_colors';
 
 const offset = 300; // Hue offset to start at

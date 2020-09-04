@@ -19,7 +19,6 @@
 
 import crypto from 'crypto';
 import { get } from 'lodash';
-
 import { Logger, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
 export interface ShortUrlLookupService {

@@ -18,7 +18,6 @@
  */
 
 import isArray from 'lodash/isArray';
-
 import last from 'lodash/last';
 
 const DEFAULT_VALUE = 0;

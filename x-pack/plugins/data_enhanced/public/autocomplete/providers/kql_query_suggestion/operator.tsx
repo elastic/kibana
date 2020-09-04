@@ -8,7 +8,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { $Keys } from 'utility-types';
 import flatten from 'lodash/flatten';
-
 import { KqlQuerySuggestionProvider } from './types';
 import { QuerySuggestionTypes } from '../../../../../../../src/plugins/data/public';
 

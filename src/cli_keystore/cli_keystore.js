@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { Keystore } from '../legacy/server/keystore';

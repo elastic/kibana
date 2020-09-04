@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { FilterManager as QueryFilterManager, IndexPattern, Filter } from '../../../../data/public';
 
 export abstract class FilterManager {

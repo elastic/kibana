@@ -18,7 +18,6 @@
  */
 
 import { noop } from 'lodash';
-
 import { createTransform } from './create_transform';
 import { rename, unused } from './deprecations';
 

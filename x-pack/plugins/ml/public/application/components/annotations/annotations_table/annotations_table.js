@@ -11,7 +11,6 @@
  */
 
 import uniq from 'lodash/uniq';
-
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import React, { Component, Fragment } from 'react';

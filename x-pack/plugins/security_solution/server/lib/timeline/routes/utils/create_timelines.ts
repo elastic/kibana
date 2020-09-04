@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
-
 import * as timelineLib from '../../saved_object';
 import * as pinnedEventLib from '../../../pinned_event/saved_object';
 import * as noteLib from '../../../note/saved_object';

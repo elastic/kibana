@@ -19,7 +19,6 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep, get, has } from 'lodash';
-
 import { getFlattenedObject } from '../../utils';
 import { Config, ConfigPath } from './';
 

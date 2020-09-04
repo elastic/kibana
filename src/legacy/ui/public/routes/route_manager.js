@@ -18,10 +18,8 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
-
 import defaultsDeep from 'lodash/defaultsDeep';
 import wrap from 'lodash/wrap';
-
 import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';
 import { parsePathToBreadcrumbs } from './breadcrumbs';

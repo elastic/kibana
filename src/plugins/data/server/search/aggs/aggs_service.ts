@@ -18,7 +18,6 @@
  */
 
 import { pick } from 'lodash';
-
 import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {

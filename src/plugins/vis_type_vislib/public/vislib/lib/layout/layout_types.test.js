@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { layoutTypes as layoutType } from './layout_types';
 
 describe('Vislib Layout Types Test Suite', function () {

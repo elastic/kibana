@@ -5,7 +5,6 @@
  */
 
 import { isEmpty, get } from 'lodash/fp';
-
 import { IndexField } from '../../graphql/types';
 import {
   baseCategoryFields,

@@ -18,7 +18,6 @@
  */
 
 import each from 'lodash/each';
-
 import isFunction from 'lodash/isFunction';
 
 /**

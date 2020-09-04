@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-
 import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';

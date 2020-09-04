@@ -6,7 +6,6 @@
 
 import React, { useEffect, useReducer } from 'react';
 import isEqual from 'lodash/isEqual';
-
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

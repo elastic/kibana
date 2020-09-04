@@ -18,7 +18,6 @@
  */
 
 import { defaults, keyBy, sortBy } from 'lodash';
-
 import { LegacyAPICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';

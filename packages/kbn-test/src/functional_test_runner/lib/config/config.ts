@@ -22,7 +22,6 @@ import cloneDeepWith from 'lodash/cloneDeepWith';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import toPath from 'lodash/toPath';
-
 import { schema } from './schema';
 
 const $values = Symbol('values');

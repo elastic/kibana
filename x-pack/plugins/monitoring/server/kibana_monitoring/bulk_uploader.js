@@ -5,7 +5,6 @@
  */
 
 import { defaultsDeep, uniq, compact } from 'lodash';
-
 import {
   TELEMETRY_COLLECTION_INTERVAL,
   KIBANA_STATS_TYPE_MONITORING,

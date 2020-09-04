@@ -18,7 +18,6 @@
  */
 
 import escapeRegExp from 'lodash/escapeRegExp';
-
 import memoize from 'lodash/memoize';
 
 // @internal

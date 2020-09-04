@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import * as states from './states';
 import Status from './status';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

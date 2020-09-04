@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { getOr } from 'lodash/fp';
-
 import { Ecs, TimelineNonEcsData } from '../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnColumnResized } from '../../events';

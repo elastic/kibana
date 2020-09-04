@@ -5,7 +5,6 @@
  */
 
 import { times } from 'lodash';
-
 import { getDateRangeInfo, DateRangeInfo } from './date_range_info';
 
 // dates to test with, separated by 1m, starting with BaseDate, descending

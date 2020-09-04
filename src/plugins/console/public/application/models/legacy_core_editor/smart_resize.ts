@@ -18,7 +18,6 @@
  */
 
 import get from 'lodash/get';
-
 import throttle from 'lodash/throttle';
 
 // eslint-disable-next-line import/no-default-export

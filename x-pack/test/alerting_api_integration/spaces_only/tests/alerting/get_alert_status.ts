@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,

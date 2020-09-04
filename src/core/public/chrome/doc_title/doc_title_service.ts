@@ -18,7 +18,6 @@
  */
 
 import compact from 'lodash/compact';
-
 import flattenDeep from 'lodash/flattenDeep';
 import isString from 'lodash/isString';
 

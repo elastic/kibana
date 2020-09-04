@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { labels } from './labels';
 import { dataArray } from './data_array';
 import { uniqLabels } from './uniq_labels';

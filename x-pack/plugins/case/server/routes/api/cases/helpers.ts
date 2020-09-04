@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { CaseAttributes, CasePatchRequest, CasesConfigureAttributes } from '../../../../common/api';
 

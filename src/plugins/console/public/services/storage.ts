@@ -18,7 +18,6 @@
  */
 
 import transform from 'lodash/transform';
-
 import keys from 'lodash/keys';
 import startsWith from 'lodash/startsWith';
 

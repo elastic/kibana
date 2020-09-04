@@ -6,7 +6,6 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
-
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';

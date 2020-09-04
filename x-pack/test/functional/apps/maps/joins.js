@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { set } from '@elastic/safer-lodash-set';
-
 import { MAPBOX_STYLES } from './mapbox_styles';
 
 const JOIN_PROPERTY_NAME = '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1';

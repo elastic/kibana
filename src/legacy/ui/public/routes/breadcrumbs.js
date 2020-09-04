@@ -18,7 +18,6 @@
  */
 
 import trim from 'lodash/trim';
-
 import startCase from 'lodash/startCase';
 
 /**

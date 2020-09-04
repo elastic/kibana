@@ -20,7 +20,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-
 import { TimeseriesVisualization } from './vis_types/timeseries/vis';
 import { metric } from './vis_types/metric/vis';
 import { TopNVisualization as topN } from './vis_types/top_n/vis';

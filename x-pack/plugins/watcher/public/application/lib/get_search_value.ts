@@ -5,7 +5,6 @@
  */
 
 import pick from 'lodash/pick';
-
 import values from 'lodash/values';
 
 /**

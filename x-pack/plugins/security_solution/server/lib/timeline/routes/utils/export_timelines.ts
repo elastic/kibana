@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash/fp';
-
 import {
   ExportedTimelines,
   ExportedNotes,

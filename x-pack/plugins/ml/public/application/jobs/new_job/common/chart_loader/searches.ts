@@ -5,7 +5,6 @@
  */
 
 import get from 'lodash/get';
-
 import { ml } from '../../../../services/ml_api_service';
 
 interface CategoryResults {

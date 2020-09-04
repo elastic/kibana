@@ -5,7 +5,6 @@
  */
 
 import get from 'lodash/get';
-
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 

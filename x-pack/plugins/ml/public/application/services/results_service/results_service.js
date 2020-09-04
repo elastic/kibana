@@ -6,7 +6,6 @@
 
 import each from 'lodash/each';
 import get from 'lodash/get';
-
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
 import {

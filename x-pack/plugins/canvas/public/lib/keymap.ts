@@ -5,7 +5,6 @@
  */
 
 import mapValues from 'lodash/mapValues';
-
 import { ShortcutMap, ShortcutNameSpace } from '../../types/shortcuts';
 import { ShortcutStrings as strings } from '../../i18n/shortcuts';
 

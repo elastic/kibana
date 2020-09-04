@@ -20,7 +20,6 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
 import debounce from 'lodash/debounce';
-
 import { isJSON } from '../../../static/validators/string';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 

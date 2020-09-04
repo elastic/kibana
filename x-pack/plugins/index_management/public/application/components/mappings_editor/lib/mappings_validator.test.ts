@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import isPlainObject from 'lodash/isPlainObject';
-
 import { validateMappings, validateProperties } from './mappings_validator';
 
 describe('Mappings configuration validator', () => {

@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-
 import { ErrorHandler } from './_error_handler';
 import { Tooltip } from '../components/tooltip';
 

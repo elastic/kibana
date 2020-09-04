@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import first from 'lodash/first';
-
 import memoize from 'lodash/memoize';
 
 export const ECS_ALLOWED_LIST = [

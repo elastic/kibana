@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { visTypes } from './vis_types';
 
 describe('Vislib Vis Types Test Suite', function () {

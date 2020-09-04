@@ -5,7 +5,6 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';

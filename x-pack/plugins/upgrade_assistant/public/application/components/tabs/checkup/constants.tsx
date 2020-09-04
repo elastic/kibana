@@ -6,7 +6,6 @@
 
 import { IconColor } from '@elastic/eui';
 import invert from 'lodash/invert';
-
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 
 export const LEVEL_MAP: { [level: string]: number } = {

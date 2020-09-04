@@ -5,7 +5,6 @@
  */
 
 import get from 'lodash/get';
-
 import pick from 'lodash/pick';
 
 export class GrokdebuggerRequest {

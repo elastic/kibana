@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { SpecDefinitionsService } from '../../../services';
 
 import { BOOLEAN } from './shared';

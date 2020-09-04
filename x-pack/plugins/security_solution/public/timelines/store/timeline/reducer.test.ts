@@ -6,7 +6,6 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { cloneDeep } from 'lodash/fp';
-
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import {

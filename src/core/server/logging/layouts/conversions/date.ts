@@ -18,7 +18,6 @@
  */
 import moment from 'moment-timezone';
 import { last } from 'lodash';
-
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 

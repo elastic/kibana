@@ -8,7 +8,6 @@ import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 import each from 'lodash/each';
 import pick from 'lodash/pick';
-
 import semver from 'semver';
 import moment, { Duration } from 'moment';
 // @ts-ignore

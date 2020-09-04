@@ -5,7 +5,6 @@
  */
 
 import { sortBy } from 'lodash/fp';
-
 import { formatIndexFields } from './elasticsearch_adapter';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 

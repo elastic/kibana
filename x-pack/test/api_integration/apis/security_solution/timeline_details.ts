@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-
 import { timelineDetailsQuery } from '../../../../plugins/security_solution/public/timelines/containers/details/index.gql_query';
 import {
   DetailItem,

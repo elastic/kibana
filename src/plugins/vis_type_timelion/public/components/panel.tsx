@@ -27,7 +27,6 @@ import each from 'lodash/each';
 import cloneDeep from 'lodash/cloneDeep';
 import last from 'lodash/last';
 import map from 'lodash/map';
-
 import { useKibana } from '../../../kibana_react/public';
 import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';

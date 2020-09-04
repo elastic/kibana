@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-
 import { layoutTypes } from '../layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {

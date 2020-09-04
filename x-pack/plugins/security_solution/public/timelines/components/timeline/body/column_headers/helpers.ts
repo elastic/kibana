@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash/fp';
-
 import { BrowserFields } from '../../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {

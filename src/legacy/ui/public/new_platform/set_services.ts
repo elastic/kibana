@@ -18,7 +18,6 @@
  */
 
 import pick from 'lodash/pick';
-
 import { PluginsSetup, PluginsStart } from './new_platform';
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

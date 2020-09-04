@@ -5,7 +5,6 @@
  */
 
 import { has } from 'lodash/fp';
-
 import { MlError } from '../types';
 
 export interface MlStartJobError {

@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../common/mock';
 import {

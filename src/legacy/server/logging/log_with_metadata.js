@@ -17,7 +17,6 @@
  * under the License.
  */
 import { isPlainObject } from 'lodash';
-
 import {
   metadataSymbol,
   attachMetaData,

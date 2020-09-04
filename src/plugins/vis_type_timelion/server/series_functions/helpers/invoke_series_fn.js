@@ -19,7 +19,6 @@
 
 // invokes a series_function with the specified arguments
 import _ from 'lodash';
-
 import indexArguments from '../../handlers/lib/index_arguments';
 
 export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {

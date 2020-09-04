@@ -5,7 +5,6 @@
  */
 
 import map from 'lodash/map';
-
 import zipObject from 'lodash/zipObject';
 
 const isString = (val: any): boolean => typeof val === 'string';

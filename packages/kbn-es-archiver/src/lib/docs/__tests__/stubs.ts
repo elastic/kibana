@@ -21,7 +21,6 @@ import { Client } from 'elasticsearch';
 import sinon from 'sinon';
 import Chance from 'chance';
 import times from 'lodash/times';
-
 import { Stats } from '../../stats';
 
 const chance = new Chance();

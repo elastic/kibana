@@ -18,7 +18,6 @@
  */
 
 import forOwn from 'lodash/forOwn';
-
 import noop from 'lodash/noop';
 
 import '../../directives/bind';

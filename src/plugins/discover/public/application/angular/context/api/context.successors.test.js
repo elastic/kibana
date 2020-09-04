@@ -20,7 +20,6 @@
 import moment from 'moment';
 import get from 'lodash/get';
 import last from 'lodash/last';
-
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices } from '../../../../kibana_services';
 

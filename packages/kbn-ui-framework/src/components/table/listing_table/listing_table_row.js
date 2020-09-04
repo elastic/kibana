@@ -21,7 +21,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import _ from 'lodash';
-
 import { KuiTableRow, KuiTableRowCell, KuiTableRowCheckBoxCell } from '../';
 
 import { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '../../../services';

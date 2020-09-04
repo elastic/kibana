@@ -17,7 +17,6 @@
  * under the License.
  */
 import { defaultsDeep, omit } from 'lodash';
-
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';

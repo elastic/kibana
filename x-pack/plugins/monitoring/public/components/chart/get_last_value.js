@@ -5,7 +5,6 @@
  */
 
 import isNumber from 'lodash/isNumber';
-
 import get from 'lodash/get';
 import last from 'lodash/last';
 

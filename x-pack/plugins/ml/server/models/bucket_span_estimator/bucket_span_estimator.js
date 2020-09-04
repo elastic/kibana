@@ -9,7 +9,6 @@ import each from 'lodash/each';
 import remove from 'lodash/remove';
 import sortBy from 'lodash/sortBy';
 import get from 'lodash/get';
-
 import { mlLog } from '../../client/log';
 
 import { INTERVALS } from './intervals';

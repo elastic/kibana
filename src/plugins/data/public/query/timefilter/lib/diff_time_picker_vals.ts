@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { RefreshInterval } from '../../../../common';
 import { InputTimeRange } from '../types';
 

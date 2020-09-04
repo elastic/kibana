@@ -5,7 +5,6 @@
  */
 
 import merge from 'lodash/merge';
-
 import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';

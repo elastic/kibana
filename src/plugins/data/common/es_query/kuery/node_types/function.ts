@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { functions } from '../functions';
 import { IIndexPattern, KueryNode } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';

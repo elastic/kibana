@@ -35,7 +35,6 @@ import { DatePickerWrapper } from '../../../../components/navigation_menu/date_p
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import isEqual from 'lodash/isEqual';
-
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
 let deletingJobsRefreshTimeout = null;

@@ -18,7 +18,6 @@
  */
 
 import { get } from 'lodash';
-
 import { getTransform } from '../../deprecation';
 
 /**

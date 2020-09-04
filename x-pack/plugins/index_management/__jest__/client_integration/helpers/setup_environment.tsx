@@ -8,7 +8,6 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
-
 import {
   notificationServiceMock,
   docLinksServiceMock,

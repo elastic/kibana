@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash/fp';
-
 import { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
 import { InputsModelId } from './constants';
 

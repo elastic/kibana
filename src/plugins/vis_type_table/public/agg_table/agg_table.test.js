@@ -23,7 +23,6 @@ import angular from 'angular';
 import 'angular-mocks';
 import sinon from 'sinon';
 import round from 'lodash/round';
-
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { coreMock } from '../../../../core/public/mocks';
 import { initAngularBootstrap } from '../../../kibana_legacy/public';

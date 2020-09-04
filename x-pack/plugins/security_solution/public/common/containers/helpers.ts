@@ -6,7 +6,6 @@
 
 import { FetchPolicy } from 'apollo-client';
 import { isString } from 'lodash/fp';
-
 import { ESQuery } from '../../../common/typed_json';
 
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>

@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-
 import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';

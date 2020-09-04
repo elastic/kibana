@@ -5,7 +5,6 @@
  */
 
 import each from 'lodash/each';
-
 import { ml } from './ml_api_service';
 
 // Returns the mapping type of the specified field.

@@ -5,7 +5,6 @@
  */
 
 import isEqual from 'lodash/isEqual';
-
 import {
   matchAllQuery,
   PivotAggsConfig,

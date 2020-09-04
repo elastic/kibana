@@ -18,7 +18,6 @@
  */
 
 import mapKeys from 'lodash/mapKeys';
-
 import camelCase from 'lodash/camelCase';
 
 export function keysToCamelCaseShallow(object: Record<string, any>) {

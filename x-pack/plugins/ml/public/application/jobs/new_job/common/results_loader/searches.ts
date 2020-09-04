@@ -5,7 +5,6 @@
  */
 
 import get from 'lodash/get';
-
 import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
 import { ml } from '../../../../services/ml_api_service';
 

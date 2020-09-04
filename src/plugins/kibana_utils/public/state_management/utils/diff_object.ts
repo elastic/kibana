@@ -17,7 +17,6 @@
  * under the License.
  */
 import keys from 'lodash/keys';
-
 import isFunction from 'lodash/isFunction';
 import difference from 'lodash/difference';
 import filter from 'lodash/filter';

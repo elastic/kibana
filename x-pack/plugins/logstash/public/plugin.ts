@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import once from 'lodash/once';
-
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
   HomePublicPluginSetup,

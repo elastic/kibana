@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash';
-
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExternalIncidentServiceConfiguration,

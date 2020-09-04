@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { Data } from './data';
 import { getMockUiState } from '../../fixtures/mocks';
 

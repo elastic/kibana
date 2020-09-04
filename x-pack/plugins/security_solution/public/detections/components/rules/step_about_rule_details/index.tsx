@@ -18,7 +18,6 @@ import {
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
-
 import { HeaderSection } from '../../../../common/components/header_section';
 import { Markdown } from '../../../../common/components/markdown';
 import { AboutStepRule, AboutStepRuleDetails } from '../../../pages/detection_engine/rules/types';

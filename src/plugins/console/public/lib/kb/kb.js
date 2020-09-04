@@ -28,7 +28,6 @@ import {
 
 import $ from 'jquery';
 import _ from 'lodash';
-
 import Api from './api';
 
 let ACTIVE_API = new Api();

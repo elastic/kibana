@@ -24,7 +24,6 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
-
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';

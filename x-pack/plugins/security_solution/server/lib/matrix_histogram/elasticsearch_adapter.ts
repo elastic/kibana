@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { MatrixHistogramOverTimeData, HistogramType } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';

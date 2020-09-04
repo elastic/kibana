@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { i18n } from '@kbn/i18n';
 
 import { createHashHistory } from 'history';

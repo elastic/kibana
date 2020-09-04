@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 
 const MAP_EMBEDDABLE_INPUT_KEYS = [

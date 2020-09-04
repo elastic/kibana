@@ -5,7 +5,6 @@
  */
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
-
 import { BrowserField, BrowserFields } from '../../containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {

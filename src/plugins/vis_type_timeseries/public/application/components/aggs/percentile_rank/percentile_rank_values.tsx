@@ -18,7 +18,6 @@
  */
 import React from 'react';
 import last from 'lodash/last';
-
 import { EuiFlexGroup } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 

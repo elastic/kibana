@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
-
 import { SortField, TimerangeInput, DocValueFieldsInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestOptions } from '../framework';
