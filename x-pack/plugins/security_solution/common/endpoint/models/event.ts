@@ -9,7 +9,7 @@ import {
   SafeResolverEvent,
   SafeLegacyEndpointEvent,
 } from '../types';
-import { firstNonNullValue, values } from './ecs_safety_helpers';
+import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
 /*
  * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
@@ -27,32 +27,24 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessRunning(event: ResolverEvent): boolean {
-  if (isLegacyEvent(event)) {
+export function isProcessRunning(event: SafeResolverEvent): boolean {
+  if (isLegacyEventSafeVersion(event)) {
     return (
-      event.event?.type === 'process_start' ||
-      event.event?.action === 'fork_event' ||
-      event.event?.type === 'already_running'
-    );
-  }
-
-  if (Array.isArray(event.event.type)) {
-    return (
-      event.event.type.includes('start') ||
-      event.event.type.includes('change') ||
-      event.event.type.includes('info')
+      hasValue(event.event?.type, 'process_start') ||
+      hasValue(event.event?.action, 'fork_event') ||
+      hasValue(event.event?.type, 'already_running')
     );
   }
 
   return (
-    event.event.type === 'start' || event.event.type === 'change' || event.event.type === 'info'
+    hasValue(event.event?.type, 'start') ||
+    hasValue(event.event?.type, 'change') ||
+    hasValue(event.event?.type, 'info')
   );
 }
 
-export function timestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
-  return isLegacyEventSafeVersion(event)
-    ? firstNonNullValue(event.endgame?.timestamp_utc)
-    : firstNonNullValue(event?.['@timestamp']);
+export function timestampSafeVersion(event: SafeResolverEvent): undefined | number {
+  return firstNonNullValue(event?.['@timestamp']);
 }
 
 /**

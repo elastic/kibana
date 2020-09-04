@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
   AlertEvent,
-  SafeResolverEvent,
   EndpointStatus,
   Host,
   HostMetadata,
@@ -18,7 +17,12 @@ import {
   SafeEndpointEvent,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
-import { ancestryArray, entityIDSafeVersion, parentEntityIDSafeVersion } from './models/event';
+import {
+  ancestryArray,
+  entityIDSafeVersion,
+  parentEntityIDSafeVersion,
+  timestampSafeVersion,
+} from './models/event';
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
@@ -804,7 +808,7 @@ export class EndpointDocGenerator {
     });
     events.push(root);
     let ancestor = root;
-    let timestamp = (firstNonNullValue(root['@timestamp']) ?? 0) + 1000;
+    let timestamp = (timestampSafeVersion(root) ?? 0) + 1000;
 
     const addRelatedAlerts = (
       node: Event,
@@ -934,7 +938,7 @@ export class EndpointDocGenerator {
       maxChildren,
     };
     const lineage: NodeState[] = [rootState];
-    let timestamp = firstNonNullValue(root['@timestamp']) ?? 0;
+    let timestamp = timestampSafeVersion(root) ?? 0;
     while (lineage.length > 0) {
       const currentState = lineage[lineage.length - 1];
       // If we get to a state node and it has made all the children, move back up a level
@@ -1014,7 +1018,7 @@ export class EndpointDocGenerator {
     ordered: boolean = false
   ) {
     let relatedEventsInfo: RelatedEventInfo[];
-    const nodeTimestamp = firstNonNullValue(node['@timestamp']) ?? 0;
+    const nodeTimestamp = timestampSafeVersion(node) ?? 0;
     let ts = nodeTimestamp + 1;
     if (typeof relatedEvents === 'number') {
       relatedEventsInfo = [{ category: RelatedEventCategory.Random, count: relatedEvents }];
@@ -1061,8 +1065,7 @@ export class EndpointDocGenerator {
     alertCreationTime: number = 6 * 3600
   ) {
     for (let i = 0; i < relatedAlerts; i++) {
-      const ts =
-        (firstNonNullValue(node['@timestamp']) ?? 0) + this.randomN(alertCreationTime) * 1000;
+      const ts = (timestampSafeVersion(node) ?? 0) + this.randomN(alertCreationTime) * 1000;
       yield this.generateAlert(
         ts,
         entityIDSafeVersion(node),

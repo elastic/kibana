@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import { eventIDSafeVersion } from '../../../../../common/endpoint/models/event';
+import {
+  eventIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ChildrenPaginationCursor } from './children_pagination';
 
@@ -120,7 +122,7 @@ export class PaginationBuilder {
   static buildCursor(results: SafeResolverEvent[]): string | null {
     const lastResult = results[results.length - 1];
     const cursor = {
-      timestamp: firstNonNullValue(lastResult['@timestamp']) ?? 0,
+      timestamp: timestampSafeVersion(lastResult) ?? 0,
       eventID:
         eventIDSafeVersion(lastResult) === undefined ? '' : String(eventIDSafeVersion(lastResult)),
     };

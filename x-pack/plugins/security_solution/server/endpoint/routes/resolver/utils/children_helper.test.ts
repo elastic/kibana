@@ -180,7 +180,7 @@ describe('Children helper', () => {
     childrenNodes.childNodes.forEach((node) => {
       node.lifecycle.forEach((event) => {
         expect(
-          childrenEvents.find((child) => child.event.id === eventIDSafeVersion(event))
+          childrenEvents.find((child) => eventIDSafeVersion(child) === eventIDSafeVersion(event))
         ).toEqual(event);
       });
     });
@@ -194,7 +194,7 @@ describe('Children helper', () => {
     childrenNodes.childNodes.forEach((node) => {
       node.lifecycle.forEach((event) => {
         expect(
-          childrenEvents.find((child) => child.event.id === eventIDSafeVersion(event))
+          childrenEvents.find((child) => eventIDSafeVersion(child) === eventIDSafeVersion(event))
         ).toEqual(event);
       });
     });

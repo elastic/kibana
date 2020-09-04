@@ -5,8 +5,7 @@
  */
 
 import {
-  entityId,
-  parentEntityId,
+  parentEntityIDSafeVersion,
   isProcessRunning,
   getAncestryAsArray,
   entityIDSafeVersion,
@@ -101,8 +100,8 @@ export class ChildrenNodesHelper {
     };
 
     for (const event of startEvents) {
-      const parentID = parentEntityId(event);
-      const entityID = entityId(event);
+      const parentID = parentEntityIDSafeVersion(event);
+      const entityID = entityIDSafeVersion(event);
       if (parentID && entityID && isProcessRunning(event)) {
         // don't actually add the start event to the node, because that'll be done in
         // a different call
@@ -162,7 +161,7 @@ export class ChildrenNodesHelper {
     return nodesToQueryNext.get(largestAncestryArray);
   }
 
-  private setPaginationForNodes(nodes: Set<string>, startEvents: ResolverEvent[]) {
+  private setPaginationForNodes(nodes: Set<string>, startEvents: SafeResolverEvent[]) {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {

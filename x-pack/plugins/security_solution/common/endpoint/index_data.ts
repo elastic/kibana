@@ -86,7 +86,7 @@ async function indexAlerts(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (array: Array<Record<string, any>>, doc) => {
         let index = eventIndex;
-        if (doc.event.kind === 'alert') {
+        if (doc.event?.kind === 'alert') {
           index = alertIndex;
         }
         array.push({ create: { _index: index } }, doc);

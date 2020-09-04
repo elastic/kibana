@@ -196,11 +196,11 @@ export interface SafeResolverTree {
    * process node that generated an alert.
    */
   entityID: string;
-  children: ResolverChildren;
-  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  children: SafeResolverChildren;
+  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: ResolverAncestry;
-  lifecycle: ResolverEvent[];
+  ancestry: SafeResolverAncestry;
+  lifecycle: SafeResolverEvent[];
   stats: ResolverNodeStats;
 }
 
@@ -338,148 +338,130 @@ interface Hashes {
   /**
    * A hash in MD5 format.
    */
-  md5: string;
+  md5: ECSField<string>;
   /**
    * A hash in SHA-1 format.
    */
-  sha1: string;
+  sha1: ECSField<string>;
   /**
    * A hash in SHA-256 format.
    */
-  sha256: string;
+  sha256: ECSField<string>;
 }
 
 interface MalwareClassification {
-  identifier: string;
-  score: number;
-  threshold: number;
-  version: string;
+  identifier: ECSField<string>;
+  score: ECSField<number>;
+  threshold: ECSField<number>;
+  version: ECSField<string>;
 }
 
-interface ThreadFields {
-  id: number;
-  Ext: {
-    service_name: string;
-    start: number;
-    start_address: number;
-    start_address_module: string;
-  };
-}
+type ThreadFields = Partial<{
+  id: ECSField<number>;
+  Ext: Partial<{
+    service_name: ECSField<string>;
+    start: ECSField<number>;
+    start_address: ECSField<number>;
+    start_address_module: ECSField<string>;
+  }>;
+}>;
 
-interface DllFields {
-  hash: Hashes;
-  path: string;
-  pe: {
-    architecture: string;
-  };
-  code_signature: {
-    subject_name: string;
-    trusted: boolean;
-  };
-  Ext: {
-    compile_time: number;
-    malware_classification: MalwareClassification;
-    mapped_address: number;
-    mapped_size: number;
-  };
-}
+type DllFields = Partial<{
+  hash: Partial<Hashes>;
+  path: ECSField<string>;
+  pe: Partial<{
+    architecture: ECSField<string>;
+  }>;
+  code_signature: Partial<{
+    subject_name: ECSField<string>;
+    trusted: ECSField<boolean>;
+  }>;
+  Ext: Partial<{
+    compile_time: ECSField<number>;
+    malware_classification: Partial<MalwareClassification>;
+    mapped_address: ECSField<number>;
+    mapped_size: ECSField<number>;
+  }>;
+}>;
 
 /**
  * Describes an Alert Event.
  */
-export interface AlertEvent {
-  '@timestamp': number;
-  agent: {
-    id: string;
-    version: string;
-    type: string;
-  };
-  ecs: {
-    version: string;
-  };
-  event: {
-    id: string;
-    action: string;
-    category: string;
-    kind: string;
-    dataset: string;
-    module: string;
-    type: string;
-    sequence: number;
-  };
-  Endpoint: {
-    policy: {
-      applied: {
-        id: string;
-        status: HostPolicyResponseActionStatus;
-        name: string;
-      };
-    };
-  };
-  process: {
-    command_line?: string;
-    pid: number;
-    ppid?: number;
-    entity_id: string;
-    parent?: {
-      pid: number;
-      entity_id: string;
-    };
-    name: string;
-    hash: Hashes;
-    executable: string;
-    start: number;
-    thread?: ThreadFields[];
+export type AlertEvent = Partial<{
+  event: Partial<{
+    action: ECSField<string>;
+    dataset: ECSField<string>;
+    module: ECSField<string>;
+  }>;
+  Endpoint: Partial<{
+    policy: Partial<{
+      applied: Partial<{
+        id: ECSField<string>;
+        // TODO this is an enum is this right?
+        status: ECSField<HostPolicyResponseActionStatus>;
+        name: ECSField<string>;
+      }>;
+    }>;
+  }>;
+  process: Partial<{
+    command_line: ECSField<string>;
+    ppid: ECSField<number>;
+    executable: ECSField<string>;
+    start: ECSField<number>;
+    thread: ECSField<ThreadFields>;
     uptime: number;
-    Ext?: {
-      /*
-       * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
-       * values towards the end of the array are more distant ancestors (grandparents). Therefore
-       * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
-       */
-      ancestry?: string[];
-      code_signature: Array<{
-        subject_name: string;
-        trusted: boolean;
+    Ext: Partial<{
+      // TODO this was an array of objects is this right?
+      code_signature: ECSField<
+        Partial<{
+          subject_name: ECSField<string>;
+          trusted: ECSField<boolean>;
+        }>
+      >;
+      malware_classification: Partial<MalwareClassification>;
+      token: Partial<{
+        domain: ECSField<string>;
+        type: ECSField<string>;
+        user: ECSField<string>;
+        sid: ECSField<string>;
+        integrity_level: ECSField<number>;
+        integrity_level_name: ECSField<string>;
+        // TODO array
+        privileges: ECSField<
+          Partial<{
+            description: string;
+            name: string;
+            enabled: boolean;
+          }>
+        >;
       }>;
-      malware_classification?: MalwareClassification;
-      token: {
-        domain: string;
-        type: string;
-        user: string;
-        sid: string;
-        integrity_level: number;
-        integrity_level_name: string;
-        privileges?: Array<{
-          description: string;
-          name: string;
-          enabled: boolean;
-        }>;
-      };
-      user: string;
-    };
-  };
-  file: {
-    owner: string;
-    name: string;
-    path: string;
-    accessed: number;
-    mtime: number;
-    created: number;
-    size: number;
-    hash: Hashes;
-    Ext: {
-      malware_classification: MalwareClassification;
-      temp_file_path: string;
-      code_signature: Array<{
-        trusted: boolean;
-        subject_name: string;
-      }>;
-    };
-  };
-  host: Host;
-  dll?: DllFields[];
-}
+      user: ECSField<string>;
+    }>;
+  }>;
+  file: Partial<{
+    owner: ECSField<string>;
+    name: ECSField<string>;
+    accessed: ECSField<number>;
+    mtime: ECSField<number>;
+    created: ECSField<number>;
+    size: ECSField<number>;
+    hash: Partial<Hashes>;
+    Ext: Partial<{
+      malware_classification: Partial<MalwareClassification>;
+      temp_file_path: ECSField<string>;
+      // TODO was an array
+      code_signature: ECSField<
+        Partial<{
+          trusted: ECSField<boolean>;
+          subject_name: ECSField<string>;
+        }>
+      >;
+    }>;
+  }>;
+  // TODO was an array
+  dll: ECSField<DllFields>;
+}> &
+  SafeEndpointEvent;
 
 /**
  * The status of the Endpoint Agent as reported by the Agent or the
@@ -724,9 +706,7 @@ export type SafeEndpointEvent = Partial<{
       subject_name: ECSField<string>;
     }>;
     pid: ECSField<number>;
-    hash: Partial<{
-      md5: ECSField<string>;
-    }>;
+    hash: Partial<Hashes>;
     parent: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
