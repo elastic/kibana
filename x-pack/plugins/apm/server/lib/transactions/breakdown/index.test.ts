@@ -79,7 +79,7 @@ describe('getTransactionBreakdown', () => {
   });
 
   it('should not include more KPIs than MAX_KPIs', async () => {
-    // @ts-ignore
+    // @ts-expect-error
     constants.MAX_KPIS = 2;
 
     const response = await getTransactionBreakdown({
