@@ -471,7 +471,11 @@ describe(`POST ${URL}`, () => {
 
   describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
-      mockUuidv4.mockReturnValueOnce('new-id-1').mockReturnValueOnce('new-id-2');
+      mockUuidv4
+        .mockReturnValueOnce('foo') // a uuid.v4() is generated for the request.id
+        .mockReturnValueOnce('foo') // another uuid.v4() is used for the request.uuid
+        .mockReturnValueOnce('new-id-1')
+        .mockReturnValueOnce('new-id-2');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
       const obj1 = {
         type: 'visualization',
@@ -490,7 +494,6 @@ describe(`POST ${URL}`, () => {
       const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
-        .set('x-opaque-id', uuidv4()) // prevents src/core/server/http/http_tools.ts from using our mocked uuidv4 to generate a unique ID for this request
         .send(
           [
             '--EXAMPLE',
