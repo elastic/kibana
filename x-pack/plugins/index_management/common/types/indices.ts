@@ -41,3 +41,18 @@ export interface IndexSettings {
   analysis?: AnalysisModule;
   [key: string]: any;
 }
+
+export interface Index {
+  health: string;
+  status: string;
+  name: string;
+  uuid: string;
+  primary: string;
+  replica: string;
+  documents: any;
+  size: any;
+  isFrozen: boolean;
+  aliases: string | string[];
+  data_stream?: string;
+  [key: string]: any;
+}

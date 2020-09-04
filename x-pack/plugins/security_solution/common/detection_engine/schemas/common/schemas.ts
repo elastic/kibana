@@ -14,7 +14,7 @@ import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
-import { parseScheduleDates } from '../../utils';
+import { parseScheduleDates } from '../../parse_schedule_dates';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -283,6 +283,9 @@ export type Status = t.TypeOf<typeof status>;
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
+export const conflicts = t.keyof({ abort: null, proceed: null });
+export type Conflicts = t.TypeOf<typeof conflicts>;
+
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
@@ -338,7 +341,7 @@ export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
 export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
 
 export const sort_order = t.keyof({ asc: null, desc: null });
-export type sortOrder = t.TypeOf<typeof sort_order>;
+export type SortOrder = t.TypeOf<typeof sort_order>;
 
 export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;

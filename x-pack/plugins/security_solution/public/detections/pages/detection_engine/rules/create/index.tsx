@@ -9,7 +9,8 @@ import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
-import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useCreateRule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -19,7 +20,7 @@ import {
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { AccordionTitle } from '../../../../components/rules/accordion_title';
 import { FormData, FormHook } from '../../../../../shared_imports';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
@@ -84,13 +85,15 @@ const StepDefineRuleAccordion: StyledComponent<
 StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
 const CreateRulePageComponent: React.FC = () => {
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -120,7 +123,7 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
   });
-  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [{ isLoading, isSaved }, setRule] = useCreateRule();
   const actionMessageParams = useMemo(
     () =>
       getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule)?.ruleType),
@@ -157,7 +160,7 @@ const CreateRulePageComponent: React.FC = () => {
           stepsData.current[RuleStep.scheduleRule].isValid
         ) {
           setRule(
-            formatRule(
+            formatRule<CreateRulesSchema>(
               stepsData.current[RuleStep.defineRule].data as DefineStepRule,
               stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
               stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule,

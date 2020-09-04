@@ -285,7 +285,10 @@ export class Embeddable
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
     const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input, this, { showSaveModal: true });
+    return this.deps.attributeService.getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {

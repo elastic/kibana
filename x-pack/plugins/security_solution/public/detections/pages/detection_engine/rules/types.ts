@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerts/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
@@ -18,13 +18,15 @@ import {
   RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
+  SortOrder,
   TimestampOverride,
+  Type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { List } from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: SortOrder;
 }
 
 export interface EuiBasicTableOnChange {
@@ -102,7 +104,7 @@ export interface DefineStepRule extends StepRuleData {
   index: string[];
   machineLearningJobId: string;
   queryBar: FieldValueQueryBar;
-  ruleType: RuleType;
+  ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
 }
@@ -134,7 +136,7 @@ export interface DefineStepRuleJson {
   };
   timeline_id?: string;
   timeline_title?: string;
-  type: RuleType;
+  type: Type;
 }
 
 export interface AboutStepRuleJson {

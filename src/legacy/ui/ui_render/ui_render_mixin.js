@@ -182,22 +182,16 @@ export function uiRenderMixin(kbnServer, server, config) {
     path: '/app/{id}/{any*}',
     method: 'GET',
     async handler(req, h) {
-      const id = req.params.id;
-      const app = server.getUiAppById(id);
       try {
-        return await h.renderApp(app);
+        return await h.renderApp();
       } catch (err) {
         throw Boom.boomify(err);
       }
     },
   });
 
-  async function renderApp(
-    h,
-    app = { getId: () => 'core' },
-    includeUserSettings = true,
-    overrides = {}
-  ) {
+  async function renderApp(h) {
+    const app = { getId: () => 'core' };
     const { http } = kbnServer.newPlatform.setup.core;
     const {
       rendering,
@@ -209,22 +203,17 @@ export function uiRenderMixin(kbnServer, server, config) {
     );
     const vars = await legacy.getVars(app.getId(), h.request, {
       apmConfig: getApmConfig(h.request.path),
-      ...overrides,
     });
     const content = await rendering.render(h.request, uiSettings, {
       app,
-      includeUserSettings,
+      includeUserSettings: true,
       vars,
     });
 
     return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function (app, overrides) {
-    return renderApp(this, app, true, overrides);
-  });
-
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
-    return renderApp(this, app, false);
+  server.decorate('toolkit', 'renderApp', function () {
+    return renderApp(this);
   });
 }
