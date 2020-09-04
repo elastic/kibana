@@ -82,6 +82,7 @@ const AppRoot = React.memo(
                 <ResolverWithoutProviders
                   databaseDocumentID=""
                   resolverComponentInstanceID="test"
+                  indices={[]}
                 />
               </Wrapper>
             </Provider>
