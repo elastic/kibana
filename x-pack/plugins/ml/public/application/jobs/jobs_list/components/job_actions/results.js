@@ -8,16 +8,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-
-import { mlJobService } from '../../../../services/job_service';
 import { i18n } from '@kbn/i18n';
-import { getBasePath } from '../../../../util/dependency_cache';
-
-export function getLink(location, jobs) {
-  const basePath = getBasePath();
-  const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
-  return `${basePath.get()}/app/ml${resultsPageUrl}`;
-}
+import { useCreateADLinks } from '../../../../components/custom_hooks/use_create_ad_links';
 
 export function ResultLinks({ jobs }) {
   const openJobsInSingleMetricViewerText = i18n.translate(
@@ -44,13 +36,13 @@ export function ResultLinks({ jobs }) {
   const singleMetricVisible = jobs.length < 2;
   const singleMetricEnabled = jobs.length === 1 && jobs[0].isSingleMetricViewerJob;
   const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
-
+  const { createLinkWithUserDefaults } = useCreateADLinks();
   return (
     <React.Fragment>
       {singleMetricVisible && (
         <EuiToolTip position="bottom" content={openJobsInSingleMetricViewerText}>
           <EuiButtonIcon
-            href={getLink('timeseriesexplorer', jobs)}
+            href={createLinkWithUserDefaults('timeseriesexplorer', jobs)}
             iconType="visLine"
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
@@ -61,7 +53,7 @@ export function ResultLinks({ jobs }) {
       )}
       <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
         <EuiButtonIcon
-          href={getLink('explorer', jobs)}
+          href={createLinkWithUserDefaults('explorer', jobs)}
           iconType="visTable"
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
