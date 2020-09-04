@@ -55,7 +55,7 @@ export function ResultLinks({ jobs }) {
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-            data-test-subj={`openJobsInSingleMetricViewer openJobsInSingleMetricViewer-${jobs[0].id}`}
+            data-test-subj="mlOpenJobsInSingleMetricViewerButton"
           />
         </EuiToolTip>
       )}
@@ -66,7 +66,7 @@ export function ResultLinks({ jobs }) {
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
           isDisabled={jobActionsDisabled === true}
-          data-test-subj={`openJobsInAnomalyExplorer openJobsInSingleAnomalyExplorer-${jobs[0].id}`}
+          data-test-subj="mlOpenJobsInAnomalyExplorerButton"
         />
       </EuiToolTip>
       <div className="actions-border" />
