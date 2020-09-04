@@ -5,9 +5,9 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-
+import { Inspect, Maybe, TimerangeInput } from '../../../common';
 import { HostItem, HostsFields } from '../common';
-import { Inspect, Maybe, RequestOptionsPaginated, TimerangeInput } from '../..';
+import { RequestOptionsPaginated } from '../..';
 
 export interface HostOverviewStrategyResponse extends IEsSearchResponse {
   hostOverview: HostItem;
