@@ -48,12 +48,12 @@ const renderCopyOptions = ({ createNewCopies, overwrite, includeRelated }: CopyO
   const overwriteLabel = overwrite ? (
     <FormattedMessage
       id="xpack.spaces.management.copyToSpace.overwriteLabel"
-      defaultMessage="Automatically try to overwrite conflicts"
+      defaultMessage="Automatically overwrite conflicts"
     />
   ) : (
     <FormattedMessage
       id="xpack.spaces.management.copyToSpace.dontOverwriteLabel"
-      defaultMessage="Do not automatically try to overwrite conflicts"
+      defaultMessage="Do not automatically overwrite conflicts"
     />
   );
   const includeRelatedLabel = includeRelated ? (

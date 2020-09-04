@@ -729,7 +729,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           label={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Please select a file to import"
+              defaultMessage="Select a file to import"
             />
           }
         >

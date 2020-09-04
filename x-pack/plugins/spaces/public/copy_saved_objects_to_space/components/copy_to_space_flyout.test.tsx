@@ -510,7 +510,7 @@ describe('CopyToSpaceFlyout', () => {
       Object {
         "color": "warning",
         "content": <FormattedMessage
-          defaultMessage="Saved object has missing references; it will be copied, but one or more of its references are broken."
+          defaultMessage="This object will be copied, but one or more references are missing."
           id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
           values={Object {}}
         />,

@@ -553,7 +553,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Please select a file to import"
+            defaultMessage="Select a file to import"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
