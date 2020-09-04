@@ -157,7 +157,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -230,6 +230,22 @@ export interface DatasourceLayerPanelProps<T> {
   setState: StateSetter<T>;
 }
 
+export interface DraggedOperation {
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}
+
+export function isDraggedOperation(
+  operationCandidate: unknown
+): operationCandidate is DraggedOperation {
+  return (
+    typeof operationCandidate === 'object' &&
+    operationCandidate !== null &&
+    'columnId' in operationCandidate
+  );
+}
+
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   layerId: string;
   columnId: string;
@@ -259,6 +275,11 @@ export interface OperationMetadata {
   // A bucketed operation is grouped by duplicate values, otherwise each row is
   // treated as unique
   isBucketed: boolean;
+  /**
+   * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
+   * interval: Histogram data, like date or number histograms
+   * ratio: Most number data is rendered as a ratio that includes 0
+   */
   scale?: 'ordinal' | 'interval' | 'ratio';
   // Extra meta-information like cardinality, color
   // TODO currently it's not possible to differentiate between a field from a raw

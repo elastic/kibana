@@ -49,7 +49,7 @@ describe('useAddOrUpdateException', () => {
   const onError = jest.fn();
   const onSuccess = jest.fn();
   const alertIdToClose = 'idToClose';
-  const bulkCloseIndex = ['.signals'];
+  const bulkCloseIndex = ['.custom'];
   const itemsToAdd: CreateExceptionListItemSchema[] = [
     {
       ...getCreateExceptionListItemSchemaMock(),
@@ -145,6 +145,50 @@ describe('useAddOrUpdateException', () => {
       const { result, waitForNextUpdate } = render();
       await waitForNextUpdate();
       expect(result.current).toEqual([{ isLoading: false }, result.current[1]]);
+    });
+  });
+
+  it('invokes "onError" if call to add exception item fails', async () => {
+    const mockError = new Error('error adding item');
+
+    addExceptionListItem = jest
+      .spyOn(listsApi, 'addExceptionListItem')
+      .mockRejectedValue(mockError);
+
+    await act(async () => {
+      const { rerender, result, waitForNextUpdate } = render();
+      const addOrUpdateItems = await waitForAddOrUpdateFunc({
+        rerender,
+        result,
+        waitForNextUpdate,
+      });
+      if (addOrUpdateItems) {
+        addOrUpdateItems(...addOrUpdateItemsArgs);
+      }
+      await waitForNextUpdate();
+      expect(onError).toHaveBeenCalledWith(mockError, null, null);
+    });
+  });
+
+  it('invokes "onError" if call to update exception item fails', async () => {
+    const mockError = new Error('error updating item');
+
+    updateExceptionListItem = jest
+      .spyOn(listsApi, 'updateExceptionListItem')
+      .mockRejectedValue(mockError);
+
+    await act(async () => {
+      const { rerender, result, waitForNextUpdate } = render();
+      const addOrUpdateItems = await waitForAddOrUpdateFunc({
+        rerender,
+        result,
+        waitForNextUpdate,
+      });
+      if (addOrUpdateItems) {
+        addOrUpdateItems(...addOrUpdateItemsArgs);
+      }
+      await waitForNextUpdate();
+      expect(onError).toHaveBeenCalledWith(mockError, null, null);
     });
   });
 

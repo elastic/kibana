@@ -25,21 +25,32 @@ const isSnapshotNameNotLowerCase = (str: string): boolean => {
   return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
 };
 
+export interface ValidatePolicyHelperData {
+  managedRepository?: {
+    name: string;
+    policy: string;
+  };
+  isEditing?: boolean;
+  policyName?: string;
+  /**
+   * Whether to block on the indices configured for this snapshot.
+   *
+   * By default ES will back up all indices and data streams if this is an empty array or left blank.
+   * However, in the UI, under certain conditions, like when displaying indices to select for backup,
+   * we want to block users from submitting an empty array, but not block the entire form if they
+   * are not configuring this value - like when they are on a previous step.
+   */
+  validateIndicesCount?: boolean;
+}
+
 export const validatePolicy = (
   policy: SlmPolicyPayload,
-  validationHelperData: {
-    managedRepository?: {
-      name: string;
-      policy: string;
-    };
-    isEditing?: boolean;
-    policyName?: string;
-  }
+  validationHelperData: ValidatePolicyHelperData
 ): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository, isEditing, policyName } = validationHelperData;
+  const { managedRepository, isEditing, policyName, validateIndicesCount } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -96,7 +107,12 @@ export const validatePolicy = (
     );
   }
 
-  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
+  if (
+    validateIndicesCount &&
+    config &&
+    typeof config.indices === 'string' &&
+    config.indices.trim().length === 0
+  ) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage', {
         defaultMessage: 'At least one index pattern is required.',
@@ -104,7 +120,12 @@ export const validatePolicy = (
     );
   }
 
-  if (config && Array.isArray(config.indices) && config.indices.length === 0) {
+  if (
+    validateIndicesCount &&
+    config &&
+    Array.isArray(config.indices) &&
+    config.indices.length === 0
+  ) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
         defaultMessage: 'You must select at least one data stream or index.',
