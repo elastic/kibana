@@ -41,7 +41,6 @@ import { Server } from './server';
 import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { rawConfigServiceMock } from './config/raw_config_service.mock';
-import { PluginName } from './plugins';
 
 const env = new Env('.', getEnvOptions());
 const logger = loggingSystemMock.create();
@@ -50,7 +49,7 @@ const rawConfigService = rawConfigServiceMock.create({});
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginTree: new Map(),
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -99,7 +98,7 @@ test('injects legacy dependency to context#setup()', async () => {
     [pluginB, [pluginA]],
   ]);
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginTree: pluginDependencies,
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 
@@ -110,31 +109,6 @@ test('injects legacy dependency to context#setup()', async () => {
       [pluginA, []],
       [pluginB, [pluginA]],
       [mockLegacyService.legacyId, [pluginA, pluginB]],
-    ]),
-  });
-});
-
-test('injects legacy dependency to status#setup()', async () => {
-  const server = new Server(rawConfigService, env, logger);
-
-  const pluginDependencies = new Map<PluginName, PluginName[]>([
-    ['a', []],
-    ['b', ['a']],
-  ]);
-  mockPluginsService.discover.mockResolvedValue({
-    pluginTree: { asOpaqueIds: new Map(), asNames: pluginDependencies },
-    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
-  });
-
-  await server.setup();
-
-  expect(mockStatusService.setup).toHaveBeenCalledWith({
-    elasticsearch: expect.any(Object),
-    savedObjects: expect.any(Object),
-    pluginDependencies: new Map([
-      ['a', []],
-      ['b', ['a']],
-      ['legacy', ['a', 'b']],
     ]),
   });
 });
