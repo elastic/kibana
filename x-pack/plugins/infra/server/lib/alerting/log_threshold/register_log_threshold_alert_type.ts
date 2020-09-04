@@ -34,6 +34,13 @@ const groupByActionVariableDescription = i18n.translate(
   }
 );
 
+const isRatioActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.isRatioActionVariableDescription',
+  {
+    defaultMessage: 'Denotes whether this alert was configured with a ratio',
+  }
+);
+
 const ratioActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.ratioActionVariableDescription',
   {
@@ -82,6 +89,7 @@ export async function registerLogThresholdAlertType(
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },
         // Ratio alerts
+        { name: 'isRatio', description: isRatioActionVariableDescription },
         { name: 'ratio', description: ratioActionVariableDescription },
         { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
         {

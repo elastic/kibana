@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
@@ -18,6 +18,8 @@ import {
   CountCriteria as CountCriteriaType,
   RatioCriteria as RatioCriteriaType,
   isRatioAlert,
+  getNumerator,
+  getDenominator,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 import { AlertsContext, ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
@@ -132,7 +134,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
 
   const handleUpdateNumeratorCriteria = useCallback(
     (criteriaParam: CriteriaType) => {
-      const nextCriteria: RatioCriteriaType = [criteriaParam, criteria[1]];
+      const nextCriteria: RatioCriteriaType = [criteriaParam, getDenominator(criteria)];
       updateCriteria(nextCriteria);
     },
     [updateCriteria, criteria]
@@ -140,7 +142,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
 
   const handleUpdateDenominatorCriteria = useCallback(
     (criteriaParam: CriteriaType) => {
-      const nextCriteria: RatioCriteriaType = [criteria[0], criteriaParam];
+      const nextCriteria: RatioCriteriaType = [getNumerator(criteria), criteriaParam];
       updateCriteria(nextCriteria);
     },
     [updateCriteria, criteria]
@@ -150,19 +152,19 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
     updateCriterion: updateNumeratorCriterion,
     addCriterion: addNumeratorCriterion,
     removeCriterion: removeNumeratorCriterion,
-  } = useCriteriaState(criteria[0], handleUpdateNumeratorCriteria);
+  } = useCriteriaState(getNumerator(criteria), handleUpdateNumeratorCriteria);
 
   const {
     updateCriterion: updateDenominatorCriterion,
     addCriterion: addDenominatorCriterion,
     removeCriterion: removeDenominatorCriterion,
-  } = useCriteriaState(criteria[1], handleUpdateDenominatorCriteria);
+  } = useCriteriaState(getDenominator(criteria), handleUpdateDenominatorCriteria);
 
   return (
     <>
       <CriteriaWrapper
         {...props}
-        criteria={criteria[0]}
+        criteria={getNumerator(criteria)}
         updateCriterion={updateNumeratorCriterion}
         addCriterion={addNumeratorCriterion}
         removeCriterion={removeNumeratorCriterion}
@@ -174,7 +176,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
 
       <CriteriaWrapper
         {...props}
-        criteria={criteria[1]}
+        criteria={getDenominator(criteria)}
         updateCriterion={updateDenominatorCriterion}
         addCriterion={addDenominatorCriterion}
         removeCriterion={removeDenominatorCriterion}

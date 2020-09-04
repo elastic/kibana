@@ -191,6 +191,7 @@ export const processUngroupedResults = (
           matchingDocuments: documentCount,
           conditions: createConditionsMessageForCriteria(criteria),
           group: null,
+          isRatio: false,
         },
       },
     ]);
@@ -222,6 +223,7 @@ export const processUngroupedRatioResults = (
           numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
           denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
           group: null,
+          isRatio: true,
         },
       },
     ]);
@@ -276,6 +278,7 @@ export const processGroupByResults = (
             matchingDocuments: documentCount,
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
+            isRatio: false,
           },
         },
       ]);
@@ -319,6 +322,7 @@ export const processGroupByRatioResults = (
             numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
+            isRatio: true,
           },
         },
       ]);

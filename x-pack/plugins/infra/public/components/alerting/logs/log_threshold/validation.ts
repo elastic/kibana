@@ -5,9 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isNumber, isFinite } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../../triggers_actions_ui/public/types';
-import { AlertParams, Criteria } from '../../../../../common/alerting/logs/log_threshold/types';
+import {
+  AlertParams,
+  Criteria,
+  RatioCriteria,
+  isRatioAlert,
+  getNumerator,
+  getDenominator,
+} from '../../../../../common/alerting/logs/log_threshold/types';
 
 export interface CriterionErrors {
   [id: string]: {
@@ -21,6 +29,9 @@ export interface Errors {
   threshold: {
     value: string[];
   };
+  // NOTE: The data structure for criteria errors isn't 100%
+  // ideal but we need to conform to the interfaces that the alerting
+  // framework expects.
   criteria: {
     [id: string]: CriterionErrors;
   };
@@ -50,7 +61,7 @@ export function validateExpression({
   validationResult.errors = errors;
 
   // Threshold validation
-  if (typeof count?.value !== 'number') {
+  if (!isNumber(count?.value) && !isFinite(count?.value)) {
     errors.threshold.value.push(
       i18n.translate('xpack.infra.logs.alertFlyout.error.thresholdRequired', {
         defaultMessage: 'Threshold value is Required.',
@@ -103,13 +114,13 @@ export function validateExpression({
       return _errors;
     };
 
-    if (!Array.isArray(criteria[0])) {
+    if (!isRatioAlert(criteria)) {
       const criteriaErrors = getCriterionErrors(criteria as Criteria);
       errors.criteria[0] = criteriaErrors;
     } else {
-      const numeratorErrors = getCriterionErrors(criteria[0] as Criteria);
+      const numeratorErrors = getCriterionErrors(getNumerator(criteria as RatioCriteria));
       errors.criteria[0] = numeratorErrors;
-      const denominatorErrors = getCriterionErrors(criteria[1] as Criteria);
+      const denominatorErrors = getCriterionErrors(getDenominator(criteria as RatioCriteria));
       errors.criteria[1] = denominatorErrors;
     }
   }
