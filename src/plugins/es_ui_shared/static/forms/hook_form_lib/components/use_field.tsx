@@ -49,7 +49,7 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
   } = props;
 
   const form = useFormContext();
-  const componentToRender = component ?? 'input';
+  const ComponentToRender = component ?? 'input';
   // For backward compatibility we merge the "componentProps" prop into the "rest"
   const propsToForward =
     componentProps !== undefined ? { ...componentProps, ...rest } : { ...rest };
@@ -91,9 +91,9 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
     return children!(field);
   }
 
-  if (componentToRender === 'input') {
+  if (ComponentToRender === 'input') {
     return (
-      <input
+      <ComponentToRender
         type={field.type}
         onChange={field.onChange}
         value={(field.value as unknown) as string}
@@ -102,7 +102,7 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
     );
   }
 
-  return componentToRender({ field, ...propsToForward });
+  return <ComponentToRender {...{ field, ...propsToForward }} />;
 }
 
 export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
