@@ -5,11 +5,11 @@
  */
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
+import { hostFieldsMap } from '../../../../../common/ecs/ecs_fields';
 import {
   HostsEdges,
   HostItem,
 } from '../../../../../common/search_strategy/security_solution/hosts';
-import { hostFieldsMap } from '../../../../lib/ecs_fields';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../lib/hosts/types';
 
