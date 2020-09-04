@@ -27,7 +27,7 @@ export const getErrorMarks = (
 
   return errorItems.map((error) => ({
     type: 'errorMark',
-    offset: error.offset + error.skew,
+    offset: Math.max(error.offset + error.skew, 0),
     verticalLine: false,
     id: error.doc.error.id,
     error: error.doc,
