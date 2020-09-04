@@ -27,6 +27,8 @@ import {
   NetworkHttpRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
 } from './network';
 import {
   MatrixHistogramQuery,
@@ -83,6 +85,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkHttpStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
   : never;
@@ -103,6 +107,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkHttpRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : never;
