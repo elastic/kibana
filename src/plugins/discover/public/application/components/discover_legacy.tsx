@@ -131,7 +131,7 @@ export function DiscoverLegacy({
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
   // @ts-ignore
-  const bucketInterval = vis?.data?.aggs?.aggs[5]?.buckets?.getInterval();
+  const bucketInterval = vis?.data?.aggs?.aggs[1]?.buckets?.getInterval();
 
   return (
     <I18nProvider>
