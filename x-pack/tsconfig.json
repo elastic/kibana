@@ -35,5 +35,8 @@
     },
     // overhead is too significant
     "incremental": false,
-  }
+  },
+  "references": [
+    { "path": "../src/core/tsconfig.json" }
+  ]
 }
