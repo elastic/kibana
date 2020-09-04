@@ -14,6 +14,7 @@ import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
+import { cacheDelete } from '../registry/cache';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -49,6 +50,10 @@ export async function removeInstallation(options: {
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+
+  // remove the package archive from the cache so that a reinstall fetches a fresh copy from the
+  // registry
+  cacheDelete(pkgkey);
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;
