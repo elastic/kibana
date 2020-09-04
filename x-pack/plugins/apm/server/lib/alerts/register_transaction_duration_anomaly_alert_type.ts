@@ -83,7 +83,7 @@ export function registerTransactionDurationAnomalyAlertType({
       );
 
       if (mlJobIds.length === 0) {
-        return;
+        return {};
       }
 
       const anomalySearchParams = {
