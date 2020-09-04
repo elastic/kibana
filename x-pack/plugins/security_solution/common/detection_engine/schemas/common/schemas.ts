@@ -283,6 +283,9 @@ export type Status = t.TypeOf<typeof status>;
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
+export const conflicts = t.keyof({ abort: null, proceed: null });
+export type Conflicts = t.TypeOf<typeof conflicts>;
+
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
