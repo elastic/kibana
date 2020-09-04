@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';

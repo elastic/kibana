@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map } from 'lodash';
+import map from 'lodash/map';
 import { SerializedFieldFormat } from '../../types/common';
 import { Datatable, PointSeries, PointSeriesColumn } from '.';
 

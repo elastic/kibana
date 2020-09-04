@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { getEsQueryConfig } from './get_es_query_config';
 import { IUiSettingsClient } from 'kibana/public';
 import { UI_SETTINGS } from '../../';

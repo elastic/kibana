@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { i18n } from '@kbn/i18n';
 import { FeaturesPrivileges } from './features_privileges';
 

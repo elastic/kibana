@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { units, px } from '../../../../../style/variables';
 import { ManagedTable } from '../../../../shared/ManagedTable';

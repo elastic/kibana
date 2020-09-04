@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,

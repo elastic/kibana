@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { dropRight, last } from 'lodash';
+import dropRight from 'lodash/dropRight';
+import last from 'lodash/last';
 import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';

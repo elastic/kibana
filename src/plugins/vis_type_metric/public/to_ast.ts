@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { getVisSchemas, SchemaConfig, Vis } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';

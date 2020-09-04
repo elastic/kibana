@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection } from 'lodash';
+import intersection from 'lodash/intersection';
 import { Vertex } from './vertex';
 
 export class IfVertex extends Vertex {

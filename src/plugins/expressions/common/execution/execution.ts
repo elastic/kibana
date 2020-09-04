@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { keys, last, mapValues, reduce, zipObject } from 'lodash';
+import keys from 'lodash/keys';
+import last from 'lodash/last';
+import mapValues from 'lodash/mapValues';
+import reduce from 'lodash/reduce';
+import zipObject from 'lodash/zipObject';
 import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';

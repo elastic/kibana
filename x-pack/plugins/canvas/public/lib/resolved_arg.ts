@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 export function getState(resolvedArg?: any): any {
   return get(resolvedArg, 'state', null);

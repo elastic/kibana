@@ -18,7 +18,7 @@
  */
 
 import handlebars from 'handlebars/dist/handlebars';
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 import { getFieldFormats } from '../../../services';
 

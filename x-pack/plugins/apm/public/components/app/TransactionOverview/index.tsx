@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { Location } from 'history';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { first } from 'lodash';
+import first from 'lodash/first';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';

@@ -7,7 +7,7 @@
 import { isEmpty, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { set } from '@elastic/safer-lodash-set/fp';
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 import { IndexField } from '../../../graphql/types';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 

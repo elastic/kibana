@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit, pick, find } from 'lodash';
+import omit from 'lodash/omit';
+import pick from 'lodash/pick';
+import find from 'lodash/find';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

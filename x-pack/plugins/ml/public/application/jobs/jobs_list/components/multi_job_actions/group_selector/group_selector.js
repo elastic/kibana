@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';

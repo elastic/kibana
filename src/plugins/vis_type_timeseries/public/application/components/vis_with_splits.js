@@ -19,7 +19,9 @@
 
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
-import { last, findIndex, first } from 'lodash';
+import last from 'lodash/last';
+import findIndex from 'lodash/findIndex';
+import first from 'lodash/first';
 import { calculateLabel } from '../../../../../plugins/vis_type_timeseries/common/calculate_label';
 
 export function visWithSplits(WrappedComponent) {

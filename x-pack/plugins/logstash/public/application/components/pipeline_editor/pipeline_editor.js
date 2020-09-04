@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import 'brace/mode/plain_text';
 import 'brace/theme/github';
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
 import {
   EuiButton,

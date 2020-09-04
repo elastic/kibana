@@ -19,7 +19,7 @@
 
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
 

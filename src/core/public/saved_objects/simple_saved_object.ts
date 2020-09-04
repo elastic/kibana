@@ -18,7 +18,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get, has } from 'lodash';
+import get from 'lodash/get';
+import has from 'lodash/has';
 import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 

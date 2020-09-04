@@ -70,7 +70,15 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
+import uniq from 'lodash/uniq';
+import extend from 'lodash/extend';
+import pick from 'lodash/pick';
+import difference from 'lodash/difference';
+import omit from 'lodash/omit';
+import isObject from 'lodash/isObject';
+import keys from 'lodash/keys';
+import isFunction from 'lodash/isFunction';
 import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';

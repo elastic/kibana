@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { last } from 'lodash';
+import last from 'lodash/last';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';

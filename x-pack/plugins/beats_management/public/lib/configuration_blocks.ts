@@ -6,7 +6,9 @@
 
 import yaml from 'js-yaml';
 import { set } from '@elastic/safer-lodash-set';
-import { get, has, omit } from 'lodash';
+import get from 'lodash/get';
+import has from 'lodash/has';
+import omit from 'lodash/omit';
 import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types';
 import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 

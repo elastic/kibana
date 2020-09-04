@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
+import once from 'lodash/once';
 import { i18n } from '@kbn/i18n';
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 

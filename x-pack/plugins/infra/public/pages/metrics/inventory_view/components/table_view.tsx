@@ -7,7 +7,8 @@
 import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { last, first } from 'lodash';
+import last from 'lodash/last';
+import first from 'lodash/first';
 import React, { useState, useCallback, useEffect } from 'react';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';

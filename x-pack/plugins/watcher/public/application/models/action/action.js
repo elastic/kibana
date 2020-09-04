@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ACTION_TYPES } from '../../../../common/constants';
 import { EmailAction } from './email_action';
 import { LoggingAction } from './logging_action';

@@ -6,7 +6,8 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment';
-import { uniq, get } from 'lodash';
+import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,

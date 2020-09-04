@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { EuiText } from '@elastic/eui';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { HeightRetainer } from '../HeightRetainer';

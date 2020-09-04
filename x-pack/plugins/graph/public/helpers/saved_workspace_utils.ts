@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, assign, defaults, forOwn } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import assign from 'lodash/assign';
+import defaults from 'lodash/defaults';
+import forOwn from 'lodash/forOwn';
 import { i18n } from '@kbn/i18n';
 import {
   IBasePath,

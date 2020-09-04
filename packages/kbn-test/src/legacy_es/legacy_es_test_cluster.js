@@ -19,7 +19,8 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import { get, toPath } from 'lodash';
+import get from 'lodash/get';
+import toPath from 'lodash/toPath';
 import { Cluster } from '@kbn/es';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';

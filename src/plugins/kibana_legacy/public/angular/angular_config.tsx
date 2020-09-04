@@ -27,7 +27,9 @@ import {
 } from 'angular';
 import $ from 'jquery';
 import { set } from '@elastic/safer-lodash-set';
-import { cloneDeep, forOwn, get } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import forOwn from 'lodash/forOwn';
+import get from 'lodash/get';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';

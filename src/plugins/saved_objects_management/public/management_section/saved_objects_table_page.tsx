@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';

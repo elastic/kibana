@@ -5,7 +5,7 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { Field, SplitField, AggFieldPair } from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';

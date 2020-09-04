@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { constant } from 'lodash';
+import constant from 'lodash/constant';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {

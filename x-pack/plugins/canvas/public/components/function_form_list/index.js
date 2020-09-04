@@ -5,7 +5,7 @@
  */
 
 import { compose, withProps } from 'recompose';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { toExpression } from '@kbn/interpreter/common';
 import { interpretAst } from '../../lib/run_interpreter';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';

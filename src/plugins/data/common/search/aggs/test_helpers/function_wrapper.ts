@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import mapValues from 'lodash/mapValues';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,

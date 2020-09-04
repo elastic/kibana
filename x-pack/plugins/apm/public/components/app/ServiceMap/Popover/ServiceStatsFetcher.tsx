@@ -12,7 +12,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 import { ServiceStatsList } from './ServiceStatsList';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';

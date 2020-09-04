@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
   EuiPage,
   EuiLink,

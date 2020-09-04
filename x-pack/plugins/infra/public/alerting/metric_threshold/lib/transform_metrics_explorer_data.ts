@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'lodash';
+import first from 'lodash/first';
 import { MetricsExplorerResponse } from '../../../../common/http_api/metrics_explorer';
 import { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
 

@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import {

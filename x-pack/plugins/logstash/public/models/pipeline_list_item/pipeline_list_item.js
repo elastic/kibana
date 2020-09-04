@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, upperFirst } from 'lodash';
+import pick from 'lodash/pick';
+import upperFirst from 'lodash/upperFirst';
 import moment from 'moment';
 
 import { getSearchValue } from '../../lib/get_search_value';

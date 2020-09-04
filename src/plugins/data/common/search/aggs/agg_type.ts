@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { constant, noop, identity } from 'lodash';
+import constant from 'lodash/constant';
+import noop from 'lodash/noop';
+import identity from 'lodash/identity';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';

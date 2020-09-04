@@ -16,7 +16,8 @@ import {
   TooltipValue,
   BrushEndListener,
 } from '@elastic/charts';
-import { first, last } from 'lodash';
+import first from 'lodash/first';
+import last from 'lodash/last';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {

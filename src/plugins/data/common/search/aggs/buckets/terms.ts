@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop } from 'lodash';
+import noop from 'lodash/noop';
 import { i18n } from '@kbn/i18n';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';

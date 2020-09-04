@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { partition } from 'lodash';
+import partition from 'lodash/partition';
 import { Position } from '@elastic/charts';
 import {
   SuggestionRequest,

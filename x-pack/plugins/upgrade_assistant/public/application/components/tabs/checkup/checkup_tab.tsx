@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from 'lodash';
+import find from 'lodash/find';
 import React, { Fragment } from 'react';
 
 import {

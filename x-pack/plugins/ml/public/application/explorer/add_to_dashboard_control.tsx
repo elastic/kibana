@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import {
   EuiFormRow,
   EuiCheckboxGroup,

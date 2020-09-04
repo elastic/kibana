@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { SearchFilterConfig } from '@elastic/eui';
 import { Tag } from '../components/tag';
 import { getId } from './get_id';

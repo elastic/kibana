@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';

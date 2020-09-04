@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { includes } from 'lodash';
+import includes from 'lodash/includes';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../legacy_shims';

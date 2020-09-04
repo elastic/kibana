@@ -5,7 +5,7 @@
  */
 
 import { createStore as createReduxStore } from 'redux';
-import { isPlainObject } from 'lodash';
+import isPlainObject from 'lodash/isPlainObject';
 import { middleware } from './middleware';
 import { getRootReducer } from './reducers';
 

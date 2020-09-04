@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first, sortBy } from 'lodash';
+import first from 'lodash/first';
+import sortBy from 'lodash/sortBy';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 import { InfraWaffleMapGroup } from '../../../../lib/lib';
 import { sizeOfSquares } from './size_of_squares';

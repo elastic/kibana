@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString } from 'lodash';
+import isString from 'lodash/isString';
 import { DslQuery } from './es_query_dsl';
 
 export function luceneStringToDsl(query: string | any): DslQuery {

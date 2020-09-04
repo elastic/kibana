@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { min, isEqual } from 'lodash';
+import min from 'lodash/min';
+import isEqual from 'lodash/isEqual';
 import { i18n } from '@kbn/i18n';
 import { L, KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { find, template } from 'lodash';
+import find from 'lodash/find';
+import template from 'lodash/template';
 import $ from 'jquery';
 import rison from 'rison-node';
 import '../../doc_viewer';

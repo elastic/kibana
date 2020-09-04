@@ -19,7 +19,8 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { get, find } from 'lodash';
+import get from 'lodash/get';
+import find from 'lodash/find';
 import { GroupBySelect } from './group_by_select';
 import { createTextHandler } from '../lib/create_text_handler';
 import { createSelectHandler } from '../lib/create_select_handler';

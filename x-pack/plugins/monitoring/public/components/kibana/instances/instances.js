@@ -17,7 +17,8 @@ import {
   EuiToolTip,
   EuiHealth,
 } from '@elastic/eui';
-import { capitalize, get } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import get from 'lodash/get';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { StatusIcon } from '../../status_icon';

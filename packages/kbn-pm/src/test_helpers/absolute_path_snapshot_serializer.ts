@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeepWith } from 'lodash';
+import cloneDeepWith from 'lodash/cloneDeepWith';
 import { resolve, sep as pathSep } from 'path';
 
 const repoRoot = resolve(__dirname, '../../../../');

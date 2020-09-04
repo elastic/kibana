@@ -5,7 +5,8 @@
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
-import { pick, throttle } from 'lodash';
+import pick from 'lodash/pick';
+import throttle from 'lodash/throttle';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import {
   LogEntriesResponse,

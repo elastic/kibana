@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { compact, flatten } from 'lodash';
+import compact from 'lodash/compact';
+import flatten from 'lodash/flatten';
 import { mapFilter } from './map_filter';
 import { Filter } from '../../../../common';
 

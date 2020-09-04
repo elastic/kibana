@@ -13,7 +13,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';

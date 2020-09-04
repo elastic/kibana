@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { trimEnd } from 'lodash';
+import trimEnd from 'lodash/trimEnd';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';

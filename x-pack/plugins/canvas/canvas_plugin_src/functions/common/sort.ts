@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last } from 'lodash';
+import last from 'lodash/last';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 

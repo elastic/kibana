@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map } from 'lodash';
+import get from 'lodash/get';
+import map from 'lodash/map';
 import { Ticks, AxisConfig, isAxisConfig } from '../../../../types';
 import { Style, PointSeriesColumns } from '../../../../../../../src/plugins/expressions/common';
 

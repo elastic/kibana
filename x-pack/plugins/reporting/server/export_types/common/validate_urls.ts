@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'url';
-import { filter } from 'lodash';
+import filter from 'lodash/filter';
 
 /*
  * isBogusUrl

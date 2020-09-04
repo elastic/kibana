@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationList } from './List';
 import { useTrackPageview } from '../../../../../../observability/public';

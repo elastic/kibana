@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import {
   Alert,
   AlertTaskState,

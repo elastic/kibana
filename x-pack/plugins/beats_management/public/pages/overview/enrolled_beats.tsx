@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { flatten, sortBy } from 'lodash';
+import flatten from 'lodash/flatten';
+import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';

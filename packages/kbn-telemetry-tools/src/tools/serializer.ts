@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniq } from 'lodash';
+import uniq from 'lodash/uniq';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,

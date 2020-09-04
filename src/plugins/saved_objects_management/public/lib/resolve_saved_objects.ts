@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import {

@@ -5,7 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
-import { isEmpty, get } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import get from 'lodash/get';
 import { FILTER_OPTIONS } from '../../../../../../../common/custom_link/custom_link_filter_options';
 import {
   Filter,

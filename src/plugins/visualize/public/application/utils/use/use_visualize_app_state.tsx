@@ -18,7 +18,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { cloneDeep, isEqual } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';

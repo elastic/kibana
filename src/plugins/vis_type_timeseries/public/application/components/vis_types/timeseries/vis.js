@@ -21,7 +21,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import reactCSS from 'reactcss';
 
-import { startsWith, get, cloneDeep, map } from 'lodash';
+import startsWith from 'lodash/startsWith';
+import get from 'lodash/get';
+import cloneDeep from 'lodash/cloneDeep';
+import map from 'lodash/map';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 

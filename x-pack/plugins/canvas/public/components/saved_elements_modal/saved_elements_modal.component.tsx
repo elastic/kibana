@@ -25,7 +25,7 @@ import {
   EuiOverlayMask,
   EuiButton,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { ComponentStrings } from '../../../i18n';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';

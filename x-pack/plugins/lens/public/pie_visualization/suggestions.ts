@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partition } from 'lodash';
+import partition from 'lodash/partition';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, VisualizationSuggestion } from '../types';
 import { PieVisualizationState } from './types';

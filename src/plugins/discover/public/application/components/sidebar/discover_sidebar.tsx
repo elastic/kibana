@@ -20,7 +20,7 @@ import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';

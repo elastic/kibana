@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { keyBy } from 'lodash';
+import keyBy from 'lodash/keyBy';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';

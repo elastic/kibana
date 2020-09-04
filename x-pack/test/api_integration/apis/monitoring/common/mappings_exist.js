@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
 import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
 import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';

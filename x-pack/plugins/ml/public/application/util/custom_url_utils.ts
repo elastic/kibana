@@ -6,7 +6,8 @@
 
 // utility functions for handling custom URLs
 
-import { get, flow } from 'lodash';
+import get from 'lodash/get';
+import flow from 'lodash/flow';
 import moment from 'moment';
 
 import { parseInterval } from '../../../common/util/parse_interval';

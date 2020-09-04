@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 
 interface ViewportDimensions {
   width: number;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isObject } from 'lodash';
+import isObject from 'lodash/isObject';
 
 // @ts-ignore
 import { saveAs } from '@elastic/filesaver';

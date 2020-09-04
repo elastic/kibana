@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFinite } from 'lodash';
+import isFinite from 'lodash/isFinite';
 import { i18n } from '@kbn/i18n';
 import { amountAndUnitToObject } from '../amount_and_unit';
 

@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { STORAGE_KEY } from '../../../common/constants';
 
 export const tableStorageGetter = (keyPrefix) => {

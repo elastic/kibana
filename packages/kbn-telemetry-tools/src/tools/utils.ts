@@ -18,7 +18,15 @@
  */
 
 import * as ts from 'typescript';
-import { pick, isObject, each, isArray, reduce, isEmpty, merge, transform, isEqual } from 'lodash';
+import pick from 'lodash/pick';
+import isObject from 'lodash/isObject';
+import each from 'lodash/each';
+import isArray from 'lodash/isArray';
+import reduce from 'lodash/reduce';
+import isEmpty from 'lodash/isEmpty';
+import merge from 'lodash/merge';
+import transform from 'lodash/transform';
+import isEqual from 'lodash/isEqual';
 import * as path from 'path';
 import glob from 'glob';
 import { readFile, writeFile } from 'fs';

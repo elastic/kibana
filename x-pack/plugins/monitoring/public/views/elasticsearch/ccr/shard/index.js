@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { uiRoutes } from '../../../../angular/helpers/routes';
 import { getPageData } from './get_page_data';
 import { routeInitProvider } from '../../../../lib/route_init';

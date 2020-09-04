@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
 import uuid from 'uuid';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { Markdown } from '../../../../../../../plugins/kibana_react/public';
 
 import { ErrorComponent } from '../../error';

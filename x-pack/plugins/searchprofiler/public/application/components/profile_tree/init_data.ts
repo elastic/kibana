@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { flow } from 'fp-ts/lib/function';
 import { Targets, Shard, ShardSerialized } from '../../types';
 import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';

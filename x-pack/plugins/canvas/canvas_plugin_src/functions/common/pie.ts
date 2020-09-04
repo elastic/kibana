@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, keyBy, map, groupBy } from 'lodash';
+import get from 'lodash/get';
+import keyBy from 'lodash/keyBy';
+import map from 'lodash/map';
+import groupBy from 'lodash/groupBy';
 // @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-expect-error untyped local

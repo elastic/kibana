@@ -7,7 +7,7 @@
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 import { useLocation } from '../../../../hooks/useLocation';
 import { APMQueryParams, toQuery, fromQuery } from '../url_helpers';
 

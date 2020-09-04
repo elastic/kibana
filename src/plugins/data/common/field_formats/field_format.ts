@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { transform, size, cloneDeep, get, defaults } from 'lodash';
+import transform from 'lodash/transform';
+import size from 'lodash/size';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import defaults from 'lodash/defaults';
 import { createCustomFieldFormat } from './converters/custom';
 import {
   FieldFormatsGetConfigFn,

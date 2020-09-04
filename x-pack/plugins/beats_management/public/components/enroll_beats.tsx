@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import React from 'react';
 import { CMBeat } from '../../common/domain_types';
 

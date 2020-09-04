@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { IUiSettingsClient } from 'kibana/public';
 import { esQuery, Query, esKuery } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';

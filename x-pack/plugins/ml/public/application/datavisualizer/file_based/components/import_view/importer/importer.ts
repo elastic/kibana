@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chunk } from 'lodash';
+import chunk from 'lodash/chunk';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';

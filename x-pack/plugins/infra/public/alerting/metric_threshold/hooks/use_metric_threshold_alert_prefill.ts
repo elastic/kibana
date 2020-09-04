@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { useState } from 'react';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 

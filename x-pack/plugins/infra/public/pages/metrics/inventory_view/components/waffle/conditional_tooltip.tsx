@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { first } from 'lodash';
+import first from 'lodash/first';
 import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import { useSourceContext } from '../../../../../containers/source';
 import { findInventoryModel } from '../../../../../../common/inventory_models';

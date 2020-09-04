@@ -6,7 +6,8 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, capitalize } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import capitalize from 'lodash/capitalize';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
 import { AlertsStatus } from '../../alerts/status';

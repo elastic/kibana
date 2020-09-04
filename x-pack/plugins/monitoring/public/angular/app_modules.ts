@@ -10,7 +10,7 @@ import '../views/all';
 import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';

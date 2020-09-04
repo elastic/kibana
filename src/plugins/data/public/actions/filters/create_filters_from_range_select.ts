@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last } from 'lodash';
+import last from 'lodash/last';
 import moment from 'moment';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';

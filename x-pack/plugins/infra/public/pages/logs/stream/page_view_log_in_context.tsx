@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { noop } from 'lodash';
+import noop from 'lodash/noop';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';

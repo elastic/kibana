@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { SavedDashboardPanel } from '../../types';
 import { DashboardPanelState } from '../embeddable';
 import { SavedObjectEmbeddableInput } from '../../embeddable_plugin';

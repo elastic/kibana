@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { ReactVisType } from './react_vis_type';
 
 describe('React Vis Type', () => {

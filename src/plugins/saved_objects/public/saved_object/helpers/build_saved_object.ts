@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { once } from 'lodash';
+import once from 'lodash/once';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';

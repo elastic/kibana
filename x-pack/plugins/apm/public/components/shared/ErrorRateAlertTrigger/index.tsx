@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isFinite } from 'lodash';
+import isFinite from 'lodash/isFinite';
 import { EuiSelect } from '@elastic/eui';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';

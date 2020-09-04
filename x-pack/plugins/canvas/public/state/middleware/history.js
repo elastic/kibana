@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { routes } from '../../apps';
 import { historyProvider } from '../../lib/history_provider';
 import { routerProvider } from '../../lib/router_provider';

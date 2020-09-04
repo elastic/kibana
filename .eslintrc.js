@@ -1273,9 +1273,9 @@ module.exports = {
     {
       files: ['**/*'],
       rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
+        //...require('eslint-config-prettier').rules,
+        //...require('eslint-config-prettier/react').rules,
+        //...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
 
@@ -1293,6 +1293,47 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: 'lodash',
+                message: 'Please import specific method as a file instead, e.g. "lodash/get"',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            paths: [
+              {
+                name: 'lodash',
+                importNames: ['_'],
+                message: 'Prefer importing individual modules, e.g. import get from "lodash/get"',
+              },
+            ],
+          },
+        ],
       },
     },
   ],

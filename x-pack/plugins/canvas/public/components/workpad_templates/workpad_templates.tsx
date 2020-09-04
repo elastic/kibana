@@ -18,7 +18,7 @@ import {
   Direction,
   SortDirection,
 } from '@elastic/eui';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 // @ts-ignore untyped local
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { Paginate, PaginateChildProps } from '../paginate';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import { TimeSeries } from '../../typings/timeseries';
 
 export function getRangeFromTimeSeries(timeseries: TimeSeries[]) {

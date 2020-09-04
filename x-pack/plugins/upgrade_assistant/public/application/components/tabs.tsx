@@ -5,7 +5,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { findIndex, get } from 'lodash';
+import findIndex from 'lodash/findIndex';
+import get from 'lodash/get';
 import React from 'react';
 
 import {

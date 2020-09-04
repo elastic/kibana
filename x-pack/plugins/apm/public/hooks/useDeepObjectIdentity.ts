@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useRef } from 'react';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 // preserve object identity if it is deeply equal to the previous instance of it
 export function useDeepObjectIdentity<T>(value: T) {

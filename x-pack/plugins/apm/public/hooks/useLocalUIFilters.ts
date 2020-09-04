@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { useFetcher } from './useFetcher';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';

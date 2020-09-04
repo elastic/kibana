@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { pick, isPlainObject } from 'lodash';
+import pick from 'lodash/pick';
+import isPlainObject from 'lodash/isPlainObject';
 import * as t from 'io-ts';
 import { ordString } from 'fp-ts/lib/Ord';
 import { toArray } from 'fp-ts/lib/Set';

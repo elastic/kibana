@@ -13,7 +13,7 @@ import React, {
   useState,
 } from 'react';
 import cytoscape from 'cytoscape';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { useTheme } from '../../../hooks/useTheme';
 import {
   getAnimationOptions,

@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { capitalize, union } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import union from 'lodash/union';
 import moment from 'moment';
 import uuid from 'uuid';
 

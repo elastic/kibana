@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { ElasticsearchAdapter } from './adapter_types';
 import { QuerySuggestion, esKuery } from '../../../../../../../src/plugins/data/public';
 import { services } from '../../../kbn_services';

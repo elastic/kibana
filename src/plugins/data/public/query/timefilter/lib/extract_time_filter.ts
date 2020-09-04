@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { keys, partition } from 'lodash';
+import keys from 'lodash/keys';
+import partition from 'lodash/partition';
 import { Filter, isRangeFilter, RangeFilter, TimeRange } from '../../../../common';
 import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 

@@ -20,7 +20,14 @@
 import { EventEmitter } from 'events';
 
 import { set } from '@elastic/safer-lodash-set';
-import { isPlainObject, cloneDeep, get, isEqual, isString, merge, mergeWith, toPath } from 'lodash';
+import isPlainObject from 'lodash/isPlainObject';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import isString from 'lodash/isString';
+import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
+import toPath from 'lodash/toPath';
 
 function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStatePath) {
   // key must be the value, set the entire state using it

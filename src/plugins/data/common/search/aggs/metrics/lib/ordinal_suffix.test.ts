@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forOwn } from 'lodash';
+import forOwn from 'lodash/forOwn';
 import { ordinalSuffix } from './ordinal_suffix';
 
 describe('ordinal suffix util', () => {

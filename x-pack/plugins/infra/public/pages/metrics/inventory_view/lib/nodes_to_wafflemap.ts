@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first, last } from 'lodash';
+import first from 'lodash/first';
+import last from 'lodash/last';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,

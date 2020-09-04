@@ -23,7 +23,7 @@ import { FieldSelect } from '../aggs/field_select';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { createTextHandler } from '../lib/create_text_handler';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import uuid from 'uuid';
 import { YesNo } from '../yes_no';
 import {

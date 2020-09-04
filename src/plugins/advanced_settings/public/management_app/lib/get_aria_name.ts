@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { words } from 'lodash';
+import words from 'lodash/words';
 
 /**
  * @name {string} the name of the configuration object

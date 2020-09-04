@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {

@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { inRange } from 'lodash';
+import inRange from 'lodash/inRange';
 import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
 import { useTheme } from '../../../../hooks/useTheme';

@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { defaults, map, last, get } from 'lodash';
+import defaults from 'lodash/defaults';
+
+import map from 'lodash/map';
+import last from 'lodash/last';
+import get from 'lodash/get';
 
 import { IndexPattern } from './index_pattern';
 

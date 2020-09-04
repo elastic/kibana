@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(

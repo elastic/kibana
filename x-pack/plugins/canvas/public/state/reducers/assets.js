@@ -6,7 +6,7 @@
 
 import { handleActions, combineActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
 import { getId } from '../../lib/get_id';
 

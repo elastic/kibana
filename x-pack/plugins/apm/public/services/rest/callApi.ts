@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isString, startsWith } from 'lodash';
+import isString from 'lodash/isString';
+import startsWith from 'lodash/startsWith';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { HttpSetup, HttpFetchOptions } from 'kibana/public';

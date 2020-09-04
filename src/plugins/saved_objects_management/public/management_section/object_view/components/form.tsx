@@ -27,7 +27,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SimpleSavedObject, SavedObjectsClientContract } from '../../../../../../core/public';

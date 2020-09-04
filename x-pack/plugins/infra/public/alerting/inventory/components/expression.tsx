@@ -5,7 +5,10 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { debounce, pick, uniqBy, isEqual } from 'lodash';
+import debounce from 'lodash/debounce';
+import pick from 'lodash/pick';
+import uniqBy from 'lodash/uniqBy';
+import isEqual from 'lodash/isEqual';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import {
   EuiSpacer,

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { forOwn, noop } from 'lodash';
+import forOwn from 'lodash/forOwn';
+
+import noop from 'lodash/noop';
 
 import '../../directives/bind';
 

@@ -5,7 +5,11 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { groupBy, get, keyBy, map, sortBy } from 'lodash';
+import groupBy from 'lodash/groupBy';
+import get from 'lodash/get';
+import keyBy from 'lodash/keyBy';
+import map from 'lodash/map';
+import sortBy from 'lodash/sortBy';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 // @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';

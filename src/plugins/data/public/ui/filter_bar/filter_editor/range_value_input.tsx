@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import React from 'react';
 import { useKibana } from '../../../../../kibana_react/public';
 import { IFieldType } from '../../..';

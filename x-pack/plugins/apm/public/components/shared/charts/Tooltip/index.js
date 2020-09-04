@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { Hint } from 'react-vis';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';

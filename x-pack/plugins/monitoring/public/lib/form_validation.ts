@@ -5,7 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isString, isNumber, upperFirst } from 'lodash';
+import isString from 'lodash/isString';
+import isNumber from 'lodash/isNumber';
+import upperFirst from 'lodash/upperFirst';
 
 export function getRequiredFieldError(field: string): string {
   return i18n.translate('xpack.monitoring.alerts.migrate.manageAction.requiredFieldError', {

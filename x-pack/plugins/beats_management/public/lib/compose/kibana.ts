@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { INDEX_NAMES } from '../../../common/constants/index_names';

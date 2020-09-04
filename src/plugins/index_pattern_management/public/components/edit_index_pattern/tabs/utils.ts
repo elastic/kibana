@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { Dictionary, countBy, defaults, uniq } from 'lodash';
+import Dictionary from 'lodash/Dictionary';
+import countBy from 'lodash/countBy';
+import defaults from 'lodash/defaults';
+import uniq from 'lodash/uniq';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';

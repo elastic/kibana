@@ -5,7 +5,7 @@
  */
 
 import { pageHelpers, mockHttpRequest } from './helpers';
-import { first } from 'lodash';
+import first from 'lodash/first';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';

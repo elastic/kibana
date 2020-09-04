@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { escapeRegExp, memoize } from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
+
+import memoize from 'lodash/memoize';
 
 // @internal
 export const makeRegEx = memoize(function makeRegEx(glob: string) {

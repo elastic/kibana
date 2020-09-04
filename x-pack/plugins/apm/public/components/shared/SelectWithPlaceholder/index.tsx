@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiSelect } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { i18n } from '@kbn/i18n';
 
 export const NO_SELECTION = '__NO_SELECTION__';

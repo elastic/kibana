@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';

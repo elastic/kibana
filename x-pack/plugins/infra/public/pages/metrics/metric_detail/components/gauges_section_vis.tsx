@@ -13,7 +13,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get, last, max } from 'lodash';
+import get from 'lodash/get';
+import last from 'lodash/last';
+import max from 'lodash/max';
 import React, { ReactText } from 'react';
 
 import { euiStyled } from '../../../../../../observability/public';

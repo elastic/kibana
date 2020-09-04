@@ -6,7 +6,8 @@
 
 import { CoreSetup } from 'kibana/public';
 import { $Keys } from 'utility-types';
-import { flatten, uniqBy } from 'lodash';
+import flatten from 'lodash/flatten';
+import uniqBy from 'lodash/uniqBy';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';

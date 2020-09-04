@@ -7,7 +7,7 @@
 import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { InfraMetadata } from '../../../../../common/http_api';
 import { euiStyled } from '../../../../../../observability/public';
 import { MetadataContext } from '../containers/metadata_context';

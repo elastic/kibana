@@ -12,7 +12,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { find, get } from 'lodash';
+import find from 'lodash/find';
+import get from 'lodash/get';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';

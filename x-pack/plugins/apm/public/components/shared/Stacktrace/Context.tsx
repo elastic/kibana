@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { size } from 'lodash';
+import size from 'lodash/size';
 import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter

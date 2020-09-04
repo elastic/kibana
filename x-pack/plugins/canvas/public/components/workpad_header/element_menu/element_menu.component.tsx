@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import {

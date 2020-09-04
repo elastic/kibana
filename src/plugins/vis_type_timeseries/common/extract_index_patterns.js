@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
+import uniq from 'lodash/uniq';
 
 export function extractIndexPatterns(panel, excludedFields = {}) {
   const patterns = [];

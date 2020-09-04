@@ -6,7 +6,8 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { difference, zipObject } from 'lodash';
+import difference from 'lodash/difference';
+import zipObject from 'lodash/zipObject';
 import { rgba } from 'polished';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';

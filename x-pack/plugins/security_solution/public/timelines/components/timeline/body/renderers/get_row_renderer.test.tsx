@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';

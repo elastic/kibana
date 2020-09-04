@@ -15,7 +15,8 @@ import {
   AnnotationDomainTypes,
   LineAnnotation,
 } from '@elastic/charts';
-import { first, last } from 'lodash';
+import first from 'lodash/first';
+import last from 'lodash/last';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';

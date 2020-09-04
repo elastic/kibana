@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
+import last from 'lodash/last';
 import PropTypes from 'prop-types';
 import React, { Fragment, ReactElement, ValidationMap } from 'react';
 

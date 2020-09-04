@@ -13,7 +13,7 @@ import {
   queryByDisplayValue,
   fireEvent,
 } from '@testing-library/react';
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { history } from '../../../../utils/history';
 import { TransactionOverview } from '..';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';

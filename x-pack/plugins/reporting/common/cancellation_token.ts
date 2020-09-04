@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFunction } from 'lodash';
+import isFunction from 'lodash/isFunction';
 
 export class CancellationToken {
   private _isCancelled: boolean;

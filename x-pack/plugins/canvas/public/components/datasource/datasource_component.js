@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { ComponentStrings, DataSourceStrings } from '../../../i18n';
 import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';

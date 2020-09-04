@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { first, get } from 'lodash';
+import first from 'lodash/first';
+import get from 'lodash/get';
 import numeral from '@elastic/numeral';
 import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';

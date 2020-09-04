@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {

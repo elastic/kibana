@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, isUndefined } from 'lodash';
+import get from 'lodash/get';
+import isUndefined from 'lodash/isUndefined';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';

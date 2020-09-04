@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';

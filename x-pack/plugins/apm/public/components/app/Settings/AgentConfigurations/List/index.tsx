@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useTheme } from '../../../../../hooks/useTheme';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';

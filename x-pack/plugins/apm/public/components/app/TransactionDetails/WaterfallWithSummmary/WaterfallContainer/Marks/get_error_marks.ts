@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
 import {
   IWaterfallError,

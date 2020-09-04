@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'query-string';
-import { get } from 'lodash';
+import get from 'lodash/get';
 // @ts-expect-error untyped local
 import { getInitialState } from '../state/initial_state';
 import { getWindow } from './get_window';

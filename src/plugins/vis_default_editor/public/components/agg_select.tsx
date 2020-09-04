@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get, has } from 'lodash';
+import get from 'lodash/get';
+import has from 'lodash/has';
 import React, { useEffect, useCallback, useState } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';

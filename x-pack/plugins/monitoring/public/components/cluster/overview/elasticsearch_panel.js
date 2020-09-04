@@ -6,7 +6,8 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment-timezone';
-import { get, capitalize } from 'lodash';
+import get from 'lodash/get';
+import capitalize from 'lodash/capitalize';
 import { formatNumber } from '../../../lib/format_number';
 import {
   ClusterItemContainer,

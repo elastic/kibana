@@ -5,7 +5,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { pickBy, isEmpty } from 'lodash';
+import pickBy from 'lodash/pickBy';
+import isEmpty from 'lodash/isEmpty';
 import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';

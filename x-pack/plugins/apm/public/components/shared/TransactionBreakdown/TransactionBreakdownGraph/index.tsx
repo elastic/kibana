@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { Maybe } from '../../../../../typings/common';

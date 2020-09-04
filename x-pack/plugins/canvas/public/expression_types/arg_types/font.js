@@ -6,7 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get, mapValues } from 'lodash';
+import get from 'lodash/get';
+import mapValues from 'lodash/mapValues';
 import { set } from '@elastic/safer-lodash-set';
 import { openSans } from '../../../common/lib/fonts';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';

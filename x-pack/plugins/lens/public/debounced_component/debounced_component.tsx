@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo, useEffect, memo, FunctionComponent } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 /**
  * debouncedComponent wraps the specified React component, returning a component which

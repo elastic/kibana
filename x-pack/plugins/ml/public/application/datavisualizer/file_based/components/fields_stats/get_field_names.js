@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 
 export function getFieldNames(results) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;

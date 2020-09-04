@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, flatten } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import flatten from 'lodash/flatten';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';

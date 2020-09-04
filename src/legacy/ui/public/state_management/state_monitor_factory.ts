@@ -17,7 +17,9 @@
  * under the License.
  */
 import { set } from '@elastic/safer-lodash-set';
-import { cloneDeep, isEqual, isPlainObject } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
+import isPlainObject from 'lodash/isPlainObject';
 import { State } from './state';
 
 export const stateMonitorFactory = {

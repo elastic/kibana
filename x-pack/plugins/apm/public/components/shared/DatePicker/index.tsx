@@ -6,7 +6,9 @@
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
-import { isEmpty, isEqual, pickBy } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import pickBy from 'lodash/pickBy';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';

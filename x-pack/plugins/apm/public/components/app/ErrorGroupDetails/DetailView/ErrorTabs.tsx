@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
 export interface ErrorTab {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern, IFieldType } from '../..';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';

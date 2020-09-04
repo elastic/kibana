@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toPath } from 'lodash';
+import toPath from 'lodash/toPath';
 
 export type Path = Array<string | number>;
 

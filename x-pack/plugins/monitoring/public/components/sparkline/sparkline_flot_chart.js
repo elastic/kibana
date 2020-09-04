@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last, isFunction, debounce } from 'lodash';
+import last from 'lodash/last';
+import isFunction from 'lodash/isFunction';
+import debounce from 'lodash/debounce';
 import $ from '../../lib/jquery_flot';
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
 

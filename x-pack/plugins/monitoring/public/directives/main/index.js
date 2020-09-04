@@ -7,7 +7,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import template from './index.html';
 import { Legacy } from '../../legacy_shims';
 import { shortenPipelineHash } from '../../../common/formatting';

@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const defaultIndex = '_all';
 

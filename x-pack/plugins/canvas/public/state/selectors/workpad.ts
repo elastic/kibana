@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit } from 'lodash';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
 // @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
 import { append } from '../../lib/modify_path';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { Datatable } from 'src/plugins/expressions/common';
 import { DatatableColumn, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';

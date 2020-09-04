@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { upperFirst, find, get, includes } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
+import find from 'lodash/find';
+import get from 'lodash/get';
+import includes from 'lodash/includes';
 import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {

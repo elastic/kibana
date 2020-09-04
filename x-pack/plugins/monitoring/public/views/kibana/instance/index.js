@@ -8,7 +8,7 @@
  * Kibana Instance
  */
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { routeInitProvider } from '../../../lib/route_init';

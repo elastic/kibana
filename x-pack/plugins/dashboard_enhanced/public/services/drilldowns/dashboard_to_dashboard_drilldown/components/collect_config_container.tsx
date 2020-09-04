@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { debounce, findIndex } from 'lodash';
+import debounce from 'lodash/debounce';
+import findIndex from 'lodash/findIndex';
 import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';

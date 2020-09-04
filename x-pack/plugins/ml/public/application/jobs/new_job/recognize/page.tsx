@@ -20,7 +20,7 @@ import {
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';

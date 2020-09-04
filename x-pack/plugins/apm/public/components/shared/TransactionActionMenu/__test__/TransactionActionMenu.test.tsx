@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
-import { merge, tail } from 'lodash';
+import merge from 'lodash/merge';
+import tail from 'lodash/tail';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';

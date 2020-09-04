@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { forEach } from 'lodash';
+import forEach from 'lodash/forEach';
 import { Action } from '../../../models/action';
 
 /*

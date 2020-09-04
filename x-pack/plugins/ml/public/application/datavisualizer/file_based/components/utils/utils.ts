@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';

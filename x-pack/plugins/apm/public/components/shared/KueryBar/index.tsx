@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { uniqueId, startsWith } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
+import startsWith from 'lodash/startsWith';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';

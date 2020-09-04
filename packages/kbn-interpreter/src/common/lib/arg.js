@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { includes } from 'lodash';
+import includes from 'lodash/includes';
 
 export function Arg(config) {
   if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');

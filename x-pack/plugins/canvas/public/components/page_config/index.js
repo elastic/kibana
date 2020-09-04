@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage, setPageTransition } from '../../state/actions/pages';

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, hasIn } from 'lodash';
+import get from 'lodash/get';
+import hasIn from 'lodash/hasIn';
 import {
   FilterValueFormatter,
   RangeFilter,

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { first } from 'lodash';
+import first from 'lodash/first';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { euiStyled } from '../../../../../../../observability/public';
 import {

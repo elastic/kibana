@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';

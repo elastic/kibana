@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
-import { isEmpty, flatten } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import flatten from 'lodash/flatten';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';

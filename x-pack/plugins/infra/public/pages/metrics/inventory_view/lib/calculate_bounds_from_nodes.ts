@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, min, max, isFinite } from 'lodash';
+import first from 'lodash/first';
+import min from 'lodash/min';
+import max from 'lodash/max';
+import isFinite from 'lodash/isFinite';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { InfraWaffleMapBounds } from '../../../../lib/lib';
 
