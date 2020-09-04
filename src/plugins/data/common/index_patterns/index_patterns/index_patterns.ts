@@ -97,13 +97,19 @@ export class IndexPatternsService {
 
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
-    options: GetFieldsOptions
+    options: GetFieldsOptions = {}
   ) =>
     this.getFieldsForWildcard(indexPattern.title, {
       ...options,
       type: indexPattern.type,
       params: indexPattern.typeMeta && indexPattern.typeMeta.params,
     });
+
+  refreshFields = async (indexPattern: IndexPattern) => {
+    const fields = await this.getFieldsForIndexPattern(indexPattern);
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    indexPattern.fields.replaceAll([...fields, ...scripted]);
+  };
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
