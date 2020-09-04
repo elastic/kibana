@@ -39,8 +39,7 @@ import { SavedObjectUnsanitizedDoc } from './serialization';
 import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 import { SavedObject } from '../../types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KueryNode } from '../../../plugins/data/common';
+type KueryNode = any;
 
 export {
   SavedObjectAttributes,

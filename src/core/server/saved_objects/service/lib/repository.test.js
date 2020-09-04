@@ -25,8 +25,8 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { nodeTypes } from '../../../../../plugins/data/common/es_query';
+// @ts-expect-error no ts
+import { nodeTypes } from '../../es_query';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
