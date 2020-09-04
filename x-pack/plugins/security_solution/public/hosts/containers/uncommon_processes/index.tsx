@@ -152,7 +152,6 @@ export const useUncommonProcesses = ({
                 if (!didCancel) {
                   setLoading(false);
                 }
-                // TODO: Make response error status clearer
                 notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
                 searchSubscription$.unsubscribe();
               }
