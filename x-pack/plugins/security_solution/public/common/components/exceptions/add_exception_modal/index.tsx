@@ -50,6 +50,7 @@ import {
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { ExceptionsBuilderExceptionItem } from '../types';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
