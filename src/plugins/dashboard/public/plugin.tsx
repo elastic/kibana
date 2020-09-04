@@ -52,6 +52,7 @@ import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
+  showSaveModal,
 } from '../../saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
@@ -102,6 +103,10 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
+import {
+  AttributeServiceOptions,
+  ATTRIBUTE_SERVICE_KEY,
+} from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -150,10 +155,13 @@ export interface DashboardStart {
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { attributes: A },
-    R extends SavedObjectEmbeddableInput
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
-    type: string
+    type: string,
+    options?: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -465,14 +473,16 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string) =>
+      getAttributeService: (type: string, options) =>
         new AttributeService(
           type,
+          showSaveModal,
           core.savedObjects.client,
           core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory
+          embeddable.getEmbeddableFactory,
+          options
         ),
     };
   }
