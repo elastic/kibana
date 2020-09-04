@@ -451,6 +451,18 @@ describe('edit policy', () => {
       rendered.update();
       expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
     });
+    test('should show default allocation warning when no node roles are found', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: {},
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
+    });
   });
   describe('cold phase', () => {
     beforeEach(() => {
@@ -541,6 +553,18 @@ describe('edit policy', () => {
       setPhaseIndexPriority(rendered, 'cold', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+    test('should show default allocation warning when no node roles are found', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: {},
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
   });
   describe('frozen phase', () => {
@@ -635,6 +659,18 @@ describe('edit policy', () => {
       setPhaseIndexPriority(rendered, 'frozen', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+    test('should show default allocation warning when no node roles are found', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: {},
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'frozen');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
   });
   describe('delete phase', () => {
