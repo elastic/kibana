@@ -14,7 +14,6 @@ import {
   PartitionLayout,
   Settings,
 } from '@elastic/charts';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
@@ -32,17 +31,17 @@ interface Props {
 export function VisitorBreakdownChart({ options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
+  const euiChartTheme = darkMode
+    ? EUI_CHARTS_THEME_DARK
+    : EUI_CHARTS_THEME_LIGHT;
+
   return (
-    <ChartWrapper loading={false} height="220px" maxWidth="415px">
+    <ChartWrapper loading={false} height="230px" maxWidth="420px">
       <Chart>
         <Settings
           showLegend
           baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-          theme={
-            darkMode
-              ? EUI_CHARTS_THEME_DARK.theme
-              : EUI_CHARTS_THEME_LIGHT.theme
-          }
+          theme={euiChartTheme.theme}
         />
         <Partition
           id="spec_1"
@@ -55,31 +54,9 @@ export function VisitorBreakdownChart({ options }: Props) {
           layers={[
             {
               groupByRollup: (d: Datum) => d.name,
-              nodeLabel: (d: Datum) => {
-                const total =
-                  options?.reduce((prevVal, { count }) => count + prevVal, 0) ||
-                  1;
-                const item = options?.find(({ name }) => name === d);
-                return (
-                  item?.name + '  ' + ((item?.count || 0) / total) * 100 + '%'
-                );
-              },
               shape: {
-                fillColor: (d) => {
-                  const colors = [
-                    euiLightVars.euiColorVis1_behindText,
-                    euiLightVars.euiColorVis0_behindText,
-                    euiLightVars.euiColorVis2_behindText,
-                    euiLightVars.euiColorVis3_behindText,
-                    euiLightVars.euiColorVis4_behindText,
-                    euiLightVars.euiColorVis5_behindText,
-                    euiLightVars.euiColorVis6_behindText,
-                    euiLightVars.euiColorVis7_behindText,
-                    euiLightVars.euiColorVis8_behindText,
-                    euiLightVars.euiColorVis9_behindText,
-                  ];
-                  return colors[d.sortIndex];
-                },
+                fillColor: (d) =>
+                  euiChartTheme.theme.colors?.vizColors[d.sortIndex],
               },
             },
           ]}
@@ -89,6 +66,7 @@ export function VisitorBreakdownChart({ options }: Props) {
             margin: { top: 0, bottom: 0, left: 0, right: 0 },
             outerSizeRatio: 1, // - 0.5 * Math.random(),
             circlePadding: 4,
+            clockwiseSectors: false,
           }}
         />
       </Chart>
