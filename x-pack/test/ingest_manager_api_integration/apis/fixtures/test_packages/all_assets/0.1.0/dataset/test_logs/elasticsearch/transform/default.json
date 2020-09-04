@@ -1,9 +1,9 @@
 {
   "source": {
-    "index": "metrics-endpoint.metadata-default*"
+    "index": "logs-all_assets.test_log-default*"
   },
   "dest": {
-    "index": "metrics-endpoint.metadata_current-default"
+    "index": "logs-all_assets.test_log_current-default"
   },
   "pivot": {
     "group_by": {
