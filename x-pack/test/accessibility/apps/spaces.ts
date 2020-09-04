@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('click on space initials input in ', async () => {
+    it('click on space initials input box', async () => {
       await PageObjects.spaceSelector.clickSpaceInitials();
       await a11y.testAppSnapshot();
     });
