@@ -60,6 +60,7 @@ describe('Resolver Data Middleware', () => {
     let firstChildNodeInTree: TreeNode;
     let eventStatsForFirstChildNode: { total: number; byCategory: Record<string, number> };
     let categoryToOverCount: string;
+    let aggregateCategoryTotalForFirstChildNode: number;
     let tree: ResolverTree;
 
     /**
@@ -74,6 +75,7 @@ describe('Resolver Data Middleware', () => {
         firstChildNodeInTree,
         eventStatsForFirstChildNode,
         categoryToOverCount,
+        aggregateCategoryTotalForFirstChildNode,
       } = mockedTree());
       if (tree) {
         dispatchTree(tree);
@@ -138,6 +140,13 @@ describe('Resolver Data Middleware', () => {
         for (const typeCounted of Object.keys(eventStatsForFirstChildNode.byCategory)) {
           expect(notDisplayed(typeCounted)).toBe(0);
         }
+      });
+      it('should return an overall correct count for the number of related events', () => {
+        const aggregateTotalByEntityId = selectors.relatedEventAggregateTotalByEntityId(
+          store.getState()
+        );
+        const countForId = aggregateTotalByEntityId(firstChildNodeInTree.id);
+        expect(countForId).toBe(aggregateCategoryTotalForFirstChildNode);
       });
     });
     describe('when data was received and stats show more related events than the API can provide', () => {
@@ -263,6 +272,7 @@ function mockedTree() {
     tree: tree!,
     firstChildNodeInTree,
     eventStatsForFirstChildNode: statsResults.eventStats,
+    aggregateCategoryTotalForFirstChildNode: statsResults.aggregateCategoryTotal,
     categoryToOverCount: statsResults.firstCategory,
   };
 }
@@ -289,12 +299,19 @@ function compileStatsForChild(
   };
   /** The category of the first event.  */
   firstCategory: string;
+  aggregateCategoryTotal: number;
 } {
   const totalRelatedEvents = node.relatedEvents.length;
   // For the purposes of testing, we pick one category to fake an extra event for
   // so we can test if the event limit selectors do the right thing.
 
   let firstCategory: string | undefined;
+
+  // This is the "aggregate total" which is displayed to users as the total count
+  // of related events for the node. It is tallied by incrementing for every discrete
+  // event.category in an event.category array (or just 1 for a plain string). E.g. two events
+  // categories 'file' and ['dns','network'] would have an `aggregate total` of 3.
+  let aggregateCategoryTotal: number = 0;
 
   const compiledStats = node.relatedEvents.reduce(
     (counts: Record<string, number>, relatedEvent) => {
@@ -311,6 +328,7 @@ function compileStatsForChild(
 
         // Increment the count of events with this category
         counts[category] = counts[category] ? counts[category] + 1 : 1;
+        aggregateCategoryTotal++;
       }
       return counts;
     },
@@ -328,5 +346,6 @@ function compileStatsForChild(
       byCategory: compiledStats,
     },
     firstCategory,
+    aggregateCategoryTotal,
   };
 }
