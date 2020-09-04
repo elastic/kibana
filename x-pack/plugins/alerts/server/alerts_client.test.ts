@@ -374,6 +374,9 @@ describe('create()', () => {
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
+        "meta": Object {
+          "versionLastmodified": "v7.10.0",
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -427,9 +430,6 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
-        "meta": Object {
-          "versionLastmodified": "v7.10.0",
-        },
         "scheduledTaskId": "task-123",
       }
     `);
@@ -1002,6 +1002,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: true,
+        meta: {
+          versionLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
@@ -1115,6 +1118,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: false,
+        meta: {
+          versionLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,

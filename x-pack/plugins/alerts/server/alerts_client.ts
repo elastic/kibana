@@ -26,7 +26,6 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertStatus,
-  AlertMeta,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
