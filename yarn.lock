@@ -4486,11 +4486,12 @@ bit-twiddle@^1.0.0:
   integrity sha1-DGwfq+KyPRcXPZpht7cJPrnhdp4=
 
 bl@^1.0.0:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/bl/-/bl-1.2.1.tgz#cac328f7bee45730d404b692203fcb590e172d5e"
-  integrity sha1-ysMo977kVzDUBLaSID/LWQ4XLV4=
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/bl/-/bl-1.2.3.tgz#1e8dd80142eac80d7158c9dccc047fb620e035e7"
+  integrity sha512-pvcNpa0UU69UT341rO6AYy4FVAIkUHuZXRIWbq+zHnsVcRzDDjIAhGuuYoi0d//cwIwtt4pkpKycWEfjdV+vww==
   dependencies:
-    readable-stream "^2.0.5"
+    readable-stream "^2.3.5"
+    safe-buffer "^5.1.1"
 
 bl@^4.0.1:
   version "4.0.3"
