@@ -8,22 +8,27 @@ import React from 'react';
 import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
+import { ApplicationStart } from 'kibana/public';
+
+import { IndexManagementPluginSetup } from '../../../index_management/public';
 
 import { retryLifecycleForIndex } from '../application/services/api';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
+
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
+import { Index } from '../application/services/policies/types';
 
 const stepPath = 'ilm.step';
 
-export const retryLifecycleActionExtension = ({ indices }) => {
+export const retryLifecycleActionExtension = ({ indices }: { indices: Index[] }) => {
   const allHaveErrors = every(indices, (index) => {
     return index.ilm && index.ilm.failed_step;
   });
   if (!allHaveErrors) {
     return null;
   }
-  const indexNames = indices.map(({ name }) => name);
+  const indexNames = indices.map(({ name }: Index) => name);
   return {
     requestMethod: retryLifecycleForIndex,
     icon: 'play',
@@ -35,22 +40,28 @@ export const retryLifecycleActionExtension = ({ indices }) => {
       'xpack.indexLifecycleMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
       {
         defaultMessage: 'Called retry lifecycle step for: {indexNames}',
-        values: { indexNames: indexNames.map((indexName) => `"${indexName}"`).join(', ') },
+        values: { indexNames: indexNames.map((indexName: string) => `"${indexName}"`).join(', ') },
       }
     ),
   };
 };
 
-export const removeLifecyclePolicyActionExtension = ({ indices, reloadIndices }) => {
+export const removeLifecyclePolicyActionExtension = ({
+  indices,
+  reloadIndices,
+}: {
+  indices: Index[];
+  reloadIndices: () => void;
+}) => {
   const allHaveIlm = every(indices, (index) => {
     return index.ilm && index.ilm.managed;
   });
   if (!allHaveIlm) {
     return null;
   }
-  const indexNames = indices.map(({ name }) => name);
+  const indexNames = indices.map(({ name }: Index) => name);
   return {
-    renderConfirmModal: (closeModal) => {
+    renderConfirmModal: (closeModal: () => void) => {
       return (
         <RemoveLifecyclePolicyConfirmModal
           indexNames={indexNames}
@@ -67,7 +78,15 @@ export const removeLifecyclePolicyActionExtension = ({ indices, reloadIndices })
   };
 };
 
-export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices, getUrlForApp }) => {
+export const addLifecyclePolicyActionExtension = ({
+  indices,
+  reloadIndices,
+  getUrlForApp,
+}: {
+  indices: Index[];
+  reloadIndices: () => void;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+}) => {
   if (indices.length !== 1) {
     return null;
   }
@@ -79,7 +98,7 @@ export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices, getU
   }
   const indexName = index.name;
   return {
-    renderConfirmModal: (closeModal) => {
+    renderConfirmModal: (closeModal: () => void) => {
       return (
         <AddLifecyclePolicyConfirmModal
           indexName={indexName}
@@ -97,12 +116,12 @@ export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices, getU
   };
 };
 
-export const ilmBannerExtension = (indices) => {
+export const ilmBannerExtension = (indices: Index[]) => {
   const { Query } = EuiSearchBar;
   if (!indices.length) {
     return null;
   }
-  const indicesWithLifecycleErrors = indices.filter((index) => {
+  const indicesWithLifecycleErrors = indices.filter((index: Index) => {
     return get(index, stepPath) === 'ERROR';
   });
   const numIndicesWithLifecycleErrors = indicesWithLifecycleErrors.length;
@@ -124,11 +143,14 @@ export const ilmBannerExtension = (indices) => {
   };
 };
 
-export const ilmSummaryExtension = (index, getUrlForApp) => {
+export const ilmSummaryExtension = (
+  index: Index,
+  getUrlForApp: ApplicationStart['getUrlForApp']
+) => {
   return <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />;
 };
 
-export const ilmFilterExtension = (indices) => {
+export const ilmFilterExtension = (indices: Index[]) => {
   const hasIlm = some(indices, (index) => index.ilm && index.ilm.managed);
   if (!hasIlm) {
     return [];
@@ -200,7 +222,9 @@ export const ilmFilterExtension = (indices) => {
   }
 };
 
-export const addAllExtensions = (extensionsService) => {
+export const addAllExtensions = (
+  extensionsService: IndexManagementPluginSetup['extensionsService']
+) => {
   extensionsService.addAction(retryLifecycleActionExtension);
   extensionsService.addAction(removeLifecyclePolicyActionExtension);
   extensionsService.addAction(addLifecyclePolicyActionExtension);
