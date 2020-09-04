@@ -18,6 +18,8 @@
  */
 
 import { Server } from 'hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
 import { configMock } from '../config/config.mock';

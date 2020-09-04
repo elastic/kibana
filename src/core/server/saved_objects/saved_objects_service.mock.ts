@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObjectsService,

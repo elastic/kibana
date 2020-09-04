@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { DeeplyMockedKeys } from '@kbn/utility-types';
 import { CoreContext } from './core_context';
 import { getEnvOptions } from './config/__mocks__/env';
 import { Env, IConfigService } from './config';

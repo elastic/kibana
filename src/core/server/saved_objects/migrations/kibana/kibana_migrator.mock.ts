@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from '../core';

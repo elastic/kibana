@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Appenders, DisposableAppender } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { LogLevel } from './log_level';

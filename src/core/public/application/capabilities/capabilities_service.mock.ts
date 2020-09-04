@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
 import { deepFreeze } from '../../../utils';
 

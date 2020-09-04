@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RenderingService } from './rendering_service';
 
 type RenderingServiceContract = PublicMethodsOf<RenderingService>;

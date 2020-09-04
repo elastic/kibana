@@ -18,6 +18,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
 import {
   elasticsearchClientMock,

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RawConfigService } from './raw_config_service';
 import { Observable, of } from 'rxjs';
 
