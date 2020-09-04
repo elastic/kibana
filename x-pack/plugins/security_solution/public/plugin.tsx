@@ -296,7 +296,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
