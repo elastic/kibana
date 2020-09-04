@@ -1,5 +1,5 @@
 [[drilldowns]]
-=== Use drilldowns for dashboard actions
+== Use drilldowns for dashboard actions
 
 Drilldowns, also known as custom actions, allow you to configure a
 workflow for analyzing and troubleshooting your data.
@@ -13,7 +13,7 @@ that shows a single data center or server.
 
 [float]
 [[how-drilldowns-work]]
-==== How drilldowns work
+=== How drilldowns work
 
 Drilldowns are user-configurable {kib} actions that are stored with the
 dashboard metadata. Drilldowns are specific to the dashboard panel
@@ -34,7 +34,7 @@ to learn how to code drilldowns.
 
 [float]
 [[create-manage-drilldowns]]
-==== Create and manage drilldowns
+=== Create and manage drilldowns
 
 Your dashboard must be in *Edit* mode to create a drilldown.
 Once a panel has at least one drilldown, the menu also includes a *Manage drilldowns* action

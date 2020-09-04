@@ -1,5 +1,5 @@
 [[url-drilldown]]
-==== URL Drilldown
+=== URL Drilldown
 
 The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
 The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
@@ -15,7 +15,7 @@ NOTE: URL drilldown is available with the https://www.elastic.co/subscriptions[G
 
 [float]
 [[try-it]]
-===== Try it: Create a URL drilldown
+==== Try it: Create a URL drilldown
 
 This example shows how to create the "Show on Github" drilldown shown earlier in this doc.
 
@@ -53,7 +53,7 @@ image:images/url_drilldown_github.png[Github]
 
 [float]
 [[trigger-picker]]
-===== Picking a trigger for a URL drilldown
+==== Picking a trigger for a URL drilldown
 
 Some panels support multiple user interactions (called triggers) for which you can configure a URL drilldown. The list of supported variables in the URL template depends on the trigger you selected.
 In the preceding <<try-it, example>>, you configured a URL drilldown on a pie chart. The only trigger that pie chart supports is clicking on a pie slice, so you didn’t have to pick a trigger.
@@ -69,7 +69,7 @@ You can create multiple URL drilldowns per panel and attach them to different tr
 
 [float]
 [[templating]]
-===== URL templating language
+==== URL templating language
 
 The URL template input uses Handlebars — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
 
@@ -111,7 +111,7 @@ In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Han
 
 [float]
 [[variables]]
-===== URL template variables
+==== URL template variables
 
 The URL drilldown template has three sources for variables:
 
@@ -134,7 +134,7 @@ You can access the full list of variables available for the current panel and se
 
 [float]
 [[variables-reference]]
-===== Supported variables reference
+==== Variables reference
 
 
 |===

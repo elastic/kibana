@@ -1,5 +1,5 @@
 [[dashboard-drilldown]]
-==== Dashboard drilldown
+=== Dashboard drilldown
 
 The dashboard drilldown allows you to navigate from one dashboard to another dashboard.
 
@@ -14,12 +14,12 @@ image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to
 
 [float]
 [[drilldowns-example]]
-===== Try it: Create a dashboard drilldown
+==== Try it: Create a dashboard drilldown
 
 This example shows how to create the *Host Overview* drilldown shown earlier in this doc.
 
-[float]
-===== Set up the dashboards
+
+*Set up the dashboards*
 
 . Add the <<gs-get-data-into-kibana, sample web logs>> data set.
 
