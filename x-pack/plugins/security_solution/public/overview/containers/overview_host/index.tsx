@@ -21,13 +21,15 @@ import { ESQuery } from '../../../../common/typed_json';
 import { useManageSource } from '../../../common/containers/sourcerer';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
 export const ID = 'overviewHostQuery';
 
 export interface HostOverviewArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   overviewHost: HostOverviewStrategyResponse['overviewHost'];
   refetch: inputsModel.Refetch;
@@ -90,7 +92,7 @@ export const useHostOverview = ({
         const searchSubscription$ = data.search
           .search<HostOverviewRequestOptions, HostOverviewStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -100,7 +102,7 @@ export const useHostOverview = ({
                   setHostOverviewResponse((prevResponse) => ({
                     ...prevResponse,
                     overviewHost: response.overviewHost,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
                 }

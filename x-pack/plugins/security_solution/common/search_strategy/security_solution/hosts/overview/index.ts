@@ -29,7 +29,6 @@ export interface HostOverviewStrategyResponse extends IEsSearchResponse {
     filebeatSystemModule?: Maybe<number>;
     winlogbeatSecurity?: Maybe<number>;
     winlogbeatMWSysmonOperational?: Maybe<number>;
-    inspect?: Maybe<Inspect>;
   };
 }
 

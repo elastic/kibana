@@ -10,17 +10,17 @@ import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostOverviewStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
   HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
+  HostUncommonProcessesStrategyResponse,
+  HostUncommonProcessesRequestOptions,
 } from './hosts';
-import {
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
-} from './hosts/authentications';
 import {
   NetworkQueries,
   NetworkTlsStrategyResponse,
@@ -70,9 +70,11 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.overview
   ? HostOverviewStrategyResponse
   : T extends HostsQueries.authentications
-  ? AuthenticationsStrategyResponse
+  ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
@@ -88,9 +90,11 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications
-  ? AuthenticationsRequestOptions
+  ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http

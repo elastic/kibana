@@ -11,6 +11,7 @@ export * from './common';
 export * from './details';
 export * from './overview';
 export * from './first_last_seen';
+export * from './uncommon_processes';
 
 export enum HostsQueries {
   authentications = 'authentications',
@@ -18,4 +19,5 @@ export enum HostsQueries {
   firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
   overview = 'overview',
+  uncommonProcesses = 'uncommonProcesses',
 }
