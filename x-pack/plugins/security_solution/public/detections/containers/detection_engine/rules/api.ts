@@ -33,7 +33,6 @@ import {
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { INITIAL_SORT_FIELD } from '../../../pages/detection_engine/rules/all';
 
 /**
  * Create provided Rule
@@ -95,7 +94,7 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: INITIAL_SORT_FIELD,
+    sortField: 'enabled',
     sortOrder: 'desc',
     showCustomRules: false,
     showElasticRules: false,

@@ -57,7 +57,7 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
-export const INITIAL_SORT_FIELD = 'enabled';
+const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
