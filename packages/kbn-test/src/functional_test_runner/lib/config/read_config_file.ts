@@ -18,7 +18,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { get, unset, defaultsDeep } from 'lodash';
+import { defaultsDeep } from 'lodash';
 
 import { Config } from './config';
 
@@ -50,11 +50,6 @@ async function getSettingsFromFile(log: ToolingLog, path: string, settingOverrid
     settingOverrides,
     await cache.get(configProvider)!
   );
-
-  if (get(settingsWithDefaults, 'servers.webdriver') !== undefined) {
-    log.error('servers.webdriver is deprecated and is no longer used');
-    unset(settingsWithDefaults, 'servers.webdriver');
-  }
 
   return settingsWithDefaults;
 }
