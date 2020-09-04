@@ -144,14 +144,14 @@ export const routes: APMRouteDefinition[] = [
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),
-  },
+  } as APMRouteDefinition<RouteParams>,
   // errors
   {
     exact: true,
     path: '/services/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
     breadcrumb: ({ match }) => match.params.groupId,
-  },
+  } as APMRouteDefinition<{ groupId: string; serviceName: string }>,
   {
     exact: true,
     path: '/services/:serviceName/errors',
