@@ -17,9 +17,8 @@ import styled from 'styled-components';
 
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { RuleType } from '../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
@@ -409,7 +408,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data: nonEcsRowData,
       fieldName: 'signal.rule.type',
     });
-    const [ruleType] = ruleTypes as RuleType[];
+    const [ruleType] = ruleTypes as Type[];
     return !isMlRule(ruleType) && !isThresholdRule(ruleType);
   }, [nonEcsRowData]);
 

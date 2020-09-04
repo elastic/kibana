@@ -133,6 +133,9 @@ export function DiscoverField({
           iconType="plusInCircleFilled"
           className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
             ev.preventDefault();
             ev.stopPropagation();
             toggleDisplay(field);
@@ -155,6 +158,9 @@ export function DiscoverField({
           iconType="cross"
           className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
             ev.preventDefault();
             ev.stopPropagation();
             toggleDisplay(field);
