@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Index as IndexInterface } from '../../../../../index_management/public';
+
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
@@ -168,4 +170,37 @@ export interface FrozenPhase
 
 export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {
   waitForSnapshotPolicy: string;
+}
+
+export interface IndexLifecyclePolicy {
+  index: string;
+  managed: boolean;
+  action?: string;
+  action_time_millis?: number;
+  age?: string;
+  failed_step?: string;
+  failed_step_retry_count?: number;
+  is_auto_retryable_error?: boolean;
+  lifecycle_date_millis?: number;
+  phase?: string;
+  phase_execution?: {
+    policy: string;
+    modified_date_in_millis: number;
+    version: number;
+    phase_definition: SerializedPhase;
+  };
+  phase_time_millis?: number;
+  policy?: string;
+  step?: string;
+  step_info?: {
+    reason?: string;
+    stack_trace?: string;
+    type?: string;
+    message?: string;
+  };
+  step_time_millis?: number;
+}
+
+export interface Index extends IndexInterface {
+  ilm: IndexLifecyclePolicy;
 }
