@@ -24,7 +24,7 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults, createDocLink } from './alerts_common';
 
 interface ParamDetails {
   [key: string]: CommonAlertParamDetail;
@@ -110,7 +110,7 @@ export class DiskUsageAlert extends BaseAlert {
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
     const alertInstanceStates = alertInstance.state?.alertStates as AlertDiskUsageState[];
-    const nodeUuid = filters.find((filter) => filter.nodeUuid);
+    const nodeUuid = filters?.find((filter) => filter.nodeUuid);
 
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeUuid) {
       return true;
@@ -153,36 +153,30 @@ export class DiskUsageAlert extends BaseAlert {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          diskUsage: stat.diskUsage.toFixed(2),
+          diskUsage: stat.diskUsage,
         },
       }),
       nextSteps: [
-        {
-          text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.hotThreads', {
-            defaultMessage: `#start_linkCheck hot threads#end_link`,
-          }),
-          tokens: [
-            {
-              startToken: '#start_link',
-              endToken: '#end_link',
-              type: AlertMessageTokenType.DocLink,
-              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`,
-            } as AlertMessageDocLinkToken,
-          ],
-        },
-        {
-          text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.runningTasks', {
-            defaultMessage: `#start_linkCheck long running tasks#end_link`,
-          }),
-          tokens: [
-            {
-              startToken: '#start_link',
-              endToken: '#end_link',
-              type: AlertMessageTokenType.DocLink,
-              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`,
-            } as AlertMessageDocLinkToken,
-          ],
-        },
+        createDocLink(
+          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk',
+          'Tune for disk usage',
+          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
+        ),
+        createDocLink(
+          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies',
+          'Implement ILM policies',
+          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
+        ),
+        createDocLink(
+          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes',
+          'Add more data nodes',
+          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
+        ),
+        createDocLink(
+          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment',
+          'Resize your deployment (ECE)',
+          `{elasticWebsiteUrl}/guide/en/cloud-enterprise/{docLinkVersion}/ece-resize-deployment.html`
+        ),
       ],
       tokens: [
         {
@@ -354,7 +348,7 @@ export class DiskUsageAlert extends BaseAlert {
         if (indexInState < 0) {
           alertInstanceState.alertStates.push(nodeState);
         } else {
-          alertInstanceState.alertStates.splice(indexInState, 0, nodeState);
+          alertInstanceState.alertStates[indexInState] = nodeState;
         }
       }
 

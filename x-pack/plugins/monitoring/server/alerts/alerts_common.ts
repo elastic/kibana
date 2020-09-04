@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertMessageDocLinkToken } from './types';
+import { AlertMessageTokenType } from '../../common/enums';
 
 export class AlertingDefaults {
   public static readonly ALERT_STATE = {
@@ -59,3 +61,19 @@ export class AlertingDefaults {
     },
   };
 }
+
+export const createDocLink = (translateStr: string, linkText: string, linkURL: string) => {
+  return {
+    text: i18n.translate(translateStr, {
+      defaultMessage: `#start_link${linkText}#end_link`,
+    }),
+    tokens: [
+      {
+        startToken: '#start_link',
+        endToken: '#end_link',
+        type: AlertMessageTokenType.DocLink,
+        partialUrl: linkURL,
+      } as AlertMessageDocLinkToken,
+    ],
+  };
+};
