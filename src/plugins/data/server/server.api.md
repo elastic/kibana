@@ -48,7 +48,6 @@ import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { FetchOptions } from 'src/plugins/data/public';
 import { FieldStatsParams } from 'elasticsearch';
 import { GenericParams } from 'elasticsearch';
 import { GetParams } from 'elasticsearch';
@@ -99,6 +98,7 @@ import { IngestDeletePipelineParams } from 'elasticsearch';
 import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
+import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType as KibanaConfigType_2 } from 'src/core/server/kibana_config';
@@ -678,8 +678,7 @@ export class IndexPatternsFetcher {
 //
 // @public (undocumented)
 export interface ISearchOptions {
-    signal?: AbortSignal;
-    // (undocumented)
+    abortSignal?: AbortSignal;
     strategy?: string;
 }
 

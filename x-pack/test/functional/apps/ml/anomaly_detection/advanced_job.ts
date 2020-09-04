@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -433,9 +432,7 @@ export default function ({ getService }: FtrProviderContext) {
             'job creation displays the created job in the job list'
           );
           await ml.jobTable.refreshJobList();
-          await ml.jobTable.filterWithSearchString(testData.jobId);
-          const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter((row) => row.id === testData.jobId)).to.have.length(1);
+          await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(
             'job creation displays details for the created job in the job list'
@@ -651,9 +648,7 @@ export default function ({ getService }: FtrProviderContext) {
             'job cloning displays the created job in the job list'
           );
           await ml.jobTable.refreshJobList();
-          await ml.jobTable.filterWithSearchString(testData.jobIdClone);
-          const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter((row) => row.id === testData.jobIdClone)).to.have.length(1);
+          await ml.jobTable.filterWithSearchString(testData.jobIdClone, 1);
 
           await ml.testExecution.logTestStep(
             'job cloning displays details for the created job in the job list'

@@ -26,11 +26,12 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FetchOptions as FetchOptions_2 } from 'src/plugins/data/public';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
+import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
@@ -485,16 +486,6 @@ export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => M
 export const extractSearchSourceReferences: (state: SearchSourceFields) => [SearchSourceFields & {
     indexRefName?: string;
 }, SavedObjectReference[]];
-
-// Warning: (ae-missing-release-tag) "FetchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface FetchOptions {
-    // (undocumented)
-    abortSignal?: AbortSignal;
-    // (undocumented)
-    searchStrategyId?: string;
-}
 
 // Warning: (ae-missing-release-tag) "FieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1233,9 +1224,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IEsSearchRequest = I
 //
 // @public (undocumented)
 export interface ISearchOptions {
-    // (undocumented)
-    signal?: AbortSignal;
-    // (undocumented)
+    abortSignal?: AbortSignal;
     strategy?: string;
 }
 
