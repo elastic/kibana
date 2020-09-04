@@ -307,7 +307,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-  console.log($scope.showSaveQuery);
 
   let abortController;
   $scope.$on('$destroy', () => {

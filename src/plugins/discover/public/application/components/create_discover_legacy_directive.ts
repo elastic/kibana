@@ -46,6 +46,7 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['setColumns', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
     ['setSortOrder', { watchDepth: 'reference' }],
+    ['showSaveQuery', { watchDepth: 'reference' }],
     ['state', { watchDepth: 'reference' }],
     ['timefilterUpdateHandler', { watchDepth: 'reference' }],
     ['timeRange', { watchDepth: 'reference' }],
