@@ -7,9 +7,8 @@
 import React, { MouseEventHandler, useState } from 'react';
 import { EuiPopover, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { debounce } from 'lodash';
-import { FilterValue, SEARCH_QUERY_LANGUAGE } from '.';
+import { FilterValue, defaultLabel } from '.';
 import { IndexPattern } from '../../../types';
 
 import {
@@ -18,13 +17,6 @@ import {
   esKuery,
   esQuery,
 } from '../../../../../../../../src/plugins/data/public';
-
-const defaultPlaceholderMessage = i18n.translate(
-  'xpack.lens.indexPattern.filters.label.placeholder',
-  {
-    defaultMessage: 'All records',
-  }
-);
 
 export const FilterPopover = ({
   filter,
@@ -53,15 +45,25 @@ export const FilterPopover = ({
   const setFilterQuery = (input: Query) => {
     setErrorMessage('');
     try {
-      if (input.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+      if (input.language === 'kuery') {
         esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(input.query), indexPattern);
-      } else if (input.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
+      } else {
         esQuery.luceneStringToDsl(input.query);
       }
       setFilter({ ...filter, input });
     } catch (e) {
       setErrorMessage(`Invalid syntax: ${JSON.stringify(e, null, 2)}`);
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
+    }
+  };
+
+  const getPlaceholder = (query: Query['query']) => {
+    if (query === '') {
+      return defaultLabel;
+    }
+    if (query === 'object') return JSON.stringify(query);
+    else {
+      return String(query);
     }
   };
 
@@ -96,7 +98,7 @@ export const FilterPopover = ({
           <LabelInput
             value={filter.label || ''}
             onChange={setFilterLabel}
-            placeholder={filter.input.query || defaultPlaceholderMessage}
+            placeholder={getPlaceholder(filter.input.query)}
           />
         </EuiFormRow>
       </EuiForm>
@@ -136,7 +138,7 @@ const QueryInput = ({
       query={inputValue}
       onChange={handleInputChange}
       placeholder={
-        inputValue.language === SEARCH_QUERY_LANGUAGE.KUERY
+        inputValue.language === 'kuery'
           ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
               defaultMessage: 'Example: {example}',
               values: { example: 'method : "GET" or status : "404"' },

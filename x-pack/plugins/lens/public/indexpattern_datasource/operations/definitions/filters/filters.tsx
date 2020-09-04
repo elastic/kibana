@@ -33,15 +33,8 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
-import { DataType } from '../../../../types';
-
-export enum SEARCH_QUERY_LANGUAGE {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
 
 const generateId = htmlIdGenerator();
-
 export interface Filter {
   input: Query;
   label: string;
@@ -56,14 +49,16 @@ const searchQueryLabel = i18n.translate('xpack.lens.indexPattern.searchQuery', {
   defaultMessage: 'Search query',
 });
 
+export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
+  defaultMessage: 'All records',
+});
+
 const defaultSearchQuery: Filter = {
   input: {
-    query: '*',
+    query: '',
     language: 'kuery',
   },
-  label: i18n.translate('xpack.lens.indexPattern.searchQueryDefault', {
-    defaultMessage: 'All records',
-  }),
+  label: '',
 };
 
 interface DraggableLocation {
@@ -92,7 +87,9 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     }
   },
   isTransferable: () => false,
-  onFieldChange: (oldColumn, indexPattern, field) => null,
+
+  onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
+
   buildColumn({ suggestedPriority, field }) {
     return {
       label: searchQueryLabel,
@@ -146,7 +143,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   },
 };
 
-const FilterList = ({
+export const FilterList = ({
   filters,
   setFilters,
   indexPattern,
@@ -249,7 +246,7 @@ const FilterList = ({
                               data-test-subj="indexPattern-filters-existingFilterTrigger"
                             >
                               <EuiText size="s" textAlign="left">
-                                {label || input.query || defaultSearchQuery.label}
+                                {label || input.query || defaultLabel}
                               </EuiText>
                             </EuiLink>
                           )}
