@@ -124,19 +124,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
-    description: () => (
-      <FormattedMessage
-        id="xpack.ingestPipelines.processors.description.enrich"
-        defaultMessage="Adds enrich data to incoming documents based on an {enrichPolicyLink}."
-        values={{
-          enrichPolicyLink: (
-            <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
-              {'enrich policy'}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
+   description: function Description() {
+      const {
+        services: { documentation },
+      } = useKibana();
+      const esDocUrl = documentation.getEsDocsBasePath();
+      return (
+        <FormattedMessage
+          id="xpack.ingestPipelines.processors.description.enrich"
+          defaultMessage="Adds enrich data to incoming documents based on an {enrichPolicyLink}."
+          values={{
+            enrichPolicyLink: (
+              <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+                {'enrich policy'}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    }
   },
   fail: {
     FieldsComponent: Fail,
