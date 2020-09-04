@@ -1,5 +1,6 @@
+[float]
 [[drilldowns]]
-== Use drilldowns for dashboard actions
+=== Use drilldowns for dashboard actions
 
 Drilldowns, also known as custom actions, allow you to configure a
 workflow for analyzing and troubleshooting your data.
@@ -13,7 +14,7 @@ that shows a single data center or server.
 
 [float]
 [[how-drilldowns-work]]
-=== How drilldowns work
+==== How drilldowns work
 
 Drilldowns are user-configurable {kib} actions that are stored with the
 dashboard metadata. Drilldowns are specific to the dashboard panel
@@ -35,7 +36,7 @@ to learn how to code drilldowns.
 
 [float]
 [[create-manage-drilldowns]]
-=== Create and manage drilldowns
+==== Create and manage drilldowns
 
 Your dashboard must be in *Edit* mode to create a drilldown.
 Once a panel has at least one drilldown, the menu also includes a *Manage drilldowns* action
@@ -46,14 +47,13 @@ image::images/drilldown_menu.png[Panel menu with Create drilldown and Manage dri
 
 [float]
 [[drilldowns-example]]
-=== Try it: Create a drilldown
+==== Try it: Create a drilldown
 
 This example shows how to create the *Host Overview* drilldown shown earlier in this doc.
 
-[float]
-==== Set up the dashboards
+*Set up the dashboards*
 
-. Add the <<get-data-in, sample web logs>> data set.
+. Add the <<gs-get-data-into-kibana, sample web logs>> data set.
 
 . Create a new dashboard, called `Host Overview`, and include these visualizations
 from the sample data set:
@@ -74,9 +74,7 @@ TIP: If you don’t see data for a panel, try changing the time range.
 Search: `extension.keyword:( “gz” or “css” or “deb”)`
 Filter: `geo.src : CN`
 
-[float]
-==== Create the drilldown
-
+*Create the drilldown*
 
 . In the dashboard menu bar, click *Edit*.
 
