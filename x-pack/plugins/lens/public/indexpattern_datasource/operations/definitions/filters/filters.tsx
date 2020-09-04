@@ -57,6 +57,8 @@ export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.labe
   defaultMessage: 'All records',
 });
 
+// we don't have an access data plugin in places where we use this function,
+// what's why we have a fallback default input
 const getDefaultFilter = (data?: DataPublicPluginStart): Filter => ({
   input: data
     ? data.query.queryString.getDefaultQuery()
@@ -110,6 +112,22 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
 
   buildColumn({ suggestedPriority, field, previousColumn }) {
+    let params = previousColumn?.params?.filters
+      ? previousColumn.params
+      : { filters: [getDefaultFilter()] };
+    if (previousColumn?.operationType === 'terms') {
+      params = {
+        filters: [
+          {
+            label: '',
+            input: {
+              query: `${previousColumn.sourceField} : *`,
+              language: 'kuery',
+            },
+          },
+        ],
+      };
+    }
     return {
       label: searchQueryLabel,
       dataType: 'string',
@@ -118,11 +136,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       suggestedPriority,
       isBucketed: true,
       sourceField: field.name,
-      params: previousColumn?.params?.filters
-        ? previousColumn.params
-        : {
-            filters: [getDefaultFilter()],
-          },
+      params,
     };
   },
 
