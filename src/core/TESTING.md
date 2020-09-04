@@ -330,7 +330,7 @@ Cons:
 To have access to Kibana TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
 ```typescript
 // src/plugins/my_plugin/server/integration_tests/formatter.test.ts
-import * as kbnTestServer from 'src/test_utils/kbn_server';
+import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {

@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiDescriptionList,
+  EuiLink,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
@@ -58,6 +59,9 @@ export const ProcessDetails = memo(function ProcessDetails({
   const isProcessTerminated = useSelector((state: ResolverState) =>
     selectors.isProcessTerminated(state)(entityId)
   );
+  const relatedEventTotal = useSelector((state: ResolverState) => {
+    return selectors.relatedEventAggregateTotalByEntityId(state)(entityId);
+  });
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
     const dateTime = eventTime === undefined ? null : formatDate(eventTime);
@@ -164,6 +168,12 @@ export const ProcessDetails = memo(function ProcessDetails({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
+  const handleEventsLinkClick = useMemo(() => {
+    return () => {
+      pushToQueryParams({ crumbId: entityId, crumbEvent: 'all' });
+    };
+  }, [entityId, pushToQueryParams]);
+
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
@@ -185,6 +195,14 @@ export const ProcessDetails = memo(function ProcessDetails({
           <span id={titleID}>{descriptionText}</span>
         </EuiTextColor>
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiLink onClick={handleEventsLinkClick}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
+          values={{ relatedEventTotal }}
+          defaultMessage="{relatedEventTotal} Events"
+        />
+      </EuiLink>
       <EuiSpacer size="l" />
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"
