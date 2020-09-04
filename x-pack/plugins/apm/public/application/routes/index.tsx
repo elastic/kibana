@@ -6,7 +6,7 @@
 
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
 
-type BreadcrumbTitle<T = {}> =
+export type BreadcrumbTitle<T = {}> =
   | string
   | ((props: RouteComponentProps<T>) => string)
   | null;

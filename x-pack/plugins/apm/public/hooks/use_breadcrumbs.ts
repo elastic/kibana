@@ -41,7 +41,7 @@ function getBreadcrumbText({
 }
 
 /**
- * Convert a route definition into a breadcrumb
+ * Get a breadcrumb from the current path and route definitions.
  */
 function getBreadcrumb({
   currentPath,
@@ -123,6 +123,7 @@ function addLinksToBreadcrumbs({
     };
   });
 }
+
 /**
  * Convert a list of route definitions to a list of breadcrumbs
  */
@@ -163,7 +164,6 @@ function routeDefinitionsToBreadcrumbs({
 }
 
 /**
- *
  * Get an array for a page title from a list of breadcrumbs
  */
 function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
