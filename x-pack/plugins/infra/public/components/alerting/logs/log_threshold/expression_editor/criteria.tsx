@@ -19,7 +19,7 @@ import {
   RatioCriteria as RatioCriteriaType,
   isRatioAlert,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
-import { AlertsContext } from './editor';
+import { AlertsContext, ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
 import { Errors, CriterionErrors } from '../validation';
 
@@ -170,7 +170,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         isRatio={true}
       />
 
-      <EuiText color="secondary">{RATIO_SEPERATOR_TEXT.toUpperCase()}</EuiText>
+      <ExpressionLike text={RATIO_SEPERATOR_TEXT.toUpperCase()} />
 
       <CriteriaWrapper
         {...props}

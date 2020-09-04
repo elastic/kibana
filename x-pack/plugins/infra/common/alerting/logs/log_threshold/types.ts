@@ -133,6 +133,8 @@ export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
 
 const RequiredAlertParamsRT = rt.type({
+  // NOTE: "count" would be better named as "threshold", but this would require a
+  // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
   count: ThresholdRT,
   timeUnit: TimeUnitRT,
   timeSize: timeSizeRT,

@@ -50,7 +50,7 @@ interface Props {
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
 const DEFAULT_BASE_EXPRESSION = {
-  threshold: {
+  count: {
     value: 75,
     comparator: Comparator.GT,
   },
@@ -259,3 +259,13 @@ export const Editor: React.FC<Props> = (props) => {
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
 export default ExpressionEditor;
+
+// NOTE: Temporary until EUI allow empty values in EuiExpression
+// components.
+export const ExpressionLike = ({ text }: { text: string }) => {
+  return (
+    <div className="euiExpression euiExpression-isUppercase euiExpression--secondary">
+      <span className="euiExpression__description">{text}</span>
+    </div>
+  );
+};

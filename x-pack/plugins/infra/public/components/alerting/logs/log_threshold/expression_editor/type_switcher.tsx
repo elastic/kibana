@@ -19,6 +19,7 @@ import {
   ThresholdType,
   isRatioAlert,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
+import { ExpressionLike } from './editor';
 
 const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {
   defaultMessage: 'when the',
@@ -77,9 +78,11 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
                 isActive={isThresholdTypePopoverOpen}
                 onClick={() => setThresholdTypePopoverOpenState(true)}
               />
-              <EuiText color="secondary">
-                {thresholdType === 'ratio' ? ratioSuffix.toUpperCase() : countSuffix.toUpperCase()}
-              </EuiText>
+              <ExpressionLike
+                text={
+                  thresholdType === 'ratio' ? ratioSuffix.toUpperCase() : countSuffix.toUpperCase()
+                }
+              />
             </>
           }
           isOpen={isThresholdTypePopoverOpen}
