@@ -17,7 +17,7 @@ import {
   getExceptions,
   sortExceptionItems,
 } from './utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -38,6 +38,7 @@ jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
 jest.mock('./../../../../common/detection_engine/utils');
+jest.mock('../../../../common/detection_engine/parse_schedule_dates');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
   alertId: ruleAlert.id,
