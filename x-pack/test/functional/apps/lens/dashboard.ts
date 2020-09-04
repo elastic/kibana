@@ -25,11 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('lens dashboard tests', () => {
-
     before(async () => {
-      await security.testUser.setRoles(['global_dashboard_all','test_logstash_reader']);
+      await security.testUser.setRoles(['global_dashboard_all', 'test_logstash_reader']);
     });
-
     after(async () => {
       await security.testUser.restoreDefaults();
     });

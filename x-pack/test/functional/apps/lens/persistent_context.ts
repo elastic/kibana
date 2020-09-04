@@ -14,13 +14,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const security = getService('security');
 
-
   describe('lens query context', () => {
-
     before(async () => {
-      await security.testUser.setRoles(['global_discover_read','global_visualize_read','test_logstash_reader']);
+      await security.testUser.setRoles([
+        'global_discover_read',
+        'global_visualize_read',
+        'test_logstash_reader',
+      ]);
     });
-  
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });
