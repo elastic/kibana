@@ -10,8 +10,8 @@ export const NAME = i18n.translate('xpack.actions.builtin.case.jiraTitle', {
   defaultMessage: 'Jira',
 });
 
-export const WHITE_LISTED_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.jira.configuration.apiWhitelistError', {
+export const ALLOWED_HOSTS_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.jira.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,

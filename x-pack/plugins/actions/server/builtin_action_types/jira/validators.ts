@@ -27,8 +27,8 @@ export const validateCommonConfig = (
 
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
-  } catch (whitelistError) {
-    return i18n.WHITE_LISTED_ERROR(whitelistError.message);
+  } catch (allowedListError) {
+    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
   }
 };
 
