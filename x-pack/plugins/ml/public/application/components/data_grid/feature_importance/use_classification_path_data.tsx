@@ -122,7 +122,7 @@ export const buildRegressionDecisionPathData = ({
     });
 
     // if the difference is small enough then no need to plot the residual feature importance
-    if (adjustedImportance > 1e-5) {
+    if (Math.abs(adjustedImportance) > 1e-5) {
       mappedFeatureImportance.push({
         [FEATURE_NAME]: i18n.translate(
           'xpack.ml.dataframe.analytics.decisionPathFeatureOtherTitle',
