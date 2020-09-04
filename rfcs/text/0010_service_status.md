@@ -137,7 +137,7 @@ interface StatusSetup {
    * Current status for all dependencies of the current plugin.
    * Each key of the `Record` is a plugin id.
    */
-  dependencies$: Observable<Record<string, ServiceStatus>>;
+  plugins$: Observable<Record<string, ServiceStatus>>;
 
   /**
    * The status of this plugin as derived from its dependencies.

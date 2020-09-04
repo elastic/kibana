@@ -12,7 +12,7 @@ import {
   SortField,
   Direction,
   TlsFields,
-} from '../../../../../../common/search_strategy/security_solution';
+} from '../../../../../../common/search_strategy';
 
 const getAggs = (querySize: number, sort: SortField<TlsFields>) => ({
   count: {
