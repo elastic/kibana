@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
@@ -60,7 +59,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
   });
 
   const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'origin',
+    panelParameters: { nodeID: 'origin' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithOriginSelected}`, () => {
@@ -110,7 +110,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'firstChild',
+    panelParameters: { nodeID: 'firstChild' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithFirstChildSelected}`, () => {
@@ -148,7 +149,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
       expect(nodeLinks).toBeTruthy();
       if (nodeLinks) {
-        nodeLinks.first().simulate('click');
+        nodeLinks.first().simulate('click', { button: 0 });
       }
     });
     it('should show the details for the first node', async () => {
@@ -164,20 +165,13 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         ['process.args', 'args'],
       ]);
     });
-    it("should have the first node's ID in the query string", async () => {
-      await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
-        urlSearch(resolverComponentInstanceID, {
-          selectedEntityID: entityIDs.origin,
-        })
-      );
-    });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {
         const nodeListLink = await simulator().resolve(
           'resolver:node-detail:breadcrumbs:node-list-link'
         );
         if (nodeListLink) {
-          nodeListLink.simulate('click');
+          nodeListLink.simulate('click', { button: 0 });
         }
       });
       it('should show the list of nodes with links to each node', async () => {

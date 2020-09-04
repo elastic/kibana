@@ -10,14 +10,13 @@ import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { StyledBreadcrumbs } from './panel_content_utilities';
-
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { PanelLoading } from './panel_loading';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -26,12 +25,15 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
   const relatedEventsStats = useSelector((state: ResolverState) =>
     selectors.relatedEventsStats(state)(nodeID)
   );
-  // TODO, loading and error states. remove the !
-  return (
-    <StyledPanel>
-      <EventCountsForProcess processEvent={processEvent!} relatedStats={relatedEventsStats!} />
-    </StyledPanel>
-  );
+  if (processEvent === null || relatedEventsStats === undefined) {
+    return <PanelLoading />;
+  } else {
+    return (
+      <StyledPanel>
+        <EventCountsForProcess processEvent={processEvent} relatedStats={relatedEventsStats} />
+      </StyledPanel>
+    );
+  }
 }
 
 /**
@@ -80,14 +82,12 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
       defaultMessage: 'Events',
     }
   );
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
   const eventsHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({ panelView: 'nodes' })
   );
 
   const eventLinkNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: eventsHref!,
+    search: eventsHref,
   });
 
   const processDetailHref = useSelector((state: ResolverState) =>
@@ -98,8 +98,7 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
   );
 
   const processDetailNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: processDetailHref!,
+    search: processDetailHref,
   });
 
   const nodeDetailHref = useSelector((state: ResolverState) =>
@@ -110,7 +109,6 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
   );
 
   const nodeDetailNavProps = useNavigateOrReplace({
-    // TODO no !
     search: nodeDetailHref!,
   });
   const crumbs = useMemo(() => {
@@ -125,13 +123,11 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
-              values={{ totalCount }}
-              defaultMessage="{totalCount} Events"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
+            values={{ totalCount }}
+            defaultMessage="{totalCount} Events"
+          />
         ),
         ...nodeDetailNavProps,
       },
@@ -154,6 +150,17 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
       }
     );
   }, [relatedEventsState]);
+
+  const eventDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'eventDetail',
+      panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
+    })
+  );
+
+  const eventDetailNavProps = useNavigateOrReplace({
+    search: eventDetailHref,
+  });
   const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
     () => [
       {
@@ -172,19 +179,11 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
         width: '80%',
         sortable: true,
         render(name: string) {
-          return (
-            <EuiButtonEmpty
-              onClick={() => {
-                pushToQueryParams({ crumbId: event.entityId(processEvent), crumbEvent: name });
-              }}
-            >
-              {name}
-            </EuiButtonEmpty>
-          );
+          return <EuiButtonEmpty {...eventDetailNavProps}>{name}</EuiButtonEmpty>;
         },
       },
     ],
-    [pushToQueryParams, processEvent]
+    [eventDetailNavProps]
   );
   return (
     <>

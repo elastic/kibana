@@ -56,7 +56,7 @@ interface ProcessTableView {
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
-export const ProcessListWithCounts = memo(() => {
+export const NodeList = memo(() => {
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
     () => [
       {
@@ -103,26 +103,28 @@ export const ProcessListWithCounts = memo(() => {
   );
 
   const { processNodePositions } = useSelector(selectors.layout);
-  const nodeHrefs: Map<SafeResolverEvent, string | null> = useSelector((state: ResolverState) => {
-    const relativeHref = selectors.relativeHref(state);
-    return new Map(
-      [...processNodePositions.keys()].map((processEvent) => {
-        const nodeID = event.entityIDSafeVersion(processEvent);
-        if (nodeID === undefined) {
-          return [processEvent, null];
-        }
-        return [
-          processEvent,
-          relativeHref({
-            panelView: 'nodeDetail',
-            panelParameters: {
-              nodeID,
-            },
-          }),
-        ];
-      })
-    );
-  });
+  const nodeHrefs: Map<SafeResolverEvent, string | null | undefined> = useSelector(
+    (state: ResolverState) => {
+      const relativeHref = selectors.relativeHref(state);
+      return new Map(
+        [...processNodePositions.keys()].map((processEvent) => {
+          const nodeID = event.entityIDSafeVersion(processEvent);
+          if (nodeID === undefined) {
+            return [processEvent, null];
+          }
+          return [
+            processEvent,
+            relativeHref({
+              panelView: 'nodeDetail',
+              panelParameters: {
+                nodeID,
+              },
+            }),
+          ];
+        })
+      );
+    }
+  );
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {

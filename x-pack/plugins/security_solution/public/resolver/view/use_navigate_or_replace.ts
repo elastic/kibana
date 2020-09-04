@@ -48,7 +48,6 @@ export function useNavigateOrReplace(
       }
 
       event.preventDefault();
-
       history.push(to);
     },
     [history, additionalOnClick, to]

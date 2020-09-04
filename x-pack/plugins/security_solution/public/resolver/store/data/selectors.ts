@@ -245,9 +245,8 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
     const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
       return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
     }, 0);
-
     // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
-    const { agent, ecs, process, ...relevantData } = specificEvent as ResolverEvent & {
+    const { agent, ecs, process, ...relevantData } = specificEvent as SafeResolverEvent & {
       // Type this with various unknown keys so that ts will let us delete those keys
       ecs: unknown;
       process: unknown;

@@ -8,7 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { NodeSubMenu, subMenuAssets } from './submenu';
+import { NodeSubMenu } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
@@ -233,8 +233,7 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const processDetailNavProps = useNavigateOrReplace({
-      // TODO no !
-      search: processDetailHref!,
+      search: processDetailHref,
     });
 
     const handleFocus = useCallback(() => {
@@ -407,7 +406,6 @@ const UnstyledProcessEventDot = React.memo(
                   buttonBorderColor={labelButtonFill}
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
-                  menuTitle={subMenuAssets.relatedEvents.title}
                   projectionMatrix={projectionMatrix}
                   relatedEventStats={relatedEventStats}
                   nodeID={nodeID}

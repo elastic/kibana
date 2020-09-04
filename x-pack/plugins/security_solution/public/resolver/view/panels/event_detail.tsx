@@ -13,14 +13,12 @@ import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
 import { StyledBreadcrumbs, BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
+import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
-import { RelatedEventCategory } from 'x-pack/plugins/security_solution/common/endpoint/generate_data';
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
@@ -76,51 +74,30 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
   });
 }
 
-export function EventDetail({
-  nodeID,
-  eventType,
-  eventID,
-}: {
-  nodeID: string;
-  eventType: string;
-  eventID: string;
-}) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
-  const relatedEventsStats = useSelector((state: ResolverState) =>
-    selectors.relatedEventsStats(state)(nodeID)
-  );
-  const parentCount: number = Object.values(relatedEventsStats?.events.byCategory || {}).reduce(
-    (sum, val) => sum + val,
-    0
-  );
-  return (
-    <StyledPanel>
-      <RelatedEventDetail
-        relatedEventId={eventID}
-        parentEvent={processEvent!}
-        countForParent={parentCount}
-      />
-    </StyledPanel>
-  );
-}
-
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
-const RelatedEventDetail = memo(function ({
-  relatedEventId,
-  parentEvent,
-  countForParent,
+export const EventDetail = memo(function ({
+  nodeID,
+  eventID,
 }: {
-  relatedEventId: string;
-  parentEvent: ResolverEvent;
-  countForParent: number | undefined;
+  nodeID: string;
+  eventID: string;
 }) {
+  const parentEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+  const countForParent: number = Object.values(relatedEventsStats?.events.byCategory || {}).reduce(
+    (sum, val) => sum + val,
+    0
+  );
   const processName = (parentEvent && event.eventName(parentEvent)) || '*';
-  const processEntityId = parentEvent && event.entityId(parentEvent);
+  const processEntityId = (parentEvent && event.entityId(parentEvent)) || '';
   const totalCount = countForParent || 0;
   const eventsString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
@@ -138,13 +115,23 @@ const RelatedEventDetail = memo(function ({
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId!);
   const dispatch = useResolverDispatch();
+  const nodesHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+  const nodesLinkNavProps = useNavigateOrReplace({
+    search: nodesHref,
+  });
 
   /**
    * If we don't have the related events for the parent yet, use this effect
    * to request them.
    */
   useEffect(() => {
-    if (typeof relatedsReady === 'undefined') {
+    if (
+      typeof relatedsReady === 'undefined' &&
+      processEntityId !== null &&
+      processEntityId !== undefined
+    ) {
       dispatch({
         type: 'appDetectedMissingEventData',
         payload: processEntityId,
@@ -159,32 +146,12 @@ const RelatedEventDetail = memo(function ({
     sections,
     formattedDate,
   ] = useSelector((state: ResolverState) =>
-    selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(processEntityId, relatedEventId)
+    selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(nodeID, eventID)
   );
-
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
-
-  const waitCrumbs = useMemo(() => {
-    return [
-      {
-        text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
-      },
-    ];
-  }, [pushToQueryParams, eventsString]);
 
   const { subject = '', descriptor = '' } = relatedEventToShowDetailsFor
     ? event.descriptiveName(relatedEventToShowDetailsFor)
     : {};
-
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref!,
-  });
 
   const nodeDetailHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({
@@ -193,8 +160,7 @@ const RelatedEventDetail = memo(function ({
     })
   );
   const nodeDetailLinkNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: nodeDetailHref!,
+    search: nodeDetailHref,
   });
 
   const nodeEventsHref = useSelector((state: ResolverState) =>
@@ -204,8 +170,7 @@ const RelatedEventDetail = memo(function ({
     })
   );
   const nodeEventsLinkNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: nodeEventsHref!,
+    search: nodeEventsHref,
   });
 
   const nodeEventsOfTypeHref = useSelector((state: ResolverState) =>
@@ -215,8 +180,7 @@ const RelatedEventDetail = memo(function ({
     })
   );
   const nodeEventsOfTypeLinkNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: nodeEventsOfTypeHref!,
+    search: nodeEventsOfTypeHref,
   });
   const crumbs = useMemo(() => {
     return [
@@ -281,25 +245,8 @@ const RelatedEventDetail = memo(function ({
     nodesLinkNavProps,
   ]);
 
-  /**
-   * If the ship hasn't come in yet, wait on the dock
-   */
   if (!relatedsReady) {
-    const waitingString = i18n.translate(
-      'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait',
-      {
-        defaultMessage: 'Waiting For Events...',
-      }
-    );
-    return (
-      <>
-        <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
-        <EuiSpacer size="l" />
-        <EuiTitle>
-          <h4>{waitingString}</h4>
-        </EuiTitle>
-      </>
-    );
+    return <PanelLoading />;
   }
 
   /**
@@ -316,7 +263,7 @@ const RelatedEventDetail = memo(function ({
   }
 
   return (
-    <>
+    <StyledPanel>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
@@ -374,6 +321,6 @@ const RelatedEventDetail = memo(function ({
           </Fragment>
         );
       })}
-    </>
+    </StyledPanel>
   );
 });

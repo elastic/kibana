@@ -313,6 +313,11 @@ export const relatedEventsRelativeHrefs = composeSelectors(
   uiSelectors.relatedEventsRelativeHrefs
 );
 
+export const relatedEventDetailHrefs = composeSelectors(
+  uiStateSelector,
+  uiSelectors.relatedEventDetailHrefs
+);
+
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.

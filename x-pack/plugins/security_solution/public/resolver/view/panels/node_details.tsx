@@ -28,7 +28,6 @@ import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
 import { ResolverState } from '../../types';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
@@ -39,7 +38,7 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   );
   return (
     <StyledPanel>
-      {processEvent === null ? <PanelLoading /> : <ProcessDetails processEvent={processEvent} />}
+      {processEvent === null ? <PanelLoading /> : <NodeDetailView processEvent={processEvent} />}
     </StyledPanel>
   );
 });
@@ -48,7 +47,7 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-const ProcessDetails = memo(function ProcessDetails({
+const NodeDetailView = memo(function NodeDetailView({
   processEvent,
 }: {
   processEvent: ResolverEvent;
@@ -131,8 +130,7 @@ const ProcessDetails = memo(function ProcessDetails({
   );
 
   const nodesLinkNavProps = useNavigateOrReplace({
-    // TODO no !
-    search: nodesHref!,
+    search: nodesHref,
   });
 
   const crumbs = useMemo(() => {
@@ -149,13 +147,11 @@ const ProcessDetails = memo(function ProcessDetails({
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.detailsForProcessName"
-              values={{ processName }}
-              defaultMessage="Details for: {processName}"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.detailsForProcessName"
+            values={{ processName }}
+            defaultMessage="Details for: {processName}"
+          />
         ),
         onClick: () => {},
       },

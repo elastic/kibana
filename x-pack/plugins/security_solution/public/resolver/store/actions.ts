@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -123,6 +123,5 @@ export type ResolverAction =
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
   | AppDetectedMissingEventData;

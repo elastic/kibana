@@ -19,13 +19,9 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 import { EuiSelectableOption } from '@elastic/eui';
-import * as selectors from '../store/selectors';
-import { useResolverDispatch } from './use_resolver_dispatch';
-import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
-import { ResolverNodeStats, ResolverState } from '../../../common/endpoint/types';
-import { useNavigateOrReplace } from './use_navigate_or_replace';
+import { ResolverNodeStats } from '../../../common/endpoint/types';
+import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { Matrix3 } from '../types';
 
 /**
@@ -138,17 +134,16 @@ const NodeSubMenuComponents = React.memo(
   ({
     count,
     buttonBorderColor,
-    menuTitle,
     menuAction,
     className,
     projectionMatrix,
     nodeID,
     relatedEventStats,
   }: {
-    menuTitle: string;
     className?: string;
     menuAction?: () => unknown;
     buttonBorderColor: ButtonColor;
+    // eslint-disable-next-line react/no-unused-prop-types
     buttonFill: string;
     count?: number;
     /**
@@ -185,14 +180,14 @@ const NodeSubMenuComponents = React.memo(
     const closePopover = useCallback(() => setMenuOpen(false), []);
     const popoverId = idGenerator('submenu-popover');
 
-    const pushToQueryParams = useReplaceBreadcrumbParameters();
-
     const isMenuLoading = !relatedEventStats;
-    const dispatch = useResolverDispatch();
 
     // The last projection matrix that was used to position the popover
     const projectionMatrixAtLastRender = useRef<Matrix3>();
-
+    const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
+      nodeID,
+      categories: relatedEventStats?.events?.byCategory,
+    });
     const relatedEventOptions = useMemo(() => {
       if (relatedEventStats === undefined) {
         return [];
@@ -201,13 +196,11 @@ const NodeSubMenuComponents = React.memo(
           return {
             prefix: <EuiI18nNumber value={total || 0} />,
             optionTitle: category,
-            action: () => {
-              pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
-            },
+            action: () => relatedEventCallbacks(category),
           };
         });
       }
-    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
+    }, [relatedEventStats, relatedEventCallbacks]);
 
     useLayoutEffect(() => {
       if (
@@ -241,7 +234,7 @@ const NodeSubMenuComponents = React.memo(
             size="s"
             tabIndex={-1}
           >
-            {menuTitle}
+            {subMenuAssets.relatedEvents.title}
           </EuiButton>
         </div>
       );
@@ -264,7 +257,7 @@ const NodeSubMenuComponents = React.memo(
         data-test-subj="resolver:submenu:button"
         data-test-resolver-node-id={nodeID}
       >
-        {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
+        {count ? <EuiI18nNumber value={count} /> : ''} {subMenuAssets.relatedEvents.title}
       </EuiButton>
     );
 

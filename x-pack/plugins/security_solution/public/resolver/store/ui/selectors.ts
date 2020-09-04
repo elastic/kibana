@@ -8,7 +8,9 @@ import { decode, encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 import { isPanelViewAndParameters } from '../../models/location_search';
+import { eventId } from '../../../../common/endpoint/models/event';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -60,13 +62,13 @@ export const panelViewAndParameters = createSelector(
 
 export const relativeHref: (
   state: ResolverUIState
-) => (params: PanelViewAndParameters) => string | null = createSelector(
+) => (params: PanelViewAndParameters) => string | undefined = createSelector(
   (state: ResolverUIState) => state.locationSearch,
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
     return (params: PanelViewAndParameters) => {
       if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
-        return null;
+        return undefined;
       }
       const urlSearchParams = new URLSearchParams(locationSearch);
       const value = encode(params);
@@ -76,13 +78,19 @@ export const relativeHref: (
   }
 );
 
+/**
+ * Returns a map of ecs category name to urls for use in panel navigation.
+ */
 export const relatedEventsRelativeHrefs: (
   state: ResolverUIState
-) => (categories: string[], nodeID: string) => string[] = createSelector(
-  relativeHref,
-  (relativeHref) => {
-    return (categories: string[], nodeID: string) => {
-      return categories.map((category) => {
+) => (
+  categories: Record<string, number> | undefined,
+  nodeID: string
+) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
+  return (categories: Record<string, number> | undefined, nodeID: string) => {
+    const hrefsByCategory = new Map<string, string | undefined>();
+    if (categories !== undefined) {
+      Object.keys(categories).map((category) => {
         const categoryPanelParams: PanelViewAndParameters = {
           panelView: 'nodeEventsOfType',
           panelParameters: {
@@ -90,16 +98,47 @@ export const relatedEventsRelativeHrefs: (
             eventType: category,
           },
         };
-        return relativeHref(categoryPanelParams);
+        hrefsByCategory.set(category, relativeHref(categoryPanelParams));
+        return category;
       });
-    };
-  }
-);
+    }
+    return hrefsByCategory;
+  };
+});
+
+/**
+ * Returns a map of event entity ids to urls for use in navigation.
+ */
+export const relatedEventDetailHrefs: (
+  state: ResolverUIState
+) => (
+  category: string,
+  nodeID: string,
+  events: ResolverEvent[]
+) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
+  return (category: string, nodeID: string, events: ResolverEvent[]) => {
+    const hrefsByEntityID = new Map<string, string | undefined>();
+    events.map((event) => {
+      const entityID = String(eventId(event));
+      const eventDetailPanelParams: PanelViewAndParameters = {
+        panelView: 'eventDetail',
+        panelParameters: {
+          nodeID,
+          eventType: category,
+          eventID: entityID,
+        },
+      };
+      hrefsByEntityID.set(entityID, relativeHref(eventDetailPanelParams));
+      return event;
+    });
+    return hrefsByEntityID;
+  };
+});
 
 /**
  * The parameter name that we use to read/write state to the query string
  */
-function parameterName(resolverComponentInstanceID: string): string {
+export function parameterName(resolverComponentInstanceID: string): string {
   return `resolver-${resolverComponentInstanceID}`;
 }
 /**
