@@ -4865,7 +4865,6 @@
     "xpack.apm.serviceOverview.upgradeAssistantLink": "升级助手",
     "xpack.apm.servicesTable.7xOldDataMessage": "可能还有需要迁移的旧数据。",
     "xpack.apm.servicesTable.7xUpgradeServerMessage": "从 7.x 之前的版本升级？另外，确保您已将\n              APM Server 实例升级到至少 7.0。",
-    "xpack.apm.servicesTable.agentColumnLabel": "代理",
     "xpack.apm.servicesTable.avgResponseTimeColumnLabel": "平均响应时间",
     "xpack.apm.servicesTable.environmentColumnLabel": "环境",
     "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 个环境} other {# 个环境}}",
