@@ -21,37 +21,91 @@ import moment from 'moment';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { IUiSettingsClient } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
-import { getServices } from '../../kibana_services';
+import { getServices, IIndexPattern } from '../../kibana_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DiscoverFetchError } from './fetch_error/fetch_error';
+import { DiscoverFetchError, FetchError } from './fetch_error/fetch_error';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
-import { search } from '../../../../data/public';
+import {
+  IndexPatternField,
+  search,
+  ISearchSource,
+  TimeRange,
+  Query,
+  IndexPatternAttributes,
+} from '../../../../data/public';
+import { Chart } from '../angular/helpers/point_series';
+import { AppState } from '../angular/discover_state';
+import { SavedSearch } from '../../saved_searches';
+
+import { SavedObject } from '../../../../../core/types';
+import { Vis } from '../../../../visualizations/public';
+import { TopNavMenuData } from '../../../../navigation/public';
+
+export interface DiscoverLegacyProps {
+  addColumn: (column: string) => void;
+  fetch: () => void;
+  fetchCounter: number;
+  fetchError: FetchError;
+  fieldCounts: Record<string, number>;
+  histogramData: Chart;
+  hits: number;
+  indexPattern: IIndexPattern;
+  minimumVisibleRows: number;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onChangeInterval: (interval: string) => void;
+  onMoveColumn: (columns: string, newIdx: number) => void;
+  onRemoveColumn: (column: string) => void;
+  onSetColumns: (columns: string[]) => void;
+  onSkipBottomButtonClick: () => void;
+  onSort: (sort: string[][]) => void;
+  opts: {
+    savedSearch: SavedSearch;
+    config: IUiSettingsClient;
+    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    timefield: string;
+    sampleSize: number;
+  };
+  resetQuery: () => void;
+  resultState: string;
+  rows: Array<Record<string, unknown>>;
+  searchSource: ISearchSource;
+  setIndexPattern: (id: string) => void;
+  showSaveQuery: boolean;
+  state: AppState;
+  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
+  timeRange?: { from: string; to: string };
+  topNavMenu: TopNavMenuData[];
+  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  updateSavedQueryId: (savedQueryId?: string) => void;
+  vis?: Vis;
+}
 
 export function DiscoverLegacy({
   addColumn,
   fetch,
-  fetchError,
   fetchCounter,
+  fetchError,
   fieldCounts,
-  getContextAppHref,
   histogramData,
   hits,
   indexPattern,
   minimumVisibleRows,
   onAddFilter,
   onChangeInterval,
+  onMoveColumn,
   onRemoveColumn,
   onSetColumns,
-  onSort,
   onSkipBottomButtonClick,
+  onSort,
   opts,
   resetQuery,
   resultState,
@@ -63,10 +117,10 @@ export function DiscoverLegacy({
   timefilterUpdateHandler,
   timeRange,
   topNavMenu,
-  vis,
   updateQuery,
   updateSavedQueryId,
-}: any) {
+  vis,
+}: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const toMoment = function (datetime: string) {
     if (!datetime) {
@@ -76,9 +130,8 @@ export function DiscoverLegacy({
   };
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
-
-  const bucketInterval =
-    vis && vis.data.aggs.aggs[1] ? vis.data.aggs.aggs[1].buckets.getInterval() : null;
+  // @ts-ignore
+  const bucketInterval = vis?.data?.aggs?.aggs[5]?.buckets?.getInterval();
 
   return (
     <I18nProvider>
@@ -109,7 +162,7 @@ export function DiscoverLegacy({
             >
               <div className="dscFieldChooser">
                 <DiscoverSidebar
-                  columns={state.columns}
+                  columns={state.columns || []}
                   fieldCounts={fieldCounts}
                   hits={rows}
                   indexPatternList={indexPatternList}
@@ -118,7 +171,6 @@ export function DiscoverLegacy({
                   onRemoveField={onRemoveColumn}
                   selectedIndexPattern={searchSource && searchSource.getField('index')}
                   setIndexPattern={setIndexPattern}
-                  state={state}
                 />
               </div>
               <button
@@ -140,7 +192,7 @@ export function DiscoverLegacy({
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
-                  queryLanguage={state.query.language}
+                  queryLanguage={state.query ? state.query.language : ''}
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
@@ -160,13 +212,13 @@ export function DiscoverLegacy({
                     showResetButton={!!(savedSearch && savedSearch.id)}
                     onResetQuery={resetQuery}
                   />
-                  {timeRange && (
+                  {timeRange && bucketInterval && (
                     <TimechartHeader
                       from={toMoment(timeRange.from)}
                       to={toMoment(timeRange.to)}
                       options={search.aggs.intervalOptions}
                       onChangeInterval={onChangeInterval}
-                      stateInterval={state.interval}
+                      stateInterval={state.interval || ''}
                       showScaledInfo={bucketInterval.scaled}
                       bucketIntervalDescription={bucketInterval.description}
                       bucketIntervalScale={bucketInterval.scale}
@@ -202,21 +254,17 @@ export function DiscoverLegacy({
                       {rows && rows.length && (
                         <div className="dscDiscover">
                           <DocTableLegacy
-                            ariaLabelledBy="documentsAriaLabel"
-                            columns={state.columns}
+                            columns={state.columns || []}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
-                            sort={state.sort}
-                            sampleSize={opts.sampleSize}
+                            sort={state.sort || []}
                             searchDescription={opts.savedSearch.description}
                             searchTitle={opts.savedSearch.lastSavedTitle}
-                            showTimeCol={opts.timefield}
-                            getContextAppHref={getContextAppHref}
                             onAddColumn={addColumn}
                             onFilter={onAddFilter}
+                            onMoveColumn={onMoveColumn}
                             onRemoveColumn={onRemoveColumn}
-                            onSetColumns={onSetColumns}
                             onSort={onSort}
                           />
                           <a tabIndex={0} id="discoverBottomMarker">

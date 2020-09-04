@@ -19,7 +19,8 @@
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
-import { getServices } from '../../../kibana_services';
+import { getServices, IIndexPattern } from '../../../kibana_services';
+import { IndexPatternField } from '../../../../../data/common/index_patterns';
 export type AngularScope = IScope;
 
 export interface AngularDirective {
@@ -67,7 +68,7 @@ export function convertDirectiveToRenderFn(
     let rejected = false;
 
     const cleanupFnPromise = injectAngularElement(domNode, directive.template, props, getInjector);
-    cleanupFnPromise.catch((e) => {
+    cleanupFnPromise.catch(() => {
       rejected = true;
       render(<div>error</div>, domNode);
     });
@@ -82,26 +83,41 @@ export function convertDirectiveToRenderFn(
   };
 }
 
-export function DocTableLegacy(renderProps: any) {
+export interface DocTableLegacyProps {
+  columns: string[];
+  searchDescription?: string;
+  searchTitle?: string;
+  onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  rows: Array<Record<string, unknown>>;
+  indexPattern: IIndexPattern;
+  minimumVisibleRows: number;
+  onAddColumn: (column: string) => void;
+  onSort: (sort: string[][]) => void;
+  onMoveColumn: (columns: string, newIdx: number) => void;
+  onRemoveColumn: (column: string) => void;
+  sort?: string[][];
+}
+
+export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   const renderFn = convertDirectiveToRenderFn(
     {
       template: `<doc-table
+                columns="columns"
+                data-description="{{searchDescription}}"
+                data-shared-item
+                data-test-subj="discoverDocTable"
+                data-title="{{searchTitle}}"
+                filter="onFilter"
                 hits="rows"
                 index-pattern="indexPattern"
-                sorting="sort"
-                columns="columns"
                 infinite-scroll="true"
-                filter="onFilter"
-                data-shared-item
-                data-title="{{searchTitle}}"
-                data-description="{{searchDescription}}"
-                data-test-subj="discoverDocTable"
                 minimum-visible-rows="minimumVisibleRows"
-                render-complete
                 on-add-column="onAddColumn"
                 on-change-sort-order="onSort"
-                on-move-column="moveColumn"
-                on-remove-column="onRemoveColumn"></doc_table>`,
+                on-move-column="onMoveColumn"
+                on-remove-column="onRemoveColumn"
+                render-complete
+                sorting="sort"></doc_table>`,
     },
     () => getServices().getEmbeddableInjector()
   );

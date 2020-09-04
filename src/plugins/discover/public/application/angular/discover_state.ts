@@ -55,6 +55,10 @@ export interface AppState {
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
 }
 
 interface GetStateParams {

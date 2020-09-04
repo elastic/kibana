@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoverLegacy } from './discover.legacy';
+import { DiscoverLegacy } from './discover_legacy';
 
 export function createDiscoverLegacyDirective(reactDirective: any) {
   return reactDirective(DiscoverLegacy, [
@@ -26,26 +26,24 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],
     ['fieldCounts', { watchDepth: 'reference' }],
-    ['getContextAppHref', { watchDepth: 'reference' }],
     ['histogramData', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onChangeInterval', { watchDepth: 'reference' }],
+    ['onMoveColumn', { watchDepth: 'reference' }],
     ['onRemoveColumn', { watchDepth: 'reference' }],
     ['onSetColumns', { watchDepth: 'reference' }],
+    ['onSkipBottomButtonClick', { watchDepth: 'reference' }],
     ['onSort', { watchDepth: 'reference' }],
     ['opts', { watchDepth: 'reference' }],
-    ['onSkipBottomButtonClick', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
     ['resultState', { watchDepth: 'reference' }],
     ['rows', { watchDepth: 'reference' }],
     ['savedSearch', { watchDepth: 'reference' }],
     ['searchSource', { watchDepth: 'reference' }],
-    ['setColumns', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
-    ['setSortOrder', { watchDepth: 'reference' }],
     ['showSaveQuery', { watchDepth: 'reference' }],
     ['state', { watchDepth: 'reference' }],
     ['timefilterUpdateHandler', { watchDepth: 'reference' }],

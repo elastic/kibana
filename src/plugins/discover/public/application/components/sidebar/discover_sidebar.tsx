@@ -30,7 +30,6 @@ import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
-import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -69,15 +68,11 @@ export interface DiscoverSidebarProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern: IndexPattern;
+  selectedIndexPattern?: IndexPattern;
   /**
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
-  /**
-   * Current app state, used for generating a link to visualize
-   */
-  state: AppState;
 }
 
 export function DiscoverSidebar({
@@ -90,7 +85,6 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
-  state,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
