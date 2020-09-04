@@ -97,9 +97,7 @@ export const installTransformForDataset = async (
       return installTransform({ callCluster, transform });
     });
 
-    installedTransforms = await Promise.all([Promise.all(installationPromises)]).then((results) =>
-      results.flat()
-    );
+    installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
   }
 
   const currentInstallation = await getInstallation({
