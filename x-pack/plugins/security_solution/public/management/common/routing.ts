@@ -94,13 +94,21 @@ interface ListPaginationParams {
   page_size: number;
 }
 
+const isDefaultOrMissing = (value: number | undefined, defaultValue: number) => {
+  return value === undefined || value === defaultValue;
+};
+
 const normalizeListPaginationParams = (
   params?: Partial<ListPaginationParams>
 ): Partial<ListPaginationParams> => {
   if (params) {
     return {
-      ...(params.page_index === MANAGEMENT_DEFAULT_PAGE ? {} : { page_index: params.page_index }),
-      ...(params.page_size === MANAGEMENT_DEFAULT_PAGE_SIZE ? {} : { page_size: params.page_size }),
+      ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: params.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: params.page_size }
+        : {}),
     };
   } else {
     return {};
