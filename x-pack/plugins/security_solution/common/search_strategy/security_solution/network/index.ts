@@ -13,7 +13,7 @@ export * from './top_n_flow';
 
 export enum NetworkQueries {
   http = 'http',
-  overview = 'overview',
+  overview = 'overviewNetwork',
   tls = 'tls',
   topCountries = 'topCountries',
   topNFlow = 'topNFlow',

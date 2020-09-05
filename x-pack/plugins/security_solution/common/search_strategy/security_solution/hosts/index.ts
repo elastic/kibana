@@ -18,6 +18,6 @@ export enum HostsQueries {
   details = 'details',
   firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
-  overview = 'overview',
+  overview = 'overviewHost',
   uncommonProcesses = 'uncommonProcesses',
 }
