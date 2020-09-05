@@ -18,7 +18,7 @@ import {
   toSnakeCase,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
-import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
+import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
 
 function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
   return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');

@@ -30,11 +30,6 @@ import { GetConfigFn } from '../../../common';
  */
 export type SearchRequest = Record<string, any>;
 
-export interface FetchOptions {
-  abortSignal?: AbortSignal;
-  searchStrategyId?: string;
-}
-
 export interface FetchHandlers {
   config: { get: GetConfigFn };
   http: HttpStart;

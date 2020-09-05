@@ -21,11 +21,11 @@ export declare class SearchInterceptor
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
+|  [showTimeoutError](./kibana-plugin-plugins-data-public.searchinterceptor.showtimeouterror.md) |  | <code>((e: Error) =&gt; void) &amp; import(&quot;lodash&quot;).Cancelable</code> |  |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [runSearch(request, signal, strategy)](./kibana-plugin-plugins-data-public.searchinterceptor.runsearch.md) |  |  |
-src/plugins/data/public/search/search_interceptor.test.ts|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
+|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
 

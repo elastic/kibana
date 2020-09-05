@@ -35,9 +35,9 @@ import {
   AbortError,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchOptions,
   ES_SEARCH_STRATEGY,
 } from '../../common';
-import { ISearchOptions } from './types';
 import { SearchUsageCollector } from './collectors';
 
 export interface SearchInterceptorDeps {
@@ -72,11 +72,8 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
 
-  /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param application  The `core.application` service
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+  /*
+   * @internal
    */
   constructor(protected readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
@@ -118,12 +115,12 @@ export class SearchInterceptor {
   ): Observable<IEsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
-      if (options?.signal?.aborted) {
+      if (options?.abortSignal?.aborted) {
         return throwError(new AbortError());
       }
 
       const { combinedSignal, cleanup } = this.setupAbortSignal({
-        abortSignal: options?.signal,
+        abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 

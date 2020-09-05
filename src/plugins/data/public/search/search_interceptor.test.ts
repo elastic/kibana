@@ -33,10 +33,10 @@ describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     searchInterceptor = new SearchInterceptor({
+      toasts: mockCoreSetup.notifications.toasts,
       startServices: mockCoreSetup.getStartServices(),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
-      toasts: mockCoreSetup.notifications.toasts,
     });
   });
 
@@ -142,7 +142,9 @@ describe('SearchInterceptor', () => {
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
-      const response = searchInterceptor.search(mockRequest, { signal: abortController.signal });
+      const response = searchInterceptor.search(mockRequest, {
+        abortSignal: abortController.signal,
+      });
 
       const next = jest.fn();
       const error = (e: any) => {
@@ -161,7 +163,7 @@ describe('SearchInterceptor', () => {
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
-      const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
+      const response = searchInterceptor.search(mockRequest, { abortSignal: abort.signal });
       abort.abort();
 
       const error = (e: any) => {

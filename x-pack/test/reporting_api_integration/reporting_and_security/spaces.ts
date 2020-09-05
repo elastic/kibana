@@ -27,7 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  describe('Exports from Non-default Space', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/76551
+  describe.skip('Exports from Non-default Space', () => {
     before(async () => {
       await esArchiver.load('reporting/ecommerce');
       await esArchiver.load('reporting/ecommerce_kibana_spaces'); // dashboard in non default space

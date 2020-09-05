@@ -40,6 +40,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -118,6 +119,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -141,6 +143,7 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -364,8 +367,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -375,8 +378,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -389,15 +392,15 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+            level: import("@kbn/config-schema").Type<"error" | "off" | "all" | "warn" | "info" | "debug" | "fatal" | "trace">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;
@@ -407,8 +410,8 @@ export const config: {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;
@@ -421,7 +424,7 @@ export const config: {
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
                 context: string;
                 appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
+                level: "error" | "off" | "all" | "warn" | "info" | "debug" | "fatal" | "trace";
             }>[]>;
         }>;
     };
