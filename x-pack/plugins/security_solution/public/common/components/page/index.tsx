@@ -8,10 +8,19 @@ import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@e
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
+  GLOBAL_HEADER_HEIGHT,
   FULL_SCREEN_TOGGLED_CLASS_NAME,
   SCROLLING_DISABLED_CLASS_NAME,
 } from '../../../../common/constants';
-import { SecuritySolutionAppWrapper } from '../../../app/home';
+
+export const SecuritySolutionAppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+`;
+SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
+
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
@@ -68,7 +77,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
-    max-height: calc(100vh - 49px);
+    max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
   }
 `;
 

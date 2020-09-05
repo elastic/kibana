@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
+import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
@@ -20,14 +21,6 @@ import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useUserInfo } from '../../detections/components/user_info';
 import { useThrottledResizeObserver } from '../../common/components/utils';
-
-export const SecuritySolutionAppWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  width: 100%;
-`;
-SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
