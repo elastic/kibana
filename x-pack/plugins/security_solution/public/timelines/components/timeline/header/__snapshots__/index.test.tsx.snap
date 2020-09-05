@@ -145,7 +145,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     onToggleDataProviderType={[MockFunction]}
     timelineId="foo"
   />
-  <Connect(StatefulSearchOrFilterComponent)
+  <Memo(SearchOrFilterComponent)
     browserFields={Object {}}
     filterManager={
       FilterManager {

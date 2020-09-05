@@ -130,7 +130,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     // const searchBarProps = savedQuery != null ? { savedQuery } : {};
 
-    console.error('indexPatterns', savedQuery);
+    // console.error('indexPatterns', savedQuery);
 
     return (
       <SearchBar

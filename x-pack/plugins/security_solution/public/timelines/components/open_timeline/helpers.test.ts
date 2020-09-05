@@ -1040,12 +1040,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-        id: TimelineId.active,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: 'expression',
-        },
-      });
       expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
         id: TimelineId.active,
         filterQuery: {
