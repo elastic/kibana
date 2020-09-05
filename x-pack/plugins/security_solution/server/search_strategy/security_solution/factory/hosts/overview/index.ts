@@ -26,7 +26,6 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewHostQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
 
     return {

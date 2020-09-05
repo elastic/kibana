@@ -29,10 +29,5 @@
     "winlogbeatSecurity": 70,
     "winlogbeatMWSysmonOperational": 30,
     "__typename": "OverviewHostData"
-  },
-  "status": {
-    "indicesExist": true,
-    "indexFields": [],
-    "__typename": "SourceStatus"
   }
 }

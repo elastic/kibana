@@ -27,6 +27,8 @@ import {
   NetworkTlsRequestOptions,
   NetworkHttpStrategyResponse,
   NetworkHttpRequestOptions,
+  NetworkOverviewStrategyResponse,
+  NetworkOverviewRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
   NetworkTopNFlowStrategyResponse,
@@ -81,6 +83,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
   ? NetworkHttpStrategyResponse
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
@@ -103,6 +107,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http
   ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow

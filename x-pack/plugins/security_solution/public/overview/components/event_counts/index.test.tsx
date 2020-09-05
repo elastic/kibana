@@ -33,16 +33,13 @@ describe('EventCounts', () => {
 
   test('it filters the `Network events` widget with a `source.ip` or `destination.ip` `exists` filter', () => {
     const wrapper = mount(
-      <TestProviders>
-        <EventCounts from={from} indexPattern={mockIndexPattern} setQuery={jest.fn()} to={to} />
-      </TestProviders>
+      <EventCounts from={from} indexPattern={mockIndexPattern} setQuery={jest.fn()} to={to} />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
-      (wrapper
-        .find('[data-test-subj="overview-network-query"]')
-        .first()
-        .props() as OverviewNetworkProps).filterQuery
+      (wrapper.find('Memo(OverviewNetworkComponent)').first().props() as OverviewNetworkProps)
+        .filterQuery
     ).toContain(
       '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field":"source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}]'
     );

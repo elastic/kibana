@@ -6,12 +6,14 @@
 
 export * from './common';
 export * from './http';
+export * from './overview';
 export * from './tls';
 export * from './top_countries';
 export * from './top_n_flow';
 
 export enum NetworkQueries {
   http = 'http',
+  overview = 'overview',
   tls = 'tls',
   topCountries = 'topCountries',
   topNFlow = 'topNFlow',
