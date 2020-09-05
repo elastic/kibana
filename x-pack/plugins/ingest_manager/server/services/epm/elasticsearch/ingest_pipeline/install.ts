@@ -156,7 +156,10 @@ async function installPipeline({
     body: pipeline.contentForInstallation,
   };
   if (pipeline.extension === 'yml') {
-    callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
+    callClusterParams.headers = {
+      'Content-Type': 'application/yaml',
+      Accept: 'application/json',
+    };
   }
 
   // This uses the catch-all endpoint 'transport.request' because we have to explicitly

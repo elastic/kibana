@@ -25,6 +25,35 @@ interface IngestErrorHandlerParams {
   context?: RequestHandlerContext;
 }
 
+// unsure if this is correct. would prefer to use something "official"
+// this type & guard are based on values observed while debugging https://github.com/elastic/kibana/issues/75862
+interface LegacyESClientError {
+  statusCode: number;
+  message: string;
+  body: {
+    error: {
+      root_cause: [{ type: string; reason: string }];
+      type: string;
+      caused_by: { type: string; reason: string };
+    };
+    status: number;
+  };
+  path: string;
+  query: string | undefined;
+  response: string;
+}
+
+export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
+  return (
+    'statusCode' in error &&
+    'message' in error &&
+    'body' in error &&
+    'path' in error &&
+    'query' in error &&
+    'response' in error
+  );
+};
+
 export class IngestManagerError extends Error {
   constructor(message?: string) {
     super(message);
@@ -48,6 +77,17 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
   const logger = appContextService.getLogger();
+  if (isLegacyESClientError(error)) {
+    // there was a problem communicating with ES (e.g. via `callCluster`)
+    // log full error
+    logger.error(error);
+    // return the endpoint that failed and the body it returned
+    const message = `${error.message} from ES at ${error.path}: ${error.response}`;
+    return response.customError({
+      statusCode: error.statusCode,
+      body: { message },
+    });
+  }
 
   // our "expected" errors
   if (error instanceof IngestManagerError) {
