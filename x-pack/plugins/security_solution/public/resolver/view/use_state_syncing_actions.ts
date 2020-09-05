@@ -15,19 +15,21 @@ import { useResolverDispatch } from './use_resolver_dispatch';
 export function useStateSyncingActions({
   databaseDocumentID,
   resolverComponentInstanceID,
+  indices,
 }: {
   /**
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
    */
-  databaseDocumentID?: string;
+  databaseDocumentID: string;
   resolverComponentInstanceID: string;
+  indices: string[];
 }) {
   const dispatch = useResolverDispatch();
   const locationSearch = useLocation().search;
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch },
+      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch, indices },
     });
-  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch]);
+  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch, indices]);
 }

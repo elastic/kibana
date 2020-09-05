@@ -5,7 +5,8 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/create_rules_schema';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
@@ -721,13 +722,13 @@ describe('helpers', () => {
       mockActions = mockActionsStepRule();
     });
 
-    test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule with type of saved_query when saved_id exists', () => {
+      const result: Rule = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
 
-    test('returns NewRule with type of query when saved_id does not exist', () => {
+    test('returns rule with type of query when saved_id does not exist', () => {
       const mockDefineStepRuleWithoutSavedId = {
         ...mockDefine,
         queryBar: {
@@ -735,7 +736,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -745,10 +746,15 @@ describe('helpers', () => {
       expect(result.type).toEqual('query');
     });
 
-    test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule without id if ruleId does not exist', () => {
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
-      expect(result.id).toBeUndefined();
+      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
     });
   });
 
