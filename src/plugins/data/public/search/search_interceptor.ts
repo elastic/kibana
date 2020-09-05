@@ -141,7 +141,7 @@ export class SearchInterceptor {
       }
 
       const { combinedSignal, cleanup } = this.setupAbortSignal({
-        abortSignal: options?.signal,
+        abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
