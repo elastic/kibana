@@ -175,11 +175,6 @@ export const updateDescription = actionCreator<{ id: string; description: string
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
-export const setKqlFilterQueryDraft = actionCreator<{
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-}>('SET_KQL_FILTER_QUERY_DRAFT');
-
 export const applyKqlFilterQuery = actionCreator<{
   id: string;
   filterQuery: SerializedFilterQuery;

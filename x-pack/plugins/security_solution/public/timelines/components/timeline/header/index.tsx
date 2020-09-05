@@ -18,7 +18,7 @@ import {
   OnToggleDataProviderExcluded,
   OnToggleDataProviderType,
 } from '../events';
-import { StatefulSearchOrFilter } from '../search_or_filter';
+import { SearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
@@ -92,7 +92,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
           onToggleDataProviderType={onToggleDataProviderType}
         />
 
-        <StatefulSearchOrFilter
+        <SearchOrFilter
           browserFields={browserFields}
           filterManager={filterManager}
           indexPattern={indexPattern}

@@ -42,14 +42,12 @@ describe('Timeline QueryBar ', () => {
 
   const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
-  const mockSetKqlFilterQueryDraft = jest.fn();
   const mockSetSavedQueryId = jest.fn();
   const mockUpdateReduxTime = jest.fn();
 
   beforeEach(() => {
     mockApplyKqlFilterQuery.mockClear();
     mockSetFilters.mockClear();
-    mockSetKqlFilterQueryDraft.mockClear();
     mockSetSavedQueryId.mockClear();
     mockUpdateReduxTime.mockClear();
   });
@@ -64,7 +62,6 @@ describe('Timeline QueryBar ', () => {
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
@@ -75,7 +72,6 @@ describe('Timeline QueryBar ', () => {
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timline-real-id"
           updateReduxTime={mockUpdateReduxTime}

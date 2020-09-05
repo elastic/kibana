@@ -75,10 +75,11 @@ export const QueryBarDefineRule = ({
   openTimelineSearch = false,
   resizeParentContainer,
 }: QueryBarDefineRuleProps) => {
+  const { value: fieldValue, setValue: setFieldValue } = field;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
-  const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
+  // const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const kibana = useKibana();
@@ -96,10 +97,10 @@ export const QueryBarDefineRule = ({
         next: () => {
           if (isSubscribed) {
             const newFilters = filterManager.getFilters();
-            const { filters } = field.value as FieldValueQueryBar;
+            const { filters } = fieldValue as FieldValueQueryBar;
 
             if (!deepEqual(filters, newFilters)) {
-              field.setValue({ ...(field.value as FieldValueQueryBar), filters: newFilters });
+              setFieldValue({ ...(fieldValue as FieldValueQueryBar), filters: newFilters });
             }
           }
         },
@@ -110,16 +111,15 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
       subscriptions.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field.value]);
+  }, [fieldValue, filterManager, setFieldValue]);
 
   useEffect(() => {
     let isSubscribed = true;
     async function updateFilterQueryFromValue() {
-      const { filters, query, saved_id: savedId } = field.value as FieldValueQueryBar;
-      if (!deepEqual(query, queryDraft)) {
-        setQueryDraft(query);
-      }
+      const { filters, query, saved_id: savedId } = fieldValue as FieldValueQueryBar;
+      // if (!deepEqual(query, queryDraft)) {
+      //   setQueryDraft(query);
+      // }
       if (!deepEqual(filters, filterManager.getFilters())) {
         filterManager.setFilters(filters);
       }
@@ -143,45 +143,54 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field.value]);
+  }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query) => {
-      const { query } = field.value as FieldValueQueryBar;
+      const { query } = fieldValue as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
-        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
+        setFieldValue({ ...(fieldValue as FieldValueQueryBar), query: newQuery });
       }
     },
-    [field]
+    [fieldValue, setFieldValue]
   );
 
   const onChangedQuery = useCallback(
     (newQuery: Query) => {
-      const { query } = field.value as FieldValueQueryBar;
+      const { query } = fieldValue as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
-        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
+        setFieldValue({ ...(fieldValue as FieldValueQueryBar), query: newQuery });
       }
     },
-    [field]
+    [fieldValue, setFieldValue]
   );
 
   const onSavedQuery = useCallback(
     (newSavedQuery: SavedQuery | null) => {
+      console.error('onSavedQuery', newSavedQuery);
       if (newSavedQuery != null) {
-        const { saved_id: savedId } = field.value as FieldValueQueryBar;
+        const { saved_id: savedId } = fieldValue as FieldValueQueryBar;
         if (newSavedQuery.id !== savedId) {
           setSavedQuery(newSavedQuery);
-          field.setValue({
+          setFieldValue({
             filters: newSavedQuery.attributes.filters,
             query: newSavedQuery.attributes.query,
             saved_id: newSavedQuery.id,
           });
         }
+      } else {
+        setSavedQuery(newSavedQuery);
+        setFieldValue({
+          filters: [],
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          saved_id: undefined,
+        });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.value]
+    [fieldValue, setFieldValue]
   );
 
   const onCloseTimelineModal = useCallback(() => {
@@ -204,7 +213,7 @@ export const QueryBarDefineRule = ({
             )
           : '';
       const newFilters = timeline.filters ?? [];
-      field.setValue({
+      setFieldValue({
         filters:
           dataProvidersDsl !== ''
             ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
@@ -213,7 +222,7 @@ export const QueryBarDefineRule = ({
         saved_id: undefined,
       });
     },
-    [browserFields, field, indexPattern]
+    [browserFields, indexPattern, setFieldValue]
   );
 
   const onMutation = () => {
@@ -239,6 +248,8 @@ export const QueryBarDefineRule = ({
 
   const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate'], []);
 
+  console.error('fieldValue', fieldValue);
+
   return (
     <>
       <StyledEuiFormRow
@@ -261,7 +272,7 @@ export const QueryBarDefineRule = ({
                 indexPattern={indexPattern}
                 isLoading={isLoading || loadingTimeline}
                 isRefreshPaused={false}
-                filterQuery={queryDraft}
+                filterQuery={fieldValue.query}
                 filterManager={filterManager}
                 filters={filterManager.getFilters() || []}
                 onChangedQuery={onChangedQuery}

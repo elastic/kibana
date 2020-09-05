@@ -14,7 +14,6 @@ import {
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
@@ -982,7 +981,6 @@ describe('helpers', () => {
         timeline: mockTimelineModel,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1019,7 +1017,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1043,7 +1040,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).toHaveBeenCalledWith({
         id: TimelineId.active,
         filterQueryDraft: {
           kind: 'kuery',

@@ -59,73 +59,78 @@ export const QueryBar = memo<QueryBarComponentProps>(
     onSavedQuery,
     dataTestSubj,
   }) => {
-    const [draftQuery, setDraftQuery] = useState(filterQuery);
+    // const [draftQuery, setDraftQuery] = useState(filterQuery);
 
-    useEffect(() => {
-      // Reset draftQuery when `Create new timeline` is clicked
-      if (filterQueryDraft == null) {
-        setDraftQuery(filterQuery);
-      }
-    }, [filterQuery, filterQueryDraft]);
+    // useEffect(() => {
+    //   // Reset draftQuery when `Create new timeline` is clicked
+    //   if (filterQueryDraft == null) {
+    //     setDraftQuery(filterQuery);
+    //   }
+    // }, [filterQuery, filterQueryDraft]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onSubmitQuery(payload.query);
-        }
+        // if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
+        onSubmitQuery(payload.query);
+        // }
       },
-      [filterQuery, onSubmitQuery]
+      [onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
-          setDraftQuery(payload.query);
-          onChangedQuery(payload.query);
-        }
+        console.error('onQueryChange', payload);
+        onChangedQuery(payload.query!);
+        // if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
+        //   setDraftQuery(payload.query);
+        // }
       },
-      [draftQuery, onChangedQuery, setDraftQuery]
+      [onChangedQuery]
     );
 
-    const onSaved = useCallback(
-      (newSavedQuery: SavedQuery) => {
-        onSavedQuery(newSavedQuery);
-      },
-      [onSavedQuery]
-    );
+    // const onSaved = useCallback(
+    //   (newSavedQuery: SavedQuery) => {
+    //     onSavedQuery(newSavedQuery);
+    //   },
+    //   [onSavedQuery]
+    // );
 
-    const onSavedQueryUpdated = useCallback(
-      (savedQueryUpdated: SavedQuery) => {
-        const { query: newQuery, filters: newFilters, timefilter } = savedQueryUpdated.attributes;
-        onSubmitQuery(newQuery, timefilter);
-        filterManager.setFilters(newFilters || []);
-        onSavedQuery(savedQueryUpdated);
-      },
-      [filterManager, onSubmitQuery, onSavedQuery]
-    );
+    // const onSavedQueryUpdated = useCallback(
+    //   (savedQueryUpdated: SavedQuery) => {
+    //     const { query: newQuery, filters: newFilters, timefilter } = savedQueryUpdated.attributes;
+    //     onSubmitQuery(newQuery, timefilter);
+    //     filterManager.setFilters(newFilters || []);
+    //     onSavedQuery(savedQueryUpdated);
+    //   },
+    //   [filterManager, onSubmitQuery, onSavedQuery]
+    // );
 
-    const onClearSavedQuery = useCallback(() => {
-      if (savedQuery != null) {
-        onSubmitQuery({
-          query: '',
-          language: savedQuery.attributes.query.language,
-        });
-        filterManager.setFilters([]);
-        onSavedQuery(null);
-      }
-    }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
+    const onClearSavedQuery = () => {};
 
-    const onFiltersUpdated = useCallback(
-      (newFilters: Filter[]) => {
-        filterManager.setFilters(newFilters);
-      },
-      [filterManager]
-    );
+    // const onClearSavedQuery = useCallback(() => {
+    //   if (savedQuery != null) {
+    //     onSubmitQuery({
+    //       query: '',
+    //       language: savedQuery.attributes.query.language,
+    //     });
+    //     filterManager.setFilters([]);
+    //     onSavedQuery(null);
+    //   }
+    // }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
+
+    // const onFiltersUpdated = useCallback(
+    //   (newFilters: Filter[]) => {
+    //     filterManager.setFilters(newFilters);
+    //   },
+    //   [filterManager]
+    // );
 
     const CustomButton = <>{null}</>;
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
-    const searchBarProps = savedQuery != null ? { savedQuery } : {};
+    // const searchBarProps = savedQuery != null ? { savedQuery } : {};
+
+    console.error('indexPatterns', savedQuery);
 
     return (
       <SearchBar
@@ -136,13 +141,13 @@ export const QueryBar = memo<QueryBarComponentProps>(
         indexPatterns={indexPatterns}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
-        query={draftQuery}
-        onClearSavedQuery={onClearSavedQuery}
-        onFiltersUpdated={onFiltersUpdated}
+        query={filterQuery}
+        onClearSavedQuery={() => onSavedQuery(undefined)}
+        // onFiltersUpdated={onFiltersUpdated}
         onQueryChange={onQueryChange}
         onQuerySubmit={onQuerySubmit}
-        onSaved={onSaved}
-        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSaved={onSavedQuery}
+        onSavedQueryUpdated={onSavedQuery}
         refreshInterval={refreshInterval}
         showAutoRefreshOnly={false}
         showFilterBar={!hideSavedQuery}
@@ -152,8 +157,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showSaveQuery={true}
         timeHistory={new TimeHistory(new Storage(localStorage))}
         dataTestSubj={dataTestSubj}
-        {...searchBarProps}
+        savedQuery={savedQuery}
+        // {...searchBarProps}
       />
     );
   }
 );
+QueryBar.displayName = 'QueryBar';

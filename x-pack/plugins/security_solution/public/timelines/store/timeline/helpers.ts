@@ -574,31 +574,6 @@ export const updateTimelineKqlMode = ({
   };
 };
 
-interface UpdateKqlFilterQueryDraftParams {
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-  timelineById: TimelineById;
-}
-
-export const updateKqlFilterQueryDraft = ({
-  id,
-  filterQueryDraft,
-  timelineById,
-}: UpdateKqlFilterQueryDraftParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      kqlQuery: {
-        ...timeline.kqlQuery,
-        filterQueryDraft,
-      },
-    },
-  };
-};
-
 interface UpdateTimelineColumnsParams {
   id: string;
   columns: ColumnHeaderOptions[];

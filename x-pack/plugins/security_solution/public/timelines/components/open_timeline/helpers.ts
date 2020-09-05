@@ -35,7 +35,6 @@ import {
 } from '../../../common/store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
@@ -383,15 +382,6 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery != null &&
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
-    dispatch(
-      dispatchSetKqlFilterQueryDraft({
-        id,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-        },
-      })
-    );
     dispatch(
       dispatchApplyKqlFilterQuery({
         id,

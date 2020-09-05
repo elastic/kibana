@@ -5,10 +5,12 @@
  */
 
 import { EuiHealth, EuiSuperSelect } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { EventType } from '../../../../timelines/store/timeline/model';
+import { timelineActions } from '../../../store/timeline';
+import { EventType } from '../../../store/timeline/model';
 import * as i18n from './translations';
 
 interface EventTypeOptionItem {
@@ -67,20 +69,29 @@ export const eventTypeOptions: EventTypeOptionItem[] = [
 
 interface PickEventTypeProps {
   eventType: EventType;
-  onChangeEventType: (value: EventType) => void;
+  timelineId: string;
 }
 
-const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
-  eventType,
-  onChangeEventType,
-}) => {
+const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({ eventType, timelineId }) => {
+  const dispatch = useDispatch();
+  const handleChange = useCallback(
+    (newEventType: EventType) =>
+      dispatch(
+        timelineActions.updateEventType({
+          id: timelineId,
+          eventType: newEventType,
+        })
+      ),
+    [dispatch, timelineId]
+  );
+
   return (
     <PickEventContainer>
       <EuiSuperSelect
         data-test-subj="pick-event-type"
         fullWidth={false}
         valueOfSelected={eventType === 'signal' ? 'alert' : eventType}
-        onChange={onChangeEventType}
+        onChange={handleChange}
         options={eventTypeOptions}
       />
     </PickEventContainer>
