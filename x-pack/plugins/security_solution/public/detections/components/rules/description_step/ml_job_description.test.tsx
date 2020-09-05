@@ -14,7 +14,7 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('MlJobDescription', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<MlJobDescription job={mockOpenedJob} />);
+    const wrapper = shallow(<MlJobDescription jobId={'myJobId'} />);
 
     expect(wrapper.find('[data-test-subj="machineLearningJobId"]')).toHaveLength(1);
   });

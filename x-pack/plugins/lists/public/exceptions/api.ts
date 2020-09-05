@@ -288,7 +288,7 @@ export const fetchExceptionListsItemsByListIds = async ({
     namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    sort_field: 'created_at',
+    sort_field: 'exception-list.created_at',
     sort_order: 'desc',
     ...(filters.trim() !== '' ? { filter: filters } : {}),
   };
