@@ -139,13 +139,6 @@ async function installTransform({
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
-  await callCluster('transport.request', {
-    method: 'DELETE',
-    query: 'force=true',
-    path: `_transform/${transform.installationName}`,
-    ignore: [404],
-  });
-
   // defer validation on put if the source index is not available
   await callCluster('transport.request', {
     method: 'PUT',

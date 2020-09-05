@@ -149,24 +149,6 @@ describe('test transform install', () => {
       [
         'transport.request',
         {
-          method: 'DELETE',
-          query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
-          ignore: [404],
-        },
-      ],
-      [
-        'transport.request',
-        {
-          method: 'DELETE',
-          query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-          ignore: [404],
-        },
-      ],
-      [
-        'transport.request',
-        {
           method: 'PUT',
           path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
           query: 'defer_validation=true',
@@ -269,15 +251,6 @@ describe('test transform install', () => {
     );
 
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
-      [
-        'transport.request',
-        {
-          method: 'DELETE',
-          query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-          ignore: [404],
-        },
-      ],
       [
         'transport.request',
         {
