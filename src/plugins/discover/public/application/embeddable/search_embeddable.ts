@@ -53,6 +53,7 @@ import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
+  columnsWidth?: any;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
@@ -248,6 +249,10 @@ export class SearchEmbeddable
 
     if (this.savedSearch.grid) {
       searchScope.grid = this.savedSearch.grid;
+      searchScope.columnsWidth =
+        this.savedSearch.grid && this.savedSearch.grid.columnsWidth
+          ? this.savedSearch.grid.columnsWidth
+          : undefined;
     }
 
     searchScope.filter = async (field, value, operator) => {

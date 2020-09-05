@@ -95,3 +95,7 @@ div[data-rbd-draggable-id='Time'] {
     padding-left: $euiSizeXS;
   }
 }
+
+.euiDataGridRowCell--numeric {
+  text-align: right;
+}

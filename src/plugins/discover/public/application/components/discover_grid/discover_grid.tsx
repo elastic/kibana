@@ -38,7 +38,6 @@ import {
 } from './discover_grid_helpers';
 import { DiscoverGridFlyoutSelection } from './discover_grid_flyout_selection';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
-import { DiscoverGridValueWithFilter } from './discover_value_with_filter';
 import { DiscoverGridToolbarSelection } from './discover_grid_toolbar_selection';
 import { DiscoverGridContext } from './discover_grid_context';
 import { DiscoverGridSelectButton } from './discover_grid_select_button';
@@ -214,15 +213,7 @@ export const DiscoverGrid = React.memo(
             />
           );
         } else if (indexPattern.fields.getByName(columnId)?.filterable) {
-          return (
-            <DiscoverGridValueWithFilter
-              value={value}
-              columnId={columnId}
-              indexPattern={indexPattern}
-              row={row}
-              onFilter={onFilter}
-            />
-          );
+          return value;
         }
         return value;
       },

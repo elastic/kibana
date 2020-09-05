@@ -53,6 +53,7 @@ export function withPropsChecker<P>(
 export function createDiscoverGridDirective(reactDirective: any) {
   return reactDirective(withPropsChecker(DiscoverGrid), [
     ['columns', { watchDepth: 'collection' }],
+    ['columnsWidth', { watchDepth: 'collection' }],
     ['rows', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['sort', { watchDepth: 'value' }],

@@ -115,6 +115,7 @@ export function buildEuiGridColumn(
       column.schema = undefined;
       break;
   }
+
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
     column.initialWidth = 180;
