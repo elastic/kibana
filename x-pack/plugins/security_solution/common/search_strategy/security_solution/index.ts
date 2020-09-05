@@ -29,6 +29,8 @@ import {
   NetworkHttpRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
 } from './network';
 import {
   DocValueFields,
@@ -81,6 +83,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkHttpStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -101,4 +105,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkHttpRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
   : never;
