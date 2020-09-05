@@ -170,7 +170,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           </p>
           <p>
             <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResultsHeading"
+              id="xpack.globalSearchBar.searchBar.noResults"
               defaultMessage="Try searching for applications and saved objects by name."
             />
           </p>
