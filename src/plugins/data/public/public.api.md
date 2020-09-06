@@ -984,6 +984,10 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     metaFields: string[];
     // (undocumented)
+    originalBody: {
+        [key: string]: any;
+    };
+    // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
     prepBody(): {
@@ -999,9 +1003,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
     // (undocumented)
-    removeScriptedField(fieldName: string): Promise<void | Error>;
-    // (undocumented)
-    save(saveAttempts?: number): Promise<void | Error>;
+    removeScriptedField(fieldName: string): void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1016,7 +1018,9 @@ export class IndexPattern implements IIndexPattern {
     type: string | undefined;
     // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
-    }
+    // (undocumented)
+    version: string | undefined;
+}
 
 // Warning: (ae-missing-release-tag) "AggregationRestrictions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1463,7 +1467,11 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
+<<<<<<< HEAD
 export const QueryStringInput: React.FC<Pick<Props_3, "placeholder" | "onBlur" | "onChange" | "onSubmit" | "query" | "size" | "indexPatterns" | "prepend" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+=======
+export const QueryStringInput: React.FC<Pick<Props_3, "placeholder" | "onBlur" | "onChange" | "onSubmit" | "size" | "query" | "indexPatterns" | "prepend" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+>>>>>>> refactor_index_pattern_save_refactor
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;

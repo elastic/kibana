@@ -94,6 +94,8 @@ const field = {
   format: new Format(),
 };
 
+const services = { redirectAway: () => {}, saveIndexPattern: async () => {} };
+
 describe('FieldEditor', () => {
   let indexPattern: IndexPattern;
 
@@ -122,7 +124,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (field as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -151,7 +153,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -181,7 +183,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -198,7 +200,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -223,7 +225,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
