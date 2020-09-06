@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 
@@ -196,7 +195,6 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  // async save(indexPattern: IndexPattern | IndexPatternSpec) {
   async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
     if (!indexPattern.id) return;
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
@@ -218,10 +216,7 @@ export class IndexPatternsService {
         indexPattern.version = resp.version;
       })
       .catch((err) => {
-        if (
-          _.get(err, 'res.status') === 409 &&
-          saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
-        ) {
+        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = new IndexPattern(indexPattern.id, {
             savedObjectsClient: this.savedObjectsClient,
             apiClient: this.apiClient,

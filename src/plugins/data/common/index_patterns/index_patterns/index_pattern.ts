@@ -43,7 +43,6 @@ import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 import { IndexPatternsService } from '..';
 
-// const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
 interface IndexPatternDeps {
@@ -76,6 +75,7 @@ export class IndexPattern implements IIndexPattern {
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
   public sourceFilters?: SourceFilter[];
+  // todo make read  only, update via  method or factor out
   public originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private indexPatternsService: IndexPatternsService;
@@ -83,7 +83,6 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
-  // private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -133,7 +132,6 @@ export class IndexPattern implements IIndexPattern {
     this.metaFields = metaFields;
     this.fields = fieldList([], this.shortDotsEnable);
 
-    // this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
@@ -371,7 +369,6 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  // appears unused
   async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
@@ -398,9 +395,6 @@ export class IndexPattern implements IIndexPattern {
       } else {
         throw err;
       }
-
-      // await this.save(this);
-      await this.indexPatternsService.save(this);
     }
   }
 
@@ -544,30 +538,37 @@ export class IndexPattern implements IIndexPattern {
   }
 
   refreshFields() {
-    return this._fetchFields()
-      .then(() => this.indexPatternsService.save(this))
-      .catch((err) => {
-        // https://github.com/elastic/kibana/issues/9224
-        // This call will attempt to remap fields from the matching
-        // ES index which may not actually exist. In that scenario,
-        // we still want to notify the user that there is a problem
-        // but we do not want to potentially make any pages unusable
-        // so do not rethrow the error here
+    return (
+      this._fetchFields()
+        // todo
+        .then(() => this.indexPatternsService.save(this))
+        .catch((err) => {
+          // https://github.com/elastic/kibana/issues/9224
+          // This call will attempt to remap fields from the matching
+          // ES index which may not actually exist. In that scenario,
+          // we still want to notify the user that there is a problem
+          // but we do not want to potentially make any pages unusable
+          // so do not rethrow the error here
 
-        if (err instanceof IndexPatternMissingIndices) {
-          this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-          return [];
-        }
+          if (err instanceof IndexPatternMissingIndices) {
+            this.onNotification({
+              title: (err as any).message,
+              color: 'danger',
+              iconType: 'alert',
+            });
+            return [];
+          }
 
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: this.id,
-              title: this.title,
-            },
-          }),
-        });
-      });
+          this.onError(err, {
+            title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+              values: {
+                id: this.id,
+                title: this.title,
+              },
+            }),
+          });
+        })
+    );
   }
 }

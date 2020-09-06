@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-QueryStringInput: React.FC<Pick<Props, "query" | "prepend" | "size" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>
+QueryStringInput: React.FC<Pick<Props, "placeholder" | "onBlur" | "onChange" | "onSubmit" | "query" | "size" | "indexPatterns" | "prepend" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>
 ```
