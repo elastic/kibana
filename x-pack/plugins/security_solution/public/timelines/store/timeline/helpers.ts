@@ -526,17 +526,17 @@ export const addTimelineProvider = ({
   }
 };
 
-interface ApplyKqlFilterQueryDraftParams {
+interface ApplyKqlFilterQueryParams {
   id: string;
   filterQuery: SerializedFilterQuery;
   timelineById: TimelineById;
 }
 
-export const applyKqlFilterQueryDraft = ({
+export const applyKqlFilterQuery = ({
   id,
   filterQuery,
   timelineById,
-}: ApplyKqlFilterQueryDraftParams): TimelineById => {
+}: ApplyKqlFilterQueryParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {

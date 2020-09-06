@@ -67,7 +67,7 @@ import {
   addTimelineToStore,
   applyDeltaToCurrentWidth,
   applyDeltaToTimelineColumnWidth,
-  applyKqlFilterQueryDraft,
+  applyKqlFilterQuery,
   pinTimelineEvent,
   removeTimelineColumn,
   removeTimelineProvider,
@@ -182,7 +182,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
     ...state,
-    timelineById: applyKqlFilterQueryDraft({
+    timelineById: applyKqlFilterQuery({
       id,
       filterQuery,
       timelineById: state.timelineById,
