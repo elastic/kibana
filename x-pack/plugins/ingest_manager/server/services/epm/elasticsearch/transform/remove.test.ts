@@ -52,6 +52,7 @@ describe('test transform install', () => {
       ['metrics-endpoint.metadata-current-default-0.15.0-dev.0'],
       ['metrics-endpoint.metadata-current-default-0.16.0-dev.0']
     );
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
