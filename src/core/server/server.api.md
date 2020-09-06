@@ -328,11 +328,11 @@ export const config: {
             sniffOnStart: import("@kbn/config-schema").Type<boolean>;
             sniffInterval: import("@kbn/config-schema").Type<false | import("moment").Duration>;
             sniffOnConnectionFault: import("@kbn/config-schema").Type<boolean>;
-            hosts: import("@kbn/config-schema").Type<import("./config").ConfigPath>;
+            hosts: import("@kbn/config-schema").Type<string | string[]>;
             preserveHost: import("@kbn/config-schema").Type<boolean>;
             username: import("@kbn/config-schema").Type<string | undefined>;
             password: import("@kbn/config-schema").Type<string | undefined>;
-            requestHeadersWhitelist: import("@kbn/config-schema").Type<import("./config").ConfigPath>;
+            requestHeadersWhitelist: import("@kbn/config-schema").Type<string | string[]>;
             customHeaders: import("@kbn/config-schema").Type<Record<string, string>>;
             shardTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
             requestTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
@@ -392,7 +392,7 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<"off" | "all" | "error" | "warn" | "debug" | "info" | "fatal" | "trace">;
+            level: import("@kbn/config-schema").Type<"debug" | "off" | "all" | "error" | "warn" | "info" | "fatal" | "trace">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
@@ -424,7 +424,7 @@ export const config: {
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
                 context: string;
                 appenders: string[];
-                level: "off" | "all" | "error" | "warn" | "debug" | "info" | "fatal" | "trace";
+                level: "debug" | "off" | "all" | "error" | "warn" | "info" | "fatal" | "trace";
             }>[]>;
         }>;
     };
