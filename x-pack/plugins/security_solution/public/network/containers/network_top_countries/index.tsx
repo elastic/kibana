@@ -50,14 +50,12 @@ interface UseNetworkTopCountries {
   endDate: string;
   startDate: string;
   skip: boolean;
-  id?: string;
 }
 
 export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
   skip,
   startDate,
   type,
@@ -101,7 +99,7 @@ export const useNetworkTopCountries = ({
     NetworkTopCountriesArgs
   >({
     networkTopCountries: [],
-    id: ID,
+    id: `${ID}-${flowTarget}`,
     inspect: {
       dsl: [],
       response: [],
