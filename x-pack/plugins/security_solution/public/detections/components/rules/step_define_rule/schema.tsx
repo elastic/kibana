@@ -19,9 +19,10 @@ import {
   FormSchema,
   ValidationFunc,
 } from '../../../../shared_imports';
+import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
 
-export const schema: FormSchema = {
+export const schema: FormSchema<DefineStepRule> = {
   index: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
