@@ -27,6 +27,6 @@ export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
     defaultMessage: 'Range selection',
   }),
   description: i18n.translate('uiActions.triggers.selectRangeDescription', {
-    defaultMessage: 'Select a group of values',
+    defaultMessage: 'A range of values on the visualization',
   }),
 };
