@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.exists('emptyPolicyTable');
       });
 
-      it('finds data after load and polling', async () => {
+      it.skip('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 120000);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
