@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -39,7 +39,6 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [\_fetchFields(indexPattern)](./kibana-plugin-plugins-data-public.indexpattern._fetchfields.md) |  |  |
 |  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  |  |
 |  [create(allowOverride)](./kibana-plugin-plugins-data-public.indexpattern.create.md) |  |  |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
