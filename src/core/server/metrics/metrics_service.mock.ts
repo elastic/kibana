@@ -32,6 +32,7 @@ const createInternalSetupContractMock = () => {
   };
   setupContract.getOpsMetrics$.mockReturnValue(
     new BehaviorSubject({
+      collected_at: new Date('2020-01-01 01:00:00'),
       process: {
         memory: {
           heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
