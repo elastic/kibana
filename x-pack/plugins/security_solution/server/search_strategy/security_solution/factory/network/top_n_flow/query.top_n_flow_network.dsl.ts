@@ -5,12 +5,14 @@
  */
 
 import {
+  SortField,
   FlowTargetSourceDest,
-  NetworkTopTablesSortField,
+  NetworkTopTablesFields,
   NetworkTopNFlowRequestOptions,
-} from '../../../../../../common/search_strategy/security_solution/network';
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { getOppositeField, getQueryOrder } from '../helpers';
+import { getOppositeField } from '../helpers';
+import { getQueryOrder } from './helpers';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_n_flow_count: {
@@ -24,7 +26,7 @@ export const buildTopNFlowQuery = ({
   defaultIndex,
   filterQuery,
   flowTarget,
-  networkTopNFlowSort,
+  sort,
   pagination: { querySize },
   timerange: { from, to },
   ip,
@@ -45,7 +47,7 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
+        ...getFlowTargetAggs(sort, flowTarget, querySize),
       },
       query: {
         bool: ip
@@ -72,7 +74,7 @@ export const buildTopNFlowQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopNFlowSortField: NetworkTopTablesSortField,
+  sort: SortField<NetworkTopTablesFields>,
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
@@ -81,7 +83,7 @@ const getFlowTargetAggs = (
       field: `${flowTarget}.ip`,
       size: querySize,
       order: {
-        ...getQueryOrder(networkTopNFlowSortField),
+        ...getQueryOrder(sort),
       },
     },
     aggs: {

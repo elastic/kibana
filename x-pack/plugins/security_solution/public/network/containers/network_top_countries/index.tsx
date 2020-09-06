@@ -14,7 +14,6 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated } from '../../../../common/search_strategy/security_solution';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
@@ -23,15 +22,18 @@ import {
   NetworkTopCountriesEdges,
   NetworkTopCountriesRequestOptions,
   NetworkTopCountriesStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  PageInfoPaginated,
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
 const ID = 'networkTopCountriesQuery';
 
 export interface NetworkTopCountriesArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -48,20 +50,16 @@ interface UseNetworkTopCountries {
   endDate: string;
   startDate: string;
   skip: boolean;
-  id?: string;
 }
 
 export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
   skip,
   startDate,
   type,
 }: UseNetworkTopCountries): [boolean, NetworkTopCountriesArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getTopCountriesSelector = networkSelectors.topCountriesSelector();
   const { activePage, limit, sort } = useSelector(
     (state: State) => getTopCountriesSelector(state, type, flowTarget),
@@ -78,9 +76,8 @@ export const useNetworkTopCountries = ({
     factoryQueryType: NetworkQueries.topCountries,
     filterQuery: createFilter(filterQuery),
     flowTarget,
-    // inspect: isInspected,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkTopCountriesSort: sort,
+    sort,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -102,7 +99,7 @@ export const useNetworkTopCountries = ({
     NetworkTopCountriesArgs
   >({
     networkTopCountries: [],
-    id: ID,
+    id: `${ID}-${flowTarget}`,
     inspect: {
       dsl: [],
       response: [],
@@ -128,7 +125,7 @@ export const useNetworkTopCountries = ({
         const searchSubscription$ = data.search
           .search<NetworkTopCountriesRequestOptions, NetworkTopCountriesStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -138,7 +135,7 @@ export const useNetworkTopCountries = ({
                   setNetworkTopCountriesResponse((prevResponse) => ({
                     ...prevResponse,
                     networkTopCountries: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
@@ -176,24 +173,20 @@ export const useNetworkTopCountries = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
+        sort,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        networkTopCountriesSort: sort,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;

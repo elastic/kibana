@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLink, IconSize, IconType } from '@elastic/eui';
 import { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 
 interface LinkProps {
@@ -47,7 +47,7 @@ export const Link = styled(({ iconSide, children, ...rest }) => (
 Link.displayName = 'Link';
 
 export interface LinkIconProps extends LinkProps {
-  children: string;
+  children: string | ReactNode;
   iconSize?: IconSize;
   iconType: IconType;
   dataTestSubj?: string;

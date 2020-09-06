@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .expect(400);
       expect(body.error).to.eql('Bad Request');
-      expect(body.message).to.contain('Unable to find filter');
+      expect(body.message).to.contain('resource_not_found_exception');
     });
   });
 };

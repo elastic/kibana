@@ -20,7 +20,7 @@ export const getTopCountriesEdges = (
   options: NetworkTopCountriesRequestOptions
 ): NetworkTopCountriesEdges[] =>
   formatTopCountriesEdges(
-    getOr([], `aggregations.${options.flowTarget}.buckets`, response),
+    getOr([], `aggregations.${options.flowTarget}.buckets`, response.rawResponse),
     options.flowTarget
   );
 

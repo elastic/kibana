@@ -17,6 +17,7 @@ import { EventCountsForProcess } from './event_counts_for_process';
 import { ProcessDetails } from './process_details';
 import { ProcessListWithCounts } from './process_list_with_counts';
 import { RelatedEventDetail } from './related_event_detail';
+import { ResolverState } from '../../types';
 
 /**
  * The team decided to use this table to determine which breadcrumbs/view to display:
@@ -102,6 +103,12 @@ const PanelContent = memo(function PanelContent() {
     ? relatedEventStats(idFromParams)
     : undefined;
 
+  const parentCount = useSelector((state: ResolverState) => {
+    if (idFromParams === '') {
+      return 0;
+    }
+    return selectors.relatedEventAggregateTotalByEntityId(state)(idFromParams);
+  });
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
    * for the table & breadcrumb nav.
@@ -186,9 +193,6 @@ const PanelContent = memo(function PanelContent() {
     }
 
     if (panelToShow === 'relatedEventDetail') {
-      const parentCount: number = Object.values(
-        relatedStatsForIdFromParams?.events.byCategory || {}
-      ).reduce((sum, val) => sum + val, 0);
       return (
         <RelatedEventDetail
           relatedEventId={crumbId}
@@ -199,7 +203,7 @@ const PanelContent = memo(function PanelContent() {
     }
     // The default 'Event List' / 'List of all processes' view
     return <ProcessListWithCounts />;
-  }, [uiSelectedEvent, crumbEvent, crumbId, relatedStatsForIdFromParams, panelToShow]);
+  }, [uiSelectedEvent, crumbEvent, crumbId, relatedStatsForIdFromParams, panelToShow, parentCount]);
 
   return <>{panelInstance}</>;
 });

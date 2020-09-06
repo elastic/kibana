@@ -8,13 +8,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
-import { px, unit } from '../../../style/variables';
+import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
-// @ts-ignore Styled Components has trouble inferring the types of the default props here.
 const Accordion = styled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
+  margin-top: ${px(units.half)};
 `;
 
 const CausedByContainer = styled('h5')`
@@ -55,7 +55,7 @@ interface CauseStacktraceProps {
   codeLanguage?: string;
   id: string;
   message?: string;
-  stackframes?: IStackframe[];
+  stackframes?: Stackframe[];
 }
 
 export function CauseStacktrace({

@@ -9,10 +9,10 @@ import { isEmpty } from 'lodash/fp';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   Direction,
+  SortField,
   NetworkDnsRequestOptions,
   NetworkDnsFields,
-  NetworkDnsSortField,
-} from '../../../../../../common/search_strategy/security_solution/network';
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 type QueryOrder =
@@ -22,20 +22,20 @@ type QueryOrder =
   | { dns_bytes_in: Direction }
   | { dns_bytes_out: Direction };
 
-const getQueryOrder = (networkDnsSortField: NetworkDnsSortField): QueryOrder => {
-  switch (networkDnsSortField.field) {
+const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
+  switch (sort.field) {
     case NetworkDnsFields.queryCount:
-      return { _count: networkDnsSortField.direction };
+      return { _count: sort.direction };
     case NetworkDnsFields.dnsName:
-      return { _key: networkDnsSortField.direction };
+      return { _key: sort.direction };
     case NetworkDnsFields.uniqueDomains:
-      return { unique_domains: networkDnsSortField.direction };
+      return { unique_domains: sort.direction };
     case NetworkDnsFields.dnsBytesIn:
-      return { dns_bytes_in: networkDnsSortField.direction };
+      return { dns_bytes_in: sort.direction };
     case NetworkDnsFields.dnsBytesOut:
-      return { dns_bytes_out: networkDnsSortField.direction };
+      return { dns_bytes_out: sort.direction };
   }
-  assertUnreachable(networkDnsSortField.field);
+  assertUnreachable(sort.field);
 };
 
 const getCountAgg = () => ({
@@ -66,7 +66,7 @@ export const buildDnsQuery = ({
   docValueFields,
   filterQuery,
   isPtrIncluded,
-  networkDnsSortField,
+  sort,
   pagination: { querySize },
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
@@ -97,7 +97,7 @@ export const buildDnsQuery = ({
             field: stackByField,
             size: querySize,
             order: {
-              ...getQueryOrder(networkDnsSortField),
+              ...getQueryOrder(sort),
             },
           },
           aggs: {

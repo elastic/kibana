@@ -40,7 +40,6 @@ export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> =
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildTopNFlowQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

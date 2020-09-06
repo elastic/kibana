@@ -25,6 +25,8 @@ import {
 } from '../../../../common/search_strategy/security_solution/network';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
 
 export * from './histogram';
 
@@ -32,7 +34,7 @@ const ID = 'networkDnsQuery';
 
 export interface NetworkDnsArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   networkDns: NetworkDnsEdges[];
@@ -60,8 +62,6 @@ export const useNetworkDns = ({
   startDate,
   type,
 }: UseNetworkDns): [boolean, NetworkDnsArgs] => {
-  // const getQuery = inputsSelectors.globalQueryByIdSelector();
-  // const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const { activePage, sort, isPtrIncluded, limit } = useSelector(
     (state: State) => getNetworkDnsSelector(state),
@@ -78,9 +78,8 @@ export const useNetworkDns = ({
     factoryQueryType: NetworkQueries.dns,
     filterQuery: createFilter(filterQuery),
     isPtrIncluded,
-    // inspect: isInspected,
     pagination: generateTablePaginationOptions(activePage, limit),
-    networkDnsSortField: sort,
+    sort,
     timerange: {
       interval: '12h',
       from: startDate ? startDate : '',
@@ -127,7 +126,7 @@ export const useNetworkDns = ({
         const searchSubscription$ = data.search
           .search<NetworkDnsRequestOptions, NetworkDnsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -137,7 +136,7 @@ export const useNetworkDns = ({
                   setNetworkDnsResponse((prevResponse) => ({
                     ...prevResponse,
                     networkDns: response.edges,
-                    inspect: response.inspect ?? prevResponse.inspect,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     refetch: refetch.current,
                     totalCount: response.totalCount,
@@ -187,12 +186,12 @@ export const useNetworkDns = ({
         isPtrIncluded,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
+        sort,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        networkDnsSortField: sort,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;

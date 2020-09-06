@@ -9,10 +9,10 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   Direction,
   FlowTargetSourceDest,
-  NetworkTopTablesSortField,
   NetworkTopTablesFields,
   NetworkTopCountriesRequestOptions,
-} from '../../../../../../common/search_strategy/security_solution/network';
+  SortField,
+} from '../../../../../../common/search_strategy';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_countries_count: {
@@ -26,7 +26,7 @@ export const buildTopCountriesQuery = ({
   defaultIndex,
   filterQuery,
   flowTarget,
-  networkTopCountriesSort,
+  sort,
   pagination: { querySize },
   timerange: { from, to },
   ip,
@@ -47,7 +47,7 @@ export const buildTopCountriesQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(networkTopCountriesSort, flowTarget, querySize),
+        ...getFlowTargetAggs(sort, flowTarget, querySize),
       },
       query: {
         bool: ip
@@ -74,7 +74,7 @@ export const buildTopCountriesQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopCountriesSortField: NetworkTopTablesSortField,
+  sort: SortField<NetworkTopTablesFields>,
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
@@ -83,7 +83,7 @@ const getFlowTargetAggs = (
       field: `${flowTarget}.geo.country_iso_code`,
       size: querySize,
       order: {
-        ...getQueryOrder(networkTopCountriesSortField),
+        ...getQueryOrder(sort),
       },
     },
     aggs: {
@@ -133,7 +133,9 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
-const getQueryOrder = (networkTopCountriesSortField: NetworkTopTablesSortField): QueryOrder => {
+const getQueryOrder = (
+  networkTopCountriesSortField: SortField<NetworkTopTablesFields>
+): QueryOrder => {
   switch (networkTopCountriesSortField.field) {
     case NetworkTopTablesFields.bytes_in:
       return { bytes_in: networkTopCountriesSortField.direction };

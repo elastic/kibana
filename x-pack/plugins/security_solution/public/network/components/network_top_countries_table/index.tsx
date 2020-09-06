@@ -16,8 +16,8 @@ import {
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
   NetworkTopTablesFields,
-  NetworkTopTablesSortField,
-} from '../../../../common/search_strategy/security_solution/network';
+  SortField,
+} from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
@@ -126,12 +126,12 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
     (criteria: Criteria) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
-        const lastField = last(splitField);
+        const lastField = last(splitField) as NetworkTopTablesFields;
         const newSortDirection =
-          lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopCountriesSort: NetworkTopTablesSortField = {
-          field: lastField as NetworkTopTablesFields,
-          direction: newSortDirection as Direction,
+          lastField !== sort.field ? Direction.desc : (criteria.sort.direction as Direction); // sort by desc on init click
+        const newTopCountriesSort: SortField<NetworkTopTablesFields> = {
+          field: lastField,
+          direction: newSortDirection,
         };
         if (!deepEqual(newTopCountriesSort, sort)) {
           dispatch(

@@ -6,15 +6,19 @@
 
 import { getOr } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
+  Direction,
   GeoItem,
+  SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
   NetworkTopNFlowRequestOptions,
+  NetworkTopTablesFields,
   FlowTargetSourceDest,
   AutonomousSystemItem,
-} from '../../../../../../common/search_strategy/security_solution/network';
+} from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
 
 export const getTopNFlowEdges = (
@@ -95,3 +99,28 @@ const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null 
         ),
       }
     : null;
+
+type QueryOrder =
+  | { bytes_in: Direction }
+  | { bytes_out: Direction }
+  | { flows: Direction }
+  | { destination_ips: Direction }
+  | { source_ips: Direction };
+
+export const getQueryOrder = (
+  networkTopNFlowSortField: SortField<NetworkTopTablesFields>
+): QueryOrder => {
+  switch (networkTopNFlowSortField.field) {
+    case NetworkTopTablesFields.bytes_in:
+      return { bytes_in: networkTopNFlowSortField.direction };
+    case NetworkTopTablesFields.bytes_out:
+      return { bytes_out: networkTopNFlowSortField.direction };
+    case NetworkTopTablesFields.flows:
+      return { flows: networkTopNFlowSortField.direction };
+    case NetworkTopTablesFields.destination_ips:
+      return { destination_ips: networkTopNFlowSortField.direction };
+    case NetworkTopTablesFields.source_ips:
+      return { source_ips: networkTopNFlowSortField.direction };
+  }
+  assertUnreachable(networkTopNFlowSortField.field);
+};
