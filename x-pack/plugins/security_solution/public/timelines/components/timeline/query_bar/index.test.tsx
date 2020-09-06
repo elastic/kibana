@@ -97,7 +97,6 @@ describe.skip('Timeline QueryBar ', () => {
       const wrapper = mount(
         <Proxy
           browserFields={mockBrowserFields}
-          dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}

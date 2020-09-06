@@ -27,7 +27,6 @@ import {
   OnToggleDataProviderExcluded,
   OnToggleDataProviderType,
 } from './events';
-import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
@@ -272,7 +271,6 @@ export const TimelineComponent: React.FC<Props> = ({
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
-      <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
       {canQueryTimeline ? (
         <TimelineQuery
           docValueFields={docValueFields}

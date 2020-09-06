@@ -28,7 +28,6 @@ describe('#useUpdateKql', () => {
     useUpdateKql({
       indexPattern: mockIndexPattern,
       kueryFilterQuery: { expression: '', kind: 'kuery' },
-      kueryFilterQueryDraft: { expression: 'host.name: "myLove"', kind: 'kuery' },
       storeType: 'timelineType',
       timelineId: 'myTimelineId',
     })(mockDispatch);

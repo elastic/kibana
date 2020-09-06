@@ -47,7 +47,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const getTimeline = timelineSelectors.getTimelineByIdSelector();
     const getInputsTimeline = inputsSelectors.getTimelineSelector();
     const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
-    // const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
     const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
     const { dataProviders, filters, savedQueryId } = useSelector(
       (state: State) => getTimeline(state, timelineId) ?? { ...timelineDefaults },
@@ -65,10 +64,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       (state: State) => getKqlFilterQuery(state, timelineId)!,
       shallowEqual
     );
-    // const filterQueryDraft = useSelector(
-    //   (state: State) => getKqlFilterQueryDraft(state, timelineId)!,
-    //   shallowEqual
-    // );
 
     const [dateRangeFrom, setDateRangeFrom] = useState<string>(
       fromStr != null ? fromStr : new Date(from).toISOString()
@@ -223,20 +218,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       };
     }, [filters, savedQueryId, savedQueryServices]);
 
-    const onChangedQuery = useCallback((newQuery: Query) => {
-      console.error('onChangedQuery', newQuery);
-      // if (
-      //   filterQueryDraft == null ||
-      //   (filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
-      //   filterQueryDraft.kind !== newQuery.language
-      // ) {
-      //   setKqlFilterQueryDraft(
-      //     newQuery.query as string,
-      //     newQuery.language as KueryFilterQueryKind
-      //   );
-      // }
-    }, []);
-
     const onSubmitQuery = useCallback(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
         if (
@@ -244,10 +225,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           (filterQuery != null && filterQuery.expression !== newQuery.query) ||
           filterQuery.kind !== newQuery.language
         ) {
-          // setKqlFilterQueryDraft(
-          //   newQuery.query as string,
-          //   newQuery.language as KueryFilterQueryKind
-          // );
           applyKqlFilterQuery(newQuery.query as string, newQuery.language as KueryFilterQueryKind);
         }
         if (timefilter != null) {
@@ -268,7 +245,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     const onSavedQuery = useCallback(
       (newSavedQuery: SavedQuery | null) => {
-        console.error('onSavedQuery', newSavedQuery);
         if (newSavedQuery != null) {
           if (newSavedQuery.id !== savedQueryId) {
             setSavedQueryId(newSavedQuery.id);
@@ -318,10 +294,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
-        // filterQueryDraft={filterQueryDraft}
         filterManager={filterManager}
         filters={queryBarFilters}
-        onChangedQuery={onChangedQuery}
         onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
