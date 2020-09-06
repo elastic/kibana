@@ -458,6 +458,8 @@ export function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient): Pro
 // @public (undocumented)
 export function getShardTimeout(config: SharedGlobalConfig): {
     timeout: string;
+} | {
+    timeout?: undefined;
 };
 
 // Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
