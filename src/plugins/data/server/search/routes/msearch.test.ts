@@ -73,7 +73,7 @@ describe('msearch route', () => {
     expect(mockClient.transport.request.mock.calls[0][0].method).toBe('GET');
     expect(mockClient.transport.request.mock.calls[0][0].path).toBe('/_msearch');
     expect(mockClient.transport.request.mock.calls[0][0].body).toEqual(
-      convertRequestBody(mockBody as any, { timeout: '0ms' })
+      convertRequestBody(mockBody as any, {})
     );
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
