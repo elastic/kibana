@@ -21,9 +21,12 @@ import { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/serve
 import { UI_SETTINGS } from '../../../common/constants';
 
 export function getShardTimeout(config: SharedGlobalConfig) {
-  return {
-    timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
-  };
+  const timeout = config.elasticsearch.shardTimeout.asMilliseconds();
+  return timeout
+    ? {
+        timeout: `${timeout}ms`,
+      }
+    : {};
 }
 
 export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient) {
