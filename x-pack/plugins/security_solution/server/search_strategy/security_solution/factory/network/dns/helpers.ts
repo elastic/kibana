@@ -13,7 +13,7 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const getDnsEdges = (response: IEsSearchResponse<unknown>): NetworkDnsEdges[] =>
-  formatDnsEdges(getOr([], `aggregations.dns_name_query_count.buckets`, response));
+  formatDnsEdges(getOr([], `aggregations.dns_name_query_count.buckets`, response.rawResponse));
 
 export const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
   buckets.map((bucket: NetworkDnsBuckets) => ({
