@@ -33,7 +33,7 @@ export interface OpsMetricsCollectorOptions {
 export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   private readonly cgroupCollector: OsCgroupMetricsCollector;
 
-  constructor(options: OpsMetricsCollectorOptions) {
+  constructor(options: OpsMetricsCollectorOptions = {}) {
     this.cgroupCollector = new OsCgroupMetricsCollector(options);
   }
 

@@ -1581,10 +1581,10 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-missing-release-tag) "MetricsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface MetricsServiceSetup {
+    readonly collectionInterval: number;
+    getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 
 // @public @deprecated (undocumented)
@@ -1671,6 +1671,7 @@ export interface OnPreRoutingToolkit {
 
 // @public
 export interface OpsMetrics {
+    collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
     process: OpsProcessMetrics;
@@ -1680,6 +1681,20 @@ export interface OpsMetrics {
 
 // @public
 export interface OpsOsMetrics {
+    cpu?: {
+        control_group: string;
+        cfs_period_micros: number;
+        cfs_quota_micros: number;
+        stat: {
+            number_of_elapsed_periods: number;
+            number_of_times_throttled: number;
+            time_throttled_nanos: number;
+        };
+    };
+    cpuacct?: {
+        control_group: string;
+        usage_nanos: number;
+    };
     distro?: string;
     distroRelease?: string;
     load: {
