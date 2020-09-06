@@ -118,18 +118,17 @@ describe('SourceFiltersTable', () => {
   });
 
   test('should remove a filter', async () => {
-    const save = jest.fn();
+    const saveIndexPattern = jest.fn(async () => {});
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={
           getIndexPatternMock({
-            save,
             sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
           }) as IndexPattern
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -138,51 +137,49 @@ describe('SourceFiltersTable', () => {
     await component.instance().deleteFilter();
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(save).toBeCalled();
+    expect(saveIndexPattern).toBeCalled();
     expect(component).toMatchSnapshot();
   });
 
   test('should add a filter', async () => {
-    const save = jest.fn();
+    const saveIndexPattern = jest.fn(async () => {});
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
-          save,
           sourceFilters: [{ value: 'tim*' }],
         })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
     await component.instance().onAddFilter('na*');
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(save).toBeCalled();
+    expect(saveIndexPattern).toBeCalled();
     expect(component).toMatchSnapshot();
   });
 
   test('should update a filter', async () => {
-    const save = jest.fn();
+    const saveIndexPattern = jest.fn(async () => {});
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={
           getIndexPatternMock({
-            save,
             sourceFilters: [{ value: 'tim*' }],
           }) as IndexPattern
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
     await component.instance().saveFilter({ clientId: 'tim*', value: 'ti*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(save).toBeCalled();
+    expect(saveIndexPattern).toBeCalled();
     expect(component).toMatchSnapshot();
   });
 });
