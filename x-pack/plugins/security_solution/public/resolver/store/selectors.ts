@@ -84,14 +84,14 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseDocumentIDToFetch = composeSelectors(
+export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToFetch
+  dataSelectors.treeParametersToFetch
 );
 
-export const databaseDocumentIDToAbort = composeSelectors(
+export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToAbort
+  dataSelectors.treeRequestParametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(
@@ -112,6 +112,18 @@ export const relatedEventsStats: (
 ) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsStats
+);
+
+/**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: ResolverState
+) => (nodeID: string) => number = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventAggregateTotalByEntityId
 );
 
 /**
@@ -195,12 +207,15 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+export const hadErrorLoadingTree = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingTree
+);
 
 /**
  * True if the children cursor is not null
