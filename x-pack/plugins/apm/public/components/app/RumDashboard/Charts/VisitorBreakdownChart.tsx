@@ -24,8 +24,6 @@ import { ChartWrapper } from '../ChartWrapper';
 
 const StyleChart = styled.div`
   height: 100%;
-  .echLegend {
-  }
 `;
 
 interface Props {
