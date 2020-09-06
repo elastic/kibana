@@ -66,7 +66,6 @@ describe('ES search strategy', () => {
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
-      timeout: '0ms',
       ignore_unavailable: true,
       track_total_hits: true,
     });
