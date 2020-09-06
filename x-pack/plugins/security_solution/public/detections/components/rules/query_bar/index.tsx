@@ -79,7 +79,6 @@ export const QueryBarDefineRule = ({
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
-  // const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const kibana = useKibana();
@@ -117,9 +116,6 @@ export const QueryBarDefineRule = ({
     let isSubscribed = true;
     async function updateFilterQueryFromValue() {
       const { filters, query, saved_id: savedId } = fieldValue as FieldValueQueryBar;
-      // if (!deepEqual(query, queryDraft)) {
-      //   setQueryDraft(query);
-      // }
       if (!deepEqual(filters, filterManager.getFilters())) {
         filterManager.setFilters(filters);
       }
@@ -247,8 +243,6 @@ export const QueryBarDefineRule = ({
   };
 
   const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate'], []);
-
-  console.error('fieldValue', fieldValue);
 
   return (
     <>
