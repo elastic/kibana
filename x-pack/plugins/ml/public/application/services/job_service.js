@@ -117,7 +117,6 @@ class JobService {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-      console.log(12222);
       ml.getJobs()
         .then((resp) => {
           jobs = resp.jobs;
@@ -574,7 +573,7 @@ class JobService {
       }
 
       ml.startDatafeed({
-        datafeedId: datafeedId + 22,
+        datafeedId,
         start,
         end,
       })

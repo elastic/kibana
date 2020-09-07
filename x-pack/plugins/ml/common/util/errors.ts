@@ -131,7 +131,6 @@ export const extractErrorProperties = (
       }
     }
 
-    // I DON'T THINK THESE ONES BELOW WILL BE HIT
     if (typeof error.body.message === 'string') {
       return {
         message: error.body.message,

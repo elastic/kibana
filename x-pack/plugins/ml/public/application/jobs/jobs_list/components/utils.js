@@ -176,7 +176,7 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId + 4);
+    const job = await loadFullJob(jobId);
     if (job.custom_settings && job.custom_settings.created_by) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job

@@ -45,6 +45,15 @@ describe('ML - error message utils', () => {
       };
       expect(extractErrorMessage(bodyWithStringMessage)).toBe(testMsg);
 
+      const bodyWithAttributes: MLCustomHttpResponseOptions<ResponseError> = {
+        body: {
+          message: 'Something else',
+          attributes: { body: { status: 404, error: { reason: testMsg } } },
+        },
+        statusCode: 404,
+      };
+      expect(extractErrorMessage(bodyWithAttributes)).toBe(testMsg);
+
       const bodyWithString: MLCustomHttpResponseOptions<ResponseError> = {
         body: testMsg,
         statusCode: 404,
