@@ -21,6 +21,7 @@ export const AddProcessorButton: FunctionComponent<Props> = (props) => {
   return (
     <EuiButtonEmpty
       data-test-subj="addProcessorButton"
+      className="pipelineProcessorsEditor__tree__addProcessorButton"
       disabled={editor.mode.id !== 'idle'}
       iconSide="left"
       iconType="plusInCircle"
