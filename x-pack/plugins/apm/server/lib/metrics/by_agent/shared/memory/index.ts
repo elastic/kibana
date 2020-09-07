@@ -52,8 +52,37 @@ export const percentSystemMemoryUsedScript = {
 };
 
 export const percentCgroupMemoryUsedScript = {
-  lang: 'expression',
-  source: `(doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'] - doc['${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}']) / (doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'] ? doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'] : doc['${METRIC_SYSTEM_TOTAL_MEMORY}'])`,
+  lang: 'painless',
+  source: `
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_USAGE_BYTES}')) {
+      return null;     
+    }
+    
+    double total = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}')){
+      limit = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value
+    }else if (isFieldAvailable(doc, '${METRIC_SYSTEM_TOTAL_MEMORY}')){
+      limit = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}')){
+      inactive_files = doc['${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  `,
 };
 
 export async function getMemoryChartData(

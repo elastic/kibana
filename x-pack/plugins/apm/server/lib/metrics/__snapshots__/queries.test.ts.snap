@@ -203,16 +203,74 @@ Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
@@ -221,16 +279,74 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
@@ -275,12 +391,7 @@ Object {
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
@@ -682,16 +793,74 @@ Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
@@ -700,16 +869,74 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
@@ -760,12 +987,7 @@ Object {
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
@@ -1157,16 +1379,74 @@ Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
           },
         },
       },
@@ -1175,16 +1455,74 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    boolean isFieldAvailable(def doc, def x) {
+      return doc.containsKey(x) 
+        && !doc[x].empty
+    }
+
+    if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
+      return null;     
+    }
+    
+    double total = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    double limit = -1;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
+      limit = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    }else if (isFieldAvailable(doc, 'system.memory.total')){
+      limit = doc['system.memory.total'].value
+    }
+    
+    if(limit == -1) {
+      return null;
+    }
+    
+    double inactive_files = 0;
+    if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
+      inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
+    }
+    
+    return (total - inactive_files) / limit;
+  ",
               },
             },
           },
@@ -1224,12 +1562,7 @@ Object {
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
