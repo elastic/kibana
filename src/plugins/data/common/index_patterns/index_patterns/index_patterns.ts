@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -38,6 +39,7 @@ import {
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
+import { IndexPatternMissingIndices } from '../lib';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -164,8 +166,51 @@ export class IndexPatternsService {
     return null;
   };
 
+  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
+    if (!specs) {
+      return true;
+    }
+
+    return specs.every((spec) => {
+      // See https://github.com/elastic/kibana/pull/8421
+      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
+
+      // See https://github.com/elastic/kibana/pull/11969
+      const hasDocValuesFlag = 'readFromDocValues' in spec;
+
+      return !hasFieldCaps || !hasDocValuesFlag;
+    });
+  }
+
+  private refreshFields = async (
+    fields: FieldSpec[],
+    id: string,
+    title: string,
+    options: GetFieldsOptions
+  ) => {
+    const scriptdFields = fields.filter((field) => field.scripted);
+    try {
+      const newFields = await this.getFieldsForWildcard(options);
+      return [...newFields, ...scriptdFields];
+    } catch (err) {
+      if (err instanceof IndexPatternMissingIndices) {
+        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        return [];
+      }
+
+      this.onError(err, {
+        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          values: { id, title },
+        }),
+      });
+    }
+    return fields;
+  };
+
   get = async (id: string): Promise<IndexPattern> => {
     const savedObjectType = 'index-pattern';
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
     const cache = indexPatternCache.get(id);
     if (cache) {
@@ -196,7 +241,16 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const parsedFields = fields ? JSON.parse(fields) : [];
+    let parsedFields = fields ? JSON.parse(fields) : [];
+    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    parsedFields = this.isFieldRefreshRequired(parsedFields)
+      ? await this.refreshFields(parsedFields, id, title, {
+          pattern: title,
+          metaFields,
+          type,
+          params: parsedTypeMeta && parsedTypeMeta.params,
+        })
+      : parsedFields;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
 
     Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
@@ -212,11 +266,9 @@ export class IndexPatternsService {
       title,
       timeFieldName,
       intervalName,
-      // fields,
       fields: parsedFields,
       sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
-      // fieldFormatMap: parsedFieldFormatMap,
-      typeMeta: typeMeta ? JSON.parse(typeMeta) : undefined,
+      typeMeta: parsedTypeMeta,
       type,
     };
 

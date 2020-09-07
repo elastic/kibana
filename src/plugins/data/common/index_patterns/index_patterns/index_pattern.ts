@@ -21,6 +21,7 @@ import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
+import { IndexPatternMissingIndices } from '../lib';
 
 import {
   ES_FIELD_TYPES,
@@ -30,7 +31,6 @@ import {
   FieldFormatNotFoundError,
 } from '../../../common';
 import { findByTitle } from '../utils';
-import { IndexPatternMissingIndices } from '../lib';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
@@ -148,8 +148,8 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    // this.fields.replaceAll(spec.fields || []);
-    this.indexFields(spec.fields);
+    // this.indexFields(spec.fields);
+    this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -191,6 +191,7 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  /*
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
     if (!specs) {
       return true;
@@ -207,6 +208,7 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
+  /*
   private async indexFields(specs?: FieldSpec[]) {
     if (!this.id) {
       return;
@@ -228,6 +230,7 @@ export class IndexPattern implements IIndexPattern {
       }
     }
   }
+  */
 
   private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = []) =>
     fldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
@@ -318,8 +321,8 @@ export class IndexPattern implements IIndexPattern {
       this.title = this.id;
     }
     this.version = response.version;
-
-    return this.indexFields(response.fields);
+    this.fields.replaceAll(response.fields);
+    // return this.indexFields(response.fields);
   }
 
   getComputedFields() {
