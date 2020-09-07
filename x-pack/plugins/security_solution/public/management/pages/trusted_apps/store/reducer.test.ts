@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RoutingAction } from '../../../../common/store/routing';
-import { TrustedAppsListResourceStateChanged } from './action';
-import { AsyncResourceState, TrustedAppsListData } from '../state';
 import { initialTrustedAppsPageState, trustedAppsPageReducer } from './reducer';
-import { createListLoadedResourceState, createListViewWithPagination } from '../test_utils';
-
-const createUserChangedUrlAction = (pathname: string, search: string = ''): RoutingAction => {
-  return { type: 'userChangedUrl', payload: { pathname, search, hash: '' } };
-};
-
-const createTrustedAppsListResourceStateChangedAction = (
-  newState: AsyncResourceState<TrustedAppsListData>
-): TrustedAppsListResourceStateChanged => ({
-  type: 'trustedAppsListResourceStateChanged',
-  payload: { newState },
-});
+import {
+  createListLoadedResourceState,
+  createLoadedListViewWithPagination,
+  createTrustedAppsListResourceStateChangedAction,
+  createUserChangedUrlAction,
+} from '../test_utils';
 
 describe('reducer', () => {
   describe('UserChangedUrl', () => {
@@ -76,7 +67,7 @@ describe('reducer', () => {
 
     it('makes page state inactive and resets list to uninitialised state when navigating away', () => {
       const result = trustedAppsPageReducer(
-        { listView: createListViewWithPagination(), active: true },
+        { listView: createLoadedListViewWithPagination(), active: true },
         createUserChangedUrlAction('/endpoints')
       );
 

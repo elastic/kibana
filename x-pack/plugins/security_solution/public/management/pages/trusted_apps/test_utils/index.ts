@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerApiError } from '../../../../common/types';
 import { TrustedApp } from '../../../../../common/endpoint/types';
+import { RoutingAction } from '../../../../common/store/routing';
+
 import {
+  AsyncResourceState,
   FailedResourceState,
   LoadedResourceState,
   LoadingResourceState,
   PaginationInfo,
+  StaleResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
   UninitialisedResourceState,
 } from '../state';
+
+import { TrustedAppsListResourceStateChanged } from '../store/action';
 
 const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
 
@@ -38,6 +45,12 @@ export const createTrustedAppsListData = (
   paginationInfo,
 });
 
+export const createServerApiError = (message: string) => ({
+  statusCode: 500,
+  error: 'Internal Server Error',
+  message,
+});
+
 export const createUninitialisedResourceState = (): UninitialisedResourceState => ({
   type: 'UninitialisedResourceState',
 });
@@ -55,11 +68,7 @@ export const createListFailedResourceState = (
   lastLoadedState?: LoadedResourceState<TrustedAppsListData>
 ): FailedResourceState<TrustedAppsListData> => ({
   type: 'FailedResourceState',
-  error: {
-    statusCode: 500,
-    error: 'Internal Server Error',
-    message,
-  },
+  error: createServerApiError(message),
   lastLoadedState,
 });
 
@@ -81,10 +90,39 @@ export const createDefaultListView = () => ({
   currentPaginationInfo: createDefaultPaginationInfo(),
 });
 
-export const createListViewWithPagination = (
-  paginationInfo: PaginationInfo = createDefaultPaginationInfo(),
-  currentPaginationInfo: PaginationInfo = createDefaultPaginationInfo()
+export const createLoadingListViewWithPagination = (
+  currentPaginationInfo: PaginationInfo,
+  previousState: StaleResourceState<TrustedAppsListData> = createUninitialisedResourceState()
 ): TrustedAppsListPageState['listView'] => ({
-  currentListResourceState: createListLoadedResourceState(paginationInfo, 200),
+  currentListResourceState: { type: 'LoadingResourceState', previousState },
   currentPaginationInfo,
+});
+
+export const createLoadedListViewWithPagination = (
+  paginationInfo: PaginationInfo = createDefaultPaginationInfo(),
+  currentPaginationInfo: PaginationInfo = createDefaultPaginationInfo(),
+  totalItemsCount: number = 200
+): TrustedAppsListPageState['listView'] => ({
+  currentListResourceState: createListLoadedResourceState(paginationInfo, totalItemsCount),
+  currentPaginationInfo,
+});
+
+export const createFailedListViewWithPagination = (
+  currentPaginationInfo: PaginationInfo,
+  error: ServerApiError,
+  lastLoadedState?: LoadedResourceState<TrustedAppsListData>
+): TrustedAppsListPageState['listView'] => ({
+  currentListResourceState: { type: 'FailedResourceState', error, lastLoadedState },
+  currentPaginationInfo,
+});
+
+export const createUserChangedUrlAction = (path: string, search: string = ''): RoutingAction => {
+  return { type: 'userChangedUrl', payload: { pathname: path, search, hash: '' } };
+};
+
+export const createTrustedAppsListResourceStateChangedAction = (
+  newState: AsyncResourceState<TrustedAppsListData>
+): TrustedAppsListResourceStateChanged => ({
+  type: 'trustedAppsListResourceStateChanged',
+  payload: { newState },
 });

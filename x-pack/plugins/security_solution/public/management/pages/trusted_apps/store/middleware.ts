@@ -5,8 +5,12 @@
  */
 
 import { Immutable } from '../../../../../common/endpoint/types';
-import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
+import {
+  ImmutableMiddleware,
+  ImmutableMiddlewareAPI,
+  ImmutableMiddlewareFactory,
+} from '../../../../common/store';
 
 import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 
@@ -77,11 +81,9 @@ const refreshList = async (
   }
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
-  coreStart
-) => {
-  const trustedAppsService: TrustedAppsService = new TrustedAppsHttpService(coreStart.http);
-
+export const createTrustedAppsPageMiddleware = (
+  trustedAppsService: TrustedAppsService
+): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
   return (store) => (next) => async (action) => {
     next(action);
 
@@ -91,3 +93,7 @@ export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<Truste
     }
   };
 };
+
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
+  coreStart
+) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

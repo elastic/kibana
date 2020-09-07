@@ -22,7 +22,7 @@ import {
   createListComplexLoadingResourceState,
   createListFailedResourceState,
   createListLoadedResourceState,
-  createListViewWithPagination,
+  createLoadedListViewWithPagination,
   createSampleTrustedApps,
   createUninitialisedResourceState,
 } from '../test_utils';
@@ -42,19 +42,19 @@ describe('selectors', () => {
     });
 
     it('returns true when current loaded page index is outdated', () => {
-      const listView = createListViewWithPagination({ index: 1, size: 20 });
+      const listView = createLoadedListViewWithPagination({ index: 1, size: 20 });
 
       expect(needsRefreshOfListData({ listView, active: true })).toBe(true);
     });
 
     it('returns true when current loaded page size is outdated', () => {
-      const listView = createListViewWithPagination({ index: 0, size: 50 });
+      const listView = createLoadedListViewWithPagination({ index: 0, size: 50 });
 
       expect(needsRefreshOfListData({ listView, active: true })).toBe(true);
     });
 
     it('returns false when current loaded data is up to date', () => {
-      const listView = createListViewWithPagination();
+      const listView = createLoadedListViewWithPagination();
 
       expect(needsRefreshOfListData({ listView, active: true })).toBe(false);
     });
