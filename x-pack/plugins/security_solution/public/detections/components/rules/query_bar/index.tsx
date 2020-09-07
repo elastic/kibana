@@ -75,10 +75,10 @@ export const QueryBarDefineRule = ({
   openTimelineSearch = false,
   resizeParentContainer,
 }: QueryBarDefineRuleProps) => {
-  const { value: fieldValue, setValue: setFieldValue } = field;
+  const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
-  const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
+  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const kibana = useKibana();
@@ -96,10 +96,10 @@ export const QueryBarDefineRule = ({
         next: () => {
           if (isSubscribed) {
             const newFilters = filterManager.getFilters();
-            const { filters } = fieldValue as FieldValueQueryBar;
+            const { filters } = fieldValue;
 
             if (!deepEqual(filters, newFilters)) {
-              setFieldValue({ ...(fieldValue as FieldValueQueryBar), filters: newFilters });
+              setFieldValue({ ...fieldValue, filters: newFilters });
             }
           }
         },
@@ -115,7 +115,7 @@ export const QueryBarDefineRule = ({
   useEffect(() => {
     let isSubscribed = true;
     async function updateFilterQueryFromValue() {
-      const { filters, saved_id: savedId } = fieldValue as FieldValueQueryBar;
+      const { filters, saved_id: savedId } = fieldValue;
       if (!deepEqual(filters, filterManager.getFilters())) {
         filterManager.setFilters(filters);
       }
@@ -129,10 +129,10 @@ export const QueryBarDefineRule = ({
             setSavedQuery(mySavedQuery);
           }
         } catch {
-          setSavedQuery(null);
+          setSavedQuery(undefined);
         }
       } else if (savedId == null && savedQuery != null) {
-        setSavedQuery(null);
+        setSavedQuery(undefined);
       }
     }
     updateFilterQueryFromValue();
@@ -143,9 +143,9 @@ export const QueryBarDefineRule = ({
 
   const onSubmitQuery = useCallback(
     (newQuery: Query) => {
-      const { query } = fieldValue as FieldValueQueryBar;
+      const { query } = fieldValue;
       if (!deepEqual(query, newQuery)) {
-        setFieldValue({ ...(fieldValue as FieldValueQueryBar), query: newQuery });
+        setFieldValue({ ...fieldValue, query: newQuery });
       }
     },
     [fieldValue, setFieldValue]
@@ -153,22 +153,22 @@ export const QueryBarDefineRule = ({
 
   const onChangedQuery = useCallback(
     (newQuery: Query) => {
-      const { query } = fieldValue as FieldValueQueryBar;
+      const { query } = fieldValue;
       if (!deepEqual(query, newQuery)) {
-        setFieldValue({ ...(fieldValue as FieldValueQueryBar), query: newQuery });
+        setFieldValue({ ...fieldValue, query: newQuery });
       }
     },
     [fieldValue, setFieldValue]
   );
 
   const onSavedQuery = useCallback(
-    (newSavedQuery: SavedQuery | null) => {
+    (newSavedQuery: SavedQuery | undefined) => {
       if (newSavedQuery != null) {
-        const { saved_id: savedId } = fieldValue as FieldValueQueryBar;
+        const { saved_id: savedId } = fieldValue;
         if (newSavedQuery.id !== savedId) {
           setSavedQuery(newSavedQuery);
           setFieldValue({
-            filters: newSavedQuery.attributes.filters,
+            filters: newSavedQuery.attributes.filters ?? [],
             query: newSavedQuery.attributes.query,
             saved_id: newSavedQuery.id,
           });

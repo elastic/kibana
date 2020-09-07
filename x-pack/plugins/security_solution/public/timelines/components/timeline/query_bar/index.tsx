@@ -74,12 +74,11 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     const updateReduxTime = useMemo(() => dispatchUpdateReduxTime(dispatch), [dispatch]);
 
-    const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
+    const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>([]);
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
@@ -137,7 +136,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                 .getFilters()
                 .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
               setFilters(filterWithoutDropArea);
-              setQueryBarFilters(filterWithoutDropArea);
             }
           },
         })
@@ -206,17 +204,17 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
               });
             }
           } catch (exc) {
-            setSavedQuery(null);
+            setSavedQuery(undefined);
           }
         } else if (isSubscribed) {
-          setSavedQuery(null);
+          setSavedQuery(undefined);
         }
       }
       setSavedQueryByServices();
       return () => {
         isSubscribed = false;
       };
-    }, [filters, savedQueryId, savedQueryServices]);
+    }, [filterManager, filters, savedQueryId, savedQueryServices]);
 
     const onSubmitQuery = useCallback(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
@@ -244,7 +242,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     const onSavedQuery = useCallback(
-      (newSavedQuery: SavedQuery | null) => {
+      (newSavedQuery: SavedQuery | undefined) => {
         if (newSavedQuery != null) {
           if (newSavedQuery.id !== savedQueryId) {
             setSavedQueryId(newSavedQuery.id);
@@ -295,7 +293,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}
-        filters={queryBarFilters}
+        filters={filterManager.getFilters() ?? []}
         onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}

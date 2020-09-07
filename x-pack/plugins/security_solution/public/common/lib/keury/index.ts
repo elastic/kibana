@@ -16,8 +16,6 @@ import {
 
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { KueryFilterQuery } from '../../store';
-
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
   indexPattern?: IIndexPattern
