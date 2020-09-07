@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
@@ -256,29 +257,56 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       }
     }
 
+    const policyRepositoryExists =
+      !!policy.repository &&
+      repositories.some((r: { name: string }) => r.name === policy.repository);
+
     return (
-      <EuiSelect
-        options={repositories.map(({ name }: Repository) => ({
-          value: name,
-          text: name,
-        }))}
-        value={policy.repository || repositories[0].name}
-        onBlur={() => setTouched({ ...touched, repository: true })}
-        onChange={(e) => {
-          updatePolicy(
-            {
-              repository: e.target.value,
-            },
-            {
-              managedRepository,
-              isEditing,
-              policyName: policy.name,
-            }
-          );
-        }}
-        fullWidth
-        data-test-subj="repositorySelect"
-      />
+      <>
+        {!policyRepositoryExists && (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
+                  defaultMessage="Policy repository not found"
+                />
+              }
+              color="warning"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
+                defaultMessage="Select another repository."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiSelect
+          options={repositories.map(({ name }: Repository) => ({
+            value: name,
+            text: name,
+          }))}
+          hasNoInitialSelection={!policyRepositoryExists}
+          value={!policyRepositoryExists ? '' : policy.repository}
+          onBlur={() => setTouched({ ...touched, repository: true })}
+          onChange={(e) => {
+            updatePolicy(
+              {
+                repository: e.target.value,
+              },
+              {
+                managedRepository,
+                isEditing,
+                policyName: policy.name,
+              }
+            );
+          }}
+          fullWidth
+          data-test-subj="repositorySelect"
+        />
+      </>
     );
   };
 
