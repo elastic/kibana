@@ -360,7 +360,7 @@ describe('api', () => {
     });
 
     describe('fieldsByIssueType', () => {
-      test('it returns the issue types correctly', async () => {
+      test('it returns the fields correctly', async () => {
         const res = await api.fieldsByIssueType({
           externalService,
           params: { id: '10006' },

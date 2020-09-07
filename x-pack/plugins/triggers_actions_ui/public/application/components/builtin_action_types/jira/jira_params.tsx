@@ -33,13 +33,20 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     actionParams.subActionParams || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
+  const [firstLoad, setFirstLoad] = useState(false);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
   const { http, toastNotifications } = useAppDependencies();
+
+  useEffect(() => {
+    setFirstLoad(true);
+  }, []);
+
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
     toastNotifications,
     actionConnector,
   });
+
   const { isLoading: isLoadingFields, fields } = useGetFieldsByIssueType({
     http,
     toastNotifications,
@@ -90,15 +97,27 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   // Reset parameters when changing connector
   useEffect(() => {
+    if (!firstLoad) {
+      return;
+    }
+
     setIssueTypesSelectOptions([]);
-    editAction('subActionParams', { savedObjectId }, index);
+    editAction('subActionParams', { title, comments, description: '', savedObjectId }, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
 
   // Reset fields when changing connector or issue type
   useEffect(() => {
+    if (!firstLoad) {
+      return;
+    }
+
     setPrioritiesSelectOptions([]);
-    editAction('subActionParams', { issueType, savedObjectId }, index);
+    editAction(
+      'subActionParams',
+      { title, issueType, comments, description: '', savedObjectId },
+      index
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueType, savedObjectId]);
 
@@ -121,7 +140,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   // Set default issue type
   useEffect(() => {
-    if (issueTypesSelectOptions.length > 0) {
+    if (!issueType && issueTypesSelectOptions.length > 0) {
       editSubActionProperty('issueType', issueTypesSelectOptions[0].value as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,7 +148,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   // Set default priority
   useEffect(() => {
-    if (prioritiesSelectOptions.length > 0) {
+    if (!priority && prioritiesSelectOptions.length > 0) {
       editSubActionProperty('priority', prioritiesSelectOptions[0].value as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
