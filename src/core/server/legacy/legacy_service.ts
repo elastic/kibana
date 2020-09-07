@@ -21,7 +21,7 @@ import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription }
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Config, ConfigDeprecationProvider } from '../config';
+import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
@@ -29,7 +29,6 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig }
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
-import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
   LegacyServiceSetupDeps,
@@ -144,18 +143,6 @@ export class LegacyService implements CoreService {
       uiExports,
       navLinks,
     };
-
-    const deprecationProviders = await pluginSpecs
-      .map((spec) => spec.getDeprecationsProvider())
-      .reduce(async (providers, current) => {
-        if (current) {
-          return [...(await providers), await convertLegacyDeprecationProvider(current)];
-        }
-        return providers;
-      }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach((provider) =>
-      this.coreContext.configService.addDeprecationProvider('', provider)
-    );
 
     this.legacyRawConfig = pluginExtendedConfig;
 
