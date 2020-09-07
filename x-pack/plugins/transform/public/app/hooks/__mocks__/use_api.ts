@@ -34,26 +34,18 @@ import type {
 
 const apiFactory = () => ({
   getTransform(transformId: TransformId): Promise<GetTransformsResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({ count: 0, transforms: [] });
-    });
+    return Promise.resolve({ count: 0, transforms: [] });
   },
   getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({ count: 0, transforms: [] });
-    });
+    return Promise.resolve({ count: 0, transforms: [] });
   },
   getTransformStats(
     transformId: TransformId
   ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({ count: 0, transforms: [] });
-    });
+    return Promise.resolve({ count: 0, transforms: [] });
   },
   getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({ count: 0, transforms: [] });
-    });
+    return Promise.resolve({ count: 0, transforms: [] });
   },
   createTransform(
     transformId: TransformId,
