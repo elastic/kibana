@@ -65,6 +65,10 @@ const onClick = (action: Action, context: ActionExecutionContext<object>, close:
   close();
 };
 
+/**
+ * This method adds "More" item to panels, which have more than 4 items; and
+ * moves all items after the thrird one into that "More" sub-menu.
+ */
 const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
   const panel = panels[id];
   if (!panel) return;
@@ -83,7 +87,7 @@ const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: 
   panel.items = [...visibleItems, more];
   const subPanel: PanelDescriptor = {
     id: morePanelId,
-    title: txtMore,
+    title: panel.title || defaultTitle,
     items: itemsInSubmenu,
   };
   panels[morePanelId] = subPanel;
@@ -153,14 +157,13 @@ export async function buildContextMenuForActions({
   });
   await Promise.all(promises);
 
-  wrapPanelItemsIntoSubmenu(panels, 'mainMenu');
-
   const panelList: PanelDescriptor[] = Object.values(panels);
-
   for (const panel of panelList) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
     panel.items = items.sort((a, b) => (a._order < b._order ? 1 : -1));
   }
 
-  return panelList;
+  wrapPanelItemsIntoSubmenu(panels, 'mainMenu');
+
+  return Object.values(panels);
 }
