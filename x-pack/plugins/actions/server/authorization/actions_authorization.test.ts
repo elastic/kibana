@@ -191,7 +191,7 @@ describe('ensureAuthorized', () => {
     `);
   });
 
-  test('exempts users from requiring privileges to execute actions when shouldLegacyRbacApply is true', async () => {
+  test('exempts users from requiring privileges to execute actions when shouldUseLegacyRbac is true', async () => {
     const { authorization, authentication } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
@@ -202,7 +202,7 @@ describe('ensureAuthorized', () => {
       authorization,
       authentication,
       auditLogger,
-      shouldLegacyRbacApply: true,
+      shouldUseLegacyRbac: true,
     });
 
     authentication.getCurrentUser.mockReturnValueOnce(({

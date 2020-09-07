@@ -23,7 +23,7 @@ export {
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 
-export { asSavedObjectExecutionSource } from './lib';
+export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 

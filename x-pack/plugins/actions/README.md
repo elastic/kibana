@@ -301,6 +301,7 @@ The following table describes the properties of the `options` object.
 | -------- | ---------------------------------------------------- | ------ |
 | id       | The id of the action you want to execute.            | string |
 | params   | The `params` value to give the action type executor. | object |
+| source   | The source of the execution, either a reponse to an HTTP request or a references to a Saved Object. | object, optional |
 
 ## Example
 
@@ -316,6 +317,10 @@ const result = await actionsClient.execute({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asSavedObjectExecutionSource({
+    id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+    type: 'alert'
+  }),
 });
 ```
 

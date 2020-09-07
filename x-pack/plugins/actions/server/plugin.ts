@@ -281,7 +281,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
-      sourceContext?: ActionExecutionSource<unknown>
+      source?: ActionExecutionSource<unknown>
     ) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
@@ -303,7 +303,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request,
         authorization: instantiateAuthorization(
           request,
-          await shouldLegacyRbacApplyBySource(unsecuredSavedObjectsClient, sourceContext)
+          await shouldLegacyRbacApplyBySource(unsecuredSavedObjectsClient, source)
         ),
         actionExecutor: actionExecutor!,
         executionEnqueuer: createExecutionEnqueuerFunction({
@@ -389,11 +389,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private instantiateAuthorization = (
     request: KibanaRequest,
-    shouldLegacyRbacApply: boolean = false
+    shouldUseLegacyRbac: boolean = false
   ) => {
     return new ActionsAuthorization({
       request,
-      shouldLegacyRbacApply,
+      shouldUseLegacyRbac,
       authorization: this.security?.authz,
       authentication: this.security?.authc,
       auditLogger: new ActionsAuthorizationAuditLogger(

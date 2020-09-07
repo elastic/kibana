@@ -19,4 +19,6 @@ export {
   ActionExecutionSource,
   asSavedObjectExecutionSource,
   isSavedObjectExecutionSource,
+  asHttpRequestExecutionSource,
+  isHttpRequestExecutionSource,
 } from './action_execution_source';

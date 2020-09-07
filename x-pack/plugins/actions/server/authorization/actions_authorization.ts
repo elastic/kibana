@@ -22,7 +22,7 @@ export interface ConstructorOptions {
   // actions to continue to execute - which requires that we exempt auth on
   // `get` for Connectors and `execute` for Action execution when used by
   // these legacy alerts
-  shouldLegacyRbacApply?: boolean;
+  shouldUseLegacyRbac?: boolean;
 }
 
 const operationAlias: Record<
@@ -43,20 +43,20 @@ export class ActionsAuthorization {
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly auditLogger: ActionsAuthorizationAuditLogger;
-  private readonly shouldLegacyRbacApply: boolean;
+  private readonly shouldUseLegacyRbac: boolean;
 
   constructor({
     request,
     authorization,
     authentication,
     auditLogger,
-    shouldLegacyRbacApply = false,
+    shouldUseLegacyRbac = false,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.authentication = authentication;
     this.auditLogger = auditLogger;
-    this.shouldLegacyRbacApply = shouldLegacyRbacApply;
+    this.shouldUseLegacyRbac = shouldUseLegacyRbac;
   }
 
   public async ensureAuthorized(operation: string, actionTypeId?: string) {
@@ -87,6 +87,6 @@ export class ActionsAuthorization {
   }
 
   private isOperationExemptDueToLegacyRbac(operation: string) {
-    return this.shouldLegacyRbacApply && LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation);
+    return this.shouldUseLegacyRbac && LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation);
   }
 }
