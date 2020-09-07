@@ -22,7 +22,7 @@ import { XJsonEditor, DragAndDropTextList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
 const { isJsonField } = fieldValidators;
 
@@ -95,7 +95,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(false),
+    serializer: from.undefinedIfValue(false),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.traceMatchFieldLabel', {
       defaultMessage: 'Trace match',
     }),
@@ -146,7 +146,7 @@ export const Grok: FunctionComponent = () => {
         config={fieldsConfig.pattern_definitions}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsAriaLabel',
               {

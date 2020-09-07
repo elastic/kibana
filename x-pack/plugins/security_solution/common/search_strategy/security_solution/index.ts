@@ -8,17 +8,17 @@ import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostOverviewStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
   HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
+  HostUncommonProcessesStrategyResponse,
+  HostUncommonProcessesRequestOptions,
 } from './hosts';
-import {
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
-} from './hosts/authentications';
 import {
   NetworkQueries,
   NetworkTlsStrategyResponse,
@@ -27,7 +27,14 @@ import {
   NetworkHttpRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
 } from './network';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+} from './matrix_histogram';
 import {
   DocValueFields,
   TimerangeInput,
@@ -37,9 +44,10 @@ import {
 } from '../common';
 
 export * from './hosts';
+export * from './matrix_histogram';
 export * from './network';
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -66,15 +74,21 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
   : T extends HostsQueries.authentications
-  ? AuthenticationsStrategyResponse
+  ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
   ? NetworkHttpStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -82,13 +96,19 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications
-  ? AuthenticationsRequestOptions
+  ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http
   ? NetworkHttpRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
   : never;
