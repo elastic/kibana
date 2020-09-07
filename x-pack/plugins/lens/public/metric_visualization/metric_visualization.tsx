@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
+import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import { State } from './types';
-import { LensIconChartMetric } from '../assets/chart_metric';
 
 const toExpression = (
   state: State,

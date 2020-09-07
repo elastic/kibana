@@ -172,7 +172,7 @@ export const xyVisualization: Visualization<State> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: false,
+          required: !layer.seriesType.includes('percentage'),
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
