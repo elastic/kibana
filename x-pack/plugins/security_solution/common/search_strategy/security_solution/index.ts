@@ -21,13 +21,22 @@ import {
 } from './hosts';
 import {
   NetworkQueries,
+  NetworkDnsStrategyResponse,
+  NetworkDnsRequestOptions,
   NetworkTlsStrategyResponse,
   NetworkTlsRequestOptions,
   NetworkHttpStrategyResponse,
   NetworkHttpRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
 } from './network';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+} from './matrix_histogram';
 import {
   DocValueFields,
   TimerangeInput,
@@ -37,9 +46,10 @@ import {
 } from '../common';
 
 export * from './hosts';
+export * from './matrix_histogram';
 export * from './network';
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -71,12 +81,18 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesStrategyResponse
-  : T extends NetworkQueries.tls
-  ? NetworkTlsStrategyResponse
+  : T extends NetworkQueries.dns
+  ? NetworkDnsStrategyResponse
   : T extends NetworkQueries.http
   ? NetworkHttpStrategyResponse
+  : T extends NetworkQueries.tls
+  ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -89,10 +105,16 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesRequestOptions
-  : T extends NetworkQueries.tls
-  ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.dns
+  ? NetworkDnsRequestOptions
   : T extends NetworkQueries.http
   ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
   : never;
