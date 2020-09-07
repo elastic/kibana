@@ -16,11 +16,15 @@ import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
+import {
+  PersistableStateDefinition,
+  SerializableState,
+} from '../../../../../src/plugins/kibana_utils/common';
 
-export interface DynamicActionsState {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DynamicActionsState = {
   events: SerializedEvent[];
-}
+};
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -44,7 +48,7 @@ export class UiActionsServiceEnhancements
    * serialize/deserialize dynamic actions.
    */
   public readonly registerActionFactory = <
-    Config extends object = object,
+    Config extends SerializableState = SerializableState,
     SupportedTriggers extends TriggerId = TriggerId,
     FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
       triggers: SupportedTriggers[];
@@ -89,7 +93,7 @@ export class UiActionsServiceEnhancements
    * Convenience method to register a {@link DrilldownDefinition | drilldown}.
    */
   public readonly registerDrilldown = <
-    Config extends object = object,
+    Config extends SerializableState = SerializableState,
     SupportedTriggers extends TriggerId = TriggerId,
     FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
       triggers: SupportedTriggers[];
@@ -149,12 +153,6 @@ export class UiActionsServiceEnhancements
     this.registerActionFactory(actionFactory);
   };
 
-  public telemetry(state: DynamicActionsState) {
-    return state.events.map((event: SerializedEvent) => {
-      return this.actionFactories.has(event.action.factoryId)
-        ? this.actionFactories.get(event.action.factoryId)!.telemetry(event)
-        : {};
-    });
   private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
 
@@ -170,13 +168,20 @@ export class UiActionsServiceEnhancements
       });
   };
 
-  public telemetry(state: SerializedEvent) {
-    return this.actionFactories.has(state.eventId)
-      ? this.actionFactories.get(state.eventId)!.telemetry(state)
-      : {};
-  }
+  public readonly telemetry = (state: DynamicActionsState) => {
+    const telemetry: Record<string, any> = {};
+    state.events.forEach((event: SerializedEvent) => {
+      const eventTelemetry = this.actionFactories.has(event.action.factoryId)
+        ? this.actionFactories.get(event.action.factoryId)!.telemetry(event)
+        : {};
+      Object.keys(eventTelemetry).forEach((key) => {
+        telemetry[key] = eventTelemetry[key];
+      });
+    });
+    return telemetry;
+  };
 
-  public extract(state: DynamicActionsState) {
+  public readonly extract = (state: DynamicActionsState) => {
     const references: SavedObjectReference[] = [];
     const newState = {
       events: state.events.map((event: SerializedEvent) => {
@@ -191,9 +196,9 @@ export class UiActionsServiceEnhancements
       }),
     };
     return { state: newState, references };
-  }
+  };
 
-  public inject(state: DynamicActionsState, references: SavedObjectReference[]) {
+  public readonly inject = (state: DynamicActionsState, references: SavedObjectReference[]) => {
     return {
       events: state.events.map((event: SerializedEvent) => {
         return this.actionFactories.has(event.action.factoryId)
@@ -201,5 +206,5 @@ export class UiActionsServiceEnhancements
           : event;
       }),
     };
-  }
+  };
 }

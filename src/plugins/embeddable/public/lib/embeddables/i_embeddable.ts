@@ -23,7 +23,7 @@ import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 import type { TimeRange, Query, Filter } from '../../../../data/common';
-import { SerializableState } from '../../../../kibana_utils/common/persistable_state';
+import { SerializableState } from '../../../../kibana_utils/common';
 
 export interface EmbeddableError {
   name: string;
@@ -45,7 +45,7 @@ export interface EmbeddableInput {
   /**
    * Reserved key for enhancements added by other plugins.
    */
-  enhancements?: Record<string, SerializableState>;
+  enhancements?: SerializableState;
 
   /**
    * List of action IDs that this embeddable should not render.

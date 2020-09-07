@@ -7,20 +7,22 @@
 import { TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
-export interface SerializedAction<Config extends SerializableState = SerializableState> {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedAction<Config extends SerializableState = SerializableState> = {
   readonly factoryId: string;
   readonly name: string;
   readonly config: Config;
-}
+};
 
 /**
  * Serialized representation of a triggers-action pair, used to persist in storage.
  */
-export interface SerializedEvent {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedEvent = {
   eventId: string;
   triggers: string[];
   action: SerializedAction;
-}
+};
 
 /**
  * Action factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType

@@ -21,7 +21,7 @@ import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/
 import { ActionFactoryPlaceContext } from '../types';
 import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 
-export interface DrilldownWizardConfig<ActionConfig extends object = object> {
+export interface DrilldownWizardConfig<ActionConfig extends SerializableState = SerializableState> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
@@ -29,7 +29,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
 }
 
 export interface FlyoutDrilldownWizardProps<
-  CurrentActionConfig extends object = object,
+  CurrentActionConfig extends SerializableState = SerializableState,
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   drilldownActionFactories: ActionFactory[];
@@ -64,7 +64,7 @@ function useWizardConfigState(
   DrilldownWizardConfig,
   {
     setName: (name: string) => void;
-    setActionConfig: (actionConfig: object) => void;
+    setActionConfig: (actionConfig: SerializableState) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
     setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
@@ -93,7 +93,7 @@ function useWizardConfigState(
           name,
         });
       },
-      setActionConfig: (actionConfig: object) => {
+      setActionConfig: (actionConfig: SerializableState) => {
         setWizardConfig({
           ...wizardConfig,
           actionConfig,
@@ -101,12 +101,12 @@ function useWizardConfigState(
       },
       setActionFactory: (actionFactory?: ActionFactory) => {
         if (actionFactory) {
+          const actionConfig = (actionConfigCache[actionFactory.id] ??
+            actionFactory.createConfig(actionFactoryContext)) as SerializableState;
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
-            actionConfig:
-              actionConfigCache[actionFactory.id] ??
-              actionFactory.createConfig(actionFactoryContext),
+            actionConfig,
             selectedTriggers: [],
           });
         } else {

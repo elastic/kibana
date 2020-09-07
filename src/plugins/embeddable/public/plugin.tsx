@@ -226,8 +226,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
 
     updatedInput.enhancements = {};
-    Object.keys(enhancements).map((key) => {
-      const enhancementResult = this.getEnhancement(key).extract(enhancements[key]);
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
+      const enhancementResult = this.getEnhancement(key).extract(
+        enhancements[key] as SerializableState
+      );
       refs = refs.concat(enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });
@@ -249,9 +252,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
 
     updatedInput.enhancements = {};
-    Object.keys(enhancements).map((key) => {
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
       updatedInput.enhancements![key] = this.getEnhancement(key).inject(
-        enhancements[key],
+        enhancements[key] as SerializableState,
         references
       );
     });

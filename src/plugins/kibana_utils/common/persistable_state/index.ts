@@ -19,11 +19,13 @@
 
 import { SavedObjectReference } from '../../../../core/types';
 
-type State = string | number | boolean | null | undefined | SerializableState;
+export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
+export type Serializable = SerializableValue | SerializableValue[];
 
-export interface SerializableState {
-  [key: string]: State | State[] | Record<string, SerializableState>;
-}
+// eslint-disable-next-line
+export type SerializableState = {
+  [key: string]: Serializable;
+};
 
 export interface PersistableState<P extends SerializableState = SerializableState> {
   // function to extract telemetry information

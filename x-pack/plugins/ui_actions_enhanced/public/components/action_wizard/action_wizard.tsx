@@ -30,6 +30,7 @@ import {
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
+import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -54,12 +55,12 @@ export interface ActionWizardProps<
   /**
    * current config for currently selected action factory
    */
-  config?: object;
+  config?: SerializableState;
 
   /**
    * config changed
    */
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: SerializableState) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
@@ -216,9 +217,9 @@ interface SelectedActionFactoryProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   actionFactory: ActionFactory;
-  config: object;
+  config: SerializableState;
   context: ActionFactoryContext;
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: SerializableState) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];

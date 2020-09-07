@@ -11,6 +11,7 @@ import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
@@ -26,8 +27,8 @@ export interface FormDrilldownWizardProps<
   onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
   actionFactoryContext: ActionFactoryContext;
 
-  actionConfig?: object;
-  onActionConfigChange?: (config: object) => void;
+  actionConfig?: SerializableState;
+  onActionConfigChange?: (config: SerializableState) => void;
 
   actionFactories?: ActionFactory[];
 

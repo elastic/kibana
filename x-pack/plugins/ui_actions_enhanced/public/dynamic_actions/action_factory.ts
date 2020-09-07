@@ -16,7 +16,10 @@ import { BaseActionFactoryContext, SerializedAction, SerializedEvent } from './t
 import { ILicense, LicensingPluginStart } from '../../../licensing/public';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
+import {
+  PersistableState,
+  SerializableState,
+} from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
   readonly getLicense: () => ILicense;
@@ -24,7 +27,7 @@ export interface ActionFactoryDeps {
 }
 
 export class ActionFactory<
-  Config extends object = object,
+  Config extends SerializableState = SerializableState,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];

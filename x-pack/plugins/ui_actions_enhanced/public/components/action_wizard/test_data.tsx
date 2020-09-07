@@ -18,19 +18,21 @@ import {
   TriggerId,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
+import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
-type ActionBaseConfig = object;
+type ActionBaseConfig = SerializableState;
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
-interface DashboardDrilldownConfig {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type DashboardDrilldownConfig = {
   dashboardId?: string;
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
-}
+};
 
 function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDrilldownConfig>) {
   const config = props.config ?? {
@@ -121,10 +123,12 @@ export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactor
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
-interface UrlDrilldownConfig {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type UrlDrilldownConfig = {
   url: string;
   openInNewTab: boolean;
-}
+};
+
 function UrlDrilldownCollectConfig(props: CollectConfigProps<UrlDrilldownConfig>) {
   const config = props.config ?? {
     url: '',

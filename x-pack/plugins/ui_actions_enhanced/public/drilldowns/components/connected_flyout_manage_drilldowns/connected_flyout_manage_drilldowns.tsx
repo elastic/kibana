@@ -31,6 +31,7 @@ import {
   SerializedEvent,
 } from '../../../dynamic_actions';
 import { ActionFactoryPlaceContext } from '../types';
+import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -125,7 +126,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object,
+        actionConfig: drilldownToEdit.action.config as SerializableState,
         name: drilldownToEdit.action.name,
         selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };

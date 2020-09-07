@@ -13,13 +13,16 @@ import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
+import {
+  PersistableStateDefinition,
+  SerializableState,
+} from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface for registering new action factories.
  */
 export interface ActionFactoryDefinition<
-  Config extends object = object,
+  Config extends SerializableState = SerializableState,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];
