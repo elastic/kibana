@@ -84,13 +84,18 @@ async function asyncSearch(
   options?: ISearchOptions
 ): Promise<IEsSearchResponse> {
   let esResponse;
+
+  const asyncOptions = {
+    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+    keepAlive: '1m', // Extend the TTL for this search request by one minute
+  };
+
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   if (!request.id) {
     const submitOptions = toSnakeCase({
       batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
       trackTotalHits: true, // Get the exact count of hits
-      waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-      keepAlive: '1m', // Extend the TTL for this search request by one minute
+      ...asyncOptions,
       ...request.params,
     });
 
@@ -98,6 +103,7 @@ async function asyncSearch(
   } else {
     esResponse = await client.asyncSearch.get({
       id: request.id,
+      ...toSnakeCase(asyncOptions),
     });
   }
 
