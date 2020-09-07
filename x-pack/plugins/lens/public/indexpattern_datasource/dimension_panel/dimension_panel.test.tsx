@@ -619,9 +619,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
-        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
-          0
-        );
+        expect(
+          wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+        ).toBeDefined();
 
         expect(setState).not.toHaveBeenCalled();
       });
@@ -1226,7 +1226,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper
           .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .prop('onChange')!({ target: { value: '0' } });
+          .prop('onChange')!({ currentTarget: { value: '0' } });
       });
 
       expect(setState).toHaveBeenCalledWith({

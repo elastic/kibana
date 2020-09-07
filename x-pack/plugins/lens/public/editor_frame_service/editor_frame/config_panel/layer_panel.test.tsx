@@ -203,7 +203,7 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
-    it('should render the datasource and visualization panels inside the dimension popover', () => {
+    it('should render the datasource and visualization panels inside the dimension flyout', () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
           {
@@ -224,10 +224,10 @@ describe('LayerPanel', () => {
       const group = component.find('DimensionPopover');
       const panel = mount(group.prop('panel'));
 
-      expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
+      expect(panel.children()).toHaveLength(2);
     });
 
-    it('should keep the popover open when configuring a new dimension', () => {
+    it('should keep the flyout open when configuring a new dimension', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
        * this tests that the ID used in the first render is used to keep the popover
@@ -271,7 +271,7 @@ describe('LayerPanel', () => {
       });
       component.update();
 
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
     });
 
     it('should close the popover when the active visualization changes', () => {
@@ -318,12 +318,12 @@ describe('LayerPanel', () => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
       act(() => {
         component.setProps({ activeVisualizationId: 'vis2' });
       });
       component.update();
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(false);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(false);
     });
   });
 

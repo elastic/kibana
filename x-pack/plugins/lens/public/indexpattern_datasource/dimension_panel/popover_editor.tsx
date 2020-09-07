@@ -235,6 +235,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       <EuiSpacer size="s" />
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormRow
+          data-test-subj="indexPattern-field-selection-row"
           label="Choose a field"
           fullWidth
           isInvalid={Boolean(incompatibleSelectedOperationType)}
