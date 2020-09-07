@@ -84,34 +84,18 @@ async function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ): Promise<IEsSearchResponse> {
-  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    ...request.params,
-  };
-
-  params.trackTotalHits = true; // Get the exact count of hits
-
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
-  const batchedReduceSize = request.id ? undefined : 64;
-
-  const asyncOptions = {
-    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-    keepAlive: '1m', // Extend the TTL for this search request by one minute
-  };
-
-  const queryOptions = toSnakeCase({
-    ...asyncOptions,
-    ...(batchedReduceSize && { batchedReduceSize }),
-    ...queryParams,
-  });
-
   let esResponse;
+  // If we have an ID, then just poll for that ID, otherwise send the entire request body
   if (!request.id) {
-    esResponse = await client.asyncSearch.submit({
-      body,
-      ...queryOptions,
+    const submitOptions = toSnakeCase({
+      batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+      trackTotalHits: true, // Get the exact count of hits
+      waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+      keepAlive: '1m', // Extend the TTL for this search request by one minute
+      ...request.params,
     });
+
+    esResponse = await client.asyncSearch.submit(submitOptions);
   } else {
     esResponse = await client.asyncSearch.get({
       id: request.id,
