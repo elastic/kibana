@@ -17,6 +17,7 @@ import {
   Position,
   GeometryValue,
   XYChartSeriesIdentifier,
+  StackMode,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -510,7 +511,7 @@ export function XYChart({
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
-            stackAsPercentage: seriesType.includes('percentage'),
+            stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {
               point: {

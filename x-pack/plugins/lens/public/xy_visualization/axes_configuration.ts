@@ -55,7 +55,7 @@ export function getAxesConfiguration(
         formatter = {
           id: 'percent',
           params: {
-            pattern: '0,0[00]%',
+            pattern: '0.[00]%',
           },
         };
       }

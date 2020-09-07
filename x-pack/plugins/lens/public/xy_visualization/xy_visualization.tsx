@@ -14,10 +14,10 @@ import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
-import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression } from './to_expression';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
