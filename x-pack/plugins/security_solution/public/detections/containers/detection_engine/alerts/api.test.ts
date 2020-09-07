@@ -67,7 +67,7 @@ describe('Detections Alerts API', () => {
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
         body:
-          '{"status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+          '{"conflicts":"proceed","status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -81,7 +81,7 @@ describe('Detections Alerts API', () => {
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
         body:
-          '{"status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+          '{"conflicts":"proceed","status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });

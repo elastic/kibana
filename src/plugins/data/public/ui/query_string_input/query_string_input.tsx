@@ -19,7 +19,7 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import classNames from 'classnames';
 import {
   EuiTextArea,
   EuiOutsideClickDetector,
@@ -62,6 +62,7 @@ interface Props {
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  className?: string;
 }
 
 interface State {
@@ -586,9 +587,12 @@ export class QueryStringInputUI extends Component<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-
+    const className = classNames(
+      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      this.props.className
+    );
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap">
+      <div className={className}>
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div

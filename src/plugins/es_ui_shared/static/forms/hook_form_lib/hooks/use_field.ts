@@ -69,11 +69,12 @@ export const useField = <T>(
   const [isChangingValue, setIsChangingValue] = useState(false);
   const [isValidated, setIsValidated] = useState(false);
 
+  const isMounted = useRef<boolean>(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
+  const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isMounted = useRef<boolean>(false);
 
   // -- HELPERS
   // ----------------------------------
@@ -142,11 +143,7 @@ export const useField = <T>(
     __updateFormDataAt(path, value);
 
     // Validate field(s) (that will update form.isValid state)
-    // We only validate if the value is different than the initial or default value
-    // to avoid validating after a form.reset() call.
-    if (value !== initialValue && value !== defaultValue) {
-      await __validateFields(fieldsToValidateOnChange ?? [path]);
-    }
+    await __validateFields(fieldsToValidateOnChange ?? [path]);
 
     if (isMounted.current === false) {
       return;
@@ -172,8 +169,6 @@ export const useField = <T>(
   }, [
     path,
     value,
-    defaultValue,
-    initialValue,
     valueChangeListener,
     errorDisplayDelay,
     fieldsToValidateOnChange,
@@ -468,6 +463,7 @@ export const useField = <T>(
       setErrors([]);
 
       if (resetValue) {
+        hasBeenReset.current = true;
         const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
         setValue(newValue);
         return newValue;
@@ -539,6 +535,13 @@ export const useField = <T>(
   }, [path, __removeField]);
 
   useEffect(() => {
+    // If the field value has been reset, we don't want to call the "onValueChange()"
+    // as it will set the "isPristine" state to true or validate the field, which initially we don't want.
+    if (hasBeenReset.current) {
+      hasBeenReset.current = false;
+      return;
+    }
+
     if (!isMounted.current) {
       return;
     }
