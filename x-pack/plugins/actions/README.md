@@ -272,12 +272,14 @@ The following table describes the properties of the `options` object.
 | params   | The `params` value to give the action type executor.                                                   | object |
 | spaceId  | The space id the action is within.                                                                     | string |
 | apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| source   | The source of the execution, either a reponse to an HTTP request or a references to a Saved Object. | object, optional |
 
 ## Example
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
 ```typescript
+const request: KibanaRequest = { ... };
 const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
 await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
@@ -288,6 +290,7 @@ await actionsClient.enqueueExecution({
     subject: 'My email subject',
     body: 'My email body',
   },
+  source: asHttpRequestExecutionSource(request),
 });
 ```
 
