@@ -80,10 +80,6 @@ export interface Explanation {
   details: Explanation[];
 }
 
-export interface TotalValue {
-  value: number;
-  relation: string;
-}
 export interface ShardsResponse {
   total: number;
   successful: number;

@@ -49,7 +49,7 @@ describe('useAddOrUpdateException', () => {
   const onError = jest.fn();
   const onSuccess = jest.fn();
   const alertIdToClose = 'idToClose';
-  const bulkCloseIndex = ['.signals'];
+  const bulkCloseIndex = ['.custom'];
   const itemsToAdd: CreateExceptionListItemSchema[] = [
     {
       ...getCreateExceptionListItemSchemaMock(),
