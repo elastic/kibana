@@ -33,7 +33,6 @@
     "kibanaReact",
     "kibanaUtils",
     "observability",
-    "home",
-    "infra"
+    "home"
   ]
 }

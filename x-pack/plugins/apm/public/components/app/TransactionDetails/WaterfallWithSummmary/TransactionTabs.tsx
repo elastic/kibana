@@ -15,7 +15,6 @@ import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { LogStream } from '../../../../../../infra/public';
 
 const timelineTab = {
   key: 'timeline',
@@ -28,13 +27,6 @@ const metadataTab = {
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
     defaultMessage: 'Metadata',
-  }),
-};
-
-const logsTab = {
-  key: 'logs',
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
-    defaultMessage: 'Logs',
   }),
 };
 
@@ -54,9 +46,9 @@ export function TransactionTabs({
   exceedsMax,
 }: Props) {
   const history = useHistory();
-  const tabs = [timelineTab, metadataTab, logsTab];
+  const tabs = [timelineTab, metadataTab];
   const currentTab =
-    tabs.find((tab) => tab.key === urlParams.detailTab) ?? timelineTab;
+    urlParams.detailTab === metadataTab.key ? metadataTab : timelineTab;
 
   return (
     <React.Fragment>
@@ -91,14 +83,6 @@ export function TransactionTabs({
           waterfall={waterfall}
           exceedsMax={exceedsMax}
         />
-      ) : currentTab.key === logsTab.key ? (
-        <div>
-          <LogStream
-            startTimestamp={Date.now() - 86400000}
-            endTimestamp={Date.now()}
-            query={`trace.id: "${urlParams.traceId}" OR "${urlParams.traceId}"`}
-          />
-        </div>
       ) : (
         <TransactionMetadata transaction={transaction} />
       )}
