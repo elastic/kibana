@@ -22,8 +22,7 @@ export function registerPipelineSaveRoute(router: IRouter, security?: SecurityPl
           id: schema.string(),
         }),
         body: schema.object({
-          id: schema.string(),
-          description: schema.string(),
+          description: schema.maybe(schema.string()),
           pipeline: schema.string(),
           settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
