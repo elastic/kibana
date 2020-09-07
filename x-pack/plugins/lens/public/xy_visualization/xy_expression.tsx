@@ -23,6 +23,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
+  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -247,6 +248,12 @@ export function XYChart({
     ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
+  const layersAlreadyFormatted: Record<string, boolean> = {};
+  // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
+  const safeXAccessorLabelRenderer = (value: unknown): string =>
+    xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
+      ? (value as string)
+      : xAxisFormatter.convert(value);
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
@@ -335,7 +342,7 @@ export function XYChart({
         theme={chartTheme}
         baseTheme={chartBaseTheme}
         tooltip={{
-          headerFormatter: (d) => xAxisFormatter.convert(d.value),
+          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
@@ -380,9 +387,15 @@ export function XYChart({
 
           const points = [
             {
-              row: table.rows.findIndex(
-                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
-              ),
+              row: table.rows.findIndex((row) => {
+                if (layer.xAccessor) {
+                  if (layer.xAccessor in layersAlreadyFormatted) {
+                    // stringify the value to compare with the chart value
+                    return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+                  }
+                  return row[layer.xAccessor] === xyGeometry.x;
+                }
+              }),
               column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
@@ -426,7 +439,7 @@ export function XYChart({
           strokeWidth: 2,
         }}
         hide={filteredLayers[0].hide}
-        tickFormat={(d) => xAxisFormatter.convert(d)}
+        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
@@ -484,18 +497,31 @@ export function XYChart({
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
-          for (const column of table.columns) {
-            for (const row of table.rows) {
-              const record = row[column.id];
-              if (record && !isPrimitive(record)) {
-                row[column.id] = formatFactory(column.formatHint).convert(record);
+          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
+          const tableConverted: KibanaDatatable = {
+            ...table,
+            rows: table.rows.map((row) => {
+              const newRow = { ...row };
+              for (const column of table.columns) {
+                const record = newRow[column.id];
+                if (record && !isPrimitive(record)) {
+                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
+                }
               }
-            }
+              return newRow;
+            }),
+          };
+
+          // save the id of the layer with the custom table
+          if (xAccessor) {
+            layersAlreadyFormatted[xAccessor] = table.rows.some((row, i) => {
+              return table.columns.some(({ id }) => row[id] !== tableConverted.rows[i][id]);
+            });
           }
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
-          const rows = table.rows.filter(
+          const rows = tableConverted.rows.filter(
             (row) =>
               xAccessor &&
               typeof row[xAccessor] !== 'undefined' &&
