@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { getEnvOptions } from '@kbn/config';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {

@@ -18,3 +18,4 @@
  */
 
 export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
+export { getConfigFromFiles } from './read_config';

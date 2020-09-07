@@ -20,10 +20,9 @@
 import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { configServiceMock, getEnvOptions } from '@kbn/config';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';

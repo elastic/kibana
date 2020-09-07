@@ -27,14 +27,14 @@ export {
   ConfigDeprecationWithContext,
 } from './deprecation';
 
-export { RawConfigurationProvider, RawConfigService } from './raw';
+export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
 
 export { ConfigService, IConfigService } from './config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env } from './env';
 export { EnvironmentMode, PackageInfo } from './types';
-export { LegacyObjectToConfigAdapter } from './legacy';
+export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
 
 // mocks
 export { configMock } from './config.mock';

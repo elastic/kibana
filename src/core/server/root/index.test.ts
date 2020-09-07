@@ -21,9 +21,9 @@ import { rawConfigService, configService, logger, mockServer } from './index.tes
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
+import { getEnvOptions } from '@kbn/config';
 import { Root } from '.';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const env = new Env('.', getEnvOptions());
 

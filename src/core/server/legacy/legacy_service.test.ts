@@ -30,11 +30,10 @@ import { BehaviorSubject, throwError } from 'rxjs';
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { getEnvOptions, configServiceMock } from '@kbn/config';
 import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
-import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';

@@ -18,9 +18,9 @@
  */
 
 import { Server } from 'hapi';
+import { configMock } from '@kbn/config';
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
-import { configMock } from '../config/config.mock';
 import {
   InternalHttpServiceSetup,
   HttpServiceSetup,

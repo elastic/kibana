@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
+export {
+  LegacyObjectToConfigAdapter,
+  LegacyLoggingConfig,
+} from './legacy_object_to_config_adapter';

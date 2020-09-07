@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { resolve, dirname } from 'path';
+import { resolve, join } from 'path';
+import loadJsonFile from 'load-json-file';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { PackageInfo, EnvironmentMode } from './types';
 
-// `require` is necessary for this to work inside x-pack code as well
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../../../package.json');
+// some tests are mocking the `fs` package while importing code from the `kbn/config` package,
+// causing the package read to fail. We use this memoize accessor trick to only read the package
+// at first actual usage.
+let kibanaPackageFile: any;
+const getRepositoryPackage = () => {
+  if (!kibanaPackageFile) {
+    kibanaPackageFile = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
+  }
+  return kibanaPackageFile;
+};
 
 /** @internal */
 export interface EnvOptions {
@@ -54,9 +63,8 @@ export class Env {
   /**
    * @internal
    */
-  public static createDefault(options: EnvOptions): Env {
-    const repoRoot = dirname(require.resolve('../../../package.json'));
-    return new Env(repoRoot, options);
+  public static createDefault(options: EnvOptions, pkg?: any): Env {
+    return new Env(REPO_ROOT, options, pkg);
   }
 
   /** @internal */
@@ -99,7 +107,11 @@ export class Env {
   /**
    * @internal
    */
-  constructor(public readonly homeDir: string, options: EnvOptions) {
+  constructor(
+    public readonly homeDir: string,
+    options: EnvOptions,
+    private readonly pkg: any = getRepositoryPackage()
+  ) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
@@ -130,12 +142,12 @@ export class Env {
       prod: !isDevMode,
     });
 
-    const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
+    const isKibanaDistributable = Boolean(this.pkg.build && this.pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
-      branch: pkg.branch,
+      branch: this.pkg.branch,
       buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      version: pkg.version,
+      version: this.pkg.version,
       dist: isKibanaDistributable,
     });
   }

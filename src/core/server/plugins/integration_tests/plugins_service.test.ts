@@ -23,9 +23,8 @@ import { join } from 'path';
 
 import { PluginsService } from '../plugins_service';
 import { ConfigPath, ConfigService, Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config';
 import { BehaviorSubject, from } from 'rxjs';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';

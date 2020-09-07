@@ -18,12 +18,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { configServiceMock } from '@kbn/config';
+
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { CoreContext } from '../core_context';
 
-import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
 
