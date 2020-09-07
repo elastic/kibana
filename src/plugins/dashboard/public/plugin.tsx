@@ -40,6 +40,7 @@ import {
   EmbeddableStart,
   SavedObjectEmbeddableInput,
   EmbeddableInput,
+  PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
@@ -51,6 +52,7 @@ import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
+  showSaveModal,
 } from '../../saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
@@ -83,6 +85,12 @@ import {
   ACTION_UNLINK_FROM_LIBRARY,
   UnlinkFromLibraryActionContext,
   UnlinkFromLibraryAction,
+  ACTION_ADD_TO_LIBRARY,
+  AddToLibraryActionContext,
+  AddToLibraryAction,
+  ACTION_LIBRARY_NOTIFICATION,
+  LibraryNotificationActionContext,
+  LibraryNotificationAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -95,6 +103,10 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
+import {
+  AttributeServiceOptions,
+  ATTRIBUTE_SERVICE_KEY,
+} from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -143,10 +155,13 @@ export interface DashboardStart {
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { attributes: A },
-    R extends SavedObjectEmbeddableInput
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
-    type: string
+    type: string,
+    options?: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -155,7 +170,9 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
+    [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
   }
 }
 
@@ -378,7 +395,7 @@ export class DashboardPlugin
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
@@ -406,6 +423,7 @@ export class DashboardPlugin
     const {
       uiActions,
       data: { indexPatterns, search },
+      embeddable,
     } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
@@ -424,9 +442,16 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+      const addToLibraryAction = new AddToLibraryAction();
+      uiActions.registerAction(addToLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
       const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+
+      const libraryNotificationAction = new LibraryNotificationAction();
+      uiActions.registerAction(libraryNotificationAction);
+      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({
@@ -448,12 +473,16 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string) =>
+      getAttributeService: (type: string, options) =>
         new AttributeService(
           type,
+          showSaveModal,
           core.savedObjects.client,
+          core.overlays,
           core.i18n.Context,
-          core.notifications.toasts
+          core.notifications.toasts,
+          embeddable.getEmbeddableFactory,
+          options
         ),
     };
   }

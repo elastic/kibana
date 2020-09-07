@@ -1,6 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-es"
+  },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ]
 }

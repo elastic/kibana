@@ -12,15 +12,14 @@ import { NetworkDnsQuery, HISTOGRAM_ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
-import { networkModel } from '../../store';
 
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import * as i18n from '../translations';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -33,11 +32,11 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 
-export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
+export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
     dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
-  histogramType: HistogramType.dns,
+  histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
 };
@@ -64,7 +63,7 @@ export const DnsQueryTabBody = ({
     []
   );
 
-  const dnsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const dnsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       title: getTitle,
@@ -74,15 +73,13 @@ export const DnsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
         endDate={endDate}
         filterQuery={filterQuery}
         id={HISTOGRAM_ID}
         setQuery={setQuery}
         showLegend={true}
-        sourceId="default"
         startDate={startDate}
-        type={networkModel.NetworkType.page}
         {...dnsHistogramConfigs}
       />
       <NetworkDnsQuery

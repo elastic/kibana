@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -21,6 +22,8 @@ import { selectorToDataTestSubject } from '../../utils';
 import { ProcessorsDispatch } from '../../processors_reducer';
 
 import { ProcessorInfo } from '../processors_tree';
+import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
+import { useTestPipelineContext } from '../../context';
 
 import { getProcessorDescriptor } from '../shared';
 
@@ -62,6 +65,17 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       editor.mode.id === 'managingProcessor' && !isEditingThisProcessor;
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
+
+    const { testPipelineData } = useTestPipelineContext();
+    const {
+      config: { selectedDocumentIndex },
+      testOutputPerProcessor,
+      isExecutingPipeline,
+    } = testPipelineData;
+
+    const processorOutput =
+      testOutputPerProcessor && testOutputPerProcessor[selectedDocumentIndex][processor.id];
+    const processorStatus = processorOutput?.status ?? 'inactive';
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -127,10 +141,18 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           alignItems="center"
           justifyContent="spaceBetween"
           data-test-subj={selectorToDataTestSubject(selector)}
+          data-processor-id={processor.id}
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
+              <EuiFlexItem grow={false} className="pipelineProcessorsEditor__item__statusContainer">
+                {isExecutingPipeline ? (
+                  <EuiLoadingSpinner size="s" />
+                ) : (
+                  <PipelineProcessorsItemStatus processorStatus={processorStatus} />
+                )}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
                   className="pipelineProcessorsEditor__item__processorTypeLabel"

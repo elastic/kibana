@@ -25,7 +25,6 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import { IndexPatternField } from '../fields';
 import {
   OnNotification,
   OnError,
@@ -84,15 +83,6 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
-  }
-
-  public createField(
-    indexPattern: IndexPattern,
-    spec: IndexPatternField['spec'],
-    displayName: string,
-    onNotification: OnNotification
-  ) {
-    return new IndexPatternField(indexPattern, spec, displayName, onNotification);
   }
 
   private async refreshSavedObjectsCache() {
@@ -185,17 +175,16 @@ export class IndexPatternsService {
   async specToIndexPattern(spec: IndexPatternSpec) {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(spec.id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       onError: this.onError,
-      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
+      shortDotsEnable,
+      metaFields,
     });
 
     indexPattern.initFromSpec(spec);
@@ -205,17 +194,16 @@ export class IndexPatternsService {
   async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       onError: this.onError,
-      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
+      shortDotsEnable,
+      metaFields,
     });
 
     return indexPattern.init();

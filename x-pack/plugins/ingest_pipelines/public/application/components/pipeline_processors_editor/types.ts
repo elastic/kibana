@@ -73,3 +73,35 @@ export interface ContextValue {
   onTreeAction: OnActionHandler;
   state: ContextValueState;
 }
+
+export interface Document {
+  _id: string;
+  [key: string]: any;
+}
+
+export type ProcessorStatus =
+  | 'success'
+  | 'error'
+  | 'error_ignored'
+  | 'dropped'
+  | 'skipped'
+  | 'inactive';
+
+export interface ProcessorResult {
+  processor_type: string;
+  status: ProcessorStatus;
+  doc?: Document;
+  tag: string;
+  ignored_error?: any;
+  error?: any;
+  prevProcessorResult?: ProcessorResult;
+  [key: string]: any;
+}
+
+export interface ProcessorResults {
+  processor_results: ProcessorResult[];
+}
+
+export interface VerboseTestOutput {
+  docs: ProcessorResults[];
+}

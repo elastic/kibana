@@ -26,12 +26,10 @@ import { InfraLoadingPanel } from '../../loading';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntriesItem, LogEntriesItemField } from '../../../../common/http_api';
 
-interface Props {
+export interface LogEntryFlyoutProps {
   flyoutItem: LogEntriesItem | null;
   setFlyoutVisibility: (visible: boolean) => void;
-  setFilter: (filter: string) => void;
-  setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
-
+  setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
   loading: boolean;
 }
 
@@ -40,27 +38,27 @@ export const LogEntryFlyout = ({
   loading,
   setFlyoutVisibility,
   setFilter,
-  setTarget,
-}: Props) => {
+}: LogEntryFlyoutProps) => {
   const createFilterHandler = useCallback(
     (field: LogEntriesItemField) => () => {
-      const filter = `${field.field}:"${field.value}"`;
-      setFilter(filter);
-
-      if (flyoutItem && flyoutItem.key) {
-        const timestampMoment = moment(flyoutItem.key.time);
-        if (timestampMoment.isValid()) {
-          setTarget(
-            {
-              time: timestampMoment.valueOf(),
-              tiebreaker: flyoutItem.key.tiebreaker,
-            },
-            flyoutItem.id
-          );
-        }
+      if (!flyoutItem) {
+        return;
       }
+
+      const filter = `${field.field}:"${field.value}"`;
+      const timestampMoment = moment(flyoutItem.key.time);
+      let target;
+
+      if (timestampMoment.isValid()) {
+        target = {
+          time: timestampMoment.valueOf(),
+          tiebreaker: flyoutItem.key.tiebreaker,
+        };
+      }
+
+      setFilter(filter, flyoutItem.id, target);
     },
-    [flyoutItem, setFilter, setTarget]
+    [flyoutItem, setFilter]
   );
 
   const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);

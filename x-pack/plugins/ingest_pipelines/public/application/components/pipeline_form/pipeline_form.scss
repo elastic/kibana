@@ -1,3 +1,11 @@
 .pipelineProcessorsEditor {
   margin-bottom: $euiSizeXL;
+
+  &__container {
+    background-color: $euiColorLightestShade;
+  }
+
+  &__onFailureTitle {
+    padding-left: $euiSizeS;
+  }
 }

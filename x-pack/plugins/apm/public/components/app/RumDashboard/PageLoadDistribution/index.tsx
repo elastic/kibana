@@ -34,7 +34,7 @@ export function PageLoadDistribution() {
     max: null,
   });
 
-  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -94,20 +94,19 @@ export function PageLoadDistribution() {
             {I18LABELS.resetZoom}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
-            id={'pageLoad'}
-            selectedBreakdowns={breakdowns}
-            onBreakdownChange={setBreakdowns}
+            selectedBreakdown={breakdown}
+            onBreakdownChange={setBreakdown}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <PageLoadDistChart
         data={data}
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
-        breakdowns={breakdowns}
+        breakdown={breakdown}
         percentileRange={{
           max: percentileRange.max || data?.maxDuration,
           min: percentileRange.min || data?.minDuration,
