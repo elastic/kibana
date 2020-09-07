@@ -22,7 +22,7 @@ const UserActionUsernameWithAvatarComponent = ({
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiAvatar size="s" name={isEmpty(fullName) ? username : fullName} />
+        <EuiAvatar size="s" name={isEmpty(fullName) ? username : fullName ?? ''} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <UserActionUsername username={username} fullName={fullName} />

@@ -19,7 +19,7 @@ interface UserActionCopyLinkProps {
 }
 
 const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
-  const { detailName: caseId } = useParams();
+  const { detailName: caseId } = useParams<{ detailName: string }>();
   const urlSearch = useGetUrlSearch(navTabs.case);
 
   const handleAnchorLink = useCallback(() => {
