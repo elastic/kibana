@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './authentications';
 export * from './all';
 export * from './authentications';
 export * from './common';
-export * from './overview';
 export * from './first_last_seen';
+export * from './overview';
 export * from './uncommon_processes';
 
 export enum HostsQueries {
