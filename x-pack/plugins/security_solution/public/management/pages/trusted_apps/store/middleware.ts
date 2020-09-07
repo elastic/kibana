@@ -8,6 +8,8 @@ import { Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 
+import { TrustedAppsHttpService, TrustedAppsService } from '../service';
+
 import {
   AsyncResourceState,
   StaleResourceState,
@@ -15,9 +17,8 @@ import {
   TrustedAppsListPageState,
 } from '../state';
 
-import { TrustedAppsHttpService, TrustedAppsService } from '../service';
-
 import { TrustedAppsListResourceStateChanged } from './action';
+
 import {
   getCurrentListResourceState,
   getLastLoadedListResourceState,
