@@ -10,12 +10,12 @@ import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 const LEGACY_VERSION = 'pre-7.10.0';
 
 export async function shouldLegacyRbacApplyBySource(
-  savedObjectsClient: SavedObjectsClientContract,
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
   executionSource?: ActionExecutionSource<unknown>
 ): Promise<boolean> {
   return isSavedObjectExecutionSource(executionSource) && executionSource?.source?.type === 'alert'
     ? (
-        await savedObjectsClient.get<{
+        await unsecuredSavedObjectsClient.get<{
           meta?: {
             versionLastmodified?: string;
           };
