@@ -40,7 +40,6 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
-import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -119,7 +118,6 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -143,7 +141,6 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
-import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -328,11 +325,11 @@ export const config: {
             sniffOnStart: import("@kbn/config-schema").Type<boolean>;
             sniffInterval: import("@kbn/config-schema").Type<false | import("moment").Duration>;
             sniffOnConnectionFault: import("@kbn/config-schema").Type<boolean>;
-            hosts: import("@kbn/config-schema").Type<string | string[]>;
+            hosts: import("@kbn/config-schema").Type<import("./config").ConfigPath>;
             preserveHost: import("@kbn/config-schema").Type<boolean>;
             username: import("@kbn/config-schema").Type<string | undefined>;
             password: import("@kbn/config-schema").Type<string | undefined>;
-            requestHeadersWhitelist: import("@kbn/config-schema").Type<string | string[]>;
+            requestHeadersWhitelist: import("@kbn/config-schema").Type<import("./config").ConfigPath>;
             customHeaders: import("@kbn/config-schema").Type<Record<string, string>>;
             shardTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
             requestTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
@@ -364,6 +361,7 @@ export const config: {
     };
     logging: {
         appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            kind: "console";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -372,9 +370,9 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "console";
         }> | Readonly<{} & {
             path: string;
+            kind: "file";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -383,7 +381,6 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "file";
         }> | Readonly<{
             legacyLoggingConfig?: any;
         } & {
@@ -392,10 +389,11 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+            level: import("@kbn/config-schema").Type<"off" | "info" | "all" | "fatal" | "error" | "warn" | "debug" | "trace">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                kind: "console";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -404,9 +402,9 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "console";
             }> | Readonly<{} & {
                 path: string;
+                kind: "file";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -415,16 +413,15 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "file";
             }> | Readonly<{
                 legacyLoggingConfig?: any;
             } & {
                 kind: "legacy-appender";
             }>>>;
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                context: string;
                 appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
+                context: string;
+                level: "off" | "info" | "all" | "fatal" | "error" | "warn" | "debug" | "trace";
             }>[]>;
         }>;
     };
@@ -1096,10 +1093,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Error | Buffer | Stream | Record<string, any> | {
+    custom: <T extends string | Error | Record<string, any> | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Buffer | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
@@ -1107,9 +1104,9 @@ export const kibanaResponseFactory: {
     conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
-    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
-    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
-    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
