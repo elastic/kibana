@@ -26,7 +26,10 @@ import { ActionFactory } from '../../../dynamic_actions';
 const storage = new Storage(new StubBrowserStorage());
 const toasts = coreMock.createStart().notifications.toasts;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  actionFactories: [
+    (dashboardFactory as unknown) as ActionFactory,
+    (urlFactory as unknown) as ActionFactory,
+  ],
   storage: new Storage(new StubBrowserStorage()),
   toastService: toasts,
   getTrigger: mockGetTriggerInfo,

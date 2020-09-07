@@ -26,7 +26,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
     return (
       <FlyoutDrilldownWizard
-        drilldownActionFactories={[urlFactory as ActionFactory, dashboardFactory as ActionFactory]}
+        drilldownActionFactories={[
+          (urlFactory as unknown) as ActionFactory,
+          (dashboardFactory as unknown) as ActionFactory,
+        ]}
         {...otherProps}
       />
     );
@@ -36,8 +39,8 @@ storiesOf('components/FlyoutDrilldownWizard', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           drilldownActionFactories={[
-            urlFactory as ActionFactory,
-            dashboardFactory as ActionFactory,
+            (urlFactory as unknown) as ActionFactory,
+            (dashboardFactory as unknown) as ActionFactory,
           ]}
           {...otherProps}
         />
@@ -49,8 +52,8 @@ storiesOf('components/FlyoutDrilldownWizard', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           drilldownActionFactories={[
-            urlFactory as ActionFactory,
-            dashboardFactory as ActionFactory,
+            (urlFactory as unknown) as ActionFactory,
+            (dashboardFactory as unknown) as ActionFactory,
           ]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
@@ -70,7 +73,7 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          drilldownActionFactories={[dashboardFactory as ActionFactory]}
+          drilldownActionFactories={[(dashboardFactory as unknown) as ActionFactory]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
             actionFactory: urlFactory as any,

@@ -15,7 +15,10 @@ import { mockDynamicActionManager } from './test_data';
 import { ActionFactory } from '../../../dynamic_actions';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
+  actionFactories: [
+    (dashboardFactory as unknown) as ActionFactory,
+    (urlFactory as unknown) as ActionFactory,
+  ],
   storage: new Storage(new StubBrowserStorage()),
   toastService: {
     addError: (...args: any[]) => {

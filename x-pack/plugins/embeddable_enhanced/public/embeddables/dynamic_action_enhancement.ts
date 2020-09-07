@@ -7,22 +7,23 @@
 import { EnhancementRegistryDefinition } from '../../../../../src/plugins/embeddable/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { StartServicesGetter } from '../../../../../src/plugins/kibana_utils/public';
+import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 import { StartDependencies } from '../plugin';
 import { DynamicActionsState } from '../../../ui_actions_enhanced/public';
 
 export const dynamicActionEnhancement = (
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>
-) => {
+): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (state: DynamicActionsState) => {
-      return start().plugins.uiActionsEnhanced.telemetry(state);
+    telemetry: (state: SerializableState) => {
+      return start().plugins.uiActionsEnhanced.telemetry(state as DynamicActionsState);
     },
-    extract: (state: DynamicActionsState) => {
-      return start().plugins.uiActionsEnhanced.extract(state);
+    extract: (state: SerializableState) => {
+      return start().plugins.uiActionsEnhanced.extract(state as DynamicActionsState);
     },
-    inject: (state: DynamicActionsState, references: SavedObjectReference[]) => {
-      return start().plugins.uiActionsEnhanced.inject(state, references);
+    inject: (state: SerializableState, references: SavedObjectReference[]) => {
+      return start().plugins.uiActionsEnhanced.inject(state as DynamicActionsState, references);
     },
-  } as EnhancementRegistryDefinition<DynamicActionsState>;
+  } as EnhancementRegistryDefinition<SerializableState>;
 };
