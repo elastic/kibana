@@ -12,16 +12,16 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SinonFakeServer } from 'sinon';
 import { ReactWrapper } from 'enzyme';
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { init as initHttpRequests } from './helpers/http_requests';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
-  injectedMetadataServiceMock,
 } from '../../../../../src/core/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
-import { HttpService } from '../../../../../src/core/public/http';
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
@@ -44,12 +44,8 @@ import {
 import { HttpResponse } from './helpers/http_requests';
 import { createMemoryHistory } from 'history';
 
-initHttp(
-  new HttpService().setup({
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-  })
-);
+// @ts-ignore
+initHttp(axios.create({ adapter: axiosXhrAdapter }));
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 initNotification(
   notificationServiceMock.createSetupContract().toasts,
