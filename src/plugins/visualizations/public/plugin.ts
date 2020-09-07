@@ -25,7 +25,6 @@ import {
   CoreStart,
   Plugin,
   ApplicationStart,
-  SavedObjectAttributes,
 } from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
@@ -78,10 +77,6 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
-import {
-  VisualizeByReferenceInput,
-  VisualizeByValueInput,
-} from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

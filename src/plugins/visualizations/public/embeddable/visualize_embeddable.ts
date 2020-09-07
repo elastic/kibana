@@ -53,7 +53,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
-import { OnSaveProps, SaveResult } from '../../../saved_objects/public';
+import { OnSaveProps } from '../../../saved_objects/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -83,13 +83,13 @@ export interface VisualizeOutput extends EmbeddableOutput {
 }
 
 export type VisualizeSavedObjectAttributes = SavedObjectAttributes & { title: string };
-
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput>
+export class VisualizeEmbeddable
+  extends Embeddable<VisualizeInput, VisualizeOutput>
   implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -106,21 +106,22 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService: AttributeService;
+  private attributeService: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >;
+  private savedVisualizationsLoader?: SavedVisualizationsLoader;
 
   constructor(
     timefilter: TimefilterContract,
-    {
-      vis,
-      editPath,
-      editUrl,
-      indexPatterns,
-      editable,
-      deps,
-      visualizations,
-    }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService: AttributeService,
+    attributeService: AttributeService<
+      VisualizeSavedObjectAttributes,
+      VisualizeByValueInput,
+      VisualizeByReferenceInput
+    >,
     savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
@@ -409,7 +410,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
-    return this.attributeService.inputIsRefType(input);
+    return this.attributeService.inputIsRefType(input as VisualizeByReferenceInput);
   };
 
   getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
@@ -417,14 +418,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       savedVis: this.vis.serialize(),
     };
     delete input.savedVis.id;
-    return input;
+    return input as VisualizeByValueInput;
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    return new Promise<RefType>((resolve, reject) => {
-      const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+    return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
+      const onSave = async (props: OnSaveProps): Promise<{ id: string } | { error: Error }> => {
         try {
-          const savedVis: VisSavedObject = await this.savedVisualizationsLoader.get({});
+          const savedVis: VisSavedObject = await this.savedVisualizationsLoader?.get({});
           const saveOptions = {
             confirmOverwrite: false,
             returnToOrigin: true,
@@ -433,7 +434,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           savedVis.copyOnSave = props.newCopyOnSave || false;
           savedVis.description = props.newDescription || '';
           savedVis.searchSourceFields = this.vis?.data.searchSource?.getSerializedFields();
-          savedVis.visState = this.vis.serialize();
+          const serializedVis = this.vis.serialize();
+          const { title, type, params, data } = serializedVis;
+          savedVis.visState = {
+            title,
+            type,
+            params,
+            aggs: data.aggs,
+          };
           savedVis.uiStateJSON = this.vis.uiState.toString();
           const id = await savedVis.save(saveOptions);
           resolve({ savedObjectId: id });
@@ -443,7 +451,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return { error };
         }
       };
-      this.attributeService.showSaveModal(onSave, '', 'visualization');
+      this.attributeService.setOptions({
+        customSaveMethod: onSave,
+      });
+      const saveModalTitle = this.vis.title ? this.vis.title : 'Placeholder Title';
+      return this.attributeService.getInputAsRefType(
+        {
+          attributes: {
+            title: this.vis.title,
+          },
+        },
+        { showSaveModal: true, saveModalTitle }
+      );
     });
   };
 }
