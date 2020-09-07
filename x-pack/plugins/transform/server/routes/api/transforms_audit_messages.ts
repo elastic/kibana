@@ -36,8 +36,8 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
       path: addBasePath('transforms/{transformId}/messages'),
       validate: { params: transformIdParamSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as TransformIdParamSchema;
+    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
+      const { transformId } = req.params;
 
       // search for audit messages,
       // transformId is optional. without it, all transforms will be listed.

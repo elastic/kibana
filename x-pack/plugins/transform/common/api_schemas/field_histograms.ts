@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const fieldHistogramsSchema = schema.object({
   /** Query to match documents in the index. */
@@ -14,3 +14,5 @@ export const fieldHistogramsSchema = schema.object({
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
 });
+
+export type FieldHistogramsSchema = TypeOf<typeof fieldHistogramsSchema>;

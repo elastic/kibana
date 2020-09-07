@@ -15,7 +15,10 @@ import {
   indexPatternTitleSchema,
   IndexPatternTitleSchema,
 } from '../../../common/api_schemas/common';
-import { fieldHistogramsSchema } from '../../../common/api_schemas/field_histograms';
+import {
+  fieldHistogramsSchema,
+  FieldHistogramsSchema,
+} from '../../../common/api_schemas/field_histograms';
 import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
@@ -24,7 +27,7 @@ import { addBasePath } from '../index';
 import { wrapError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.post(
+  router.post<IndexPatternTitleSchema, undefined, FieldHistogramsSchema>(
     {
       path: addBasePath('field_histograms/{indexPatternTitle}'),
       validate: {
@@ -32,23 +35,25 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
         body: fieldHistogramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { indexPatternTitle } = req.params as IndexPatternTitleSchema;
-      const { query, fields, samplerShardSize } = req.body;
+    license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsSchema>(
+      async (ctx, req, res) => {
+        const { indexPatternTitle } = req.params;
+        const { query, fields, samplerShardSize } = req.body;
 
-      try {
-        const resp = await getHistogramsForFields(
-          ctx.core.elasticsearch.client,
-          indexPatternTitle,
-          query,
-          fields,
-          samplerShardSize
-        );
+        try {
+          const resp = await getHistogramsForFields(
+            ctx.core.elasticsearch.client,
+            indexPatternTitle,
+            query,
+            fields,
+            samplerShardSize
+          );
 
-        return res.ok({ body: resp });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
+          return res.ok({ body: resp });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
       }
-    })
+    )
   );
 }
