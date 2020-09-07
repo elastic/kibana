@@ -40,6 +40,8 @@ exports[`Error FCP_FIELD 1`] = `undefined`;
 
 exports[`Error FID_FIELD 1`] = `undefined`;
 
+exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
@@ -202,6 +204,8 @@ exports[`Span FCP_FIELD 1`] = `undefined`;
 
 exports[`Span FID_FIELD 1`] = `undefined`;
 
+exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
@@ -363,6 +367,8 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction FID_FIELD 1`] = `undefined`;
+
+exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
