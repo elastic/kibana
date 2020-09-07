@@ -97,6 +97,7 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
+import { ISessionService } from '../session_service';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -117,6 +118,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies {
   getConfig: GetConfigFn;
   search: ISearchGeneric;
+  session: ISessionService;
   http: HttpStart;
   esShardTimeout: number;
   loadingCount$: BehaviorSubject<number>;
@@ -240,9 +242,13 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
-    );
+    return search(
+      { params, indexType: searchRequest.indexType },
+      {
+        sessionId: this.dependencies.session.get(),
+        ...options,
+      }
+    ).pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
   }
 
   /**

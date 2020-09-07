@@ -17,12 +17,47 @@
  * under the License.
  */
 
-export {
-  ISearchRequestParams,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-  ISearchOptions,
-} from './types';
+import uuid from 'uuid';
 
-export * from './utils';
+export class SessionService {
+  private sessionId?: string;
+  private isRestore!: boolean;
+  protected isStored!: boolean;
+
+  constructor() {
+    this.start();
+  }
+
+  public get() {
+    return this.sessionId;
+  }
+
+  public isRestoredSession() {
+    return this.isRestore;
+  }
+
+  public getStored() {
+    return this.isStored;
+  }
+
+  public restore(sessionId: string) {
+    this.sessionId = sessionId;
+    this.isRestore = true;
+    this.isStored = true;
+  }
+
+  public start() {
+    this.sessionId = uuid.v4();
+    this.isRestore = false;
+    this.isStored = false;
+    return this.sessionId;
+  }
+
+  public clear() {
+    this.sessionId = undefined;
+    this.isRestore = false;
+    this.isStored = false;
+  }
+}
+
+export type ISessionService = PublicMethodsOf<SessionService>;

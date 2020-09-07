@@ -30,6 +30,7 @@ import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { ISessionService, SessionService } from './session_service';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -47,6 +48,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private sessionService!: ISessionService;
 
   public setup(
     { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
@@ -56,6 +58,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
+    this.sessionService = new SessionService();
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -101,6 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
+      session: this.sessionService,
       // TODO: we don't need this, apply on the server
       esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
@@ -117,6 +121,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           return new SearchSource({}, searchSourceDependencies);
         },
       },
+      session: this.sessionService,
     };
   }
 

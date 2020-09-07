@@ -140,12 +140,11 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -385,6 +384,8 @@ export class DashboardAppController {
         refreshInterval: timefilter.getRefreshInterval(),
       };
       $scope.panels = dashboardStateManager.getPanels();
+
+      searchService.session.start();
     };
 
     updateState();
@@ -531,9 +532,6 @@ export class DashboardAppController {
       filterManager.getFilters()
     );
 
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
-
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
     const getDashTitle = () =>
@@ -598,6 +596,7 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
+        // searchService.session.start();
         dashboardContainer.updateInput(changes);
       }
     };
@@ -1107,6 +1106,7 @@ export class DashboardAppController {
         $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         if (dashboardContainer) {
+          // searchService.session.start();
           dashboardContainer.updateInput({
             filters: $scope.model.filters,
             query: $scope.model.query,

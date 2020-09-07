@@ -19,6 +19,7 @@ import {
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
+  isCompleteResponse,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
@@ -55,8 +56,7 @@ export const enhancedEsSearchStrategyProvider = (
         usage &&
         isAsync &&
         isEnhancedEsSearchResponse(response) &&
-        !response.isRunning &&
-        !response.isPartial
+        isCompleteResponse(response)
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }

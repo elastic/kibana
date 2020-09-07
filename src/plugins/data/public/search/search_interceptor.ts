@@ -18,6 +18,7 @@
  */
 
 import { trimEnd } from 'lodash';
+import { createHash } from 'crypto';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
@@ -41,7 +42,29 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
 }
 
+export enum SearchStatus {
+  Running,
+  Done,
+  Error,
+  Timeout,
+  Expired,
+  Canceled,
+}
+
+interface RequestInfo {
+  searchId?: string;
+  status: SearchStatus;
+}
+
+interface SessionInfo {
+  requests: Record<string, RequestInfo>;
+  abortSignals?: AbortSignal[];
+  status: SearchStatus;
+}
+
 export class SearchInterceptor {
+  private readonly idMapping: Map<string, SessionInfo>;
+
   /**
    * `abortController` used to signal all searches to abort.
    *  @internal
@@ -82,6 +105,8 @@ export class SearchInterceptor {
     protected readonly deps: SearchInterceptorDeps,
     protected readonly requestTimeout?: number
   ) {
+    this.idMapping = new Map();
+
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
@@ -93,6 +118,79 @@ export class SearchInterceptor {
     this.getPendingCount$()
       .pipe(filter((count) => count === 0))
       .subscribe(this.hideToast);
+  }
+
+  private createHash(keys: Record<any, any>) {
+    return createHash(`sha256`).update(JSON.stringify(keys)).digest('hex');
+  }
+
+  protected onRequestStart(
+    request: IEsSearchRequest,
+    sessionId: string | undefined,
+    timeoutSignal: AbortSignal,
+    searchId: string = new Date().getTime().toString()
+  ) {
+    if (sessionId && searchId && request.params && request.params.body) {
+      let sessionInfo = this.idMapping.get(sessionId);
+
+      // Create session info for a new session
+      if (!sessionInfo) {
+        sessionInfo = {
+          abortSignals: [],
+          requests: {},
+          status: SearchStatus.Running,
+        };
+        this.idMapping.set(sessionId, sessionInfo);
+      }
+
+      // Reopen a complete session, if a new search is run. We know this can happen because of follow up requests.
+      if (sessionInfo.status === SearchStatus.Done) {
+        sessionInfo.status = SearchStatus.Running;
+      }
+
+      // Listen to search timeouts
+      timeoutSignal.addEventListener('abort', () => {
+        if (sessionInfo?.status === SearchStatus.Running) {
+          sessionInfo.status = SearchStatus.Timeout;
+          this.onSessionTimeout();
+        }
+      });
+
+      // Add request info to the session
+      sessionInfo.requests[this.createHash(request.params.body)] = {
+        status: SearchStatus.Running,
+        searchId,
+      };
+    }
+  }
+
+  protected onRequestComplete(request: IEsSearchRequest, sessionId?: string) {
+    if (sessionId && request.params && request.params.body) {
+      const sessionInfo = this.idMapping.get(sessionId);
+      sessionInfo!.requests[this.createHash(request.params.body)].status = SearchStatus.Done;
+
+      // Mark session as done, if all requests are done
+      Object.values(sessionInfo!.requests)
+        .map((requestInfo) => requestInfo.status === SearchStatus.Done)
+        .every(() => {
+          sessionInfo!.status = SearchStatus.Done;
+        });
+    }
+  }
+
+  protected onRequestError(request: IEsSearchRequest, sessionId?: string) {
+    if (sessionId && request.params && request.params.body) {
+      const sessionInfo = this.idMapping.get(sessionId);
+
+      // Mark request as errored, don't update session status
+      sessionInfo!.requests[this.createHash(request.params.body)].status = SearchStatus.Error;
+    }
+  }
+
+  private onSessionTimeout() {
+    this.deps.toasts.addDanger({
+      title: 'Your query timed out',
+    });
   }
 
   /**
@@ -136,10 +234,21 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupTimers(options);
+      const { timeoutSignal, combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      this.onRequestStart(request, options?.sessionId, timeoutSignal);
+
+      const res$ = this.runSearch(request, combinedSignal, options?.strategy);
+      res$.subscribe({
+        error: () => {
+          this.onRequestError(request, options?.sessionId);
+        },
+        complete: () => {
+          this.onRequestComplete(request, options?.sessionId);
+        },
+      });
+      return res$.pipe(
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
           cleanup();
@@ -180,6 +289,7 @@ export class SearchInterceptor {
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
+      timeoutSignal,
       combinedSignal,
       cleanup,
     };

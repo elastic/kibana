@@ -23,10 +23,4 @@ export * from './expressions';
 export * from './tabify';
 export * from './types';
 
-export {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-  ISearchRequestParams,
-  ISearchOptions,
-} from './es_search';
+export * from './es_search';

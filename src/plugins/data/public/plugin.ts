@@ -210,6 +210,14 @@ export class DataPublicPlugin
       storage: this.storage,
     });
 
+    /*
+      Clear any open sessions upon navigation to make sure they are not used mistakenly by
+      another application.
+     */
+    core.application.currentAppId$.subscribe(() => {
+      search.session.clear();
+    });
+
     return {
       ...dataServices,
       ui: {

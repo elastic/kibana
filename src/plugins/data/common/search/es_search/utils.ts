@@ -17,12 +17,16 @@
  * under the License.
  */
 
-export {
-  ISearchRequestParams,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-  ISearchOptions,
-} from './types';
+import { IEsSearchResponse } from './types';
 
-export * from './utils';
+export const isErrorResponse = (response?: IEsSearchResponse) => {
+  return !response || (!response.isRunning && response.isPartial);
+};
+
+export const isCompleteResponse = (response?: IEsSearchResponse) => {
+  return response && !response.isRunning && !response.isPartial;
+};
+
+export const isPartialResponse = (response?: IEsSearchResponse) => {
+  return response && response.isRunning && response.isPartial;
+};

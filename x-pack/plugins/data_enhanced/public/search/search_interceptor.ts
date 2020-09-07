@@ -11,6 +11,8 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
+  isErrorResponse,
+  isCompleteResponse,
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
@@ -74,21 +76,26 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       ...request.params,
     };
 
-    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const { combinedSignal, timeoutSignal, cleanup } = this.setupTimers(options);
     const aborted$ = from(toPromise(combinedSignal));
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return this.runSearch(request, combinedSignal, strategy).pipe(
+      tap({
+        next: (firstResponse) => {
+          this.onRequestStart(request, options.sessionId, timeoutSignal, firstResponse.id);
+        },
+      }),
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (!response.isRunning && response.isPartial)) {
+        if (isErrorResponse(response)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.isRunning) {
+        if (isCompleteResponse(response)) {
           return EMPTY;
         }
 
@@ -104,12 +111,16 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       takeUntil(aborted$),
       tap({
         error: () => {
+          this.onRequestError(request, options.sessionId);
           // If we haven't received the response to the initial request, including the ID, then
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
             this.deps.http.delete(`/internal/search/es/${id}`);
           }
+        },
+        complete: () => {
+          this.onRequestComplete(request, options.sessionId);
         },
       }),
       finalize(() => {

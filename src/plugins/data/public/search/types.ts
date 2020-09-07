@@ -32,6 +32,7 @@ import {
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { ISessionService } from './session_service';
 
 export type ISearch = (
   request: IKibanaSearchRequest,
@@ -69,6 +70,7 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
+  session: ISessionService;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

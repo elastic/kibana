@@ -201,6 +201,8 @@ export {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  isCompleteResponse,
+  isErrorResponse,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
