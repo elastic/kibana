@@ -367,8 +367,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -378,8 +378,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -399,8 +399,8 @@ export const config: {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;
@@ -410,8 +410,8 @@ export const config: {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;

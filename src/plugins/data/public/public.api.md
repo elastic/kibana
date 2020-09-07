@@ -1003,7 +1003,7 @@ export class IndexPattern implements IIndexPattern {
         typeMeta: string | undefined;
     };
     // (undocumented)
-    refreshFields(): Promise<void | Error | never[] | undefined>;
+    refreshFields(): Promise<void | never[] | Error | undefined>;
     // (undocumented)
     removeScriptedField(fieldName: string): void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
@@ -1469,7 +1469,7 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "placeholder" | "onBlur" | "onChange" | "onSubmit" | "size" | "query" | "indexPatterns" | "prepend" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "placeholder" | "onBlur" | "onChange" | "onSubmit" | "query" | "size" | "indexPatterns" | "prepend" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
