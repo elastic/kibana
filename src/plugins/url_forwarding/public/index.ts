@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import { KibanaLegacyPlugin } from './plugin';
+import { UrlForwardingPlugin } from './plugin';
 
-export type Setup = jest.Mocked<ReturnType<KibanaLegacyPlugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<KibanaLegacyPlugin['start']>>;
+export const plugin = () => new UrlForwardingPlugin();
 
-const createSetupContract = (): Setup => ({});
-
-const createStartContract = (): Start => ({
-  config: {
-    defaultAppId: 'home',
-  },
-  dashboardConfig: {
-    turnHideWriteControlsOn: jest.fn(),
-    getHideWriteControls: jest.fn(),
-  },
-  loadFontAwesome: jest.fn(),
-});
-
-export const kibanaLegacyPluginMock = {
-  createSetupContract,
-  createStartContract,
-};
+export * from './plugin';
