@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBadge,
-  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
@@ -112,23 +112,80 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     setIsExpandedResultsTable(!isExpandedResultsTable);
   };
 
+  const featureButtons = [
+    {
+      id: `sectionAnalysis`,
+      label: 'Analysis',
+    },
+    {
+      id: `sectionResults`,
+      label: 'Results',
+    },
+    {
+      id: `sectionScatterplotMatrix`,
+      label: 'Scatterplot Matrix',
+    },
+  ];
+
+  const [toggleIdToSelectedMap, setToggleIdToSelectedMap] = useState<Record<string, boolean>>({
+    sectionResults: true,
+  });
+  const onChangeMulti = (optionId: string) => {
+    const newToggleIdToSelectedMap = {
+      ...toggleIdToSelectedMap,
+      ...{
+        [optionId]: !toggleIdToSelectedMap[optionId],
+      },
+    };
+    setToggleIdToSelectedMap(newToggleIdToSelectedMap);
+  };
+
   return (
     <>
+      <EuiButtonGroup
+        legend="Feature Button Group"
+        name="featureButtonGroup"
+        options={featureButtons}
+        idToSelectedMap={toggleIdToSelectedMap}
+        onChange={(id) => onChangeMulti(id)}
+        buttonSize="m"
+        type="multi"
+        color="primary"
+      />
+
+      <EuiSpacer size="m" />
+
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+            <ExplorationQueryBar
+              indexPattern={indexPattern}
+              setSearchQuery={setSearchQuery}
+              options={{
+                checkboxes: featureButtons,
+                checkboxIdToSelectedMap: toggleIdToSelectedMap,
+                onChange: (id: string) => {
+                  onChangeMulti(id);
+                },
+              }}
+            />
             <EuiSpacer size="m" />
           </>
         )}
 
-      <EuiPanel paddingSize="none">
-        <div style={{ padding: '10px' }}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>Analysis</h2>
-              </EuiTitle>
+      {toggleIdToSelectedMap.sectionAnalysis && (
+        <>
+          <EuiPanel paddingSize="none">
+            <div style={{ padding: '10px' }}>
+              <EuiButtonEmpty
+                onClick={toggleExpandedAnalysisDetails}
+                iconType={isExpandedAnalysisDetails ? 'arrowUp' : 'arrowDown'}
+                size="l"
+                iconSide="right"
+                flush="left"
+              >
+                Analysis
+              </EuiButtonEmpty>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
@@ -149,38 +206,36 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
                   <EuiBadge>glass_outlier_detection</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={toggleExpandedAnalysisDetails}
-                iconType={isExpandedAnalysisDetails ? 'arrowUp' : 'arrowDown'}
-                size="s"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        {isExpandedAnalysisDetails && (
-          <>
-            <EuiHorizontalRule size="full" margin="none" />
-            {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-              indexPattern !== undefined &&
-              jobConfig !== undefined &&
-              columnsWithCharts.length > 0 &&
-              tableItems.length > 0 &&
-              expandedRowItem !== undefined && <ExpandedRow item={expandedRowItem} />}
-          </>
-        )}
-      </EuiPanel>
+            </div>
+            {isExpandedAnalysisDetails && (
+              <>
+                <EuiHorizontalRule size="full" margin="none" />
+                {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+                  indexPattern !== undefined &&
+                  jobConfig !== undefined &&
+                  columnsWithCharts.length > 0 &&
+                  tableItems.length > 0 &&
+                  expandedRowItem !== undefined && <ExpandedRow item={expandedRowItem} />}
+              </>
+            )}
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
-      <EuiSpacer size="m" />
-
-      <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
-        <div style={{ padding: '10px' }}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>Results</h2>
-              </EuiTitle>
+      {toggleIdToSelectedMap.sectionResults && (
+        <>
+          <EuiPanel paddingSize="none" data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+            <div style={{ padding: '10px' }}>
+              <EuiButtonEmpty
+                onClick={toggleExpandedResultsTable}
+                iconType={isExpandedResultsTable ? 'arrowUp' : 'arrowDown'}
+                size="l"
+                iconSide="right"
+                flush="left"
+              >
+                Results
+              </EuiButtonEmpty>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
@@ -212,37 +267,32 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={toggleExpandedResultsTable}
-                iconType={isExpandedResultsTable ? 'arrowUp' : 'arrowDown'}
-                size="s"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        {isExpandedResultsTable && (
-          <>
-            {jobConfig !== undefined && needsDestIndexPattern && (
-              <IndexPatternPrompt destIndex={jobConfig.dest.index} />
-            )}
-            {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-              indexPattern !== undefined && (
-                <>
-                  <EuiSpacer size="s" />
-                  {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-                    <DataGrid
-                      {...outlierData}
-                      dataTestSubj="mlExplorationDataGrid"
-                      toastNotifications={getToastNotifications()}
-                    />
+            </div>
+            {isExpandedResultsTable && (
+              <>
+                {jobConfig !== undefined && needsDestIndexPattern && (
+                  <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+                )}
+                {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+                  indexPattern !== undefined && (
+                    <>
+                      <EuiSpacer size="s" />
+                      {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+                        <DataGrid
+                          {...outlierData}
+                          dataTestSubj="mlExplorationDataGrid"
+                          toastNotifications={getToastNotifications()}
+                        />
+                      )}
+                    </>
                   )}
-                </>
-              )}
-          </>
-        )}
-      </EuiPanel>
+              </>
+            )}
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {toggleIdToSelectedMap.sectionScatterplotMatrix && <EuiPanel>SCATTERPLOT MATRIX</EuiPanel>}
     </>
   );
 });
