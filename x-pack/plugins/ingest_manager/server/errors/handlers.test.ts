@@ -6,15 +6,14 @@
 
 import Boom from 'boom';
 import { httpServerMock } from 'src/core/server/mocks';
-import { createAppContextStartContractMock } from './mocks';
-
+import { createAppContextStartContractMock } from '../mocks';
+import { appContextService } from '../services';
 import {
   IngestManagerError,
   RegistryError,
   PackageNotFoundError,
   defaultIngestErrorHandler,
-} from './errors';
-import { appContextService } from './services';
+} from './index';
 
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
