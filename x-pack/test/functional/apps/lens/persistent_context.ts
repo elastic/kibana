@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'global_visualize_read',
         'test_logstash_reader',
       ]);
+      await PageObjects.visualize.navigateToNewVisualization();
     });
 
     after(async () => {
@@ -28,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should carry over time range and pinned filters to discover', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      // await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange(
         'Sep 06, 2015 @ 06:31:44.000',
