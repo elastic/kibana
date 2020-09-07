@@ -12,7 +12,7 @@ import {
   HostsFields,
   HostsQueries,
   HostsRequestOptions,
-} from '../../../../../../../common/search_strategy/security_solution';
+} from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
