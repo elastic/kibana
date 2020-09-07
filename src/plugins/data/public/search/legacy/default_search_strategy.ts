@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { getPreference, getTimeout } from '../fetch';
-import { getMSearchParams } from './get_msearch_params';
+import { getPreference } from '../fetch';
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
 // @deprecated
@@ -30,34 +29,45 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({
-  searchRequests,
-  legacySearchService,
-  config,
-  esShardTimeout,
-}: SearchStrategySearchParams) {
-  const es = legacySearchService.esClient;
-  const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
-    const inlineHeader = {
-      index: index.title || index,
-      search_type: searchType,
-      ignore_unavailable: true,
-      preference: getPreference(config.get),
+function msearch({ searchRequests, config, http, loadingCount$ }: SearchStrategySearchParams) {
+  const requests = searchRequests.map(({ index, body }) => {
+    return {
+      header: {
+        index: index.title || index,
+        preference: getPreference(config.get),
+      },
+      body,
     };
-    const inlineBody = {
-      ...body,
-      timeout: getTimeout(esShardTimeout),
-    };
-    return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
   });
 
-  const searching = es.msearch({
-    ...getMSearchParams(config.get),
-    body: `${inlineRequests.join('\n')}\n`,
-  });
+  const abortController = new AbortController();
+  let resolved = false;
+
+  // Start LoadingIndicator
+  loadingCount$.next(loadingCount$.getValue() + 1);
+
+  const cleanup = () => {
+    if (!resolved) {
+      resolved = true;
+      // Decrement loading counter & cleanup BehaviorSubject
+      loadingCount$.next(loadingCount$.getValue() - 1);
+      loadingCount$.complete();
+    }
+  };
+
+  const searching = http
+    .post('/internal/_msearch', {
+      body: JSON.stringify({ searches: requests }),
+      signal: abortController.signal,
+    })
+    .then(({ body }) => body?.responses)
+    .finally(() => cleanup());
 
   return {
-    searching: searching.then(({ responses }: any) => responses),
-    abort: searching.abort,
+    abort: () => {
+      abortController.abort();
+      cleanup();
+    },
+    searching,
   };
 }

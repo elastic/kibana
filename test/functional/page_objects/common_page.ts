@@ -346,6 +346,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await browser.pressKeys(browser.keys.ENTER);
     }
 
+    async pressTabKey() {
+      await browser.pressKeys(browser.keys.TAB);
+    }
+
     // Pause the browser at a certain place for debugging
     // Not meant for usage in CI, only for dev-usage
     async pause() {
