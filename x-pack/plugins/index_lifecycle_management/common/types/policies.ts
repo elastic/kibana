@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Index as IndexInterface } from '../../../../../index_management/public';
+import { Index as IndexInterface } from '../../../index_management/common/types';
 
 export interface SerializedPolicy {
   name: string;
@@ -28,7 +28,7 @@ export interface PolicyFromES {
 }
 
 export interface SerializedPhase {
-  min_age: string;
+  min_age?: string;
   actions: {
     [action: string]: any;
   };
@@ -94,10 +94,10 @@ export interface SerializedDeletePhase extends SerializedPhase {
 }
 
 export interface AllocateAction {
-  number_of_replicas: number;
+  number_of_replicas?: number;
   include: {};
   exclude: {};
-  require: {
+  require?: {
     [attribute: string]: string;
   };
 }
