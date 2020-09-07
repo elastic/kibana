@@ -112,9 +112,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
 
   buildColumn({ suggestedPriority, field, previousColumn }) {
-    let params = previousColumn?.params?.filters
-      ? previousColumn.params
-      : { filters: [getDefaultFilter()] };
+    let params = { filters: [getDefaultFilter()] };
     if (previousColumn?.operationType === 'terms') {
       params = {
         filters: [
@@ -127,7 +125,14 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
           },
         ],
       };
+    } else if (
+      previousColumn?.operationType === 'filters' &&
+      'params' in previousColumn &&
+      previousColumn.params?.filters
+    ) {
+      params = previousColumn.params;
     }
+
     return {
       label: searchQueryLabel,
       dataType: 'string',

@@ -40,6 +40,14 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
     }
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
+    let params;
+    if (
+      previousColumn?.operationType === 'count' &&
+      previousColumn.dataType === 'number' &&
+      'params' in previousColumn
+    ) {
+      params = previousColumn.params;
+    }
     return {
       label: countLabel,
       dataType: 'number',
@@ -48,8 +56,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
-      params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
+      params,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
