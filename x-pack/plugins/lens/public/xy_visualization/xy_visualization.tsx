@@ -225,7 +225,9 @@ export const xyVisualization: Visualization<State> = {
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          accessors: layer.splitAccessor
+            ? [{ columnId: layer.splitAccessor, triggerIcon: 'colorBy' }]
+            : [],
           filterOperations: isBucketed,
           suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
