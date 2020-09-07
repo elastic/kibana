@@ -45,7 +45,7 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
 }
 
 type ItemDescriptor = EuiContextMenuPanelItemDescriptor & { _order: number };
-type PanelDescriptor = EuiContextMenuPanelDescriptor & { items: ItemDescriptor[] };
+type PanelDescriptor = EuiContextMenuPanelDescriptor & { _level?: number; items: ItemDescriptor[] };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
   event: React.MouseEvent
@@ -122,7 +122,8 @@ export async function buildContextMenuForActions({
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping && action.grouping) {
-      for (const group of action.grouping) {
+      for (let i = 0; i < action.grouping.length; i++) {
+        const group = action.grouping[i];
         currentPanel = group.id;
         if (!panels[currentPanel]) {
           const name = group.getDisplayName ? group.getDisplayName(context) : group.id;
@@ -130,6 +131,7 @@ export async function buildContextMenuForActions({
             id: currentPanel,
             title: name,
             items: [],
+            _level: i,
           };
           if (parentPanel) {
             panels[parentPanel].items!.push({
@@ -157,13 +159,18 @@ export async function buildContextMenuForActions({
   });
   await Promise.all(promises);
 
-  const panelList: PanelDescriptor[] = Object.values(panels);
-  for (const panel of panelList) {
+  for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
     panel.items = items.sort((a, b) => (a._order < b._order ? 1 : -1));
   }
 
   wrapPanelItemsIntoSubmenu(panels, 'mainMenu');
+
+  for (const panel of Object.values(panels)) {
+    if (panel._level === 0) {
+      panels.mainMenu.items.push(...panel.items);
+    }
+  }
 
   return Object.values(panels);
 }
