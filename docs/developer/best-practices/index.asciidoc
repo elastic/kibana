@@ -130,7 +130,10 @@ Review:
 * <<development-unit-tests>>
 * <<stability>>
 * <<security-best-practices>>
+* <<kibana-navigation>>
 
 include::stability.asciidoc[leveloffset=+1]
 
 include::security.asciidoc[leveloffset=+1]
+
+include::navigation.asciidoc[leveloffset=+1]

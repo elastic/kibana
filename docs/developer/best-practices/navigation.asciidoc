@@ -1,0 +1,201 @@
+[[kibana-navigation]]
+== Routing, Navigation and URL FAQ
+
+{kib} platform provides a set of tools to help developers built consistent experience around routing and browser navigation.
+Some of that tooling is inside the `core`, some are available as plugins.  
+
+The purpose of this guide is to give you (a {kib} contributor}) a high-level overview of available tools and common approaches around routing,
+browser navigation and, in general, working with URL.
+
+This FAQ covers following topics:
+
+* <<navigating-between-kibana-apps>>
+* <<deep-linking>>
+* <<routing>>
+* <<history-and-location>>
+* <<state-sync>>
+* <<preserve-state>>
+
+
+[[navigating-between-kibana-apps]]
+=== Navigating between {kib} apps
+
+{kib} is a single page application and there is a set of simple rules developers should follow
+to make sure there is no page reload when navigating from one place in {kib} to another. 
+
+**For example**, navigation using native browser apis:  
+
+```
+window.location.href = `/dashboard/my-dashboard`; // (try to avoid this)
+```
+
+would cause a full page reload.
+
+To navigate between different {kib} apps without a page reload there are apis in `core`:
+
+* {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md[core.application.navigateToApp]
+* {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md[core.application.navigateToUrl]
+
+*Rendering a link to a different {kib} app on its own would also cause a full page reload:*
+
+```
+const myLink = () => <a href={`/dashboard/my-dashboard`}> Go to Dashboard </a>; 
+```
+
+A workaround would be to handle a click, prevent browser navigation and use `core.application.navigateToUrl` api:
+
+```
+const MySPALink = () => 
+    <a 
+        href={`/dashboard/my-dashboard`} 
+        onClick={(e) => {
+            e.preventDefault();
+            core.application.navigateToUrl(`/dashboard/my-dashboard`); 
+        }}> 
+        Go to Dashboard 
+    </a>; 
+```
+
+It is too much boilerplate to do this for each {kib} link in your app, so there is a handy HOC that helps with it: 
+{kib-repo}tree/{branch}src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks]. 
+
+```
+const MyApp = () => 
+  <RedirectAppLinks application={core.application}>
+    {/*...*/}
+        <a href={`/dashboard/my-dashboard`}>Go to Dashboard</a> {/* navigations using this link will happen in SPA friendly way */}
+    {/*...*/}
+  </RedirectAppLinks>
+```
+
+
+[[deep-linking]]
+=== Deep-linking into {kib} apps
+
+**Consider a {kib} app URL a part of app's plugin contract.** +
+Try to avoid hardcoding other app's URL in your app's code: 
+
+```
+const urlToDashboarWithComplexState = `/dashboards#/view/0289f5d0-e61c-11ea-8c31-8bd3114ed023?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'URL%20Drilldown%20Demo',viewMode:view)`
+```
+
+Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[a URL generator].
+Other apps should use those URL generators for deep-linking.
+To get a better idea, take a look at {kib-repo}tree/{branch}/src/plugins/dashboard/public/url_generator.ts#L38[dashboard's app URL generator].
+It allows specifying various dashboard app state pieces like: dashboardId, filters, query, time range and more.
+And then others should use it to generate a link a dashboard with specified state:
+
+```
+const dashboardUrl = dashboardUrlGenerator.createUrl({dashboardId, filters, timeRange});
+```
+
+There are two ways to access other's app URL generator in your code:
+
+1. *(preferred)* From a plugin contract of a destination app.
+2. (in case an explicit plugin dependency is not possible) Using {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[url generator service] from `share` plugin. 
+
+
+[[routing]]
+=== Setting up internal app routing
+
+It is very common for {kib} apps to use React and React Router.
+Common rules to follow in this scenario:
+
+* Set up `BrowserRouter` and not `HashRouter`;
+* *Initialize your router with `history` instance provided by the `core`.*
+
+This is required to make sure `core` is aware of navigations triggered inside your app, so it could act accordingly when needed.
+
+* `Core`'s {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory] instance
+* {kib-repo}tree/{branch}/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120[Example plugin]
+
+Relative links will be resolved relative to your app's route (`http://localhost5601/app/{your-app-id}`)
+and setting up internal links in your app in SPA friendly way would look something like:
+
+```
+import {Link} from 'react-router-dom';
+
+const MyInternalLink = () => <Link to="/my-other-page"></Link>
+```
+
+[[history-and-location]]
+=== Working with history and browser location
+
+Try to avoid using `window.location.href` and `window.history` directly. +  
+Instead, consider using {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory]
+instance provided by `core`.
+
+* This way `core` will know about location changes triggered within your app, and it would act accordingly.
+* Some plugins are listening to location changes. Triggering location change bypassing `core` could cause unpredicted and hard-to-catch bugs.
+
+Common use-case for using 
+`core`'s {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory] directly: 
+
+* Reading/writing query params or hash,
+* Imperatively triggering internal navigations within your app,
+* Listening to browser location changes
+
+
+[[state-sync]]
+=== Syncing state with URL 
+
+Historically {kib} apps store _a lot_ of application state in the URL.
+The most common pattern that {kib} apps follow today is storing state in `_a` and `_g` query params in https://github.com/w33ble/rison-node#readme[rison] format.
+[[query-params]]
+Those query params follow the convention: 
+
+* `_g` (*global*) - global UI state that should be shared and synced across multiple apps. common example from analyze apps: time range, refresh interval, *pinned* filters.
+* `_a` (*application*) - UI state scoped to current app.
+
+NOTE: Since finishing KP migration and entering SPA era, there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern in your app or if you prefer a single query param. The need for this separation is explained in <<preserve-state>>. 
+
+There are utils to help you to implement such kind of state syncing.
+
+**When you should consider using state syncing utils:**
+
+* You want to sync your application state with URL in similar manner analyze applications do that.
+* You want to follow platform's <<history-and-location, working with browser history and location best practices>> out of the box. 
+* You want to support `state:storeInSessionStore` escape hatch for URL overflowing out of the box.
+* You should also consider using them if you'd like to serialize state to different (not `rison`) format. Utils are composable, and you can implement your own `storage`.
+* In case you want to sync part of your state with URL, but other part of it with browser storage. 
+
+**When you shouldn't look into using state syncing utils:**
+
+* Adding a query param flag or simple key/value to URL
+
+Follow {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
+
+
+[[preserve-state]]
+=== Preserving state between navigations
+
+Consider the scenario: 
+
+1. You are in a dashboard app looking at a dashboard with some filters applied;
+2. Navigate to `discover` using in-app navigation;
+3. Change the time filter.
+4. Navigate to `dashboard` using in-app navigation;
+
+You'd notice that you are navigated to a dashboard app with the *same state* that you left it,
+except that the time filter has changed to the one you applied on discover app.
+
+Historically {kib} analyze apps achieve that behavior relying on state in the URL. 
+If you'd have a closer look on a link in the navigation, 
+you'd notice that state is stored inside those links, and it also gets update whenever relevant state change happens:
+
+[role="screenshot"]
+image:images/state_inside_the_link.png[State is stored inside the navigation link]
+
+This is where <<query-params, separation>> on `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
+This is backed by {kib-repo}tree/{branch}/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
+
+NOTE: After migrating to KP platform we got navigations without page reloads. Because of that there are, probably, simpler ways to preserve state. 
+For example, you could just try keep the reference to your application state handy and reuse it when your app re-mounts.   
+
+
+
+
+
+
+
+
