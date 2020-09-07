@@ -367,8 +367,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -378,8 +378,8 @@ export const config: {
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
-                pattern?: string | undefined;
                 highlight?: boolean | undefined;
+                pattern?: string | undefined;
             } & {
                 kind: "pattern";
             }>;
@@ -392,15 +392,15 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+            level: import("@kbn/config-schema").Type<"warn" | "error" | "off" | "all" | "debug" | "info" | "fatal" | "trace">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;
@@ -410,8 +410,8 @@ export const config: {
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
-                    pattern?: string | undefined;
                     highlight?: boolean | undefined;
+                    pattern?: string | undefined;
                 } & {
                     kind: "pattern";
                 }>;
@@ -424,7 +424,7 @@ export const config: {
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
                 context: string;
                 appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
+                level: "warn" | "error" | "off" | "all" | "debug" | "info" | "fatal" | "trace";
             }>[]>;
         }>;
     };

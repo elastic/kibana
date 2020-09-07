@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-FilterBar: React.ComponentClass<Pick<Props, "className" | "filters" | "indexPatterns" | "onFiltersUpdated">, any> & {
+FilterBar: React.ComponentClass<Pick<Props, "filters" | "onFiltersUpdated" | "className" | "indexPatterns">, any> & {
     WrappedComponent: React.ComponentType<Props & ReactIntl.InjectedIntlProps>;
 }
 ```
