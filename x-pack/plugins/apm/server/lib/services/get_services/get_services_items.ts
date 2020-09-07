@@ -15,7 +15,7 @@ import {
   getTransactionDurationAverages,
   getAgentNames,
   getTransactionRates,
-  getErrorRates,
+  getTransactionErrorRates,
   getEnvironments,
   getHealthStatuses,
 } from './get_services_items_stats';
@@ -40,14 +40,14 @@ export async function getServicesItems({
     transactionDurationAverages,
     agentNames,
     transactionRates,
-    errorRates,
+    transactionErrorRates,
     environments,
     healthStatuses,
   ] = await Promise.all([
     getTransactionDurationAverages(params),
     getAgentNames(params),
     getTransactionRates(params),
-    getErrorRates(params),
+    getTransactionErrorRates(params),
     getEnvironments(params),
     getHealthStatuses(params, mlAnomaliesEnvironment),
   ]);
@@ -56,7 +56,7 @@ export async function getServicesItems({
     ...transactionDurationAverages,
     ...agentNames,
     ...transactionRates,
-    ...errorRates,
+    ...transactionErrorRates,
     ...environments,
     ...healthStatuses,
   ];

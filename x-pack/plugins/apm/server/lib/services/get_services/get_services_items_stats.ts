@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EventOutcome } from '../../../../common/event_outcome';
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   TRANSACTION_DURATION,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
+  EVENT_OUTCOME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../projections/util/merge_projection';
 import { ProcessorEvent } from '../../../../common/processor_event';
@@ -22,6 +24,7 @@ import {
   getMLJobIds,
   getServiceAnomalies,
 } from '../../service_map/get_service_anomalies';
+import { AggregationResultOf } from '../../../../typings/elasticsearch/aggregations';
 
 function getDateHistogramOpts(start: number, end: number) {
   return {
@@ -203,18 +206,37 @@ export const getTransactionRates = async ({
   });
 };
 
-export const getErrorRates = async ({
+export const getTransactionErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
   const { apmEventClient, start, end } = setup;
+
+  const outcomes = {
+    terms: {
+      field: EVENT_OUTCOME,
+    },
+  };
+
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        events: [ProcessorEvent.error],
+        events: [ProcessorEvent.transaction],
       },
       body: {
         size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...projection.body.query.bool.filter,
+              {
+                terms: {
+                  [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
+                },
+              },
+            ],
+          },
+        },
         aggs: {
           services: {
             terms: {
@@ -222,8 +244,12 @@ export const getErrorRates = async ({
               size: MAX_NUMBER_OF_SERVICES,
             },
             aggs: {
+              outcomes,
               over_time: {
                 date_histogram: getDateHistogramOpts(start, end),
+                aggs: {
+                  outcomes,
+                },
               },
             },
           },
@@ -238,18 +264,35 @@ export const getErrorRates = async ({
     return [];
   }
 
-  const deltaAsMinutes = getDeltaAsMinutes(setup);
+  function calculateTransactionErrorPercentage(
+    outcomeResponse: AggregationResultOf<typeof outcomes, {}>
+  ) {
+    const successfulTransactions =
+      outcomeResponse.buckets.find(
+        (bucket) => bucket.key === EventOutcome.success
+      )?.doc_count ?? 0;
+    const failedTransactions =
+      outcomeResponse.buckets.find(
+        (bucket) => bucket.key === EventOutcome.failure
+      )?.doc_count ?? 0;
+
+    return failedTransactions / (successfulTransactions + failedTransactions);
+  }
 
   return aggregations.services.buckets.map((serviceBucket) => {
-    const errorsPerMinute = serviceBucket.doc_count / deltaAsMinutes;
+    const transactionErrorRate = calculateTransactionErrorPercentage(
+      serviceBucket.outcomes
+    );
     return {
       serviceName: serviceBucket.key as string,
-      errorsPerMinute: {
-        value: errorsPerMinute,
-        over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
-          x: dateBucket.key,
-          y: dateBucket.doc_count / deltaAsMinutes,
-        })),
+      transactionErrorRate: {
+        value: transactionErrorRate,
+        over_time: serviceBucket.over_time.buckets.map((dateBucket) => {
+          return {
+            x: dateBucket.key,
+            y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+          };
+        }),
       },
     };
   });

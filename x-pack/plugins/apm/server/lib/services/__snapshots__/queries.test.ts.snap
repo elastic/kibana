@@ -257,14 +257,26 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
-        "error",
+        "transaction",
       ],
     },
     "body": Object {
       "aggs": Object {
         "services": Object {
           "aggs": Object {
+            "outcomes": Object {
+              "terms": Object {
+                "field": "event.outcome",
+              },
+            },
             "over_time": Object {
+              "aggs": Object {
+                "outcomes": Object {
+                  "terms": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
               "date_histogram": Object {
                 "extended_bounds": Object {
                   "max": 1528977600000,
@@ -297,6 +309,14 @@ Array [
             Object {
               "term": Object {
                 "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "terms": Object {
+                "event.outcome": Array [
+                  "failure",
+                  "success",
+                ],
               },
             },
           ],

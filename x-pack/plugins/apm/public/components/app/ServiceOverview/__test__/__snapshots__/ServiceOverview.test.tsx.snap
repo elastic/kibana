@@ -355,7 +355,7 @@ NodeList [
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Errors per minute
+        Error rate %
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -391,7 +391,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 err.
+            0%
           </div>
         </div>
       </div>
@@ -595,7 +595,7 @@ NodeList [
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Errors per minute
+        Error rate %
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -631,7 +631,7 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
           >
-            0 err.
+            0%
           </div>
         </div>
       </div>

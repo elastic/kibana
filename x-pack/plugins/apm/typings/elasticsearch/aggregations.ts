@@ -346,6 +346,12 @@ export type ValidAggregationKeysOf<
   T extends Record<string, any>
 > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
 
+export type AggregationResultOf<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> = AggregationResponsePart<TAggregationOptionsMap, TDocument>[AggregationType &
+  ValidAggregationKeysOf<TAggregationOptionsMap>];
+
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument

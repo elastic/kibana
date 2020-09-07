@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import { asPercent } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -147,23 +148,16 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
   },
   {
     field: 'errorsPerMinute',
-    name: i18n.translate('xpack.apm.servicesTable.errorsPerMinuteColumnLabel', {
-      defaultMessage: 'Errors per minute',
+    name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
+      defaultMessage: 'Error rate %',
     }),
     sortable: true,
     dataType: 'number',
-    render: (_, { errorsPerMinute }) => (
+    render: (_, { transactionErrorRate }) => (
       <ServiceListMetric
-        series={errorsPerMinute?.over_time}
+        series={transactionErrorRate?.over_time}
         color="euiColorVis7"
-        valueLabel={`${formatNumber(
-          errorsPerMinute?.value || 0
-        )} ${i18n.translate(
-          'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
-          {
-            defaultMessage: 'err.',
-          }
-        )}`}
+        valueLabel={asPercent(transactionErrorRate?.value || 0, 1)}
       />
     ),
     align: 'left',
@@ -219,8 +213,8 @@ export function ServiceList({
                     return item.avgResponseTime?.value ?? 0;
                   case 'transactionsPerMinute':
                     return item.transactionsPerMinute?.value ?? 0;
-                  case 'errorsPerMinute':
-                    return item.errorsPerMinute?.value ?? 0;
+                  case 'transactionErrorRate':
+                    return item.transactionErrorRate?.value ?? 0;
 
                   default:
                     return item[sortField as keyof typeof item];
