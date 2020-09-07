@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -208,9 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
             'displays the created transform in the transform list'
           );
           await transform.table.refreshTransformList();
-          await transform.table.filterWithSearchString(testData.transformId);
-          const rows = await transform.table.parseTransformTable();
-          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
+          await transform.table.filterWithSearchString(testData.transformId, 1);
 
           await transform.testExecution.logTestStep(
             'transform creation displays details for the created transform in the transform list'
