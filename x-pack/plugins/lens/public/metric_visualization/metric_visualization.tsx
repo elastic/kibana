@@ -9,7 +9,7 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import { State } from './types';
-import chartMetricSVG from '../assets/chart_metric.svg';
+import { LensIconChartMetric } from '../assets/chart_metric';
 
 const toExpression = (
   state: State,
