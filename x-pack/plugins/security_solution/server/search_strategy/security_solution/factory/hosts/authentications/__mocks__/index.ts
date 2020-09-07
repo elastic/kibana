@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-
-import {
-  Direction,
-  HostsQueries,
-} from '../../../../../../../common/search_strategy/security_solution';
 import {
   AuthenticationHit,
-  AuthenticationsRequestOptions,
-} from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
+  Direction,
+  HostsQueries,
+  HostAuthenticationsRequestOptions,
+} from '../../../../../../../common/search_strategy';
 
-export const mockOptions: AuthenticationsRequestOptions = {
+export const mockOptions: HostAuthenticationsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',

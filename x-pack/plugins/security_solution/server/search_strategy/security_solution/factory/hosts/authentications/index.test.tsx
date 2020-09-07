@@ -6,7 +6,7 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { AuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
+import { HostAuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import * as buildQuery from './dsl/query.dsl';
 import { authentications } from '.';
 import {
@@ -35,7 +35,7 @@ describe('authentications search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as AuthenticationsRequestOptions;
+      } as HostAuthenticationsRequestOptions;
 
       expect(() => {
         authentications.buildDsl(overSizeOptions);
