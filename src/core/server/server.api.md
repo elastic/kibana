@@ -364,6 +364,7 @@ export const config: {
     };
     logging: {
         appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            kind: "console";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -372,9 +373,9 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "console";
         }> | Readonly<{} & {
             path: string;
+            kind: "file";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -383,7 +384,6 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "file";
         }> | Readonly<{
             legacyLoggingConfig?: any;
         } & {
@@ -392,10 +392,11 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+            level: import("@kbn/config-schema").Type<"off" | "info" | "error" | "all" | "fatal" | "warn" | "debug" | "trace">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                kind: "console";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -404,9 +405,9 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "console";
             }> | Readonly<{} & {
                 path: string;
+                kind: "file";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -415,16 +416,15 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "file";
             }> | Readonly<{
                 legacyLoggingConfig?: any;
             } & {
                 kind: "legacy-appender";
             }>>>;
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                context: string;
                 appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
+                context: string;
+                level: "off" | "info" | "error" | "all" | "fatal" | "warn" | "debug" | "trace";
             }>[]>;
         }>;
     };
@@ -2915,11 +2915,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:132:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:133:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:134:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:135:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:136:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts

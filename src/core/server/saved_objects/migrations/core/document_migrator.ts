@@ -110,8 +110,6 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
-   * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
-   *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
