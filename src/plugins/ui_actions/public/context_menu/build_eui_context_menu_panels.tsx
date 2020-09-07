@@ -30,6 +30,10 @@ export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
 });
 
+export const txtMore = i18n.translate('uiActions.actionPanel.more', {
+  defaultMessage: 'More',
+});
+
 interface ActionWithContext<Context extends BaseContext = BaseContext> {
   action: Action<Context>;
   context: Context;
@@ -61,6 +65,30 @@ const onClick = (action: Action, context: ActionExecutionContext<object>, close:
   close();
 };
 
+const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
+  const panel = panels[id];
+  if (!panel) return;
+  const maxItemsBeforeWrapping = 4;
+  if (!panel.items) return;
+  if (panel.items.length <= maxItemsBeforeWrapping) return;
+  const visibleItems = panel.items.slice(0, 3) as ItemDescriptor[];
+  const itemsInSubmenu = panel.items.slice(3) as ItemDescriptor[];
+  const morePanelId = panel.id + '__more';
+  const more: ItemDescriptor = {
+    name: txtMore,
+    panel: morePanelId,
+    icon: 'boxesHorizontal',
+    _order: -1,
+  };
+  panel.items = [...visibleItems, more];
+  const subPanel: PanelDescriptor = {
+    id: morePanelId,
+    title: txtMore,
+    items: itemsInSubmenu,
+  };
+  panels[morePanelId] = subPanel;
+};
+
 export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
@@ -76,7 +104,7 @@ export async function buildContextMenuForActions({
   closeMenu,
 }: BuildContextMenuParams): Promise<PanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
-    mainPanel: {
+    mainMenu: {
       id: 'mainMenu',
       title,
       items: [],
@@ -87,7 +115,7 @@ export async function buildContextMenuForActions({
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
     if (!isCompatible) return;
-    let parentPanel = 'mainPanel';
+    let parentPanel = '';
     let currentPanel = '';
     if (action.grouping && action.grouping) {
       for (const group of action.grouping) {
@@ -99,17 +127,19 @@ export async function buildContextMenuForActions({
             title: name,
             items: [],
           };
-          panels[parentPanel].items!.push({
-            name,
-            panel: currentPanel,
-            icon: group.getIconType ? group.getIconType(context) : 'empty',
-            _order: group.order || 0,
-          });
+          if (parentPanel) {
+            panels[parentPanel].items!.push({
+              name,
+              panel: currentPanel,
+              icon: group.getIconType ? group.getIconType(context) : 'empty',
+              _order: group.order || 0,
+            });
+          }
         }
         parentPanel = currentPanel;
       }
     }
-    panels[parentPanel].items!.push({
+    panels[parentPanel || 'mainMenu'].items!.push({
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -122,6 +152,8 @@ export async function buildContextMenuForActions({
     });
   });
   await Promise.all(promises);
+
+  wrapPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   const panelList: PanelDescriptor[] = Object.values(panels);
 
