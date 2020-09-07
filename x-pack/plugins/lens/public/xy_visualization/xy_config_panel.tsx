@@ -32,7 +32,7 @@ import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } 
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
-import { ToolbarPopover } from '../toolbar_popover';
+import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -182,29 +182,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
-  const toggleButtonsIcons = [
-    {
-      id: Position.Bottom,
-      label: 'Bottom',
-      iconType: 'arrowDown',
-    },
-    {
-      id: Position.Left,
-      label: 'Left',
-      iconType: 'arrowLeft',
-    },
-    {
-      id: Position.Right,
-      label: 'Right',
-      iconType: 'arrowRight',
-    },
-    {
-      id: Position.Top,
-      label: 'Top',
-      iconType: 'arrowUp',
-    },
-  ];
-
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -259,73 +236,36 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               </EuiFormRow>
             </ToolbarPopover>
           </EuiToolTip>
-          <ToolbarPopover
-            title={i18n.translate('xpack.lens.xyChart.legendLabel', {
-              defaultMessage: 'Legend',
-            })}
-            type="legend"
-            groupPosition="right"
-          >
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-                defaultMessage: 'Display',
-              })}
-            >
-              <EuiButtonGroup
-                isFullWidth
-                legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-                  defaultMessage: 'Display',
-                })}
-                name="legendDisplay"
-                buttonSize="compressed"
-                options={legendOptions}
-                idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
-                onChange={(optionId) => {
-                  const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-                  if (newMode === 'auto') {
-                    setState({
-                      ...state,
-                      legend: { ...state.legend, isVisible: true, showSingleSeries: false },
-                    });
-                  } else if (newMode === 'show') {
-                    setState({
-                      ...state,
-                      legend: { ...state.legend, isVisible: true, showSingleSeries: true },
-                    });
-                  } else if (newMode === 'hide') {
-                    setState({
-                      ...state,
-                      legend: { ...state.legend, isVisible: false, showSingleSeries: false },
-                    });
-                  }
-                }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-                defaultMessage: 'Position',
-              })}
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-                  defaultMessage: 'Position',
-                })}
-                name="legendPosition"
-                buttonSize="compressed"
-                options={toggleButtonsIcons}
-                idSelected={state?.legend.position}
-                onChange={(id) => {
-                  setState({
-                    ...state,
-                    legend: { ...state.legend, position: id as Position },
-                  });
-                }}
-                isIconOnly
-              />
-            </EuiFormRow>
-          </ToolbarPopover>
+          <LegendSettingsPopover
+            legendOptions={legendOptions}
+            mode={legendMode}
+            onDisplayChange={(optionId) => {
+              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+              if (newMode === 'auto') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                });
+              } else if (newMode === 'show') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                });
+              } else if (newMode === 'hide') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                });
+              }
+            }}
+            position={state?.legend.position}
+            onPositionChange={(id) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, position: id as Position },
+              });
+            }}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

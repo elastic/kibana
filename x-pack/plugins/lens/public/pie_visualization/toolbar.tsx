@@ -12,16 +12,13 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiRange,
-  EuiSwitch,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationToolbarProps } from '../types';
-import { ToolbarPopover } from '../toolbar_popover';
+import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -114,29 +111,6 @@ const legendOptions: Array<{
   },
 ];
 
-const toggleButtonsIcons = [
-  {
-    id: Position.Bottom,
-    label: 'Bottom',
-    iconType: 'arrowDown',
-  },
-  {
-    id: Position.Left,
-    label: 'Left',
-    iconType: 'arrowLeft',
-  },
-  {
-    id: Position.Right,
-    label: 'Right',
-    iconType: 'arrowRight',
-  },
-  {
-    id: Position.Top,
-    label: 'Top',
-    iconType: 'arrowUp',
-  },
-];
-
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState } = props;
   const layer = state.layers[0];
@@ -215,81 +189,36 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.pieChart.legendLabel', {
-          defaultMessage: 'Legend',
-        })}
-        type="legend"
-        groupPosition="right"
-      >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {
-            defaultMessage: 'Display',
-          })}
-          display="columnCompressed"
-        >
-          <div>
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.pieChart.legendDisplayLegend', {
-                defaultMessage: 'Display',
-              })}
-              options={legendOptions}
-              idSelected={legendOptions.find(({ value }) => value === layer.legendDisplay)!.id}
-              onChange={(optionId) => {
-                setState({
-                  ...state,
-                  layers: [
-                    {
-                      ...layer,
-                      legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
-                    },
-                  ],
-                });
-              }}
-              buttonSize="compressed"
-              isFullWidth
-            />
-
-            <EuiSpacer size="s" />
-            <EuiSwitch
-              compressed
-              label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-                defaultMessage: 'Nested legend',
-              })}
-              disabled={layer.legendDisplay === 'hide'}
-              checked={!!layer.nestedLegend}
-              onChange={() => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
-                });
-              }}
-            />
-          </div>
-        </EuiFormRow>
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-        >
-          <EuiButtonGroup
-            isDisabled={layer.legendDisplay === 'hide'}
-            legend="Position"
-            name="legendPosition"
-            buttonSize="compressed"
-            options={toggleButtonsIcons}
-            idSelected={layer.legendPosition || Position.Right}
-            onChange={(id) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, legendPosition: id as Position }],
-              });
-            }}
-            isIconOnly
-          />
-        </EuiFormRow>
-      </ToolbarPopover>
+      <LegendSettingsPopover
+        legendOptions={legendOptions}
+        mode={layer.legendDisplay}
+        onDisplayChange={(optionId) => {
+          setState({
+            ...state,
+            layers: [
+              {
+                ...layer,
+                legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
+              },
+            ],
+          });
+        }}
+        position={layer.legendPosition}
+        onPositionChange={(id) => {
+          setState({
+            ...state,
+            layers: [{ ...layer, legendPosition: id as Position }],
+          });
+        }}
+        renderNestedLegendSwitch
+        nestedLegend={!!layer.nestedLegend}
+        onNestedLegendChange={() => {
+          setState({
+            ...state,
+            layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
+          });
+        }}
+      />
     </EuiFlexGroup>
   );
 }

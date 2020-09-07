@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar } from './xy_config_panel';
-import { ToolbarPopover } from '../toolbar_popover';
+import { ToolbarPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../types';
 import { State } from './types';

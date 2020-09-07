@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LayerConfig, AxesSettingsConfig } from './types';
 import { FramePublicAPI } from '../types';
-import { ToolbarPopover } from '../toolbar_popover';
+import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '../toolbar_button';
 // @ts-ignore
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 // @ts-ignore
@@ -82,7 +83,7 @@ export interface AxisSettingsPopoverProps {
 }
 const popoverConfig = (
   axis: AxesSettingsConfigKeys
-): { icon: IconType; groupPosition: 'left' | 'right' | 'center' } => {
+): { icon: IconType; groupPosition: ToolbarButtonProps['groupPosition'] } => {
   switch (axis) {
     case 'yLeft':
       return {
