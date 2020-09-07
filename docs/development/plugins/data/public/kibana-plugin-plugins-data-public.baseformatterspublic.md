@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-baseFormattersPublic: (typeof DateFormat | typeof DateNanosFormat | import("../../common").FieldFormatInstanceType)[]
+baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateFormat | typeof DateNanosFormat)[]
 ```

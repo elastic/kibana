@@ -392,7 +392,7 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<"error" | "off" | "all" | "warn" | "debug" | "info" | "fatal" | "trace">;
+            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
@@ -424,7 +424,7 @@ export const config: {
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
                 context: string;
                 appenders: string[];
-                level: "error" | "off" | "all" | "warn" | "debug" | "info" | "fatal" | "trace";
+                level: import("./logging/log_level").LogLevelId;
             }>[]>;
         }>;
     };
