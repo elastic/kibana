@@ -14,14 +14,14 @@ interface HasEncryptedHeaders {
 // TODO merge functionality with CSV execute job
 export const decryptJobHeaders = async <
   JobParamsType,
-  ScheduledTaskParamsType extends HasEncryptedHeaders
+  TaskPayloadType extends HasEncryptedHeaders
 >({
   encryptionKey,
   job,
   logger,
 }: {
   encryptionKey?: string;
-  job: ScheduledTaskParamsType;
+  job: TaskPayloadType;
   logger: LevelLogger;
 }): Promise<Record<string, string>> => {
   try {

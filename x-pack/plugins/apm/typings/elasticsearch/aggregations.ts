@@ -23,13 +23,13 @@ type BucketsPath = string | Record<string, string>;
 
 type SourceOptions = string | string[];
 
-type MetricsAggregationOptions =
+type AggregationSourceOptions =
   | {
       field: string;
-      missing?: number;
+      missing?: unknown;
     }
   | {
-      script?: Script;
+      script: Script;
     };
 
 interface MetricsAggregationResponsePart {
@@ -56,43 +56,39 @@ type CompositeOptionsSource = Record<
 
 export interface AggregationOptionsByType {
   terms: {
-    field: string;
     size?: number;
-    missing?: string;
     order?: SortOptions;
     execution_hint?: 'map' | 'global_ordinals';
-  };
+  } & AggregationSourceOptions;
   date_histogram: {
-    field: string;
     format?: string;
     min_doc_count?: number;
     extended_bounds?: {
       min: number;
       max: number;
     };
-  } & ({ calendar_interval: string } | { fixed_interval: string });
+  } & ({ calendar_interval: string } | { fixed_interval: string }) &
+    AggregationSourceOptions;
   histogram: {
-    field: string;
     interval: number;
     min_doc_count?: number;
     extended_bounds?: {
       min?: number | string;
       max?: number | string;
     };
-  };
-  avg: MetricsAggregationOptions;
-  max: MetricsAggregationOptions;
-  min: MetricsAggregationOptions;
-  sum: MetricsAggregationOptions;
-  value_count: MetricsAggregationOptions;
-  cardinality: MetricsAggregationOptions & {
+  } & AggregationSourceOptions;
+  avg: AggregationSourceOptions;
+  max: AggregationSourceOptions;
+  min: AggregationSourceOptions;
+  sum: AggregationSourceOptions;
+  value_count: AggregationSourceOptions;
+  cardinality: AggregationSourceOptions & {
     precision_threshold?: number;
   };
   percentiles: {
-    field: string;
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & AggregationSourceOptions;
   extended_stats: {
     field: string;
   };
@@ -133,7 +129,6 @@ export interface AggregationOptionsByType {
     reduce_script: Script;
   };
   date_range: {
-    field: string;
     format?: string;
     ranges: Array<
       | { from: string | number }
@@ -141,17 +136,15 @@ export interface AggregationOptionsByType {
       | { from: string | number; to: string | number }
     >;
     keyed?: boolean;
-  };
+  } & AggregationSourceOptions;
   auto_date_histogram: {
-    field: string;
     buckets: number;
-  };
+  } & AggregationSourceOptions;
   percentile_ranks: {
-    field: string;
     values: string[];
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & AggregationSourceOptions;
 }
 
 type AggregationType = keyof AggregationOptionsByType;
