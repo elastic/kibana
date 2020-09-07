@@ -10,7 +10,6 @@
   "exclude": [
     "test/**/*",
     "**/__fixtures__/**/*",
-    "plugins/security_solution/cypress/**/*",
-    "**/typespec_tests.ts"
+    "plugins/security_solution/cypress/**/*"
   ]
 }

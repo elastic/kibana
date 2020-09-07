@@ -5,12 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  AckEventSchema,
-  NewAgentEventSchema,
-  AgentTypeSchema,
-  NewAgentActionSchema,
-} from '../models';
+import { NewAgentActionSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({
@@ -27,37 +22,134 @@ export const GetOneAgentRequestSchema = {
   }),
 };
 
-export const PostAgentCheckinRequestSchema = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  body: schema.object({
-    status: schema.maybe(
-      schema.oneOf([schema.literal('online'), schema.literal('error'), schema.literal('degraded')])
-    ),
-    local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    events: schema.maybe(schema.arrayOf(NewAgentEventSchema)),
-  }),
+export const PostAgentCheckinRequestParamsJSONSchema = {
+  type: 'object',
+  properties: {
+    agentId: { type: 'string' },
+  },
+  required: ['agentId'],
 };
 
-export const PostAgentEnrollRequestSchema = {
-  body: schema.object({
-    type: AgentTypeSchema,
-    shared_id: schema.maybe(schema.string()),
-    metadata: schema.object({
-      local: schema.recordOf(schema.string(), schema.any()),
-      user_provided: schema.recordOf(schema.string(), schema.any()),
-    }),
-  }),
+export const PostAgentCheckinRequestBodyJSONSchema = {
+  type: 'object',
+  properties: {
+    status: { type: 'string', enum: ['online', 'error', 'degraded'] },
+    local_metadata: {
+      additionalProperties: {
+        anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'object' }],
+      },
+    },
+    events: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['STATE', 'ERROR', 'ACTION_RESULT', 'ACTION'] },
+          subtype: {
+            type: 'string',
+            enum: [
+              'RUNNING',
+              'STARTING',
+              'IN_PROGRESS',
+              'CONFIG',
+              'FAILED',
+              'STOPPING',
+              'STOPPED',
+              'DEGRADED',
+              'DATA_DUMP',
+              'ACKNOWLEDGED',
+              'UNKNOWN',
+            ],
+          },
+          timestamp: { type: 'string' },
+          message: { type: 'string' },
+          payload: { type: 'object', additionalProperties: true },
+          agent_id: { type: 'string' },
+          action_id: { type: 'string' },
+          policy_id: { type: 'string' },
+          stream_id: { type: 'string' },
+        },
+        required: ['type', 'subtype', 'timestamp', 'message', 'agent_id'],
+        additionalProperties: false,
+      },
+    },
+  },
+  additionalProperties: false,
 };
 
-export const PostAgentAcksRequestSchema = {
-  body: schema.object({
-    events: schema.arrayOf(AckEventSchema),
-  }),
-  params: schema.object({
-    agentId: schema.string(),
-  }),
+export const PostAgentEnrollRequestBodyJSONSchema = {
+  type: 'object',
+  properties: {
+    type: { type: 'string', enum: ['EPHEMERAL', 'PERMANENT', 'TEMPORARY'] },
+    shared_id: { type: 'string' },
+    metadata: {
+      type: 'object',
+      properties: {
+        local: {
+          type: 'object',
+          additionalProperties: true,
+        },
+        user_provided: {
+          type: 'object',
+          additionalProperties: true,
+        },
+      },
+      additionalProperties: false,
+      required: ['local', 'user_provided'],
+    },
+  },
+  additionalProperties: false,
+  required: ['type', 'metadata'],
+};
+
+export const PostAgentAcksRequestParamsJSONSchema = {
+  type: 'object',
+  properties: {
+    agentId: { type: 'string' },
+  },
+  required: ['agentId'],
+};
+
+export const PostAgentAcksRequestBodyJSONSchema = {
+  type: 'object',
+  properties: {
+    events: {
+      type: 'array',
+      item: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['STATE', 'ERROR', 'ACTION_RESULT', 'ACTION'] },
+          subtype: {
+            type: 'string',
+            enum: [
+              'RUNNING',
+              'STARTING',
+              'IN_PROGRESS',
+              'CONFIG',
+              'FAILED',
+              'STOPPING',
+              'STOPPED',
+              'DEGRADED',
+              'DATA_DUMP',
+              'ACKNOWLEDGED',
+              'UNKNOWN',
+            ],
+          },
+          timestamp: { type: 'string' },
+          message: { type: 'string' },
+          payload: { type: 'object', additionalProperties: true },
+          agent_id: { type: 'string' },
+          action_id: { type: 'string' },
+          policy_id: { type: 'string' },
+          stream_id: { type: 'string' },
+        },
+        required: ['type', 'subtype', 'timestamp', 'message', 'agent_id', 'action_id'],
+        additionalProperties: false,
+      },
+    },
+  },
+  additionalProperties: false,
+  required: ['events'],
 };
 
 export const PostNewAgentActionRequestSchema = {
