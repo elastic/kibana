@@ -190,12 +190,4 @@ This is where <<query-params, separation>> on `_a` and `_g` query params comes i
 This is backed by {kib-repo}tree/{branch}/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
 
 NOTE: After migrating to KP platform we got navigations without page reloads. Because of that there are, probably, simpler ways to preserve state. 
-For example, you could just try keep the reference to your application state handy and reuse it when your app re-mounts.   
-
-
-
-
-
-
-
-
+For example, you could just try keep the reference to your application state handy and reuse it when your app re-mounts.
