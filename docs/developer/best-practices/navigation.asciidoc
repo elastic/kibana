@@ -61,7 +61,7 @@ const MySPALink = () =>
 
 
 It is too much boilerplate to do this for each {kib} link in your app, so there is a handy HOC that helps with it: 
-{kib-repo}tree/{branch}src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks].
+{kib-repo}tree/{branch}/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks].
 
 [source,typescript jsx]
 ----
