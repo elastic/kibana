@@ -18,7 +18,11 @@
  */
 
 import * as React from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
@@ -168,6 +172,9 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
+      panels.mainMenu.items.push({
+        name: <EuiHorizontalRule margin="none" />,
+      });
       panels.mainMenu.items.push(...panel.items);
     }
   }
