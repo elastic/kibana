@@ -100,7 +100,7 @@ async function asyncSearch(
     keepAlive: '1m', // Extend the TTL for this search request by one minute
   };
 
-  const querystring = toSnakeCase({
+  const queryOptions = toSnakeCase({
     ...asyncOptions,
     ...(batchedReduceSize && { batchedReduceSize }),
     ...queryParams,
@@ -110,7 +110,7 @@ async function asyncSearch(
   if (!request.id) {
     esResponse = await client.asyncSearch.submit({
       body,
-      ...querystring,
+      ...queryOptions,
     });
   } else {
     esResponse = await client.asyncSearch.get({
