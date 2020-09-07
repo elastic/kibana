@@ -323,7 +323,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: string[];
+  accessors: Array<
+    | string
+    | { columnId: string; triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none'; color?: string }
+  >;
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;

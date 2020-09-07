@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
@@ -160,7 +161,13 @@ export const xyVisualization: Visualization<State> = {
   },
 
   getConfiguration(props) {
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    const layerIndex = props.state.layers.findIndex((l) => l.layerId === props.layerId);
+    const layer = props.state.layers[layerIndex];
+    const chartContainsSplits = props.state.layers.some(({ splitAccessor }) => splitAccessor);
+    const layerContainsSplits = Boolean(layer.splitAccessor);
+    const allAccessors = props.state.layers.flatMap((currentLayer) =>
+      currentLayer.accessors.map((currentAccessor) => ({ currentLayer, currentAccessor }))
+    );
     return {
       groups: [
         {
@@ -180,7 +187,33 @@ export const xyVisualization: Visualization<State> = {
           groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
             defaultMessage: 'Y-axis',
           }),
-          accessors: layer.accessors,
+          accessors: layer.accessors.map((accessor) => {
+            const currentYConfig = layer.yConfig?.find(
+              (yConfig) => yConfig.forAccessor === accessor
+            );
+            const previousLayerContainsSplit = props.state.layers
+              .slice(0, layerIndex)
+              .some(({ splitAccessor }) => splitAccessor);
+            if (layerContainsSplits || (!currentYConfig?.color && previousLayerContainsSplit)) {
+              return {
+                columnId: accessor,
+                triggerIcon: 'disabled',
+              };
+            }
+            const accessorIndex = allAccessors.findIndex(
+              (a) => a.currentAccessor === accessor && a.currentLayer === layer
+            );
+            const seriesColor =
+              currentYConfig?.color ||
+              EUI_CHARTS_THEME_LIGHT.theme.colors!.vizColors![
+                accessorIndex % EUI_CHARTS_THEME_LIGHT.theme.colors!.vizColors!.length
+              ];
+            return {
+              columnId: accessor,
+              triggerIcon: 'color',
+              color: seriesColor,
+            };
+          }),
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,

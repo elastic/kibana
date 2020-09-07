@@ -47,3 +47,12 @@
   width: $euiSize * 30;
   padding: $euiSizeS;
 }
+
+.lnsLayerPanel__colorIndicator {
+  margin-left: $euiSizeS;
+}
+
+.lnsLayerPanel__colorIndicator--solidColor {
+  width: $euiSizeS;
+  height: $euiSizeS;
+}

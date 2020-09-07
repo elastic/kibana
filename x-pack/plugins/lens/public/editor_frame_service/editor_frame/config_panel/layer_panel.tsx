@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFormRow,
   EuiTabbedContent,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -171,7 +172,9 @@ export function LayerPanel(
               }
             >
               <>
-                {group.accessors.map((accessor) => {
+                {group.accessors.map((accessorConfig) => {
+                  const accessor =
+                    typeof accessorConfig === 'string' ? accessorConfig : accessorConfig.columnId;
                   const tabs = [
                     {
                       id: 'datasource',
@@ -275,27 +278,63 @@ export function LayerPanel(
                         accessor={accessor}
                         groupId={group.groupId}
                         trigger={
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
-                              togglePopover: () => {
-                                if (popoverState.isOpen) {
-                                  setPopoverState(initialPopoverState);
-                                } else {
-                                  setPopoverState({
-                                    isOpen: true,
-                                    openId: accessor,
-                                    addingToGroupId: null, // not set for existing dimension
-                                    tabId: 'datasource',
-                                  });
-                                }
-                              },
-                            }}
-                          />
+                          <EuiFlexGroup gutterSize="none" alignItems="center">
+                            {typeof accessorConfig !== 'string' &&
+                              accessorConfig.triggerIcon === 'color' &&
+                              accessorConfig.color && (
+                                <EuiFlexItem grow={false}>
+                                  <div
+                                    className="lnsLayerPanel__colorIndicator lnsLayerPanel__colorIndicator--solidColor"
+                                    style={{
+                                      backgroundColor: accessorConfig.color,
+                                    }}
+                                  />
+                                </EuiFlexItem>
+                              )}
+                            {typeof accessorConfig !== 'string' &&
+                              accessorConfig.triggerIcon === 'disabled' && (
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon
+                                    type="stopSlash"
+                                    size="s"
+                                    className="lnsLayerPanel__colorIndicator"
+                                  />
+                                </EuiFlexItem>
+                              )}
+                            {typeof accessorConfig !== 'string' &&
+                              accessorConfig.triggerIcon === 'colorBy' && (
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon
+                                    type="brush"
+                                    size="s"
+                                    className="lnsLayerPanel__colorIndicator"
+                                  />
+                                </EuiFlexItem>
+                              )}
+                            <EuiFlexItem>
+                              <NativeRenderer
+                                render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                                nativeProps={{
+                                  ...layerDatasourceConfigProps,
+                                  columnId: accessor,
+                                  filterOperations: group.filterOperations,
+                                  suggestedPriority: group.suggestedPriority,
+                                  togglePopover: () => {
+                                    if (popoverState.isOpen) {
+                                      setPopoverState(initialPopoverState);
+                                    } else {
+                                      setPopoverState({
+                                        isOpen: true,
+                                        openId: accessor,
+                                        addingToGroupId: null, // not set for existing dimension
+                                        tabId: 'datasource',
+                                      });
+                                    }
+                                  },
+                                }}
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         }
                         panel={
                           <EuiTabbedContent
