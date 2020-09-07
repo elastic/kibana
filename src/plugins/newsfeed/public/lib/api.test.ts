@@ -48,7 +48,7 @@ Object.defineProperty(window, 'sessionStorage', {
 });
 
 describe('NewsfeedApiDriver', () => {
-  const kibanaVersion = 'test_version';
+  const kibanaVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
   const fetchInterval = 2000;
   const getDriver = () => new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
@@ -179,7 +179,7 @@ describe('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "test_version",
+          "kibanaVersion": "99.999.9",
         }
       `);
     });
@@ -227,7 +227,7 @@ describe('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: 'test_version',
+        kibanaVersion: '99.999.9',
       });
     });
 
@@ -309,7 +309,7 @@ describe('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: 'test_version',
+        kibanaVersion: '99.999.9',
       });
     });
 
@@ -375,7 +375,7 @@ describe('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: 'test_version',
+        kibanaVersion: '99.999.9',
       });
     });
 
@@ -405,7 +405,7 @@ describe('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "test_version",
+          "kibanaVersion": "99.999.9",
         }
       `);
     });
@@ -436,7 +436,7 @@ describe('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "test_version",
+          "kibanaVersion": "99.999.9",
         }
       `);
     });

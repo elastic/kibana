@@ -84,6 +84,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          placeContext={{ embeddable }}
         />
       ),
       {
