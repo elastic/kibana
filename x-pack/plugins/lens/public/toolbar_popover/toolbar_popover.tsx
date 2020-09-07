@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@el
 import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
 import { EuiIconLegend } from '../assets/legend';
 
-const typeToIconMap = {
+const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
   values: 'visText',
 };
@@ -50,7 +50,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
     }
   }, [open, handlePopoverState]);
 
-  const iconType = typeof type === 'string' ? typeToIconMap[type] : type;
+  const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
   return (
     <EuiFlexItem grow={false}>

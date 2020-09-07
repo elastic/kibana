@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 
-export const EuiIconLegend = ({ title, titleId, ...props }) => (
+export const EuiIconLegend = ({ title, titleId, ...props }: { title: string; titleId: string }) => (
   <svg
     width={16}
     height={16}
