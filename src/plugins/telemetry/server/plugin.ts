@@ -68,7 +68,7 @@ export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
-   * or did not choose to opt-in or out -yet- after an minor or major upgrade.
+   * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    */
   getIsOptedIn: () => Promise<boolean>;
 }
