@@ -182,8 +182,10 @@ export class SearchInterceptor {
     if (sessionId && request.params && request.params.body) {
       const sessionInfo = this.idMapping.get(sessionId);
 
-      // Mark request as errored, don't update session status
-      sessionInfo!.requests[this.createHash(request.params.body)].status = SearchStatus.Error;
+      if (sessionInfo) {
+        // Mark request as errored, don't update session status
+        sessionInfo.requests[this.createHash(request.params.body)].status = SearchStatus.Error;
+      }
     }
   }
 
