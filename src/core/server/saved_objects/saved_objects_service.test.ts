@@ -239,8 +239,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
 
-      const startContract = await soService.start(createStartDeps());
-      expect(startContract.migrator).toBe(migratorInstanceMock);
+      await soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 

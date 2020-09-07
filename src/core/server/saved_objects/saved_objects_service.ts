@@ -23,12 +23,10 @@ import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
-  ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { LegacyServiceDiscoverPlugins } from '../legacy';
 import {
   ElasticsearchClient,
   IClusterClient,
@@ -64,9 +62,6 @@ import { createMigrationEsClient } from './migrations/core/';
  * When plugins access the Saved Objects client, a new client is created using
  * the factory provided to `setClientFactory` and wrapped by all wrappers
  * registered through `addClientWrapper`.
- *
- * All the setup APIs will throw if called after the service has started, and therefor cannot be used
- * from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
  *
  * @example
  * ```ts
@@ -153,9 +148,6 @@ export interface SavedObjectsServiceSetup {
    *   }
    * }
    * ```
-   *
-   * @remarks The type definition is an aggregation of the legacy savedObjects `schema`, `mappings` and `migration` concepts.
-   * This API is the single entry point to register saved object types in the new platform.
    */
   registerType: (type: SavedObjectsType) => void;
 
@@ -228,16 +220,7 @@ export interface SavedObjectsServiceStart {
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
-export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
-  /**
-   * @deprecated Exposed only for injecting into Legacy
-   */
-  migrator: IKibanaMigrator;
-  /**
-   * @deprecated Exposed only for injecting into Legacy
-   */
-  clientProvider: ISavedObjectsClientProvider;
-}
+export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
 
 /**
  * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}
@@ -269,7 +252,6 @@ export interface SavedObjectsRepositoryFactory {
 /** @internal */
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
-  legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
 }
 
@@ -294,7 +276,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private migrator$ = new Subject<KibanaMigrator>();
+  private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
@@ -461,8 +443,6 @@ export class SavedObjectsService
     this.started = true;
 
     return {
-      migrator,
-      clientProvider,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
@@ -478,7 +458,7 @@ export class SavedObjectsService
     savedObjectsConfig: SavedObjectsMigrationConfigType,
     client: IClusterClient,
     migrationsRetryDelay?: number
-  ): KibanaMigrator {
+  ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
