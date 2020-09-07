@@ -12,7 +12,7 @@ import { LogStream } from '../../../../../../infra/public';
 
 To use the component, there are several things you need to ensure in your plugin:
 
-- In your `kibana.json` plugin, you need to either add `"requiredBundles": ["infra"]` or `"requiredPlugins": ["infra"]`.
+- In your plugin's `kibana.json` plugin, add `"infra"` to `requiredPlugins`.
 - The component needs to be mounted inside the hiearchy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
 
 ## Usage
