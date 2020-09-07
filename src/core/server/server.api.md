@@ -21,6 +21,7 @@ import { CatSnapshotsParams } from 'elasticsearch';
 import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
+import { CliArgs } from '@kbn/config';
 import { Client } from 'elasticsearch';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
@@ -31,7 +32,13 @@ import { ClusterPutSettingsParams } from 'elasticsearch';
 import { ClusterRerouteParams } from 'elasticsearch';
 import { ClusterStateParams } from 'elasticsearch';
 import { ClusterStatsParams } from 'elasticsearch';
+import { ConfigDeprecation } from '@kbn/config';
+import { ConfigDeprecationFactory } from '@kbn/config';
+import { ConfigDeprecationLogger } from '@kbn/config';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigOptions } from 'elasticsearch';
+import { ConfigPath } from '@kbn/config';
+import { ConfigService } from '@kbn/config';
 import { CountParams } from 'elasticsearch';
 import { CreateDocumentParams } from 'elasticsearch';
 import { DeleteDocumentByQueryParams } from 'elasticsearch';
@@ -40,6 +47,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -106,6 +114,7 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { PackageInfo } from '@kbn/config';
 import { ParsedQuery } from 'query-string';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
@@ -364,6 +373,7 @@ export const config: {
     };
     logging: {
         appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            kind: "console";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -372,9 +382,9 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "console";
         }> | Readonly<{} & {
             path: string;
+            kind: "file";
             layout: Readonly<{} & {
                 kind: "json";
             }> | Readonly<{
@@ -383,7 +393,6 @@ export const config: {
             } & {
                 kind: "pattern";
             }>;
-            kind: "file";
         }> | Readonly<{
             legacyLoggingConfig?: any;
         } & {
@@ -392,10 +401,11 @@ export const config: {
         loggers: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<string[]>;
             context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+            level: import("@kbn/config-schema").Type<"all" | "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "off">;
         }>;
         loggerContext: import("@kbn/config-schema").ObjectType<{
             appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                kind: "console";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -404,9 +414,9 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "console";
             }> | Readonly<{} & {
                 path: string;
+                kind: "file";
                 layout: Readonly<{} & {
                     kind: "json";
                 }> | Readonly<{
@@ -415,60 +425,31 @@ export const config: {
                 } & {
                     kind: "pattern";
                 }>;
-                kind: "file";
             }> | Readonly<{
                 legacyLoggingConfig?: any;
             } & {
                 kind: "legacy-appender";
             }>>>;
             loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                context: string;
                 appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
+                context: string;
+                level: "all" | "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "off";
             }>[]>;
         }>;
     };
 };
 
-// @public
-export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, logger: ConfigDeprecationLogger) => Record<string, any>;
+export { ConfigDeprecation }
 
-// @public
-export interface ConfigDeprecationFactory {
-    rename(oldKey: string, newKey: string): ConfigDeprecation;
-    renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
-    unused(unusedKey: string): ConfigDeprecation;
-    unusedFromRoot(unusedKey: string): ConfigDeprecation;
-}
+export { ConfigDeprecationFactory }
 
-// @public
-export type ConfigDeprecationLogger = (message: string) => void;
+export { ConfigDeprecationLogger }
 
-// @public
-export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
+export { ConfigDeprecationProvider }
 
-// @public (undocumented)
-export type ConfigPath = string | string[];
+export { ConfigPath }
 
-// @internal (undocumented)
-export class ConfigService {
-    // Warning: (ae-forgotten-export) The symbol "RawConfigurationProvider" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
-    constructor(rawConfigProvider: RawConfigurationProvider, env: Env, logger: LoggerFactory);
-    addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider): void;
-    atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
-    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
-    getConfig$(): Observable<Config>;
-    // (undocumented)
-    getUnusedPaths(): Promise<string[]>;
-    // (undocumented)
-    getUsedPaths(): Promise<string[]>;
-    // (undocumented)
-    isEnabledAtPath(path: ConfigPath): Promise<boolean>;
-    optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
-    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
-    validate(): Promise<void>;
-    }
+export { ConfigService }
 
 // @public
 export interface ContextSetup {
@@ -743,15 +724,7 @@ export interface ElasticsearchStatusMeta {
     warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
-// @public (undocumented)
-export interface EnvironmentMode {
-    // (undocumented)
-    dev: boolean;
-    // (undocumented)
-    name: 'development' | 'production';
-    // (undocumented)
-    prod: boolean;
-}
+export { EnvironmentMode }
 
 // @public
 export interface ErrorHttpResponseOptions {
@@ -1726,19 +1699,7 @@ export interface OpsServerMetrics {
     };
 }
 
-// @public (undocumented)
-export interface PackageInfo {
-    // (undocumented)
-    branch: string;
-    // (undocumented)
-    buildNum: number;
-    // (undocumented)
-    buildSha: string;
-    // (undocumented)
-    dist: boolean;
-    // (undocumented)
-    version: string;
-}
+export { PackageInfo }
 
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -1752,6 +1713,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 
 // @public
 export interface PluginConfigDescriptor<T = any> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     deprecations?: ConfigDeprecationProvider;
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
@@ -1789,6 +1751,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
 
 // @public
 export interface PluginManifest {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     readonly configPath: ConfigPath;
     // @deprecated
     readonly extraPublicDirs?: string[];
