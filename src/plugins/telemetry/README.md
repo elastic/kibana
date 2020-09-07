@@ -12,7 +12,15 @@ This plugin is responsible for sending usage data to the telemetry cluster. For 
 
 ### Setup
 
-The `setup` function does not expose any public api.
+The `setup` function exposes the following interface:
+
+- `getTelemetryUrl: () => Promise<URL>`:
+  An async function that resolves into the telemetry Url used to send telemetry. The url is wrapped with node's [URL constructor](https://nodejs.org/api/url.html). Here is an example on how to grab the url origin:
+  ```
+  const telemetryUrl = await getTelemetryUrl();
+    > telemetryUrl.origin; // 'https://telemetry.elastic.co'
+  ```
+  Note that the telemetry URL is a kibana.yml configuration hence it is recommended to call the `getTelemetryUrl` everytime before using the actual url.
 
 ### Start
 
@@ -22,7 +30,6 @@ The `start` function exposes the following interface:
   An async function that resolves into `true` if the user has opted into send Elastic usage data.
   Resolves to `false` if the user explicitly opted out of sending usage data to Elastic or did not choose
   to opt-in or out yet after an minor or major upgrade.
-
 
 ### Usage
 

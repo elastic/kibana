@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { URL } from 'url';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
@@ -55,8 +56,15 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
-export type TelemetryPluginsSetup = void;
-export interface TelemetryPluginsStart {
+export interface TelemetryPluginSetup {
+  /**
+   * Resolves into the telemetry Url used to send telemetry.
+   * The url is wrapped with node's [URL constructor](https://nodejs.org/api/url.html).
+   */
+  getTelemetryUrl: () => Promise<URL>;
+}
+
+export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
@@ -67,7 +75,7 @@ export interface TelemetryPluginsStart {
 
 type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginsSetup, TelemetryPluginsStart> {
+export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
@@ -90,7 +98,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginsSetup, TelemetryP
   public async setup(
     { elasticsearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
-  ): Promise<TelemetryPluginsSetup> {
+  ): Promise<TelemetryPluginSetup> {
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
@@ -109,12 +117,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginsSetup, TelemetryP
 
     this.registerMappings((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
+
+    return {
+      getTelemetryUrl: async () => {
+        const config = await config$.pipe(take(1)).toPromise();
+        return new URL(config.url);
+      },
+    };
   }
 
   public async start(
     core: CoreStart,
     { telemetryCollectionManager }: TelemetryPluginsDepsStart
-  ): Promise<TelemetryPluginsStart> {
+  ): Promise<TelemetryPluginStart> {
     const { savedObjects, uiSettings } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository();
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
