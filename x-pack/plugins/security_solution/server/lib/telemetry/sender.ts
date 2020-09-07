@@ -15,7 +15,7 @@ export interface TelemetryEventsSenderContract {
 // Allowlist for the fields that we copy from the original event to the
 // telemetry event.
 // Top level fields:
-const allowlistTop = ['@timestamp', 'agent', 'endpoint', 'ecs', 'elastic'];
+const allowlistTop = ['@timestamp', 'agent', 'Endpoint', 'ecs', 'elastic'];
 // file.* fields:
 const allowlistFile = ['path', 'size', 'created', 'accessed', 'mtime', 'directory', 'hash'];
 // file.Ext.* fields:
@@ -53,6 +53,12 @@ export class TelemetryEventsSender {
   public queueTelemetryEvents(events: object[]) {
     const qlength = this.queue.length;
 
+    if (events.length === 0) {
+      return;
+    }
+
+    this.logger.debug(`Queue events`);
+
     if (qlength >= this.maxQueueSize) {
       // we're full already
       return;
@@ -68,6 +74,7 @@ export class TelemetryEventsSender {
   }
 
   private processEvents(events: object[]): object[] {
+    this.logger.debug(`Before processing events: ${JSON.stringify(events, null, 2)}`);
     return events.map(function (obj: object): object {
       const newObj = pick(obj, allowlistTop);
       if ('file' in obj) {
@@ -88,7 +95,12 @@ export class TelemetryEventsSender {
   }
 
   private async sendIfDue() {
+    // this.logger.debug(`Send if due`);
     if (this.isSending) {
+      return;
+    }
+
+    if (this.queue.length === 0) {
       return;
     }
 
@@ -105,5 +117,6 @@ export class TelemetryEventsSender {
 
   private async sendEvents(events: object[]) {
     // TODO
+    this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
   }
 }

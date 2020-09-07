@@ -240,6 +240,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.alerts != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
+        eventsTelemetry: this.telemetryEventsSender,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,

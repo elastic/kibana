@@ -19,6 +19,8 @@ import { SignalSearchResponse } from './types';
 import { filterEventsAgainstList } from './filter_events_with_list';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { getSignalTimeTuples } from './utils';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { sendAlertTelemetryEvents } from './send_telemetry_events';
 
 interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
@@ -28,6 +30,7 @@ interface SearchAfterAndBulkCreateParams {
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
@@ -64,6 +67,7 @@ export const searchAfterAndBulkCreate = async ({
   services,
   listClient,
   logger,
+  eventsTelemetry,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -230,6 +234,14 @@ export const searchAfterAndBulkCreate = async ({
           if (bulkDuration) {
             toReturn.bulkCreateTimes.push(bulkDuration);
           }
+
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            filteredEvents,
+            ruleParams,
+            buildRuleMessage
+          );
 
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
