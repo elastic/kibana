@@ -13,7 +13,7 @@ import {
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
@@ -65,7 +65,6 @@ export const createTimeline = actionCreator<{
   itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
   sort?: Sort;

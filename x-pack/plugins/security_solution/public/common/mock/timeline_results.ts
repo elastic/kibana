@@ -2132,7 +2132,6 @@ export const mockTimelineModel: TimelineModel = {
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,
-    filterQueryDraft: null,
   },
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
@@ -2238,7 +2237,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     kqlMode: 'filter',
     kqlQuery: {
       filterQuery: { kuery: { expression: '', kind: 'kuery' }, serializedQuery: '' },
-      filterQueryDraft: { expression: '', kind: 'kuery' },
     },
     loadingEventIds: [],
     noteIds: [],

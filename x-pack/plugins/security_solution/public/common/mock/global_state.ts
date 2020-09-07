@@ -215,7 +215,7 @@ export const mockGlobalState: State = {
         isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
-        kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
         timelineType: TimelineType.default,

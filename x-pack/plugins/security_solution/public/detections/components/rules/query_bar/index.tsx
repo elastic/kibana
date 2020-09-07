@@ -115,7 +115,7 @@ export const QueryBarDefineRule = ({
   useEffect(() => {
     let isSubscribed = true;
     async function updateFilterQueryFromValue() {
-      const { filters, query, saved_id: savedId } = fieldValue as FieldValueQueryBar;
+      const { filters, saved_id: savedId } = fieldValue as FieldValueQueryBar;
       if (!deepEqual(filters, filterManager.getFilters())) {
         filterManager.setFilters(filters);
       }
@@ -163,7 +163,6 @@ export const QueryBarDefineRule = ({
 
   const onSavedQuery = useCallback(
     (newSavedQuery: SavedQuery | null) => {
-      console.error('onSavedQuery', newSavedQuery);
       if (newSavedQuery != null) {
         const { saved_id: savedId } = fieldValue as FieldValueQueryBar;
         if (newSavedQuery.id !== savedId) {

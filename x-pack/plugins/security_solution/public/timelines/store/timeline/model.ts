@@ -14,7 +14,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 import type { RowRendererId } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
@@ -84,7 +84,6 @@ export interface TimelineModel {
   /** the KQL query in the KQL bar */
   kqlQuery: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   /** Title */
   title: string;

@@ -30,7 +30,7 @@ export interface QueryBarComponentProps {
   filterQuery: Query;
   filterManager: FilterManager;
   filters: Filter[];
-  onChangedQuery?: (query: Query) => void;
+  onChangedQuery?: (query?: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
   savedQuery?: SavedQuery | null;
@@ -66,7 +66,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        onChangedQuery(payload.query!);
+        onChangedQuery(payload.query);
         // if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
         //   setDraftQuery(payload.query);
         // }

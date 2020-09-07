@@ -19,7 +19,7 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
 import {
   TimelineTypeLiteral,
@@ -526,17 +526,17 @@ export const addTimelineProvider = ({
   }
 };
 
-interface ApplyKqlFilterQueryParams {
+interface ApplyKqlFilterQueryDraftParams {
   id: string;
   filterQuery: SerializedFilterQuery;
   timelineById: TimelineById;
 }
 
-export const applyKqlFilterQuery = ({
+export const applyKqlFilterQueryDraft = ({
   id,
   filterQuery,
   timelineById,
-}: ApplyKqlFilterQueryParams): TimelineById => {
+}: ApplyKqlFilterQueryDraftParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {

@@ -57,17 +57,6 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
   return val;
 };
 
-export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
-  if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
-    try {
-      esKuery.fromKueryExpression(kqlFilterQuery.expression);
-    } catch (err) {
-      return false;
-    }
-  }
-  return true;
-};
-
 const escapeWhitespace = (val: string) =>
   val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 

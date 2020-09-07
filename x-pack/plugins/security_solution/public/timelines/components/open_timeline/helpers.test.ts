@@ -282,7 +282,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -380,7 +379,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -478,7 +476,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -574,7 +571,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -708,7 +704,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -874,7 +869,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -1005,7 +999,6 @@ describe('helpers', () => {
             kuery: null,
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
@@ -1028,7 +1021,6 @@ describe('helpers', () => {
             kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
