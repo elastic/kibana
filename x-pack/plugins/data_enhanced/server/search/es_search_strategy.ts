@@ -92,10 +92,6 @@ async function asyncSearch(
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-
-  const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
-
   // Only report partial results every 64 shards; this should be reduced when we actually display partial results
   const batchedReduceSize = request.id ? undefined : 64;
 
@@ -110,13 +106,17 @@ async function asyncSearch(
     ...queryParams,
   });
 
-  // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
-  const esResponse = await client.transport.request({
-    method,
-    path,
-    body,
-    querystring,
-  });
+  let esResponse;
+  if (!request.id) {
+    esResponse = await client.asyncSearch.submit({
+      body,
+      ...querystring,
+    });
+  } else {
+    esResponse = await client.asyncSearch.get({
+      id: request.id,
+    });
+  }
 
   const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
   return {
