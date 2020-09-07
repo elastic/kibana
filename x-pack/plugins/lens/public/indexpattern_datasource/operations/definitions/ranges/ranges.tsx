@@ -15,8 +15,6 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 
 export const DEFAULT_INTERVAL = 1000;
-// TODO: find a way to read the UI settings config from here
-export const HISTOGRAM_MAX_BARS = 100;
 
 export const MODES = {
   Range: 'range',
@@ -36,7 +34,6 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     type: MODES_TYPES;
     interval: 'auto' | number;
-    maxBars: number;
     intervalBase?: number;
     ranges: RangeType[];
   };
@@ -80,7 +77,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
         type: MODES.Histogram,
         interval: autoInterval,
         ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-        maxBars: HISTOGRAM_MAX_BARS, // TODO: need to make an async request here to workout the right number
       },
     };
   },
@@ -117,7 +113,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
         field: column.sourceField,
         ranges: column.params.ranges.map(({ label, ...rawRange }) => ({ ...rawRange })),
         interval: column.params.interval,
-        maxBars: column.params.maxBars,
         intervalBase: column.params.intervalBase,
         drop_partials: false,
         min_doc_count: 0,

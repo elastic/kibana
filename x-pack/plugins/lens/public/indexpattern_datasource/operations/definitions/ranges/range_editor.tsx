@@ -6,7 +6,6 @@
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import {
   DraggableLocation,
   EuiButtonEmpty,
@@ -25,20 +24,12 @@ import {
   EuiLink,
   EuiText,
   EuiPopover,
-  EuiRange,
   EuiForm,
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
 import { isAutoInterval } from '../../../../../../../../src/plugins/data/common';
-import {
-  RangeType,
-  MODES,
-  RangeColumnParams,
-  UpdateParamsFnType,
-  MODES_TYPES,
-  HISTOGRAM_MAX_BARS,
-} from './ranges';
+import { RangeType, MODES, RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 
 // Taken from the Visualize editor
 const FROM_PLACEHOLDER = '\u2212\u221E';
@@ -59,19 +50,15 @@ const getSafeLabel = (range: RangeType) =>
 // It should make the user able to choose how many buckets he wants
 const BaseRangeEditor = ({
   autoIntervalEnabled,
-  maxBars,
   interval,
   onToggleEditor,
   toggleAutoInterval,
-  onMaxBarsChange,
   onIntervalChange,
 }: {
   autoIntervalEnabled: boolean;
-  maxBars: number;
   interval: number;
   onToggleEditor: () => void;
   toggleAutoInterval: (enabled: boolean) => void;
-  onMaxBarsChange: (newMaxBars: number) => void;
   onIntervalChange: (newInterval: number) => void;
 }) => {
   const sectionLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
@@ -98,32 +85,17 @@ const BaseRangeEditor = ({
         <>
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
-              {autoIntervalEnabled ? (
-                <EuiRange
-                  min={1}
-                  max={HISTOGRAM_MAX_BARS}
-                  step={1}
-                  value={maxBars}
-                  onChange={({ target }) =>
-                    onMaxBarsChange(Number(get(target, 'value', HISTOGRAM_MAX_BARS)))
-                  }
-                  showLabels
-                  showInput="inputWithPopover"
-                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
-                    defaultMessage: 'Max intervals',
-                  })}
-                />
-              ) : (
-                <EuiFieldNumber
-                  data-test-subj="lens-range-interval-field"
-                  value={interval}
-                  onChange={({ target }) => onIntervalChange(Number(target.value))}
-                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                    defaultMessage: 'Min Interval',
-                  })}
-                  min={0}
-                />
-              )}
+              <EuiFieldNumber
+                data-test-subj="lens-range-interval-field"
+                value={autoIntervalEnabled ? '' : interval}
+                onChange={({ target }) => onIntervalChange(Number(target.value))}
+                prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
+                  defaultMessage: 'Min Interval',
+                })}
+                min={0}
+                placeholder={autoIntervalEnabled ? 'Auto' : ''}
+                disabled={autoIntervalEnabled}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -427,11 +399,7 @@ export const RangeEditor = ({
     <BaseRangeEditor
       autoIntervalEnabled={isAutoIntervalEnabled}
       interval={numericIntervalValue}
-      maxBars={params.maxBars}
       toggleAutoInterval={onAutoIntervalToggle}
-      onMaxBarsChange={(maxBars: number) => {
-        setParam('maxBars', maxBars);
-      }}
       onIntervalChange={(interval: number) => {
         setParam('interval', interval);
       }}
