@@ -493,7 +493,9 @@ export function XYChart({
 
           if (!xAccessor) {
             rows.forEach((row) => {
-              row.unifiedX = '(empty)';
+              row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
+                defaultMessage: '(empty)',
+              });
             });
           }
 
