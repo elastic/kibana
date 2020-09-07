@@ -9714,8 +9714,6 @@
     "xpack.lens.pieChart.fitInsideOnlyLabel": "仅内部",
     "xpack.lens.pieChart.hiddenNumbersLabel": "在图表中隐藏",
     "xpack.lens.pieChart.labelPositionLabel": "标签位置",
-    "xpack.lens.pieChart.legendDisplayLabel": "图例显示",
-    "xpack.lens.pieChart.legendDisplayLegend": "图例显示",
     "xpack.lens.pieChart.nestedLegendLabel": "嵌套图例",
     "xpack.lens.pieChart.numberLabels": "标签值",
     "xpack.lens.pieChart.percentDecimalsLabel": "百分比的小数位数",
