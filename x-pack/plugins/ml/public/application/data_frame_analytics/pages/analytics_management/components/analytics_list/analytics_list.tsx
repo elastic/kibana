@@ -218,7 +218,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   if (analytics.length === 0) {
     return (
-      <>
+      <div data-test-subj="mlAnalyticsJobList">
         <AnalyticsEmptyPrompt
           isManagementTable={isManagementTable}
           disabled={disabled}
@@ -227,7 +227,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
-      </>
+      </div>
     );
   }
 
@@ -251,7 +251,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
 
   return (
-    <>
+    <div data-test-subj="mlAnalyticsJobList">
       {modals}
       {!isManagementTable && <EuiSpacer size="m" />}
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -301,6 +301,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       {isSourceIndexModalVisible === true && (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
-    </>
+    </div>
   );
 };

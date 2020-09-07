@@ -481,7 +481,7 @@ export class IndexPattern implements IIndexPattern {
       fields: this.mapping.fields._serialize!(this.fields),
       fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
       type: this.type,
-      typeMeta: this.mapping.typeMeta._serialize!(this.mapping),
+      typeMeta: this.mapping.typeMeta._serialize!(this.typeMeta),
     };
   }
 
