@@ -266,6 +266,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         {!policyRepositoryExists && (
           <>
             <EuiCallOut
+              data-test-subj="repositoryNotFoundWarning"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
