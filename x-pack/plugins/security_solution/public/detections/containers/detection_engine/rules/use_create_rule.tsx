@@ -7,20 +7,20 @@
 import { useEffect, useState, Dispatch } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
-import { addRule as persistRule } from './api';
+import { createRule } from './api';
 import * as i18n from './translations';
-import { NewRule } from './types';
 
-interface PersistRuleReturn {
+interface CreateRuleReturn {
   isLoading: boolean;
   isSaved: boolean;
 }
 
-export type ReturnPersistRule = [PersistRuleReturn, Dispatch<NewRule | null>];
+export type ReturnCreateRule = [CreateRuleReturn, Dispatch<CreateRulesSchema | null>];
 
-export const usePersistRule = (): ReturnPersistRule => {
-  const [rule, setRule] = useState<NewRule | null>(null);
+export const useCreateRule = (): ReturnCreateRule => {
+  const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
@@ -33,7 +33,7 @@ export const usePersistRule = (): ReturnPersistRule => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await persistRule({ rule, signal: abortCtrl.signal });
+          await createRule({ rule, signal: abortCtrl.signal });
           if (isSubscribed) {
             setIsSaved(true);
           }
