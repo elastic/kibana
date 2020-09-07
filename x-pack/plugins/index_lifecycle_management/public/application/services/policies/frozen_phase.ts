@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash';
 import { serializedPhaseInitialization } from '../../constants';
-import { AllocateAction, FrozenPhase, SerializedFrozenPhase } from './types';
+import { AllocateAction, FrozenPhase, SerializedFrozenPhase } from '../../../../common/types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,
@@ -90,7 +90,6 @@ export const frozenPhaseToES = (
     };
   } else {
     if (esPhase.actions.allocate) {
-      // @ts-expect-error
       delete esPhase.actions.allocate.require;
     }
   }
@@ -100,7 +99,6 @@ export const frozenPhaseToES = (
     esPhase.actions.allocate.number_of_replicas = parseInt(phase.selectedReplicaCount, 10);
   } else {
     if (esPhase.actions.allocate) {
-      // @ts-expect-error
       delete esPhase.actions.allocate.number_of_replicas;
     }
   }
