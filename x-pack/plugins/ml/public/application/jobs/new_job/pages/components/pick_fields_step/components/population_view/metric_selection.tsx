@@ -159,7 +159,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

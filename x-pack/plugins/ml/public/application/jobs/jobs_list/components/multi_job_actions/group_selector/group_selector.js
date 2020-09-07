@@ -160,7 +160,7 @@ export class GroupSelector extends Component {
           // check success of each job update
           if (resp.hasOwnProperty(jobId)) {
             if (resp[jobId].success === false) {
-              mlMessageBarService.notify.error(resp[jobId].error);
+              mlMessageBarService.error(resp[jobId].error);
               success = false;
             }
           }
@@ -175,7 +175,7 @@ export class GroupSelector extends Component {
         }
       })
       .catch((error) => {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         console.error(error);
       });
   };

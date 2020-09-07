@@ -68,7 +68,7 @@ export function useEstimateBucketSpan() {
     const { name, error, message } = await ml.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
-      mlMessageBarService.notify.error(message);
+      mlMessageBarService.error(message);
     } else {
       jobCreator.bucketSpan = name;
       jobCreatorUpdate();

@@ -94,7 +94,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
         setFieldExamples(null);
         setValidationChecks([]);
         setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
       }
     } else {
       setFieldExamples(null);

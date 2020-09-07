@@ -43,7 +43,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
           const tempFieldValues = await chartLoader.loadFieldExampleValues(jobCreator.splitField);
           setFieldValues(tempFieldValues);
         } catch (error) {
-          mlMessageBarService.notify.error(error);
+          mlMessageBarService.error(error);
         }
       }
     })();
@@ -75,7 +75,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartsData({});
       }
       setLoadingData(false);

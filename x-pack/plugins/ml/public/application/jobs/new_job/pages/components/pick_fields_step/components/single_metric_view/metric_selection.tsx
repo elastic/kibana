@@ -93,7 +93,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           setLineChartData(resp);
         }
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartData({});
       }
       setLoadingData(false);

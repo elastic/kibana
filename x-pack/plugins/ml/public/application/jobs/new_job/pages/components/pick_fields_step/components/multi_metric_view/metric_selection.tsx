@@ -109,7 +109,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         .loadFieldExampleValues(splitField)
         .then(setFieldValues)
         .catch((error) => {
-          mlMessageBarService.notify.error(error);
+          mlMessageBarService.error(error);
         });
     } else {
       setFieldValues([]);
@@ -138,7 +138,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

@@ -9,6 +9,7 @@ import { KbnError } from '../../../../../../src/plugins/kibana_utils/public';
 export class MLRequestFailure extends KbnError {
   origError: any;
   resp: any;
+  stack: any;
   // takes an Error object and and optional response object
   // if error is falsy (null) the response object will be used
   // notify will show the full expandable stack trace of the response if a response object is used and no error is passed in.
@@ -18,5 +19,8 @@ export class MLRequestFailure extends KbnError {
 
     this.origError = error;
     this.resp = typeof resp === 'string' ? JSON.parse(resp) : resp;
+    if (resp.body) {
+      this.stack = JSON.stringify(resp.body, null, 2);
+    }
   }
 }

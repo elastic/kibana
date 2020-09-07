@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { MLRequestFailure } from '../../util/ml_error';
-import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 function errorNotify(text, resp) {
   let err = null;
-  if (typeof text === 'object' && text.response !== undefined) {
-    resp = text.response;
+  if (typeof text === 'object') {
+    err = new Error(extractErrorMessage(text));
   } else if (typeof text === 'object' && text.message !== undefined) {
     err = new Error(text.message);
   } else {
@@ -19,7 +20,7 @@ function errorNotify(text, resp) {
   }
 
   const toastNotifications = getToastNotifications();
-  toastNotifications.addError(new MLRequestFailure(err, resp), {
+  toastNotifications.addError(new MLRequestFailure(err, resp ?? text), {
     title: i18n.translate('xpack.ml.messagebarService.errorTitle', {
       defaultMessage: 'An error has occurred',
     }),
@@ -27,7 +28,5 @@ function errorNotify(text, resp) {
 }
 
 export const mlMessageBarService = {
-  notify: {
-    error: errorNotify,
-  },
+  error: errorNotify,
 };

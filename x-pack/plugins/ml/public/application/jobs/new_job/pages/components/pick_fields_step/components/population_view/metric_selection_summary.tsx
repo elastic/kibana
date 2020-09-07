@@ -81,7 +81,7 @@ export const PopulationDetectorsSummary: FC = () => {
 
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartsData({});
       }
       setLoadingData(false);

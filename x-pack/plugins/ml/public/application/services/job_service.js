@@ -20,7 +20,6 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 
-const msgs = mlMessageBarService;
 let jobs = [];
 let datafeedIds = {};
 
@@ -117,7 +116,7 @@ class JobService {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-
+      console.log(12222);
       ml.getJobs()
         .then((resp) => {
           jobs = resp.jobs;
@@ -160,7 +159,6 @@ class JobService {
                 }
                 processBasicJobInfo(this, jobs);
                 this.jobs = jobs;
-                createJobStats(this.jobs, this.jobStats);
                 resolve({ jobs: this.jobs });
               });
             })
@@ -174,12 +172,7 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
-            defaultMessage: 'Jobs list could not be retrieved',
-          })
-        );
-        msgs.notify.error('', err);
+        mlMessageBarService.error(err);
         reject({ jobs, err });
       }
     });
@@ -246,7 +239,6 @@ class JobService {
                     }
                   }
                   this.jobs = jobs;
-                  createJobStats(this.jobs, this.jobStats);
                   resolve({ jobs: this.jobs });
                 });
               })
@@ -261,12 +253,7 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
-            defaultMessage: 'Jobs list could not be retrieved',
-          })
-        );
-        msgs.notify.error('', err);
+        mlMessageBarService.error(err);
         reject({ jobs, err });
       }
     });
@@ -307,12 +294,7 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.datafeedsListCouldNotBeRetrievedErrorMessage', {
-            defaultMessage: 'datafeeds list could not be retrieved',
-          })
-        );
-        msgs.notify.error('', err);
+        mlMessageBarService.error(err);
         reject({ jobs, err });
       }
     });
@@ -591,7 +573,7 @@ class JobService {
       }
 
       ml.startDatafeed({
-        datafeedId,
+        datafeedId: datafeedId + 22,
         start,
         end,
       })
@@ -600,7 +582,7 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error starting datafeed:', err);
-          msgs.notify.error(
+          mlMessageBarService.error(
             i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
               defaultMessage: 'Could not start datafeed for {jobId}',
               values: { jobId },
@@ -624,24 +606,20 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error stopping datafeed:', err);
-          const couldNotStopDatafeedErrorMessage = i18n.translate(
-            'xpack.ml.jobService.couldNotStopDatafeedErrorMessage',
-            {
+          mlMessageBarService.error(
+            i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
               defaultMessage: 'Could not stop datafeed for {jobId}',
               values: { jobId },
-            }
+            }),
+            err
           );
-
           if (err.statusCode === 500) {
-            msgs.notify.error(couldNotStopDatafeedErrorMessage);
-            msgs.notify.error(
+            mlMessageBarService.error(
               i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
                 defaultMessage:
                   'Request may have timed out and may still be running in the background.',
               })
             );
-          } else {
-            msgs.notify.error(couldNotStopDatafeedErrorMessage, err);
           }
           reject(err);
         });
@@ -808,51 +786,6 @@ function processBasicJobInfo(localJobService, jobsList) {
   localJobService.customUrlsByJob = customUrlsByJob;
 
   return processedJobsList;
-}
-
-// Loop through the jobs list and create basic stats
-// stats are displayed along the top of the Jobs Management page
-function createJobStats(jobsList, jobStats) {
-  jobStats.activeNodes.value = 0;
-  jobStats.total.value = 0;
-  jobStats.open.value = 0;
-  jobStats.closed.value = 0;
-  jobStats.failed.value = 0;
-  jobStats.activeDatafeeds.value = 0;
-
-  // object to keep track of nodes being used by jobs
-  const mlNodes = {};
-  let failedJobs = 0;
-
-  each(jobsList, (job) => {
-    if (job.state === 'opened') {
-      jobStats.open.value++;
-    } else if (job.state === 'closed') {
-      jobStats.closed.value++;
-    } else if (job.state === 'failed') {
-      failedJobs++;
-    }
-
-    if (job.datafeed_config && job.datafeed_config.state === 'started') {
-      jobStats.activeDatafeeds.value++;
-    }
-
-    if (job.node && job.node.name) {
-      mlNodes[job.node.name] = {};
-    }
-  });
-
-  jobStats.total.value = jobsList.length;
-
-  // // Only show failed jobs if it is non-zero
-  if (failedJobs) {
-    jobStats.failed.value = failedJobs;
-    jobStats.failed.show = true;
-  } else {
-    jobStats.failed.show = false;
-  }
-
-  jobStats.activeNodes.value = Object.keys(mlNodes).length;
 }
 
 function createResultsUrlForJobs(jobsList, resultsPage) {

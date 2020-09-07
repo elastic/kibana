@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { Datafeed } from './datafeed';
 import { DatafeedStats } from './datafeed_stats';
 import { Job } from './job';

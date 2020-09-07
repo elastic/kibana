@@ -498,7 +498,6 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldName,
           splitFieldValue,
         } = request.body;
-
         const { newJobLineChart } = jobServiceProvider(client);
         const resp = await newJobLineChart(
           indexPatternTitle,

@@ -63,7 +63,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
           setLineChartData(resp);
         }
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        mlMessageBarService.error(error);
         setLineChartData({});
       }
       setLoadingData(false);

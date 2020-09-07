@@ -17,7 +17,6 @@ import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
-import { extractErrorMessage } from '../../../../../common/util/errors';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -61,7 +60,7 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
+      mlMessageBarService.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
@@ -82,7 +81,7 @@ export function stopDatafeeds(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
+      mlMessageBarService.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
@@ -220,7 +219,7 @@ export async function cloneJob(jobId) {
 
     window.location.href = '#/jobs/new_job';
   } catch (error) {
-    mlMessageBarService.notify.error(extractErrorMessage(error));
+    mlMessageBarService.error(error);
     const toastNotifications = getToastNotifications();
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
@@ -241,7 +240,7 @@ export function closeJobs(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
+      mlMessageBarService.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
@@ -262,7 +261,7 @@ export function deleteJobs(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
+      mlMessageBarService.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {

@@ -5,9 +5,7 @@
  */
 
 declare interface MlMessageBarService {
-  notify: {
-    error(text: any, resp?: any): void;
-  };
+  error(text: any, resp?: any): void;
 }
 
 export const mlMessageBarService: MlMessageBarService;
