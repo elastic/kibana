@@ -17,6 +17,4 @@
  * under the License.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, nodeTypes } from '../../../plugins/data/server';
-
-export { esKuery, nodeTypes };
+export { esKuery } from '../../../plugins/data/server';

@@ -17,7 +17,7 @@
  * under the License.
  */
 // @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import { esKuery } from '../../es_query';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 

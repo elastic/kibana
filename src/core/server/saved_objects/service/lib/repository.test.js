@@ -25,8 +25,8 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-// @ts-expect-error no ts
-import { nodeTypes } from '../../es_query';
+import { esKuery } from '../../es_query';
+const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
