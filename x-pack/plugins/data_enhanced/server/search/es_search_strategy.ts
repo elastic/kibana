@@ -70,9 +70,8 @@ export const enhancedEsSearchStrategyProvider = (
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.debug(`cancel ${id}`);
-    await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'DELETE',
-      path: encodeURI(`/_async_search/${id}`),
+    await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
+      id,
     });
   };
 
