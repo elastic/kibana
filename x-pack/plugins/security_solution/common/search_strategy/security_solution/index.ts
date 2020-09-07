@@ -31,6 +31,11 @@ import {
   NetworkTopNFlowRequestOptions,
 } from './network';
 import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+} from './matrix_histogram';
+import {
   DocValueFields,
   TimerangeInput,
   SortField,
@@ -39,9 +44,10 @@ import {
 } from '../common';
 
 export * from './hosts';
+export * from './matrix_histogram';
 export * from './network';
 
-export type FactoryQueryTypes = HostsQueries | NetworkQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -81,6 +87,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -101,4 +109,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
   : never;
