@@ -4,38 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { noop } from 'lodash/fp';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { shallowEqual, useSelector } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
+import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  GetNetworkHttpQuery,
-  NetworkHttpEdges,
-  NetworkHttpSortField,
-  PageInfoPaginated,
-} from '../../../graphql/types';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
-import { withKibana, WithKibanaProps } from '../../../common/lib/kibana';
+import { inputsModel, State } from '../../../common/store';
+import { useKibana } from '../../../common/lib/kibana';
+import { createFilter } from '../../../common/containers/helpers';
+import { NetworkHttpEdges, PageInfoPaginated } from '../../../graphql/types';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import {
-  QueryTemplatePaginated,
-  QueryTemplatePaginatedProps,
-} from '../../../common/containers/query_template_paginated';
 import { networkModel, networkSelectors } from '../../store';
-import { networkHttpQuery } from './index.gql_query';
+import {
+  NetworkQueries,
+  NetworkHttpRequestOptions,
+  NetworkHttpStrategyResponse,
+  SortField,
+} from '../../../../common/search_strategy';
+import { AbortError } from '../../../../../../../src/plugins/data/common';
+import * as i18n from './translations';
+import { InspectResponse } from '../../../types';
+import { getInspectResponse } from '../../../helpers';
 
 const ID = 'networkHttpQuery';
 
 export interface NetworkHttpArgs {
   id: string;
   ip?: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
-  loading: boolean;
   loadPage: (newActivePage: number) => void;
   networkHttp: NetworkHttpEdges[];
   pageInfo: PageInfoPaginated;
@@ -43,118 +42,161 @@ export interface NetworkHttpArgs {
   totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkHttpArgs) => React.ReactNode;
+interface UseNetworkHttp {
+  id?: string;
   ip?: string;
   type: networkModel.NetworkType;
+  filterQuery?: ESTermQuery | string;
+  endDate: string;
+  startDate: string;
+  skip: boolean;
 }
 
-export interface NetworkHttpComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-  sort: NetworkHttpSortField;
-}
-
-type NetworkHttpProps = OwnProps & NetworkHttpComponentReduxProps & WithKibanaProps;
-
-class NetworkHttpComponentQuery extends QueryTemplatePaginated<
-  NetworkHttpProps,
-  GetNetworkHttpQuery.Query,
-  GetNetworkHttpQuery.Variables
-> {
-  public render() {
-    const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      id = ID,
-      ip,
-      isInspected,
-      kibana,
-      limit,
-      skip,
-      sourceId,
-      sort,
-      startDate,
-    } = this.props;
-    const variables: GetNetworkHttpQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-      filterQuery: createFilter(filterQuery),
-      inspect: isInspected,
-      ip,
-      pagination: generateTablePaginationOptions(activePage, limit),
-      sort,
-      sourceId,
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-    };
-    return (
-      <Query<GetNetworkHttpQuery.Query, GetNetworkHttpQuery.Variables>
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        query={networkHttpQuery}
-        skip={skip}
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const networkHttp = getOr([], `source.NetworkHttp.edges`, data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
-            variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  NetworkHttp: {
-                    ...fetchMoreResult.source.NetworkHttp,
-                    edges: [...fetchMoreResult.source.NetworkHttp.edges],
-                  },
-                },
-              };
-            },
-          }));
-          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
-          return children({
-            id,
-            inspect: getOr(null, 'source.NetworkHttp.inspect', data),
-            isInspected,
-            loading: isLoading,
-            loadPage: this.wrappedLoadMore,
-            networkHttp,
-            pageInfo: getOr({}, 'source.NetworkHttp.pageInfo', data),
-            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            totalCount: getOr(-1, 'source.NetworkHttp.totalCount', data),
-          });
-        }}
-      </Query>
-    );
-  }
-}
-
-const makeMapStateToProps = () => {
+export const useNetworkHttp = ({
+  endDate,
+  filterQuery,
+  id = ID,
+  ip,
+  skip,
+  startDate,
+  type,
+}: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
   const getHttpSelector = networkSelectors.httpSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  return (state: State, { id = ID, type }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getHttpSelector(state, type),
-      isInspected,
-    };
-  };
-};
+  const { activePage, limit, sort } = useSelector(
+    (state: State) => getHttpSelector(state, type),
+    shallowEqual
+  );
+  const { data, notifications, uiSettings } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const [loading, setLoading] = useState(false);
 
-export const NetworkHttpQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(NetworkHttpComponentQuery);
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions>({
+    defaultIndex,
+    factoryQueryType: NetworkQueries.http,
+    filterQuery: createFilter(filterQuery),
+    ip,
+    pagination: generateTablePaginationOptions(activePage, limit),
+    sort: sort as SortField,
+    timerange: {
+      interval: '12h',
+      from: startDate ? startDate : '',
+      to: endDate ? endDate : new Date(Date.now()).toISOString(),
+    },
+  });
+
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      setHostRequest((prevRequest) => {
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [limit]
+  );
+
+  const [networkHttpResponse, setNetworkHttpResponse] = useState<NetworkHttpArgs>({
+    networkHttp: [],
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    loadPage: wrappedLoadMore,
+    pageInfo: {
+      activePage: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+  });
+
+  const networkHttpSearch = useCallback(
+    (request: NetworkHttpRequestOptions) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<NetworkHttpRequestOptions, NetworkHttpStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (!response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setNetworkHttpResponse((prevResponse) => ({
+                    ...prevResponse,
+                    networkHttp: response.edges,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_HTTP);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_NETWORK_HTTP,
+                  text: msg.message,
+                });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
+
+  useEffect(() => {
+    setHostRequest((prevRequest) => {
+      const myRequest = {
+        ...prevRequest,
+        defaultIndex,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        sort: sort as SortField,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+
+  useEffect(() => {
+    networkHttpSearch(networkHttpRequest);
+  }, [networkHttpRequest, networkHttpSearch]);
+
+  return [loading, networkHttpResponse];
+};

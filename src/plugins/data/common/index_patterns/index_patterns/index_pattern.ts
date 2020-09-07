@@ -26,11 +26,12 @@ import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IIndexPattern,
+  FieldTypeUnknownError,
   FieldFormatNotFoundError,
 } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
+import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -126,9 +127,9 @@ export class IndexPattern implements IIndexPattern {
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
-
     // initialize functionality
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onNotification);
+    this.fields = fieldList([], this.shortDotsEnable);
+
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
@@ -154,6 +155,22 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
+  }
+
+  private unknownFieldErrorNotification(
+    fieldType: string,
+    fieldName: string,
+    indexPatternTitle: string
+  ) {
+    const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+      values: { type: fieldType },
+      defaultMessage: 'Unknown field type {type}',
+    });
+    const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
+      values: { name: fieldName, title: indexPatternTitle },
+      defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+    });
+    this.onNotification({ title, text, color: 'danger', iconType: 'alert' });
   }
 
   private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
@@ -199,13 +216,21 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        this.fields.replaceAll(specs);
+        try {
+          this.fields.replaceAll(specs);
+        } catch (err) {
+          if (err instanceof FieldTypeUnknownError) {
+            this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+          } else {
+            throw err;
+          }
+        }
       }
     }
   }
 
-  private fieldSpecsToFieldFormatMap = (fieldList: IndexPatternSpec['fields'] = []) =>
-    fieldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
+  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = []) =>
+    fldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
       if (fieldSpec.format) {
         col[fieldSpec.name] = { ...fieldSpec.format };
       }
@@ -250,7 +275,15 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    try {
+      this.fields.replaceAll(spec.fields || []);
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
+    }
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -372,7 +405,7 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec(),
+      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
     };
   }
@@ -392,19 +425,27 @@ export class IndexPattern implements IIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.add({
-      name,
-      script,
-      type: fieldType,
-      scripted: true,
-      lang,
-      aggregatable: true,
-      searchable: true,
-      count: 0,
-      readFromDocValues: false,
-    });
+    try {
+      this.fields.add({
+        name,
+        script,
+        type: fieldType,
+        scripted: true,
+        lang,
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
 
-    await this.save();
+      await this.save();
+    }
   }
 
   removeScriptedField(fieldName: string) {
@@ -491,7 +532,7 @@ export class IndexPattern implements IIndexPattern {
       fields: this.mapping.fields._serialize!(this.fields),
       fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
       type: this.type,
-      typeMeta: this.mapping.typeMeta._serialize!(this.mapping),
+      typeMeta: this.mapping.typeMeta._serialize!(this.typeMeta),
     };
   }
 
@@ -623,7 +664,15 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
-    this.fields.replaceAll([...fields, ...scripted]);
+    try {
+      this.fields.replaceAll([...fields, ...scripted]);
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
+    }
   }
 
   refreshFields() {
@@ -652,13 +701,5 @@ export class IndexPattern implements IIndexPattern {
           }),
         });
       });
-  }
-
-  toJSON() {
-    return this.id;
-  }
-
-  toString() {
-    return '' + this.toJSON();
   }
 }

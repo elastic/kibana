@@ -54,6 +54,16 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await testSubjects.existOrFail('mlFileDataVisFileStatsPanel');
     },
 
+    async assertImportButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFileDataVisOpenImportPageButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
     async navigateToFileImport() {
       await testSubjects.click('mlFileDataVisOpenImportPageButton');
       await testSubjects.existOrFail('mlPageFileDataVisImport');

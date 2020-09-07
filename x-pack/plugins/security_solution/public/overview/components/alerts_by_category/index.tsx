@@ -26,7 +26,7 @@ import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/alerts_viewer/histogram_configs';
-import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
+import { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
@@ -93,7 +93,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     [goToHostAlerts, formatUrl]
   );
 
-  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const alertsByCategoryHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:

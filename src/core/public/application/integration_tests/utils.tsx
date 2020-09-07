@@ -20,11 +20,10 @@
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { App, LegacyApp, AppMountParameters } from '../types';
-import { EitherApp, MockedMounter, MockedMounterTuple, Mountable } from '../test_types';
+import { AppMountParameters } from '../types';
+import { MockedMounterTuple, Mountable } from '../test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
@@ -55,7 +54,7 @@ export const createAppMounter = ({
   appRoute?: string;
   exactRoute?: boolean;
   extraMountHook?: (params: AppMountParameters) => void;
-}): MockedMounterTuple<App> => {
+}): MockedMounterTuple => {
   const unmount = jest.fn();
   return [
     appId,
@@ -63,7 +62,6 @@ export const createAppMounter = ({
       mounter: {
         appRoute,
         appBasePath: appRoute,
-        legacy: false,
         exactRoute,
         mount: jest.fn(async (params: AppMountParameters) => {
           const { appBasePath: basename, element } = params;
@@ -82,24 +80,6 @@ export const createAppMounter = ({
   ];
 };
 
-export const createLegacyAppMounter = (
-  appId: string,
-  legacyMount: MockedMounter<LegacyApp>['mount']
-): MockedMounterTuple<LegacyApp> => [
-  appId,
-  {
-    mounter: {
-      appRoute: `/app/${appId.split(':')[0]}`,
-      appBasePath: `/app/${appId.split(':')[0]}`,
-      unmountBeforeMounting: true,
-      legacy: true,
-      exactRoute: false,
-      mount: legacyMount,
-    },
-    unmount: jest.fn(),
-  },
-];
-
-export function getUnmounter(app: Mountable<EitherApp>) {
+export function getUnmounter(app: Mountable) {
   return app.mounter.mount.mock.results[0].value;
 }

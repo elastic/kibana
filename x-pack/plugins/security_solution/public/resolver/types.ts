@@ -194,53 +194,68 @@ export interface VisibleEntites {
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
+export interface TreeFetcherParameters {
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  databaseDocumentID: string;
+
+  /**
+   * The indices that the backend will use to search for the document ID.
+   */
+  indices: string[];
+}
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
-  /**
-   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
-   */
-  readonly databaseDocumentID?: string;
-  /**
-   * The id used for the pending request, if there is one.
-   */
-  readonly pendingRequestDatabaseDocumentID?: string;
+
+  readonly tree: {
+    /**
+     * The parameters passed from the resolver properties
+     */
+    readonly currentParameters?: TreeFetcherParameters;
+
+    /**
+     * The id used for the pending request, if there is one.
+     */
+    readonly pendingRequestParameters?: TreeFetcherParameters;
+    /**
+     * The parameters and response from the last successful request.
+     */
+    readonly lastResponse?: {
+      /**
+       * The id used in the request.
+       */
+      readonly parameters: TreeFetcherParameters;
+    } & (
+      | {
+          /**
+           * If a response with a success code was received, this is `true`.
+           */
+          readonly successful: true;
+          /**
+           * The ResolverTree parsed from the response.
+           */
+          readonly result: ResolverTree;
+        }
+      | {
+          /**
+           * If the request threw an exception or the response had a failure code, this will be false.
+           */
+          readonly successful: false;
+        }
+    );
+  };
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   readonly resolverComponentInstanceID?: string;
-
-  /**
-   * The parameters and response from the last successful request.
-   */
-  readonly lastResponse?: {
-    /**
-     * The id used in the request.
-     */
-    readonly databaseDocumentID: string;
-  } & (
-    | {
-        /**
-         * If a response with a success code was received, this is `true`.
-         */
-        readonly successful: true;
-        /**
-         * The ResolverTree parsed from the response.
-         */
-        readonly result: ResolverTree;
-      }
-    | {
-        /**
-         * If the request threw an exception or the response had a failure code, this will be false.
-         */
-        readonly successful: false;
-      }
-  );
 }
 
 /**
@@ -495,11 +510,6 @@ export interface DataAccessLayer {
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
 
   /**
-   * Get an array of index patterns that contain events.
-   */
-  indexPatterns: () => string[];
-
-  /**
    * Get entities matching a document.
    */
   entities: (parameters: {
@@ -524,13 +534,18 @@ export interface ResolverProps {
    * The `_id` value of an event in ES.
    * Used as the origin of the Resolver graph.
    */
-  databaseDocumentID?: string;
+  databaseDocumentID: string;
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
+
+  /**
+   * Indices that the backend should use to find the originating document.
+   */
+  indices: string[];
 }
 
 /**

@@ -30,8 +30,8 @@ import { getSchema, getStubSchema } from './schema';
  *  @param  {Function} [logDeprecation]
  *  @return {Promise<undefined>}
  */
-export async function extendConfigService(spec, config, rootSettings, logDeprecation) {
-  const settings = await getSettings(spec, rootSettings, logDeprecation);
+export async function extendConfigService(spec, config, rootSettings) {
+  const settings = await getSettings(spec, rootSettings);
   const schema = await getSchema(spec);
   config.extendSchema(schema, settings, spec.getConfigPrefix());
 }

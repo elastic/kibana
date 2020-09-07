@@ -27,6 +27,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 /** @internal **/
 export interface HtmlContextTypeOptions {
   field?: any;
+  indexPattern?: any;
   hit?: Record<string, any>;
 }
 
