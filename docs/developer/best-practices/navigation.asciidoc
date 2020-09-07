@@ -25,9 +25,10 @@ to make sure there is no page reload when navigating from one place in {kib} to 
 
 **For example**, navigation using native browser apis:  
 
-```
+[source,js]
+----
 window.location.href = `/dashboard/my-dashboard`; // (try to avoid this)
-```
+----
 
 would cause a full page reload.
 
@@ -38,13 +39,15 @@ To navigate between different {kib} apps without a page reload there are apis in
 
 *Rendering a link to a different {kib} app on its own would also cause a full page reload:*
 
-```
+[source,typescript jsx]
+----
 const myLink = () => <a href={`/dashboard/my-dashboard`}> Go to Dashboard </a>; 
-```
+----
 
 A workaround would be to handle a click, prevent browser navigation and use `core.application.navigateToUrl` api:
 
-```
+[source,typescript jsx]
+----
 const MySPALink = () => 
     <a 
         href={`/dashboard/my-dashboard`} 
@@ -54,30 +57,33 @@ const MySPALink = () =>
         }}> 
         Go to Dashboard 
     </a>; 
-```
+----
+
 
 It is too much boilerplate to do this for each {kib} link in your app, so there is a handy HOC that helps with it: 
-{kib-repo}tree/{branch}src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks]. 
+{kib-repo}tree/{branch}src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks].
 
-```
+[source,typescript jsx]
+----
 const MyApp = () => 
   <RedirectAppLinks application={core.application}>
     {/*...*/}
         <a href={`/dashboard/my-dashboard`}>Go to Dashboard</a> {/* navigations using this link will happen in SPA friendly way */}
     {/*...*/}
   </RedirectAppLinks>
-```
+----
 
 
 [[deep-linking]]
 === Deep-linking into {kib} apps
 
 **Consider a {kib} app URL a part of app's plugin contract.** +
-Try to avoid hardcoding other app's URL in your app's code: 
+Try to avoid hardcoding other app's URL in your app's code:
 
-```
+[source,typescript jsx]
+----
 const urlToDashboarWithComplexState = `/dashboards#/view/0289f5d0-e61c-11ea-8c31-8bd3114ed023?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'URL%20Drilldown%20Demo',viewMode:view)`
-```
+----
 
 Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[a URL generator].
 Other apps should use those URL generators for deep-linking.
@@ -85,9 +91,10 @@ To get a better idea, take a look at {kib-repo}tree/{branch}/src/plugins/dashboa
 It allows specifying various dashboard app state pieces like: dashboardId, filters, query, time range and more.
 And then others should use it to generate a link a dashboard with specified state:
 
-```
+[source,typescript jsx]
+----
 const dashboardUrl = dashboardUrlGenerator.createUrl({dashboardId, filters, timeRange});
-```
+----
 
 There are two ways to access other's app URL generator in your code:
 
@@ -112,11 +119,12 @@ This is required to make sure `core` is aware of navigations triggered inside yo
 Relative links will be resolved relative to your app's route (`http://localhost5601/app/{your-app-id}`)
 and setting up internal links in your app in SPA friendly way would look something like:
 
-```
+[source,typescript jsx]
+----
 import {Link} from 'react-router-dom';
 
 const MyInternalLink = () => <Link to="/my-other-page"></Link>
-```
+----
 
 [[history-and-location]]
 === Working with history and browser location
@@ -147,7 +155,7 @@ Those query params follow the convention:
 * `_g` (*global*) - global UI state that should be shared and synced across multiple apps. common example from analyze apps: time range, refresh interval, *pinned* filters.
 * `_a` (*application*) - UI state scoped to current app.
 
-NOTE: Since finishing KP migration and entering SPA era, there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern in your app or if you prefer a single query param. The need for this separation is explained in <<preserve-state>>. 
+NOTE: After migrating to KP platform we got navigations without page reloads. Since then there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern or if you prefer a single query param or something else. The need for this separation earlier is explained in <<preserve-state>>. 
 
 There are utils to help you to implement such kind of state syncing.
 
