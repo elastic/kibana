@@ -4,7 +4,7 @@
     "declaration": true,
     "declarationDir": "./target/types",
     "outDir": "./target/out",
-    "stripInternal": true,
+    "stripInternal": false,
     "declarationMap": true,
     "types": [
       "jest",

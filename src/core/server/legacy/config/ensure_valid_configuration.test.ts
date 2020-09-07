@@ -19,7 +19,7 @@
 
 import { ensureValidConfiguration } from './ensure_valid_configuration';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
-import { configServiceMock } from '../../config/config_service.mock';
+import { configServiceMock } from '@kbn/config';
 
 jest.mock('./get_unused_config_keys');
 

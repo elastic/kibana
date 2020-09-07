@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { configServiceMock } from '@kbn/config';
 import { CoreContext } from './core_context';
 import { getEnvOptions } from './config/__mocks__/env';
 import { Env, IConfigService } from './config';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { configServiceMock } from './config/config_service.mock';
 import { ILoggingSystem } from './logging';
 
 function create({

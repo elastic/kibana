@@ -37,4 +37,5 @@ export {
   ConfigDeprecationFactory,
   EnvironmentMode,
   PackageInfo,
+  LegacyObjectToConfigAdapter,
 } from '@kbn/config';

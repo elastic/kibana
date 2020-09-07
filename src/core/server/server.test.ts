@@ -35,12 +35,11 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
 const env = new Env('.', getEnvOptions());
 const logger = loggingSystemMock.create();
