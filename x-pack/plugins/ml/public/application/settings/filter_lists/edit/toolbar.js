@@ -33,6 +33,7 @@ function renderToolsRight(
       disabled={selectedItemCount === 0 || canDeleteFilter === false}
       onClick={deleteSelectedItems}
       key="delete_item_btn"
+      data-test-subj="mlFilterListDeleteItemButton"
     >
       <FormattedMessage
         id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
