@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
+import { useNetworkTopNFlow } from '../../containers/network_top_n_flow';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
@@ -22,45 +22,37 @@ export const NetworkTopNFlowQueryTable = ({
   skip,
   startDate,
   type,
-}: NetworkWithIndexComponentsQueryTableProps) => (
-  <NetworkTopNFlowQuery
-    endDate={endDate}
-    filterQuery={filterQuery}
-    flowTarget={flowTarget}
-    ip={ip}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={type}
-  >
-    {({
-      id,
-      inspect,
-      isInspected,
-      loading,
-      loadPage,
-      networkTopNFlow,
-      pageInfo,
-      refetch,
-      totalCount,
-    }) => (
-      <NetworkTopNFlowTableManage
-        data={networkTopNFlow}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        flowTargeted={flowTarget}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        loading={loading}
-        loadPage={loadPage}
-        refetch={refetch}
-        setQuery={setQuery}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        totalCount={totalCount}
-        type={type}
-      />
-    )}
-  </NetworkTopNFlowQuery>
-);
+}: NetworkWithIndexComponentsQueryTableProps) => {
+  const [
+    loading,
+    { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
+  ] = useNetworkTopNFlow({
+    endDate,
+    filterQuery,
+    flowTarget,
+    ip,
+    skip,
+    startDate,
+    type,
+  });
+
+  return (
+    <NetworkTopNFlowTableManage
+      data={networkTopNFlow}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      flowTargeted={flowTarget}
+      id={id}
+      inspect={inspect}
+      isInspect={isInspected}
+      loading={loading}
+      loadPage={loadPage}
+      refetch={refetch}
+      setQuery={setQuery}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      totalCount={totalCount}
+      type={type}
+    />
+  );
+};
 
 NetworkTopNFlowQueryTable.displayName = 'NetworkTopNFlowQueryTable';
