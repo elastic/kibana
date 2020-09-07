@@ -79,7 +79,7 @@ describe('#toExpression', () => {
     ).toEqual('None');
   });
 
-  it('should default the showXAxisTitle, showYLeftAxisTitle and showYRightAxisTitle to true', () => {
+  it('should default the axisTitles visibility settings to true', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -96,9 +96,13 @@ describe('#toExpression', () => {
       },
       frame.datasourceLayers
     ) as Ast;
-    expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
-    expect(expression.chain[0].arguments.showYLeftAxisTitle[0]).toBe(true);
-    expect(expression.chain[0].arguments.showYRightAxisTitle[0]).toBe(true);
+    expect(
+      (expression.chain[0].arguments.axisTitlesVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [true],
+      yLeft: [true],
+      yRight: [true],
+    });
   });
 
   it('should not generate an expression when missing x', () => {

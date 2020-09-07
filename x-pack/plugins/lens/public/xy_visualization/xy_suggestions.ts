@@ -410,9 +410,11 @@ function buildSuggestion({
     xTitle: currentState?.xTitle,
     yLeftTitle: currentState?.yLeftTitle,
     yRightTitle: currentState?.yRightTitle,
-    showXAxisTitle: currentState?.showXAxisTitle ?? true,
-    showYLeftAxisTitle: currentState?.showYLeftAxisTitle ?? true,
-    showYRightAxisTitle: currentState?.showYRightAxisTitle ?? true,
+    axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
     tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
       x: true,
       yLeft: true,

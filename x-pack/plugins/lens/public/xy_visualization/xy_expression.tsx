@@ -118,22 +118,10 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes gridlines',
       }),
     },
-    showXAxisTitle: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showXAxisTitle.help', {
-        defaultMessage: 'Show x axis title',
-      }),
-    },
-    showYLeftAxisTitle: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showYLeftAxisTitle.help', {
-        defaultMessage: 'Show y left axis title',
-      }),
-    },
-    showYRightAxisTitle: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showYRighttAxisTitle.help', {
-        defaultMessage: 'Show y right axis title',
+    axisTitlesVisibilitySettings: {
+      types: ['lens_xy_axisTitlesVisibilityConfig'],
+      help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
+        defaultMessage: 'Show x and y axes titles',
       }),
     },
     layers: {
@@ -272,9 +260,11 @@ export function XYChart({
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
-  const showXAxisTitle = args.showXAxisTitle ?? true;
-  const showYLeftAxisTitle = args.showYLeftAxisTitle ?? true;
-  const showYRightAxisTitle = args.showYRightAxisTitle ?? true;
+  const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
   const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || {
     x: true,
     yLeft: true,
@@ -344,7 +334,8 @@ export function XYChart({
           index > 0 ? tickLabelsVisibilitySettings?.yRight : tickLabelsVisibilitySettings?.yLeft,
       },
       axisTitle: {
-        visible: index > 0 ? showYRightAxisTitle : showYLeftAxisTitle,
+        visible:
+          index > 0 ? axisTitlesVisibilitySettings?.yRight : axisTitlesVisibilitySettings?.yLeft,
       },
     };
     return style;
@@ -460,7 +451,7 @@ export function XYChart({
             visible: tickLabelsVisibilitySettings?.x,
           },
           axisTitle: {
-            visible: showXAxisTitle,
+            visible: axisTitlesVisibilitySettings.x,
           },
         }}
       />

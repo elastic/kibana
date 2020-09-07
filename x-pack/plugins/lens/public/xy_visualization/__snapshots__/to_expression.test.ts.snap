@@ -5,6 +5,28 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "axisTitlesVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    true,
+                  ],
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_axisTitlesVisibilityConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "fittingFunction": Array [
           "Carry",
         ],
@@ -94,15 +116,6 @@ Object {
             ],
             "type": "expression",
           },
-        ],
-        "showXAxisTitle": Array [
-          true,
-        ],
-        "showYLeftAxisTitle": Array [
-          true,
-        ],
-        "showYRightAxisTitle": Array [
-          true,
         ],
         "tickLabelsVisibilitySettings": Array [
           Object {

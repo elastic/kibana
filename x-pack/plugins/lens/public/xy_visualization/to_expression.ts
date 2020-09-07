@@ -119,9 +119,22 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
-          showXAxisTitle: [state.showXAxisTitle ?? true],
-          showYLeftAxisTitle: [state.showYLeftAxisTitle ?? true],
-          showYRightAxisTitle: [state.showYRightAxisTitle ?? true],
+          axisTitlesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  arguments: {
+                    x: [state?.axisTitlesVisibilitySettings?.x ?? true],
+                    yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
           tickLabelsVisibilitySettings: [
             {
               type: 'expression',

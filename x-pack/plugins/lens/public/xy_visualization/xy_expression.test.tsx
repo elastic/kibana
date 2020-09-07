@@ -221,9 +221,12 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
-  showXAxisTitle: true,
-  showYLeftAxisTitle: true,
-  showYRightAxisTitle: true,
+  axisTitlesVisibilitySettings: {
+    type: 'lens_xy_axisTitlesVisibilityConfig',
+    x: true,
+    yLeft: true,
+    yRight: true,
+  },
   tickLabelsVisibilitySettings: {
     type: 'lens_xy_tickLabelsConfig',
     x: true,
@@ -1929,7 +1932,12 @@ describe('xy_expression', () => {
     test('it should hide the X axis title if the corresponding switch is off', () => {
       const { data, args } = sampleArgs();
 
-      args.showXAxisTitle = false;
+      args.axisTitlesVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_axisTitlesVisibilityConfig',
+      };
 
       const component = shallow(
         <XYChart

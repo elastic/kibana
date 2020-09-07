@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -22,9 +22,6 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
-  EuiFieldText,
-  EuiSwitch,
-  EuiSpacer,
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
@@ -36,14 +33,10 @@ import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_h
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover } from '../toolbar_popover';
-// @ts-ignore
-import { EuiIconAxisBottom } from '../assets/axis_bottom';
-// @ts-ignore
-import { EuiIconAxisLeft } from '../assets/axis_left';
-// @ts-ignore
-import { EuiIconAxisRight } from '../assets/axis_right';
+import { AxisSettingsPopover } from './axis_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
   const newLayers = [...state.layers];
@@ -126,102 +119,21 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { frame, state, setState } = props;
 
-  const [popoversOpenState, setPopoversOpenState] = useState(false);
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
   const rightAxisLayer = state?.layers.filter((layer) => layer.yConfig && layer.yConfig.length > 0);
-
-  const [xAxisTitle, setXAxisTitle] = useState<string | undefined>(state?.xTitle);
-  const [yLeftAxisTitle, setYLeftAxisTitle] = useState<string | undefined>(state?.yLeftTitle);
-  const [yRightAxisTitle, setYRightAxisTitle] = useState<string | undefined>(state?.yRightTitle);
-
-  const xyTitles = useCallback(() => {
-    const defaults = {
-      xTitle: state?.xTitle,
-      yLeftTitle: state?.yLeftTitle,
-      yRightTitle: state?.yRightTitle,
-    };
-    const layer = state?.layers[0];
-    if (!layer || !layer.accessors.length) {
-      return defaults;
-    }
-    const datasource = frame.datasourceLayers[layer.layerId];
-    if (!datasource) {
-      return defaults;
-    }
-    const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
-    const yLeft = layer.accessors[0]
-      ? datasource.getOperationForColumnId(layer.accessors[0])
-      : null;
-
-    let yRightTitle: string = '';
-    if (rightAxisLayer.length > 0) {
-      const yConfig = rightAxisLayer[0].yConfig;
-      const dataSourceNewLayer = frame.datasourceLayers[rightAxisLayer[0].layerId];
-      const y = yConfig
-        ? dataSourceNewLayer.getOperationForColumnId(yConfig[yConfig.length - 1].forAccessor)
-        : null;
-      yRightTitle = y?.label || '';
-    }
-
-    return {
-      xTitle: defaults.xTitle || x?.label,
-      yLeftTitle: defaults.yLeftTitle || yLeft?.label,
-      yRightTitle: defaults.yRightTitle || yRightTitle,
-    };
-    /* We want this callback to run only if open changes its state. What we want to accomplish here is to give the user a better UX.
-       By default these input fields have the axis legends. If the user changes the input text, the axis legends should also change.
-       BUT if the user cleans up the input text, it should remain empty until the user closes and reopens the panel.
-       In that case, the default axes legend should appear. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [popoversOpenState]);
-
-  useEffect(() => {
-    const {
-      xTitle,
-      yLeftTitle,
-      yRightTitle,
-    }: {
-      xTitle: string | undefined;
-      yLeftTitle: string | undefined;
-      yRightTitle: string | undefined;
-    } = xyTitles();
-    setXAxisTitle(xTitle);
-    setYLeftAxisTitle(yLeftTitle);
-    setYRightAxisTitle(yRightTitle);
-  }, [xyTitles]);
-
-  const onXTitleChange = (value: string): void => {
-    setXAxisTitle(value);
-    setState({ ...state, xTitle: value });
-  };
-
-  const onYLeftTitleChange = (value: string): void => {
-    setYLeftAxisTitle(value);
-    setState({ ...state, yLeftTitle: value });
-  };
-
-  const onYRightTitleChange = (value: string): void => {
-    setYRightAxisTitle(value);
-    setState({ ...state, yRightTitle: value });
-  };
-
-  type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
-
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
     yLeft: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
     yRight: state?.tickLabelsVisibilitySettings?.yRight ?? true,
   };
-
-  const onTickLabelsVisibilitySettingsChange = (optionId: string): void => {
-    const id = optionId as AxesSettingsConfigKeys;
+  const onTickLabelsVisibilitySettingsChange = (optionId: AxesSettingsConfigKeys): void => {
     const newTickLabelsVisibilitySettings = {
       ...tickLabelsVisibilitySettings,
       ...{
-        [id]: !tickLabelsVisibilitySettings[id],
+        [optionId]: !tickLabelsVisibilitySettings[optionId],
       },
     };
     setState({
@@ -236,17 +148,37 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     yRight: state?.gridlinesVisibilitySettings?.yRight ?? true,
   };
 
-  const onGridlinesVisibilitySettingsChange = (optionId: string): void => {
-    const id = optionId as AxesSettingsConfigKeys;
+  const onGridlinesVisibilitySettingsChange = (optionId: AxesSettingsConfigKeys): void => {
     const newGridlinesVisibilitySettings = {
       ...gridlinesVisibilitySettings,
       ...{
-        [id]: !gridlinesVisibilitySettings[id],
+        [optionId]: !gridlinesVisibilitySettings[optionId],
       },
     };
     setState({
       ...state,
       gridlinesVisibilitySettings: newGridlinesVisibilitySettings,
+    });
+  };
+
+  const axisTitlesVisibilitySettings = {
+    x: state?.axisTitlesVisibilitySettings?.x ?? true,
+    yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
+    yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
+  };
+  const onAxisTitlesVisibilitySettingsChange = (
+    axis: AxesSettingsConfigKeys,
+    checked: boolean
+  ): void => {
+    const newAxisTitlesVisibilitySettings = {
+      ...axisTitlesVisibilitySettings,
+      ...{
+        [axis]: checked,
+      },
+    };
+    setState({
+      ...state,
+      axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
     });
   };
 
@@ -398,138 +330,38 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <ToolbarPopover
-            title={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+          <AxisSettingsPopover
+            popoverTitle={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
               defaultMessage: 'Left axis',
             })}
-            handlePopoverState={setPopoversOpenState}
-            type={EuiIconAxisLeft}
-            groupPosition="left"
-          >
-            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <h4>
-                    {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                      defaultMessage: 'Axis name',
-                    })}
-                  </h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  compressed
-                  data-test-subj="lnsShowYLeftAxisTitleSwitch"
-                  label={i18n.translate('xpack.lens.xyChart.ShowYLeftAxisTitleLabel', {
-                    defaultMessage: 'Show',
-                  })}
-                  onChange={({ target }) =>
-                    setState({ ...state, showYLeftAxisTitle: target.checked })
-                  }
-                  checked={state?.showYLeftAxisTitle ?? true}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiFieldText
-              data-test-subj="lnsYLeftAxisTitle"
-              compressed
-              placeholder={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
-                defaultMessage: 'Overwrite left y-axis title',
-              })}
-              value={yLeftAxisTitle || ''}
-              disabled={state && 'showYLeftAxisTitle' in state ? !state.showYLeftAxisTitle : false}
-              onChange={({ target }) => onYLeftTitleChange(target.value)}
-              aria-label={i18n.translate('xpack.lens.xyChart.overwriteLeftYaxis', {
-                defaultMessage: 'Overwrite left y-axis title',
-              })}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsshowYLeftAxisTickLabels"
-              label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-                defaultMessage: 'Tick labels',
-              })}
-              onChange={() => onTickLabelsVisibilitySettingsChange('yLeft')}
-              checked={tickLabelsVisibilitySettings.yLeft}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsshowYLeftAxisGridlines"
-              label={i18n.translate('xpack.lens.xyChart.Gridlines', {
-                defaultMessage: 'Gridlines',
-              })}
-              onChange={() => onGridlinesVisibilitySettingsChange('yLeft')}
-              checked={gridlinesVisibilitySettings.yLeft}
-            />
-          </ToolbarPopover>
-          <ToolbarPopover
-            title={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+            axis="yLeft"
+            layers={state?.layers}
+            frame={frame}
+            axisTitle={state?.yLeftTitle}
+            updateTitleState={(value) => setState({ ...state, yLeftTitle: value })}
+            areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
+            toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+            areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
+            toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
+            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+          />
+          <AxisSettingsPopover
+            popoverTitle={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
               defaultMessage: 'Bottom axis',
             })}
-            handlePopoverState={setPopoversOpenState}
-            type={EuiIconAxisBottom}
-            groupPosition="center"
-          >
-            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <h4>
-                    {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                      defaultMessage: 'Axis name',
-                    })}
-                  </h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  compressed
-                  data-test-subj="lnsshowXAxisTitleSwitch"
-                  label={i18n.translate('xpack.lens.xyChart.showXAxisTitleLabel', {
-                    defaultMessage: 'Show',
-                  })}
-                  onChange={({ target }) => setState({ ...state, showXAxisTitle: target.checked })}
-                  checked={state?.showXAxisTitle ?? true}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiFieldText
-              data-test-subj="lnsXAxisTitle"
-              compressed
-              placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-                defaultMessage: 'Overwrite x-axis title',
-              })}
-              value={xAxisTitle || ''}
-              disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
-              onChange={({ target }) => onXTitleChange(target.value)}
-              aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
-                defaultMessage: 'Overwrite x-axis title',
-              })}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsshowXAxisTickLabels"
-              label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-                defaultMessage: 'Tick labels',
-              })}
-              onChange={() => onTickLabelsVisibilitySettingsChange('x')}
-              checked={tickLabelsVisibilitySettings.x}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              compressed
-              data-test-subj="lnsshowXAxisGridlines"
-              label={i18n.translate('xpack.lens.xyChart.Gridlines', {
-                defaultMessage: 'Gridlines',
-              })}
-              onChange={() => onGridlinesVisibilitySettingsChange('x')}
-              checked={gridlinesVisibilitySettings.x}
-            />
-          </ToolbarPopover>
+            axis="x"
+            layers={state?.layers}
+            frame={frame}
+            axisTitle={state?.xTitle}
+            updateTitleState={(value) => setState({ ...state, xTitle: value })}
+            areTickLabelsVisible={tickLabelsVisibilitySettings.x}
+            toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+            areGridlinesVisible={gridlinesVisibilitySettings.x}
+            toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            isAxisTitleVisible={axisTitlesVisibilitySettings.x}
+            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+          />
           <EuiToolTip
             anchorClassName="eui-displayBlock"
             content={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
@@ -537,76 +369,23 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             })}
             delay="long"
           >
-            <ToolbarPopover
-              title={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
+            <AxisSettingsPopover
+              popoverTitle={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
                 defaultMessage: 'Right axis',
               })}
-              handlePopoverState={setPopoversOpenState}
+              axis="yRight"
+              layers={state?.layers}
+              frame={frame}
+              axisTitle={state?.yRightTitle}
+              updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
+              areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
+              toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+              areGridlinesVisible={gridlinesVisibilitySettings.yRight}
+              toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
               isDisabled={rightAxisLayer?.length === 0 ?? true}
-              type={EuiIconAxisRight}
-              groupPosition="right"
-            >
-              <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <h4>
-                      {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                        defaultMessage: 'Axis name',
-                      })}
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    compressed
-                    data-test-subj="lnsShowYRightAxisTitleSwitch"
-                    label={i18n.translate('xpack.lens.xyChart.ShowYRightAxisTitleLabel', {
-                      defaultMessage: 'Show',
-                    })}
-                    onChange={({ target }) =>
-                      setState({ ...state, showYRightAxisTitle: target.checked })
-                    }
-                    checked={state?.showYRightAxisTitle ?? true}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-              <EuiFieldText
-                data-test-subj="lnsYRightAxisTitle"
-                compressed
-                placeholder={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
-                  defaultMessage: 'Overwrite right y-axis title',
-                })}
-                value={yRightAxisTitle || ''}
-                disabled={
-                  state && 'showYRightAxisTitle' in state ? !state.showYRightAxisTitle : false
-                }
-                onChange={({ target }) => onYRightTitleChange(target.value)}
-                aria-label={i18n.translate('xpack.lens.xyChart.overwriteRightYaxis', {
-                  defaultMessage: 'Overwrite right y-axis title',
-                })}
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                compressed
-                data-test-subj="lnsshowYRightAxisTickLabels"
-                label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-                  defaultMessage: 'Tick labels',
-                })}
-                onChange={() => onTickLabelsVisibilitySettingsChange('yRight')}
-                checked={tickLabelsVisibilitySettings.yRight}
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                compressed
-                data-test-subj="lnsshowYRightAxisGridlines"
-                label={i18n.translate('xpack.lens.xyChart.Gridlines', {
-                  defaultMessage: 'Gridlines',
-                })}
-                onChange={() => onGridlinesVisibilitySettingsChange('yRight')}
-                checked={gridlinesVisibilitySettings.yRight}
-              />
-            </ToolbarPopover>
+              isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
+              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            />
           </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>

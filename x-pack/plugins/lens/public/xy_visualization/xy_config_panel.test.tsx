@@ -9,6 +9,7 @@ import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/e
 import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar } from './xy_config_panel';
 import { ToolbarPopover } from '../toolbar_popover';
+import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
@@ -129,7 +130,7 @@ describe('XY Config panels', () => {
       const state = testState();
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
 
-      expect(component.find(ToolbarPopover).at(4).prop('isDisabled')).toEqual(true);
+      expect(component.find(AxisSettingsPopover).at(2).prop('isDisabled')).toEqual(true);
     });
 
     it('should enable the popover if there is right axis', () => {
@@ -145,10 +146,10 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(ToolbarPopover).at(4).prop('isDisabled')).toEqual(false);
+      expect(component.find(AxisSettingsPopover).at(2).prop('isDisabled')).toEqual(false);
     });
 
-    it('should show the values of the X and Y axes titles on the corresponding input text', () => {
+    it('should render the AxisSettingsPopover 3 times', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -156,70 +157,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            xTitle: 'My custom X axis title',
-            yLeftTitle: 'My custom Y left axis title',
-            yRightTitle: 'My custom Y right axis title',
+            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
           }}
         />
       );
 
-      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('value')).toBe(
-        'My custom X axis title'
-      );
-      expect(component.find('[data-test-subj="lnsYLeftAxisTitle"]').prop('value')).toBe(
-        'My custom Y left axis title'
-      );
-      expect(component.find('[data-test-subj="lnsYRightAxisTitle"]').prop('value')).toBe(
-        'My custom Y right axis title'
-      );
-    });
-
-    it('should disable the input texts if the switch is off', () => {
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            showXAxisTitle: false,
-            showYLeftAxisTitle: false,
-            showYRightAxisTitle: false,
-          }}
-        />
-      );
-
-      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('disabled')).toBe(true);
-      expect(component.find('[data-test-subj="lnsYLeftAxisTitle"]').prop('disabled')).toBe(true);
-      expect(component.find('[data-test-subj="lnsYRightAxisTitle"]').prop('disabled')).toBe(true);
-    });
-
-    it('has the tick labels switches enabled', () => {
-      const state = testState();
-      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
-
-      expect(component.find('[data-test-subj="lnsshowYLeftAxisTickLabels"]').prop('checked')).toBe(
-        true
-      );
-      expect(component.find('[data-test-subj="lnsshowYRightAxisTickLabels"]').prop('checked')).toBe(
-        true
-      );
-      expect(component.find('[data-test-subj="lnsshowXAxisTickLabels"]').prop('checked')).toBe(
-        true
-      );
-    });
-
-    it('has the gridlines switches enabled', () => {
-      const state = testState();
-      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
-
-      expect(component.find('[data-test-subj="lnsshowYLeftAxisGridlines"]').prop('checked')).toBe(
-        true
-      );
-      expect(component.find('[data-test-subj="lnsshowYRightAxisGridlines"]').prop('checked')).toBe(
-        true
-      );
-      expect(component.find('[data-test-subj="lnsshowXAxisGridlines"]').prop('checked')).toBe(true);
+      expect(component.find(AxisSettingsPopover).length).toEqual(3);
     });
   });
 });
