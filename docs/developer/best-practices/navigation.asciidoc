@@ -1,13 +1,13 @@
 [[kibana-navigation]]
-== Routing, Navigation and URL FAQ
+== Routing, Navigation and URL
 
 {kib} platform provides a set of tools to help developers built consistent experience around routing and browser navigation.
-Some of that tooling is inside the `core`, some are available as plugins.  
+Some of that tooling is inside the `core`, some is available as part of various plugins.  
 
-The purpose of this guide is to give you (a {kib} contributor}) a high-level overview of available tools and common approaches around routing,
-browser navigation and, in general, working with URL.
+The purpose of this guide is to give you (a {kib} contributor}) a high-level overview of available tools and to explain common approaches for handling routing,
+and browser navigation.
 
-This FAQ covers following topics:
+This guide covers following topics:
 
 * <<navigating-between-kibana-apps>>
 * <<deep-linking>>
