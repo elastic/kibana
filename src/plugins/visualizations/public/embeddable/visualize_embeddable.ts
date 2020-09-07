@@ -43,7 +43,7 @@ import {
 } from '../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getUiActions, getSearch } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
@@ -343,6 +343,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   private async updateHandler() {
+    getSearch().session.start();
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
