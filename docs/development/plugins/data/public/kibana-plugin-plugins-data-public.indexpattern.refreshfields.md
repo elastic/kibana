@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-refreshFields(): Promise<void | never[] | Error | undefined>;
+refreshFields(): Promise<void | Error | never[] | undefined>;
 ```
 <b>Returns:</b>
 
-`Promise<void | never[] | Error | undefined>`
+`Promise<void | Error | never[] | undefined>`
 
