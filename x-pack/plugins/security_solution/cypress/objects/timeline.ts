@@ -33,7 +33,7 @@ export const filter: TimelineFilter = {
 export const timeline: CompleteTimeline = {
   title: 'Security Timeline',
   description: 'This is the best timeline',
-  query: 'host.name: *',
+  query: 'host.name: * ',
   notes: 'Yes, the best timeline',
   filter,
 };

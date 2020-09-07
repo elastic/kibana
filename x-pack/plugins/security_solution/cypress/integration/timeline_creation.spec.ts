@@ -15,6 +15,8 @@ import {
   NOTES_TEXT_AREA,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
+  TIMELINE_FILTER,
+  TIMELINE_QUERY,
   TIMELINE_TITLE,
 } from '../screens/timeline';
 import {
@@ -30,6 +32,7 @@ import { navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   addDescriptionToTimeline,
+  addFilter,
   addNameToTimeline,
   addNotesToTimeline,
   closeNotes,
@@ -70,6 +73,7 @@ describe('Timelines', () => {
     addDescriptionToTimeline(timeline.description);
     addNotesToTimeline(timeline.notes);
     closeNotes();
+    addFilter(timeline.filter);
     markAsFavorite();
     createNewTimeline();
     closeTimeline();
@@ -87,6 +91,8 @@ describe('Timelines', () => {
     cy.get(FAVORITE_TIMELINE).should('exist');
     cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
     cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
+    cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
+    cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
     cy.get(NOTES_COUNT).should('have.text', '1');
     cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
     cy.get(NOTES_BUTTON).click();

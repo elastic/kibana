@@ -146,7 +146,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         <EuiButton
           size="s"
           onClick={handleOpenPopover}
-          data-test-subj="addFilter"
+          data-test-subj="addField"
           iconType="arrowDown"
           fill
           iconSide="right"
@@ -160,7 +160,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       <EuiButtonEmpty
         size="s"
         onClick={handleOpenPopover}
-        data-test-subj="addFilter"
+        data-test-subj="addField"
         iconSide="right"
       >
         <EuiText size="s">{`+ ${ADD_FIELD_LABEL}`}</EuiText>

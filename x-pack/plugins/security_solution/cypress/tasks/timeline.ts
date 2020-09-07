@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimelineFilter } from '../objects/timeline';
+
 import {
+  ADD_FILTER,
   ADD_NOTE_BUTTON,
   CLOSE_TIMELINE_BTN,
   CLOSE_NOTES_BTN,
+  COMBO_BOX,
   CREATE_NEW_TIMELINE,
   HEADER,
   ID_FIELD,
@@ -24,11 +28,15 @@ import {
   TIMELINE_CHANGES_IN_PROGRESS,
   TIMELINE_DESCRIPTION,
   TIMELINE_FIELDS_BUTTON,
+  TIMELINE_FILTER_FIELD,
+  TIMELINE_FILTER_OPERATOR,
+  TIMELINE_FILTER_VALUE,
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  SAVE_FILTER_BTN,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -49,6 +57,16 @@ export const addNotesToTimeline = (notes: string) => {
   cy.get(NOTES_BUTTON).click();
   cy.get(NOTES_TEXT_AREA).type(notes);
   cy.get(ADD_NOTE_BUTTON).click();
+};
+
+export const addFilter = (filter: TimelineFilter) => {
+  cy.get(ADD_FILTER).click();
+  cy.get(TIMELINE_FILTER_FIELD).type(filter.field);
+  cy.get(COMBO_BOX).contains(filter.field).click();
+  cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
+  cy.get(COMBO_BOX).contains(filter.operator).click();
+  cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
+  cy.get(SAVE_FILTER_BTN).click();
 };
 
 export const checkIdToggleField = () => {
