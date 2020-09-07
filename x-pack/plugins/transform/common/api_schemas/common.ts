@@ -30,9 +30,7 @@ export const indexPatternTitleSchema = schema.object({
   indexPatternTitle: schema.string(),
 });
 
-export interface IndexPatternTitleSchema {
-  indexPatternTitle: string;
-}
+export type IndexPatternTitleSchema = TypeOf<typeof indexPatternTitleSchema>;
 
 export const transformIdParamSchema = schema.object({
   transformId: schema.string(),
