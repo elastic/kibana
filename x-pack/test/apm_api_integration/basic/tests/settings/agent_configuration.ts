@@ -130,13 +130,24 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       it('returns all services', async () => {
         const { body } = await getServices();
-        expect(body).to.eql(['ALL_OPTION_VALUE', 'client', 'opbeans-java', 'opbeans-node']);
+        expect(body).to.eql([
+          'ALL_OPTION_VALUE',
+          'client',
+          'opbeans-dotnet',
+          'opbeans-go',
+          'opbeans-java',
+          'opbeans-node',
+          'opbeans-python',
+          'opbeans-ruby',
+          'opbeans-rum',
+        ]);
       });
 
       it('returns the environments', async () => {
         const { body } = await getEnvironments('opbeans-node');
         expect(body).to.eql([
           { name: 'ALL_OPTION_VALUE', alreadyConfigured: false },
+          { name: 'testing', alreadyConfigured: false },
           { name: 'production', alreadyConfigured: false },
         ]);
       });

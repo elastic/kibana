@@ -18,7 +18,7 @@ export function PageViewsTrend() {
 
   const { start, end, serviceName } = urlParams;
 
-  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -30,9 +30,9 @@ export function PageViewsTrend() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              ...(breakdowns.length > 0
+              ...(breakdown
                 ? {
-                    breakdowns: JSON.stringify(breakdowns),
+                    breakdowns: JSON.stringify(breakdown),
                   }
                 : {}),
             },
@@ -41,12 +41,8 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, serviceName, uiFilters, breakdowns]
+    [end, start, serviceName, uiFilters, breakdown]
   );
-
-  const onBreakdownChange = (values: BreakdownItem[]) => {
-    setBreakdowns(values);
-  };
 
   return (
     <div>
@@ -56,11 +52,10 @@ export function PageViewsTrend() {
             <h3>{I18LABELS.pageViews}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
-            id={'pageView'}
-            selectedBreakdowns={breakdowns}
-            onBreakdownChange={onBreakdownChange}
+            selectedBreakdown={breakdown}
+            onBreakdownChange={setBreakdown}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

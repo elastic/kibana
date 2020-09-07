@@ -30,7 +30,7 @@ import {
   SerializedAction,
   SerializedEvent,
 } from '../../../dynamic_actions';
-import { ExtraActionFactoryContext } from '../types';
+import { ActionFactoryPlaceContext } from '../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -47,7 +47,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
    */
-  extraContext?: ExtraActionFactoryContext<ActionFactoryContext>;
+  placeContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 }
 
 /**
@@ -81,8 +81,8 @@ export function createFlyoutManageDrilldowns({
     const isCreateOnly = props.viewMode === 'create';
 
     const factoryContext: BaseActionFactoryContext = useMemo(
-      () => ({ ...props.extraContext, triggers: props.supportedTriggers }),
-      [props.extraContext, props.supportedTriggers]
+      () => ({ ...props.placeContext, triggers: props.supportedTriggers }),
+      [props.placeContext, props.supportedTriggers]
     );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -137,7 +137,7 @@ export function createFlyoutManageDrilldowns({
     function mapToDrilldownToDrilldownListItem(drilldown: SerializedEvent): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       const drilldownFactoryContext: BaseActionFactoryContext = {
-        ...props.extraContext,
+        ...props.placeContext,
         triggers: drilldown.triggers as TriggerId[],
       };
       return {
@@ -204,7 +204,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            extraActionFactoryContext={props.extraContext}
+            actionFactoryPlaceContext={props.placeContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
             supportedTriggers={props.supportedTriggers}
             getTrigger={getTrigger}

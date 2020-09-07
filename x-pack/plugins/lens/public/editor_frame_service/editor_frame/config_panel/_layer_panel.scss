@@ -27,6 +27,14 @@
   overflow: hidden;
 }
 
+.lnsLayerPanel__dimension-isHidden {
+  opacity: 0;
+}
+
+.lnsLayerPanel__dimension-isReplacing {
+  text-decoration: line-through;
+}
+
 .lnsLayerPanel__triggerLink {
   padding: $euiSizeS;
   width: 100%;
