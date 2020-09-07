@@ -25,5 +25,5 @@ export const getMapsSavedObjectLoader = _.once(function () {
   };
   const SavedGisMap = createSavedGisMapClass(services);
 
-  return new SavedObjectLoader(SavedGisMap, getSavedObjectsClient(), getCoreChrome());
+  return new SavedObjectLoader(SavedGisMap, getSavedObjectsClient());
 });
