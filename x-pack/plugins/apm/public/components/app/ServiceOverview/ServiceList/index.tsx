@@ -70,7 +70,11 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     width: '40%',
     sortable: true,
     render: (_, { serviceName, agentName }) => (
-      <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
+      <EuiToolTip
+        delay="long"
+        content={formatString(serviceName)}
+        id="service-name-tooltip"
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {agentName && (
             <EuiFlexItem grow={false}>

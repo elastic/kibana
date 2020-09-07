@@ -53,6 +53,50 @@ export function getSeverityColor(theme: EuiTheme, severity?: Severity) {
   }
 }
 
+export function getSeverityLabel(severity?: Severity) {
+  let label: string = '';
+
+  switch (severity) {
+    case Severity.critical:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.critical',
+        {
+          defaultMessage: 'Critical',
+        }
+      );
+      break;
+
+    case Severity.major:
+    case Severity.minor:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.warning',
+        {
+          defaultMessage: 'Warning',
+        }
+      );
+      break;
+
+    case Severity.warning:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.healthy',
+        {
+          defaultMessage: 'Healthy',
+        }
+      );
+      break;
+
+    default:
+      label = i18n.translate(
+        'xpack.apm.servicesTable.serviceHealthStatus.unknown',
+        {
+          defaultMessage: 'Unknown',
+        }
+      );
+      break;
+  }
+  return label;
+}
+
 export const ML_ERRORS = {
   INVALID_LICENSE: i18n.translate(
     'xpack.apm.anomaly_detection.error.invalid_license',

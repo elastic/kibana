@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity, Severity } from '../../../../common/anomaly_detection';
+import { getSeverity } from '../../../../common/anomaly_detection';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   TRANSACTION_DURATION,
@@ -90,11 +90,11 @@ export const getTransactionDurationAverages = async ({
     return [];
   }
 
-  return aggregations.services.buckets.map((bucket) => ({
-    serviceName: bucket.key as string,
+  return aggregations.services.buckets.map((serviceBucket) => ({
+    serviceName: serviceBucket.key as string,
     avgResponseTime: {
-      value: bucket.average.value,
-      over_time: bucket.over_time.buckets.map((dateBucket) => ({
+      value: serviceBucket.average.value,
+      over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
         x: dateBucket.key,
         y: dateBucket.average.value,
       })),
@@ -144,9 +144,10 @@ export const getAgentNames = async ({
     return [];
   }
 
-  return aggregations.services.buckets.map((bucket) => ({
-    serviceName: bucket.key as string,
-    agentName: bucket.agent_name.hits.hits[0]?._source.agent.name as AgentName,
+  return aggregations.services.buckets.map((serviceBucket) => ({
+    serviceName: serviceBucket.key as string,
+    agentName: serviceBucket.agent_name.hits.hits[0]?._source.agent
+      .name as AgentName,
   }));
 };
 
@@ -187,13 +188,13 @@ export const getTransactionRates = async ({
 
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
-  return aggregations.services.buckets.map((bucket) => {
-    const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
+  return aggregations.services.buckets.map((serviceBucket) => {
+    const transactionsPerMinute = serviceBucket.doc_count / deltaAsMinutes;
     return {
-      serviceName: bucket.key as string,
+      serviceName: serviceBucket.key as string,
       transactionsPerMinute: {
         value: transactionsPerMinute,
-        over_time: bucket.over_time.buckets.map((dateBucket) => ({
+        over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
           x: dateBucket.key,
           y: dateBucket.doc_count / deltaAsMinutes,
         })),
@@ -239,13 +240,13 @@ export const getErrorRates = async ({
 
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
-  return aggregations.services.buckets.map((bucket) => {
-    const errorsPerMinute = bucket.doc_count / deltaAsMinutes;
+  return aggregations.services.buckets.map((serviceBucket) => {
+    const errorsPerMinute = serviceBucket.doc_count / deltaAsMinutes;
     return {
-      serviceName: bucket.key as string,
+      serviceName: serviceBucket.key as string,
       errorsPerMinute: {
         value: errorsPerMinute,
-        over_time: bucket.over_time.buckets.map((dateBucket) => ({
+        over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
           x: dateBucket.key,
           y: dateBucket.doc_count / deltaAsMinutes,
         })),
@@ -295,9 +296,11 @@ export const getEnvironments = async ({
     return [];
   }
 
-  return aggregations.services.buckets.map((bucket) => ({
-    serviceName: bucket.key as string,
-    environments: bucket.environments.buckets.map((env) => env.key as string),
+  return aggregations.services.buckets.map((serviceBucket) => ({
+    serviceName: serviceBucket.key as string,
+    environments: serviceBucket.environments.buckets.map(
+      (envBucket) => envBucket.key as string
+    ),
   }));
 };
 
@@ -322,16 +325,14 @@ export const getHealthStatuses = async (
     environment: mlAnomaliesEnvironment,
   });
 
-  return Object.keys(anomalies.serviceAnomalies).reduce<
-    Array<{ serviceName: string; severity?: Severity }>
-  >((prev, serviceName) => {
+  return Object.keys(anomalies.serviceAnomalies).map((serviceName) => {
     const stats = anomalies.serviceAnomalies[serviceName];
 
     const severity = getSeverity(stats.anomalyScore);
 
-    return prev.concat({
+    return {
       serviceName,
       severity,
-    });
-  }, []);
+    };
+  });
 };

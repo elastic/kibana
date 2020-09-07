@@ -20,7 +20,7 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { MLCallout } from './ServiceList/MLCallout';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useAnomalyDetectionSettings } from '../../../hooks/useAnomalyDetectionSettings';
+import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
 
 const initialData = {
   items: [],
@@ -97,9 +97,9 @@ export function ServiceOverview() {
   );
 
   const {
-    data: anomalyDetectionSettingsData,
-    status: anomalyDetectionSettingsStatus,
-  } = useAnomalyDetectionSettings();
+    data: anomalyDetectionJobsData,
+    status: anomalyDetectionJobsStatus,
+  } = useAnomalyDetectionJobs();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',
@@ -109,8 +109,8 @@ export function ServiceOverview() {
   const canCreateJob = !!core.application.capabilities.ml?.canCreateJob;
 
   const displayMlCallout =
-    anomalyDetectionSettingsStatus === FETCH_STATUS.SUCCESS &&
-    !anomalyDetectionSettingsData?.jobs.length &&
+    anomalyDetectionJobsStatus === FETCH_STATUS.SUCCESS &&
+    !anomalyDetectionJobsData?.jobs.length &&
     canCreateJob &&
     !userHasDismissedCallout;
 

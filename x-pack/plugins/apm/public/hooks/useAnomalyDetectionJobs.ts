@@ -6,7 +6,7 @@
 
 import { useFetcher } from './useFetcher';
 
-export function useAnomalyDetectionSettings() {
+export function useAnomalyDetectionJobs() {
   return useFetcher(
     (callApmApi) =>
       callApmApi({

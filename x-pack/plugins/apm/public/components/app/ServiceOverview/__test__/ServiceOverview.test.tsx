@@ -8,6 +8,7 @@ import { render, wait, waitForElement } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import React, { FunctionComponent, ReactChild } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { merge } from 'lodash';
 import { ServiceOverview } from '..';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
@@ -17,7 +18,7 @@ import {
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as useAnomalyDetectionSettings from '../../../../hooks/useAnomalyDetectionSettings';
+import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
 import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
 import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
 
@@ -25,28 +26,27 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
 } as Partial<CoreStart>);
 
+const addWarning = jest.fn();
+const httpGet = jest.fn();
+
 function wrapper({ children }: { children: ReactChild }) {
+  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+    core: {
+      http: {
+        get: httpGet,
+      },
+      notifications: {
+        toasts: {
+          addWarning,
+        },
+      },
+    },
+  }) as unknown) as ApmPluginContextValue;
+
   return (
     <KibanaReactContext.Provider>
       <EuiThemeProvider>
-        <MockApmPluginContextWrapper
-          value={
-            ({
-              ...mockApmPluginContextValue,
-              core: {
-                ...mockApmPluginContextValue.core,
-                http: { ...mockApmPluginContextValue.core.http, get: httpGet },
-                notifications: {
-                  ...mockApmPluginContextValue.core.notifications,
-                  toasts: {
-                    ...mockApmPluginContextValue.core.notifications.toasts,
-                    addWarning,
-                  },
-                },
-              },
-            } as unknown) as ApmPluginContextValue
-          }
-        >
+        <MockApmPluginContextWrapper value={mockPluginContext as any}>
           {children}
         </MockApmPluginContextWrapper>
       </EuiThemeProvider>
@@ -59,9 +59,6 @@ function renderServiceOverview() {
     wrapper: FunctionComponent<{}>;
   });
 }
-
-const addWarning = jest.fn();
-const httpGet = jest.fn();
 
 describe('Service Overview -> View', () => {
   beforeEach(() => {
@@ -86,7 +83,7 @@ describe('Service Overview -> View', () => {
     });
 
     jest
-      .spyOn(useAnomalyDetectionSettings, 'useAnomalyDetectionSettings')
+      .spyOn(useAnomalyDetectionJobs, 'useAnomalyDetectionJobs')
       .mockReturnValue({
         status: FETCH_STATUS.SUCCESS,
         data: {
