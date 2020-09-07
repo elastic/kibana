@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -236,12 +236,10 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     return null;
   }
   return (
-    <EuiLink
+    <EuiText
+      size="s"
       id={columnId}
       className="lnsLayerPanel__triggerLink"
-      onClick={() => {
-        props.togglePopover();
-      }}
       data-test-subj="lns-dimensionTrigger"
       aria-label={i18n.translate('xpack.lens.configure.editConfig', {
         defaultMessage: 'Edit configuration',
@@ -251,7 +249,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
       })}
     >
       {uniqueLabel}
-    </EuiLink>
+    </EuiText>
   );
 };
 

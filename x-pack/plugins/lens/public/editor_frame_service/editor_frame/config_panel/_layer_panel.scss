@@ -43,6 +43,10 @@
   min-height: $euiSizeXXL;
 }
 
+.lnsLayerPanel__dimensionLink {
+  width: 100%;
+}
+
 .lnsLayerPanel__styleEditor {
   width: $euiSize * 30;
   padding: $euiSizeS;

@@ -163,7 +163,6 @@ export const xyVisualization: Visualization<State> = {
   getConfiguration(props) {
     const layerIndex = props.state.layers.findIndex((l) => l.layerId === props.layerId);
     const layer = props.state.layers[layerIndex];
-    const chartContainsSplits = props.state.layers.some(({ splitAccessor }) => splitAccessor);
     const layerContainsSplits = Boolean(layer.splitAccessor);
     const allAccessors = props.state.layers.flatMap((currentLayer) =>
       currentLayer.accessors.map((currentAccessor) => ({ currentLayer, currentAccessor }))

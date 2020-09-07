@@ -221,7 +221,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  togglePopover: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
