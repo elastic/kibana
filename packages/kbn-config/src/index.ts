@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { coreDeprecationProvider } from './core_deprecations';
+export {
+  applyDeprecations,
+  ConfigDeprecation,
+  ConfigDeprecationFactory,
+  configDeprecationFactory,
+  ConfigDeprecationLogger,
+  ConfigDeprecationProvider,
+  ConfigDeprecationWithContext,
+} from './deprecation';
+
+export { RawConfigurationProvider, RawConfigService } from './raw';

@@ -19,8 +19,8 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
+import { unset } from '../utils';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
-import { unset } from '../../../utils';
 
 const _rename = (
   config: Record<string, any>,

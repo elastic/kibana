@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { coreDeprecationProvider } from './core_deprecations';
+export { get } from './get';
+export { unset } from './unset';

@@ -20,7 +20,7 @@
 import { mockGetConfigFromFiles } from './raw_config_service.test.mocks';
 
 import { first } from 'rxjs/operators';
-import { RawConfigService } from '.';
+import { RawConfigService } from './raw_config_service';
 
 const configFile = '/config/kibana.yml';
 const anotherConfigFile = '/config/kibana.dev.yml';

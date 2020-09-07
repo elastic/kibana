@@ -1,0 +1,26 @@
+{
+  "name": "@kbn/config",
+  "main": "./target/out/index.js",
+  "types": "./target/types/index.d.ts",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
+  },
+  "dependencies": {
+    "@kbn/config-schema": "1.0.0",
+    "@kbn/dev-utils": "1.0.0",
+    "js-yaml": "3.13.1"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2",
+    "tsd": "^0.7.4"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "type-detect": "^4.0.8"
+  }
+}

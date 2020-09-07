@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { coreDeprecationProvider } from './core_deprecations';
+export {
+  ConfigDeprecation,
+  ConfigDeprecationWithContext,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  ConfigDeprecationProvider,
+} from './types';
+export { configDeprecationFactory } from './deprecation_factory';
+export { applyDeprecations } from './apply_deprecations';
