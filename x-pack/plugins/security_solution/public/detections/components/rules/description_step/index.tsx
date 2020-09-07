@@ -37,7 +37,6 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
 } from './helpers';
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
@@ -52,22 +51,21 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
 `;
 
-interface StepRuleDescriptionProps {
+interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: IIndexPattern;
-  schema: FormSchema;
+  schema: FormSchema<T>;
 }
 
-export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+export const StepRuleDescriptionComponent = <T,>({
   data,
   columns = 'multi',
   indexPatterns,
   schema,
-}) => {
+}: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const { jobs } = useSecurityJobs(false);
 
   const keys = Object.keys(schema);
   const listItems = keys.reduce((acc: ListItems[], key: string) => {
@@ -76,8 +74,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         ...acc,
         buildMlJobDescription(
           get(key, data) as string,
-          (get(key, schema) as { label: string }).label,
-          jobs
+          (get(key, schema) as { label: string }).label
         ),
       ];
     }
@@ -125,11 +122,13 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
   );
 };
 
-export const StepRuleDescription = memo(StepRuleDescriptionComponent);
+export const StepRuleDescription = memo(
+  StepRuleDescriptionComponent
+) as typeof StepRuleDescriptionComponent;
 
-export const buildListItems = (
+export const buildListItems = <T,>(
   data: unknown,
-  schema: FormSchema,
+  schema: FormSchema<T>,
   filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] =>
