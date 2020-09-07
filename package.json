@@ -137,6 +137,7 @@
     "@hapi/wreck": "^15.0.2",
     "@kbn/analytics": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
+    "@kbn/config": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",

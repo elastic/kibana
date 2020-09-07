@@ -17,24 +17,4 @@
  * under the License.
  */
 
-export { coreDeprecationProvider } from './deprecation';
-
-export {
-  ConfigService,
-  IConfigService,
-  RawConfigService,
-  RawConfigurationProvider,
-  Config,
-  ConfigPath,
-  isConfigPath,
-  hasConfigPathIntersection,
-  ObjectToConfigAdapter,
-  CliArgs,
-  Env,
-  ConfigDeprecation,
-  ConfigDeprecationLogger,
-  ConfigDeprecationProvider,
-  ConfigDeprecationFactory,
-  EnvironmentMode,
-  PackageInfo,
-} from '@kbn/config';
+export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';

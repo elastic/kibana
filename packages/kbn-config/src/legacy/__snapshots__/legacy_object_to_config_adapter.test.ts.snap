@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get correctly handles server config.: default 1`] = `
+Object {
+  "autoListen": true,
+  "basePath": "/abc",
+  "compression": Object {
+    "enabled": true,
+  },
+  "cors": false,
+  "customResponseHeaders": Object {
+    "custom-header": "custom-value",
+  },
+  "host": "host",
+  "keepaliveTimeout": 5000,
+  "maxPayload": 1000,
+  "name": "kibana-hostname",
+  "port": 1234,
+  "rewriteBasePath": false,
+  "socketTimeout": 2000,
+  "ssl": Object {
+    "enabled": true,
+    "keyPassphrase": "some-phrase",
+    "someNewValue": "new",
+  },
+  "uuid": undefined,
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
+  },
+}
+`;
+
+exports[`#get correctly handles server config.: disabled ssl 1`] = `
+Object {
+  "autoListen": true,
+  "basePath": "/abc",
+  "compression": Object {
+    "enabled": true,
+  },
+  "cors": false,
+  "customResponseHeaders": Object {
+    "custom-header": "custom-value",
+  },
+  "host": "host",
+  "keepaliveTimeout": 5000,
+  "maxPayload": 1000,
+  "name": "kibana-hostname",
+  "port": 1234,
+  "rewriteBasePath": false,
+  "socketTimeout": 2000,
+  "ssl": Object {
+    "certificate": "cert",
+    "enabled": false,
+    "key": "key",
+  },
+  "uuid": undefined,
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
+  },
+}
+`;
+
+exports[`#get correctly handles silent logging config. 1`] = `
+Object {
+  "appenders": Object {
+    "default": Object {
+      "kind": "legacy-appender",
+      "legacyLoggingConfig": Object {
+        "silent": true,
+      },
+    },
+  },
+  "loggers": undefined,
+  "root": Object {
+    "level": "off",
+  },
+}
+`;
+
+exports[`#get correctly handles verbose file logging config with json format. 1`] = `
+Object {
+  "appenders": Object {
+    "default": Object {
+      "kind": "legacy-appender",
+      "legacyLoggingConfig": Object {
+        "dest": "/some/path.log",
+        "json": true,
+        "verbose": true,
+      },
+    },
+  },
+  "loggers": undefined,
+  "root": Object {
+    "level": "all",
+  },
+}
+`;
+
+exports[`#getFlattenedPaths returns all paths of the underlying object. 1`] = `
+Array [
+  "known",
+  "knownContainer.sub1",
+  "knownContainer.sub2",
+  "legacy.known",
+]
+`;
+
+exports[`#set correctly sets values for existing paths. 1`] = `
+Object {
+  "known": "value",
+  "knownContainer": Object {
+    "sub1": "sub-value-1",
+    "sub2": "sub-value-2",
+  },
+}
+`;
+
+exports[`#set correctly sets values for paths that do not exist. 1`] = `
+Object {
+  "unknown": Object {
+    "sub1": "sub-value-1",
+    "sub2": "sub-value-2",
+  },
+}
+`;
+
+exports[`#toRaw returns a deep copy of the underlying raw config object. 1`] = `
+Object {
+  "known": "foo",
+  "knownContainer": Object {
+    "sub1": "bar",
+    "sub2": "baz",
+  },
+  "legacy": Object {
+    "known": "baz",
+  },
+}
+`;
+
+exports[`#toRaw returns a deep copy of the underlying raw config object. 2`] = `
+Object {
+  "known": "bar",
+  "knownContainer": Object {
+    "sub1": "baz",
+    "sub2": "baz",
+  },
+  "legacy": Object {
+    "known": "baz",
+  },
+}
+`;

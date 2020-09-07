@@ -19,3 +19,4 @@
 
 export { get } from './get';
 export { unset } from './unset';
+export { getFlattenedObject } from './get_flattened_object';

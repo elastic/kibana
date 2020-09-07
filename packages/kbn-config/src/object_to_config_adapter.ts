@@ -20,8 +20,8 @@
 import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep, get, has } from 'lodash';
 
-import { getFlattenedObject } from '../../utils';
-import { Config, ConfigPath } from './';
+import { getFlattenedObject } from './utils';
+import { Config, ConfigPath } from './config';
 
 /**
  * Allows plain javascript object to behave like `RawConfig` instance.

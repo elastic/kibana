@@ -17,10 +17,14 @@
  * under the License.
  */
 
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../package.json', () => mockPackage);
-
-export const mockApplyDeprecations = jest.fn((config, deprecations, log) => config);
-jest.mock('./deprecation/apply_deprecations', () => ({
-  applyDeprecations: mockApplyDeprecations,
+jest.mock('path', () => ({
+  resolve(...pathSegments: string[]) {
+    return pathSegments.join('/');
+  },
+  dirname(filePath: string) {
+    return '/test/kibanaRoot';
+  },
 }));
+
+export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../package.json', () => mockPackage);

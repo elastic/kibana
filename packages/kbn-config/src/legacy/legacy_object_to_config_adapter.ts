@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { ConfigPath } from '../../config';
-import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
-import { LoggingConfigType } from '../../logging/logging_config';
-import { LegacyVars } from '../types';
+import { ConfigPath } from '../config';
+import { ObjectToConfigAdapter } from '../object_to_config_adapter';
+import { LoggingConfigType } from '../logging';
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type LegacyVars = Record<string, any>;
 
 /**
  * Represents logging config supported by the legacy platform.

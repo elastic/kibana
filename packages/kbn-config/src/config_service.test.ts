@@ -21,17 +21,22 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
 import { mockPackage, mockApplyDeprecations } from './config_service.test.mocks';
-import { rawConfigServiceMock } from './raw_config_service.mock';
+import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
 
 import { ConfigService, Env } from '.';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+
 import { getEnvOptions } from './__mocks__/env';
 
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
-const logger = loggingSystemMock.create();
+
+// TODO: fix
+// import { loggingSystemMock } from '../logging/logging_system.mock';
+// const logger = loggingSystemMock.create();
+const loggingSystemMock: any = {};
+const logger: any = {};
 
 const getRawConfigProvider = (rawConfig: Record<string, any>) =>
   rawConfigServiceMock.create({ rawConfig });

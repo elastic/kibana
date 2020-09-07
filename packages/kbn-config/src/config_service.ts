@@ -23,16 +23,16 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
 
 import { Config, ConfigPath, Env } from '.';
-import { Logger, LoggerFactory } from '../logging';
+import { Logger, LoggerFactory } from './logging';
 import { hasConfigPathIntersection } from './config';
-import { RawConfigurationProvider } from './raw_config_service';
+import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
   applyDeprecations,
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
 } from './deprecation';
-import { LegacyObjectToConfigAdapter } from '../legacy/config';
+import { LegacyObjectToConfigAdapter } from './legacy';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;

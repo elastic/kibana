@@ -22,7 +22,7 @@ import { PackageInfo, EnvironmentMode } from './types';
 
 // `require` is necessary for this to work inside x-pack code as well
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../../../../package.json');
+const pkg = require('../../../package.json');
 
 /** @internal */
 export interface EnvOptions {
@@ -55,7 +55,7 @@ export class Env {
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
-    const repoRoot = dirname(require.resolve('../../../../package.json'));
+    const repoRoot = dirname(require.resolve('../../../package.json'));
     return new Env(repoRoot, options);
   }
 
