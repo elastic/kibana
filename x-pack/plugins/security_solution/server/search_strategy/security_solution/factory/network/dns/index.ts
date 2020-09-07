@@ -40,7 +40,6 @@ export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
     const edges = networkDnsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildDnsQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
