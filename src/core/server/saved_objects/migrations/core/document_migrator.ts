@@ -73,12 +73,9 @@ import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
-type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
-
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
-  validateDoc: ValidateDoc;
   log: Logger;
 }
 
@@ -118,14 +115,13 @@ export class DocumentMigrator implements VersionedTransformer {
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion,
       migrations: this.migrations,
-      validateDoc,
     });
   }
 
@@ -231,20 +227,15 @@ function buildActiveMigrations(
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
-  kibanaVersion,
   migrations,
-  validateDoc,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
-  validateDoc: ValidateDoc;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
-
-    validateDoc(result);
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have

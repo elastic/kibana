@@ -633,27 +633,6 @@ describe('DocumentMigrator', () => {
       bbb: '3.2.3',
     });
   });
-
-  test('fails if the validate doc throws', () => {
-    const migrator = new DocumentMigrator({
-      ...testOpts(),
-      typeRegistry: createRegistry({
-        name: 'aaa',
-        migrations: {
-          '2.3.4': (d) => set(d, 'attributes.counter', 42),
-        },
-      }),
-      validateDoc: (d) => {
-        if ((d.attributes as any).counter === 42) {
-          throw new Error('Meaningful!');
-        }
-      },
-    });
-
-    const doc = { id: '1', type: 'foo', attributes: {}, migrationVersion: {}, aaa: {} };
-
-    expect(() => migrator.migrate(doc)).toThrow(/Meaningful/);
-  });
 });
 
 function renameAttr(path: string, newPath: string) {

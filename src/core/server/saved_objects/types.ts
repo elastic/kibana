@@ -20,7 +20,6 @@
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
-import { PropertyValidators } from './validation';
 
 export {
   SavedObjectsImportResponse,
@@ -268,18 +267,6 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsLegacyMapping[];
-  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
-  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
-  savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
 }
 
 /**

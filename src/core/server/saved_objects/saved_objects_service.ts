@@ -49,9 +49,7 @@ import {
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
-import { convertLegacyTypes } from './utils';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { PropertyValidators } from './validation';
 import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
@@ -298,7 +296,6 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<KibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
-  private validations: PropertyValidators = {};
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -309,13 +306,6 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-
-    const legacyTypes = convertLegacyTypes(
-      setupDeps.legacyPlugins.uiExports,
-      setupDeps.legacyPlugins.pluginExtendedConfig
-    );
-    legacyTypes.forEach((type) => this.typeRegistry.registerType(type));
-    this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -494,7 +484,6 @@ export class SavedObjectsService
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
-      savedObjectValidations: this.validations,
       kibanaConfig,
       client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
     });
