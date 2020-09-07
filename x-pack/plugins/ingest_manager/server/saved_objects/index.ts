@@ -23,6 +23,7 @@ import {
   migrateAgentPolicyToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
+  migrateSettingsToV7100,
 } from './migrations/to_v7_10_0';
 
 /*
@@ -43,10 +44,13 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_auto_upgrade: { type: 'keyword' },
         package_auto_upgrade: { type: 'keyword' },
-        kibana_url: { type: 'keyword' },
+        kibana_urls: { type: 'keyword' },
         kibana_ca_sha256: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
       },
+    },
+    migrations: {
+      '7.10.0': migrateSettingsToV7100,
     },
   },
   [AGENT_SAVED_OBJECT_TYPE]: {
@@ -285,6 +289,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             type: { type: 'keyword' },
           },
         },
+        install_started_at: { type: 'date' },
+        install_version: { type: 'keyword' },
+        install_status: { type: 'keyword' },
       },
     },
   },

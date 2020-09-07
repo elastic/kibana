@@ -13,7 +13,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { TextEditor } from '../field_components';
 
-import { FieldsConfig } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
@@ -29,7 +29,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     deserializer: String,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldHelpText', {
-      defaultMessage: 'Regular expression used to match substrings in the field',
+      defaultMessage: 'Regular expression used to match substrings in the field.',
     }),
     validations: [
       {
@@ -49,7 +49,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
-      { defaultMessage: 'Replacement text for matches' }
+      { defaultMessage: 'Replacement text for matches.' }
     ),
     validations: [
       {
@@ -69,7 +69,7 @@ export const Gsub: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.gsubForm.fieldNameHelpText',
-          { defaultMessage: 'Field to search for matches' }
+          { defaultMessage: 'Field to search for matches.' }
         )}
       />
 
@@ -78,7 +78,7 @@ export const Gsub: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            height: 75,
+            height: EDITOR_PX_HEIGHT.extraSmall,
             options: { minimap: { enabled: false } },
           },
         }}

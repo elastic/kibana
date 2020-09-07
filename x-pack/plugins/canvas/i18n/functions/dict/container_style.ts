@@ -74,7 +74,7 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
       },
     }),
     padding: i18n.translate('xpack.canvas.functions.containerStyle.args.paddingHelpText', {
-      defaultMessage: 'The distance of the content, in pixels, from border.',
+      defaultMessage: 'The distance of the content, in pixels, from the border.',
     }),
   },
 };

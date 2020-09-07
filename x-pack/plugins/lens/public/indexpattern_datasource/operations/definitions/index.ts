@@ -84,7 +84,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string) => unknown;
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern

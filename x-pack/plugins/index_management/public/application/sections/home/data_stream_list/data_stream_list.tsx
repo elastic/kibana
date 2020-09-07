@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiText,
+  EuiIconTip,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLink,
+} from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { reactRouterNavigate, extractQueryParams } from '../../../../shared_imports';
@@ -39,7 +48,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     plugins: { ingestManager },
   } = useAppContext();
 
-  const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams();
+  const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
+  const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams({
+    includeStats: isIncludeStatsChecked,
+  });
 
   let content;
 
@@ -134,26 +146,60 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
     content = (
       <>
-        {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-            defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink
-                  href={documentationService.getDataStreamsDocumentationLink()}
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
-                    defaultMessage: 'Learn more.',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
+                defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={documentationService.getDataStreamsDocumentationLink()}
+                      target="_blank"
+                      external
+                    >
+                      {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
+                        defaultMessage: 'Learn more.',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
+                    {
+                      defaultMessage: 'Include stats',
+                    }
+                  )}
+                  checked={isIncludeStatsChecked}
+                  onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                  data-test-subj="includeStatsSwitch"
+                />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+                    {
+                      defaultMessage: 'Including stats can increase reload times',
+                    }
+                  )}
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 
@@ -166,6 +212,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           dataStreams={dataStreams}
           reload={reload}
           history={history as ScopedHistory}
+          includeStats={isIncludeStatsChecked}
         />
       </>
     );

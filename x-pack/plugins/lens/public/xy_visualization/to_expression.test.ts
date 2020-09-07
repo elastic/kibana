@@ -53,7 +53,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toMatchSnapshot();
   });
@@ -74,7 +74,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       ) as Ast).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
@@ -94,7 +94,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     ) as Ast;
     expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
     expect(expression.chain[0].arguments.showYAxisTitle[0]).toBe(true);
@@ -115,7 +115,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     ) as Ast;
     expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
       []
@@ -138,7 +138,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toBeNull();
   });
@@ -158,7 +158,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     )! as Ast;
 
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
@@ -192,7 +192,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     ) as Ast;
     expect(
       (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
@@ -217,7 +217,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     ) as Ast;
     expect(
       (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments

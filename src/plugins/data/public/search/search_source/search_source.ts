@@ -72,19 +72,31 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
+import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
+import { IIndexPattern, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
+import {
+  RequestFailure,
+  handleResponse,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  UI_SETTINGS,
+  ISearchOptions,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
-import { ISearchStartLegacy } from '../types';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -105,8 +117,9 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies {
   getConfig: GetConfigFn;
   search: ISearchGeneric;
-  legacySearch: ISearchStartLegacy;
+  http: HttpStart;
   esShardTimeout: number;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 /** @public **/
@@ -115,7 +128,7 @@ export class SearchSource {
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -219,7 +232,7 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Observable<SearchResponse<unknown>>}
    */
-  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
+  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, esShardTimeout, getConfig } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -227,7 +240,7 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );
   }
@@ -236,8 +249,8 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { esShardTimeout, legacySearch, getConfig } = this.dependencies;
+  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { http, getConfig, loadingCount$ } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -246,9 +259,9 @@ export class SearchSource {
         ...options,
       },
       {
-        legacySearchService: legacySearch,
+        http,
         config: { get: getConfig },
-        esShardTimeout,
+        loadingCount$,
       }
     );
   }
@@ -257,7 +270,7 @@ export class SearchSource {
    *
    * @async
    */
-  async fetch(options: FetchOptions = {}) {
+  async fetch(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
     await this.requestIsStarting(options);
 
@@ -268,10 +281,11 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+      response = await this.fetch$(searchRequest, options).toPromise();
     }
 
-    if (response.error) {
+    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+    if ((response as any).error) {
       throw new RequestFailure(null, response);
     }
 
@@ -284,7 +298,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }
@@ -311,7 +325,7 @@ export class SearchSource {
    *  @param options
    *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: FetchOptions = {}) {
+  private requestIsStarting(options: ISearchOptions = {}) {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -403,7 +417,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index: IIndexPattern) {
+  private getIndexType(index?: IIndexPattern) {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {

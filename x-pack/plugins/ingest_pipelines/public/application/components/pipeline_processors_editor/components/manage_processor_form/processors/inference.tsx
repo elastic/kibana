@@ -21,7 +21,7 @@ import { XJsonEditor } from '../field_components';
 
 import { TargetField } from './common_fields/target_field';
 
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
@@ -82,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldHelpText',
       {
-        defaultMessage: 'ID of the model to infer against',
+        defaultMessage: 'ID of the model to infer against.',
       }
     ),
     validations: [
@@ -177,7 +177,7 @@ export const Inference: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             options: { minimap: { enabled: false } },
           },
         }}
@@ -192,7 +192,7 @@ export const Inference: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             options: { minimap: { enabled: false } },
           },
         }}
