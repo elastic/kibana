@@ -51,7 +51,12 @@ type GetCompositeKeys<
 
 type CompositeOptionsSource = Record<
   string,
-  { terms: { field: string; missing_bucket?: boolean } } | undefined
+  | {
+      terms: ({ field: string } | { script: Script }) & {
+        missing_bucket?: boolean;
+      };
+    }
+  | undefined
 >;
 
 export interface AggregationOptionsByType {
@@ -288,7 +293,9 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+    after_key: {
+      [key in GetCompositeKeys<TAggregationOptionsMap>]: TAggregationOptionsMap;
+    };
     buckets: Array<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
