@@ -806,6 +806,7 @@ describe('Timeline', () => {
       };
       // temporary, we will have to decouple DataProvider & DataProvidersAnd
       // that's bigger a refactor than just fixing a bug
+      // @ts-expect-error
       delete andProviderToAdd.and;
       const update = addTimelineProvider({
         id: 'foo',

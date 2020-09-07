@@ -29,7 +29,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Add to root',
     }),
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(false),
+    serializer: from.undefinedIfValue(false),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.jsonForm.addToRootFieldHelpText',
       {
@@ -61,7 +61,7 @@ export const Json: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.jsonForm.fieldNameHelpText',
-          { defaultMessage: 'Field to be parsed' }
+          { defaultMessage: 'Field to parse.' }
         )}
       />
 

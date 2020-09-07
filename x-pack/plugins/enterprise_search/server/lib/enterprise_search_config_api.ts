@@ -90,6 +90,8 @@ export const callEnterpriseSearchConfigAPI = async ({
         },
       },
       workplaceSearch: {
+        canCreateInvitations: !!data?.settings?.workplace_search?.can_create_invitations,
+        isFederatedAuth: !!data?.settings?.workplace_search?.is_federated_auth,
         organization: {
           name: data?.settings?.workplace_search?.organization?.name,
           defaultOrgName: data?.settings?.workplace_search?.organization?.default_org_name,

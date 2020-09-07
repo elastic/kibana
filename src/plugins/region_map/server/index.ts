@@ -18,7 +18,9 @@
  */
 
 import { PluginConfigDescriptor } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
 import { configSchema, ConfigSchema } from '../config';
+import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -29,6 +31,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = () => ({
-  setup() {},
+  setup(core: CoreSetup) {
+    core.uiSettings.register(getUiSettings());
+  },
+
   start() {},
 });

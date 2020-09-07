@@ -316,7 +316,7 @@ export class EditFilterListUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="ml-edit-filter-lists">
+        <EuiPage className="ml-edit-filter-lists" data-test-subj="mlPageFilterListEdit">
           <EuiPageBody>
             <EuiPageContent
               className="ml-edit-filter-lists-content"

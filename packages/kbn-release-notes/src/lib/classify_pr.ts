@@ -27,7 +27,7 @@ import {
   ASCIIDOC_SECTIONS,
   UNKNOWN_ASCIIDOC_SECTION,
 } from '../release_notes_config';
-import { PullRequest } from './pull_request';
+import { PullRequest } from './pr_api';
 
 export interface ClassifiedPr extends PullRequest {
   area: Area;
