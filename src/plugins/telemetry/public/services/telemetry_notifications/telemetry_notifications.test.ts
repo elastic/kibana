@@ -53,3 +53,27 @@ describe('setOptedInNoticeSeen', () => {
     expect(telemetryService.setUserHasSeenNotice).toBeCalledTimes(1);
   });
 });
+
+describe('shouldShowOptedInNoticeBanner', () => {
+  it('should return true because no banner, not seen and user can change settings', () => {
+    const telemetryService = mockTelemetryService();
+    telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(true);
+    const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+    expect(telemetryNotifications.shouldShowOptedInNoticeBanner()).toBe(true);
+  });
+
+  it('should return false because the banner is already on screen', () => {
+    const telemetryService = mockTelemetryService();
+    telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(true);
+    const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+    telemetryNotifications['optedInNoticeBannerId'] = 'bruce-banner';
+    expect(telemetryNotifications.shouldShowOptedInNoticeBanner()).toBe(false);
+  });
+
+  it('should return false because already seen or the user cannot change the settings', () => {
+    const telemetryService = mockTelemetryService();
+    telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(false);
+    const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+    expect(telemetryNotifications.shouldShowOptedInNoticeBanner()).toBe(false);
+  });
+});
