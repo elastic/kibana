@@ -1578,4 +1578,46 @@ describe('migration visualization', () => {
       expect(metric.denominator).toHaveProperty('language');
     });
   });
+
+  describe('7.10.0 remove tsvb search source', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.10.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (visState: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(visState),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            filter: [],
+            query: {
+              query: {
+                query_string: {
+                  query: '*',
+                },
+              },
+              language: 'lucene',
+            },
+          }),
+        },
+      },
+    });
+
+    it('should remove the search source JSON', () => {
+      const timeSeriesDoc = generateDoc({ type: 'metrics' });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
+      const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+      const {
+        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
+        ...oldAttributes
+      } = migratedtimeSeriesDoc.attributes;
+      expect(attributes).toEqual(oldAttributes);
+    });
+  });
 });
