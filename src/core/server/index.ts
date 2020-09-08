@@ -39,6 +39,7 @@
  * @packageDocumentation
  */
 
+import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
   ILegacyScopedClusterClient,
@@ -46,7 +47,6 @@ import {
   ElasticsearchServiceStart,
   IScopedClusterClient,
 } from './elasticsearch';
-
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
@@ -63,12 +63,7 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
-import {
-  LoggingServiceSetup,
-  appendersSchema,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging';
+import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -497,8 +492,6 @@ export const config = {
     schema: elasticsearchConfigSchema,
   },
   logging: {
-    appenders: appendersSchema,
-    loggers: loggerSchema,
-    loggerContext: loggerContextConfigSchema,
+    appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
