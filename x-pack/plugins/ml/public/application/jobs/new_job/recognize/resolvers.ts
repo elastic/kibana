@@ -35,7 +35,7 @@ export function checkViewOrCreateJobs(
           await navigateToPath(url);
           reject();
         } else {
-          await navigateToPath(`#/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`);
+          await navigateToPath(`/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`);
           reject();
         }
       })
