@@ -7,7 +7,6 @@
 import {
   SafeResolverAncestry,
   SafeResolverTree,
-  ResolverChildNode,
   ResolverRelatedAlerts,
   SafeResolverChildren,
   SafeResolverLifecycleNode,

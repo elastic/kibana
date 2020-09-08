@@ -11,7 +11,7 @@ import {
   SafeResolverEvent,
   SafeResolverRelatedEvents,
 } from '../../../../../common/endpoint/types';
-import { entityId, entityIDSafeVersion } from '../../../../../common/endpoint/models/event';
+import { entityIDSafeVersion } from '../../../../../common/endpoint/models/event';
 
 describe('Tree', () => {
   const generator = new EndpointDocGenerator();

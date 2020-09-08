@@ -67,11 +67,7 @@ export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | und
 }
 
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
-  if (isLegacyEvent(event)) {
-    return event.endgame.timestamp_utc;
-  } else {
-    return event['@timestamp'];
-  }
+  return event['@timestamp'];
 }
 
 export function eventName(event: ResolverEvent): string {

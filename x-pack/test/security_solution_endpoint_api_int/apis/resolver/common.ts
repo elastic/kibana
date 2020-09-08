@@ -13,6 +13,7 @@ import {
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
+  entityIDSafeVersion,
   eventIDSafeVersion,
 } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import {
@@ -22,6 +23,23 @@ import {
   RelatedEventInfo,
   categoryMapping,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
+
+/**
+ * Creates the ancestry array based on an array of events. The order of the ancestry array will match the order
+ * of the events passed in.
+ *
+ * @param events an array of generated events
+ */
+export const createAncestryArray = (events: Event[]) => {
+  const ancestry: string[] = [];
+  for (const event of events) {
+    const entityID = entityIDSafeVersion(event);
+    if (entityID) {
+      ancestry.push(entityID);
+    }
+  }
+  return ancestry;
+};
 
 /**
  * Check that the given lifecycle is in the resolver tree's corresponding map
