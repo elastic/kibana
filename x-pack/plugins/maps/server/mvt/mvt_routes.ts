@@ -34,16 +34,11 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
     },
     async (context, request, response) => {
       const { query } = request;
-
-      const callElasticsearch = async (type: string, ...args: any[]): Promise<unknown> => {
-        return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
-      };
-
       const requestBodyDSL = rison.decode(query.requestBody);
 
       const tile = await getTile({
         logger,
-        callElasticsearch,
+        callElasticsearch: makeCallElasticsearch(context),
         geometryFieldName: query.geometryFieldName,
         x: query.x,
         y: query.y,
@@ -52,26 +47,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         requestBody: requestBodyDSL,
       });
 
-      if (tile) {
-        return response.ok({
-          body: tile,
-          headers: {
-            'content-disposition': 'inline',
-            'content-length': `${tile.length}`,
-            'Content-Type': 'application/x-protobuf',
-            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-          },
-        });
-      } else {
-        return response.ok({
-          headers: {
-            'content-disposition': 'inline',
-            'content-length': '0',
-            'Content-Type': 'application/x-protobuf',
-            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-          },
-        });
-      }
+      return sendResponse(response, tile);
     }
   );
 
@@ -93,16 +69,11 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
     },
     async (context, request, response) => {
       const { query } = request;
-
-      const callElasticsearch = async (type: string, ...args: any[]): Promise<unknown> => {
-        return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
-      };
-
       const requestBodyDSL = rison.decode(query.requestBody);
 
       const tile = await getGridTile({
         logger,
-        callElasticsearch,
+        callElasticsearch: makeCallElasticsearch(context),
         geometryFieldName: query.geometryFieldName,
         x: query.x,
         y: query.y,
@@ -113,26 +84,33 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         geoFieldType: query.geoFieldType,
       });
 
-      if (tile) {
-        return response.ok({
-          body: tile,
-          headers: {
-            'content-disposition': 'inline',
-            'content-length': `${tile.length}`,
-            'Content-Type': 'application/x-protobuf',
-            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-          },
-        });
-      } else {
-        return response.ok({
-          headers: {
-            'content-disposition': 'inline',
-            'content-length': '0',
-            'Content-Type': 'application/x-protobuf',
-            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-          },
-        });
-      }
+      return sendResponse(response, tile);
     }
   );
+}
+
+function sendResponse(response, tile) {
+  const headers = {
+    'content-disposition': 'inline',
+    'content-length': tile ? `${tile.length}` : 0,
+    'Content-Type': 'application/x-protobuf',
+    'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
+  };
+
+  if (tile) {
+    return response.ok({
+      body: tile,
+      headers,
+    });
+  } else {
+    return response.ok({
+      headers,
+    });
+  }
+}
+
+function makeCallElasticsearch(context) {
+  return async (type: string, ...args: any[]): Promise<unknown> => {
+    return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
+  };
 }
