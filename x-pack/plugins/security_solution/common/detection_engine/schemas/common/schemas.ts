@@ -113,8 +113,11 @@ export type RuleIdOrUndefined = t.TypeOf<typeof ruleIdOrUndefined>;
 export type RuleIdsOrUndefined = t.TypeOf<typeof ruleIdsOrUndefined>;
 
 export const id = UUID;
+export const ids = t.array(UUID);
 export const idOrUndefined = t.union([id, t.undefined]);
+export const idsOrUndefined = t.union([ids, t.undefined]);
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
+export type IdsOrUndefined = t.TypeOf<typeof idsOrUndefined>;
 
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;

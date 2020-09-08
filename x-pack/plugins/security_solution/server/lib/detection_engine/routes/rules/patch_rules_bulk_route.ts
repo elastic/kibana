@@ -119,22 +119,22 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            let existingRule = foundRules?.find(
-              (rule) => rule.params.ruleId === ruleId || rule.id === id
-            );
-            if (existingRule == null) {
+            const foundRule = foundRules?.find((rule) => rule.params.ruleId === ruleId);
+            let existingRule = foundRule != null ? [foundRule] : null;
+            if (foundRule == null) {
+              // try the id?
               existingRule = await readRules({ alertsClient, ruleIds: undefined, id });
             }
             // const existingRule = await readRules({ alertsClient, ruleIds: [ruleId], id });
 
             // is this a bug?
-            if (existingRule != null && existingRule.params.type) {
+            if (existingRule != null && existingRule.length > 0 && existingRule[0].params.type) {
               // reject an unauthorized modification of an ML rule
-              throwHttpError(await mlAuthz.validateRuleType(existingRule.params.type));
+              throwHttpError(await mlAuthz.validateRuleType(existingRule[0].params.type));
             }
 
             const rule = await patchRules({
-              rule: existingRule ?? null,
+              rule: existingRule != null && existingRule.length > 0 ? existingRule[0] : null,
               alertsClient,
               author,
               buildingBlockType,
