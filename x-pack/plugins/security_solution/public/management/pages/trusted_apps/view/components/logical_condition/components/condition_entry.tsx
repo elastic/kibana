@@ -40,10 +40,15 @@ export interface ConditionEntryProps {
   isRemoveDisabled?: boolean;
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
+  onRemove: (entry: TrustedApp['entries'][0]) => void;
 }
 export const ConditionEntry = memo<ConditionEntryProps>(
-  ({ showLabels = false, isRemoveDisabled = false }) => {
-    const handleRemoveClick = useCallback(() => {}, []);
+  ({ entry, showLabels = false, onRemove, isRemoveDisabled = false }) => {
+    const handleValueUpdate = useCallback(() => {}, []);
+    const handleFieldUpdate = useCallback(() => {}, []);
+    const handleRemoveClick = useCallback(() => {
+      onRemove(entry);
+    }, [entry, onRemove]);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
@@ -55,7 +60,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               { defaultMessage: 'Field' }
             )}
           >
-            <EuiSuperSelect options={[]} />
+            <EuiSuperSelect options={[]} onChange={handleFieldUpdate} />
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -84,7 +89,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               { defaultMessage: 'Value' }
             )}
           >
-            <EuiFieldText name="operator" value="is" />
+            <EuiFieldText name="operator" value={entry.value} onChange={handleValueUpdate} />
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

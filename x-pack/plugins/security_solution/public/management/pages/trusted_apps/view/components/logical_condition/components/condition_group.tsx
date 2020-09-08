@@ -12,8 +12,9 @@ import { ConditionEntry } from './condition_entry';
 interface ConditionGroupProps {
   os: TrustedApp['os'];
   entries: TrustedApp['entries'];
+  onEntryRemove: (entry: TrustedApp['entries'][0]) => void;
 }
-export const ConditionGroup = memo<ConditionGroupProps>(({ os, entries }) => {
+export const ConditionGroup = memo<ConditionGroupProps>(({ os, entries, onEntryRemove }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>{'AND'}</EuiFlexItem>
@@ -23,7 +24,8 @@ export const ConditionGroup = memo<ConditionGroupProps>(({ os, entries }) => {
             os={os}
             entry={entry}
             showLabels={index === 0}
-            isRemoveDisabled={index === 0}
+            isRemoveDisabled={index === 0 && entries.length <= 1}
+            onRemove={onEntryRemove}
           />
         ))}
       </EuiFlexItem>

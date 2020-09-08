@@ -18,8 +18,16 @@ import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoi
 import { LogicalConditionBuilder } from './logical_condition';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 
+const newEntry = (): NewTrustedApp['entries'][0] => {
+  return {
+    field: 'path',
+    operator: 'included',
+    type: 'match',
+    value: '',
+  };
+};
+
 export const NewTrustedAppForm = memo(() => {
-  const handleAndClick = useCallback(() => {}, []);
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
@@ -32,16 +40,17 @@ export const NewTrustedAppForm = memo(() => {
   const [formValues, setFormValues] = useState<NewTrustedApp>({
     name: '',
     os: 'windows',
-    entries: [
-      {
-        operator: 'included',
-        type: 'match',
-        field: 'path',
-        value: 'Microsoft',
-      },
-    ],
+    entries: [newEntry()],
     description: '',
   });
+  const handleAndClick = useCallback(() => {
+    setFormValues((prevState) => {
+      return {
+        ...prevState,
+        entries: [...prevState.entries, newEntry()],
+      };
+    });
+  }, [setFormValues]);
   const handleDomChangeEvents = useCallback<
     ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
   >(({ target: { name, value } }) => {
@@ -59,6 +68,14 @@ export const NewTrustedAppForm = memo(() => {
         os: newOsValue as NewTrustedApp['os'],
       };
       // FIXME:PT need to adjust `entries` (potentially) based on OS being windows
+    });
+  }, []);
+  const handleEntryRemove = useCallback((entry: NewTrustedApp['entries'][0]) => {
+    setFormValues((prevState) => {
+      return {
+        ...prevState,
+        entries: prevState.entries.filter((item) => item !== entry),
+      };
     });
   }, []);
 
@@ -88,6 +105,7 @@ export const NewTrustedAppForm = memo(() => {
           entries={formValues.entries}
           os={formValues.os}
           onAndClicked={handleAndClick}
+          onEntryRemove={handleEntryRemove}
         />
       </EuiFormRow>
       <EuiFormRow
