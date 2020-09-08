@@ -10,7 +10,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
-import { useQuery } from '../../../common/containers/matrix_histogram';
+import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
@@ -19,11 +19,9 @@ import { AlertsByCategory } from '.';
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/containers/matrix_histogram', () => {
-  return {
-    useQuery: jest.fn(),
-  };
-});
+jest.mock('../../../common/containers/matrix_histogram', () => ({
+  useMatrixHistogram: jest.fn(),
+}));
 
 const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
 const from = '2020-03-31T06:00:00.000Z';
@@ -34,12 +32,14 @@ describe('Alerts by category', () => {
 
   describe('before loading data', () => {
     beforeAll(async () => {
-      (useQuery as jest.Mock).mockReturnValue({
-        data: null,
-        loading: false,
-        inspect: false,
-        totalCount: null,
-      });
+      (useMatrixHistogram as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: null,
+          inspect: false,
+          totalCount: null,
+        },
+      ]);
 
       wrapper = mount(
         <ThemeProvider theme={theme}>
@@ -100,19 +100,21 @@ describe('Alerts by category', () => {
 
   describe('after loading data', () => {
     beforeAll(async () => {
-      (useQuery as jest.Mock).mockReturnValue({
-        data: [
-          { x: 1, y: 2, g: 'g1' },
-          { x: 2, y: 4, g: 'g1' },
-          { x: 3, y: 6, g: 'g1' },
-          { x: 1, y: 1, g: 'g2' },
-          { x: 2, y: 3, g: 'g2' },
-          { x: 3, y: 5, g: 'g2' },
-        ],
-        loading: false,
-        inspect: false,
-        totalCount: 6,
-      });
+      (useMatrixHistogram as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            { x: 1, y: 2, g: 'g1' },
+            { x: 2, y: 4, g: 'g1' },
+            { x: 3, y: 6, g: 'g1' },
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+          inspect: false,
+          totalCount: 6,
+        },
+      ]);
 
       wrapper = mount(
         <ThemeProvider theme={theme}>
