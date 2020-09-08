@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
@@ -270,15 +271,16 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
-                  defaultMessage="Policy repository not found"
+                  defaultMessage="Repository not found"
                 />
               }
-              color="warning"
+              color="danger"
               iconType="alert"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
-                defaultMessage="Select another repository."
+                defaultMessage="The repository {repo} does not exist. Please select an existing repository."
+                values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
               />
             </EuiCallOut>
             <EuiSpacer size="m" />
