@@ -17609,7 +17609,6 @@
     "xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage": "{space}スペースにコピーされました。",
     "xpack.spaces.management.copyToSpace.copyToSpacesButton": "{spaceCount} {spaceCount, plural, one {スペース} other {スペース}}にコピー",
     "xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton": "コピー",
-    "xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel": "関連性のある保存されたオブジェクトを含みません",
     "xpack.spaces.management.copyToSpace.finishCopyToSpacesButton": "終了",
     "xpack.spaces.management.copyToSpace.finishedButtonLabel": "コピーが完了しました。",
     "xpack.spaces.management.copyToSpace.finishPendingOverwritesCopyToSpacesButton": "{overwriteCount}件のオブジェクトを上書き",

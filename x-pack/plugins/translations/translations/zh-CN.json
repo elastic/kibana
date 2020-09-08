@@ -17619,7 +17619,6 @@
     "xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage": "已成功复制到 {space} 工作区。",
     "xpack.spaces.management.copyToSpace.copyToSpacesButton": "复制到 {spaceCount} {spaceCount, plural, one {个工作区} other {个工作区}}",
     "xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton": "复制",
-    "xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel": "不包括相关已保存对象",
     "xpack.spaces.management.copyToSpace.finishCopyToSpacesButton": "完成",
     "xpack.spaces.management.copyToSpace.finishedButtonLabel": "复制已完成。",
     "xpack.spaces.management.copyToSpace.finishPendingOverwritesCopyToSpacesButton": "覆盖 {overwriteCount} 个对象",
