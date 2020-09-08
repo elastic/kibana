@@ -17,10 +17,10 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
 [cols="2*<"]
 |===
-| [[xpack-enable-reporting]]`xpack.reporting.enabled`
+| [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}
   | Set to `false` to disable the {report-features}.
 
-| `xpack.reporting.encryptionKey`
+| `xpack.reporting.encryptionKey` {ess-icon}
   | Set to an alphanumeric, at least 32 characters long text string. By default, {kib} will generate a random key when it
   starts, which will cause pending reports to fail after restart. Configure this
   setting to preserve the same key across multiple restarts and multiple instances of {kib}.
@@ -86,7 +86,7 @@ reports, you might need to change the following settings.
   | How often the index that stores reporting jobs rolls over to a new index.
   Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
-| `xpack.reporting.queue.pollEnabled`
+| `xpack.reporting.queue.pollEnabled` {ess-icon}
   | Set to `true` (default) to enable the {kib} instance to to poll the index for
   pending jobs and claim them for execution. Setting this to `false` allows the
   {kib} instance to only add new jobs to the reporting queue, list jobs, and
@@ -107,7 +107,7 @@ security is enabled, `xpack.security.encryptionKey`.
   | Specifies the number of milliseconds that the reporting poller waits between polling the
   index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
 
-| [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout`
+| [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}
   | How long each worker has to produce a report. If your machine is slow or under
   heavy load, you might need to increase this timeout. Specified in milliseconds.
   If a Reporting job execution time goes over this time limit, the job will be
@@ -125,19 +125,22 @@ control the capturing process.
 
 [cols="2*<"]
 |===
-| `xpack.reporting.capture.timeouts.openUrl`
+a| `xpack.reporting.capture.timeouts`
+`.openUrl` {ess-icon}
   | Specify how long to allow the Reporting browser to wait for the "Loading..." screen
   to dismiss and find the initial data for the Kibana page.  If the time is
   exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
   Defaults to `30000` (30 seconds).
 
-| `xpack.reporting.capture.timeouts.waitForElements`
+a| `xpack.reporting.capture.timeouts`
+`.waitForElements` {ess-icon}
   | Specify how long to allow the Reporting browser to wait for all visualization
   panels to load on the Kibana page. If the time is exceeded, a page screenshot
   is captured showing the current state, and the download link shows a warning message. Defaults to `30000` (30
   seconds).
 
-| `xpack.reporting.capture.timeouts.renderComplete`
+a| `xpack.reporting.capture.timeouts`
+`.renderComplete` {ess-icon}
   | Specify how long to allow the Reporting browser to wait for all visualizations to
   fetch and render the data. If the time is exceeded, a
   page screenshot is captured showing the current state, and the download link shows a warning message. Defaults to
@@ -155,7 +158,7 @@ available, but there will likely be errors in the visualizations in the report.
 
 [cols="2*<"]
 |===
-| `xpack.reporting.capture.maxAttempts`
+| `xpack.reporting.capture.maxAttempts` {ess-icon}
   | If capturing a report fails for any reason, {kib} will re-attempt other reporting
   job, as many times as this setting. Defaults to `3`.
 
@@ -166,7 +169,7 @@ available, but there will likely be errors in the visualizations in the report.
   visualizations, try increasing this value.
   Defaults to `3000` (3 seconds).
 
-| [[xpack-reporting-browser]] `xpack.reporting.capture.browser.type`
+| [[xpack-reporting-browser]] `xpack.reporting.capture.browser.type` {ess-icon}
   | Specifies the browser to use to capture screenshots. This setting exists for
   backward compatibility. The only valid option is `chromium`.
 
@@ -180,20 +183,24 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
 
 [cols="2*<"]
 |===
-| `xpack.reporting.capture.browser.chromium.disableSandbox`
+a| `xpack.reporting.capture.browser`
+`.chromium.disableSandbox`
   | It is recommended that you research the feasibility of enabling unprivileged user namespaces.
   See Chromium Sandbox for additional information. Defaults to false for all operating systems except Debian,
   Red Hat Linux, and CentOS which use true.
 
-| `xpack.reporting.capture.browser.chromium.proxy.enabled`
+a| `xpack.reporting.capture.browser`
+`.chromium.proxy.enabled`
   | Enables the proxy for Chromium to use. When set to `true`, you must also specify the
   `xpack.reporting.capture.browser.chromium.proxy.server` setting.
   Defaults to `false`.
 
-| `xpack.reporting.capture.browser.chromium.proxy.server`
+a| `xpack.reporting.capture.browser`
+.chromium.proxy.server`
   | The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
 
-| `xpack.reporting.capture.browser.chromium.proxy.bypass`
+a| `xpack.reporting.capture.browser`
+.chromium.proxy.bypass`
   | An array of hosts that should not go through the proxy server and should use a direct connection instead.
   Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 
@@ -205,27 +212,27 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
 
 [cols="2*<"]
 |===
-| [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes`
+| [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}
   | The maximum size of a CSV file before being truncated. This setting exists to prevent
   large exports from causing performance and storage issues.
   Defaults to `10485760` (10mB).
 
 | `xpack.reporting.csv.scroll.size`
-  | Number of documents retrieved from {es} for each scroll iteration during a CSV 
+  | Number of documents retrieved from {es} for each scroll iteration during a CSV
   export.
   Defaults to `500`.
 
 | `xpack.reporting.csv.scroll.duration`
   | Amount of time allowed before {kib} cleans the scroll context during a CSV export.
   Defaults to `30s`.
-  
+
 | `xpack.reporting.csv.checkForFormulas`
   | Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars).
   See OWASP: https://www.owasp.org/index.php/CSV_Injection
   Defaults to `true`.
-  
+
 | `xpack.reporting.csv.enablePanelActionDownload`
-  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard 
+  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard
   panel menu for the saved search.
   Defaults to `true`.
 
