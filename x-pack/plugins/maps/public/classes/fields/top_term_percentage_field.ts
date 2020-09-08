@@ -13,9 +13,11 @@ import { FIELD_ORIGIN } from '../../../common/constants';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
+  private readonly _canReadFromGeoJson: boolean;
 
-  constructor(topTermAggField: IESAggField) {
+  constructor(topTermAggField: IESAggField, canReadFromGeoJson?: boolean = true) {
     this._topTermAggField = topTermAggField;
+    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   getSource(): IVectorSource {
@@ -61,7 +63,7 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return true;
+    return this._canReadFromGeoJson;
   }
 
   supportsFieldMeta(): boolean {
@@ -81,6 +83,6 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   canReadFromGeoJson(): boolean {
-    return true;
+    return this._canReadFromGeoJson;
   }
 }

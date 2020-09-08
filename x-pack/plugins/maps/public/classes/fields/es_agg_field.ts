@@ -135,7 +135,7 @@ export class ESAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
+    return this._canReadFromGeoJson;
   }
 
   canReadFromGeoJson(): boolean {
@@ -163,7 +163,7 @@ export function esAggFieldsFactory(
   const aggFields: IESAggField[] = [aggField];
 
   if (aggDescriptor.field && aggDescriptor.type === AGG_TYPE.TERMS) {
-    aggFields.push(new TopTermPercentageField(aggField));
+    aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
   }
 
   return aggFields;
