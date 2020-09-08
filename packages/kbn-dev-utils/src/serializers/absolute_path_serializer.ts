@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '../repo_root';
+import { REPO_ROOT } from '@kbn/utils';
 
 export function createAbsolutePathSerializer(
   rootPath: string = REPO_ROOT,

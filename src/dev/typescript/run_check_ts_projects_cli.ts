@@ -22,8 +22,8 @@ import { resolve } from 'path';
 import execa from 'execa';
 
 import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
-const REPO_ROOT = resolve(__dirname, '../../../');
 import { File } from '../file';
 import { PROJECTS } from './projects';
 

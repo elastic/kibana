@@ -69,7 +69,8 @@ To run the optimizer from code, you can import the [`OptimizerConfig`][Optimizer
 Example:
 ```ts
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const log = new ToolingLog({
   level: 'verbose',

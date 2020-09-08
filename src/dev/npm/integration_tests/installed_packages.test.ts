@@ -21,8 +21,8 @@ import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { getInstalledPackages, InstalledPackage } from '../installed_packages';
-import { REPO_ROOT } from '../../constants';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 

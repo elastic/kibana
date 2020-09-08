@@ -66,6 +66,7 @@
     "write-pkg": "^4.0.0"
   },
   "dependencies": {
+    "@kbn/utils": "1.0.0",
     "tslib": "^2.0.0"
   }
 }

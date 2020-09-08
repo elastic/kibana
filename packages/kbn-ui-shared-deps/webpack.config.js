@@ -21,7 +21,7 @@ const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const { REPO_ROOT } = require('@kbn/dev-utils');
+const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
 
 const UiSharedDeps = require('./index');

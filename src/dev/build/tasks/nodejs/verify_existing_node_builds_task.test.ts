@@ -20,12 +20,12 @@
 import Path from 'path';
 import Fs from 'fs';
 
+import { REPO_ROOT } from '@kbn/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAnyInstanceSerializer,
   createRecursiveSerializer,
-  REPO_ROOT,
 } from '@kbn/dev-utils';
 
 import { Config, Platform } from '../../lib';

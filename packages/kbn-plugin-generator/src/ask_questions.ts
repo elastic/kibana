@@ -19,7 +19,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import inquirer from 'inquirer';
 
 export interface Answers {

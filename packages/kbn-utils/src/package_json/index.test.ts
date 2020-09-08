@@ -17,29 +17,15 @@
  * under the License.
  */
 
-import globby from 'globby';
+import path from 'path';
+import { kibanaPackageJSON } from './';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { run } from '@kbn/dev-utils';
-import { File } from './file';
-import { checkFileCasing } from './precommit_hook/check_file_casing';
+it('parses package.json', () => {
+  expect(kibanaPackageJSON.name).toEqual('kibana');
+});
 
-run(async ({ log }) => {
-  const paths = await globby('**/*', {
-    cwd: REPO_ROOT,
-    nodir: true,
-    gitignore: true,
-    ignore: [
-      // the gitignore: true option makes sure that we don't
-      // include files from node_modules in the result, but it still
-      // loads all of the files from node_modules before filtering
-      // so it's still super slow. This prevents loading the files
-      // and still relies on gitignore to to final ignores
-      '**/node_modules',
-    ],
-  });
-
-  const files = paths.map((path) => new File(path));
-
-  await checkFileCasing(log, files);
+it('includes __dirname and __filename', () => {
+  const root = path.resolve(__dirname, '../../../../');
+  expect(kibanaPackageJSON.__filename).toEqual(path.resolve(root, 'package.json'));
+  expect(kibanaPackageJSON.__dirname).toEqual(root);
 });

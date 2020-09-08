@@ -19,7 +19,8 @@
 
 import Path from 'path';
 
-import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
 
 import { getFailures, TestFailure } from './get_failures';

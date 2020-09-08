@@ -17,11 +17,6 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { REPO_ROOT } = require('@kbn/utils');
-
-exports.ASSET_DIR = resolve(REPO_ROOT, 'built_assets/storybook');
-exports.CURRENT_CONFIG = resolve(exports.ASSET_DIR, 'current.config.js');
-exports.STORY_ENTRY_PATH = resolve(exports.ASSET_DIR, 'stories.entry.js');
-exports.DLL_DIST_DIR = resolve(exports.ASSET_DIR, 'dll');
-exports.DLL_NAME = 'storybook_dll';
+export * from './package_json';
+export * from './path';
+export * from './repo_root';

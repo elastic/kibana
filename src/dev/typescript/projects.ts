@@ -19,7 +19,7 @@
 
 import glob from 'glob';
 import { resolve } from 'path';
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT } from '@kbn/utils';
 import { Project } from './project';
 
 export const PROJECTS = [

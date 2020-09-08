@@ -23,7 +23,7 @@ import { basename, dirname, relative, resolve } from 'path';
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
 
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT } from '@kbn/utils';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(

@@ -21,7 +21,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { promisify } from 'util';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { OptimizerConfig, runOptimizer, logOptimizerState } from '@kbn/optimizer';
 
 import { BuildContext } from '../build_context';

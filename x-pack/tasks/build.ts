@@ -10,7 +10,8 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
-import { ToolingLog, REPO_ROOT, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';

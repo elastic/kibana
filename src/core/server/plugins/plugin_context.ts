@@ -19,6 +19,7 @@
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -28,7 +29,6 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
