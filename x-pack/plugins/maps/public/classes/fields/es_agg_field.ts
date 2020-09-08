@@ -12,7 +12,7 @@ import { IVectorSource } from '../sources/vector_source';
 import { ESDocField } from './es_doc_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
-import { getField, addFieldToDSL } from '../util/es_agg_utils';
+import { getField, addFieldToDSL } from '../../../common/es_agg_utils';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';

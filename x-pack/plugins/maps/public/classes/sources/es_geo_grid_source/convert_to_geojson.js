@@ -11,7 +11,7 @@ import {
   GEOCENTROID_AGG_NAME,
 } from '../../../../common/constants';
 import { getTileBoundingBox } from '../../../../common/geo_tile_utils';
-import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
+import { extractPropertiesFromBucket } from '../../../../common/es_agg_utils';
 import { clamp } from '../../../../common/elasticsearch_geo_utils';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
