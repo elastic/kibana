@@ -15,7 +15,7 @@ import {
   IRouter,
 } from '../../../../../../src/core/server';
 
-import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 // FAILING: https://github.com/elastic/kibana/issues/58942

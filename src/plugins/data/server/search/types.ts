@@ -18,21 +18,13 @@
  */
 
 import { RequestHandlerContext } from '../../../../core/server';
-import { IKibanaSearchResponse } from '../../common/search';
+import { ISearchOptions } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
-}
-
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  signal?: AbortSignal;
-  strategy?: string;
 }
 
 export interface ISearchSetup {
@@ -76,7 +68,7 @@ export interface ISearchStart<
     context: RequestHandlerContext,
     request: IEsSearchRequest,
     options: ISearchOptions
-  ) => Promise<IKibanaSearchResponse>;
+  ) => Promise<IEsSearchResponse>;
 }
 
 /**
