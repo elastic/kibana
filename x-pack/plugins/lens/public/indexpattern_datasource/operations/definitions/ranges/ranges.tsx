@@ -45,6 +45,14 @@ export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
   value: RangeColumnParams[K]
 ) => void;
 
+export const isValidNumber = (value: number | '') =>
+  value !== '' && !isNaN(value) && isFinite(value);
+export const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
+export const isValidRange = (range: RangeType): boolean => {
+  const { from, to } = range;
+  return isValidNumber(from) && isValidNumber(to) && isRangeWithin(range);
+};
+
 export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   type: 'range',
   displayName: i18n.translate('xpack.lens.indexPattern.ranges', {
@@ -111,7 +119,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       schema: 'segment',
       params: {
         field: column.sourceField,
-        ranges: column.params.ranges.map(({ label, ...rawRange }) => ({ ...rawRange })),
+        ranges: column.params.ranges
+          .filter(isValidRange)
+          .map(({ label, ...rawRange }) => ({ ...rawRange })),
         interval: column.params.interval,
         intervalBase: column.params.intervalBase,
         drop_partials: false,
