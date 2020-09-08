@@ -15,7 +15,7 @@ import { getViewLinkStatus } from './get_view_link_status';
 export const viewActionButtonText = i18n.translate(
   'xpack.ml.dataframe.analyticsList.viewActionName',
   {
-    defaultMessage: 'View DFA',
+    defaultMessage: 'View',
   }
 );
 
