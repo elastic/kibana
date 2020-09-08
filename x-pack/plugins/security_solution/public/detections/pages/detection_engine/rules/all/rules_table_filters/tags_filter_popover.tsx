@@ -76,9 +76,6 @@ const TagsFilterPopoverComponent = ({
   }, []);
 
   useEffect(() => {
-    if (searchInput === '') {
-      setFilterTags(sortedTags);
-    }
     setFilterTags(
       sortedTags.filter((tag) => tag.toLowerCase().includes(searchInput.toLowerCase()))
     );
