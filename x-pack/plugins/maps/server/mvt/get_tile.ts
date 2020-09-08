@@ -60,8 +60,6 @@ export async function getGridTile({
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
-  logger.warn('getGridTile not implemented');
-
   const esBbox = tileToESBbox(x, y, z);
   try {
     try {
