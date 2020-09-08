@@ -64,15 +64,15 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   } = useSearchItems(undefined);
 
   const fetchTransformConfig = async () => {
-    try {
-      const transformConfigs = await api.getTransform(transformId);
-      if (isHttpFetchError(transformConfigs)) {
-        setTransformConfig(undefined);
-        setErrorMessage(transformConfigs.message);
-        setIsInitialized(true);
-        return;
-      }
+    const transformConfigs = await api.getTransform(transformId);
+    if (isHttpFetchError(transformConfigs)) {
+      setTransformConfig(undefined);
+      setErrorMessage(transformConfigs.message);
+      setIsInitialized(true);
+      return;
+    }
 
+    try {
       await loadIndexPatterns(savedObjectsClient, indexPatterns);
       const indexPatternTitle = Array.isArray(transformConfigs.transforms[0].source.index)
         ? transformConfigs.transforms[0].source.index.join(',')

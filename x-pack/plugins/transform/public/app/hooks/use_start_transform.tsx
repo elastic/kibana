@@ -4,21 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import type { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
-import { useToastNotifications } from '../app_dependencies';
+import type { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
+import { isStartTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
+
+import { getErrorMessage } from '../../shared_imports';
+
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 
 export const useStartTransforms = () => {
+  const deps = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
   return async (transformsInfo: StartTransformsRequestSchema) => {
     const results = await api.startTransforms(transformsInfo);
+
+    if (!isStartTransformsResponseSchema(results)) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.transform.transformList.startTransformCommonErrorMessage', {
+          defaultMessage: 'An error occurred starting the transforms.',
+        })
+      );
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
+          defaultMessage: 'An error occurred starting the transform(s).',
+        }),
+        text: toMountPoint(
+          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
+        ),
+      });
+      return;
+    }
 
     for (const transformId in results) {
       // hasOwnProperty check to ensure only properties on object itself, and not its prototypes

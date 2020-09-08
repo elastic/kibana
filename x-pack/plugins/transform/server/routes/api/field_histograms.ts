@@ -16,8 +16,8 @@ import {
   IndexPatternTitleSchema,
 } from '../../../common/api_schemas/common';
 import {
-  fieldHistogramsSchema,
-  FieldHistogramsSchema,
+  fieldHistogramsRequestSchema,
+  FieldHistogramsRequestSchema,
 } from '../../../common/api_schemas/field_histograms';
 import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
@@ -27,15 +27,15 @@ import { addBasePath } from '../index';
 import { wrapError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.post<IndexPatternTitleSchema, undefined, FieldHistogramsSchema>(
+  router.post<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
     {
       path: addBasePath('field_histograms/{indexPatternTitle}'),
       validate: {
         params: indexPatternTitleSchema,
-        body: fieldHistogramsSchema,
+        body: fieldHistogramsRequestSchema,
       },
     },
-    license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsSchema>(
+    license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
       async (ctx, req, res) => {
         const { indexPatternTitle } = req.params;
         const { query, fields, samplerShardSize } = req.body;

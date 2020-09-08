@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 import { dictionaryToArray } from '../../../common/types/common';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
@@ -161,33 +162,35 @@ export const usePivotData = (
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
-    try {
-      const previewRequest = getPreviewTransformRequestBody(
-        indexPatternTitle,
-        query,
-        groupByArr,
-        aggsArr
-      );
-      const resp = await api.getTransformsPreview(previewRequest);
-      setTableItems(resp.preview);
-      setRowCount(resp.preview.length);
-      setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
-      setStatus(INDEX_STATUS.LOADED);
+    const previewRequest = getPreviewTransformRequestBody(
+      indexPatternTitle,
+      query,
+      groupByArr,
+      aggsArr
+    );
+    const resp = await api.getTransformsPreview(previewRequest);
 
-      if (resp.preview.length === 0) {
-        setNoDataMessage(
-          i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
-            defaultMessage:
-              'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
-          })
-        );
-      }
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+    if (!isPostTransformsPreviewResponseSchema(resp)) {
+      setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
       setRowCount(0);
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
+      return;
+    }
+
+    setTableItems(resp.preview);
+    setRowCount(resp.preview.length);
+    setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
+    setStatus(INDEX_STATUS.LOADED);
+
+    if (resp.preview.length === 0) {
+      setNoDataMessage(
+        i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
+          defaultMessage:
+            'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+        })
+      );
     }
   };
 

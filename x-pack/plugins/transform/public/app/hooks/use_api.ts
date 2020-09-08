@@ -15,6 +15,7 @@ import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
+import type { FieldHistogramsResponseSchema } from '../../../common/api_schemas/field_histograms';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -37,10 +38,12 @@ import type {
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
+import { EsIndex } from '../../../common/types/es_index';
+
+import type { SearchResponse7 } from '../../shared_imports';
 
 import { useAppDependencies } from '../app_dependencies';
 
-import { EsIndex } from './use_api_types';
 import { SavedSearchQuery } from './use_search_items';
 
 // Default sampler shard size used for field histograms
@@ -56,90 +59,146 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      getTransform(
+      async getTransform(
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | HttpFetchError> {
-        return http.get(`${API_BASE_PATH}transforms/${transformId}`);
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/${transformId}`);
+        } catch (e) {
+          return e;
+        }
       },
-      getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
-        return http.get(`${API_BASE_PATH}transforms`);
+      async getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms`);
+        } catch (e) {
+          return e;
+        }
       },
-      getTransformStats(
+      async getTransformStats(
         transformId: TransformId
       ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
-        return http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
+        } catch (e) {
+          return e;
+        }
       },
-      getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
-        return http.get(`${API_BASE_PATH}transforms/_stats`);
+      async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/_stats`);
+        } catch (e) {
+          return e;
+        }
       },
-      createTransform(
+      async createTransform(
         transformId: TransformId,
         transformConfig: PutTransformsRequestSchema
-      ): Promise<PutTransformsResponseSchema> {
-        return http.put(`${API_BASE_PATH}transforms/${transformId}`, {
-          body: JSON.stringify(transformConfig),
-        });
+      ): Promise<PutTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.put(`${API_BASE_PATH}transforms/${transformId}`, {
+            body: JSON.stringify(transformConfig),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      updateTransform(
+      async updateTransform(
         transformId: TransformId,
         transformConfig: PostTransformsUpdateRequestSchema
       ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
-        return http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
-          body: JSON.stringify(transformConfig),
-        });
+        try {
+          return await http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
+            body: JSON.stringify(transformConfig),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      deleteTransforms(
+      async deleteTransforms(
         reqBody: DeleteTransformsRequestSchema
-      ): Promise<DeleteTransformsResponseSchema> {
-        return http.post(`${API_BASE_PATH}delete_transforms`, {
-          body: JSON.stringify(reqBody),
-        });
+      ): Promise<DeleteTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}delete_transforms`, {
+            body: JSON.stringify(reqBody),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      getTransformsPreview(
+      async getTransformsPreview(
         obj: PostTransformsPreviewRequestSchema
-      ): Promise<PostTransformsPreviewResponseSchema> {
-        return http.post(`${API_BASE_PATH}transforms/_preview`, {
-          body: JSON.stringify(obj),
-        });
+      ): Promise<PostTransformsPreviewResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}transforms/_preview`, {
+            body: JSON.stringify(obj),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      startTransforms(
+      async startTransforms(
         reqBody: StartTransformsRequestSchema
-      ): Promise<StartTransformsResponseSchema> {
-        return http.post(`${API_BASE_PATH}start_transforms`, {
-          body: JSON.stringify(reqBody),
-        });
+      ): Promise<StartTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}start_transforms`, {
+            body: JSON.stringify(reqBody),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      stopTransforms(
+      async stopTransforms(
         transformsInfo: StopTransformsRequestSchema
-      ): Promise<StopTransformsResponseSchema> {
-        return http.post(`${API_BASE_PATH}stop_transforms`, {
-          body: JSON.stringify(transformsInfo),
-        });
+      ): Promise<StopTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}stop_transforms`, {
+            body: JSON.stringify(transformsInfo),
+          });
+        } catch (e) {
+          return e;
+        }
       },
-      getTransformAuditMessages(
+      async getTransformAuditMessages(
         transformId: TransformId
-      ): Promise<GetTransformsAuditMessagesResponseSchema> {
-        return http.get(`${API_BASE_PATH}transforms/${transformId}/messages`);
+      ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`);
+        } catch (e) {
+          return e;
+        }
       },
-      esSearch(payload: any): Promise<any> {
-        return http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
+      async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
+        } catch (e) {
+          return e;
+        }
       },
-      getIndices(): Promise<EsIndex[]> {
-        return http.get(`/api/index_management/indices`);
+      async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
+        try {
+          return await http.get(`/api/index_management/indices`);
+        } catch (e) {
+          return e;
+        }
       },
-      getHistogramsForFields(
+      async getHistogramsForFields(
         indexPatternTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
-      ) {
-        return http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
-          body: JSON.stringify({
-            query,
-            fields,
-            samplerShardSize,
-          }),
-        });
+      ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+            body: JSON.stringify({
+              query,
+              fields,
+              samplerShardSize,
+            }),
+          });
+        } catch (e) {
+          return e;
+        }
       },
     }),
     [http]

@@ -38,50 +38,57 @@ export const useGetTransforms = (
         return;
       }
 
-      try {
-        const transformConfigs = await api.getTransforms();
+      const transformConfigs = await api.getTransforms();
+      const transformStats = await api.getTransformsStats();
 
-        if (!isGetTransformsResponseSchema(transformConfigs)) {
-          throw transformConfigs;
-        }
-
-        const transformStats = await api.getTransformsStats();
-
-        const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-          const stats = isGetTransformsStatsResponseSchema(transformStats)
-            ? transformStats.transforms.find((d) => config.id === d.id)
-            : undefined;
-
-          // A newly created transform might not have corresponding stats yet.
-          // If that's the case we just skip the transform and don't add it to the transform list yet.
-          if (!isTransformStats(stats)) {
-            return reducedtableRows;
-          }
-
-          // Table with expandable rows requires `id` on the outer most level
-          reducedtableRows.push({
-            id: config.id,
-            config,
-            mode:
-              typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
-            stats,
-          });
-          return reducedtableRows;
-        }, [] as TransformListRow[]);
-
-        setTransforms(tableRows);
-        setErrorMessage(undefined);
-        setIsInitialized(true);
-        refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
-      } catch (e) {
+      if (
+        !isGetTransformsResponseSchema(transformConfigs) ||
+        !isGetTransformsStatsResponseSchema(transformStats)
+      ) {
         // An error is followed immediately by setting the state to idle.
         // This way we're able to treat ERROR as a one-time-event like REFRESH.
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
         setTransforms([]);
-        setErrorMessage(e);
+
         setIsInitialized(true);
+
+        if (!isGetTransformsResponseSchema(transformConfigs)) {
+          setErrorMessage(transformConfigs);
+        } else if (!isGetTransformsStatsResponseSchema(transformStats)) {
+          setErrorMessage(transformStats);
+        }
+
+        return;
       }
+
+      const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
+        const stats = isGetTransformsStatsResponseSchema(transformStats)
+          ? transformStats.transforms.find((d) => config.id === d.id)
+          : undefined;
+
+        // A newly created transform might not have corresponding stats yet.
+        // If that's the case we just skip the transform and don't add it to the transform list yet.
+        if (!isTransformStats(stats)) {
+          return reducedtableRows;
+        }
+
+        // Table with expandable rows requires `id` on the outer most level
+        reducedtableRows.push({
+          id: config.id,
+          config,
+          mode:
+            typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
+          stats,
+        });
+        return reducedtableRows;
+      }, [] as TransformListRow[]);
+
+      setTransforms(tableRows);
+      setErrorMessage(undefined);
+      setIsInitialized(true);
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
+
       concurrentLoads--;
 
       if (concurrentLoads > 0) {

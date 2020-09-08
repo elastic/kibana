@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const fieldHistogramsSchema = schema.object({
+export const fieldHistogramsRequestSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),
   /** The fields to return histogram data. */
@@ -15,4 +15,5 @@ export const fieldHistogramsSchema = schema.object({
   samplerShardSize: schema.number(),
 });
 
-export type FieldHistogramsSchema = TypeOf<typeof fieldHistogramsSchema>;
+export type FieldHistogramsRequestSchema = TypeOf<typeof fieldHistogramsRequestSchema>;
+export type FieldHistogramsResponseSchema = any[];

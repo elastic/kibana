@@ -6,7 +6,10 @@
 
 import { HttpFetchError } from 'kibana/public';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+
 import { TransformId } from '../../../../common/types/transform';
+import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
@@ -23,6 +26,7 @@ import type {
 import type {
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
+  PostTransformsPreviewResponseSchema,
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
 } from '../../../../common/api_schemas/transforms';
@@ -32,90 +36,117 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
+import { EsIndex } from '../../../../common/types/es_index';
+
+import type { SearchResponse7 } from '../../../shared_imports';
+
+import type { SavedSearchQuery } from '../use_search_items';
+
+// Default sampler shard size used for field histograms
+export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
+
+export interface FieldHistogramRequestConfig {
+  fieldName: string;
+  type?: KBN_FIELD_TYPES;
+}
+
 const apiFactory = () => ({
-  getTransform(transformId: TransformId): Promise<GetTransformsResponseSchema | HttpFetchError> {
+  async getTransform(
+    transformId: TransformId
+  ): Promise<GetTransformsResponseSchema | HttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+  async getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  getTransformStats(
+  async getTransformStats(
     transformId: TransformId
   ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+  async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  createTransform(
+  async createTransform(
     transformId: TransformId,
     transformConfig: PutTransformsRequestSchema
   ): Promise<PutTransformsResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({ transformsCreated: [], errors: [] });
-    });
+    return Promise.resolve({ transformsCreated: [], errors: [] });
   },
-  updateTransform(
+  async updateTransform(
     transformId: TransformId,
     transformConfig: PostTransformsUpdateRequestSchema
   ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
-    return new Promise((resolve, reject) => {
-      resolve({
-        id: 'the-test-id',
-        source: { index: ['the-index-name'], query: { match_all: {} } },
-        dest: { index: 'user-the-destination-index-name' },
-        frequency: '10m',
-        pivot: {
-          group_by: { the_group: { terms: { field: 'the-group-by-field' } } },
-          aggregations: { the_agg: { value_count: { field: 'the-agg-field' } } },
-        },
-        description: 'the-description',
-        settings: { docs_per_second: null },
-        version: '8.0.0',
-        create_time: 1598860879097,
-      });
+    return Promise.resolve({
+      id: 'the-test-id',
+      source: { index: ['the-index-name'], query: { match_all: {} } },
+      dest: { index: 'user-the-destination-index-name' },
+      frequency: '10m',
+      pivot: {
+        group_by: { the_group: { terms: { field: 'the-group-by-field' } } },
+        aggregations: { the_agg: { value_count: { field: 'the-agg-field' } } },
+      },
+      description: 'the-description',
+      settings: { docs_per_second: null },
+      version: '8.0.0',
+      create_time: 1598860879097,
     });
   },
-  deleteTransforms(
+  async deleteTransforms(
     reqBody: DeleteTransformsRequestSchema
-  ): Promise<DeleteTransformsResponseSchema> {
-    return new Promise((resolve, reject) => {
-      resolve({});
+  ): Promise<DeleteTransformsResponseSchema | HttpFetchError> {
+    return Promise.resolve({});
+  },
+  async getTransformsPreview(
+    obj: PostTransformsPreviewRequestSchema
+  ): Promise<PostTransformsPreviewResponseSchema | HttpFetchError> {
+    return Promise.resolve({
+      generated_dest_index: {
+        mappings: {
+          _meta: {
+            _transform: {
+              transform: 'the-transform',
+              version: { create: 'the-version' },
+              creation_date_in_millis: 0,
+            },
+            created_by: 'mock',
+          },
+          properties: {},
+        },
+        settings: { index: { number_of_shards: '1', auto_expand_replicas: '0-1' } },
+        aliases: {},
+      },
+      preview: [],
     });
   },
-  getTransformsPreview(obj: PostTransformsPreviewRequestSchema): Promise<any> {
-    return new Promise((resolve, reject) => {
-      resolve([]);
-    });
+  async startTransforms(
+    reqBody: StartTransformsRequestSchema
+  ): Promise<StartTransformsResponseSchema | HttpFetchError> {
+    return Promise.resolve({});
   },
-  startTransforms(reqBody: StartTransformsRequestSchema): Promise<StartTransformsResponseSchema> {
-    return new Promise((resolve, reject) => {
-      resolve({});
-    });
-  },
-  stopTransforms(
+  async stopTransforms(
     transformsInfo: StopTransformsRequestSchema
-  ): Promise<StopTransformsResponseSchema> {
-    return new Promise((resolve, reject) => {
-      resolve({});
-    });
+  ): Promise<StopTransformsResponseSchema | HttpFetchError> {
+    return Promise.resolve({});
   },
-  getTransformAuditMessages(
+  async getTransformAuditMessages(
     transformId: TransformId
-  ): Promise<GetTransformsAuditMessagesResponseSchema> {
-    return new Promise((resolve, reject) => {
-      resolve([]);
-    });
+  ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
+    return Promise.resolve([]);
   },
-  esSearch(payload: any) {
-    return new Promise((resolve, reject) => {
-      resolve([]);
-    });
+  async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+    return Promise.resolve([]);
   },
-  getIndices() {
-    return new Promise((resolve, reject) => {
-      resolve([]);
-    });
+  async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
+    return Promise.resolve([]);
+  },
+  async getHistogramsForFields(
+    indexPatternTitle: string,
+    fields: FieldHistogramRequestConfig[],
+    query: string | SavedSearchQuery,
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
+  ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
+    return Promise.resolve([]);
   },
 });
 
