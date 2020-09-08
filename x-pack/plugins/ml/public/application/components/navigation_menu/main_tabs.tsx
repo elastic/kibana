@@ -9,7 +9,7 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
 import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
 import { useUrlState } from '../../util/url_state';
 
@@ -111,6 +111,12 @@ const TAB_DATA: Record<TabId, TabData> = {
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
+  const {
+    services: {
+      appName,
+      chrome: { docTitle },
+    },
+  } = useMlKibana();
   const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: TabId) {
@@ -126,6 +132,8 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
     // @ts-ignore
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
+      // globalState (e.g. selected jobs and time range) should be retained when changing pages.
+      // appState will not be considered.
       pageState: { globalState },
     });
 
@@ -133,7 +141,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   };
 
   useEffect(() => {
-    document.title = `ML - ${TAB_DATA[selectedTabId].name} - Kibana`;
+    docTitle.change([appName, TAB_DATA[selectedTabId].name, 'Kibana']);
   }, [selectedTabId]);
 
   return (
@@ -142,8 +150,6 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         const { id, disabled } = tab;
         const testSubject = TAB_DATA[id].testSubject;
         const defaultPathId = (TAB_DATA[id].pathId || id) as MlUrlGeneratorState['page'];
-        // globalState (e.g. selected jobs and time range) should be retained when changing pages.
-        // appState will not be considered.
 
         return disabled ? (
           <EuiTab key={`${id}-key`} className={'mlNavigationMenu__mainTab'} disabled={true}>
