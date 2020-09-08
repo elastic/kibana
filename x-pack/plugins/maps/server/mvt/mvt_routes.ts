@@ -86,6 +86,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
+          requestType: schema.string(),
         }),
       },
     },
@@ -107,6 +108,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         z: query.z,
         index: query.index,
         requestBody: requestBodyDSL,
+        requestType: query.requestType,
       });
 
       if (tile) {

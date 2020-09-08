@@ -381,7 +381,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}`;
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&requestType=${this._descriptor.requestType}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

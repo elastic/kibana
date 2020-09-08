@@ -47,6 +47,7 @@ export async function getGridTile({
   y,
   z,
   requestBody = {},
+  requestType = RENDER_AS.POINT,
 }: {
   x: number;
   y: number;
@@ -56,6 +57,7 @@ export async function getGridTile({
   callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
   logger: Logger;
   requestBody: any;
+  requestType: RENDER_AS;
 }): Promise<Buffer | null> {
   logger.warn('getGridTile not implemented');
 
@@ -87,7 +89,7 @@ export async function getGridTile({
 
       const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
 
-      const features = convertRegularRespToGeoJson(gridAggResult, RENDER_AS.POINT);
+      const features = convertRegularRespToGeoJson(gridAggResult, requestType);
       const featureCollection = {
         features,
         type: 'FeatureCollection',
