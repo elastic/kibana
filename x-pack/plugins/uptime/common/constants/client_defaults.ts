@@ -31,6 +31,7 @@ export const CLIENT_DEFAULTS = {
    * The end of the default date range is now.
    */
   DATE_RANGE_END: 'now',
+  FOCUS_CONNECTOR_FIELD: false,
   FILTERS: '',
   MONITOR_LIST_PAGE_INDEX: 0,
   MONITOR_LIST_PAGE_SIZE: 20,
