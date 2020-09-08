@@ -24,10 +24,10 @@ const querySchema = schema.object({
   dateStart: schema.maybe(schema.string()),
 });
 
-export const getAlertStatusRoute = (router: IRouter, licenseState: LicenseState) => {
+export const getAlertInstanceSummaryRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/alert/{id}/status`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}/_instance_summary`,
       validate: {
         params: paramSchema,
         query: querySchema,
@@ -45,8 +45,8 @@ export const getAlertStatusRoute = (router: IRouter, licenseState: LicenseState)
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
       const { dateStart } = req.query;
-      const status = await alertsClient.getAlertStatus({ id, dateStart });
-      return res.ok({ body: status });
+      const summary = await alertsClient.getAlertInstanceSummary({ id, dateStart });
+      return res.ok({ body: summary });
     })
   );
 };
