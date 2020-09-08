@@ -39,6 +39,7 @@ import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { createFlyoutManageDrilldowns } from './drilldowns';
 import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
+import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -90,7 +91,7 @@ export class AdvancedUiActionsPublicPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { uiActions, licensing }: SetupDependencies
+    { embeddable, uiActions, licensing }: SetupDependencies
   ): SetupContract {
     const startServices = createStartServicesGetter(core.getStartServices);
     this.enhancements = new UiActionsServiceEnhancements({
@@ -98,6 +99,7 @@ export class AdvancedUiActionsPublicPlugin
       featureUsageSetup: licensing.featureUsage,
       getFeatureUsageStart: () => startServices().plugins.licensing.featureUsage,
     });
+    embeddable.registerEnhancement(dynamicActionEnhancement(this.enhancements));
     return {
       ...uiActions,
       ...this.enhancements,

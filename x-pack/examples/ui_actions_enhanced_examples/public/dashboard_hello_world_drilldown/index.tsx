@@ -17,9 +17,10 @@ import {
 
 export type ActionContext = ChartActionContext;
 
-export interface Config {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type Config = {
   name: string;
-}
+};
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 

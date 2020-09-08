@@ -21,7 +21,7 @@ import { SavedObjectReference } from '../../../../../core/types';
 import { EmbeddableInput } from './i_embeddable';
 
 export const telemetryBaseEmbeddableInput = (state: EmbeddableInput) => {
-  return {};
+  return {} as Record<string, any>;
 };
 
 export const extractBaseEmbeddableInput = (state: EmbeddableInput) => {

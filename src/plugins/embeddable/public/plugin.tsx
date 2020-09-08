@@ -199,13 +199,22 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   private telemetry = (state: EmbeddableInput) => {
-    const enhancements: Record<string, any> = (state as any).enhanecemnts || {};
+    const enhancements: Record<string, any> = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
     const telemetryData = telemetryBaseEmbeddableInput(state);
-    factory.telemetry(state);
+    if (factory) {
+      const factoryTelemetry = factory.telemetry(state);
+      Object.keys(factoryTelemetry).forEach((key) => {
+        telemetryData[key] = factoryTelemetry[key];
+      });
+    }
     Object.keys(enhancements).map((key) => {
-      this.getEnhancement(key).telemetry(enhancements[key]);
+      if (!enhancements[key]) return;
+      const enhancementTelemetry = this.getEnhancement(key).telemetry(enhancements[key]);
+      Object.keys(enhancementTelemetry).forEach((k) => {
+        telemetryData[k] = enhancementTelemetry[k];
+      });
     });
 
     return telemetryData;
@@ -329,12 +338,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.ensureFactoryExists(embeddableFactoryId);
     const factory = this.embeddableFactories.get(embeddableFactoryId);
-
-    if (!factory) {
-      throw new Error(
-        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] does not exist.`
-      );
-    }
 
     return factory as EmbeddableFactory<I, O, E>;
   };
