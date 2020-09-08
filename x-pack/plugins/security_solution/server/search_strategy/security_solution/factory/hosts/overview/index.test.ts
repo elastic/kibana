@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-
-import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts/overview';
-import * as buildQuery from './query.overview_host.dsl.ts';
+import * as buildQuery from './query.overview_host.dsl';
 import { hostOverview } from '.';
 import {
   mockOptions,

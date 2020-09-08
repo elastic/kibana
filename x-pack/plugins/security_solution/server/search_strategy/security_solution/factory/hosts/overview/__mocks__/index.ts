@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-import { Direction, HostOverviewRequestOptions } from '../../../../../../../common/search_strategy';
+import {
+  Direction,
+  HostsQueries,
+  HostOverviewRequestOptions,
+} from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostOverviewRequestOptions = {
   defaultIndex: [
@@ -16,11 +20,10 @@ export const mockOptions: HostOverviewRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  factoryQueryType: 'overviewHost',
+  factoryQueryType: HostsQueries.overview,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
   timerange: { interval: '12h', from: '2020-09-07T09:47:28.606Z', to: '2020-09-08T09:47:28.606Z' },
-  params: { ignoreThrottled: true },
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
@@ -30,7 +33,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
     took: 45,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: -1, max_score: null, hits: [] },
+    hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
       fim_count: { meta: {}, doc_count: 0 },
       endgame_module: {
@@ -73,7 +76,7 @@ export const formattedSearchStrategyResponse = {
     took: 45,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: -1, max_score: null, hits: [] },
+    hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
       fim_count: { meta: {}, doc_count: 0 },
       endgame_module: {
@@ -112,7 +115,7 @@ export const formattedSearchStrategyResponse = {
       '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "auditd_count": {\n        "filter": {\n          "term": {\n            "event.module": "auditd"\n          }\n        }\n      },\n      "endgame_module": {\n        "filter": {\n          "bool": {\n            "should": [\n              {\n                "term": {\n                  "event.module": "endpoint"\n                }\n              },\n              {\n                "term": {\n                  "event.module": "endgame"\n                }\n              }\n            ]\n          }\n        },\n        "aggs": {\n          "dns_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "term": {\n                            "network.protocol": "dns"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "network"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "dns_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "file_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "file"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "file_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "image_load_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "should": [\n                        {\n                          "term": {\n                            "event.category": "library"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "driver"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "image_load_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "network_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "bool": {\n                            "must_not": {\n                              "term": {\n                                "network.protocol": "dns"\n                              }\n                            }\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "network"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "network_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "process_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "process"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "process_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "registry_event": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "term": {\n                      "event.category": "registry"\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "registry_event"\n                    }\n                  }\n                ]\n              }\n            }\n          },\n          "security_event_count": {\n            "filter": {\n              "bool": {\n                "should": [\n                  {\n                    "bool": {\n                      "filter": [\n                        {\n                          "term": {\n                            "event.category": "session"\n                          }\n                        },\n                        {\n                          "term": {\n                            "event.category": "authentication"\n                          }\n                        }\n                      ]\n                    }\n                  },\n                  {\n                    "term": {\n                      "endgame.event_type_full": "security_event"\n                    }\n                  }\n                ]\n              }\n            }\n          }\n        }\n      },\n      "fim_count": {\n        "filter": {\n          "term": {\n            "event.module": "file_integrity"\n          }\n        }\n      },\n      "winlog_module": {\n        "filter": {\n          "term": {\n            "agent.type": "winlogbeat"\n          }\n        },\n        "aggs": {\n          "mwsysmon_operational_event_count": {\n            "filter": {\n              "term": {\n                "winlog.channel": "Microsoft-Windows-Sysmon/Operational"\n              }\n            }\n          },\n          "security_event_count": {\n            "filter": {\n              "term": {\n                "winlog.channel": "Security"\n              }\n            }\n          }\n        }\n      },\n      "system_module": {\n        "filter": {\n          "term": {\n            "event.module": "system"\n          }\n        },\n        "aggs": {\n          "login_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "login"\n              }\n            }\n          },\n          "package_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "package"\n              }\n            }\n          },\n          "process_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "process"\n              }\n            }\n          },\n          "user_count": {\n            "filter": {\n              "term": {\n                "event.dataset": "user"\n              }\n            }\n          },\n          "filebeat_count": {\n            "filter": {\n              "term": {\n                "agent.type": "filebeat"\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"host.name\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-07T09:47:28.606Z",\n                "lte": "2020-09-08T09:47:28.606Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
     ],
   },
-  overviewHost: {
+  overview: {
     auditbeatAuditd: 0,
     auditbeatFIM: 0,
     auditbeatLogin: 0,
