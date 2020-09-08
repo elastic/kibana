@@ -67,7 +67,7 @@ export const isBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: false,
-  fieldTypes: ['number', 'date', 'ip'],
+  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
 };
 
 export const isNotBetweenOperator = {
@@ -76,7 +76,7 @@ export const isNotBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: true,
-  fieldTypes: ['number', 'date', 'ip'],
+  fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
 };
 
 export const existsOperator = {

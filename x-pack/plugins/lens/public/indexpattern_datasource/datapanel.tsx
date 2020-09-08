@@ -62,7 +62,17 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
+const supportedFieldTypes = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+  'ip',
+  'document',
+  'number_range',
+  'date_range',
+  'ip_range',
+]);
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {

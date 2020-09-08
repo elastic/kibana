@@ -113,6 +113,9 @@ export const fieldMappings = {
   bytes: {
     type: 'long',
   },
+  bytes_range: {
+    type: 'long_range',
+  },
   tags: {
     type: 'text',
     fields: {
@@ -128,12 +131,18 @@ export const fieldMappings = {
   ip: {
     type: 'ip',
   },
+  ip_range: {
+    type: 'ip_range',
+  },
   timestamp: {
     type: 'date',
   },
   '@timestamp': {
     type: 'alias',
     path: 'timestamp',
+  },
+  timestamp_range: {
+    type: 'date_range',
   },
   phpmemory: {
     type: 'long',

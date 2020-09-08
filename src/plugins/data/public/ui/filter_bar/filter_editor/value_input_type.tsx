@@ -51,6 +51,7 @@ class ValueInputTypeUI extends Component<Props> {
         );
         break;
       case 'number':
+      case 'number_range':
         inputElement = (
           <EuiFieldNumber
             placeholder={this.props.placeholder}
@@ -62,6 +63,7 @@ class ValueInputTypeUI extends Component<Props> {
         );
         break;
       case 'date':
+      case 'date_range':
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}
@@ -75,6 +77,7 @@ class ValueInputTypeUI extends Component<Props> {
         );
         break;
       case 'ip':
+      case 'ip_range':
         inputElement = (
           <EuiFieldText
             placeholder={this.props.placeholder}

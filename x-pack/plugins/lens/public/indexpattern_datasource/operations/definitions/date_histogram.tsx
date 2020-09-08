@@ -45,7 +45,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      type === 'date' &&
+      (type === 'date' || type === 'date_range') &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {
