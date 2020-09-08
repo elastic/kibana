@@ -74,7 +74,9 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
 
   setPagination(page) {
     this.pagination = {
+      initialPageSize: page.size,
       pageSize: page.size,
+      initialPageIndex: page.index,
       pageIndex: page.index,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
