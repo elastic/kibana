@@ -57,13 +57,15 @@ export function DimensionPopover({
       <div
         role="dialog"
         aria-labelledby="lnsDimensionPopoverFlyoutTitle"
-        className="lnsDimensionPopover"
+        className={classNames('lnsDimensionPopover', {
+          'lnsDimensionPopover--noAnimation': openByCreation,
+        })}
       >
         <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
           <EuiTitle size="xs">
             <EuiButtonEmpty
               onClick={closeFlyout}
-              data-test-subj="lnsDimensionPopoverFlyoutTitle"
+              data-test-subj="lns-indexPatternDimension-flyoutTitle"
               id="lnsDimensionPopoverFlyoutTitle"
               iconType="sortLeft"
               flush="left"
@@ -77,7 +79,9 @@ export function DimensionPopover({
         </EuiFlexItem>
         <EuiFlyoutFooter className="lnsDimensionPopover__footer">
           <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-            Close
+            {i18n.translate('xpack.lens.dimensionFlyout.close', {
+              defaultMessage: 'Close',
+            })}
           </EuiButtonEmpty>
         </EuiFlyoutFooter>
       </div>
