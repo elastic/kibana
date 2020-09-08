@@ -8,10 +8,9 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { ListNodesRouteResponse } from '../../../../../../common/types';
+import { ListNodesRouteResponse, DataTierAllocationType } from '../../../../../../common/types';
 
 import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
-import { DataTierAllocationType } from '../../../../services/policies/types';
 
 interface Props {
   phase: Parameters<typeof isPhaseDefaultDataAllocationCompatible>[0];

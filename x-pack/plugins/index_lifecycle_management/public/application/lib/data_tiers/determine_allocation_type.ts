@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataTierAllocationType, AllocateAction } from '../../services/policies/types';
+import { DataTierAllocationType, AllocateAction } from '../../../../common/types';
 
 /**
  * Determine what deserialized state the policy config represents.
