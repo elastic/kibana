@@ -633,6 +633,16 @@ describe('rules_schema', () => {
       expect(fields.length).toEqual(2);
     });
 
+    test('should return two fields for a rule of type "eql"', () => {
+      const fields = addQueryFields({ type: 'eql' });
+      expect(fields.length).toEqual(2);
+    });
+
+    test('should return two fields for a rule of type "threshold"', () => {
+      const fields = addQueryFields({ type: 'threshold' });
+      expect(fields.length).toEqual(2);
+    });
+
     test('should return two fields for a rule of type "saved_query"', () => {
       const fields = addQueryFields({ type: 'saved_query' });
       expect(fields.length).toEqual(2);
