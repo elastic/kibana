@@ -27,18 +27,18 @@ export interface PercentileRange {
 export function PageLoadDistribution() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
 
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
   });
 
-  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (start && end) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
           params: {
@@ -58,14 +58,7 @@ export function PageLoadDistribution() {
       }
       return Promise.resolve(null);
     },
-    [
-      end,
-      start,
-      serviceName,
-      uiFilters,
-      percentileRange.min,
-      percentileRange.max,
-    ]
+    [end, start, uiFilters, percentileRange.min, percentileRange.max]
   );
 
   const onPercentileChange = (min: number, max: number) => {
@@ -94,11 +87,10 @@ export function PageLoadDistribution() {
             {I18LABELS.resetZoom}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
-            id={'pageLoad'}
-            selectedBreakdowns={breakdowns}
-            onBreakdownChange={setBreakdowns}
+            selectedBreakdown={breakdown}
+            onBreakdownChange={setBreakdown}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -107,7 +99,7 @@ export function PageLoadDistribution() {
         data={data}
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
-        breakdowns={breakdowns}
+        breakdown={breakdown}
         percentileRange={{
           max: percentileRange.max || data?.maxDuration,
           min: percentileRange.min || data?.minDuration,
