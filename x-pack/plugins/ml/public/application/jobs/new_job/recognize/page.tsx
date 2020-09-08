@@ -21,6 +21,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { merge } from 'lodash';
+import moment from 'moment';
 import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
@@ -40,6 +41,7 @@ import { JobSettingsForm, JobSettingsFormValues } from './components/job_setting
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -187,13 +189,14 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         })
       );
       setKibanaObjects(merge(kibanaObjects, kibanaResponse));
+
       const url = await urlGenerator.createUrl({
         page: ML_PAGES.ANOMALY_EXPLORER,
         pageState: {
           jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
           timeRange: {
-            from: 'resultTimeRange.start',
-            to: 'resultTimeRange.end',
+            from: moment(resultTimeRange.start).format(TIME_FORMAT),
+            to: moment(resultTimeRange.end).format(TIME_FORMAT),
             mode: 'absolute',
           },
         },
