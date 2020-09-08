@@ -16,8 +16,9 @@ export async function agentPolicyUpdateEventHandler(
   agentPolicyId: string
 ) {
   const adminUser = await outputService.getAdminUser(soClient);
-  // If no admin user fleet is not enabled just skip this hook
-  if (!adminUser) {
+  const outputId = await outputService.getDefaultOutputId(soClient);
+  // If no admin user and no default output fleet is not enabled just skip this hook
+  if (!adminUser || !outputId) {
     return;
   }
 
