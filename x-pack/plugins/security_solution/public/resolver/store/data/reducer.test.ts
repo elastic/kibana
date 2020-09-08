@@ -40,6 +40,8 @@ describe('Resolver Data Middleware', () => {
       // Generate a 'tree' using the Resolver generator code. This structure isn't the same as what the API returns.
       const baseTree = generateBaseTree();
       const tree = mockResolverTree({
+        // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+        // a lot of the frontend functions. So casting it back to the unsafe type for now.
         events: baseTree.allEvents as ResolverEvent[],
         cursors: {
           childrenNextChild: 'aValidChildCursor',
@@ -89,7 +91,8 @@ describe('Resolver Data Middleware', () => {
           type: 'serverReturnedRelatedEventData',
           payload: {
             entityID: firstChildNodeInTree.id,
-            // TODO comment about casting it to unsafe event type
+            // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+            // a lot of the frontend functions. So casting it back to the unsafe type for now.
             events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
             nextEvent: null,
           },
@@ -163,6 +166,8 @@ describe('Resolver Data Middleware', () => {
             type: 'serverReturnedRelatedEventData',
             payload: {
               entityID: firstChildNodeInTree.id,
+              // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+              // a lot of the frontend functions. So casting it back to the unsafe type for now.
               events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
               nextEvent: 'aValidNextEventCursor',
             },
@@ -233,6 +238,8 @@ function mockedTree() {
   const statsResults = compileStatsForChild(firstChildNodeInTree);
 
   const tree = mockResolverTree({
+    // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+    // a lot of the frontend functions. So casting it back to the unsafe type for now.
     events: baseTree.allEvents as ResolverEvent[],
     /**
      * Calculate children from the ResolverTree response using the children of the `Tree` we generated using the Resolver data generator code.
@@ -245,12 +252,14 @@ function mockedTree() {
      */
     children: [...baseTree.children.values()].map((node: TreeNode) => {
       const childNode: Partial<ResolverChildNode> = {};
+      // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+      // a lot of the frontend functions. So casting it back to the unsafe type for now.
       childNode.lifecycle = node.lifecycle as ResolverEvent[];
 
       // `TreeNode` has `id` which is the same as `entityID`.
       // The `ResolverChildNode` calls the entityID as `entityID`.
       // Set `entityID` on `childNode` since the code in test relies on it.
-      childNode.entityID = (childNode as TreeNode).id;
+      childNode.entityID = node.id;
 
       // This should only be true for the first child.
       if (node.id === firstChildNodeInTree.id) {

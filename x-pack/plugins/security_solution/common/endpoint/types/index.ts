@@ -334,7 +334,7 @@ export interface Host {
 /**
  * A record of hashes for something. Provides hashes in multiple formats. A favorite structure of the Elastic Endpoint.
  */
-interface Hashes {
+type Hashes = Partial<{
   /**
    * A hash in MD5 format.
    */
@@ -347,14 +347,14 @@ interface Hashes {
    * A hash in SHA-256 format.
    */
   sha256: ECSField<string>;
-}
+}>;
 
-interface MalwareClassification {
+type MalwareClassification = Partial<{
   identifier: ECSField<string>;
   score: ECSField<number>;
   threshold: ECSField<number>;
   version: ECSField<string>;
-}
+}>;
 
 type ThreadFields = Partial<{
   id: ECSField<number>;
@@ -367,7 +367,7 @@ type ThreadFields = Partial<{
 }>;
 
 type DllFields = Partial<{
-  hash: Partial<Hashes>;
+  hash: Hashes;
   path: ECSField<string>;
   pe: Partial<{
     architecture: ECSField<string>;
@@ -378,7 +378,7 @@ type DllFields = Partial<{
   }>;
   Ext: Partial<{
     compile_time: ECSField<number>;
-    malware_classification: Partial<MalwareClassification>;
+    malware_classification: MalwareClassification;
     mapped_address: ECSField<number>;
     mapped_size: ECSField<number>;
   }>;
@@ -397,7 +397,6 @@ export type AlertEvent = Partial<{
     policy: Partial<{
       applied: Partial<{
         id: ECSField<string>;
-        // TODO this is an enum is this right?
         status: ECSField<HostPolicyResponseActionStatus>;
         name: ECSField<string>;
       }>;
@@ -411,14 +410,14 @@ export type AlertEvent = Partial<{
     thread: ECSField<ThreadFields>;
     uptime: number;
     Ext: Partial<{
-      // TODO this was an array of objects is this right?
+      // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
           subject_name: ECSField<string>;
           trusted: ECSField<boolean>;
         }>
       >;
-      malware_classification: Partial<MalwareClassification>;
+      malware_classification: MalwareClassification;
       token: Partial<{
         domain: ECSField<string>;
         type: ECSField<string>;
@@ -426,12 +425,12 @@ export type AlertEvent = Partial<{
         sid: ECSField<string>;
         integrity_level: ECSField<number>;
         integrity_level_name: ECSField<string>;
-        // TODO array
+        // Using ECSField as the outer because the object is expected to be an array
         privileges: ECSField<
           Partial<{
-            description: string;
-            name: string;
-            enabled: boolean;
+            description: ECSField<string>;
+            name: ECSField<string>;
+            enabled: ECSField<boolean>;
           }>
         >;
       }>;
@@ -445,11 +444,11 @@ export type AlertEvent = Partial<{
     mtime: ECSField<number>;
     created: ECSField<number>;
     size: ECSField<number>;
-    hash: Partial<Hashes>;
+    hash: Hashes;
     Ext: Partial<{
-      malware_classification: Partial<MalwareClassification>;
+      malware_classification: MalwareClassification;
       temp_file_path: ECSField<string>;
-      // TODO was an array
+      // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
           trusted: ECSField<boolean>;
@@ -458,7 +457,7 @@ export type AlertEvent = Partial<{
       >;
     }>;
   }>;
-  // TODO was an array
+  // Using ECSField as the outer because the object is expected to be an array
   dll: ECSField<DllFields>;
 }> &
   SafeEndpointEvent;
@@ -706,7 +705,7 @@ export type SafeEndpointEvent = Partial<{
       subject_name: ECSField<string>;
     }>;
     pid: ECSField<number>;
-    hash: Partial<Hashes>;
+    hash: Hashes;
     parent: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
