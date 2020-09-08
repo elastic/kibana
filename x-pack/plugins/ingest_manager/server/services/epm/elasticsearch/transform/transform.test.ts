@@ -5,11 +5,7 @@
  */
 
 jest.mock('../../packages/get', () => {
-  return { getInstallation: jest.fn() };
-});
-
-jest.mock('../../packages/install', () => {
-  return { saveInstalledEsRefs: jest.fn() };
+  return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
 
 jest.mock('./common', () => {
@@ -19,10 +15,9 @@ jest.mock('./common', () => {
 });
 
 import { installTransformForDataset } from './install';
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
-import { getInstallation } from '../../packages';
-import { saveInstalledEsRefs } from '../../packages/install';
+import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
@@ -30,30 +25,29 @@ import { savedObjectsClientMock } from '../../../../../../../../src/core/server/
 describe('test transform install', () => {
   let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let saveInstalledEsRefsMock: jest.MockedFunction<typeof saveInstalledEsRefs>;
   beforeEach(() => {
     legacyScopedClusterClient = {
       callAsInternalUser: jest.fn(),
       callAsCurrentUser: jest.fn(),
     };
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
-    saveInstalledEsRefsMock = saveInstalledEsRefs as jest.MockedFunction<
-      typeof saveInstalledEsRefs
-    >;
-    saveInstalledEsRefsMock.mockClear();
   });
 
-  afterEach(() => {});
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('can install new versions and removes older version', async () => {
     const previousInstallation: Installation = ({
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
-          type: 'ingest_pipeline',
+          type: ElasticsearchAssetType.ingestPipeline,
         },
         {
-          id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
@@ -63,14 +57,18 @@ describe('test transform install', () => {
       installed_es: [
         {
           id: 'metrics-endpoint.policy-0.16.0-dev.0',
-          type: 'ingest_pipeline',
+          type: ElasticsearchAssetType.ingestPipeline,
         },
         {
-          id: 'metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
         {
-          id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
+          id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
           type: ElasticsearchAssetType.transform,
         },
       ],
@@ -82,6 +80,16 @@ describe('test transform install', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
+
+    (getInstallationObject as jest.MockedFunction<
+      typeof getInstallationObject
+    >).mockReturnValueOnce(
+      Promise.resolve(({
+        attributes: {
+          installed_es: previousInstallation.installed_es,
+        },
+      } as unknown) as SavedObject<Installation>)
+    );
 
     await installTransformForDataset(
       ({
@@ -132,7 +140,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -142,7 +150,7 @@ describe('test transform install', () => {
         {
           method: 'DELETE',
           query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
           ignore: [404],
         },
       ],
@@ -180,24 +188,48 @@ describe('test transform install', () => {
       ],
     ]);
 
-    expect(saveInstalledEsRefsMock.mock.calls[0][2]).toEqual([
-      {
-        id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
-        type: 'transform',
-      },
-      {
-        id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-        type: 'transform',
-      },
-    ]);
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
         'endpoint',
         {
           installed_es: [
-            { id: 'metrics-endpoint.policy-0.16.0-dev.0', type: 'ingest_pipeline' },
-            { id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0', type: 'transform' },
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+              type: 'transform',
+            },
+            {
+              id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
+              type: 'transform',
+            },
+            {
+              id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+              type: 'transform',
+            },
+          ],
+        },
+      ],
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+              type: 'transform',
+            },
+            {
+              id: 'metrics-endpoint.metadata-default-0.16.0-dev.0',
+              type: 'transform',
+            },
           ],
         },
       ],
@@ -224,6 +256,14 @@ describe('test transform install', () => {
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
 
+    (getInstallationObject as jest.MockedFunction<
+      typeof getInstallationObject
+    >).mockReturnValueOnce(
+      Promise.resolve(({ attributes: { installed_es: [] } } as unknown) as SavedObject<
+        Installation
+      >)
+    );
+    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -268,21 +308,13 @@ describe('test transform install', () => {
         },
       ],
     ]);
-
-    expect(saveInstalledEsRefsMock.mock.calls[0][2]).toEqual([
-      {
-        id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0',
-        type: 'transform',
-      },
-    ]);
-
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
         'endpoint',
         {
           installed_es: [
-            { id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0', type: 'transform' },
+            { id: 'metrics-endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
         },
       ],
@@ -306,6 +338,14 @@ describe('test transform install', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
+
+    (getInstallationObject as jest.MockedFunction<
+      typeof getInstallationObject
+    >).mockReturnValueOnce(
+      Promise.resolve(({
+        attributes: { installed_es: currentInstallation.installed_es },
+      } as unknown) as SavedObject<Installation>)
+    );
 
     await installTransformForDataset(
       ({
@@ -367,7 +407,6 @@ describe('test transform install', () => {
         },
       ],
     ]);
-    expect(saveInstalledEsRefsMock.mock.calls).toEqual([]);
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',

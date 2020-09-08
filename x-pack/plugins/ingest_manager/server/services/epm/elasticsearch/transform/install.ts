@@ -100,20 +100,21 @@ export const installTransformForDataset = async (
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
   }
 
-  const currentInstallation = await getInstallation({
-    savedObjectsClient,
-    pkgName: registryPackage.name,
-  });
+  if (previousInstalledTransformEsAssets.length > 0) {
+    const currentInstallation = await getInstallation({
+      savedObjectsClient,
+      pkgName: registryPackage.name,
+    });
 
-  // remove the saved object reference
-  await deleteTransformRefs(
-    savedObjectsClient,
-    currentInstallation?.installed_es || [],
-    registryPackage.name,
-    previousInstalledTransformEsAssets.map((asset) => asset.id),
-    installedTransforms.map((installed) => installed.id)
-  );
-
+    // remove the saved object reference
+    await deleteTransformRefs(
+      savedObjectsClient,
+      currentInstallation?.installed_es || [],
+      registryPackage.name,
+      previousInstalledTransformEsAssets.map((asset) => asset.id),
+      installedTransforms.map((installed) => installed.id)
+    );
+  }
   return installedTransforms;
 };
 
