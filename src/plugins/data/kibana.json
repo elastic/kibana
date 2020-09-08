@@ -13,7 +13,6 @@
     "usageCollection",
     "kibanaUtils",
     "kibanaReact",
-    "kibanaLegacy",
     "inspector"
   ]
 }
