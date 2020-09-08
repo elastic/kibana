@@ -157,7 +157,9 @@ async function installPipeline({
   };
   if (pipeline.extension === 'yml') {
     callClusterParams.headers = {
+      // pipeline is YAML
       'Content-Type': 'application/yaml',
+      // but we want JSON responses (to extract error messages, status code, or other metadata)
       Accept: 'application/json',
     };
   }

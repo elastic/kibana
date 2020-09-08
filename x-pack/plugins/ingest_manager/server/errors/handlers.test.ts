@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { errors } from 'elasticsearch';
 import { httpServerMock } from 'src/core/server/mocks';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
@@ -15,6 +16,7 @@ import {
   defaultIngestErrorHandler,
 } from './index';
 
+const LegacyESErrors = errors as Record<string, any>;
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   beforeEach(async () => {
@@ -26,6 +28,69 @@ describe('defaultIngestErrorHandler', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     appContextService.stop();
+  });
+
+  describe('use the HTTP error status code provided by LegacyESErrors', () => {
+    const statusCodes = Object.keys(LegacyESErrors).filter((key) => /^\d+$/.test(key));
+    const errorCodes = statusCodes.filter((key) => parseInt(key, 10) >= 400);
+    const testCasesWithMeta = errorCodes.map((errorCode) => [
+      errorCode,
+      LegacyESErrors[errorCode],
+      'the root message',
+      {
+        path: '/path/to/call',
+        response: 'response is here',
+      },
+    ]);
+
+    test.each(testCasesWithMeta)(
+      '%d - with meta',
+      async (statusCode, StatusCodeError, message, meta) => {
+        jest.clearAllMocks();
+        const error = new StatusCodeError(message, meta);
+        const response = httpServerMock.createResponseFactory();
+        await defaultIngestErrorHandler({ error, response });
+
+        // response
+        expect(response.ok).toHaveBeenCalledTimes(0);
+        expect(response.customError).toHaveBeenCalledTimes(1);
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: error.status,
+          body: { message: `${error.message} response from ${error.path}: ${error.response}` },
+        });
+
+        // logging
+        expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+        expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+      }
+    );
+
+    const testCasesWithoutMeta = errorCodes.map((errorCode) => [
+      errorCode,
+      LegacyESErrors[errorCode],
+      'the root message',
+    ]);
+    test.each(testCasesWithoutMeta)(
+      '%d - without meta',
+      async (statusCode, StatusCodeError, message) => {
+        jest.clearAllMocks();
+        const error = new StatusCodeError(message);
+        const response = httpServerMock.createResponseFactory();
+        await defaultIngestErrorHandler({ error, response });
+
+        // response
+        expect(response.ok).toHaveBeenCalledTimes(0);
+        expect(response.customError).toHaveBeenCalledTimes(1);
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: error.status,
+          body: { message: error.message },
+        });
+
+        // logging
+        expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+        expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+      }
+    );
   });
 
   describe('IngestManagerError', () => {
