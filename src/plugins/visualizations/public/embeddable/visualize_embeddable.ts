@@ -20,6 +20,7 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -417,6 +418,9 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
+    if (this.getTitle()) {
+      input.savedVis.title = this.getTitle();
+    }
     delete input.savedVis.id;
     return input as VisualizeByValueInput;
   };
@@ -451,7 +455,11 @@ export class VisualizeEmbeddable
           return { error };
         }
       };
-      const saveModalTitle = this.vis.title ? this.vis.title : 'Placeholder Title';
+      const saveModalTitle = this.getTitle()
+        ? this.getTitle()
+        : i18n.translate('visualize.embeddable.placeholderTitle', {
+            defaultMessage: 'Placeholder Title',
+          });
       return this.attributeService.getInputAsRefType(
         {
           id: this.id,
