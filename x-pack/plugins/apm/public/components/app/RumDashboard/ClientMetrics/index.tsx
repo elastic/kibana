@@ -56,7 +56,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' s'}
+          title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
