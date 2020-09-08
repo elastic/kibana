@@ -72,25 +72,54 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
+import { IIndexPattern, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
+import {
+  RequestFailure,
+  handleResponse,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  UI_SETTINGS,
+  ISearchOptions,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
-import { ISearchStartLegacy } from '../types';
+
+/** @internal */
+export const searchSourceRequiredUiSettings = [
+  'dateFormat:tz',
+  UI_SETTINGS.COURIER_BATCH_SEARCHES,
+  UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
+  UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
+  UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
+  UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE,
+  UI_SETTINGS.DOC_HIGHLIGHT,
+  UI_SETTINGS.META_FIELDS,
+  UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS,
+  UI_SETTINGS.QUERY_STRING_OPTIONS,
+  UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
+  UI_SETTINGS.SORT_OPTIONS,
+];
 
 export interface SearchSourceDependencies {
-  uiSettings: CoreStart['uiSettings'];
+  getConfig: GetConfigFn;
   search: ISearchGeneric;
-  legacySearch: ISearchStartLegacy;
-  injectedMetadata: CoreStart['injectedMetadata'];
+  http: HttpStart;
+  esShardTimeout: number;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 /** @public **/
@@ -99,7 +128,7 @@ export class SearchSource {
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -203,15 +232,15 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Observable<SearchResponse<unknown>>}
    */
-  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
-    const { search, injectedMetadata, uiSettings } = this.dependencies;
+  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { search, esShardTimeout, getConfig } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
-      injectedMetadata,
-      uiSettings,
+      esShardTimeout,
+      getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );
   }
@@ -220,9 +249,8 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { http, getConfig, loadingCount$ } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -231,9 +259,9 @@ export class SearchSource {
         ...options,
       },
       {
-        legacySearchService: legacySearch,
-        config: uiSettings,
-        esShardTimeout,
+        http,
+        config: { get: getConfig },
+        loadingCount$,
       }
     );
   }
@@ -242,21 +270,22 @@ export class SearchSource {
    *
    * @async
    */
-  async fetch(options: FetchOptions = {}) {
-    const { uiSettings } = this.dependencies;
+  async fetch(options: ISearchOptions = {}) {
+    const { getConfig } = this.dependencies;
     await this.requestIsStarting(options);
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
     let response;
-    if (uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+      response = await this.fetch$(searchRequest, options).toPromise();
     }
 
-    if (response.error) {
+    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+    if ((response as any).error) {
       throw new RequestFailure(null, response);
     }
 
@@ -269,7 +298,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }
@@ -296,7 +325,7 @@ export class SearchSource {
    *  @param options
    *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: FetchOptions = {}) {
+  private requestIsStarting(options: ISearchOptions = {}) {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -342,7 +371,7 @@ export class SearchSource {
       }
     };
 
-    const { uiSettings } = this.dependencies;
+    const { getConfig } = this.dependencies;
 
     switch (key) {
       case 'filter':
@@ -364,7 +393,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          uiSettings.get(UI_SETTINGS.SORT_OPTIONS)
+          getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       default:
@@ -388,7 +417,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index: IIndexPattern) {
+  private getIndexType(index?: IIndexPattern) {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {
@@ -418,14 +447,11 @@ export class SearchSource {
       body._source = index.getSourceFiltering();
     }
 
-    const { uiSettings } = this.dependencies;
+    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(
-        body._source.excludes,
-        uiSettings.get(UI_SETTINGS.META_FIELDS)
-      );
+      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -445,11 +471,11 @@ export class SearchSource {
       );
     }
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, uiSettings.get(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 

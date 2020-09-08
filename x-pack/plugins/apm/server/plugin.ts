@@ -83,6 +83,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       registerApmAlerts({
         alerts: plugins.alerts,
         actions: plugins.actions,
+        ml: plugins.ml,
         config$: mergedConfig$,
       });
     }
@@ -100,6 +101,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
 

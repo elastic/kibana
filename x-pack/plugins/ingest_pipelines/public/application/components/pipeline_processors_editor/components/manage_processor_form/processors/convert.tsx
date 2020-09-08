@@ -11,13 +11,13 @@ import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
-  Field,
   SelectField,
 } from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
 
@@ -30,7 +30,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Type',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.typeFieldHelpText', {
-      defaultMessage: 'The type to convert the existing value to.',
+      defaultMessage: 'Field data type for the output.',
     }),
     validations: [
       {
@@ -42,19 +42,6 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
-  /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
-      {
-        defaultMessage: 'The field to assign the converted value to.',
-      }
-    ),
-  },
 };
 
 export const Convert: FunctionComponent = () => {
@@ -63,7 +50,7 @@ export const Convert: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.convertForm.fieldNameHelpText',
-          { defaultMessage: 'The field whose value is to be converted.' }
+          { defaultMessage: 'Field to convert.' }
         )}
       />
 
@@ -128,7 +115,7 @@ export const Convert: FunctionComponent = () => {
         path="fields.type"
       />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

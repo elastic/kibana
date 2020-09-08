@@ -5,6 +5,7 @@
  */
 
 import { flatten, orderBy, last } from 'lodash';
+import { asPercent } from '../../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
@@ -36,7 +37,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, apmEventClient, start, end } = setup;
+  const { uiFiltersES, apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -104,7 +105,11 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs: subAggs,
         },
       },
@@ -145,9 +150,16 @@ export async function getTransactionBreakdown({
       )
     : [];
 
-  const kpis = orderBy(visibleKpis, 'name').map((kpi, index) => {
-    return {
+  const kpis = orderBy(
+    visibleKpis.map((kpi) => ({
       ...kpi,
+      lowerCaseName: kpi.name.toLowerCase(),
+    })),
+    'lowerCaseName'
+  ).map((kpi, index) => {
+    const { lowerCaseName, ...rest } = kpi;
+    return {
+      ...rest,
       color: getVizColorForIndex(index),
     };
   });
@@ -209,11 +221,9 @@ export async function getTransactionBreakdown({
     color: kpi.color,
     type: 'areaStacked',
     data: timeseriesPerSubtype[kpi.name],
-    hideLegend: true,
+    hideLegend: false,
+    legendValue: asPercent(kpi.percentage, 1),
   }));
 
-  return {
-    kpis,
-    timeseries,
-  };
+  return { timeseries };
 }

@@ -14,6 +14,7 @@ import {
   TimefilterContract,
   TimeRange,
 } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 
 import { Subscription } from 'rxjs';
 import {
@@ -28,12 +29,13 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import { DOC_TYPE, Document } from '../../persistence';
+import { DOC_TYPE, Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 export interface LensEmbeddableConfiguration {
+  expression: string | null;
   savedVis: Document;
   editUrl: string;
   editPath: string;
@@ -56,12 +58,13 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   private expressionRenderer: ReactExpressionRendererType;
   private getTrigger: UiActionsStart['getTrigger'] | undefined;
+  private expression: string | null;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
 
-  private currentContext: {
+  private externalSearchContext: {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
@@ -72,7 +75,14 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
     getTrigger: UiActionsStart['getTrigger'] | undefined,
-    { savedVis, editPath, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
+    {
+      expression,
+      savedVis,
+      editPath,
+      editUrl,
+      editable,
+      indexPatterns,
+    }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
   ) {
@@ -95,6 +105,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
     this.getTrigger = getTrigger;
     this.expressionRenderer = expressionRenderer;
+    this.expression = expression;
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
@@ -122,14 +133,14 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
-      !_.isEqual(containerState.timeRange, this.currentContext.timeRange) ||
-      !_.isEqual(containerState.query, this.currentContext.query) ||
-      !_.isEqual(cleanedFilters, this.currentContext.filters)
+      !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !_.isEqual(containerState.query, this.externalSearchContext.query) ||
+      !_.isEqual(cleanedFilters, this.externalSearchContext.filters)
     ) {
-      this.currentContext = {
+      this.externalSearchContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
-        lastReloadRequestTime: this.currentContext.lastReloadRequestTime,
+        lastReloadRequestTime: this.externalSearchContext.lastReloadRequestTime,
         filters: cleanedFilters,
       };
 
@@ -149,12 +160,35 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
-        expression={this.savedVis.expression}
-        context={this.currentContext}
+        expression={this.expression}
+        searchContext={this.getMergedSearchContext()}
         handleEvent={this.handleEvent}
       />,
       domNode
     );
+  }
+
+  /**
+   * Combines the embeddable context with the saved object context, and replaces
+   * any references to index patterns
+   */
+  private getMergedSearchContext(): ExecutionContextSearch {
+    const output: ExecutionContextSearch = {
+      timeRange: this.externalSearchContext.timeRange,
+    };
+    if (this.externalSearchContext.query) {
+      output.query = [this.externalSearchContext.query, this.savedVis.state.query];
+    } else {
+      output.query = [this.savedVis.state.query];
+    }
+    if (this.externalSearchContext.filters?.length) {
+      output.filters = [...this.externalSearchContext.filters, ...this.savedVis.state.filters];
+    } else {
+      output.filters = [...this.savedVis.state.filters];
+    }
+
+    output.filters = injectFilterReferences(output.filters, this.savedVis.references);
+    return output;
   }
 
   handleEvent = (event: ExpressionRendererEvent) => {
@@ -188,9 +222,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   reload() {
     const currentTime = Date.now();
-    if (this.currentContext.lastReloadRequestTime !== currentTime) {
-      this.currentContext = {
-        ...this.currentContext,
+    if (this.externalSearchContext.lastReloadRequestTime !== currentTime) {
+      this.externalSearchContext = {
+        ...this.externalSearchContext,
         lastReloadRequestTime: currentTime,
       };
 

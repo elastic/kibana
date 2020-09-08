@@ -3,17 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isFinite } from 'lodash';
-import { EuiSelect } from '@elastic/eui';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../../common/environment_filter_values';
+import { useEnvironments } from '../../../hooks/useEnvironments';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
-import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export interface ErrorRateAlertTriggerParams {
   windowSize: number;
@@ -30,16 +34,16 @@ interface Props {
 
 export function ErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
-
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
   const defaults = {
     threshold: 25,
     windowSize: 1,
     windowUnit: 'm',
-    environment: ALL_OPTION.value,
+    environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
   const params = {
@@ -51,11 +55,7 @@ export function ErrorRateAlertTrigger(props: Props) {
 
   const fields = [
     <PopoverExpression
-      value={
-        params.environment === ALL_OPTION.value
-          ? ALL_OPTION.text
-          : params.environment
-      }
+      value={getEnvironmentLabel(params.environment)}
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.environment', {
         defaultMessage: 'Environment',
       })}

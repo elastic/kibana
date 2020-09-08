@@ -21,7 +21,7 @@ import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription }
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Config, ConfigDeprecationProvider } from '../config';
+import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
@@ -29,7 +29,6 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig }
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
-import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
   LegacyServiceSetupDeps,
@@ -145,18 +144,6 @@ export class LegacyService implements CoreService {
       navLinks,
     };
 
-    const deprecationProviders = await pluginSpecs
-      .map((spec) => spec.getDeprecationsProvider())
-      .reduce(async (providers, current) => {
-        if (current) {
-          return [...(await providers), await convertLegacyDeprecationProvider(current)];
-        }
-        return providers;
-      }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach((provider) =>
-      this.coreContext.configService.addDeprecationProvider('', provider)
-    );
-
     this.legacyRawConfig = pluginExtendedConfig;
 
     // check for unknown uiExport types
@@ -188,7 +175,7 @@ export class LegacyService implements CoreService {
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals(
       this.legacyPlugins.uiExports,
@@ -322,12 +309,10 @@ export class LegacyService implements CoreService {
       },
       status: {
         core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
-      },
-      uuid: {
-        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
