@@ -203,6 +203,7 @@ export {
   IEsSearchResponse,
   isCompleteResponse,
   isErrorResponse,
+  ES_SEARCH_STRATEGY,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
