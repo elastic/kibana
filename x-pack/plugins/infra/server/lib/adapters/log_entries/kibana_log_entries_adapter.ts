@@ -8,7 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import { compact, first, get, has } from 'lodash';
+import { compact, first } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
@@ -82,7 +82,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       body: {
         size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
         track_total_hits: false,
-        _source: fields,
+        _source: false,
+        fields,
         query: {
           bool: {
             filter: [
@@ -230,8 +231,8 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
   return hits.map((hit) => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
       (flattenedFields, field) => {
-        if (has(hit._source, field)) {
-          flattenedFields[field] = get(hit._source, field);
+        if (field in hit.fields) {
+          flattenedFields[field] = hit.fields[field][0];
         }
         return flattenedFields;
       },
