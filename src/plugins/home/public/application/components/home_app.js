@@ -32,8 +32,8 @@ import { useMount } from 'react-use';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
-    const { kibanaLegacy } = getServices();
-    kibanaLegacy.navigateToDefaultApp();
+    const { urlForwarding } = getServices();
+    urlForwarding.navigateToDefaultApp();
   });
   return null;
 };

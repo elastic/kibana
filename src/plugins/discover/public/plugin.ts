@@ -37,6 +37,7 @@ import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navi
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -119,6 +120,7 @@ export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
@@ -135,6 +137,7 @@ export interface DiscoverStartPlugins {
   data: DataPublicPluginStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
 }
@@ -267,13 +270,13 @@ export class DiscoverPlugin
       },
     });
 
-    plugins.kibanaLegacy.forwardApp('doc', 'discover', (path) => {
+    plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;
     });
-    plugins.kibanaLegacy.forwardApp('context', 'discover', (path) => {
+    plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
       return `#${path}`;
     });
-    plugins.kibanaLegacy.forwardApp('discover', 'discover', (path) => {
+    plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
       const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
       if (!id) {
         return `#${path.replace('/discover', '') || '/'}`;

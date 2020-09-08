@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "kibanaLegacy"],
+  "requiredPlugins": ["data", "urlForwarding"],
   "optionalPlugins": ["usageCollection", "telemetry"],
   "requiredBundles": [
     "kibanaReact"

@@ -9,6 +9,7 @@
   "optionalPlugins": ["security"],
   "requiredPlugins": [
     "kibanaLegacy",
+    "urlForwarding",
     "dashboard"
   ],
   "server": true,

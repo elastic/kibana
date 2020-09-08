@@ -50,7 +50,7 @@ export class UrlForwardingPlugin {
        *
        * Example usage:
        * ```
-       * kibanaLegacy.forwardApp(
+       * urlForwarding.forwardApp(
        *   'old',
        *   'new',
        *   path => {

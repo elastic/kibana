@@ -8,7 +8,7 @@
     "data",
     "expressions",
     "navigation",
-    "kibanaLegacy",
+    "urlForwarding",
     "visualizations",
     "dashboard",
     "charts"
