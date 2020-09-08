@@ -14,7 +14,7 @@ import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-// @ts-ignore
+// @ts-expect-error
 import CustomPlot from '../CustomPlot';
 
 const tickFormatY = (y?: number) => {
