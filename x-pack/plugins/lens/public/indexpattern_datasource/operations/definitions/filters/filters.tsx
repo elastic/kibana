@@ -125,11 +125,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
           },
         ],
       };
-    } else if (
-      previousColumn?.operationType === 'filters' &&
-      'params' in previousColumn &&
-      previousColumn.params?.filters
-    ) {
+    } else if (previousColumn?.operationType === 'filters' && previousColumn.params?.filters) {
       params = previousColumn.params;
     }
 

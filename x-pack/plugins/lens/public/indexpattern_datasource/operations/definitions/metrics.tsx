@@ -52,7 +52,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     buildColumn: ({ suggestedPriority, field, previousColumn }) => {
       let params;
-      if (previousColumn?.dataType === 'number' && 'params' in previousColumn) {
+      if (previousColumn?.dataType === 'number' && previousColumn.operationType === type) {
         params = previousColumn.params;
       }
       return {
