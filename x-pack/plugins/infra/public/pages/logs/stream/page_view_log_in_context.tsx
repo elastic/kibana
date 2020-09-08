@@ -12,43 +12,38 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { noop } from 'lodash';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
-import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
 import { euiStyled } from '../../../../../observability/public';
+import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const { sourceConfiguration } = useLogSourceContext();
-  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const columnConfigurations = useMemo(() => sourceConfiguration?.configuration.logColumns ?? [], [
-    sourceConfiguration,
-  ]);
-  const [{ contextEntry, entries, isLoading }, { setContextEntry }] = useContext(
-    ViewLogInContext.Context
-  );
+  const [
+    { contextEntry, startTimestamp, endTimestamp, sourceId },
+    { setContextEntry },
+  ] = useContext(ViewLogInContext.Context);
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
 
-  const streamItems = useMemo(
-    () =>
-      entries.map((entry) => ({
-        kind: 'logEntry' as const,
-        logEntry: entry,
-        highlights: [],
-      })),
-    [entries]
-  );
+  const contextQuery = useMemo(() => {
+    if (contextEntry && !isEmpty(contextEntry.context)) {
+      return Object.entries(contextEntry.context).reduce((kuery, [key, value]) => {
+        const currentExpression = `${key} : "${value}"`;
+        if (kuery.length > 0) {
+          return `${kuery} AND ${currentExpression}`;
+        } else {
+          return currentExpression;
+        }
+      }, '');
+    }
+  }, [contextEntry]);
 
   if (!contextEntry) {
     return null;
@@ -64,31 +59,18 @@ export const PageViewLogInContext: React.FC = () => {
             wrap={false}
             style={{ height: '100%' }}
           >
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={false}>
               <LogEntryContext context={contextEntry.context} />
-              <EuiSpacer size="m" />
-              <ScrollableLogTextStreamView
-                target={contextEntry.cursor}
-                columnConfigurations={columnConfigurations}
-                items={streamItems}
-                scale={textScale}
-                wrap={textWrap}
-                isReloading={isLoading}
-                isLoadingMore={false}
-                hasMoreBeforeStart={false}
-                hasMoreAfterEnd={false}
-                isStreaming={false}
-                lastLoadedTime={null}
-                jumpToTarget={noop}
-                reportVisibleInterval={noop}
-                loadNewerItems={noop}
-                reloadItems={noop}
-                highlightedItem={contextEntry.id}
-                currentHighlightKey={null}
-                startDateExpression={''}
-                endDateExpression={''}
-                updateDateRange={noop}
-                startLiveStreaming={noop}
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <LogStream
+                sourceId={sourceId}
+                startTimestamp={startTimestamp}
+                endTimestamp={endTimestamp}
+                query={contextQuery}
+                center={contextEntry.cursor}
+                highlight={contextEntry.id}
+                height="100%"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
