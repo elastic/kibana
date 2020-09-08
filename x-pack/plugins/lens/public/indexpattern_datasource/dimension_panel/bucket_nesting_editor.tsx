@@ -40,6 +40,7 @@ export function BucketNestingEditor({
       value,
       text: c.label,
       fieldName: hasField(c) ? fieldMap[c.sourceField].displayName : '',
+      operationType: c.operationType,
     }));
 
   if (!column || !column.isBucketed || !aggColumns.length) {
@@ -52,6 +53,15 @@ export function BucketNestingEditor({
 
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
+
+    if (
+      (column.operationType === 'filters' && target.operationType === 'date_histogram') ||
+      (column.operationType === 'date_histogram' && target.operationType === 'filters') ||
+      (column.operationType === 'filters' && target.operationType === 'filters') ||
+      (column.operationType === 'date_histogram' && target.operationType === 'date_histogram')
+    ) {
+      return null;
+    }
 
     function toggleNesting() {
       if (prevColumn) {
@@ -70,7 +80,8 @@ export function BucketNestingEditor({
         defaultMessage: 'Search query overall',
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
-        defaultMessage: 'Dates overall',
+        defaultMessage: 'Top values for each {field}',
+        values: { field: fieldName },
       }),
     };
 
@@ -84,7 +95,7 @@ export function BucketNestingEditor({
         values: { target: target.fieldName },
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-        defaultMessage: 'Dates for each {target}',
+        defaultMessage: 'Overall top {target}',
         values: { target: target.fieldName },
       }),
     };
