@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject, JsonValue } from '../../../../common/typed_json';
+import { JsonValue } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -31,7 +31,7 @@ const TIMESTAMP_FORMAT = 'epoch_millis';
 interface LogItemHit {
   _index: string;
   _id: string;
-  _source: JsonObject;
+  fields: { [key: string]: [value: unknown] };
   sort: [number, number];
 }
 
@@ -215,6 +215,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             values: [id],
           },
         },
+        fields: ['*'],
+        _source: false,
       },
     };
 
