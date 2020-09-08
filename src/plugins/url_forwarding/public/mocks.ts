@@ -32,7 +32,7 @@ const createStartContract = (): Start => ({
   navigateToLegacyKibanaUrl: jest.fn(),
 });
 
-export const kibanaLegacyPluginMock = {
+export const urlForwardingPluginMock = {
   createSetupContract,
   createStartContract,
 };
