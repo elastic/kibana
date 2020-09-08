@@ -125,11 +125,11 @@ class PipelineEditorUi extends React.Component {
 
   onPipelineSave = () => {
     const { pipelineService, toastNotifications, intl } = this.props;
-    const { id } = this.state.pipeline;
+    const { id, ...pipelineToStore } = this.state.pipeline;
     return pipelineService
       .savePipeline({
         id,
-        upstreamJSON: this.state.pipeline,
+        upstreamJSON: pipelineToStore,
       })
       .then(() => {
         toastNotifications.addSuccess(

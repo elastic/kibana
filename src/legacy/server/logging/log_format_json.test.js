@@ -65,12 +65,14 @@ describe('KbnLoggerJsonFormat', () => {
         },
       };
       const result = await createPromiseFromStreams([createListStream([event]), format]);
-      const { type, method, statusCode, message } = JSON.parse(result);
+      const { type, method, statusCode, message, req } = JSON.parse(result);
 
       expect(type).toBe('response');
       expect(method).toBe('GET');
       expect(statusCode).toBe(200);
       expect(message).toBe('GET /path/to/resource 200 12000ms - 13.0B');
+      expect(req.remoteAddress).toBe('127.0.0.1');
+      expect(req.userAgent).toBe('Test Thing');
     });
 
     it('ops', async () => {
