@@ -12,18 +12,15 @@ import deepEqual from 'fast-deep-equal';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
-  Direction,
-  DocValueFields,
-  HostPolicyResponseActionStatus,
-  HostsQueries,
-  PageInfoPaginated,
-} from '../../../../common/search_strategy/security_solution';
-import {
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
-} from '../../../../common/search_strategy/security_solution/hosts/authentications';
+  PageInfoPaginated,
+  DocValueFields,
+  SortField,
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { inputsModel, State } from '../../../common/store';
@@ -57,6 +54,7 @@ interface UseAuthentications {
   endDate: string;
   startDate: string;
   type: hostsModel.HostsType;
+  skip: boolean;
 }
 
 export const useAuthentications = ({
@@ -65,6 +63,7 @@ export const useAuthentications = ({
   endDate,
   startDate,
   type,
+  skip,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
   const { activePage, limit } = useSelector(
@@ -77,7 +76,7 @@ export const useAuthentications = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] = useState<
-    AuthenticationsRequestOptions
+    HostAuthenticationsRequestOptions
   >({
     defaultIndex,
     docValueFields: docValueFields ?? [],
@@ -89,10 +88,7 @@ export const useAuthentications = ({
       from: startDate,
       to: endDate,
     },
-    sort: {
-      direction: Direction.desc,
-      field: HostPolicyResponseActionStatus.success,
-    },
+    sort: {} as SortField,
   });
 
   const wrappedLoadMore = useCallback(
@@ -127,16 +123,16 @@ export const useAuthentications = ({
   });
 
   const authenticationsSearch = useCallback(
-    (request: AuthenticationsRequestOptions) => {
+    (request: HostAuthenticationsRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<AuthenticationsRequestOptions, AuthenticationsStrategyResponse>(request, {
+          .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
@@ -196,12 +192,12 @@ export const useAuthentications = ({
           to: endDate,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, startDate]);
+  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

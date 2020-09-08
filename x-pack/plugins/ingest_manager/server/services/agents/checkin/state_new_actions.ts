@@ -156,7 +156,10 @@ export function agentCheckinStateNewActionsFactory() {
     }
 
     const stream$ = agentPolicy$.pipe(
-      timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
+      timeout(
+        // Set a timeout 3s before the real timeout to have a chance to respond an empty response before socket timeout
+        Math.max((appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0) - 3000, 3000)
+      ),
       filter(
         (action) =>
           agent.policy_id !== undefined &&

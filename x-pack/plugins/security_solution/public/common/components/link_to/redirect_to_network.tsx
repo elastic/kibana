@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+} from '../../../../common/search_strategy/security_solution/network';
 
 import { appendSearch } from './helpers';
 

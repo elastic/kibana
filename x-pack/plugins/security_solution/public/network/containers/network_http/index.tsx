@@ -22,7 +22,7 @@ import {
   NetworkHttpRequestOptions,
   NetworkHttpStrategyResponse,
   SortField,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
@@ -126,7 +126,7 @@ export const useNetworkHttp = ({
         const searchSubscription$ = data.search
           .search<NetworkHttpRequestOptions, NetworkHttpStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
