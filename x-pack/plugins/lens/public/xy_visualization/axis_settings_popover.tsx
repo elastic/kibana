@@ -146,12 +146,15 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         return defaultTitle || x?.label;
       case 'yRight':
         let yRightTitle: string = '';
-        const rightAxisLayer = layers?.filter((layer) => layer.yConfig && layer.yConfig.length > 0);
+        const rightAxisLayer = layers?.filter(
+          (layer) =>
+            layer.yConfig && layer.yConfig.length > 0 && layer.yConfig[0].axisMode === 'right'
+        );
         if (rightAxisLayer && rightAxisLayer.length > 0) {
           const yConfig = rightAxisLayer[0].yConfig;
           const dataSourceNewLayer = frame.datasourceLayers[rightAxisLayer[0].layerId];
           const y = yConfig
-            ? dataSourceNewLayer.getOperationForColumnId(yConfig[yConfig.length - 1].forAccessor)
+            ? dataSourceNewLayer.getOperationForColumnId(yConfig[0].forAccessor)
             : null;
           yRightTitle = y?.label || '';
         }

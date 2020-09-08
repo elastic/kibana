@@ -123,7 +123,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const rightAxisLayer = state?.layers.filter((layer) => layer.yConfig && layer.yConfig.length > 0);
+  const rightAxisLayer = state?.layers.filter(
+    (layer) => layer.yConfig && layer.yConfig.length > 0 && layer.yConfig[0].axisMode === 'right'
+  );
+
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
     yLeft: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
