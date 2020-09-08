@@ -24,6 +24,10 @@ interface Props {
   tabId: TabId;
 }
 
+const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
+  defaultMessage: 'Machine Learning',
+});
+
 function getTabs(disableLinks: boolean): Tab[] {
   return [
     {
@@ -113,7 +117,6 @@ const TAB_DATA: Record<TabId, TabData> = {
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const {
     services: {
-      appName,
       chrome: { docTitle },
     },
   } = useMlKibana();
@@ -128,20 +131,23 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const navigateToPath = useNavigateToPath();
 
   const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
-    // TODO: fix ts
     // @ts-ignore
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
-      // globalState (e.g. selected jobs and time range) should be retained when changing pages.
+      // on retain the refreshInterval part of globalState
       // appState will not be considered.
-      pageState: { globalState },
+      pageState: {
+        globalState: {
+          refreshInterval: globalState.refreshInterval,
+        },
+      },
     });
 
     await navigateToPath(path, false);
   };
 
   useEffect(() => {
-    docTitle.change([appName, TAB_DATA[selectedTabId].name, 'Kibana']);
+    docTitle.change([TAB_DATA[selectedTabId].name, ML_APP_NAME, 'Elastic']);
   }, [selectedTabId]);
 
   return (
