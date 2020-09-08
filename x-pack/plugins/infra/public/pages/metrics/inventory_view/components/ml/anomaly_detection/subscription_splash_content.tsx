@@ -37,7 +37,7 @@ export const SubscriptionSplashContent: React.FC = () => {
   if (loadState === 'pending') {
     return (
       <LoadingPage
-        message={i18n.translate('xpack.infra.logs.logAnalysis.splash.loadingMessage', {
+        message={i18n.translate('xpack.infra.ml.splash.loadingMessage', {
           defaultMessage: 'Checking license...',
         })}
       />
@@ -53,14 +53,14 @@ export const SubscriptionSplashContent: React.FC = () => {
   if (canStartTrial) {
     title = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
+        id="xpack.infra.ml.splash.startTrialTitle"
         defaultMessage="To access anomaly detection, start a free trial"
       />
     );
 
     description = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
+        id="xpack.infra.ml.splash.startTrialDescription"
         defaultMessage="Our free trial includes machine learning features, which enable you to detect anomalies in your logs."
       />
     );
@@ -71,23 +71,20 @@ export const SubscriptionSplashContent: React.FC = () => {
         fill
         href={services.http.basePath.prepend('/app/management/stack/license_management')}
       >
-        <FormattedMessage
-          id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
-          defaultMessage="Start trial"
-        />
+        <FormattedMessage id="xpack.infra.ml.splash.startTrialCta" defaultMessage="Start trial" />
       </EuiButton>
     );
   } else {
     title = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionTitle"
+        id="xpack.infra.ml.splash.updateSubscriptionTitle"
         defaultMessage="To access anomaly detection, upgrade to a Platinum Subscription"
       />
     );
 
     description = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionDescription"
+        id="xpack.infra.ml.splash.updateSubscriptionDescription"
         defaultMessage="You must have a Platinum Subscription to use machine learning features."
       />
     );
@@ -95,7 +92,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     cta = (
       <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
         <FormattedMessage
-          id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionCta"
+          id="xpack.infra.ml.splash.updateSubscriptionCta"
           defaultMessage="Upgrade subscription"
         />
       </EuiButton>
@@ -120,7 +117,7 @@ export const SubscriptionSplashContent: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiImage
-                alt={i18n.translate('xpack.infra.logs.logAnalysis.splash.splashImageAlt', {
+                alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
                   defaultMessage: 'Placeholder image',
                 })}
                 url={services.http.basePath.prepend(
@@ -134,7 +131,7 @@ export const SubscriptionSplashContent: React.FC = () => {
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.infra.logs.logAnalysis.splash.learnMoreTitle"
+                  id="xpack.infra.ml.splash.learnMoreTitle"
                   defaultMessage="Want to learn more?"
                 />
               </h3>
@@ -147,7 +144,7 @@ export const SubscriptionSplashContent: React.FC = () => {
               href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
             >
               <FormattedMessage
-                id="xpack.infra.logs.logAnalysis.splash.learnMoreLink"
+                id="xpack.infra.ml.splash.learnMoreLink"
                 defaultMessage="Read documentation"
               />
             </EuiButtonEmpty>

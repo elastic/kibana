@@ -69,7 +69,7 @@ export const AnomalyDetectionFlyout = () => {
             spaceId={space.id}
             timestampField={source?.configuration.fields.timestamp ?? ''}
           >
-            <EuiFlyout onClose={closeFlyout} data-test-subj="loadViewsFlyout">
+            <EuiFlyout onClose={closeFlyout} data-test-subj="loadMLFlyout">
               {screenName === 'home' && (
                 <FlyoutHome
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}

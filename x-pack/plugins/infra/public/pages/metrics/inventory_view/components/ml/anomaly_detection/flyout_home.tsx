@@ -76,7 +76,7 @@ export const FlyoutHome = (props: Props) => {
   } else if (hostSetupStatus.type === 'initializing' || k8sSetupStatus.type === 'initializing') {
     return (
       <LoadingPage
-        message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
+        message={i18n.translate('xpack.infra.ml.anomalyFlyout.jobStatusLoadingMessage', {
           defaultMessage: 'Checking status of metris jobs...',
         })}
       />
@@ -91,7 +91,7 @@ export const FlyoutHome = (props: Props) => {
             <h2>
               <FormattedMessage
                 defaultMessage="Machine Learning anomaly detection"
-                id="xpack.ml.aomalyFlyout.flyoutHeader"
+                id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
               />
             </h2>
           </EuiTitle>
@@ -100,12 +100,19 @@ export const FlyoutHome = (props: Props) => {
         <EuiFlyoutBody>
           <EuiTabs>
             <EuiTab isSelected={tab === 'jobs'} onClick={goToJobs}>
-              Jobs
+              <FormattedMessage
+                defaultMessage="Jobs"
+                id="xpack.infra.ml.anomalyFlyout.jobsTabLabel"
+              />
             </EuiTab>
             <EuiTab isSelected={tab === 'anomalies'} onClick={goToAnomalies}>
-              Anomalies
+              <FormattedMessage
+                defaultMessage="Anomalies"
+                id="xpack.infra.ml.anomalyFlyout.anomaliesTabLabel"
+              />
             </EuiTab>
           </EuiTabs>
+          <EuiSpacer size="l" />
           <JobsEnabledCallout
             hasHostJobs={hostJobSummaries.length > 0}
             hasK8sJobs={k8sJobSummaries.length > 0}
@@ -134,11 +141,21 @@ const JobsEnabledCallout = (props: CalloutProps) => {
       <EuiCallOut
         size="m"
         color="success"
-        title="Anomaly detection enabled for Hosts and Kubernetes."
+        title={
+          <FormattedMessage
+            defaultMessage="Anomaly detection enabled for Hosts."
+            id="xpack.infra.ml.anomalyFlyout.enabledCallout"
+          />
+        }
         iconType="check"
       />
       <EuiSpacer size="l" />
-      <EuiButton>Manage Jobs</EuiButton>
+      <EuiButton>
+        <FormattedMessage
+          defaultMessage="Manage Jobs"
+          id="xpack.infra.ml.anomalyFlyout.manageJobs"
+        />
+      </EuiButton>
     </>
   );
 };
@@ -156,12 +173,19 @@ const CreateJobTab = (props: CreateJobTab) => {
     <>
       <div>
         <EuiText>
-          <h3>Create ML Jobs</h3>
+          <h3>
+            <FormattedMessage
+              defaultMessage="Create ML Jobs"
+              id="xpack.infra.ml.anomalyFlyout.create.jobsTitle"
+            />
+          </h3>
         </EuiText>
         <EuiText>
           <p>
-            Machine Learning jobs are available for the following resource types. Enable these jobs
-            to begin detecting anomalies in your infrastructure metrics
+            <FormattedMessage
+              defaultMessage="Machine Learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics"
+              id="xpack.infra.ml.anomalyFlyout.create.description"
+            />
           </p>
         </EuiText>
       </div>
@@ -172,18 +196,35 @@ const CreateJobTab = (props: CreateJobTab) => {
           <EuiCard
             // isDisabled={props.hasSetupCapabilities}
             icon={<EuiIcon type={'storage'} />}
-            title="Hosts"
-            description="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+            // title="Hosts"
+            title={
+              <FormattedMessage
+                defaultMessage="Hosts"
+                id="xpack.infra.ml.anomalyFlyout.create.hostTitle"
+              />
+            }
+            description={
+              <FormattedMessage
+                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+                id="xpack.infra.ml.anomalyFlyout.create.hostDescription"
+              />
+            }
             footer={
               <>
                 {props.hasHostJobs && (
-                  <EuiButtonEmpty onClick={props.createHosts} aria-label="Create jobs">
-                    Recreate Jobs
+                  <EuiButtonEmpty onClick={props.createHosts}>
+                    <FormattedMessage
+                      defaultMessage="Recreate Jobs"
+                      id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
+                    />
                   </EuiButtonEmpty>
                 )}
                 {!props.hasHostJobs && (
-                  <EuiButton onClick={props.createHosts} aria-label="Create jobs">
-                    Create Jobs
+                  <EuiButton onClick={props.createHosts}>
+                    <FormattedMessage
+                      defaultMessage="Create Jobs"
+                      id="xpack.infra.ml.anomalyFlyout.create.createButton"
+                    />
                   </EuiButton>
                 )}
               </>
@@ -194,18 +235,34 @@ const CreateJobTab = (props: CreateJobTab) => {
           <EuiCard
             // isDisabled={props.hasSetupCapabilities}
             icon={<EuiIcon type={'logoKubernetes'} />}
-            title="Kubernetes Pods"
-            description="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+            title={
+              <FormattedMessage
+                defaultMessage="Kubernetes Pods"
+                id="xpack.infra.ml.anomalyFlyout.create.k8sTitle"
+              />
+            }
+            description={
+              <FormattedMessage
+                defaultMessage="Detect anomalies for CPU usage, memory usage, network traffic, and load."
+                id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
+              />
+            }
             footer={
               <>
                 {props.hasK8sJobs && (
-                  <EuiButtonEmpty onClick={props.createK8s} aria-label="Create jobs">
-                    Recreate Jobs
+                  <EuiButtonEmpty onClick={props.createK8s}>
+                    <FormattedMessage
+                      defaultMessage="Recreate Jobs"
+                      id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
+                    />
                   </EuiButtonEmpty>
                 )}
                 {!props.hasK8sJobs && (
-                  <EuiButton onClick={props.createK8s} aria-label="Create jobs">
-                    Create Jobs
+                  <EuiButton onClick={props.createK8s}>
+                    <FormattedMessage
+                      defaultMessage="Create Jobs"
+                      id="xpack.infra.ml.anomalyFlyout.create.createButton"
+                    />
                   </EuiButton>
                 )}
               </>
