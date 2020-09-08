@@ -25,7 +25,7 @@ import { HostOverview } from '../../../overview/components/host_overview';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
+import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useWithSource } from '../../../common/containers/source';
