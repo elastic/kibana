@@ -199,7 +199,6 @@ export async function installPackage({
     savedObjectsClient
   );
 
-
   // if this is an update or retrying an update, delete the previous version's pipelines
   if (installType === 'update' || installType === 'reupdate') {
     await deletePreviousPipelines(
