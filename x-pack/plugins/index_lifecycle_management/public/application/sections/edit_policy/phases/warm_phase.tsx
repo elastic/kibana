@@ -47,6 +47,19 @@ const i18nTexts = {
       defaultMessage: 'Move to warm phase on rollover',
     }
   ),
+  defaultAllocationNotAvailable: {
+    title: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
+      { defaultMessage: 'No warm tier nodes found' }
+    ),
+    body: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+      {
+        defaultMessage:
+          'This policy will not complete allocation because no node was found for data allocation.',
+      }
+    ),
+  },
 };
 
 const warmProperty: keyof Phases = 'warm';
@@ -171,6 +184,8 @@ export const WarmPhase: FunctionComponent<Props> = ({
                       {
                         <DefaultAllocationWarning
                           phase={warmProperty}
+                          title={i18nTexts.defaultAllocationNotAvailable.title}
+                          body={i18nTexts.defaultAllocationNotAvailable.body}
                           nodesByRoles={nodesData.nodesByRoles}
                           currentAllocationType={phaseData.dataTierAllocationType}
                         />

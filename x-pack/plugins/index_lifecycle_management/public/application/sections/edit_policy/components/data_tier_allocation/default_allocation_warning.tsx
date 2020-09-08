@@ -13,29 +13,17 @@ import { ListNodesRouteResponse, DataTierAllocationType } from '../../../../../.
 import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
 interface Props {
+  title: string;
+  body: string;
   phase: Parameters<typeof isPhaseDefaultDataAllocationCompatible>[0];
   nodesByRoles: ListNodesRouteResponse['nodesByRoles'];
   currentAllocationType: DataTierAllocationType;
 }
 
-const i18nTexts = {
-  notAvailable: {
-    title: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'No warm tier nodes found' }
-    ),
-    body: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
-      {
-        defaultMessage:
-          'This policy will not complete allocation because no node was found for data allocation.',
-      }
-    ),
-  },
-};
-
 export const DefaultAllocationWarning: FunctionComponent<Props> = ({
+  title,
   phase,
+  body,
   nodesByRoles,
   currentAllocationType,
 }) => {
@@ -45,11 +33,11 @@ export const DefaultAllocationWarning: FunctionComponent<Props> = ({
       <EuiSpacer size="m" />
       <EuiCallOut
         data-test-subj="defaultAllocationWarning"
-        title={i18nTexts.notAvailable.title}
+        title={title}
         iconType="alert"
         color="warning"
       >
-        {i18nTexts.notAvailable.body}
+        {body}
       </EuiCallOut>
     </>
   ) : null;

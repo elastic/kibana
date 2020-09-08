@@ -37,6 +37,22 @@ const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeI
   defaultMessage: 'Freeze index',
 });
 
+const i18nTexts = {
+  defaultAllocationNotAvailable: {
+    title: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
+      { defaultMessage: 'No frozen tier nodes found' }
+    ),
+    body: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+      {
+        defaultMessage:
+          'This policy will not complete allocation because no node was found for data allocation.',
+      }
+    ),
+  },
+};
+
 const frozenProperty: keyof Phases = 'frozen';
 const phaseProperty = (propertyName: keyof FrozenPhaseInterface) => propertyName;
 
@@ -134,6 +150,8 @@ export const FrozenPhase: FunctionComponent<Props> = ({
                       />
                       {
                         <DefaultAllocationWarning
+                          title={i18nTexts.defaultAllocationNotAvailable.title}
+                          body={i18nTexts.defaultAllocationNotAvailable.body}
                           phase={frozenProperty}
                           nodesByRoles={nodesData.nodesByRoles}
                           currentAllocationType={phaseData.dataTierAllocationType}
