@@ -405,10 +405,10 @@ export type AlertEvent = Partial<{
   process: Partial<{
     command_line: ECSField<string>;
     ppid: ECSField<number>;
-    executable: ECSField<string>;
     start: ECSField<number>;
+    // Using ECSField as the outer because the object is expected to be an array
     thread: ECSField<ThreadFields>;
-    uptime: number;
+    uptime: ECSField<number>;
     Ext: Partial<{
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<

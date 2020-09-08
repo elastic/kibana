@@ -19,6 +19,8 @@ describe('Generated documents', () => {
     it('returns the right name for a registry event', () => {
       const extensions = { registry: { key: `HKLM/Windows/Software/abc` } };
       const event = generator.generateEvent({ eventCategory: 'registry', extensions });
+      // casting to ResolverEvent here because the `descriptiveName` function is used by the frontend is still relies
+      // on the unsafe ResolverEvent type. Once it's switched over to the safe version we can remove this cast.
       expect(descriptiveName(event as ResolverEvent)).toEqual({
         subject: `HKLM/Windows/Software/abc`,
       });
@@ -28,6 +30,8 @@ describe('Generated documents', () => {
       const randomIP = `${generator.randomIP()}`;
       const extensions = { network: { direction: 'outbound', forwarded_ip: randomIP } };
       const event = generator.generateEvent({ eventCategory: 'network', extensions });
+      // casting to ResolverEvent here because the `descriptiveName` function is used by the frontend is still relies
+      // on the unsafe ResolverEvent type. Once it's switched over to the safe version we can remove this cast.
       expect(descriptiveName(event as ResolverEvent)).toEqual({
         subject: `${randomIP}`,
         descriptor: 'outbound',
@@ -37,6 +41,8 @@ describe('Generated documents', () => {
     it('returns the right name for a file event', () => {
       const extensions = { file: { path: 'C:\\My Documents\\business\\January\\processName' } };
       const event = generator.generateEvent({ eventCategory: 'file', extensions });
+      // casting to ResolverEvent here because the `descriptiveName` function is used by the frontend is still relies
+      // on the unsafe ResolverEvent type. Once it's switched over to the safe version we can remove this cast.
       expect(descriptiveName(event as ResolverEvent)).toEqual({
         subject: 'C:\\My Documents\\business\\January\\processName',
       });
@@ -45,6 +51,8 @@ describe('Generated documents', () => {
     it('returns the right name for a dns event', () => {
       const extensions = { dns: { question: { name: `${generator.randomIP()}` } } };
       const event = generator.generateEvent({ eventCategory: 'dns', extensions });
+      // casting to ResolverEvent here because the `descriptiveName` function is used by the frontend is still relies
+      // on the unsafe ResolverEvent type. Once it's switched over to the safe version we can remove this cast.
       expect(descriptiveName(event as ResolverEvent)).toEqual({
         subject: extensions.dns.question.name,
       });
