@@ -285,5 +285,37 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
       });
     });
+
+    describe('when there is data with anomalies', () => {
+      before(() => esArchiver.load('ml_8.0.0'));
+      after(() => esArchiver.unload('ml_8.0.0'));
+
+      it('returns service map elements', async () => {
+        const response = await supertest.get(
+          '/api/apm/service-map?start=2020-08-26T11%3A00%3A00.000Z&end=2020-08-26T11%3A30%3A00.000Z'
+        );
+
+        expect(response.status).to.be(200);
+        const opbeansJavaWithAnomaly = response.body.elements.filter(
+          (el: { data: { id: string } }) => el.data.id === 'opbeans-java'
+        );
+        expect(opbeansJavaWithAnomaly).to.eql([
+          {
+            data: {
+              id: 'opbeans-java',
+              'service.environment': 'production',
+              'service.name': 'opbeans-java',
+              'agent.name': 'java',
+              serviceAnomalyStats: {
+                transactionType: 'request',
+                anomalyScore: 0.21359169006333134,
+                actualValue: 1526662.1320754716,
+                jobId: 'apm-production-229a-high_mean_transaction_duration',
+              },
+            },
+          },
+        ]);
+      });
+    });
   });
 }
