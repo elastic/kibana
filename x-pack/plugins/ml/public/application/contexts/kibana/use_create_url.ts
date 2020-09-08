@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMlKibana } from './kibana_context';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
 import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
+import { useUrlState } from '../../util/url_state';
 
 export const useMlUrlGenerator = () => {
   const {
@@ -40,6 +41,8 @@ export const useCreateAndNavigateToMlLink = (
   page: MlUrlGeneratorState['page']
 ): (() => Promise<void>) => {
   const mlUrlGenerator = useMlUrlGenerator();
+  const [globalState] = useUrlState('_g');
+
   const {
     services: {
       application: { navigateToUrl },
@@ -47,7 +50,17 @@ export const useCreateAndNavigateToMlLink = (
   } = useMlKibana();
 
   const redirectToMlPage = async (_page: MlUrlGeneratorState['page']) => {
-    const url = await mlUrlGenerator.createUrl({ page: _page });
+    const pageState =
+      globalState?.refreshInterval !== undefined
+        ? {
+            globalState: {
+              refreshInterval: globalState.refreshInterval,
+            },
+          }
+        : undefined;
+
+    // @ts-ignore
+    const url = await mlUrlGenerator.createUrl({ page: _page, pageState });
     await navigateToUrl(url);
   };
 
