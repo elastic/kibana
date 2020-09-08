@@ -1,0 +1,9 @@
+
+.lnsFiltersOperation__popoverButton {
+  min-height: $euiSizeXL;
+  width: 100%;
+
+  .lnsFiltersOperation__popoverButtonContent {
+    justify-content: flex-start;
+  }
+}

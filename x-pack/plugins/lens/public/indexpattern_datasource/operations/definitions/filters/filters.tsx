@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './filters.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
 import { omit } from 'lodash';
@@ -17,10 +18,8 @@ import {
   EuiPanel,
   euiDragDropReorder,
   EuiButtonIcon,
-  EuiLink,
   EuiText,
   EuiButtonEmpty,
-  EuiForm,
   EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -169,20 +168,19 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       );
 
     return (
-      <EuiForm>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.filters.queries', {
-            defaultMessage: 'Queries',
-          })}
-        >
-          <FilterList
-            filters={filters}
-            setFilters={setFilters}
-            indexPattern={indexPattern}
-            defaultQuery={defaultFilter}
-          />
-        </EuiFormRow>
-      </EuiForm>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.indexPattern.filters.queries', {
+          defaultMessage: 'Queries',
+        })}
+        labelType="legend"
+      >
+        <FilterList
+          filters={filters}
+          setFilters={setFilters}
+          indexPattern={indexPattern}
+          defaultQuery={defaultFilter}
+        />
+      </EuiFormRow>
     );
   },
 };
@@ -246,7 +244,7 @@ export const FilterList = ({
     }
   };
   return (
-    <div>
+    <>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
           {localFilters?.map((filter: FilterValue, idx: number) => {
@@ -262,16 +260,6 @@ export const FilterList = ({
                 {(provided) => (
                   <EuiPanel paddingSize="none">
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <div className="lnsLayerPanel__dndGrab">
-                          <EuiIcon
-                            type="grab"
-                            aria-label={i18n.translate('xpack.lens.indexPattern.filters.grabIcon', {
-                              defaultMessage: 'Grab icon',
-                            })}
-                          />
-                        </div>
-                      </EuiFlexItem>
                       <EuiFlexItem
                         grow={true}
                         data-test-subj="indexPattern-filters-existingFilterContainer"
@@ -282,20 +270,19 @@ export const FilterList = ({
                           indexPattern={indexPattern}
                           filter={filter}
                           Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                            <EuiLink
-                              color="text"
-                              onClick={onClick}
-                              className="lnsLayerPanel__filterLink"
+                            <EuiButtonEmpty
+                              className="lnsFiltersOperation__popoverButton"
                               data-test-subj="indexPattern-filters-existingFilterTrigger"
+                              size="xs"
+                              onClick={onClick}
+                              color={isQueryValid(input, indexPattern) ? 'text' : 'danger'}
+                              iconType={isQueryValid(input, indexPattern) ? 'grab' : 'alert'}
+                              contentProps={{
+                                className: 'lnsFiltersOperation__popoverButtonContent',
+                              }}
                             >
-                              <EuiText
-                                size="s"
-                                textAlign="left"
-                                color={isQueryValid(input, indexPattern) ? 'default' : 'danger'}
-                              >
-                                {label || input.query || defaultLabel}
-                              </EuiText>
-                            </EuiLink>
+                              {label || input.query || defaultLabel}
+                            </EuiButtonEmpty>
                           )}
                           setFilter={(f: FilterValue) => {
                             onChangeValue(f.id, f.input, f.label);
@@ -304,7 +291,7 @@ export const FilterList = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          size="m"
+                          iconSize="s"
                           iconType="cross"
                           color="danger"
                           data-test-subj="indexPattern-filters-existingFilterDelete"
@@ -329,6 +316,7 @@ export const FilterList = ({
       </EuiDragDropContext>
 
       <EuiButtonEmpty
+        size="xs"
         iconType="plusInCircle"
         onClick={() => {
           onAddFilter();
@@ -339,6 +327,6 @@ export const FilterList = ({
           defaultMessage: 'Add a search query',
         })}
       </EuiButtonEmpty>
-    </div>
+    </>
   );
 };
