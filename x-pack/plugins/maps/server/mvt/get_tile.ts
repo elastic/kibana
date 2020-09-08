@@ -18,11 +18,15 @@ import {
   KBN_TOO_MANY_FEATURES_PROPERTY,
   MAX_ZOOM,
   MVT_SOURCE_LAYER_NAME,
+  RENDER_AS,
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
 import { hitsToGeoJson } from '../../common/elasticsearch_geo_utils';
 import { flattenHit } from './util';
+
+// @ts-expect-error
+import { convertRegularRespToGeoJson } from '../../common/convert_to_geojson';
 
 interface ESBounds {
   top_left: {
@@ -85,48 +89,9 @@ export async function getGridTile({
 
       const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
 
-      // logger.warn(JSON.stringify(gridAggResult, null, '\t'));
-
-      // todo: pass iun aggnames
-      const aggNames = ['doc_count'];
-      const ffeats = [];
-      gridAggResult.aggregations[GEOTILE_GRID_AGG_NAME].buckets.forEach((bucket) => {
-        const feature = {
-          type: 'Feature',
-          properties: {},
-          geometry: null,
-        };
-
-        for (let i = 0; i < aggNames.length; i++) {
-          const aggName = aggNames[i];
-          if (aggName === 'doc_count') {
-            feature.properties[aggName] = bucket[aggName];
-            feature.properties.count = bucket[aggName];
-          } else if (aggName === GEOCENTROID_AGG_NAME) {
-            // do nothing
-          } else {
-            feature.properties[aggName] = bucket[aggName].value;
-          }
-        }
-
-        feature.properties[KBN_TOO_MANY_FEATURES_PROPERTY] = false;
-
-        // Todo: needs to differentiate output between clusters and grids
-        const centroid = {
-          type: 'Point',
-          coordinates: [
-            parseFloat(bucket[GEOCENTROID_AGG_NAME].location.lon),
-            parseFloat(bucket[GEOCENTROID_AGG_NAME].location.lat),
-          ],
-        };
-
-        feature.geometry = centroid;
-
-        ffeats.push(feature);
-      });
-
+      const features = convertRegularRespToGeoJson(gridAggResult, RENDER_AS.POINT);
       const featureCollection = {
-        features: ffeats,
+        features,
         type: 'FeatureCollection',
       };
 
