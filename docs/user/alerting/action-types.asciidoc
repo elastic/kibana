@@ -25,7 +25,7 @@ a| <<server-log-action-type, ServerLog>>
 
 a| <<servicenow-action-type, ServiceNow>>
 
-| Push or update data to a new incident in ServiceNow.
+| Create an incident in ServiceNow.
 
 a| <<slack-action-type, Slack>>
 

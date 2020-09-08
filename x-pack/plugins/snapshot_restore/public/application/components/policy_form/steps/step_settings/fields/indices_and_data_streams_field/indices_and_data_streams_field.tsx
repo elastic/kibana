@@ -67,7 +67,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
 
   // We assume all indices if the config has no indices entry or if we receive an empty array
   const [isAllIndices, setIsAllIndices] = useState<boolean>(
-    !config.indices || (Array.isArray(config.indices) && config.indices.length === 0)
+    config.indices == null || (Array.isArray(config.indices) && config.indices.length === 0)
   );
 
   const onUpdate = (data: IndicesConfig) => {
@@ -135,12 +135,17 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
           );
           onUpdate({ indices: undefined });
         } else {
-          onUpdate({
-            indices:
-              selectIndicesMode === 'custom'
-                ? indexPatterns.join(',')
-                : [...(indicesAndDataStreamsSelection || [])],
-          });
+          _onUpdate(
+            {
+              indices:
+                selectIndicesMode === 'custom'
+                  ? indexPatterns.join(',')
+                  : [...(indicesAndDataStreamsSelection || [])],
+            },
+            {
+              validateIndicesCount: true,
+            }
+          );
         }
       }}
     />

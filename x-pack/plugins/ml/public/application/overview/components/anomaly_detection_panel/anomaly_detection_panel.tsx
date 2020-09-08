@@ -200,6 +200,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
               fill
               iconType="plusInCircle"
               isDisabled={jobCreationDisabled}
+              data-test-subj="mlOverviewCreateADJobButton"
             >
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
                 defaultMessage: 'Create job',
