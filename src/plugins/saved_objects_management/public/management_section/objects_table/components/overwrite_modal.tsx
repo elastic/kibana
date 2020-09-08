@@ -98,13 +98,13 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
   const bodyText =
     error.type === 'conflict'
       ? i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.body.conflict', {
-          defaultMessage: '"{title}" conflicts with an existing object, overwrite it?',
+          defaultMessage: '"{title}" conflicts with an existing object. Overwrite it?',
           values: { title },
         })
       : i18n.translate(
           'savedObjectsManagement.objectsTable.overwriteModal.body.ambiguousConflict',
           {
-            defaultMessage: '"{title}" conflicts with multiple existing objects, overwrite one?',
+            defaultMessage: '"{title}" conflicts with multiple existing objects. Overwrite one?',
             values: { title },
           }
         );

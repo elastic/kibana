@@ -51,7 +51,7 @@ const createNewCopiesEnabled = {
     'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
     {
       defaultMessage:
-        'This option enables you to create multiple copies of the object in the same space.',
+        'Use this option to create one or more copies of the object in the same space.',
     }
   ),
 };
@@ -88,7 +88,7 @@ const copyOptionsTitle = i18n.translate(
 );
 const relationshipOptionsTitle = i18n.translate(
   'xpack.spaces.management.copyToSpace.copyModeControl.relationshipOptionsTitle',
-  { defaultMessage: 'Relationship options' }
+  { defaultMessage: 'Relationship' }
 );
 
 const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (

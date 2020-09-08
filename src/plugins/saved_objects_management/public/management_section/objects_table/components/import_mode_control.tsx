@@ -51,7 +51,7 @@ const createNewCopiesDisabled = {
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
     {
-      defaultMessage: 'Check if objects were previously copied or imported into the space.',
+      defaultMessage: 'Check if objects were previously copied or imported.',
     }
   ),
 };
@@ -64,8 +64,7 @@ const createNewCopiesEnabled = {
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
     {
-      defaultMessage:
-        'This option enables you to create multiple copies of the object in the same space.',
+      defaultMessage: 'Use this option to create one or more copies of the object.',
     }
   ),
 };

@@ -107,7 +107,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
               defaultMessage: 'Object is now shared',
             })
           : i18n.translate('xpack.spaces.management.shareToSpace.shareEditSuccessTitle', {
-              defaultMessage: 'Object is updated',
+              defaultMessage: 'Object was updated',
             });
       if (spacesToAdd.length > 0) {
         await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
@@ -227,7 +227,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
               <h2>
                 <FormattedMessage
                   id="xpack.spaces.management.shareToSpaceFlyoutHeader"
-                  defaultMessage="Share saved object to space"
+                  defaultMessage="Share to space"
                 />
               </h2>
             </EuiTitle>

@@ -59,7 +59,7 @@ export const CopyStatusIndicator = (props: Props) => {
       // this is a manual overwrite, e.g., the individual "Overwrite?" switch was enabled
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
-        defaultMessage="Object will be overwritten. Disable to skip."
+        defaultMessage="Object will be overwritten. Disable 'Overwrite' to skip."
       />
     ) : (
       // this object is pending success, but it will not result in an overwrite
@@ -80,7 +80,7 @@ export const CopyStatusIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
-            defaultMessage="There was an error copying this saved object."
+            defaultMessage="An error occurred copying this object."
           />
         }
       />
@@ -88,20 +88,38 @@ export const CopyStatusIndicator = (props: Props) => {
   }
 
   if (hasConflicts) {
-    return (
-      <EuiIconTip
-        type={'alert'}
-        color={'warning'}
-        content={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
-              defaultMessage="An object with this ID already exists in this space. Enable ‘Overwrite’ to replace the existing object."
-            />
-          </Fragment>
-        }
-      />
-    );
+    switch (conflict!.error.type) {
+      case 'conflict':
+        return (
+          <EuiIconTip
+            type={'alert'}
+            color={'warning'}
+            content={
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpace.copyStatus.conflictMessage"
+                  defaultMessage="This conflicts with an existing object. Enable ‘Overwrite’ to replace it."
+                />
+              </Fragment>
+            }
+          />
+        );
+      case 'ambiguous_conflict':
+        return (
+          <EuiIconTip
+            type={'alert'}
+            color={'warning'}
+            content={
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpace.copyStatus.ambiguousConflictMessage"
+                  defaultMessage="This conflicts with multiple existing objects. Enable ‘Overwrite’ to replace one."
+                />
+              </Fragment>
+            }
+          />
+        );
+    }
   }
 
   return hasMissingReferences ? (
@@ -113,17 +131,17 @@ export const CopyStatusIndicator = (props: Props) => {
         overwrite ? (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesAutomaticOverwriteMessage"
-            defaultMessage="This object will be overwritten, but one or more references are missing."
+            defaultMessage="Object will be overwritten, but one or more references are missing."
           />
         ) : conflict ? (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesOverwriteMessage"
-            defaultMessage="This object will be overwritten, but one or more references are missing. Disable to skip."
+            defaultMessage="Object will be overwritten, but one or more references are missing. Disable 'Overwrite' to skip."
           />
         ) : (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
-            defaultMessage="This object will be copied, but one or more references are missing."
+            defaultMessage="Object will be copied, but one or more references are missing."
           />
         )
       }
