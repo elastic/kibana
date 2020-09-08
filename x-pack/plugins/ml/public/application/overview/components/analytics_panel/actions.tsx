@@ -8,13 +8,12 @@ import React, { useCallback, FC } from 'react';
 import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useNavigateToPath } from '../../../contexts/kibana';
+import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
-import {
-  getResultsUrl,
-  DataFrameAnalyticsListRow,
-} from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { DataFrameAnalyticsType } from '../../../../../common/types/data_frame_analytics';
 
 interface Props {
   item: DataFrameAnalyticsListRow;
@@ -22,10 +21,19 @@ interface Props {
 
 export const ViewLink: FC<Props> = ({ item }) => {
   const navigateToPath = useNavigateToPath();
+  const urlGenerator = useMlUrlGenerator();
 
-  const clickHandler = useCallback(() => {
+  const clickHandler = useCallback(async () => {
     const analysisType = getAnalysisType(item.config.analysis);
-    navigateToPath(getResultsUrl(item.id, analysisType));
+    const url = await urlGenerator.createUrl({
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+      pageState: {
+        jobId: item.id,
+        analysisType: analysisType as DataFrameAnalyticsType,
+      },
+    });
+
+    navigateToPath(url);
   }, []);
 
   const { disabled, tooltipContent } = getViewLinkStatus(item);
