@@ -32,6 +32,7 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
+import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -44,11 +45,8 @@ export const getCategoriesHandler: RequestHandler<
       success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -69,11 +67,8 @@ export const getListHandler: RequestHandler<
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -88,11 +83,8 @@ export const getLimitedListHandler: RequestHandler = async (context, request, re
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -113,11 +105,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       customResponseObj.headers = { 'Content-Type': contentType };
     }
     return response.custom(customResponseObj);
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -137,11 +126,8 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
       success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -165,6 +151,13 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    // could have also done `return defaultIngestErrorHandler({ error: e, response })` at each of the returns,
+    // but doing it this way will log the outer/install errors before any inner/rollback errors
+    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
+    if (e instanceof IngestManagerError) {
+      return defaultResult;
+    }
+    // if there is an unknown server error, uninstall any package assets
     try {
       const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
       const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
@@ -175,17 +168,7 @@ export const installPackageHandler: RequestHandler<TypeOf<
     } catch (error) {
       logger.error(`could not remove assets from failed installation attempt for ${pkgkey}`);
     }
-
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultResult;
   }
 };
 
@@ -202,16 +185,7 @@ export const deletePackageHandler: RequestHandler<TypeOf<
       success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
