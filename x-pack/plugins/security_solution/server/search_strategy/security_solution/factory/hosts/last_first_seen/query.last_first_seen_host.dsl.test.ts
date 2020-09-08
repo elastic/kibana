@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { buildFirstLastSeenHostQuery as buildQuery } from './query.last_first_seen_host.dsl.ts';
+import { buildFirstLastSeenHostQuery as buildQuery } from './query.last_first_seen_host.dsl';
 import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildQuery', () => {

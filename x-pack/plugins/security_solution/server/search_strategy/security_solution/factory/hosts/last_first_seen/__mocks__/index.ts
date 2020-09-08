@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HostsQueries } from '../../../../../../../common/search_strategy';
+
 export const mockOptions = {
   defaultIndex: [
     'apm-*-transaction*',
@@ -15,7 +17,7 @@ export const mockOptions = {
     'winlogbeat-*',
   ],
   docValueFields: [],
-  factoryQueryType: 'firstLastSeen',
+  factoryQueryType: HostsQueries.firstLastSeen,
   hostName: 'siem-kibana',
 };
 
@@ -26,7 +28,7 @@ export const mockSearchStrategyResponse = {
     took: 230,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: -1, max_score: null, hits: [] },
+    hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
       lastSeen: { value: 1599554931759, value_as_string: '2020-09-08T08:48:51.759Z' },
       firstSeen: { value: 1591611722000, value_as_string: '2020-06-08T10:22:02.000Z' },
@@ -43,7 +45,7 @@ export const formattedSearchStrategyResponse = {
     took: 230,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: -1, max_score: null, hits: [] },
+    hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
       lastSeen: { value: 1599554931759, value_as_string: '2020-09-08T08:48:51.759Z' },
       firstSeen: { value: 1591611722000, value_as_string: '2020-06-08T10:22:02.000Z' },
