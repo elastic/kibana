@@ -13,7 +13,7 @@ import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey } from '../registry';
+import { splitPkgKey, deletePackageCache, getArchiveInfo } from '../registry';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -22,7 +22,7 @@ export async function removeInstallation(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
-  const { pkgName } = splitPkgKey(pkgkey);
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
@@ -49,6 +49,11 @@ export async function removeInstallation(options: {
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+
+  // remove the package archive and its contents from the cache so that a reinstall fetches
+  // a fresh copy from the registry
+  const paths = await getArchiveInfo(pkgName, pkgVersion);
+  deletePackageCache(pkgName, pkgVersion, paths);
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;
