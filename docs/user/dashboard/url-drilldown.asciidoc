@@ -125,7 +125,6 @@ The URL drilldown template has three sources for variables:
 A subtle but important difference between *context* and *event* variables is that *context* variables use real values in previews when creating a URL drilldown. 
 For example, `{{context.panel.filters}}` are previewed with the current filters that applied to a panel. 
 *Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
-
 Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
 To work around this, {kib} provides a sample interaction that relies on a picked <<trigger-picker, trigger>>.
 So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
@@ -196,7 +195,7 @@ context.panel.timeRange.indexPatternIds
 
 | *Event*
 | 
-| Variables that depend on user interaction. These variables are dynamically extracted from the interaction context when the drilldown is executed.
+| Variables that depend on user interaction. These variables are dynamically extracted from the interaction context when the drilldown is executed. Please note that in *preview* these variables are replaced by <<values-in-preview, dummy values>>.
 
 | *Single click* trigger
 | 
