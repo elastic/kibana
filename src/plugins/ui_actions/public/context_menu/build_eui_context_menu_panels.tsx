@@ -86,6 +86,7 @@ const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: 
     name: txtMore,
     panel: morePanelId,
     icon: 'boxesHorizontal',
+    'data-test-subj': `embeddablePanelMore-${id}`,
     _order: -1,
   };
   panel.items = [...visibleItems, more];
