@@ -30,6 +30,11 @@ export type APMDataTelemetry = DeepPartial<{
       patch: number;
     };
   };
+  environments: {
+    services_without_environments: number;
+    services_with_multiple_environments: number;
+    top_environments: string[];
+  };
   aggregated_transactions: {
     current_implementation: AggregatedTransactionsCounts;
     no_observer_name: AggregatedTransactionsCounts;

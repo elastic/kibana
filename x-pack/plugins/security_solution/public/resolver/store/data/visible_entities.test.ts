@@ -12,6 +12,7 @@ import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/
 import { visibleNodesAndEdgeLines } from '../selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 describe('resolver visible entities', () => {
   let processA: LegacyEndpointEvent;
@@ -112,7 +113,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -140,7 +141,7 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useLoadPoliciesList } from '../../services/api';
 
@@ -50,25 +50,29 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   if (error || !policies) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <EuiCallOut
+      <EuiEmptyPrompt
         title={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
-            defaultMessage="Unable to load existing lifecycle policies"
-          />
+          <h2>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
+              defaultMessage="Unable to load existing lifecycle policies"
+            />
+          </h2>
         }
-        color="danger"
-      >
-        <p>
-          {message} ({statusCode})
-        </p>
-        <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
-            defaultMessage="Try again"
-          />
-        </EuiButton>
-      </EuiCallOut>
+        body={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actions={
+          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
