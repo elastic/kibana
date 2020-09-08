@@ -65,6 +65,9 @@ object DefaultTemplate : Template({
     password("env.KIBANA_CI_STATS_CONFIG", "", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_TOKEN", "credentialsJSON:ea975068-ca68-4da5-8189-ce90f4286bc0", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_HOST", "credentialsJSON:933ba93e-4b06-44c1-8724-8c536651f2b6", display = ParameterDisplay.HIDDEN)
+
+    // TODO remove this once we are able to pull it out of vault and put it closer to the things that require it
+    password("env.GITHUB_TOKEN", "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b", display = ParameterDisplay.HIDDEN)
   }
 
   steps {
