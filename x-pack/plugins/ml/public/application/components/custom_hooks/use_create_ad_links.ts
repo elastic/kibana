@@ -34,3 +34,7 @@ export const useCreateADLinks = () => {
   );
   return { createLinkWithUserDefaults };
 };
+
+export type CreateLinkWithUserDefaults = ReturnType<
+  typeof useCreateADLinks
+>['createLinkWithUserDefaults'];
