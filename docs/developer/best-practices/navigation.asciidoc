@@ -2,7 +2,7 @@
 == Routing, Navigation and URL
 
 {kib} platform provides a set of tools to help developers built consistent experience around routing and browser navigation.
-Some of that tooling is inside the `core`, some is available as part of various plugins.  
+Some of that tooling is inside `core`, some is available as part of various plugins.  
 
 The purpose of this guide is to give you (a {kib} contributor}) a high-level overview of available tools and to explain common approaches for handling routing,
 and browser navigation.
@@ -27,7 +27,7 @@ to make sure there is no page reload when navigating from one place in {kib} to 
 
 [source,js]
 ----
-window.location.href = `/dashboard/my-dashboard`; // (try to avoid this)
+window.location.href = core.http.basePath.prepend(`/dashboard/my-dashboard`); // (try to avoid this)
 ----
 
 would cause a full page reload.
@@ -41,26 +41,26 @@ To navigate between different {kib} apps without a page reload there are apis in
 
 [source,typescript jsx]
 ----
-const myLink = () => <a href={`/dashboard/my-dashboard`}> Go to Dashboard </a>; 
+const myLink = () => <a href={core.http.basePath.prepend(`/dashboard/my-dashboard`)}> Go to Dashboard </a>; 
 ----
 
-A workaround would be to handle a click, prevent browser navigation and use `core.application.navigateToUrl` api:
+A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` api:
 
 [source,typescript jsx]
 ----
 const MySPALink = () => 
     <a 
-        href={`/dashboard/my-dashboard`} 
+        href={core.http.basePath.prepend(`/dashboard/my-dashboard`)} 
         onClick={(e) => {
             e.preventDefault();
-            core.application.navigateToUrl(`/dashboard/my-dashboard`); 
+            core.application.navigateToApp('dashboard', {path: '/my-dashboard'}); 
         }}> 
         Go to Dashboard 
     </a>; 
 ----
 
 
-It is too much boilerplate to do this for each {kib} link in your app, so there is a handy HOC that helps with it: 
+As it would be too much boilerplate to do this for each {kib} link in your app, there is a handy HOC that helps with it: 
 {kib-repo}tree/{branch}/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks].
 
 [source,typescript jsx]
@@ -68,7 +68,8 @@ It is too much boilerplate to do this for each {kib} link in your app, so there 
 const MyApp = () => 
   <RedirectAppLinks application={core.application}>
     {/*...*/}
-        <a href={`/dashboard/my-dashboard`}>Go to Dashboard</a> {/* navigations using this link will happen in SPA friendly way */}
+    {/* navigations using this link will happen in SPA friendly way */}
+        <a href={core.http.basePath.prepend(`/dashboard/my-dashboard`)}>Go to Dashboard</a>
     {/*...*/}
   </RedirectAppLinks>
 ----
@@ -113,7 +114,8 @@ Common rules to follow in this scenario:
 
 This is required to make sure `core` is aware of navigations triggered inside your app, so it could act accordingly when needed.
 
-* `Core`'s {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory] instance
+* `Core`'s {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory] instance.
+* {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.appmountparameters.history.md[Example usage]
 * {kib-repo}tree/{branch}/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120[Example plugin]
 
 Relative links will be resolved relative to your app's route (`http://localhost5601/app/{your-app-id}`)
