@@ -16,6 +16,7 @@ import { getField, addFieldToDSL } from '../../../common/elasticsearch_util';
 import { TopTermPercentageField } from './top_term_percentage_field';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
+import { getComputedFieldName } from '../styles/vector/style_util';
 
 const TERMS_AGG_SHARD_SIZE = 5;
 
@@ -140,6 +141,18 @@ export class ESAggField implements IESAggField {
 
   canReadFromGeoJson(): boolean {
     return this._canReadFromGeoJson;
+  }
+
+  getMbPropertyNameField(styleName): string {
+    let targetName;
+    if (this.canReadFromGeoJson()) {
+      targetName = this.supportsAutoDomain()
+        ? getComputedFieldName(styleName, this.getName())
+        : this.getName();
+    } else {
+      targetName = this.getName();
+    }
+    return targetName;
   }
 }
 
