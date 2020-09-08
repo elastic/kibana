@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert, AlertStatus, AlertInstanceStatus } from '../types';
+import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
 import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
 
-export interface AlertStatusFromEventLogParams {
+export interface AlertInstanceSummaryFromEventLogParams {
   alert: SanitizedAlert;
   events: IEvent[];
   dateStart: string;
   dateEnd: string;
 }
 
-export function alertStatusFromEventLog(params: AlertStatusFromEventLogParams): AlertStatus {
+export function alertInstanceSummaryFromEventLog(
+  params: AlertInstanceSummaryFromEventLogParams
+): AlertInstanceSummary {
   // initialize the  result
   const { alert, events, dateStart, dateEnd } = params;
-  const alertStatus: AlertStatus = {
+  const alertInstanceSummary: AlertInstanceSummary = {
     id: alert.id,
     name: alert.name,
     tags: alert.tags,
@@ -50,17 +52,17 @@ export function alertStatusFromEventLog(params: AlertStatusFromEventLogParams): 
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
-      alertStatus.lastRun = timeStamp;
+      alertInstanceSummary.lastRun = timeStamp;
 
       const errorMessage = event?.error?.message;
       if (errorMessage !== undefined) {
-        alertStatus.status = 'Error';
-        alertStatus.errorMessages.push({
+        alertInstanceSummary.status = 'Error';
+        alertInstanceSummary.errorMessages.push({
           date: timeStamp,
           message: errorMessage,
         });
       } else {
-        alertStatus.status = 'OK';
+        alertInstanceSummary.status = 'OK';
       }
 
       continue;
@@ -91,19 +93,19 @@ export function alertStatusFromEventLog(params: AlertStatusFromEventLogParams): 
   // convert the instances map to object form
   const instanceIds = Array.from(instances.keys()).sort();
   for (const instanceId of instanceIds) {
-    alertStatus.instances[instanceId] = instances.get(instanceId)!;
+    alertInstanceSummary.instances[instanceId] = instances.get(instanceId)!;
   }
 
   // set the overall alert status to Active if appropriate
-  if (alertStatus.status !== 'Error') {
+  if (alertInstanceSummary.status !== 'Error') {
     if (Array.from(instances.values()).some((instance) => instance.status === 'Active')) {
-      alertStatus.status = 'Active';
+      alertInstanceSummary.status = 'Active';
     }
   }
 
-  alertStatus.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
+  alertInstanceSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
 
-  return alertStatus;
+  return alertInstanceSummary;
 }
 
 // return an instance status object, creating and adding to the map if needed

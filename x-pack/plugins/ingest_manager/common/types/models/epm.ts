@@ -19,6 +19,8 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAlertStatusRoute } from './get_alert_status';
+import { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { alertsClientMock } from '../alerts_client.mock';
-import { AlertStatus } from '../types';
+import { AlertInstanceSummary } from '../types';
 
 const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -21,9 +21,9 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('getAlertStatusRoute', () => {
+describe('getAlertInstanceSummaryRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedAlertStatus: AlertStatus = {
+  const mockedAlertInstanceSummary: AlertInstanceSummary = {
     id: '',
     name: '',
     tags: [],
@@ -39,17 +39,17 @@ describe('getAlertStatusRoute', () => {
     instances: {},
   };
 
-  it('gets alert status', async () => {
+  it('gets alert instance summary', async () => {
     const licenseState = mockLicenseState();
     const router = httpServiceMock.createRouter();
 
-    getAlertStatusRoute(router, licenseState);
+    getAlertInstanceSummaryRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/status"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_instance_summary"`);
 
-    alertsClient.getAlertStatus.mockResolvedValueOnce(mockedAlertStatus);
+    alertsClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -64,8 +64,8 @@ describe('getAlertStatusRoute', () => {
 
     await handler(context, req, res);
 
-    expect(alertsClient.getAlertStatus).toHaveBeenCalledTimes(1);
-    expect(alertsClient.getAlertStatus.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.getAlertInstanceSummary).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertInstanceSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "dateStart": undefined,
@@ -81,11 +81,11 @@ describe('getAlertStatusRoute', () => {
     const licenseState = mockLicenseState();
     const router = httpServiceMock.createRouter();
 
-    getAlertStatusRoute(router, licenseState);
+    getAlertInstanceSummaryRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.getAlertStatus = jest
+    alertsClient.getAlertInstanceSummary = jest
       .fn()
       .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
