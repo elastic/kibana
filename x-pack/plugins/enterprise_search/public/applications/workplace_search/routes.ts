@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { generatePath } from 'react-router-dom';
+
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
@@ -107,4 +109,8 @@ export const EDIT_SLACK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/slack/edit`;
 export const EDIT_ZENDESK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/zendesk/edit`;
 export const EDIT_CUSTOM_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/custom/edit`;
 
-export const getSourcePath = (sourceId: string): string => `${ORG_SOURCES_PATH}/${sourceId}`;
+export const getContentSourcePath = (
+  path: string,
+  sourceId: string,
+  isOrganization: boolean
+): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });

@@ -31,5 +31,9 @@ export function TransformSecurityUIProvider(
     async loginAsTransformViewer() {
       await this.loginAs(USER.TRANSFORM_VIEWER);
     },
+
+    async logout() {
+      await PageObjects.security.forceLogout();
+    },
   };
 }
