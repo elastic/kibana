@@ -12,6 +12,7 @@ import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
 import { ClassificationDecisionPath } from './decision_path_classification';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
@@ -40,6 +41,10 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   predictionFieldName,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -91,7 +96,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
                 predictionFieldName,
                 linkedFeatureImportanceValues: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/machine-learning/7.8/ml-feature-importance.html"
+                    href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
                     target="_blank"
                   >
                     <FormattedMessage

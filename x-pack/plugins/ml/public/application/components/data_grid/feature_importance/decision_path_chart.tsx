@@ -105,7 +105,9 @@ export const DecisionPathChart = ({
     ],
     [baseline]
   );
-  const tickFormatter = useCallback((d) => Number(d).toPrecision(NUM_PRECISION), []);
+  // guarantee up to num_precision significant digits
+  // without having it in scientific notation
+  const tickFormatter = useCallback((d) => Number(d.toPrecision(NUM_PRECISION)).toString(), []);
 
   return (
     <Chart

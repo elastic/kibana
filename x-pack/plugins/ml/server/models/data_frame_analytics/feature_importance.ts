@@ -5,8 +5,12 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { getPredictionFieldName, isRegressionAnalysis } from '../../../common/util/analytics_utils';
-
+import {
+  getDefaultPredictionFieldName,
+  getPredictionFieldName,
+  isRegressionAnalysis,
+} from '../../../common/util/analytics_utils';
+import { DEFAULT_RESULTS_FIELD } from '../../../common/constants/data_frame_analytics';
 // Obtains data for the data frame analytics feature importance functionalities
 // such as baseline, decision paths, or importance summary.
 export function analyticsFeatureImportanceProvider({
@@ -20,7 +24,13 @@ export function analyticsFeatureImportanceProvider({
     const jobConfig = body.data_frame_analytics[0];
     if (!isRegressionAnalysis) return undefined;
     const destinationIndex = jobConfig.dest.index;
-    const predictionField = getPredictionFieldName(jobConfig.analysis);
+    const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+    const mlResultsField = jobConfig.dest?.results_field ?? DEFAULT_RESULTS_FIELD;
+    const predictedField = `${mlResultsField}.${
+      predictionFieldName ? predictionFieldName : getDefaultPredictionFieldName(jobConfig.analysis)
+    }`;
+    const isTrainingField = `${mlResultsField}.is_training`;
+
     const params = {
       index: destinationIndex,
       size: 0,
@@ -30,7 +40,7 @@ export function analyticsFeatureImportanceProvider({
             filter: [
               {
                 term: {
-                  'ml.is_training': true,
+                  [isTrainingField]: true,
                 },
               },
             ],
@@ -39,7 +49,7 @@ export function analyticsFeatureImportanceProvider({
         aggs: {
           featureImportanceBaseline: {
             avg: {
-              field: `ml.${predictionField}`,
+              field: predictedField,
             },
           },
         },

@@ -30,11 +30,8 @@ import {
   getPredictionFieldName,
   getDefaultPredictionFieldName,
 } from '../../../../../../../common/util/analytics_utils';
-import {
-  DEFAULT_RESULTS_FIELD,
-  FEATURE_IMPORTANCE,
-  TOP_CLASSES,
-} from '../../../../common/constants';
+import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
