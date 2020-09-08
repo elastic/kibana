@@ -58,6 +58,11 @@ describe('docTable', function () {
       expect(getSort([['foo', 'bar']], indexPattern)).toEqual([]);
       expect(getSort([{ foo: 'bar' }], indexPattern)).toEqual([]);
     });
+
+    test('should convert a legacy sort to an array of objects', function () {
+      expect(getSort(['foo', 'desc'], indexPattern)).toEqual([{ foo: 'desc' }]);
+      expect(getSort(['foo', 'asc'], indexPattern)).toEqual([{ foo: 'asc' }]);
+    });
   });
 
   describe('getSortArray function', function () {
