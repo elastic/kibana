@@ -153,10 +153,12 @@ import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
 
-// Warning: (ae-forgotten-export) The symbol "appendersSchema" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = TypeOf<typeof appendersSchema>;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
 
 // @public
 export function assertNever(x: never): never;
@@ -325,108 +327,45 @@ export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capa
 export const config: {
     elasticsearch: {
         schema: import("@kbn/config-schema").ObjectType<{
-            sniffOnStart: import("@kbn/config-schema").Type<boolean>;
-            sniffInterval: import("@kbn/config-schema").Type<false | import("moment").Duration>;
-            sniffOnConnectionFault: import("@kbn/config-schema").Type<boolean>;
-            hosts: import("@kbn/config-schema").Type<string | string[]>;
-            preserveHost: import("@kbn/config-schema").Type<boolean>;
-            username: import("@kbn/config-schema").Type<string | undefined>;
-            password: import("@kbn/config-schema").Type<string | undefined>;
-            requestHeadersWhitelist: import("@kbn/config-schema").Type<string | string[]>;
-            customHeaders: import("@kbn/config-schema").Type<Record<string, string>>;
-            shardTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            requestTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            pingTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            startupTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            logQueries: import("@kbn/config-schema").Type<boolean>;
+            sniffOnStart: Type<boolean>;
+            sniffInterval: Type<false | import("moment").Duration>;
+            sniffOnConnectionFault: Type<boolean>;
+            hosts: Type<string | string[]>;
+            preserveHost: Type<boolean>;
+            username: Type<string | undefined>;
+            password: Type<string | undefined>;
+            requestHeadersWhitelist: Type<string | string[]>;
+            customHeaders: Type<Record<string, string>>;
+            shardTimeout: Type<import("moment").Duration>;
+            requestTimeout: Type<import("moment").Duration>;
+            pingTimeout: Type<import("moment").Duration>;
+            startupTimeout: Type<import("moment").Duration>;
+            logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: import("@kbn/config-schema").Type<"none" | "certificate" | "full">;
-                certificateAuthorities: import("@kbn/config-schema").Type<string | string[] | undefined>;
-                certificate: import("@kbn/config-schema").Type<string | undefined>;
-                key: import("@kbn/config-schema").Type<string | undefined>;
-                keyPassphrase: import("@kbn/config-schema").Type<string | undefined>;
+                verificationMode: Type<"none" | "certificate" | "full">;
+                certificateAuthorities: Type<string | string[] | undefined>;
+                certificate: Type<string | undefined>;
+                key: Type<string | undefined>;
+                keyPassphrase: Type<string | undefined>;
                 keystore: import("@kbn/config-schema").ObjectType<{
-                    path: import("@kbn/config-schema").Type<string | undefined>;
-                    password: import("@kbn/config-schema").Type<string | undefined>;
+                    path: Type<string | undefined>;
+                    password: Type<string | undefined>;
                 }>;
                 truststore: import("@kbn/config-schema").ObjectType<{
-                    path: import("@kbn/config-schema").Type<string | undefined>;
-                    password: import("@kbn/config-schema").Type<string | undefined>;
+                    path: Type<string | undefined>;
+                    password: Type<string | undefined>;
                 }>;
-                alwaysPresentCertificate: import("@kbn/config-schema").Type<boolean>;
+                alwaysPresentCertificate: Type<boolean>;
             }>;
-            apiVersion: import("@kbn/config-schema").Type<string>;
+            apiVersion: Type<string>;
             healthCheck: import("@kbn/config-schema").ObjectType<{
-                delay: import("@kbn/config-schema").Type<import("moment").Duration>;
+                delay: Type<import("moment").Duration>;
             }>;
             ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
-        appenders: import("@kbn/config-schema").Type<Readonly<{} & {
-            kind: "console";
-            layout: Readonly<{} & {
-                kind: "json";
-            }> | Readonly<{
-                pattern?: string | undefined;
-                highlight?: boolean | undefined;
-            } & {
-                kind: "pattern";
-            }>;
-        }> | Readonly<{} & {
-            path: string;
-            kind: "file";
-            layout: Readonly<{} & {
-                kind: "json";
-            }> | Readonly<{
-                pattern?: string | undefined;
-                highlight?: boolean | undefined;
-            } & {
-                kind: "pattern";
-            }>;
-        }> | Readonly<{
-            legacyLoggingConfig?: any;
-        } & {
-            kind: "legacy-appender";
-        }>>;
-        loggers: import("@kbn/config-schema").ObjectType<{
-            appenders: import("@kbn/config-schema").Type<string[]>;
-            context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<"off" | "info" | "error" | "all" | "fatal" | "warn" | "debug" | "trace">;
-        }>;
-        loggerContext: import("@kbn/config-schema").ObjectType<{
-            appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
-                kind: "console";
-                layout: Readonly<{} & {
-                    kind: "json";
-                }> | Readonly<{
-                    pattern?: string | undefined;
-                    highlight?: boolean | undefined;
-                } & {
-                    kind: "pattern";
-                }>;
-            }> | Readonly<{} & {
-                path: string;
-                kind: "file";
-                layout: Readonly<{} & {
-                    kind: "json";
-                }> | Readonly<{
-                    pattern?: string | undefined;
-                    highlight?: boolean | undefined;
-                } & {
-                    kind: "pattern";
-                }>;
-            }> | Readonly<{
-                legacyLoggingConfig?: any;
-            } & {
-                kind: "legacy-appender";
-            }>>>;
-            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                appenders: string[];
-                context: string;
-                level: "off" | "info" | "error" | "all" | "fatal" | "warn" | "debug" | "trace";
-            }>[]>;
-        }>;
+        appenders: Type<AppenderConfigType>;
     };
 };
 
