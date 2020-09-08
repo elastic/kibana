@@ -24,7 +24,7 @@ index named `shakespeare,` and the accounts data set, which has an index named
 . In the *Index pattern name* field, enter `shakes*`.
 +
 [role="screenshot"]
-image::images/tutorial-pattern-1.png[shakes* index patterns]
+image::images/tutorial-pattern-1.png[image describing how to create index pattern, specifically entering "shakes*" in index pattern name field]
 
 . Click *Next step*.
 
