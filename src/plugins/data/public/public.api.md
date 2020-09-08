@@ -26,11 +26,12 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FetchOptions as FetchOptions_2 } from 'src/plugins/data/public';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
+import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
@@ -485,16 +486,6 @@ export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => M
 export const extractSearchSourceReferences: (state: SearchSourceFields) => [SearchSourceFields & {
     indexRefName?: string;
 }, SavedObjectReference[]];
-
-// Warning: (ae-missing-release-tag) "FetchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface FetchOptions {
-    // (undocumented)
-    abortSignal?: AbortSignal;
-    // (undocumented)
-    searchStrategyId?: string;
-}
 
 // Warning: (ae-missing-release-tag) "FieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -956,7 +947,7 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, shortDotsEnable, metaFields, }: IndexPatternDeps);
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
@@ -1030,6 +1021,10 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     metaFields: string[];
     // (undocumented)
+    originalBody: {
+        [key: string]: any;
+    };
+    // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
     prepBody(): {
@@ -1045,9 +1040,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
     // (undocumented)
-    removeScriptedField(fieldName: string): Promise<void | Error>;
-    // (undocumented)
-    save(saveAttempts?: number): Promise<void | Error>;
+    removeScriptedField(fieldName: string): void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1057,16 +1050,14 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     title: string;
     // (undocumented)
-    toJSON(): string | undefined;
-    // (undocumented)
     toSpec(): IndexPatternSpec;
-    // (undocumented)
-    toString(): string;
     // (undocumented)
     type: string | undefined;
     // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
-    }
+    // (undocumented)
+    version: string | undefined;
+}
 
 // Warning: (ae-missing-release-tag) "AggregationRestrictions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1271,9 +1262,7 @@ export type ISearchGeneric = <SearchStrategyRequest extends IEsSearchRequest = I
 //
 // @public (undocumented)
 export interface ISearchOptions {
-    // (undocumented)
-    signal?: AbortSignal;
-    // (undocumented)
+    abortSignal?: AbortSignal;
     strategy?: string;
 }
 
@@ -1514,7 +1503,7 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "size" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "size" | "className" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
