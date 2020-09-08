@@ -56,20 +56,24 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-type ErrorGroupDetailsProps = RouteComponentProps<{}>;
+type ErrorGroupDetailsProps = RouteComponentProps<{
+  groupId: string;
+  serviceName: string;
+}>;
 
-export function ErrorGroupDetails({ location }: ErrorGroupDetailsProps) {
+export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
+  const { serviceName, groupId } = match.params;
   const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, start, end, errorGroupId } = urlParams;
+  const { start, end } = urlParams;
 
   const { data: errorGroupData } = useFetcher(() => {
-    if (serviceName && start && end && errorGroupId) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
         params: {
           path: {
             serviceName,
-            groupId: errorGroupId,
+            groupId,
           },
           query: {
             start,
@@ -79,10 +83,10 @@ export function ErrorGroupDetails({ location }: ErrorGroupDetailsProps) {
         },
       });
     }
-  }, [serviceName, start, end, errorGroupId, uiFilters]);
+  }, [serviceName, start, end, groupId, uiFilters]);
 
   const { data: errorDistributionData } = useFetcher(() => {
-    if (serviceName && start && end && errorGroupId) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/distribution',
         params: {
@@ -92,13 +96,13 @@ export function ErrorGroupDetails({ location }: ErrorGroupDetailsProps) {
           query: {
             start,
             end,
-            groupId: errorGroupId,
+            groupId,
             uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     }
-  }, [serviceName, start, end, errorGroupId, uiFilters]);
+  }, [serviceName, start, end, groupId, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
@@ -125,7 +129,7 @@ export function ErrorGroupDetails({ location }: ErrorGroupDetailsProps) {
                 {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
                   defaultMessage: 'Error group {errorGroupId}',
                   values: {
-                    errorGroupId: getShortGroupId(urlParams.errorGroupId),
+                    errorGroupId: getShortGroupId(groupId),
                   },
                 })}
               </h1>

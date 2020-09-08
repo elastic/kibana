@@ -29,9 +29,13 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 
-type TransactionDetailsProps = RouteComponentProps<{}>;
+type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
 
-export function TransactionDetails({ location }: TransactionDetailsProps) {
+export function TransactionDetails({
+  location,
+  match,
+}: TransactionDetailsProps) {
+  const { serviceName } = match.params;
   const { urlParams } = useUrlParams();
   const {
     data: distributionData,
@@ -42,7 +46,7 @@ export function TransactionDetails({ location }: TransactionDetailsProps) {
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
-  const { transactionName, transactionType, serviceName } = urlParams;
+  const { transactionName, transactionType } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });

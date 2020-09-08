@@ -4,63 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
-import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import produce from 'immer';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
-import { routes } from './route_config';
-import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
+import { routes } from '../components/app/Main/route_config';
+import { ApmPluginContextValue } from '../context/ApmPluginContext';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
+  MockApmPluginContextWrapper,
+} from '../context/ApmPluginContext/MockApmPluginContext';
+import { useBreadcrumbs } from './use_breadcrumbs';
 
-const setBreadcrumbs = jest.fn();
-const changeTitle = jest.fn();
+function createWrapper(path: string) {
+  return ({ children }: { children?: ReactNode }) => {
+    const value = (produce(mockApmPluginContextValue, (draft) => {
+      draft.core.application.navigateToUrl = (url: string) => Promise.resolve();
+      draft.core.chrome.docTitle.change = changeTitle;
+      draft.core.chrome.setBreadcrumbs = setBreadcrumbs;
+    }) as unknown) as ApmPluginContextValue;
 
-function mountBreadcrumb(route: string, params = '') {
-  mount(
-    <MockApmPluginContextWrapper
-      value={
-        ({
-          ...mockApmPluginContextValue,
-          core: {
-            ...mockApmPluginContextValue.core,
-            chrome: {
-              ...mockApmPluginContextValue.core.chrome,
-              docTitle: { change: changeTitle },
-              setBreadcrumbs,
-            },
-          },
-        } as unknown) as ApmPluginContextValue
-      }
-    >
-      <MemoryRouter initialEntries={[`${route}?kuery=myKuery&${params}`]}>
-        <UpdateBreadcrumbs routes={routes} />
+    return (
+      <MemoryRouter initialEntries={[path]}>
+        <MockApmPluginContextWrapper value={value}>
+          {children}
+        </MockApmPluginContextWrapper>
       </MemoryRouter>
-    </MockApmPluginContextWrapper>
-  );
-  expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    );
+  };
 }
 
-describe('UpdateBreadcrumbs', () => {
-  beforeEach(() => {
-    setBreadcrumbs.mockReset();
-    changeTitle.mockReset();
-  });
+function mountBreadcrumb(path: string) {
+  renderHook(() => useBreadcrumbs(routes), { wrapper: createWrapper(path) });
+}
 
-  it('Changes the homepage title', () => {
+const changeTitle = jest.fn();
+const setBreadcrumbs = jest.fn();
+
+describe('useBreadcrumbs', () => {
+  it('changes the page title', () => {
     mountBreadcrumb('/');
+
     expect(changeTitle).toHaveBeenCalledWith(['APM']);
   });
 
-  it('/services/:serviceName/errors/:groupId', () => {
+  test('/services/:serviceName/errors/:groupId', () => {
     mountBreadcrumb(
-      '/services/opbeans-node/errors/myGroupId',
-      'rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0'
+      '/services/opbeans-node/errors/myGroupId?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0'
     );
-    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual(
+
+    expect(setBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -95,10 +88,10 @@ describe('UpdateBreadcrumbs', () => {
     ]);
   });
 
-  it('/services/:serviceName/errors', () => {
-    mountBreadcrumb('/services/opbeans-node/errors');
-    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual(
+  test('/services/:serviceName/errors', () => {
+    mountBreadcrumb('/services/opbeans-node/errors?kuery=myKuery');
+
+    expect(setBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -115,6 +108,7 @@ describe('UpdateBreadcrumbs', () => {
         expect.objectContaining({ text: 'Errors', href: undefined }),
       ])
     );
+
     expect(changeTitle).toHaveBeenCalledWith([
       'Errors',
       'opbeans-node',
@@ -123,10 +117,10 @@ describe('UpdateBreadcrumbs', () => {
     ]);
   });
 
-  it('/services/:serviceName/transactions', () => {
-    mountBreadcrumb('/services/opbeans-node/transactions');
-    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual(
+  test('/services/:serviceName/transactions', () => {
+    mountBreadcrumb('/services/opbeans-node/transactions?kuery=myKuery');
+
+    expect(setBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -152,14 +146,12 @@ describe('UpdateBreadcrumbs', () => {
     ]);
   });
 
-  it('/services/:serviceName/transactions/view?transactionName=my-transaction-name', () => {
+  test('/services/:serviceName/transactions/view?transactionName=my-transaction-name', () => {
     mountBreadcrumb(
-      '/services/opbeans-node/transactions/view',
-      'transactionName=my-transaction-name'
+      '/services/opbeans-node/transactions/view?kuery=myKuery&transactionName=my-transaction-name'
     );
-    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
 
-    expect(breadcrumbs).toEqual(
+    expect(setBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
