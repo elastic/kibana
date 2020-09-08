@@ -150,102 +150,98 @@
         "isEnabled": {
           "type": "boolean"
         },
-        "clusters": {
+        "license": {
+          "type": "keyword"
+        },
+        "clusterUuid": {
+          "type": "keyword"
+        },
+        "stackProductCount": {
+          "type": "long"
+        },
+        "stackProductMbCount": {
+          "type": "long"
+        },
+        "stackProductMbRatio": {
+          "type": "float"
+        },
+        "elasticsearch": {
           "properties": {
-            "license": {
-              "type": "keyword"
-            },
-            "clusterUuid": {
-              "type": "keyword"
-            },
-            "stackProductCount": {
+            "count": {
               "type": "long"
             },
-            "stackProductMbCount": {
+            "mbCount": {
               "type": "long"
             },
-            "stackProductMbRatio": {
+            "mbPercentage": {
               "type": "float"
             },
-            "elasticsearch": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "mbCount": {
-                  "type": "long"
-                },
-                "mbPercentage": {
-                  "type": "float"
-                },
-                "versions": {
-                  "type": "keyword"
-                }
-              }
+            "versions": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "count": {
+              "type": "long"
             },
-            "kibana": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "mbCount": {
-                  "type": "long"
-                },
-                "mbPercentage": {
-                  "type": "float"
-                },
-                "versions": {
-                  "type": "keyword"
-                }
-              }
+            "mbCount": {
+              "type": "long"
             },
-            "logstash": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "mbCount": {
-                  "type": "long"
-                },
-                "mbPercentage": {
-                  "type": "float"
-                },
-                "versions": {
-                  "type": "keyword"
-                }
-              }
+            "mbPercentage": {
+              "type": "float"
             },
-            "beats": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "mbCount": {
-                  "type": "long"
-                },
-                "mbPercentage": {
-                  "type": "float"
-                },
-                "versions": {
-                  "type": "keyword"
-                }
-              }
+            "versions": {
+              "type": "keyword"
+            }
+          }
+        },
+        "logstash": {
+          "properties": {
+            "count": {
+              "type": "long"
             },
-            "apm": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "mbCount": {
-                  "type": "long"
-                },
-                "mbPercentage": {
-                  "type": "float"
-                },
-                "versions": {
-                  "type": "keyword"
-                }
-              }
+            "mbCount": {
+              "type": "long"
+            },
+            "mbPercentage": {
+              "type": "float"
+            },
+            "versions": {
+              "type": "keyword"
+            }
+          }
+        },
+        "beats": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "mbCount": {
+              "type": "long"
+            },
+            "mbPercentage": {
+              "type": "float"
+            },
+            "versions": {
+              "type": "keyword"
+            }
+          }
+        },
+        "apm": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "mbCount": {
+              "type": "long"
+            },
+            "mbPercentage": {
+              "type": "float"
+            },
+            "versions": {
+              "type": "keyword"
             }
           }
         }
