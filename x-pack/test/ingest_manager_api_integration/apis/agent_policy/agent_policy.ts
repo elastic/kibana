@@ -51,6 +51,9 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.loadIfNeeded('fleet/agents');
       });
+      before(async () => {
+        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+      });
       after(async () => {
         await esArchiver.unload('fleet/agents');
       });
