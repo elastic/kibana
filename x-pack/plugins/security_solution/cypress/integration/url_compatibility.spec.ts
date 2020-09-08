@@ -19,7 +19,7 @@ const ABSOLUTE_DATE = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/75697
-describe.skip('URL compatibility', () => {
+describe('URL compatibility', () => {
   it('Redirects to Detection alerts from old Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
 
