@@ -407,10 +407,23 @@ export class MapsAppView extends React.Component<Props, State> {
             forceRefresh: true,
           });
         }}
+        onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
         dateRangeTo={this.props.timeFilters.to}
         isRefreshPaused={this.props.refreshConfig.isPaused}
         refreshInterval={this.props.refreshConfig.interval}
+        onRefreshChange={({
+          isPaused,
+          refreshInterval,
+        }: {
+          isPaused: boolean;
+          refreshInterval: number;
+        }) => {
+          this._onRefreshConfigChange({
+            isPaused,
+            interval: refreshInterval,
+          });
+        }}
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}

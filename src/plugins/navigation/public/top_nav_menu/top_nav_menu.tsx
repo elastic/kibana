@@ -23,7 +23,7 @@ import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
 import { MountPointPortal } from '../../../kibana_react/public';
-import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
+import { StatefulSearchBarProps, DataPublicPluginStart, Filter } from '../../../data/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
@@ -55,6 +55,8 @@ export type TopNavMenuProps = StatefulSearchBarProps & {
    * ```
    */
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 };
 
 /*
