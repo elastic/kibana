@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,6 +12,7 @@ import {
   EuiSuperSelect,
   EuiFieldText,
   EuiButtonIcon,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrustedApp } from '../../../../../../../../common/endpoint/types';
@@ -44,6 +45,24 @@ export interface ConditionEntryProps {
 }
 export const ConditionEntry = memo<ConditionEntryProps>(
   ({ entry, showLabels = false, onRemove, isRemoveDisabled = false }) => {
+    const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+      return [
+        {
+          inputDisplay: i18n.translate(
+            'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
+            { defaultMessage: 'Hash' }
+          ),
+          value: 'process.hash.*',
+        },
+        {
+          inputDisplay: i18n.translate(
+            'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
+            { defaultMessage: 'Path' }
+          ),
+          value: 'process.path',
+        },
+      ];
+    }, []);
     const handleValueUpdate = useCallback(() => {}, []);
     const handleFieldUpdate = useCallback(() => {}, []);
     const handleRemoveClick = useCallback(() => {
@@ -60,7 +79,11 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               { defaultMessage: 'Field' }
             )}
           >
-            <EuiSuperSelect options={[]} onChange={handleFieldUpdate} />
+            <EuiSuperSelect
+              options={fieldOptions}
+              valueOfSelected={entry.field}
+              onChange={handleFieldUpdate}
+            />
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem>

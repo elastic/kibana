@@ -20,7 +20,7 @@ import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 
 const newEntry = (): NewTrustedApp['entries'][0] => {
   return {
-    field: 'path',
+    field: 'process.hash.*',
     operator: 'included',
     type: 'match',
     value: '',
