@@ -38,7 +38,7 @@ export function DimensionPopover({
   panel: React.ReactElement;
   panelTitle: React.ReactNode;
 }) {
-  const [openByCreation, setIsOpenByCreation] = React.useState(popoverState.openId === accessor);
+  const [openByCreation, setIsOpenByCreation] = useState(popoverState.openId === accessor);
 
   const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
 
@@ -51,44 +51,42 @@ export function DimensionPopover({
     setIsOpenByCreation(false);
   };
 
+  const flyout =
+    popoverState.isOpen &&
+    (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId)) ? (
+      <div
+        role="dialog"
+        aria-labelledby="lnsDimensionPopoverFlyoutTitle"
+        className="lnsDimensionPopover"
+      >
+        <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
+          <EuiTitle size="xs">
+            <EuiButtonEmpty
+              onClick={closeFlyout}
+              data-test-subj="lnsDimensionPopoverFlyoutTitle"
+              id="lnsDimensionPopoverFlyoutTitle"
+              iconType="sortLeft"
+              flush="left"
+            >
+              <strong>{panelTitle}</strong>
+            </EuiButtonEmpty>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
+          {panel}
+        </EuiFlexItem>
+        <EuiFlyoutFooter className="lnsDimensionPopover__footer">
+          <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+            Close
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </div>
+    ) : null;
+
   return (
     <>
       <div className="lnsDimensionPopover__trigger">{trigger}</div>
-      {popoverState.isOpen &&
-        (popoverState.openId === accessor ||
-          (noMatch && popoverState.addingToGroupId === groupId)) && (
-          <div
-            role="dialog"
-            aria-labelledby="lnsDimensionPopoverFlyoutTitle"
-            className={classNames('lnsDimensionPopover', {
-              'lnsDimensionPopover--noAnimation': openByCreation,
-            })}
-          >
-            <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
-              <EuiTitle size="xs">
-                <EuiButtonEmpty
-                  onClick={closeFlyout}
-                  data-test-subj="lns-indexPatternDimension-flyoutTitle"
-                  id="lnsDimensionPopoverFlyoutTitle"
-                  iconType="sortLeft"
-                  flush="left"
-                >
-                  <strong>{panelTitle}</strong>
-                </EuiButtonEmpty>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-              {panel}
-            </EuiFlexItem>
-            <EuiFlyoutFooter className="lnsDimensionPopover__footer">
-              <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-                {i18n.translate('xpack.lens.dimensionFlyout.close', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlyoutFooter>
-          </div>
-        )}
+      {flyout}
     </>
   );
 }
