@@ -53,7 +53,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
-import { OnSaveProps } from '../../../saved_objects/public';
+import { OnSaveProps, SaveResult } from '../../../saved_objects/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -423,7 +423,7 @@ export class VisualizeEmbeddable
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
     return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
-      const onSave = async (props: OnSaveProps): Promise<{ id: string } | { error: Error }> => {
+      const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         try {
           const savedVis: VisSavedObject = await this.savedVisualizationsLoader?.get({});
           const saveOptions = {
@@ -444,24 +444,23 @@ export class VisualizeEmbeddable
           };
           savedVis.uiStateJSON = this.vis.uiState.toString();
           const id = await savedVis.save(saveOptions);
-          resolve({ savedObjectId: id });
+          resolve({ savedObjectId: id, id: this.id });
           return { id };
         } catch (error) {
           reject(error);
           return { error };
         }
       };
-      this.attributeService.setOptions({
-        customSaveMethod: onSave,
-      });
       const saveModalTitle = this.vis.title ? this.vis.title : 'Placeholder Title';
       return this.attributeService.getInputAsRefType(
         {
+          id: this.id,
           attributes: {
             title: this.vis.title,
           },
         },
-        { showSaveModal: true, saveModalTitle }
+        { showSaveModal: true, saveModalTitle },
+        onSave
       );
     });
   };

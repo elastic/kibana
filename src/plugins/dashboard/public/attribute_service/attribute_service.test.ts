@@ -172,11 +172,11 @@ describe('attributeService', () => {
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
         byReferenceInput
       );
-      expect(customSaveMethod).toHaveBeenCalledWith({
-        type: defaultTestType,
+      expect(customSaveMethod).toHaveBeenCalledWith(
+        defaultTestType,
         attributes,
-        savedObjectId: byReferenceInput.savedObjectId
-      });
+        byReferenceInput.savedObjectId
+      );
     });
 
     it('uses custom save method given no id', async () => {
@@ -187,17 +187,7 @@ describe('attributeService', () => {
       expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
         savedObjectId: '678',
       });
-      expect(customSaveMethod).toHaveBeenCalledWith( { type: defaultTestType, attributes });
-    });
-
-    it('uses setOptions to set custom save method', async () => {
-      const customSaveMethod = jest.fn().mockReturnValue({ id: '678' });
-      const attributeService = mockAttributeService<TestAttributes>(defaultTestType);
-      attributeService.setOptions({ customSaveMethod });
-      expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
-        savedObjectId: '678',
-      });
-      expect(customSaveMethod).toHaveBeenCalledWith({ type: defaultTestType, attributes: attributes });
+      expect(customSaveMethod).toHaveBeenCalledWith(defaultTestType, attributes, undefined);
     });
   });
 });

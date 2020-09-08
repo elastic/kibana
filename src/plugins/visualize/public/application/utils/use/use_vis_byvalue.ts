@@ -24,11 +24,6 @@ import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getBreadcrumbsPrefixedWithApp, getEditBreadcrumbs } from '../breadcrumbs';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
-import {
-  VisualizeByReferenceInput,
-  VisualizeByValueInput,
-  VisualizeSavedObjectAttributes,
-} from '../../../../../visualizations/public/embeddable/visualize_embeddable';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -44,22 +39,12 @@ export const useVisByValue = (
   const visEditorRef = useRef<HTMLDivElement>(null);
   const loaded = useRef(false);
   useEffect(() => {
-    const { chrome, dashboard } = services;
+    const { chrome } = services;
     const getVisInstance = async () => {
       if (!valueInput || loaded.current) {
         return;
       }
-      const input = { ...valueInput };
-      input.attributes = valueInput.savedVis;
-      const byValueVisInstance = await getVisualizationInstanceFromInput(
-        services,
-        input,
-        dashboard.getAttributeService<
-          VisualizeSavedObjectAttributes,
-          VisualizeByValueInput,
-          VisualizeByReferenceInput
-        >('visualization')
-      );
+      const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
       const { embeddableHandler, vis } = byValueVisInstance;
       const Editor = vis.type.editor || DefaultEditorController;
       const visEditorController = new Editor(

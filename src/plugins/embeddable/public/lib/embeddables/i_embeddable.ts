@@ -37,7 +37,7 @@ export interface EmbeddableInput {
    * Embeddable instance from others (e.g. inside a container).  It's possible to
    * have two Embeddables where everything else is the same but the id.
    */
-  id?: string;
+  id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
 
