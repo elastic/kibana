@@ -50,10 +50,6 @@ import { HomeServerPluginSetup } from '../../plugins/home/server';
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
 
-export interface UiApp {
-  getId(): string;
-}
-
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
   interface PluginProperties {
@@ -66,13 +62,6 @@ declare module 'hapi' {
   interface Server {
     config: () => KibanaConfig;
     savedObjects: SavedObjectsLegacyService;
-    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
-    getHiddenUiAppById(appId: string): UiApp;
-    addScopedTutorialContextFactory: (
-      scopedTutorialContextFactory: (...args: any[]) => any
-    ) => void;
-    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
-    getUiNavLinks(): Array<{ _id: string }>;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
   }
@@ -81,10 +70,6 @@ declare module 'hapi' {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
     getUiSettingsService(): IUiSettingsClient;
-  }
-
-  interface ResponseToolkit {
-    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
 }
 

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -32,6 +33,7 @@ import {
   AddExceptionModalBaseProps,
 } from '../../../../common/components/exceptions/add_exception_modal';
 import { getMappedNonEcsValue } from '../../../../common/components/exceptions/helpers';
+import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 import {
   useStateToaster,
@@ -71,6 +73,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
   );
   const eventId = ecsRowData._id;
+
+  const { addWarning } = useAppToasts();
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -124,22 +128,30 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, newStatus: Status) => {
-      let title: string;
-      switch (newStatus) {
-        case 'closed':
-          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
-          break;
-        case 'open':
-          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-          break;
-        case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+    (updated: number, conflicts: number, newStatus: Status) => {
+      if (conflicts > 0) {
+        // Partial failure
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      } else {
+        let title: string;
+        switch (newStatus) {
+          case 'closed':
+            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'open':
+            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'in-progress':
+            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+        }
+        displaySuccessToast(title, dispatchToaster);
       }
-      displaySuccessToast(title, dispatchToaster);
       setAlertStatus(newStatus);
     },
-    [dispatchToaster]
+    [dispatchToaster, addWarning]
   );
 
   const onAlertStatusUpdateFailure = useCallback(

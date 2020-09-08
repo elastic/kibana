@@ -13,6 +13,7 @@ import { DataAction } from './action';
 import { ResolverChildNode, ResolverEvent, ResolverTree } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { values } from '../../../../common/endpoint/models/ecs_safety_helpers';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 /**
  * Test the data reducer and selector.
@@ -28,7 +29,7 @@ describe('Resolver Data Middleware', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          databaseDocumentID: '',
+          parameters: mockTreeFetcherParameters(),
         },
       };
       store.dispatch(action);
