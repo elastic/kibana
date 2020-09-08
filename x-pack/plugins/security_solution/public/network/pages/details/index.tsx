@@ -5,39 +5,40 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
+import { FlowTarget } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
-import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
+import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { networkToCriteria } from '../../../common/components/ml/criteria/network_to_criteria';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
-import { IpOverview } from '../../components/ip_overview';
+import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { IpOverviewQuery } from '../../containers/ip_overview';
+import { useNetworkDetails } from '../../containers/details';
 import { useWithSource } from '../../../common/containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { ConditionalFlexGroup } from '../../pages/navigation/conditional_flex_group';
-import { State, inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/actions';
+import { inputsSelectors } from '../../../common/store';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
-import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
@@ -45,36 +46,42 @@ import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 export { getBreadcrumbs } from './utils';
 
-const IpOverviewManage = manageQuery(IpOverview);
+const NetworkDetailsManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRedux> = ({
-  detailName,
-  filters,
-  flowTarget,
-  query,
-  setAbsoluteRangeDatePicker,
-  setIpDetailsTablesActivePageToZero,
-}) => {
+const NetworkDetailsComponent: React.FC = () => {
+  const dispatch = useDispatch();
   const { to, from, setQuery, isInitializing } = useGlobalTime();
+  const { detailName, flowTarget } = useParams<{
+    detailName: string;
+    flowTarget: FlowTarget;
+  }>();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+
+  const query = useSelector(getGlobalQuerySelector, shallowEqual);
+  const filters = useSelector(getGlobalFiltersQuerySelector, shallowEqual);
+
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: fromTo.from,
-        to: fromTo.to,
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
     },
-    [setAbsoluteRangeDatePicker]
+    [dispatch]
   );
   const {
     services: { uiSettings },
   } = useKibana();
 
   useEffect(() => {
-    setIpDetailsTablesActivePageToZero();
-  }, [detailName, setIpDetailsTablesActivePageToZero]);
+    dispatch(setNetworkDetailsTablesActivePageToZero());
+  }, [detailName, dispatch]);
 
   const { docValueFields, indicesExist, indexPattern } = useWithSource();
   const ip = decodeIpv6(detailName);
@@ -85,8 +92,27 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     filters,
   });
 
+  const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
+    docValueFields,
+    skip: isInitializing,
+    filterQuery,
+    ip,
+  });
+
+  const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
+    criteriaFields: networkToCriteria(detailName, flowTarget),
+    startDate: from,
+    endDate: to,
+    skip: isInitializing,
+  });
+
+  const headerDraggableArguments = useMemo(() => ({ field: `${flowTarget}.ip`, value: ip }), [
+    flowTarget,
+    ip,
+  ]);
+
   return (
-    <div data-test-subj="ip-details-page">
+    <div data-test-subj="network-details-page">
       {indicesExist ? (
         <>
           <FiltersGlobal>
@@ -96,50 +122,30 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
           <WrapperPage>
             <HeaderPage
               border
-              data-test-subj="ip-details-headline"
-              draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+              data-test-subj="network-details-headline"
+              draggableArguments={headerDraggableArguments}
               subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
               title={ip}
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
 
-            <IpOverviewQuery
-              docValueFields={docValueFields}
-              skip={isInitializing}
-              sourceId="default"
-              filterQuery={filterQuery}
-              type={type}
+            <NetworkDetailsManage
+              id={id}
+              inspect={inspect}
               ip={ip}
-            >
-              {({ id, inspect, ipOverviewData, loading, refetch }) => (
-                <AnomalyTableProvider
-                  criteriaFields={networkToCriteria(detailName, flowTarget)}
-                  startDate={from}
-                  endDate={to}
-                  skip={isInitializing}
-                >
-                  {({ isLoadingAnomaliesData, anomaliesData }) => (
-                    <IpOverviewManage
-                      id={id}
-                      inspect={inspect}
-                      ip={ip}
-                      data={ipOverviewData}
-                      anomaliesData={anomaliesData}
-                      loading={loading}
-                      isLoadingAnomaliesData={isLoadingAnomaliesData}
-                      type={type}
-                      flowTarget={flowTarget}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      startDate={from}
-                      endDate={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </AnomalyTableProvider>
-              )}
-            </IpOverviewQuery>
+              data={networkDetails}
+              anomaliesData={anomaliesData}
+              loading={loading}
+              isLoadingAnomaliesData={isLoadingAnomaliesData}
+              type={type}
+              flowTarget={flowTarget}
+              refetch={refetch}
+              setQuery={setQuery}
+              startDate={from}
+              endDate={to}
+              narrowDateRange={narrowDateRange}
+            />
 
             <EuiHorizontalRule />
 
@@ -272,25 +278,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     </div>
   );
 };
-IPDetailsComponent.displayName = 'IPDetailsComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+NetworkDetailsComponent.displayName = 'NetworkDetailsComponent';
 
-  return (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-  setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-};
-
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const IPDetails = connector(React.memo(IPDetailsComponent));
+export const NetworkDetails = React.memo(NetworkDetailsComponent);
