@@ -85,7 +85,7 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'X axis title',
     },
-    yLeftTitle: {
+    yTitle: {
       types: ['string'],
       help: 'Y left axis title',
     },
@@ -315,7 +315,7 @@ export function XYChart({
     axisSeries: Array<{ layer: string; accessor: string }>,
     index: number
   ) => {
-    const yTitle = index > 0 ? args.yRightTitle : args.yLeftTitle;
+    const yTitle = index > 0 ? args.yRightTitle : args.yTitle;
     return (
       yTitle ||
       axisSeries

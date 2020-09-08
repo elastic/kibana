@@ -370,7 +370,7 @@ export type LayerArgs = LayerConfig & {
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
   xTitle: string;
-  yLeftTitle: string;
+  yTitle: string;
   yRightTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
@@ -389,7 +389,7 @@ export interface XYState {
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
   xTitle?: string;
-  yLeftTitle?: string;
+  yTitle?: string;
   yRightTitle?: string;
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;

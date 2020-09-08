@@ -280,8 +280,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             axis="yLeft"
             layers={state?.layers}
             frame={frame}
-            axisTitle={state?.yLeftTitle}
-            updateTitleState={(value) => setState({ ...state, yLeftTitle: value })}
+            axisTitle={state?.yTitle}
+            updateTitleState={(value) => setState({ ...state, yTitle: value })}
             areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.yLeft}

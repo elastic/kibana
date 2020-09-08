@@ -214,7 +214,7 @@ const sampleLayer: LayerArgs = {
 
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
-  yLeftTitle: '',
+  yTitle: '',
   yRightTitle: '',
   legend: {
     type: 'lens_xy_legendConfig',
@@ -1584,7 +1584,7 @@ describe('xy_expression', () => {
 
       const args: XYArgs = {
         xTitle: '',
-        yLeftTitle: '',
+        yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
         tickLabelsVisibilitySettings: {
@@ -1666,7 +1666,7 @@ describe('xy_expression', () => {
 
       const args: XYArgs = {
         xTitle: '',
-        yLeftTitle: '',
+        yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
         tickLabelsVisibilitySettings: {
@@ -1735,7 +1735,7 @@ describe('xy_expression', () => {
 
       const args: XYArgs = {
         xTitle: '',
-        yLeftTitle: '',
+        yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
         tickLabelsVisibilitySettings: {

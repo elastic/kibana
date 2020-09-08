@@ -408,7 +408,7 @@ function buildSuggestion({
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
     xTitle: currentState?.xTitle,
-    yLeftTitle: currentState?.yLeftTitle,
+    yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,

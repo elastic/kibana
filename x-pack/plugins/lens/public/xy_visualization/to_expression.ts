@@ -98,7 +98,7 @@ export const buildExpression = (
         function: 'lens_xy_chart',
         arguments: {
           xTitle: [state.xTitle || ''],
-          yLeftTitle: [state.yLeftTitle || ''],
+          yTitle: [state.yTitle || ''],
           yRightTitle: [state.yRightTitle || ''],
           legend: [
             {
