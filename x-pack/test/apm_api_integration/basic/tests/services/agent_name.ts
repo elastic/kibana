@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { archives } from '../../config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -28,12 +29,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load('apm_8.0.0'));
+      after(() => esArchiver.unload('apm_8.0.0'));
+
+      const { from, to } = archives['apm_8.0.0'];
 
       it('returns the agent name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/agent_name?start=${start}&end=${end}`
+          `/api/apm/services/opbeans-node/agent_name?start=${encodeURIComponent(
+            from
+          )}&end=${encodeURIComponent(to)}`
         );
 
         expect(response.status).to.be(200);

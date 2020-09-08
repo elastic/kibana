@@ -5,9 +5,12 @@
  */
 
 import { createTestConfig } from '../common/config';
+import archivesMetadata from './archives_metadata.json';
 
 export default createTestConfig({
   license: 'basic',
   name: 'X-Pack APM API integration tests (basic)',
   testFiles: [require.resolve('./tests')],
 });
+
+export const archives: Record<string, { from: string; to: string }> = archivesMetadata as any;
