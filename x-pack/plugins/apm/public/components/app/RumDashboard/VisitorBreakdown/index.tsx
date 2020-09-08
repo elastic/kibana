@@ -14,11 +14,11 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (start && end) {
         return callApmApi({
           pathname: '/api/apm/rum-client/visitor-breakdown',
           params: {
@@ -32,7 +32,7 @@ export function VisitorBreakdown() {
       }
       return Promise.resolve(null);
     },
-    [end, start, serviceName, uiFilters]
+    [end, start, uiFilters]
   );
 
   return (
