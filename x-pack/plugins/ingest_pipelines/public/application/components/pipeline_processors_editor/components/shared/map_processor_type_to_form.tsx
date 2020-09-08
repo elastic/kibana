@@ -5,6 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React, { ReactNode } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import {
   Append,
@@ -47,6 +50,7 @@ interface FieldDescriptor {
    * A sentence case label that can be displayed to users
    */
   label: string;
+  description?: string | ReactNode;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -58,12 +62,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.append', {
       defaultMessage: 'Append',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.append', {
+      defaultMessage:
+        "Appends values to a field's array. If the field contains a single value, the processor first converts it to an array. If the field doesn't exist, the processor creates an array containing the appended values.",
+    }),
   },
   bytes: {
     FieldsComponent: Bytes,
     docLinkPath: '/bytes-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.bytes', {
       defaultMessage: 'Bytes',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.bytes', {
+      defaultMessage:
+        'Converts digital storage units to bytes. For example, 1KB becomes 1024 bytes.',
     }),
   },
   circle: {
@@ -72,12 +84,19 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.circle', {
       defaultMessage: 'Circle',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.circle', {
+      defaultMessage: 'Converts a circle definition into an approximate polygon.',
+    }),
   },
   convert: {
     FieldsComponent: Convert,
     docLinkPath: '/convert-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.convert', {
       defaultMessage: 'Convert',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.convert', {
+      defaultMessage:
+        'Converts a field to a different data type. For example, you can convert a string to an long.',
     }),
   },
   csv: {
@@ -86,12 +105,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.csv', {
       defaultMessage: 'CSV',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.csv', {
+      defaultMessage: 'Extracts fields values from CSV data.',
+    }),
   },
   date: {
     FieldsComponent: DateProcessor,
     docLinkPath: '/date-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.date', {
       defaultMessage: 'Date',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.date', {
+      defaultMessage: 'Converts a date to a document timestamp.',
     }),
   },
   date_index_name: {
@@ -100,12 +125,22 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
       defaultMessage: 'Date index name',
     }),
+    description: () => (
+      <FormattedMessage
+        id="xpack.ingestPipelines.processors.description.dateIndexName"
+        defaultMessage="Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as {value}."
+        values={{ value: <EuiCode inline>{'my-index-yyyy-MM-dd'}</EuiCode> }}
+      />
+    ),
   },
   dissect: {
     FieldsComponent: Dissect,
     docLinkPath: '/dissect-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dissect', {
       defaultMessage: 'Dissect',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.dissect', {
+      defaultMessage: 'Uses dissect patterns to extract matches from a field.',
     }),
   },
   dot_expander: {
@@ -114,12 +149,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
       defaultMessage: 'Dot expander',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.dotExpander', {
+      defaultMessage:
+        'Expands a field containing dot notation into an object field. The object field is then accessible by other processors in the pipeline.',
+    }),
   },
   drop: {
     FieldsComponent: Drop,
     docLinkPath: '/drop-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.drop', {
       defaultMessage: 'Drop',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.drop', {
+      defaultMessage:
+        'Drops documents without returning an error. Used to only index documents that meet specified conditions.',
     }),
   },
   enrich: {

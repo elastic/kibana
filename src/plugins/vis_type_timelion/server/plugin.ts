@@ -22,6 +22,7 @@ import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
+import { PluginStart } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
 import { configSchema } from '../config';
@@ -40,6 +41,10 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
  */
 export interface PluginSetupContract {
   uiEnabled: boolean;
+}
+
+export interface TimelionPluginStartDeps {
+  data: PluginStart;
 }
 
 /**
@@ -80,11 +85,12 @@ export class Plugin {
       functions,
       getFunction,
       logger,
+      core,
     };
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router);
+    validateEsRoute(router, core);
 
     core.uiSettings.register({
       'timelion:es.timefield': {
