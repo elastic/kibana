@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { DECIMAL_DEGREES_PRECISION } from './constants';
-import { clampToLatBounds } from './elasticsearch_geo_utils';
+import { clampToLatBounds } from './elasticsearch_util';
 
 const ZOOM_TILE_KEY_INDEX = 0;
 const X_TILE_KEY_INDEX = 1;

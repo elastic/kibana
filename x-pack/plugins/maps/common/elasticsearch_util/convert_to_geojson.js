@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { RENDER_AS, GEOTILE_GRID_AGG_NAME, GEOCENTROID_AGG_NAME } from './constants';
-import { getTileBoundingBox } from './geo_tile_utils';
+import { RENDER_AS, GEOTILE_GRID_AGG_NAME, GEOCENTROID_AGG_NAME } from '../constants';
+import { getTileBoundingBox } from '../geo_tile_utils';
 import { extractPropertiesFromBucket } from './es_agg_utils';
 import { clamp } from './elasticsearch_geo_utils';
 

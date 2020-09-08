@@ -10,7 +10,8 @@ import uuid from 'uuid/v4';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
-} from '../../../../common/convert_to_geojson';
+  makeESBbox,
+} from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
@@ -29,7 +30,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
+
 import rison from 'rison-node';
 import { getHttp } from '../../../kibana_services';
 

@@ -21,10 +21,10 @@ import {
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
-import { hitsToGeoJson } from '../../common/elasticsearch_geo_utils';
+import { hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 // @ts-expect-error
-import { convertRegularRespToGeoJson } from '../../common/convert_to_geojson';
+import { convertRegularRespToGeoJson } from '../../common/elasticsearch_util';
 
 interface ESBounds {
   top_left: {

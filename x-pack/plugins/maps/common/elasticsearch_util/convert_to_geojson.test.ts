@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../kibana_services', () => {});
-
 // @ts-ignore
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
-import { RENDER_AS } from '../../../../common/constants';
+import { RENDER_AS } from '../constants';
 
 describe('convertCompositeRespToGeoJson', () => {
   const esResponse = {

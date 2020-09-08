@@ -15,9 +15,9 @@ import {
   POLYGON_COORDINATES_EXTERIOR_INDEX,
   LON_INDEX,
   LAT_INDEX,
-} from '../common/constants';
-import { getEsSpatialRelationLabel } from './i18n_getters';
-import { FILTERS } from '../../../../src/plugins/data/common';
+} from '../constants';
+import { getEsSpatialRelationLabel } from '../i18n_getters';
+import { FILTERS } from '../../../../../src/plugins/data/common';
 import turfCircle from '@turf/circle';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;

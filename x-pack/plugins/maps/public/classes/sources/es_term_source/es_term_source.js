@@ -20,7 +20,7 @@ import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
-} from '../../../../common/es_agg_utils';
+} from '../../../../common/elasticsearch_util';
 
 const TERMS_AGG_NAME = 'join';
 
