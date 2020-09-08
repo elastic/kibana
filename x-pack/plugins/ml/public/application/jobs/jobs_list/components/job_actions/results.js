@@ -5,14 +5,20 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateADLinks } from '../../../../components/custom_hooks/use_create_ad_links';
 import { Link } from 'react-router-dom';
+import { useMlKibana } from '../../../../contexts/kibana';
 
-export function ResultLinks({ jobs }) {
+export function ResultLinks({ jobs, isManagementTable }) {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
   const openJobsInSingleMetricViewerText = i18n.translate(
     'xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText',
     {
@@ -38,31 +44,59 @@ export function ResultLinks({ jobs }) {
   const singleMetricEnabled = jobs.length === 1 && jobs[0].isSingleMetricViewerJob;
   const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
   const { createLinkWithUserDefaults } = useCreateADLinks();
+  const timeSeriesExplorerLink = useMemo(
+    () => createLinkWithUserDefaults('timeseriesexplorer', jobs),
+    [jobs]
+  );
+  const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
+
   return (
     <React.Fragment>
       {singleMetricVisible && (
         <EuiToolTip position="bottom" content={openJobsInSingleMetricViewerText}>
-          <Link to={createLinkWithUserDefaults('timeseriesexplorer', jobs)}>
+          {isManagementTable ? (
             <EuiButtonIcon
+              href={`${basePath.get()}/app/ml/${timeSeriesExplorerLink}`}
               iconType="visLine"
               aria-label={openJobsInSingleMetricViewerText}
               className="results-button"
               isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-              data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+              data-test-subj="mlOpenJobsInSingleMetricViewerFromManagementButton"
             />
-          </Link>
+          ) : (
+            <Link to={timeSeriesExplorerLink}>
+              <EuiButtonIcon
+                iconType="visLine"
+                aria-label={openJobsInSingleMetricViewerText}
+                className="results-button"
+                isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
+                data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+              />
+            </Link>
+          )}
         </EuiToolTip>
       )}
       <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-        <Link to={createLinkWithUserDefaults('explorer', jobs)}>
+        {isManagementTable ? (
           <EuiButtonIcon
+            href={`${basePath.get()}/app/ml/${anomalyExplorerLink}`}
             iconType="visTable"
-            aria-label={openJobsInAnomalyExplorerText}
+            aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
-            isDisabled={jobActionsDisabled === true}
-            data-test-subj="mlOpenJobsInAnomalyExplorerButton"
+            isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
+            data-test-subj="mlOpenJobsInSingleMetricViewerFromManagementButton"
           />
-        </Link>
+        ) : (
+          <Link to={anomalyExplorerLink}>
+            <EuiButtonIcon
+              iconType="visTable"
+              aria-label={openJobsInAnomalyExplorerText}
+              className="results-button"
+              isDisabled={jobActionsDisabled === true}
+              data-test-subj="mlOpenJobsInAnomalyExplorerButton"
+            />
+          </Link>
+        )}
       </EuiToolTip>
       <div className="actions-border" />
     </React.Fragment>

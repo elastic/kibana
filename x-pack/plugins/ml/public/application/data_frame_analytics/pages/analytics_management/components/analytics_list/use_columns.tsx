@@ -30,7 +30,7 @@ import {
   DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
-import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 enum TASK_STATE_COLOR {
@@ -135,21 +135,12 @@ export const progressColumn = {
 };
 
 export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
-  const mlUrlGenerator = useMlUrlGenerator();
-  const {
-    services: {
-      application: { navigateToUrl },
-    },
-  } = useMlKibana();
+  const href = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    pageState: { jobId: item.id },
+  });
 
-  const redirectToAnalyticsManagementPage = async () => {
-    const url = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-      pageState: { jobId: item.id },
-    });
-    await navigateToUrl(url);
-  };
-  return <EuiLink onClick={() => redirectToAnalyticsManagementPage()}>{item.id}</EuiLink>;
+  return <EuiLink href={href}>{item.id}</EuiLink>;
 };
 
 export const useColumns = (

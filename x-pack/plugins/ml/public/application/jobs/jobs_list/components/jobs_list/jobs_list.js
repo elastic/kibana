@@ -241,7 +241,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: (item) => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} isManagementTable={isManagementTable} />,
       },
     ];
 
