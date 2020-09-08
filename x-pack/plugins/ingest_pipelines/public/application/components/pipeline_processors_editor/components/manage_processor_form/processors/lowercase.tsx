@@ -23,17 +23,7 @@ export const Lowercase: FunctionComponent = () => {
         )}
       />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.lowerCaseForm.targetFieldHelpText"
-            defaultMessage="Field to assign the converted value to. Defaults to {field}."
-            values={{
-              field: <EuiCode>{'field'}</EuiCode>,
-            }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>
