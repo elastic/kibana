@@ -57,17 +57,14 @@ export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.labe
   defaultMessage: 'All records',
 });
 
-// we don't have an access data plugin in places where we use this function,
-// what's why we have a fallback default input
-const getDefaultFilter = (data?: DataPublicPluginStart): Filter => ({
-  input: data
-    ? data.query.queryString.getDefaultQuery()
-    : {
-        query: '',
-        language: 'kuery',
-      },
+// to do: get the language from uiSettings
+const defaultFilter: Filter = {
+  input: {
+    query: '',
+    language: 'kuery',
+  },
   label: '',
-});
+};
 
 export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
   try {
@@ -112,7 +109,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   onFieldChange: (oldColumn, indexPattern, field) => oldColumn,
 
   buildColumn({ suggestedPriority, field, previousColumn }) {
-    let params = { filters: [getDefaultFilter()] };
+    let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
         filters: [
@@ -151,7 +148,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       type: 'filters',
       schema: 'segment',
       params: {
-        filters: validFilters?.length > 0 ? validFilters : [getDefaultFilter()],
+        filters: validFilters?.length > 0 ? validFilters : [defaultFilter],
       },
     };
   },
@@ -182,7 +179,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
             filters={filters}
             setFilters={setFilters}
             indexPattern={indexPattern}
-            defaultQuery={getDefaultFilter(data)}
+            defaultQuery={defaultFilter}
           />
         </EuiFormRow>
       </EuiForm>
