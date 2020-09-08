@@ -30,12 +30,10 @@ export class Fullscreen extends React.Component {
 
   componentDidMount() {
     this.win.addEventListener('resize', this.onWindowResize);
-    document.querySelector('.app-wrapper').classList.add('hidden-chrome');
   }
 
   componentWillUnmount() {
     this.win.removeEventListener('resize', this.onWindowResize);
-    document.querySelector('.app-wrapper').classList.remove('hidden-chrome');
   }
 
   getWindowSize = () => ({
