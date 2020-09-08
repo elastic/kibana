@@ -21,6 +21,8 @@ import { TestFailure } from './get_failures';
 import { GithubIssueMini, GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
+const getCiType = () => (process.env.TEAMCITY_CI ? 'TeamCity' : 'Jenkins');
+
 export async function createFailureIssue(buildUrl: string, failure: TestFailure, api: GithubApi) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
 
@@ -32,7 +34,7 @@ export async function createFailureIssue(buildUrl: string, failure: TestFailure,
       failure.failure,
       '```',
       '',
-      `First failure: [Jenkins Build](${buildUrl})`,
+      `First failure: [${getCiType()} Build](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -52,7 +54,7 @@ export async function updateFailureIssue(buildUrl: string, issue: GithubIssueMin
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
-  await api.addIssueComment(issue.number, `New failure: [Jenkins Build](${buildUrl})`);
+  await api.addIssueComment(issue.number, `New failure: [${getCiType()} Build](${buildUrl})`);
 
   return newCount;
 }
