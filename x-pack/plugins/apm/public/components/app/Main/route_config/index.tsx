@@ -113,33 +113,33 @@ function ServiceDetailsTransactions(
   return <ServiceDetails {...props} tab="transactions" />;
 }
 
-function SettingsAgentConfiguration() {
+function SettingsAgentConfiguration(props: RouteComponentProps<{}>) {
   return (
-    <Settings>
+    <Settings {...props}>
       <AgentConfigurations />
     </Settings>
   );
 }
 
-function SettingsAnomalyDetection() {
+function SettingsAnomalyDetection(props: RouteComponentProps<{}>) {
   return (
-    <Settings>
+    <Settings {...props}>
       <AnomalyDetection />
     </Settings>
   );
 }
 
-function SettingsApmIndices() {
+function SettingsApmIndices(props: RouteComponentProps<{}>) {
   return (
-    <Settings>
+    <Settings {...props}>
       <ApmIndices />
     </Settings>
   );
 }
 
-function SettingsCustomizeUI() {
+function SettingsCustomizeUI(props: RouteComponentProps<{}>) {
   return (
-    <Settings>
+    <Settings {...props}>
       <CustomizeUI />
     </Settings>
   );
