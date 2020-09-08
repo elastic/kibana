@@ -21,7 +21,7 @@ export const buildParent = (doc: SignalSourceHit): Ancestor => {
       index: doc._index,
       // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
       // and should have signal.parent.depth instead. signal.parent.depth in this case is treated as equivalent to signal.depth.
-      depth: doc._source.signal.depth ?? doc._source.signal?.parent?.depth ?? 1,
+      depth: doc._source.signal.depth ?? doc._source.signal.parent?.depth ?? 1,
     };
   } else {
     return {
@@ -38,7 +38,7 @@ export const buildParent = (doc: SignalSourceHit): Ancestor => {
  * creating an array of N+1 ancestors.
  * @param doc The parent signal/event for which to extend the ancestry.
  */
-export const buildAncestors = (doc: SignalSourceHit): Signal['ancestors'] => {
+export const buildAncestors = (doc: SignalSourceHit): Ancestor[] => {
   const newAncestor = buildParent(doc);
   const existingAncestors = doc._source.signal?.ancestors;
   if (existingAncestors != null) {
