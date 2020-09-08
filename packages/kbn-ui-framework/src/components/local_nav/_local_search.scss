@@ -28,6 +28,7 @@
 }
 
 .kuiLocalSearchAssistedInput {
+  overflow: visible !important; // Override EUI form control
   display: flex;
   flex: 1 1 100%;
   position: relative;

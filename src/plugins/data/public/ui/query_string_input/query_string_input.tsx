@@ -64,6 +64,7 @@ interface Props {
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
+  isInvalid?: boolean;
 }
 
 interface State {
@@ -653,6 +654,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 }
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
               </EuiTextArea>

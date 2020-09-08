@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './filter_popover.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
-import { EuiPopover, EuiFieldText, EuiForm, EuiFormRow, keys } from '@elastic/eui';
+import { EuiPopover, EuiFieldText, EuiSpacer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
@@ -50,7 +51,7 @@ export const FilterPopover = ({
 
   return (
     <EuiPopover
-      anchorClassName="lnsLayerPanel__anchor"
+      anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpenByCreation || isPopoverOpen}
       ownFocus
@@ -66,28 +67,23 @@ export const FilterPopover = ({
         />
       }
     >
-      <EuiForm>
-        <EuiFormRow fullWidth>
-          <QueryInput
-            isInvalid={!isQueryValid(filter.input, indexPattern)}
-            value={filter.input}
-            indexPattern={indexPattern}
-            onChange={setFilterQuery}
-            onSubmit={() => {
-              if (inputRef.current) inputRef.current.focus();
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow fullWidth>
-          <LabelInput
-            value={filter.label || ''}
-            onChange={setFilterLabel}
-            placeholder={getPlaceholder(filter.input.query)}
-            inputRef={inputRef}
-            onSubmit={() => setPopoverOpen(false)}
-          />
-        </EuiFormRow>
-      </EuiForm>
+      <QueryInput
+        isInvalid={!isQueryValid(filter.input, indexPattern)}
+        value={filter.input}
+        indexPattern={indexPattern}
+        onChange={setFilterQuery}
+        onSubmit={() => {
+          if (inputRef.current) inputRef.current.focus();
+        }}
+      />
+      <EuiSpacer size="s" />
+      <LabelInput
+        value={filter.label || ''}
+        onChange={setFilterLabel}
+        placeholder={getPlaceholder(filter.input.query)}
+        inputRef={inputRef}
+        onSubmit={() => setPopoverOpen(false)}
+      />
     </EuiPopover>
   );
 };
@@ -120,7 +116,8 @@ const QueryInput = ({
 
   return (
     <QueryStringInput
-      className={isInvalid ? 'lnsIndexPatternDimensionEditor__queryInput--invalid' : ''}
+      size="s"
+      isInvalid={isInvalid}
       bubbleSubmitEvent={false}
       indexPatterns={[indexPattern]}
       query={inputValue}
@@ -176,7 +173,6 @@ const LabelInput = ({
 
   return (
     <EuiFieldText
-      compressed
       data-test-subj="indexPattern-filters-label"
       value={inputValue}
       onChange={handleInputChange}
@@ -194,9 +190,6 @@ const LabelInput = ({
       }}
       prepend={i18n.translate('xpack.lens.indexPattern.filters.label', {
         defaultMessage: 'Label',
-      })}
-      aria-label={i18n.translate('xpack.lens.indexPattern.filters.label.aria-message', {
-        defaultMessage: 'Label for your filter',
       })}
     />
   );
