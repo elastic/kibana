@@ -131,16 +131,20 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const navigateToPath = useNavigateToPath();
 
   const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+    const pageState =
+      globalState?.refreshInterval !== undefined
+        ? {
+            globalState: {
+              refreshInterval: globalState.refreshInterval,
+            },
+          }
+        : undefined;
     // @ts-ignore
     const path = await mlUrlGenerator.createUrl({
       page: defaultPathId,
-      // on retain the refreshInterval part of globalState
+      // only retain the refreshInterval part of globalState
       // appState will not be considered.
-      pageState: {
-        globalState: {
-          refreshInterval: globalState.refreshInterval,
-        },
-      },
+      pageState,
     });
 
     await navigateToPath(path, false);
