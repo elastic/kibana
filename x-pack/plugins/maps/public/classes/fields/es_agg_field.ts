@@ -135,7 +135,7 @@ export class ESAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson;
+    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
   }
 
   canReadFromGeoJson(): boolean {
