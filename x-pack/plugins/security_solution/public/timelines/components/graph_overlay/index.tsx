@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { State } from '../../../common/store';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
@@ -33,6 +33,8 @@ import { Resolver } from '../../../resolver/view';
 import { useAllCasesModal } from '../../../cases/components/use_all_cases_modal';
 
 import * as i18n from './translations';
+import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const OverlayContainer = styled.div`
   height: 100%;
@@ -137,6 +139,16 @@ const GraphOverlayComponent = ({
     globalFullScreen,
   ]);
 
+  const { signalIndexName } = useSignalIndex();
+  const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const indices: string[] | null = useMemo(() => {
+    if (signalIndexName === null) {
+      return null;
+    } else {
+      return [...siemDefaultIndices, signalIndexName];
+    }
+  }, [signalIndexName, siemDefaultIndices]);
+
   return (
     <OverlayContainer>
       <EuiHorizontalRule margin="none" />
@@ -178,10 +190,13 @@ const GraphOverlayComponent = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      <StyledResolver
-        databaseDocumentID={graphEventId}
-        resolverComponentInstanceID={currentTimeline.id}
-      />
+      {graphEventId !== undefined && indices !== null && (
+        <StyledResolver
+          databaseDocumentID={graphEventId}
+          resolverComponentInstanceID={currentTimeline.id}
+          indices={indices}
+        />
+      )}
       <AllCasesModal />
     </OverlayContainer>
   );

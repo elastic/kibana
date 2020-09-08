@@ -240,6 +240,12 @@ export function useForm<T extends FormData = FormData>(
 
       if (!field.isValidated) {
         setIsValid(undefined);
+
+        // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.
+        // If a field is added and it is not validated it means that we have swapped fields and added new ones:
+        // --> we have basically have a new form in front of us.
+        // For that reason we make sure that the "isSubmitted" state is false.
+        setIsSubmitted(false);
       }
     },
     [updateFormDataAt]
@@ -389,6 +395,7 @@ export function useForm<T extends FormData = FormData>(
       isValid,
       id,
       submit: submitForm,
+      validate: validateAllFields,
       subscribe,
       setFieldValue,
       setFieldErrors,
@@ -428,6 +435,7 @@ export function useForm<T extends FormData = FormData>(
     addField,
     removeField,
     validateFields,
+    validateAllFields,
   ]);
 
   useEffect(() => {

@@ -375,6 +375,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single,single',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -406,6 +408,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -437,6 +441,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -468,6 +474,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -500,6 +508,8 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });

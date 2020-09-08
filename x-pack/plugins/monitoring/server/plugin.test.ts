@@ -5,8 +5,6 @@
  */
 import { Plugin } from './plugin';
 import { combineLatest } from 'rxjs';
-// @ts-ignore
-import { initBulkUploader } from './kibana_monitoring';
 import { AlertsFactory } from './alerts';
 
 jest.mock('rxjs', () => ({
@@ -27,10 +25,6 @@ jest.mock('./license_service', () => ({
       refresh: jest.fn(),
     })),
   })),
-}));
-
-jest.mock('./kibana_monitoring', () => ({
-  initBulkUploader: jest.fn(),
 }));
 
 jest.mock('./kibana_monitoring/collectors', () => ({
@@ -77,6 +71,11 @@ describe('Monitoring plugin', () => {
         createClient: jest.fn(),
       },
     },
+    status: {
+      overall$: {
+        subscribe: jest.fn(),
+      },
+    },
   };
 
   const setupPlugins = {
@@ -119,19 +118,13 @@ describe('Monitoring plugin', () => {
 
   afterEach(() => {
     (setupPlugins.alerts.registerType as jest.Mock).mockReset();
+    (coreSetup.status.overall$.subscribe as jest.Mock).mockReset();
   });
 
   it('always create the bulk uploader', async () => {
-    const setKibanaStatusGetter = jest.fn();
-    (initBulkUploader as jest.Mock).mockImplementation(() => {
-      return {
-        setKibanaStatusGetter,
-      };
-    });
     const plugin = new Plugin(initializerContext as any);
-    const contract = await plugin.setup(coreSetup as any, setupPlugins as any);
-    contract.registerLegacyAPI(null as any);
-    expect(setKibanaStatusGetter).toHaveBeenCalled();
+    await plugin.setup(coreSetup as any, setupPlugins as any);
+    expect(coreSetup.status.overall$.subscribe).toHaveBeenCalled();
   });
 
   it('should register all alerts', async () => {

@@ -10,22 +10,28 @@ import {
   queryByLabelText,
   render,
 } from '@testing-library/react';
-import { omit } from 'lodash';
+import { createMemoryHistory } from 'history';
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { TransactionOverview } from './';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { UrlParamsProvider } from '../../../context/UrlParamsContext';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../hooks/useFetcher';
 import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
-import { history } from '../../../utils/history';
+import { disableConsoleWarning } from '../../../utils/testHelpers';
 import { fromQuery } from '../../shared/Links/url_helpers';
+import { TransactionOverview } from './';
 
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
+
+const history = createMemoryHistory();
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes,
@@ -35,7 +41,7 @@ function setup({
 }) {
   const defaultLocation = {
     pathname: '/services/foo/transactions',
-    search: fromQuery(omit(urlParams, 'serviceName')),
+    search: fromQuery(urlParams),
   } as any;
 
   history.replace({
@@ -49,17 +55,29 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return render(
-    <MockApmPluginContextWrapper>
-      <Router history={history}>
-        <UrlParamsProvider>
-          <TransactionOverview />
-        </UrlParamsProvider>
-      </Router>
-    </MockApmPluginContextWrapper>
+    <KibanaReactContext.Provider>
+      <MockApmPluginContextWrapper>
+        <Router history={history}>
+          <UrlParamsProvider>
+            <TransactionOverview serviceName="opbeans-python" />
+          </UrlParamsProvider>
+        </Router>
+      </MockApmPluginContextWrapper>
+    </KibanaReactContext.Provider>
   );
 }
 
 describe('TransactionOverview', () => {
+  let consoleMock: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleMock = disableConsoleWarning('Warning: componentWillReceiveProps');
+  });
+
+  afterAll(() => {
+    consoleMock.mockRestore();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -68,9 +86,7 @@ describe('TransactionOverview', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          serviceName: 'MyServiceName',
-        },
+        urlParams: {},
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -88,7 +104,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName',
         },
       });
 
@@ -103,7 +118,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName',
         },
       });
 
@@ -124,7 +138,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType'],
         urlParams: {
           transactionType: 'firstType',
-          serviceName: 'MyServiceName',
         },
       });
 

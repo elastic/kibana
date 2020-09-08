@@ -192,8 +192,8 @@ export const TemplateForm = ({
       wizardData: WizardContent
     ): TemplateDeserialized => {
       const outputTemplate = {
-        ...initialTemplate,
         ...wizardData.logistics,
+        _kbnMeta: initialTemplate._kbnMeta,
         composedOf: wizardData.components,
         template: {
           settings: wizardData.settings,
