@@ -108,8 +108,7 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: (id) => <EditFilterLink filterListId={id}           data-test-subj="mlEditFilterListLink"
-      />,
+      render: (id) => <EditFilterLink filterListId={id} data-test-subj="mlEditFilterListLink" />,
       sortable: true,
       scope: 'row',
       'data-test-subj': 'mlFilterListColumnId',
