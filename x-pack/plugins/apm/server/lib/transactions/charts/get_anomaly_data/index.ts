@@ -5,6 +5,7 @@
  */
 import { Logger } from 'kibana/server';
 import { isNumber } from 'lodash';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   Setup,
@@ -44,12 +45,19 @@ export async function getAnomalySeries({
     return;
   }
 
+  // don't fetch anomalies when no specific environment is selected
+  if (uiFilters.environment === ENVIRONMENT_ALL.value) {
+    return;
+  }
+
   // don't fetch anomalies if unknown uiFilters are applied
   const knownFilters = ['environment', 'serviceName'];
-  const uiFilterNames = Object.keys(uiFilters);
-  if (
-    uiFilterNames.some((uiFilterName) => !knownFilters.includes(uiFilterName))
-  ) {
+  const hasUnknownFiltersApplied = Object.entries(uiFilters)
+    .filter(([key, value]) => !!value)
+    .map(([key]) => key)
+    .some((uiFilterName) => !knownFilters.includes(uiFilterName));
+
+  if (hasUnknownFiltersApplied) {
     return;
   }
 
@@ -75,10 +83,6 @@ export async function getAnomalySeries({
     return;
   }
 
-  // don't fetch anomalies if there are isn't exaclty 1 ML job match for the given environment
-  if (mlJobIds.length !== 1) {
-    return;
-  }
   const jobId = mlJobIds[0];
 
   const mlBucketSize = await getMlBucketSize({ setup, jobId, logger });
