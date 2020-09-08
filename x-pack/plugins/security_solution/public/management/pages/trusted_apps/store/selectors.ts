@@ -9,7 +9,6 @@ import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 import {
   AsyncResourceState,
   getCurrentResourceError,
-  getLastLoadedResourceData,
   getLastLoadedResourceState,
   isLoadingResourceState,
   isOutdatedResourceState,
@@ -49,7 +48,7 @@ export const getLastLoadedListResourceState = (
 export const getListItems = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<TrustedApp[]> => {
-  return getLastLoadedResourceData(state.listView.currentListResourceState)?.items || [];
+  return getLastLoadedResourceState(state.listView.currentListResourceState)?.data.items || [];
 };
 
 export const getListCurrentPageIndex = (state: Immutable<TrustedAppsListPageState>): number => {
@@ -61,7 +60,9 @@ export const getListCurrentPageSize = (state: Immutable<TrustedAppsListPageState
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
-  return getLastLoadedResourceData(state.listView.currentListResourceState)?.totalItemsCount || 0;
+  return (
+    getLastLoadedResourceState(state.listView.currentListResourceState)?.data.totalItemsCount || 0
+  );
 };
 
 export const getListErrorMessage = (

@@ -14,7 +14,6 @@ import {
   isLoadedResourceState,
   isFailedResourceState,
   getLastLoadedResourceState,
-  getLastLoadedResourceData,
   getCurrentResourceError,
   isOutdatedResourceState,
 } from './async_resource_state';
@@ -177,42 +176,6 @@ describe('AsyncResourceState', () => {
       it('returns previous state for LoadingResourceState after subsequent failure', () => {
         expect(getLastLoadedResourceState(loadingResourceStateAfterSubsequentFailure)).toBe(
           loadedResourceState
-        );
-      });
-    });
-
-    describe('getLastLoadedResourceData()', () => {
-      it('returns undefined for UninitialisedResourceState', () => {
-        expect(getLastLoadedResourceData(uninitialisedResourceState)).toBeUndefined();
-      });
-
-      it('returns current data for LoadedResourceState', () => {
-        expect(getLastLoadedResourceData(loadedResourceState)).toStrictEqual(data);
-      });
-
-      it('returns undefined for initial FailedResourceState', () => {
-        expect(getLastLoadedResourceData(failedResourceStateInitially)).toBeUndefined();
-      });
-
-      it('returns last loaded data for subsequent FailedResourceState', () => {
-        expect(getLastLoadedResourceData(failedResourceStateSubsequently)).toStrictEqual(data);
-      });
-
-      it('returns undefined for initial LoadingResourceState', () => {
-        expect(getLastLoadedResourceData(loadingResourceStateInitially)).toBeUndefined();
-      });
-
-      it('returns previous data for LoadingResourceState after success', () => {
-        expect(getLastLoadedResourceData(loadingResourceStateAfterSuccess)).toStrictEqual(data);
-      });
-
-      it('returns undefined for LoadingResourceState after initial failure', () => {
-        expect(getLastLoadedResourceData(loadingResourceStateAfterInitialFailure)).toBeUndefined();
-      });
-
-      it('returns previous data for LoadingResourceState after subsequent failure', () => {
-        expect(getLastLoadedResourceData(loadingResourceStateAfterSubsequentFailure)).toStrictEqual(
-          data
         );
       });
     });

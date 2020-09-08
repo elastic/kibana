@@ -122,12 +122,6 @@ export const getLastLoadedResourceState = <Data, Error>(
   }
 };
 
-export const getLastLoadedResourceData = <Data, Error>(
-  state: Immutable<AsyncResourceState<Data, Error>>
-): Immutable<Data> | undefined => {
-  return getLastLoadedResourceState(state)?.data;
-};
-
 export const getCurrentResourceError = <Data, Error>(
   state: Immutable<AsyncResourceState<Data, Error>>
 ): Immutable<Error> | undefined => {
