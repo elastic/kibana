@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
-import { TestProviderWithoutDragAndDrop } from '../../../../common/mock/test_providers';
+import { TestProviders } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
 import * as i18n from '../translations';
 
@@ -23,11 +23,11 @@ describe('OpenTimelineModalButton', () => {
 
   test('it renders the expected button text', async () => {
     const wrapper = mount(
-      <TestProviderWithoutDragAndDrop>
+      <TestProviders>
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <OpenTimelineModalButton onClick={jest.fn()} />
         </MockedProvider>
-      </TestProviderWithoutDragAndDrop>
+      </TestProviders>
     );
 
     await waitFor(() => {
@@ -44,11 +44,11 @@ describe('OpenTimelineModalButton', () => {
       const onClick = jest.fn();
       const wrapper = mount(
         <ThemeProvider theme={theme}>
-          <TestProviderWithoutDragAndDrop>
+          <TestProviders>
             <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <OpenTimelineModalButton onClick={onClick} />
             </MockedProvider>
-          </TestProviderWithoutDragAndDrop>
+          </TestProviders>
         </ThemeProvider>
       );
 

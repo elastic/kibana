@@ -28,9 +28,12 @@ import {
 } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 
+import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
 
-export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig) {
+type SomeCliArgs = Pick<CliArgs, 'watch' | 'cache' | 'dist' | 'oss' | 'runExamples'>;
+
+export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
     watch: !!opts.watch,

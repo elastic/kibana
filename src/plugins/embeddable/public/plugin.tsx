@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { Subscription } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -27,6 +28,7 @@ import {
   CoreStart,
   Plugin,
   ScopedHistory,
+  PublicAppInfo,
 } from '../../../core/public';
 import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
@@ -37,10 +39,8 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
-  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { AttributeService } from './lib/embeddables/attribute_service';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 
 export interface EmbeddableSetupDependencies {
@@ -75,14 +75,6 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-  getAttributeService: <
-    A,
-    V extends EmbeddableInput & { attributes: A },
-    R extends SavedObjectEmbeddableInput
-  >(
-    type: string
-  ) => AttributeService<A, V, R>;
-
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
@@ -99,6 +91,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
+  private appList?: ReadonlyMap<string, PublicAppInfo>;
+  private appListSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -131,7 +125,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+    this.appListSubscription = core.application.applications$.subscribe((appList) => {
+      this.appList = appList;
+    });
+
+    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(
+      core.application.navigateToApp,
+      undefined,
+      this.appList
+    );
     this.isRegistryReady = true;
 
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
@@ -159,10 +161,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
-      getAttributeService: (type: string) => new AttributeService(type, core.savedObjects.client),
       getStateTransfer: (history?: ScopedHistory) => {
         return history
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
+          ? new EmbeddableStateTransfer(core.application.navigateToApp, history, this.appList)
           : this.outgoingOnlyStateTransfer;
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
@@ -170,7 +171,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appListSubscription) {
+      this.appListSubscription.unsubscribe();
+    }
+  }
 
   private getEmbeddableFactories = () => {
     this.ensureFactoriesExist();

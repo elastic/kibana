@@ -20,7 +20,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 import { getConfigDirectory, getDataPath } from '../core/server/path';
 
 export function getKeystore() {

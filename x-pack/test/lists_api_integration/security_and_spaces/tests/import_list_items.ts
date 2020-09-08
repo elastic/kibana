@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('importing rules with an index', () => {
+    describe('importing lists with an index', () => {
       beforeEach(async () => {
         await createListsIndex(supertest);
       });

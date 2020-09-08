@@ -22,11 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import {
-  ViewMode,
-  EmbeddableStart,
-  SavedObjectEmbeddableInput,
-} from '../../../../src/plugins/embeddable/public';
+import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -34,10 +30,11 @@ import {
   BookByValueInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
-  getAttributeService: EmbeddableStart['getAttributeService'];
+  getAttributeService: DashboardStart['getAttributeService'];
 }
 
 interface ActionContext {
@@ -60,16 +57,16 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
     },
     execute: async ({ embeddable }: ActionContext) => {
       const { openModal, getAttributeService } = await getStartServices();
-      const attributeService = getAttributeService<
-        BookSavedObjectAttributes,
-        BookByValueInput,
-        BookByReferenceInput
-      >(BOOK_SAVED_OBJECT);
+      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT);
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
-        const newInput = await attributeService.wrapAttributes(attributes, useRefType, embeddable);
+        const newInput = await attributeService.wrapAttributes(
+          attributes,
+          useRefType,
+          attributeService.getExplicitInputFromEmbeddable(embeddable)
+        );
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
-          // Remove the savedObejctId when un-linking
-          newInput.savedObjectId = null;
+          // Set the saved object ID to null so that update input will remove the existing savedObjectId...
+          (newInput as BookByValueInput & { savedObjectId: unknown }).savedObjectId = null;
         }
         embeddable.updateInput(newInput);
         if (useRefType) {

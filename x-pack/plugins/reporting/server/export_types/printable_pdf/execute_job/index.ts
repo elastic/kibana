@@ -8,7 +8,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../../types';
+import { RunTaskFn, RunTaskFnFactory, TaskRunResult } from '../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -17,9 +17,9 @@ import {
   omitBlacklistedHeaders,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { ScheduledTaskParamsPDF } from '../types';
+import { TaskPayloadPDF } from '../types';
 
-type QueuedPdfExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPDF>>;
+type QueuedPdfExecutorFactory = RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>>;
 
 export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   reporting,

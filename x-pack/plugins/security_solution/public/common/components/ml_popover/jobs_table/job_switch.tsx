@@ -12,7 +12,7 @@ import {
   isJobFailed,
   isJobStarted,
 } from '../../../../../common/machine_learning/helpers';
-import { SiemJob } from '../types';
+import { SecurityJob } from '../types';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -24,14 +24,14 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface JobSwitchProps {
-  job: SiemJob;
-  isSiemJobsLoading: boolean;
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
+  job: SecurityJob;
+  isSecurityJobsLoading: boolean;
+  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 export const JobSwitchComponent = ({
   job,
-  isSiemJobsLoading,
+  isSecurityJobsLoading,
   onJobStateChange,
 }: JobSwitchProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,7 @@ export const JobSwitchComponent = ({
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedState) ? (
+        {isSecurityJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedState) ? (
           <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
         ) : (
           <StaticSwitch

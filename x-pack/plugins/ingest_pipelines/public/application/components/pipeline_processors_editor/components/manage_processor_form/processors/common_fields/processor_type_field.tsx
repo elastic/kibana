@@ -5,7 +5,7 @@
  */
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
@@ -46,20 +46,12 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const typeConfig: FieldConfig = {
+const typeConfig: FieldConfig<any, string> = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Processor',
   }),
-  deserializer: (value: string | undefined) => {
-    if (value) {
-      return [value];
-    }
-    return [];
-  },
-  serializer: (value: string[]) => {
-    return value[0];
-  },
+  deserializer: String,
   validations: [
     {
       validator: emptyField(
@@ -73,16 +65,21 @@ const typeConfig: FieldConfig = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   return (
-    <UseField config={typeConfig} defaultValue={initialType} path="type">
+    <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
-        if ((typeField.value as string[]).length) {
-          const [type] = typeField.value as string[];
-          const descriptor = getProcessorDescriptor(type);
-          selectedOptions = descriptor
-            ? [{ label: descriptor.label, value: type }]
-            : // If there is no label for this processor type, just use the type as the label
-              [{ label: type, value: type }];
+        let description: string | ReactNode = '';
+
+        if (typeField.value?.length) {
+          const type = typeField.value;
+          const processorDescriptor = getProcessorDescriptor(type);
+          if (processorDescriptor) {
+            description = processorDescriptor.description || '';
+            selectedOptions = [{ label: processorDescriptor.label, value: type }];
+          } else {
+            // If there is no label for this processor type, just use the type as the label
+            selectedOptions = [{ label: type, value: type }];
+          }
         } else {
           selectedOptions = [];
         }
@@ -103,18 +100,14 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
             return false;
           }
 
-          const newValue = [...(typeField.value as string[]), value];
-
-          typeField.setValue(newValue);
+          typeField.setValue(value);
         };
 
         return (
           <EuiFormRow
             label={typeField.label}
             labelAppend={typeField.labelAppend}
-            helpText={
-              typeof typeField.helpText === 'function' ? typeField.helpText() : typeField.helpText
-            }
+            helpText={typeof description === 'function' ? description() : description}
             error={error}
             isInvalid={isInvalid}
             fullWidth
@@ -131,8 +124,9 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
               options={processorTypesAndLabels}
               selectedOptions={selectedOptions}
               onCreateOption={onCreateComboOption}
-              onChange={(options: EuiComboBoxOptionOption[]) => {
-                typeField.setValue(options.map(({ value }) => value));
+              onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
+                const [selection] = options;
+                typeField.setValue(selection?.value! ?? '');
               }}
               noSuggestions={false}
               singleSelection={{

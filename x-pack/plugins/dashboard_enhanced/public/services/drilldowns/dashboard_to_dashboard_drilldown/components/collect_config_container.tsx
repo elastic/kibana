@@ -11,7 +11,7 @@ import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { Config } from '../types';
+import { Config, FactoryContext } from '../types';
 import { Params } from '../drilldown';
 
 const mergeDashboards = (
@@ -34,7 +34,7 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config> {
+interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, FactoryContext> {
   params: Params;
 }
 

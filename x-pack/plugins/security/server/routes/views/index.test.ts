@@ -25,6 +25,7 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -51,6 +52,7 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -78,6 +80,7 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -105,6 +108,7 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`

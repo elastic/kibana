@@ -65,7 +65,7 @@ describe('calculateStatus', () => {
     });
   });
 
-  it('changes to degraded when isCompatible and warningNodes present', async () => {
+  it('changes to available with a differemnt message when isCompatible and warningNodes present', async () => {
     expect(
       await calculateStatus$(
         of({
@@ -81,7 +81,7 @@ describe('calculateStatus', () => {
         .pipe(take(2))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevels.degraded,
+      level: ServiceStatusLevels.available,
       summary: 'Some nodes are a different version',
       meta: {
         incompatibleNodes: [],
@@ -188,7 +188,7 @@ describe('calculateStatus', () => {
           "summary": "Incompatible with Elasticsearch",
         },
         Object {
-          "level": degraded,
+          "level": available,
           "meta": Object {
             "incompatibleNodes": Array [],
             "warningNodes": Array [

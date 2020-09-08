@@ -96,8 +96,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200)
           .parse(binaryToString);
-
-        expect(body.toString()).to.eql('127.0.0.2\n127.0.0.1\n');
+        const bodyString = body.toString();
+        expect(bodyString.includes('127.0.0.1')).to.be(true);
+        expect(bodyString.includes('127.0.0.2')).to.be(true);
       });
     });
   });

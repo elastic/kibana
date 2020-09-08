@@ -36,7 +36,7 @@ export const readPrivilegesRoute = (
         );
         const clusterPrivilegesListItems = await readPrivileges(
           clusterClient.callAsCurrentUser,
-          lists.getListIndex()
+          lists.getListItemIndex()
         );
         const privileges = merge(
           {

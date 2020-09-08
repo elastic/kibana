@@ -26,21 +26,15 @@ export * from './search_source/mocks';
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
+    __enhance: jest.fn(),
   };
 }
 
 function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
-    setInterceptor: jest.fn(),
     search: jest.fn(),
     searchSource: searchSourceMock,
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
   };
 }
 

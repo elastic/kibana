@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
 describe('Platform assets', function () {
   let root: Root;
 
   beforeAll(async function () {
-    root = kbnTestServer.createRoot();
+    root = kbnTestServer.createRoot({ plugins: { initialize: false } });
 
     await root.setup();
     await root.start();

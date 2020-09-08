@@ -49,6 +49,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           dataAccessLayer,
           resolverComponentInstanceID,
           history: memoryHistory,
+          indices: [],
         });
         return simulatorInstance;
       }
@@ -72,8 +73,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     it('should show the node details for the origin', async () => {
       await expect(
         simulator().map(() => {
-          const titleWrapper = simulator().nodeDetailViewTitle();
-          const titleIconWrapper = simulator().nodeDetailViewTitleIcon();
+          const titleWrapper = simulator().testSubject('resolver:node-detail:title');
+          const titleIconWrapper = simulator().testSubject('resolver:node-detail:title-icon');
           return {
             title: titleWrapper.exists() ? titleWrapper.text() : null,
             titleIcon: titleIconWrapper.exists() ? titleIconWrapper.text() : null,
@@ -81,7 +82,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           };
         })
       ).toYieldEqualTo({
-        title: 'c',
+        title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
           ['process.executable', 'executable'],
@@ -92,6 +93,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           ['process.hash.md5', 'hash.md5'],
           ['process.args', 'args'],
         ],
+      });
+    });
+    it('should have breaking opportunities (<wbr>s) in node titles to allow wrapping', async () => {
+      await expect(
+        simulator().map(() => {
+          const titleWrapper = simulator().testSubject('resolver:node-detail:title');
+          return {
+            wordBreaks: titleWrapper.find('wbr').length,
+          };
+        })
+      ).toYieldEqualTo({
+        // The GeneratedText component adds 1 <wbr> after the period and one at the end
+        wordBreaks: 2,
       });
     });
   });
@@ -122,17 +136,17 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
   });
 
   it('should have 3 nodes (with icons) in the node list', async () => {
-    await expect(simulator().map(() => simulator().nodeListNodeLinkText().length)).toYieldEqualTo(
-      3
-    );
-    await expect(simulator().map(() => simulator().nodeListNodeLinkIcons().length)).toYieldEqualTo(
-      3
-    );
+    await expect(
+      simulator().map(() => simulator().testSubject('resolver:node-list:node-link:title').length)
+    ).toYieldEqualTo(3);
+    await expect(
+      simulator().map(() => simulator().testSubject('resolver:node-list:node-link:icon').length)
+    ).toYieldEqualTo(3);
   });
 
   describe('when there is an item in the node list and its text has been clicked', () => {
     beforeEach(async () => {
-      const nodeLinks = await simulator().resolveWrapper(() => simulator().nodeListNodeLinkText());
+      const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
       expect(nodeLinks).toBeTruthy();
       if (nodeLinks) {
         nodeLinks.first().simulate('click');
@@ -152,14 +166,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       ]);
     });
     it("should have the first node's ID in the query string", async () => {
-      await expect(simulator().map(() => simulator().queryStringValues())).toYieldEqualTo({
-        selectedNode: [entityIDs.origin],
-      });
+      await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
+        urlSearch(resolverComponentInstanceID, {
+          selectedEntityID: entityIDs.origin,
+        })
+      );
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {
-        const nodeListLink = await simulator().resolveWrapper(() =>
-          simulator().nodeDetailBreadcrumbNodeListLink()
+        const nodeListLink = await simulator().resolve(
+          'resolver:node-detail:breadcrumbs:node-list-link'
         );
         if (nodeListLink) {
           nodeListLink.simulate('click');
@@ -169,10 +185,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         await expect(
           simulator().map(() => {
             return simulator()
-              .nodeListNodeLinkText()
+              .testSubject('resolver:node-list:node-link:title')
               .map((node) => node.text());
           })
-        ).toYieldEqualTo(['c', 'd', 'e']);
+        ).toYieldEqualTo(['c.ext', 'd', 'e']);
       });
     });
   });

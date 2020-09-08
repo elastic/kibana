@@ -31,7 +31,7 @@ export default {
     hits: [],
   },
   aggregations: {
-    '1': {
+    1: {
       buckets: [
         {
           key_as_string: '2015-01-30T01:00:00.000Z',

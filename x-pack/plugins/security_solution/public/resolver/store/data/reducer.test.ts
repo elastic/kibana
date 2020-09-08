@@ -11,6 +11,8 @@ import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
 import { ResolverChildNode, ResolverTree } from '../../../../common/endpoint/types';
+import * as eventModel from '../../../../common/endpoint/models/event';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 /**
  * Test the data reducer and selector.
@@ -26,7 +28,7 @@ describe('Resolver Data Middleware', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          databaseDocumentID: '',
+          parameters: mockTreeFetcherParameters(),
         },
       };
       store.dispatch(action);
@@ -58,6 +60,7 @@ describe('Resolver Data Middleware', () => {
     let firstChildNodeInTree: TreeNode;
     let eventStatsForFirstChildNode: { total: number; byCategory: Record<string, number> };
     let categoryToOverCount: string;
+    let aggregateCategoryTotalForFirstChildNode: number;
     let tree: ResolverTree;
 
     /**
@@ -72,6 +75,7 @@ describe('Resolver Data Middleware', () => {
         firstChildNodeInTree,
         eventStatsForFirstChildNode,
         categoryToOverCount,
+        aggregateCategoryTotalForFirstChildNode,
       } = mockedTree());
       if (tree) {
         dispatchTree(tree);
@@ -137,6 +141,13 @@ describe('Resolver Data Middleware', () => {
           expect(notDisplayed(typeCounted)).toBe(0);
         }
       });
+      it('should return an overall correct count for the number of related events', () => {
+        const aggregateTotalByEntityId = selectors.relatedEventAggregateTotalByEntityId(
+          store.getState()
+        );
+        const countForId = aggregateTotalByEntityId(firstChildNodeInTree.id);
+        expect(countForId).toBe(aggregateCategoryTotalForFirstChildNode);
+      });
     });
     describe('when data was received and stats show more related events than the API can provide', () => {
       beforeEach(() => {
@@ -172,6 +183,24 @@ describe('Resolver Data Middleware', () => {
           firstChildNodeInTree.id
         )(categoryToOverCount);
         expect(relatedEventsForOvercountedCategory.length).toBe(
+          eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
+        );
+      });
+      it('should return the correct related event detail metadata for a given related event', () => {
+        const relatedEventsByCategory = selectors.relatedEventsByCategory(store.getState());
+        const someRelatedEventForTheFirstChild = relatedEventsByCategory(firstChildNodeInTree.id)(
+          categoryToOverCount
+        )[0];
+        const relatedEventID = eventModel.eventId(someRelatedEventForTheFirstChild)!;
+        const relatedDisplayInfo = selectors.relatedEventDisplayInfoByEntityAndSelfID(
+          store.getState()
+        )(firstChildNodeInTree.id, relatedEventID);
+        const [, countOfSameType, , sectionData] = relatedDisplayInfo;
+        const hostEntries = sectionData.filter((section) => {
+          return section.sectionTitle === 'host';
+        })[0].entries;
+        expect(hostEntries).toContainEqual({ title: 'os.platform', description: 'Windows' });
+        expect(countOfSameType).toBe(
           eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
         );
       });
@@ -243,6 +272,7 @@ function mockedTree() {
     tree: tree!,
     firstChildNodeInTree,
     eventStatsForFirstChildNode: statsResults.eventStats,
+    aggregateCategoryTotalForFirstChildNode: statsResults.aggregateCategoryTotal,
     categoryToOverCount: statsResults.firstCategory,
   };
 }
@@ -269,12 +299,19 @@ function compileStatsForChild(
   };
   /** The category of the first event.  */
   firstCategory: string;
+  aggregateCategoryTotal: number;
 } {
   const totalRelatedEvents = node.relatedEvents.length;
   // For the purposes of testing, we pick one category to fake an extra event for
   // so we can test if the event limit selectors do the right thing.
 
   let firstCategory: string | undefined;
+
+  // This is the "aggregate total" which is displayed to users as the total count
+  // of related events for the node. It is tallied by incrementing for every discrete
+  // event.category in an event.category array (or just 1 for a plain string). E.g. two events
+  // categories 'file' and ['dns','network'] would have an `aggregate total` of 3.
+  let aggregateCategoryTotal: number = 0;
 
   const compiledStats = node.relatedEvents.reduce(
     (counts: Record<string, number>, relatedEvent) => {
@@ -291,6 +328,7 @@ function compileStatsForChild(
 
         // Increment the count of events with this category
         counts[category] = counts[category] ? counts[category] + 1 : 1;
+        aggregateCategoryTotal++;
       }
       return counts;
     },
@@ -308,5 +346,6 @@ function compileStatsForChild(
       byCategory: compiledStats,
     },
     firstCategory,
+    aggregateCategoryTotal,
   };
 }

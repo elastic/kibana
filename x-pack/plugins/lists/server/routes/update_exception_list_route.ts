@@ -15,7 +15,7 @@ import {
   updateExceptionListSchema,
 } from '../../common/schemas';
 
-import { getExceptionListClient } from './utils';
+import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
 export const updateExceptionListRoute = (router: IRouter): void => {
   router.put(
@@ -50,7 +50,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
         const exceptionLists = getExceptionListClient(context);
         if (id == null && listId == null) {
           return siemResponse.error({
-            body: `either id or list_id need to be defined`,
+            body: 'either id or list_id need to be defined',
             statusCode: 404,
           });
         } else {
@@ -69,7 +69,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           });
           if (list == null) {
             return siemResponse.error({
-              body: `exception list id: "${id}" not found`,
+              body: getErrorMessageExceptionList({ id, listId }),
               statusCode: 404,
             });
           } else {
