@@ -21,18 +21,3 @@ export const setArchiveLocation = (name: string, version: string, location: stri
 
 export const deleteArchiveLocation = (name: string, version: string) =>
   archiveLocationCache.delete(pkgToPkgKey({ name, version }));
-
-export const deletePackageCache = (name: string, version: string, paths: string[]) => {
-  const archiveLocation = getArchiveLocation(name, version);
-  if (archiveLocation) {
-    // delete cached archive
-    cacheDelete(archiveLocation);
-
-    // delete cached archive location
-    deleteArchiveLocation(name, version);
-  }
-  // delete cached archive contents
-  // this has been populated in Registry.getArchiveInfo()
-  // TODO: move cache population and cache cleanup closer together?
-  paths.forEach((path) => cacheDelete(path));
-};

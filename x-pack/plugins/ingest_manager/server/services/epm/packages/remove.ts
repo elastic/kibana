@@ -13,9 +13,7 @@ import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey } from '../registry';
-import { deletePackageCache } from '../registry/cache';
-import * as Registry from '../registry';
+import { splitPkgKey, deletePackageCache, getArchiveInfo } from '../registry';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -54,7 +52,7 @@ export async function removeInstallation(options: {
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
-  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
+  const paths = await getArchiveInfo(pkgName, pkgVersion);
   deletePackageCache(pkgName, pkgVersion, paths);
 
   // successful delete's in SO client return {}. return something more useful
