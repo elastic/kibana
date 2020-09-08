@@ -129,7 +129,7 @@ describe('POST /diagnose/browser', () => {
       });
   });
 
-  it('logs a message when the browser starts, but then crashes', async () => {
+  it('logs a message when the browser starts, but then has problems later', async () => {
     registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
@@ -162,6 +162,49 @@ describe('POST /diagnose/browser', () => {
             ],
             "logs": "DevTools listening on (ws://localhost:4000)
           Could not find the default font
+          ",
+            "success": false,
+          }
+        `);
+      });
+  });
+
+  it('logs a message when the browser starts, but then crashes', async () => {
+    registerDiagnoseBrowser(core, mockLogger);
+
+    await server.start();
+
+    mockedCreateInterface.mockImplementation(() => ({
+      addEventListener: (e: string, cb: any) => {
+        setTimeout(() => cb(fontNotFoundMessage), 0);
+      },
+      removeEventListener: jest.fn(),
+      removeAllListeners: jest.fn(),
+      close: jest.fn(),
+    }));
+
+    mockedSpawn.mockImplementation(() => ({
+      removeAllListeners: jest.fn(),
+      kill: jest.fn(),
+      addEventListener: (e: string, cb: any) => {
+        if (e === 'exit') {
+          setTimeout(() => cb(), 5);
+        }
+      },
+      removeEventListener: jest.fn(),
+    }));
+
+    return supertest(httpSetup.server.listener)
+      .post('/api/reporting/diagnose/browser')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchInlineSnapshot(`
+          Object {
+            "help": Array [
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+            ],
+            "logs": "Could not find the default font
+          Browser exited abnormally during startup
           ",
             "success": false,
           }
