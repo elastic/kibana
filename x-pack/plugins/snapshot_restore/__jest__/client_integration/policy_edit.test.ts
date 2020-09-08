@@ -77,6 +77,17 @@ describe('<PolicyEdit />', () => {
         // The select should be an empty string to allow users to select a new repository
         expect(find('repositorySelect').props().value).toBe('');
       });
+
+      describe('validation', () => {
+        test('should block navigating to next step', () => {
+          const { exists, find, actions } = testBed;
+          actions.clickNextButton();
+          // Assert that we are still on the repository configuration step
+          expect(exists('repositoryNotFoundWarning')).toBe(true);
+          // The select should be an empty string to allow users to select a new repository
+          expect(find('repositorySelect').props().value).toBe('');
+        });
+      });
     });
 
     /**
