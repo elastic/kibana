@@ -7,22 +7,20 @@
 import { Subject } from 'rxjs';
 import { Filter, Query } from 'src/plugins/data/public';
 
+export interface MapsAppState {
+  query?: Query | null;
+  savedQueryId?: string;
+  filters?: Filter[];
+}
+
 export class AppStateManager {
-  _query: string | { [key: string]: any } = '';
+  _query: Query | null = null;
   _savedQueryId: string = '';
   _filters: Filter[] = [];
 
   _updated$ = new Subject();
 
-  setQueryAndFilters({
-    query,
-    savedQueryId,
-    filters,
-  }: {
-    query?: Query;
-    filters?: Filter[];
-    savedQueryId?: string;
-  }) {
+  setQueryAndFilters({ query, savedQueryId, filters }: MapsAppState) {
     if (query && this._query !== query) {
       this._query = query;
     }
@@ -43,7 +41,7 @@ export class AppStateManager {
     return this._filters;
   }
 
-  getAppState() {
+  getAppState(): MapsAppState {
     return {
       query: this._query,
       savedQueryId: this._savedQueryId,

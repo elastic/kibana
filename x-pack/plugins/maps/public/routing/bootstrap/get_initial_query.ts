@@ -5,15 +5,14 @@
  */
 
 import { getData } from '../../kibana_services';
+import { MapsAppState } from '../state_syncing/app_state_manager';
 
 export function getInitialQuery({
   mapStateJSON,
   appState = {},
 }: {
   mapStateJSON?: string;
-  appState: {
-    query?: string | { [key: string]: any };
-  };
+  appState: MapsAppState;
 }) {
   if (appState.query) {
     return appState.query;
