@@ -92,7 +92,8 @@ describe('Timelines', () => {
     cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
     cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
-    cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+    // Comments this assertion until we agreed what to do with the filters.
+    // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
     cy.get(NOTES_COUNT).should('have.text', '1');
     cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
     cy.get(NOTES_BUTTON).click();
