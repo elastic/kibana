@@ -37,24 +37,24 @@ export function VisitorBreakdown() {
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <VisitorBreakdownChart options={data?.browsers} />
-          <EuiSpacer />
           <EuiTitle size="xs">
-            <h4 style={{ marginLeft: 124 }}>{I18LABELS.browser}</h4>
+            <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <VisitorBreakdownChart options={data?.browsers} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <VisitorBreakdownChart options={data?.os} />
-          <EuiSpacer />
           <EuiTitle size="xs">
-            <h4 style={{ marginLeft: 107 }}>{I18LABELS.operatingSystem}</h4>
+            <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <VisitorBreakdownChart options={data?.os} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
