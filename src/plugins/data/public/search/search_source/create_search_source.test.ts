@@ -24,6 +24,7 @@ import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { searchServiceMock } from '../mocks';
 
 describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
@@ -32,9 +33,11 @@ describe('createSearchSource', () => {
   let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
 
   beforeEach(() => {
+    const searchMock = searchServiceMock.createStartContract();
     dependencies = {
       getConfig: jest.fn(),
       search: jest.fn(),
+      session: searchMock.session,
       esShardTimeout: 30000,
       http: coreMock.createStart().http,
       loadingCount$: new BehaviorSubject(0),

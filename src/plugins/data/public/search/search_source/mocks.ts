@@ -22,6 +22,7 @@ import { httpServiceMock, uiSettingsServiceMock } from '../../../../../core/publ
 
 import { ISearchSource, SearchSource } from './search_source';
 import { SearchSourceFields } from './types';
+import { searchServiceMock } from '../mocks';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
@@ -55,6 +56,7 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
     getConfig: uiSettingsServiceMock.createStartContract().get,
     esShardTimeout: 30000,
     search: jest.fn(),
+    session: searchServiceMock.createStartContract().session,
     http: httpServiceMock.createStartContract(),
     loadingCount$: new BehaviorSubject(0),
   });

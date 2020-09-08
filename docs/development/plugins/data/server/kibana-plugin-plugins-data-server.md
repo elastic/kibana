@@ -77,6 +77,8 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
+|  [isCompleteResponse](./kibana-plugin-plugins-data-server.iscompleteresponse.md) |  |
+|  [isErrorResponse](./kibana-plugin-plugins-data-server.iserrorresponse.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 

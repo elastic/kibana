@@ -34,6 +34,14 @@ function createStartContract(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
+    session: {
+      clear: jest.fn(),
+      restore: jest.fn(),
+      start: jest.fn(),
+      get: jest.fn(),
+      isRestoredSession: jest.fn(),
+      getStored: jest.fn(),
+    },
     searchSource: searchSourceMock,
   };
 }

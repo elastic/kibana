@@ -23,6 +23,7 @@ import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { fetchSoon } from '../legacy';
 import { coreMock } from '../../../../../core/public/mocks';
+import { searchServiceMock } from '../mocks';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -54,6 +55,7 @@ describe('SearchSource', () => {
   let searchSourceDependencies: SearchSourceDependencies;
 
   beforeEach(() => {
+    const searchMock = searchServiceMock.createStartContract();
     mockSearchMethod = jest.fn(() => {
       return new Observable((subscriber) => {
         setTimeout(() => {
@@ -68,6 +70,7 @@ describe('SearchSource', () => {
     searchSourceDependencies = {
       getConfig: jest.fn(),
       search: mockSearchMethod,
+      session: searchMock.session,
       esShardTimeout: 30000,
       http: coreMock.createStart().http,
       loadingCount$: new BehaviorSubject(0),

@@ -8,6 +8,7 @@
 
 ```typescript
 protected setupTimers(options?: ISearchOptions): {
+        timeoutSignal: AbortSignal;
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
@@ -22,6 +23,7 @@ protected setupTimers(options?: ISearchOptions): {
 <b>Returns:</b>
 
 `{
+        timeoutSignal: AbortSignal;
         combinedSignal: AbortSignal;
         cleanup: () => void;
     }`
