@@ -84,14 +84,22 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
     },
 
-    async navigateToStackManagementJobsListPage() {
+    async navigateToStackManagementJobsListPage({
+      expectAccessDenied = false,
+    }: {
+      expectAccessDenied?: boolean;
+    } = {}) {
       // clicks the jobsListLink and loads the jobs list page
       await testSubjects.click('jobsListLink');
       await retry.tryForTime(60 * 1000, async () => {
-        // verify that the overall page is present
-        await testSubjects.existOrFail('mlPageStackManagementJobsList');
-        // verify that the default tab with the anomaly detection jobs list got loaded
-        await testSubjects.existOrFail('ml-jobs-list');
+        if (expectAccessDenied === true) {
+          await testSubjects.existOrFail('mlPageAccessDenied');
+        } else {
+          // verify that the overall page is present
+          await testSubjects.existOrFail('mlPageStackManagementJobsList');
+          // verify that the default tab with the anomaly detection jobs list got loaded
+          await testSubjects.existOrFail('ml-jobs-list');
+        }
       });
     },
 
@@ -100,7 +108,7 @@ export function MachineLearningNavigationProvider({
       await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
+        await testSubjects.existOrFail('mlAnalyticsJobList');
       });
     },
 
@@ -119,6 +127,36 @@ export function MachineLearningNavigationProvider({
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the single metric viewer page is visible
         await testSubjects.existOrFail('mlPageSingleMetricViewer');
+      });
+    },
+
+    async openKibanaNav() {
+      if (!(await testSubjects.exists('collapsibleNav'))) {
+        await testSubjects.click('toggleNavButton');
+      }
+      await testSubjects.existOrFail('collapsibleNav');
+    },
+
+    async assertKibanaNavMLEntryExists() {
+      const navArea = await testSubjects.find('collapsibleNav');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      if (mlNavLink.length === 0) {
+        throw new Error(`expected ML link in nav menu to exist`);
+      }
+    },
+
+    async assertKibanaNavMLEntryNotExists() {
+      const navArea = await testSubjects.find('collapsibleNav');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      if (mlNavLink.length !== 0) {
+        throw new Error(`expected ML link in nav menu to not exist`);
+      }
+    },
+
+    async navigateToKibanaHome() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('home');
+        await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
     },
   };

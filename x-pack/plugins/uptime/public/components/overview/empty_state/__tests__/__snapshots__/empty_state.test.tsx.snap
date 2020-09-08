@@ -213,7 +213,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -421,17 +421,17 @@ exports[`EmptyState component does not render empty state with appropriate base 
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
                                   color="primary"
                                   element="a"
-                                  href="/app/uptime#/settings"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
-                                    href="/app/uptime#/settings"
+                                    href="/app/uptime/settings"
                                     rel="noreferrer"
                                   >
                                     <EuiButtonContent
@@ -687,7 +687,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -895,17 +895,17 @@ exports[`EmptyState component doesn't render child components when count is fals
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
                                   color="primary"
                                   element="a"
-                                  href="/app/uptime#/settings"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
-                                    href="/app/uptime#/settings"
+                                    href="/app/uptime/settings"
                                     rel="noreferrer"
                                   >
                                     <EuiButtonContent
@@ -1166,7 +1166,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
-                            href="/app/uptime#/settings"
+                            href="/app/uptime/settings"
                           >
                             <FormattedMessage
                               defaultMessage="Update index pattern settings"
@@ -1374,17 +1374,17 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                             >
                               <EuiButton
                                 color="primary"
-                                href="/app/uptime#/settings"
+                                href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
                                   color="primary"
                                   element="a"
-                                  href="/app/uptime#/settings"
+                                  href="/app/uptime/settings"
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
-                                    href="/app/uptime#/settings"
+                                    href="/app/uptime/settings"
                                     rel="noreferrer"
                                   >
                                     <EuiButtonContent

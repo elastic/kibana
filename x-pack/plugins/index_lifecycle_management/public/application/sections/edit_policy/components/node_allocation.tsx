@@ -20,7 +20,7 @@ import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
-import { PhaseWithAllocationAction, Phases } from '../../../services/policies/types';
+import { PhaseWithAllocationAction, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const learnMoreLink = (

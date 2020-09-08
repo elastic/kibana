@@ -61,7 +61,7 @@ const httpGet = jest.fn();
 
 describe('Service Overview -> View', () => {
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
 
     // mock urlParams

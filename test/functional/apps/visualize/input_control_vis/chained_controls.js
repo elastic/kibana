@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/68472
-  describe.skip('chained controls', function () {
+  describe('chained controls', function () {
     this.tags('includeFirefox');
 
     before(async () => {
