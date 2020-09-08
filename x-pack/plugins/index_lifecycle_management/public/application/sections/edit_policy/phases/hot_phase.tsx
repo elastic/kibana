@@ -18,7 +18,7 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
-import { HotPhase as HotPhaseInterface, Phases } from '../../../services/policies/types';
+import { HotPhase as HotPhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
