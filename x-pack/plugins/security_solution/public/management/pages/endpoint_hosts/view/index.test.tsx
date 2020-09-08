@@ -6,6 +6,7 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
+import { prettyDOM, screen } from '@testing-library/dom';
 
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media.ts';
@@ -668,5 +669,64 @@ describe('when on the list page', () => {
         expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
     });
+  });
+
+  describe('when the more actions column is opened', () => {
+    let hostInfo: HostInfo;
+    let agentId: string;
+    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+
+    const mockEndpointListApi = () => {
+      const { hosts } = mockEndpointResultList();
+      hostInfo = {
+        host_status: hosts[0].host_status,
+        metadata: hosts[0].metadata,
+      };
+      const packagePolicy = docGenerator.generatePolicyPackagePolicy();
+      packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+      agentId = hosts[0].metadata.elastic.agent.id;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostInfo],
+        endpointPackagePolicies: [packagePolicy],
+      });
+    };
+
+    beforeEach(() => {
+      mockEndpointListApi();
+
+      reactTestingLibrary.act(() => {
+        history.push('/endpoints');
+      });
+
+      renderAndWaitForData = async () => {
+        const renderResult = render();
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+        return renderResult;
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('navigates to the Security Solution Host Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      // open the endpoint actions menu
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+      const hostLink = await renderResult.findByTestId('hostLink');
+      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(hostLink);
+      });
+      const changedUrlAction = await userChangedUrlChecker;
+      expect(changedUrlAction.payload.pathname).toEqual(`hosts/${hostInfo.metadata.host.hostname}`);
+    });
+    it.skip('navigates to the Ingest Agent Policy page', () => {});
+    it.skip('navigates to the Ingest Agent Details page', () => {});
   });
 });

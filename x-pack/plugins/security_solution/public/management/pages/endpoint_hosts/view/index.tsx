@@ -86,6 +86,7 @@ const TableRowActions = memo<{
 
   return (
     <EuiPopover
+      data-test-subj="endpointTableRowActions"
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
@@ -419,7 +420,7 @@ export const EndpointList = () => {
                           agentPolicies[item.metadata.Endpoint.policy.applied.id]
                         }`}
                         href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
-                          agentPolicies[item.metadata.elastic.agent.id]
+                          agentPolicies[item.metadata.Endpoint.policy.applied.id]
                         }`}
                       >
                         <FormattedMessage

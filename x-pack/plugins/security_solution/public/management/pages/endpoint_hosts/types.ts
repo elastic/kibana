@@ -51,9 +51,9 @@ export interface EndpointState {
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** tracks the list of policies IDs used in Host metadata that may no longer exist */
-  nonExistingPolicies: Record<string, boolean>;
+  nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Agent Policies Ids*/
-  agentPolicies: Record<string, string>;
+  agentPolicies: PolicyIds['agentPolicy'];
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** Is auto-refresh enabled */
@@ -63,7 +63,8 @@ export interface EndpointState {
 }
 
 /**
- * Policy Ids returned from an API call to ingest
+ * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.
+ * agentPolicy contains a list of existing Package Policy Ids mapped to an associated Fleet parent Agent Config.
  */
 export interface PolicyIds {
   packagePolicy: Record<string, boolean>;

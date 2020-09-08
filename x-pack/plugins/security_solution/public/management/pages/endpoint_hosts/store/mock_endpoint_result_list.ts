@@ -43,7 +43,7 @@ export const mockEndpointResultList: (options?: {
   // total - numberToSkip is the count of non-skipped ones, but return no more than a pageSize, and no less than 0
   const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
 
-  const hosts = [];
+  const hosts: HostInfo[] = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),

@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'IP Address',
       'Version',
       'Last Active',
+      'Actions',
     ],
     [
       'cadmann-4.example.com',
@@ -32,6 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'thurlow-9.example.com',
@@ -42,6 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.46.229.234',
       '6.0.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'rezzani-7.example.com',
@@ -52,6 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
   ];
 
