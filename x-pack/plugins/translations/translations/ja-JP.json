@@ -4865,8 +4865,6 @@
     "xpack.apm.servicesTable.avgResponseTimeColumnLabel": "平均応答時間",
     "xpack.apm.servicesTable.environmentColumnLabel": "環境",
     "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 個の環境} other {# 個の環境}}",
-    "xpack.apm.servicesTable.errorsPerMinuteColumnLabel": "1 分あたりのエラー",
-    "xpack.apm.servicesTable.errorsPerMinuteUnitLabel": "エラー",
     "xpack.apm.servicesTable.nameColumnLabel": "名前",
     "xpack.apm.servicesTable.noServicesLabel": "APM サービスがインストールされていないようです。追加しましょう！",
     "xpack.apm.servicesTable.notFoundLabel": "サービスが見つかりません",
