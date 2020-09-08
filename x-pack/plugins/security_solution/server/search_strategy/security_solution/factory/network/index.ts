@@ -12,6 +12,7 @@ import {
 import { SecuritySolutionFactory } from '../types';
 import { networkDns } from './dns';
 import { networkHttp } from './http';
+import { networkOverview } from './overview';
 import { networkTls } from './tls';
 import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
@@ -19,6 +20,7 @@ import { networkTopNFlow } from './top_n_flow';
 export const networkFactory: Record<NetworkQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [NetworkQueries.dns]: networkDns,
   [NetworkQueries.http]: networkHttp,
+  [NetworkQueries.overview]: networkOverview,
   [NetworkQueries.tls]: networkTls,
   [NetworkQueries.topCountries]: networkTopCountries,
   [NetworkQueries.topNFlow]: networkTopNFlow,

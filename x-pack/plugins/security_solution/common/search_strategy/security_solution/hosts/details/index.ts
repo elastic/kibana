@@ -6,22 +6,18 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
+import { Inspect, Maybe, TimerangeInput } from '../../../common';
 import { HostItem, HostsFields } from '../common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 
-export interface HostsEdges {
-  node: HostItem;
-  cursor: CursorType;
-}
-
-export interface HostsStrategyResponse extends IEsSearchResponse {
-  edges: HostsEdges[];
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
+export interface HostDetailsStrategyResponse extends IEsSearchResponse {
+  hostDetails: HostItem;
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
-  defaultIndex: string[];
+export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
+  hostName: string;
+  skip?: boolean;
+  timerange: TimerangeInput;
+  inspect?: Maybe<Inspect>;
 }

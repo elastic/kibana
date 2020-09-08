@@ -216,6 +216,7 @@ export {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
+  shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';
