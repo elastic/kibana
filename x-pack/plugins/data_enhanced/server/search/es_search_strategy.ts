@@ -5,8 +5,8 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { SearchResponse } from 'elasticsearch';
+import { Observable } from 'rxjs';
 import { SharedGlobalConfig, RequestHandlerContext, Logger } from '../../../../../src/core/server';
 import {
   getTotalLoaded,
@@ -16,6 +16,7 @@ import {
   getDefaultSearchParams,
   getShardTimeout,
   toSnakeCase,
+  shimHitsTotal,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
@@ -62,55 +63,50 @@ export const enhancedEsSearchStrategyProvider = (
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.debug(`cancel ${id}`);
-    await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'DELETE',
-      path: encodeURI(`/_async_search/${id}`),
+    await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
+      id,
     });
   };
 
-  const asyncSearch = async function (
+  async function asyncSearch(
     context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest
   ): Promise<IEsSearchResponse> {
+    let esResponse;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const uiSettingsClient = await context.core.uiSettings.client;
 
-    const { params = {} } = request;
-
-    // If we have an ID, then just poll for that ID, otherwise send the entire request body
-    const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-
-    const method = request.id ? 'GET' : 'POST';
-    const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
-
-    const querystring = toSnakeCase({
+    const asyncOptions = {
       waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
       keepAlive: '1m', // Extend the TTL for this search request by one minute
-      ...(request.id
-        ? {}
-        : {
-            ...(await getDefaultSearchParams(uiSettingsClient)),
-            batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
-          }),
-      ...queryParams,
-    });
-    // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
-    const esResponse = await esClient.transport.request({
-      method,
-      path,
-      body,
-      querystring,
-    });
+    };
+
+    // If we have an ID, then just poll for that ID, otherwise send the entire request body
+    if (!request.id) {
+      const submitOptions = toSnakeCase({
+        batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...asyncOptions,
+        ...request.params,
+      });
+
+      esResponse = await esClient.asyncSearch.submit(submitOptions);
+    } else {
+      esResponse = await esClient.asyncSearch.get({
+        id: request.id,
+        ...toSnakeCase(asyncOptions),
+      });
+    }
 
     const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
     return {
       id,
       isPartial,
       isRunning,
-      rawResponse: response,
+      rawResponse: shimHitsTotal(response),
       ...getTotalLoaded(response._shards),
     };
-  };
+  }
 
   const rollupSearch = async function (
     context: RequestHandlerContext,

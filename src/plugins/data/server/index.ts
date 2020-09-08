@@ -201,6 +201,7 @@ export {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -215,6 +216,7 @@ export {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
+  shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';
