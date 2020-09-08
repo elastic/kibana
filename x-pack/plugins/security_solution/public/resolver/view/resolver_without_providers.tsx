@@ -21,7 +21,7 @@ import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverProps } from '../types';
+import { ResolverProps, ResolverState } from '../types';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -31,7 +31,7 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
+    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -39,16 +39,19 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
+    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
 
     const { timestamp } = useContext(SideEffectContext);
 
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-      selectors.visibleNodesAndEdgeLines
-    )(timeAtRender);
+    const {
+      processNodePositions,
+      connectingEdgeLineSegments,
+    } = useSelector((state: ResolverState) =>
+      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    );
     const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
@@ -66,8 +69,8 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isLoading);
-    const hasError = useSelector(selectors.hasError);
+    const isLoading = useSelector(selectors.isTreeLoading);
+    const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
 

@@ -562,6 +562,7 @@ module.exports = require("path");
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolingLogCollectingWriter = exports.parseLogLevel = exports.pickLevelFromFlags = exports.ToolingLogTextWriter = exports.ToolingLog = void 0;
 var tooling_log_1 = __webpack_require__(6);
 Object.defineProperty(exports, "ToolingLog", { enumerable: true, get: function () { return tooling_log_1.ToolingLog; } });
 var tooling_log_text_writer_1 = __webpack_require__(110);
@@ -27650,6 +27651,7 @@ var eos = function(stream, opts, callback) {
 	var rs = stream._readableState;
 	var readable = opts.readable || (opts.readable !== false && stream.readable);
 	var writable = opts.writable || (opts.writable !== false && stream.writable);
+	var cancelled = false;
 
 	var onlegacyfinish = function() {
 		if (!stream.writable) onfinish();
@@ -27674,8 +27676,13 @@ var eos = function(stream, opts, callback) {
 	};
 
 	var onclose = function() {
-		if (readable && !(rs && rs.ended)) return callback.call(stream, new Error('premature close'));
-		if (writable && !(ws && ws.ended)) return callback.call(stream, new Error('premature close'));
+		process.nextTick(onclosenexttick);
+	};
+
+	var onclosenexttick = function() {
+		if (cancelled) return;
+		if (readable && !(rs && (rs.ended && !rs.destroyed))) return callback.call(stream, new Error('premature close'));
+		if (writable && !(ws && (ws.ended && !ws.destroyed))) return callback.call(stream, new Error('premature close'));
 	};
 
 	var onrequest = function() {
@@ -27700,6 +27707,7 @@ var eos = function(stream, opts, callback) {
 	stream.on('close', onclose);
 
 	return function() {
+		cancelled = true;
 		stream.removeListener('complete', onfinish);
 		stream.removeListener('abort', onclose);
 		stream.removeListener('request', onrequest);

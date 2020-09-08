@@ -12,7 +12,7 @@ import { shallow, ReactWrapper } from 'enzyme';
 
 import { mountWithAsyncContext, mockKibanaContext } from '../../../__mocks__';
 
-import { LoadingState, EmptyState, ErrorState } from '../empty_states';
+import { LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
 
 import { EngineOverview } from './';
@@ -39,16 +39,6 @@ describe('EngineOverview', () => {
       });
 
       expect(wrapper.find(EmptyState)).toHaveLength(1);
-    });
-
-    it('hasErrorConnecting', async () => {
-      const wrapper = await mountWithAsyncContext(<EngineOverview />, {
-        http: {
-          ...mockHttp,
-          get: () => ({ invalidPayload: true }),
-        },
-      });
-      expect(wrapper.find(ErrorState)).toHaveLength(1);
     });
   });
 

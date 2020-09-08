@@ -64,6 +64,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       }
     }
 
+    public async checkTabIsSelected(chartType: string) {
+      const chartTypeBtn = await testSubjects.find(`${chartType}TsvbTypeBtn`);
+      const isSelected = await chartTypeBtn.getAttribute('aria-selected');
+
+      if (isSelected !== 'true') {
+        throw new Error(`TSVB ${chartType} tab is not selected`);
+      }
+    }
+
+    public async checkPanelConfigIsPresent(chartType: string) {
+      await testSubjects.existOrFail(`tvbPanelConfig__${chartType}`);
+    }
+
     public async checkVisualBuilderIsPresent() {
       await this.checkTabIsLoaded('tvbVisEditor', 'Time Series');
     }
@@ -558,8 +571,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await find.allByCssSelector('.echLegendItem');
     }
 
+    public async getLegendItemsContent(): Promise<string[]> {
+      const legendList = await find.byCssSelector('.echLegendList');
+      const $ = await legendList.parseDomContent();
+
+      return $('li')
+        .toArray()
+        .map((li) => {
+          const label = $(li).find('.echLegendItem__label').text();
+          const value = $(li).find('.echLegendItem__extra').text();
+
+          return `${label}: ${value}`;
+        });
+    }
+
     public async getSeries(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('.tvbSeriesEditor');
+    }
+
+    public async setMetricsGroupByTerms(field: string) {
+      const groupBy = await find.byCssSelector(
+        '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
+      );
+      await comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
+      await PageObjects.common.sleep(1000);
+      const byField = await testSubjects.find('groupByField');
+      await comboBox.setElement(byField, field, { clickWithMouse: true });
+    }
+
+    public async checkSelectedMetricsGroupByValue(value: string) {
+      const groupBy = await find.byCssSelector(
+        '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
+      );
+      return await comboBox.isOptionSelected(groupBy, value);
     }
   }
 

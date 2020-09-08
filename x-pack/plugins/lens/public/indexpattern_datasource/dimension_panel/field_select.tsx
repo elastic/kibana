@@ -181,7 +181,7 @@ export function FieldSelect({
       }}
       renderOption={(option, searchValue) => {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={null}>
               <LensFieldIcon
                 type={((option.value as unknown) as { dataType: DataType }).dataType}

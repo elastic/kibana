@@ -6,8 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -19,19 +17,11 @@ export const HtmlStrip: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.htmlStripForm.fieldNameHelpText',
-          { defaultMessage: 'Field to remove HTML tags from' }
+          { defaultMessage: 'Field to remove HTML tags from.' }
         )}
       />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldHelpText"
-            defaultMessage="Field used to contain stripped text. Defaults to {field}."
-            values={{ field: <EuiCode>{'field'}</EuiCode> }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

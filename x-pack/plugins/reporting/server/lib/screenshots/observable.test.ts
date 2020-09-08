@@ -16,11 +16,12 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
 }));
 
 import * as Rx from 'rxjs';
+import { LevelLogger } from '../';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { LevelLogger } from '../';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../test_helpers';
-import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
+import { CaptureConfig, ConditionalHeaders } from '../../types';
+import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 

@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 import { setupXPackMain } from '../setup_xpack_main';
-import * as InjectXPackInfoSignatureNS from '../inject_xpack_info_signature';
 
 describe('setupXPackMain()', () => {
   const sandbox = sinon.createSandbox();
@@ -19,7 +18,6 @@ describe('setupXPackMain()', () => {
 
   beforeEach(() => {
     sandbox.useFakeTimers();
-    sandbox.stub(InjectXPackInfoSignatureNS, 'injectXPackInfoSignature');
 
     mockElasticsearchPlugin = {
       getCluster: sinon.stub(),
@@ -63,27 +61,7 @@ describe('setupXPackMain()', () => {
     setupXPackMain(mockServer);
 
     sinon.assert.calledWithExactly(mockServer.expose, 'info', sinon.match.instanceOf(XPackInfo));
-    sinon.assert.calledWithExactly(mockServer.ext, 'onPreResponse', sinon.match.func);
     sinon.assert.calledWithExactly(mockElasticsearchPlugin.status.on, 'change', sinon.match.func);
-  });
-
-  it('onPreResponse hook calls `injectXPackInfoSignature` for every request.', () => {
-    setupXPackMain(mockServer);
-
-    const xPackInfo = mockServer.expose.firstCall.args[1];
-    const onPreResponse = mockServer.ext.firstCall.args[1];
-
-    const mockRequest = {};
-    const mockReply = sinon.stub();
-
-    onPreResponse(mockRequest, mockReply);
-
-    sinon.assert.calledWithExactly(
-      InjectXPackInfoSignatureNS.injectXPackInfoSignature,
-      xPackInfo,
-      sinon.match.same(mockRequest),
-      sinon.match.same(mockReply)
-    );
   });
 
   describe('Elasticsearch plugin state changes cause XPackMain plugin state change.', () => {

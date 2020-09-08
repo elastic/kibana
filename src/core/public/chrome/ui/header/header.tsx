@@ -67,7 +67,6 @@ export interface HeaderProps {
   forceAppSwitcherNavigation$: Observable<boolean>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
-  legacyMode: boolean;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
@@ -93,7 +92,6 @@ function renderMenuTrigger(toggleOpen: () => void) {
 export function Header({
   kibanaVersion,
   kibanaDocLink,
-  legacyMode,
   application,
   basePath,
   onIsLockedUpdate,
@@ -125,7 +123,7 @@ export function Header({
     <>
       <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
-        <EuiHeader position="fixed">
+        <EuiHeader position="fixed" id="headerGlobalNav">
           <EuiHeaderSection grow={false}>
             {navType === 'modern' ? (
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
@@ -195,7 +193,6 @@ export function Header({
             isOpen={isOpen}
             homeHref={homeHref}
             basePath={basePath}
-            legacyMode={legacyMode}
             navigateToApp={application.navigateToApp}
             onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
@@ -218,7 +215,6 @@ export function Header({
             appId$={application.currentAppId$}
             navigateToApp={application.navigateToApp}
             ref={navDrawerRef}
-            legacyMode={legacyMode}
           />
         )}
       </header>
