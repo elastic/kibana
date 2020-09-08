@@ -13,10 +13,10 @@ import { AgentConfigurationCreateEdit } from '../../../Settings/AgentConfigurati
 
 type EditAgentConfigurationRouteHandler = RouteComponentProps<{}>;
 
-export function EditAgentConfigurationRouteHandler({
-  history,
-}: EditAgentConfigurationRouteHandler) {
-  const { search } = history.location;
+export function EditAgentConfigurationRouteHandler(
+  props: EditAgentConfigurationRouteHandler
+) {
+  const { search } = props.history.location;
 
   // typescript complains because `pageStop` does not exist in `APMQueryParams`
   // Going forward we should move away from globally declared query params and this is a first step
@@ -45,10 +45,10 @@ export function EditAgentConfigurationRouteHandler({
 
 type CreateAgentConfigurationRouteHandlerProps = RouteComponentProps<{}>;
 
-export function CreateAgentConfigurationRouteHandler({
-  history,
-}: CreateAgentConfigurationRouteHandlerProps) {
-  const { search } = history.location;
+export function CreateAgentConfigurationRouteHandler(
+  props: CreateAgentConfigurationRouteHandlerProps
+) {
+  const { search } = props.history.location;
 
   // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
   // @ts-expect-error
