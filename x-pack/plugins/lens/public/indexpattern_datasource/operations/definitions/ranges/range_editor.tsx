@@ -6,6 +6,7 @@
 
 import React, { useState, MouseEventHandler, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import {
   DraggableLocation,
   EuiButtonEmpty,
@@ -24,6 +25,7 @@ import {
   EuiLink,
   EuiText,
   EuiPopover,
+  EuiRange,
   EuiForm,
   EuiSwitch,
   EuiToolTip,
@@ -37,6 +39,7 @@ import {
   RangeColumnParams,
   UpdateParamsFnType,
   MODES_TYPES,
+  HISTOGRAM_MAX_BARS,
   isValidRange,
   isValidNumber,
   isRangeWithin,
@@ -61,17 +64,22 @@ const getBetterLabel = (range: RangeType) =>
 
 const BaseRangeEditor = ({
   autoIntervalEnabled,
+  maxBars,
   interval,
   onToggleEditor,
   toggleAutoInterval,
+  onMaxBarsChange,
   onIntervalChange,
 }: {
   autoIntervalEnabled: boolean;
+  maxBars: 'auto' | number;
   interval: number;
   onToggleEditor: () => void;
   toggleAutoInterval: (enabled: boolean) => void;
+  onMaxBarsChange: (newMaxBars: number) => void;
   onIntervalChange: (newInterval: number) => void;
 }) => {
+  // TODO: manage the temporary empty string for interval
   const sectionLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
     defaultMessage: 'Granularity',
   });
@@ -96,17 +104,35 @@ const BaseRangeEditor = ({
         <>
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
-              <EuiFieldNumber
-                data-test-subj="lens-range-interval-field"
-                value={autoIntervalEnabled ? '' : interval}
-                onChange={({ target }) => onIntervalChange(Number(target.value))}
-                prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                  defaultMessage: 'Min Interval',
-                })}
-                min={0}
-                placeholder={autoIntervalEnabled ? 'Auto' : ''}
-                disabled={autoIntervalEnabled}
-              />
+              {autoIntervalEnabled ? (
+                <EuiRange
+                  min={1}
+                  max={HISTOGRAM_MAX_BARS}
+                  step={1}
+                  value={maxBars === 'auto' ? '' : maxBars}
+                  onChange={({ target }) =>
+                    onMaxBarsChange(Number(get(target, 'value', HISTOGRAM_MAX_BARS)))
+                  }
+                  placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
+                    defaultMessage: 'Auto',
+                  })}
+                  showLabels
+                  showInput="inputWithPopover"
+                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
+                    defaultMessage: 'Max intervals',
+                  })}
+                />
+              ) : (
+                <EuiFieldNumber
+                  data-test-subj="lens-range-interval-field"
+                  value={interval}
+                  onChange={({ target }) => onIntervalChange(Number(target.value))}
+                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
+                    defaultMessage: 'Min Interval',
+                  })}
+                  min={0}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -459,7 +485,11 @@ export const RangeEditor = ({
     <BaseRangeEditor
       autoIntervalEnabled={isAutoIntervalEnabled}
       interval={numericIntervalValue}
+      maxBars={params.maxBars}
       toggleAutoInterval={onAutoIntervalToggle}
+      onMaxBarsChange={(maxBars: number) => {
+        setParam('maxBars', maxBars);
+      }}
       onIntervalChange={(interval: number) => {
         setParam('interval', interval);
       }}
