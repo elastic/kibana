@@ -53,7 +53,7 @@ export const useRequest = <D = any, E = Error>(
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const requestCountRef = useRef<number>(0);
-  const isInitialRequest = requestCountRef.current === 0;
+  const isInitialRequest = requestCountRef.current <= 1; // isInitialRequest === true if no request are sent or if one is sent
   const pollIntervalIdRef = useRef<any>(null);
 
   const clearPollInterval = useCallback(() => {
