@@ -80,7 +80,8 @@ export function BucketNestingEditor({
                       values: { field: fieldName },
                     })
                   : i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
-                      defaultMessage: 'Dates overall',
+                      defaultMessage: 'Top values for each {field}',
+                      values: { field: fieldName },
                     })
               }
               checked={!prevColumn}
@@ -96,7 +97,7 @@ export function BucketNestingEditor({
                       values: { target: target.fieldName },
                     })
                   : i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-                      defaultMessage: 'Dates for each {target}',
+                      defaultMessage: 'Overall top {target}',
                       values: { target: target.fieldName },
                     })
               }
