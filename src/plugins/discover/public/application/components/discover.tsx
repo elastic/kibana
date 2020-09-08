@@ -122,7 +122,6 @@ export function Discover({
                     onRemoveField={onRemoveColumn}
                     selectedIndexPattern={searchSource && searchSource.getField('index')}
                     setIndexPattern={setIndexPattern}
-                    state={state}
                   />
                 </EuiResizablePanel>
 
