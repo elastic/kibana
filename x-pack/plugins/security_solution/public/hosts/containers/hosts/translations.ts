@@ -19,3 +19,17 @@ export const FAIL_ALL_HOST = i18n.translate(
     defaultMessage: `Failed to run search on all hosts`,
   }
 );
+
+export const ERROR_HOST_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.hostOverview.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on host overview search`,
+  }
+);
+
+export const FAIL_HOST_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.hostOverview.failSearchDescription',
+  {
+    defaultMessage: `Failed to run search on host overview`,
+  }
+);

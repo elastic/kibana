@@ -1,3 +1,7 @@
+.lnsDragDrop-isNotDroppable {
+  opacity: .5;
+}
+
 // Fix specificity by chaining classes
 
 .lnsDragDrop.lnsDragDrop-isDropTarget {
