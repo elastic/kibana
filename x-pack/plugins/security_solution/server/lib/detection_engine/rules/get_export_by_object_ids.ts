@@ -51,9 +51,19 @@ export const getRulesFromObjects = async (
     objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
       const exportWorkerPromise = new Promise<ExportRules>(async (resolve) => {
         try {
-          const rule = await readRules({ alertsClient, ruleId: object.rule_id, id: undefined });
-          if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
-            const transformedRule = transformAlertToRule(rule);
+          const rules = await readRules({
+            alertsClient,
+            ruleIds: [object.rule_id],
+            id: undefined,
+          });
+          if (
+            rules != null &&
+            rules.length > 0 &&
+            isAlertType(rules[0]) &&
+            rules[0].params.immutable !== true
+          ) {
+            const rules0 = rules[0];
+            const transformedRule = transformAlertToRule(rules0);
             resolve({
               statusCode: 200,
               rule: transformedRule,

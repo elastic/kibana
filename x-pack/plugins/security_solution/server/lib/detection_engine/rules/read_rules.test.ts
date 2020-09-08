@@ -33,9 +33,9 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        ruleId: undefined,
+        ruleIds: undefined,
       });
-      expect(rule).toEqual(getResult());
+      expect(rule).toEqual([getResult()]);
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const alertsClient = alertsClientMock.create();
@@ -47,7 +47,7 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        ruleId: undefined,
+        ruleIds: undefined,
       });
       expect(rule).toEqual(null);
     });
@@ -61,7 +61,7 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        ruleId: undefined,
+        ruleIds: undefined,
       });
       expect(rule).toEqual(null);
     });
@@ -75,7 +75,7 @@ describe('read_rules', () => {
         await readRules({
           alertsClient,
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          ruleId: undefined,
+          ruleIds: undefined,
         });
       } catch (exc) {
         expect(exc.message).toEqual('Test error');
@@ -90,9 +90,9 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: undefined,
-        ruleId: 'rule-1',
+        ruleIds: ['rule-1'],
       });
-      expect(rule).toEqual(getResult());
+      expect(rule).toEqual([getResult()]);
     });
 
     test('should return null if the output from alertsClient with ruleId set is empty', async () => {
@@ -103,7 +103,7 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: undefined,
-        ruleId: 'rule-1',
+        ruleIds: ['rule-1'],
       });
       expect(rule).toEqual(null);
     });
@@ -116,9 +116,9 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: undefined,
-        ruleId: 'rule-1',
+        ruleIds: ['rule-1'],
       });
-      expect(rule).toEqual(getResult());
+      expect(rule).toEqual([getResult()]);
     });
 
     test('should return null if id and ruleId are undefined', async () => {
@@ -129,7 +129,7 @@ describe('read_rules', () => {
       const rule = await readRules({
         alertsClient,
         id: undefined,
-        ruleId: undefined,
+        ruleIds: undefined,
       });
       expect(rule).toEqual(null);
     });

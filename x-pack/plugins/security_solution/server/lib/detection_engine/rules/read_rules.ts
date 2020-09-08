@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert } from '../../../../../alerts/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-import { isAlertType, ReadRuleOptions } from './types';
+import { isAlertType, ReadRuleOptions, RuleAlertType } from './types';
 
 /**
  * This reads the rules through a cascade try of what is fastest to what is slowest.
@@ -20,13 +19,13 @@ import { isAlertType, ReadRuleOptions } from './types';
 export const readRules = async ({
   alertsClient,
   id,
-  ruleId,
-}: ReadRuleOptions): Promise<SanitizedAlert | null> => {
+  ruleIds,
+}: ReadRuleOptions): Promise<RuleAlertType[] | null> => {
   if (id != null) {
     try {
       const rule = await alertsClient.get({ id });
       if (isAlertType(rule)) {
-        return rule;
+        return [rule];
       } else {
         return null;
       }
@@ -38,20 +37,26 @@ export const readRules = async ({
         throw err;
       }
     }
-  } else if (ruleId != null) {
+  } else if (ruleIds != null && ruleIds.length > 0) {
     const ruleFromFind = await findRules({
       alertsClient,
-      filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
+      filter: ruleIds
+        .map((ruleId) => `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`)
+        .join(' OR '),
       page: 1,
       fields: undefined,
       perPage: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
-    if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
-      return null;
+    const rules = ruleFromFind.data;
+    if (
+      ruleFromFind.data.length > 0 &&
+      rules.every((rule): rule is RuleAlertType => isAlertType(rule))
+    ) {
+      return rules;
     } else {
-      return ruleFromFind.data[0];
+      return null;
     }
   } else {
     // should never get here, and yet here we are.

@@ -116,8 +116,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           });
         }
         if (ruleId != null) {
-          const rule = await readRules({ alertsClient, ruleId, id: undefined });
-          if (rule != null) {
+          const readRulesResult = await readRules({
+            alertsClient,
+            ruleIds: [ruleId],
+            id: undefined,
+          });
+          if (readRulesResult != null && readRulesResult.length > 0) {
             return siemResponse.error({
               statusCode: 409,
               body: `rule_id: "${ruleId}" already exists`,

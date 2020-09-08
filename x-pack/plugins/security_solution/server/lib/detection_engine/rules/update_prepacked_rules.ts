@@ -57,7 +57,11 @@ export const updatePrepackagedRules = async (
         exceptions_list: exceptionsList,
       } = rule;
 
-      const existingRule = await readRules({ alertsClient, ruleId, id: undefined });
+      const existingRules = await readRules({
+        alertsClient,
+        ruleIds: ruleId ? [ruleId] : undefined,
+        id: undefined,
+      });
 
       // TODO: Fix these either with an is conversion or by better typing them within io-ts
       const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
@@ -75,7 +79,7 @@ export const updatePrepackagedRules = async (
         language,
         license,
         outputIndex,
-        rule: existingRule,
+        rule: existingRules != null ? existingRules[0] : null,
         savedId,
         savedObjectsClient,
         meta,

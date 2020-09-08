@@ -12,7 +12,7 @@ export const getFilter = (filter: string | null | undefined) => {
   if (filter == null) {
     return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
   } else {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
+    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND (${filter})`;
   }
 };
 

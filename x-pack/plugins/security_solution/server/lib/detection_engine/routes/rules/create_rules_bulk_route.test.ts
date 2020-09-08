@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../alerts/common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -34,7 +35,7 @@ describe('create_rules_bulk', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.alertsClient.create.mockResolvedValue(getResult()); // successful creation
+    clients.alertsClient.create.mockResolvedValue((getResult() as unknown) as Alert); // successful creation
 
     createRulesBulkRoute(server.router, ml);
   });

@@ -58,7 +58,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = false): CreateRulesSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): CreateRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,

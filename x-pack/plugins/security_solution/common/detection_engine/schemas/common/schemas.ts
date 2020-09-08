@@ -103,10 +103,14 @@ export type Immutable = t.TypeOf<typeof immutable>;
 // in case we encounter 3rd party rule systems which might be using auto incrementing numbers
 // or other different things.
 export const rule_id = t.string;
+export const rule_ids = t.array(rule_id);
 export type RuleId = t.TypeOf<typeof rule_id>;
+export type RuleIds = t.TypeOf<typeof rule_ids>;
 
 export const ruleIdOrUndefined = t.union([rule_id, t.undefined]);
+export const ruleIdsOrUndefined = t.union([rule_ids, t.undefined]);
 export type RuleIdOrUndefined = t.TypeOf<typeof ruleIdOrUndefined>;
+export type RuleIdsOrUndefined = t.TypeOf<typeof ruleIdsOrUndefined>;
 
 export const id = UUID;
 export const idOrUndefined = t.union([id, t.undefined]);

@@ -104,10 +104,14 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           throwHttpError(await mlAuthz.validateRuleType(type));
         }
 
-        const existingRule = await readRules({ alertsClient, ruleId, id });
-        if (existingRule?.params.type) {
+        const existingRules = await readRules({
+          alertsClient,
+          ruleIds: ruleId ? [ruleId] : undefined,
+          id,
+        });
+        if (existingRules != null && existingRules.length > 0 && existingRules[0].params.type) {
           // reject an unauthorized modification of an ML rule
-          throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+          throwHttpError(await mlAuthz.validateRuleType(existingRules[0].params.type));
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
@@ -129,7 +133,7 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           timelineTitle,
           meta,
           filters,
-          rule: existingRule,
+          rule: existingRules != null && existingRules.length > 0 ? existingRules[0] : null,
           index,
           interval,
           maxSignals,

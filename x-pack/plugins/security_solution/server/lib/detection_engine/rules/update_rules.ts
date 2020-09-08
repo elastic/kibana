@@ -55,12 +55,12 @@ export const updateRules = async ({
   machineLearningJobId,
   actions,
 }: UpdateRulesOptions): Promise<PartialAlert | null> => {
-  const rule = await readRules({ alertsClient, ruleId, id });
-  if (rule == null) {
+  const rules = await readRules({ alertsClient, ruleIds: ruleId ? [ruleId] : undefined, id });
+  if (rules == null) {
     return null;
   }
 
-  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+  const calculatedVersion = calculateVersion(rules[0].params.immutable, rules[0].params.version, {
     author,
     buildingBlockType,
     description,
@@ -99,9 +99,9 @@ export const updateRules = async ({
   });
 
   const update = await alertsClient.update({
-    id: rule.id,
+    id: rules[0].id,
     data: {
-      tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
+      tags: addTags(tags, rules[0].params.ruleId, rules[0].params.immutable),
       name,
       schedule: { interval },
       actions: actions.map(transformRuleToAlertAction),
@@ -110,10 +110,10 @@ export const updateRules = async ({
         author,
         buildingBlockType,
         description,
-        ruleId: rule.params.ruleId,
+        ruleId: rules[0].params.ruleId,
         falsePositives,
         from,
-        immutable: rule.params.immutable,
+        immutable: rules[0].params.immutable,
         query,
         language,
         license,
@@ -145,17 +145,17 @@ export const updateRules = async ({
     },
   });
 
-  if (rule.enabled && enabled === false) {
-    await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled === true) {
-    await alertsClient.enable({ id: rule.id });
+  if (rules[0].enabled && enabled === false) {
+    await alertsClient.disable({ id: rules[0].id });
+  } else if (!rules[0].enabled && enabled === true) {
+    await alertsClient.enable({ id: rules[0].id });
 
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
     const ruleCurrentStatus = await ruleStatusClient.find({
       perPage: 1,
       sortField: 'statusDate',
       sortOrder: 'desc',
-      search: rule.id,
+      search: rules[0].id,
       searchFields: ['alertId'],
     });
 

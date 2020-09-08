@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../alerts/common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
@@ -36,7 +37,7 @@ describe('create_rules', () => {
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.alertsClient.create.mockResolvedValue(getResult()); // creation succeeds
+    clients.alertsClient.create.mockResolvedValue((getResult() as unknown) as Alert); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
     createRulesRoute(server.router, ml);

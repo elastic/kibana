@@ -31,9 +31,11 @@ describe('deleteRules', () => {
   });
 
   it('should call alertsClient.delete if notification was found', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: notificationId,
-    });
+    (readRules as jest.Mock).mockResolvedValue([
+      {
+        id: notificationId,
+      },
+    ]);
 
     const result = await deleteRules({
       alertsClient,
@@ -50,9 +52,11 @@ describe('deleteRules', () => {
   });
 
   it('should call alertsClient.delete if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
+    (readRules as jest.Mock).mockResolvedValue([
+      {
+        id: null,
+      },
+    ]);
 
     const result = await deleteRules({
       alertsClient,
@@ -69,9 +73,11 @@ describe('deleteRules', () => {
   });
 
   it('should return null if alertsClient.delete rejects with 404 if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
+    (readRules as jest.Mock).mockResolvedValue([
+      {
+        id: null,
+      },
+    ]);
 
     alertsClient.delete.mockRejectedValue({
       output: {
@@ -94,9 +100,11 @@ describe('deleteRules', () => {
   });
 
   it('should return error object if alertsClient.delete rejects with status different than 404 and if ruleId was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
+    (readRules as jest.Mock).mockResolvedValue([
+      {
+        id: null,
+      },
+    ]);
 
     const errorObject = {
       output: {
@@ -126,9 +134,11 @@ describe('deleteRules', () => {
   });
 
   it('should return null if ruleId and id was undefined', async () => {
-    (readRules as jest.Mock).mockResolvedValue({
-      id: null,
-    });
+    (readRules as jest.Mock).mockResolvedValue([
+      {
+        id: null,
+      },
+    ]);
 
     const result = await deleteRules({
       alertsClient,

@@ -17,6 +17,7 @@ import {
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
+import { Alert } from '../../../../../../alerts/common';
 import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import {
@@ -157,7 +158,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue((getResult() as unknown) as Alert);
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

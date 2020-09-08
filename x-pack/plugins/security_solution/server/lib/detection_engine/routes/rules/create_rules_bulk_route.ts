@@ -57,6 +57,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
 
       const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
+      const foundRules = await readRules({
+        alertsClient,
+        ruleIds: ruleDefinitions.map((rule) => rule.rule_id),
+        id: undefined,
+      });
 
       const rules = await Promise.all(
         ruleDefinitions
@@ -133,8 +138,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
               if (ruleId != null) {
-                const rule = await readRules({ alertsClient, ruleId, id: undefined });
-                if (rule != null) {
+                if (
+                  foundRules != null &&
+                  foundRules.length > 0 &&
+                  foundRules.find((rule) => rule.params.ruleId === ruleId)
+                ) {
                   return createBulkErrorObject({
                     ruleId,
                     statusCode: 409,

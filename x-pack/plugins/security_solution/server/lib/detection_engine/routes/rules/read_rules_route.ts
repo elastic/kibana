@@ -50,25 +50,25 @@ export const readRulesRoute = (router: IRouter) => {
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await readRules({
+        const rules = await readRules({
           alertsClient,
           id,
-          ruleId,
+          ruleIds: ruleId ? [ruleId] : undefined,
         });
-        if (rule != null) {
+        if (rules != null && rules.length > 0) {
           const ruleActions = await getRuleActionsSavedObject({
             savedObjectsClient,
-            ruleAlertId: rule.id,
+            ruleAlertId: rules[0].id,
           });
           const ruleStatuses = await ruleStatusClient.find({
             perPage: 1,
             sortField: 'statusDate',
             sortOrder: 'desc',
-            search: rule.id,
+            search: rules[0].id,
             searchFields: ['alertId'],
           });
           const [validated, errors] = transformValidate(
-            rule,
+            rules[0],
             ruleActions,
             ruleStatuses.saved_objects[0]
           );

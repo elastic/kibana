@@ -51,8 +51,21 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
 
       const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+      const ruleDefinitions = request.body;
+      // const dupes = getDuplicates(ruleDefinitions, 'rule_id');
+      const ruleIds = ruleDefinitions.reduce<string[]>((acc, rule) => {
+        if (rule != null && rule.rule_id != null) {
+          return [rule.rule_id, ...acc];
+        }
+        return acc;
+      }, []);
+      const foundRules = await readRules({
+        alertsClient,
+        ruleIds,
+        id: undefined,
+      });
       const rules = await Promise.all(
-        request.body.map(async (payloadRule) => {
+        ruleDefinitions.map(async (payloadRule) => {
           const {
             actions: actionsRest,
             author,
@@ -106,14 +119,22 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ alertsClient, ruleId, id });
-            if (existingRule?.params.type) {
+            let existingRule = foundRules?.find(
+              (rule) => rule.params.ruleId === ruleId || rule.id === id
+            );
+            if (existingRule == null) {
+              existingRule = await readRules({ alertsClient, ruleIds: undefined, id });
+            }
+            // const existingRule = await readRules({ alertsClient, ruleIds: [ruleId], id });
+
+            // is this a bug?
+            if (existingRule != null && existingRule.params.type) {
               // reject an unauthorized modification of an ML rule
-              throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+              throwHttpError(await mlAuthz.validateRuleType(existingRule.params.type));
             }
 
             const rule = await patchRules({
-              rule: existingRule,
+              rule: existingRule ?? null,
               alertsClient,
               author,
               buildingBlockType,
@@ -185,7 +206,6 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
           }
         })
       );
-
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
         return siemResponse.error({ statusCode: 500, body: errors });

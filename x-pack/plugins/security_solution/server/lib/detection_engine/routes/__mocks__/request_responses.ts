@@ -6,6 +6,7 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server';
+import { SanitizedAlert } from '../../../../../../alerts/common';
 import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -159,14 +160,14 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (): FindHit => ({
+export const getFindResultWithSingleHit = (): FindHit<SanitizedAlert> => ({
   page: 1,
   perPage: 1,
   total: 1,
   data: [getResult()],
 });
 
-export const nonRuleFindResult = (): FindHit => ({
+export const nonRuleFindResult = (): FindHit<SanitizedAlert> => ({
   page: 1,
   perPage: 1,
   total: 1,
@@ -409,7 +410,6 @@ export const getResult = (): RuleAlertType => ({
   throttle: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
-  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],

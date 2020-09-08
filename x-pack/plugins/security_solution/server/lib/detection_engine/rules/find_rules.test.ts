@@ -10,7 +10,7 @@ import { SIGNALS_ID } from '../../../../common/constants';
 describe('find_rules', () => {
   test('it returns a full filter with an AND if sent down', () => {
     expect(getFilter('alert.attributes.enabled: true')).toEqual(
-      `alert.attributes.alertTypeId: ${SIGNALS_ID} AND alert.attributes.enabled: true`
+      `alert.attributes.alertTypeId: ${SIGNALS_ID} AND (alert.attributes.enabled: true)`
     );
   });
 

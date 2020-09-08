@@ -115,6 +115,19 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
+          const ruleIds = await Promise.all(
+            batchParseObjects
+              .filter((item): item is ImportRulesSchemaDecoded => !(item instanceof Error))
+              .map((parsedObject) => {
+                return parsedObject.rule_id;
+              })
+          );
+
+          const rules = await readRules({
+            alertsClient,
+            ruleIds: ruleIds.map((someId) => someId),
+            id: undefined,
+          });
           const newImportRuleResponse = await Promise.all(
             batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
               const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve) => {
@@ -181,7 +194,11 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ alertsClient, ruleId, id: undefined });
+                  let rule;
+                  if (rules != null) {
+                    rule = rules.find((aRule) => aRule.params.ruleId === ruleId);
+                  }
+
                   if (rule == null) {
                     await createRules({
                       alertsClient,

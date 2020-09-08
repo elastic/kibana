@@ -47,6 +47,7 @@ import {
   VersionOrUndefined,
   IdOrUndefined,
   RuleIdOrUndefined,
+  RuleIdsOrUndefined,
   EnabledOrUndefined,
   FalsePositivesOrUndefined,
   FromOrUndefined,
@@ -86,12 +87,12 @@ import {
   RuleNameOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
-import { Alert, SanitizedAlert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
-export interface RuleAlertType extends Alert {
+export interface RuleAlertType extends SanitizedAlert {
   params: RuleTypeParams;
 }
 
@@ -306,7 +307,7 @@ export interface PatchRulesOptions {
 export interface ReadRuleOptions {
   alertsClient: AlertsClient;
   id: IdOrUndefined;
-  ruleId: RuleIdOrUndefined;
+  ruleIds: RuleIdsOrUndefined;
 }
 
 export interface DeleteRuleOptions {

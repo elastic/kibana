@@ -8,18 +8,18 @@ import { readRules } from './read_rules';
 import { DeleteRuleOptions } from './types';
 
 export const deleteRules = async ({ alertsClient, id, ruleId }: DeleteRuleOptions) => {
-  const rule = await readRules({ alertsClient, id, ruleId });
-  if (rule == null) {
+  const rules = await readRules({ alertsClient, id, ruleIds: ruleId ? [ruleId] : undefined });
+  if (rules == null || rules.length === 0) {
     return null;
   }
 
   if (ruleId != null) {
-    await alertsClient.delete({ id: rule.id });
-    return rule;
+    await alertsClient.delete({ id: rules[0].id });
+    return rules[0];
   } else if (id != null) {
     try {
       await alertsClient.delete({ id });
-      return rule;
+      return rules[0];
     } catch (err) {
       if (err.output.statusCode === 404) {
         return null;
