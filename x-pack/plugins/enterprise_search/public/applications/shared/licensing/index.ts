@@ -5,4 +5,4 @@
  */
 
 export { LicenseContext, LicenseProvider, ILicenseContext } from './license_context';
-export { hasPlatinumLicense } from './license_checks';
+export { hasPlatinumLicense, hasGoldLicense } from './license_checks';
