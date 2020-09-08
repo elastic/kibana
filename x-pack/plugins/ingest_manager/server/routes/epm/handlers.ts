@@ -162,18 +162,22 @@ export const installPackageHandler: RequestHandler<
 
     // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
     try {
-      if (!installedPkg) throw new Error('no installation exists');
       if (installType === 'install' || installType === 'reinstall') {
+        logger.error(`uninstalling ${pkgkey} after error installing`);
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
-      } else {
+      }
+      if (installType === 'update') {
+        // @ts-ignore installType conditions already check for existence of installedPkg
+        const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
+        logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
         await installPackage({
           savedObjectsClient,
-          pkgkey: `${pkgName}-${installedPkg.attributes.version}`,
+          pkgkey: prevVersion,
           callCluster,
         });
       }
     } catch (error) {
-      logger.error(`failed to uninstall or rollback package ${error}`);
+      logger.error(`failed to uninstall or rollback package after installation error ${error}`);
     }
     return defaultResult;
   }

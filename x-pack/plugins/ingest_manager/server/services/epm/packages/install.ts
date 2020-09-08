@@ -346,7 +346,7 @@ export function getInstallType({
 }: {
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
-}): InstallType | undefined {
+}): InstallType {
   const isInstalledPkg = !!installedPkg;
   const currentPkgVersion = installedPkg?.attributes.version;
   const lastStartedInstallVersion = installedPkg?.attributes.install_version;
@@ -357,4 +357,5 @@ export function getInstallType({
   if (pkgVersion === lastStartedInstallVersion && pkgVersion !== currentPkgVersion)
     return 'reupdate';
   if (pkgVersion !== lastStartedInstallVersion && pkgVersion !== currentPkgVersion) return 'update';
+  throw new Error('unknown install type');
 }
