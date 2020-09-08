@@ -31,6 +31,7 @@ import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
 import { TopClasses } from '../../../../common/types/feature_importance';
+import { DEFAULT_RESULTS_FIELD } from '../../data_frame_analytics/common/constants';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
@@ -106,7 +107,7 @@ export const DataGrid: FC<Props> = memo(
               const row = data[rowIndex];
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml
-              const mlResultsField = resultsField ?? 'ml';
+              const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
               const parsedFIArray = row[mlResultsField].feature_importance;
               let predictedValue: string | number | undefined;
               let topClasses: TopClasses = [];
