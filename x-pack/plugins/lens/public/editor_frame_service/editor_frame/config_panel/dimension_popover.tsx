@@ -61,7 +61,7 @@ export function DimensionPopover({
               <EuiTitle size="xs">
                 <EuiButtonEmpty
                   onClick={closeFlyout}
-                  data-test-subj="lnsDimensionPopoverFlyoutTitle"
+                  data-test-subj="lns-indexPatternDimension-flyoutTitle"
                   id="lnsDimensionPopoverFlyoutTitle"
                   iconType="sortLeft"
                   flush="left"
