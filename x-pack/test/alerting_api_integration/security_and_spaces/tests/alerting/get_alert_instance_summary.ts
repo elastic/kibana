@@ -17,11 +17,11 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
-export default function createGetAlertStatusTests({ getService }: FtrProviderContext) {
+export default function createGetAlertInstanceSummaryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('getAlertStatus', () => {
+  describe('getAlertInstanceSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -29,7 +29,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle getAlertStatus alert request appropriately', async () => {
+        it('should handle getAlertInstanceSummary alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
@@ -38,7 +38,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/status`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -85,7 +85,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           }
         });
 
-        it('should handle getAlertStatus alert request appropriately when unauthorized', async () => {
+        it('should handle getAlertInstanceSummary alert request appropriately when unauthorized', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
@@ -99,7 +99,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/status`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -140,7 +140,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           }
         });
 
-        it(`shouldn't getAlertStatus for an alert from another space`, async () => {
+        it(`shouldn't getAlertInstanceSummary for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
@@ -149,7 +149,7 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/status`)
+            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -172,9 +172,9 @@ export default function createGetAlertStatusTests({ getService }: FtrProviderCon
           }
         });
 
-        it(`should handle getAlertStatus request appropriately when alert doesn't exist`, async () => {
+        it(`should handle getAlertInstanceSummary request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1/status`)
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1/_instance_summary`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
