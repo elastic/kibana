@@ -119,7 +119,7 @@ export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
-  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
+  const fieldRef = field.scripted
     ? {
         script: {
           lang: field.lang as string,
