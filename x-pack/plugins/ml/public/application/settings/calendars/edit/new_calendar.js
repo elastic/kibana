@@ -339,7 +339,7 @@ class NewCalendarUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarEditForm">
+        <EuiPage className="mlCalendarEditForm" data-test-subj="mlPageCalendarEdit">
           <EuiPageBody>
             <EuiPageContent
               className="mlCalendarEditForm__content"
