@@ -55,7 +55,6 @@ describe('POST /diagnose/browser', () => {
       kill: jest.fn(),
       pid: 123,
       stderr: 'stderr',
-      once: jest.fn(),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     }));
@@ -107,7 +106,6 @@ describe('POST /diagnose/browser', () => {
     }));
 
     mockedSpawn.mockImplementation(() => ({
-      once: (e: string, cb: any) => setTimeout(() => cb(), 0), // Invoke the exit event
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
       addEventListener: jest.fn(),
@@ -123,8 +121,8 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
-            "logs": "
-          Could not find the default font",
+            "logs": "Could not find the default font
+          ",
             "success": false,
           }
         `);
@@ -147,7 +145,6 @@ describe('POST /diagnose/browser', () => {
     }));
 
     mockedSpawn.mockImplementation(() => ({
-      once: (e: string, cb: any) => setTimeout(() => cb(), 0),
       removeAllListeners: jest.fn(),
       kill: jest.fn(),
       addEventListener: jest.fn(),
@@ -163,9 +160,9 @@ describe('POST /diagnose/browser', () => {
             "help": Array [
               "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
-            "logs": "
-          DevTools listening on (ws://localhost:4000)
-          Could not find the default font",
+            "logs": "DevTools listening on (ws://localhost:4000)
+          Could not find the default font
+          ",
             "success": false,
           }
         `);
@@ -186,7 +183,6 @@ describe('POST /diagnose/browser', () => {
       kill: killMock,
       pid: 123,
       stderr: 'stderr',
-      once: jest.fn(),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     }));

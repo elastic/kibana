@@ -45,7 +45,14 @@ const logsToHelpMap = {
       },
     }
   ),
-  'No usable sandbox': '',
+
+  'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
+    defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'. Please see {url}`,
+    values: {
+      url:
+        'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
+    },
+  }),
 };
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {

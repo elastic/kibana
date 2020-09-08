@@ -12,8 +12,8 @@ import { uniq } from 'lodash';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { createInterface } from 'readline';
-import { fromEvent, timer, race, of } from 'rxjs';
-import { takeUntil, map, scan, takeLast, tap, take, catchError } from 'rxjs/operators';
+import { fromEvent, timer, merge, of } from 'rxjs';
+import { takeUntil, map, reduce, tap, catchError } from 'rxjs/operators';
 import { ReportingCore } from '../../..';
 import { LevelLogger } from '../../../lib';
 import { getBinaryPath } from '../../install';
@@ -77,7 +77,6 @@ export const browserStartLogs = (
     detached: process.platform !== 'win32',
   });
 
-  const timer$ = timer(browserLaunchTimeToWait);
   const rl = createInterface({ input: browserProcess.stderr });
 
   const exit$ = fromEvent(browserProcess, 'exit').pipe(
@@ -100,15 +99,12 @@ export const browserStartLogs = (
 
   // Some chromium errors don't show up until a few seconds after startup
   // hence why we wait for at least 5 seconds to let them surface
-  const log$ = fromEvent(rl, 'line').pipe(
-    scan((acc, curr) => `${acc}\n${curr}`, ''),
-    takeUntil(timer$),
-    takeLast(1)
-  );
+  const log$ = fromEvent(rl, 'line');
 
-  return race(exit$, error$, log$).pipe(
-    take(1),
-    tap((val) => {
+  return merge(exit$, error$, log$).pipe(
+    takeUntil(timer(browserLaunchTimeToWait)),
+    reduce((acc, curr) => `${acc}${curr}\n`, ''),
+    tap(() => {
       if (browserProcess && browserProcess.pid && !browserProcess.killed) {
         browserProcess.kill('SIGKILL');
         logger.info(`Successfully sent 'SIGKILL' to browser process (PID: ${browserProcess.pid})`);
