@@ -218,10 +218,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       loadExplorerData({
         ...loadExplorerDataConfig,
         swimlaneLimit:
-          explorerState?.viewBySwimlaneData &&
-          isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
-            ? explorerState?.viewBySwimlaneData.cardinality
-            : undefined,
+          isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
+          explorerState?.viewBySwimlaneData.cardinality,
       });
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);

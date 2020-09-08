@@ -12,7 +12,6 @@ import {
 } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
-import { omit } from 'lodash';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
@@ -42,7 +41,7 @@ function setup({
 }) {
   const defaultLocation = {
     pathname: '/services/foo/transactions',
-    search: fromQuery(omit(urlParams, 'serviceName')),
+    search: fromQuery(urlParams),
   } as any;
 
   history.replace({
@@ -60,7 +59,7 @@ function setup({
       <MockApmPluginContextWrapper>
         <Router history={history}>
           <UrlParamsProvider>
-            <TransactionOverview />
+            <TransactionOverview serviceName="opbeans-python" />
           </UrlParamsProvider>
         </Router>
       </MockApmPluginContextWrapper>
@@ -87,9 +86,7 @@ describe('TransactionOverview', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          serviceName: 'MyServiceName',
-        },
+        urlParams: {},
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -107,7 +104,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName',
         },
       });
 
@@ -122,7 +118,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           transactionType: 'secondType',
-          serviceName: 'MyServiceName',
         },
       });
 
@@ -143,7 +138,6 @@ describe('TransactionOverview', () => {
         serviceTransactionTypes: ['firstType'],
         urlParams: {
           transactionType: 'firstType',
-          serviceName: 'MyServiceName',
         },
       });
 

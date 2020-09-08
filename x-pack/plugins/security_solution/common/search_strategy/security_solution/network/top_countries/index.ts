@@ -14,14 +14,6 @@ import {
   TopNetworkTablesEcsField,
 } from '../common';
 
-export enum NetworkDnsFields {
-  dnsName = 'dnsName',
-  queryCount = 'queryCount',
-  uniqueDomains = 'uniqueDomains',
-  dnsBytesIn = 'dnsBytesIn',
-  dnsBytesOut = 'dnsBytesOut',
-}
-
 export enum FlowTarget {
   client = 'client',
   destination = 'destination',
