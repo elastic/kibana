@@ -20,8 +20,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { PolicyFromES } from '../../../../../common/types';
 import { LearnMoreLink } from '../../edit_policy/components';
-import { PolicyFromES } from '../../../services/policies/types';
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../services/api';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
