@@ -1,5 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.ScriptBuildStep
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import projects.kibanaConfiguration
 
 fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
@@ -108,4 +110,17 @@ fun BuildType.dependsOn(buildType: BuildType, init: SnapshotDependency.() -> Uni
 
 fun BuildType.dependsOn(vararg buildTypes: BuildType, init: SnapshotDependency.() -> Unit = {}) {
   buildTypes.forEach { dependsOn(it, init) }
+}
+
+fun BuildSteps.failedTestReporter(init: ScriptBuildStep.() -> Unit = {}) {
+  script {
+    name = "Failed Test Reporter"
+    scriptContent =
+      """
+        #!/bin/bash
+        node scripts/report_failed_tests
+      """.trimIndent()
+    executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
+    init()
+  }
 }

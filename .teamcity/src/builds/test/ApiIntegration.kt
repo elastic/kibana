@@ -2,6 +2,7 @@ package builds.test
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
@@ -20,6 +21,8 @@ object ApiIntegration : BuildType({
                 yarn run grunt run:apiIntegrationTests
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {

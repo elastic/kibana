@@ -2,6 +2,7 @@ package builds.default
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
@@ -25,6 +26,8 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
                 ./.ci/teamcity/default/ci_group.sh $ciGroup
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {

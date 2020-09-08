@@ -2,6 +2,7 @@ package builds.default
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
@@ -25,6 +26,8 @@ object DefaultVisualRegression : BuildType({
           ./.ci/teamcity/default/visual_regression.sh
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {

@@ -2,6 +2,7 @@ package builds.oss
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
@@ -29,6 +30,8 @@ object OssVisualRegression : BuildType({
           ./.ci/teamcity/oss/visual_regression.sh
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {

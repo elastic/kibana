@@ -2,6 +2,7 @@ package builds.oss
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
@@ -24,6 +25,8 @@ class OssCiGroup(val ciGroup: Int) : BuildType({
           ./.ci/teamcity/oss/ci_group.sh $ciGroup
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {

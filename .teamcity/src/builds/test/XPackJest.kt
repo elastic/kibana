@@ -2,6 +2,7 @@ package builds.test
 
 import addSlackNotifications
 import addTestArtifacts
+import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
@@ -25,6 +26,8 @@ object XPackJest : BuildType({
                 node --max-old-space-size=6144 scripts/jest --ci --verbose
         """.trimIndent()
     }
+
+    failedTestReporter()
   }
 
   features {
