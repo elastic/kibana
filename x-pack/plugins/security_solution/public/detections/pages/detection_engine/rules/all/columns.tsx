@@ -200,7 +200,7 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <EuiText data-test-subj="riskScore" size="s">
+          <EuiText data-test-subj="version" size="s">
             {value}
           </EuiText>
         );
