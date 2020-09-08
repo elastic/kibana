@@ -10,7 +10,7 @@ import {
   GEOTILE_GRID_AGG_NAME,
   GEOCENTROID_AGG_NAME,
 } from '../../../../common/constants';
-import { getTileBoundingBox } from './geo_tile_utils';
+import { getTileBoundingBox } from '../../../../common/geo_tile_utils';
 import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 import { clamp } from '../../../../common/elasticsearch_geo_utils';
 

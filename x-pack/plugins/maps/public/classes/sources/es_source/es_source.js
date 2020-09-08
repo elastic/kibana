@@ -18,7 +18,7 @@ import uuid from 'uuid/v4';
 
 import { copyPersistentState } from '../../../reducers/util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
+import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
 
 export class AbstractESSource extends AbstractVectorSource {

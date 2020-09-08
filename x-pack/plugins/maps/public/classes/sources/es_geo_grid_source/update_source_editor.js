@@ -75,7 +75,7 @@ export class UpdateSourceEditor extends Component {
       }
     } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
       if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-        throw new Error('NOT SUPPORTED!!');
+        throw new Error('Heatmap does not support SUPER_FINE resolution');
       } else {
         newLayerType = LAYER_TYPE.HEATMAP;
       }

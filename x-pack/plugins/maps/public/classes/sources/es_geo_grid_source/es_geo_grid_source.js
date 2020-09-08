@@ -108,11 +108,9 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   isGeoGridPrecisionAware() {
-    console.log('is precisoin aware?', this._descriptor.resolution);
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // MVT gridded data should not bootstrap each time the precision changes
       // MBtiles needs to handle this
-      console.log('NOT AWARE');
       return false;
     } else {
       // Should requery each time grid-precision changes
@@ -355,8 +353,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getUrlTemplateWithMeta(searchFilters) {
-    console.log('url template', searchFilters);
-
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -366,20 +362,13 @@ export class ESGeoGridSource extends AbstractESAggSource {
       bufferedExtent: null, //this needs to be stripped server-side
     });
 
-    //todo!
-    console.warn('THIS IS WONKY!');
-
     const dsl = await searchSource.getSearchRequestBody();
-
-    // console.log(JSON.stringify(dsl, null, '\t'));
 
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
     );
-
-    console.log('mv', mvtUrlServicePath);
 
     const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}`;
     return {

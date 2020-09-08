@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
-import { clampToLatBounds } from '../../../../common/elasticsearch_geo_utils';
+import { DECIMAL_DEGREES_PRECISION } from './constants';
+import { clampToLatBounds } from './elasticsearch_geo_utils';
 
 const ZOOM_TILE_KEY_INDEX = 0;
 const X_TILE_KEY_INDEX = 1;
