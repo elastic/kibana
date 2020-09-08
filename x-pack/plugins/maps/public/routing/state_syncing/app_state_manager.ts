@@ -5,20 +5,27 @@
  */
 
 import { Subject } from 'rxjs';
+import { Filter, Query } from 'src/plugins/data/public';
+
+export interface MapsAppState {
+  query?: Query | null;
+  savedQueryId?: string;
+  filters?: Filter[];
+}
 
 export class AppStateManager {
-  _query = '';
-  _savedQuery = '';
-  _filters = [];
+  _query: Query | null = null;
+  _savedQueryId: string = '';
+  _filters: Filter[] = [];
 
   _updated$ = new Subject();
 
-  setQueryAndFilters({ query, savedQuery, filters }) {
+  setQueryAndFilters({ query, savedQueryId, filters }: MapsAppState) {
     if (query && this._query !== query) {
       this._query = query;
     }
-    if (savedQuery && this._savedQuery !== savedQuery) {
-      this._savedQuery = savedQuery;
+    if (savedQueryId && this._savedQueryId !== savedQueryId) {
+      this._savedQueryId = savedQueryId;
     }
     if (filters && this._filters !== filters) {
       this._filters = filters;
@@ -34,10 +41,10 @@ export class AppStateManager {
     return this._filters;
   }
 
-  getAppState() {
+  getAppState(): MapsAppState {
     return {
       query: this._query,
-      savedQuery: this._savedQuery,
+      savedQueryId: this._savedQueryId,
       filters: this._filters,
     };
   }
