@@ -17,8 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
+import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
 
-const newEntry = (): NewTrustedApp['entries'][0] => {
+const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   return {
     field: 'process.hash.*',
     operator: 'included',
@@ -40,14 +41,14 @@ export const NewTrustedAppForm = memo(() => {
   const [formValues, setFormValues] = useState<NewTrustedApp>({
     name: '',
     os: 'windows',
-    entries: [newEntry()],
+    entries: [generateNewEntry()],
     description: '',
   });
   const handleAndClick = useCallback(() => {
     setFormValues((prevState) => {
       return {
         ...prevState,
-        entries: [...prevState.entries, newEntry()],
+        entries: [...prevState.entries, generateNewEntry()],
       };
     });
   }, [setFormValues]);
@@ -78,6 +79,22 @@ export const NewTrustedAppForm = memo(() => {
       };
     });
   }, []);
+  const handleEntryChange = useCallback<LogicalConditionBuilderProps['onEntryChange']>(
+    (newEntry, oldEntry) => {
+      setFormValues((prevState) => {
+        return {
+          ...prevState,
+          entries: prevState.entries.map((item) => {
+            if (item === oldEntry) {
+              return newEntry;
+            }
+            return item;
+          }),
+        };
+      });
+    },
+    []
+  );
 
   return (
     <EuiForm>
@@ -106,6 +123,7 @@ export const NewTrustedAppForm = memo(() => {
           os={formValues.os}
           onAndClicked={handleAndClick}
           onEntryRemove={handleEntryRemove}
+          onEntryChange={handleEntryChange}
         />
       </EuiFormRow>
       <EuiFormRow

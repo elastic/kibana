@@ -7,19 +7,15 @@
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, CommonProps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NewTrustedApp } from '../../../../../../../common/endpoint/types';
-import { ConditionGroup } from './components/condition_group';
+import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
 
 const BUTTON_MIN_WIDTH = Object.freeze({ minWidth: '95px' });
 
-interface LogicalConditionBuilderProps extends CommonProps {
-  os: NewTrustedApp['os'];
-  entries: NewTrustedApp['entries'];
-  onAndClicked: () => void;
-  isAndDisabled?: boolean;
-  onEntryRemove: (entry: NewTrustedApp['entries'][0]) => void;
-}
-
+export type LogicalConditionBuilderProps = CommonProps &
+  ConditionGroupProps & {
+    onAndClicked: () => void;
+    isAndDisabled?: boolean;
+  };
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
   ({
     entries,
@@ -28,6 +24,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     isAndDisabled = false,
     onAndClicked,
     onEntryRemove,
+    onEntryChange,
     'data-test-subj': dataTestSubj,
   }) => {
     return (
@@ -36,7 +33,12 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
           {entries.length === 0 ? (
             <NoEntries />
           ) : (
-            <ConditionGroup os={os} entries={entries} onEntryRemove={onEntryRemove} />
+            <ConditionGroup
+              os={os}
+              entries={entries}
+              onEntryRemove={onEntryRemove}
+              onEntryChange={onEntryChange}
+            />
           )}
         </div>
         <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { ChangeEventHandler, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,9 +42,10 @@ export interface ConditionEntryProps {
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
   onRemove: (entry: TrustedApp['entries'][0]) => void;
+  onChange: (newEntry: TrustedApp['entries'][0], oldEntry: TrustedApp['entries'][0]) => void;
 }
 export const ConditionEntry = memo<ConditionEntryProps>(
-  ({ entry, showLabels = false, onRemove, isRemoveDisabled = false }) => {
+  ({ entry, showLabels = false, onRemove, onChange, isRemoveDisabled = false }) => {
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
         {
@@ -63,8 +64,30 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         },
       ];
     }, []);
-    const handleValueUpdate = useCallback(() => {}, []);
-    const handleFieldUpdate = useCallback(() => {}, []);
+    const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
+      (ev) => {
+        onChange(
+          {
+            ...entry,
+            value: ev.target.value,
+          },
+          entry
+        );
+      },
+      [entry, onChange]
+    );
+    const handleFieldUpdate = useCallback(
+      (newField) => {
+        onChange(
+          {
+            ...entry,
+            field: newField,
+          },
+          entry
+        );
+      },
+      [entry, onChange]
+    );
     const handleRemoveClick = useCallback(() => {
       onRemove(entry);
     }, [entry, onRemove]);
@@ -122,6 +145,10 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               iconType="trash"
               onClick={handleRemoveClick}
               isDisabled={isRemoveDisabled}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
+                { defaultMessage: 'Remove Entry' }
+              )}
             />
           </ConditionEntryCell>
         </EuiFlexItem>
