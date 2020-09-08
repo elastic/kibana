@@ -6,10 +6,7 @@
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import {
-  NetworkHttpRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy/security_solution';
+import { NetworkHttpRequestOptions, SortField } from '../../../../../../common/search_strategy';
 
 const getCountAgg = () => ({
   http_count: {

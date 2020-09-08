@@ -5,13 +5,18 @@
  */
 
 export * from './all';
+export * from './authentications';
 export * from './common';
-export * from './overview';
+export * from './details';
 export * from './first_last_seen';
+export * from './overview';
+export * from './uncommon_processes';
 
 export enum HostsQueries {
   authentications = 'authentications',
+  details = 'details',
   firstLastSeen = 'firstLastSeen',
   hosts = 'hosts',
-  hostOverview = 'hostOverview',
+  overview = 'overviewHost',
+  uncommonProcesses = 'uncommonProcesses',
 }

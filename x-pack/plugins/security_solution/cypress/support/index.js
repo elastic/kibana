@@ -23,7 +23,7 @@
 import './commands';
 
 Cypress.Cookies.defaults({
-  whitelist: 'sid',
+  preserve: 'sid',
 });
 
 Cypress.on('uncaught:exception', (err) => {

@@ -17,7 +17,10 @@ export const Bytes: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.bytesForm.fieldNameHelpText',
-          { defaultMessage: 'The field to convert.' }
+          {
+            defaultMessage:
+              'Field to convert. If the field contains an array, each array value is converted.',
+          }
         )}
       />
 

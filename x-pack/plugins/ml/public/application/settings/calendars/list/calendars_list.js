@@ -149,7 +149,7 @@ export class CalendarsListUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarList">
+        <EuiPage className="mlCalendarList" data-test-subj="mlPageCalendarManagement">
           <EuiPageBody>
             <EuiPageContent
               className="mlCalendarList__content"
