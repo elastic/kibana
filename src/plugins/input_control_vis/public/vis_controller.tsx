@@ -64,12 +64,14 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     }
 
     async render(visData: any, visParams: VisParams) {
+      if (!this.I18nContext) {
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
+      }
       if (!this.isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
         this.controls = await this.initControls();
-        const [{ i18n }] = await deps.core.getStartServices();
-        this.I18nContext = i18n.Context;
         this.isLoaded = true;
       }
       this.drawVis();
