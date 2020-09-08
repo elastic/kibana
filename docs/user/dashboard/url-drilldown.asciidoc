@@ -29,9 +29,10 @@ This example shows how to create the "Show on Github" drilldown shown earlier in
 image:images/url_drilldown_pick_an_action.png[Action picker]
 . Enter a URL template: 
 +
-```
+[source]
+----
 https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
-```
+----
 +
 This example URL navigates to {kib} issues on Github. `{{event.value}}` will be substituted with a value associated with a clicked pie slice. Please note, that in _preview_ `{{event.value}}` is substituted with <<values-in-preview, dummy>> value.
 [role="screenshot"]
@@ -41,7 +42,7 @@ image:images/url_drilldown_url_template.png[URL template input]
 +
 If you don’t save the drilldown, and then navigate away, the drilldown is lost.
 
-. In `[Logs] Visitors by OS`, click any slice of the pie, and then select the drilldown *Show on Github*.
+. In *[Logs] Visitors by OS*, click any slice of the pie, and then select the drilldown *Show on Github*.
 +
 [role="screenshot"]
 image:images/url_drilldown_popup.png[URL drilldown popup]
@@ -61,10 +62,10 @@ In the preceding <<try-it, example>>, you configured a URL drilldown on a pie ch
 However, the sample *[Logs] Unique Visitors vs. Average Bytes* chart supports both clicking on a data point and selecting a range. When you create a URL drilldown for this  chart, you have the following choices:
 
 [role="screenshot"]
-image:images/url_drilldown_trigger_picker.png[Trigger picker: single click and range selection]
+image:images/url_drilldown_trigger_picker.png[Trigger picker: Single click and Range selection]
 
 Variables in the URL template differ per trigger. 
-For example, "single click" has `{{event.value}}` and "range selection" has `{{event.from}}` and `{{event.to}}`. 
+For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
 You can create multiple URL drilldowns per panel and attach them to different triggers.
 
 [float]
@@ -73,9 +74,10 @@ You can create multiple URL drilldowns per panel and attach them to different tr
 
 The URL template input uses Handlebars — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
 
-```
+[source]
+----
 https://github.com/elastic/kibana/issues?q={{event.value}}
-```
+----
 
 A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
 
@@ -96,7 +98,7 @@ In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Han
 
 
 |rison
-|Serialize context variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
 |`{{rison event}}` +
 `{{rison event.key event.value}}` +
 `{{rison filters=context.panel.filters}}` +
@@ -116,7 +118,7 @@ In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Han
 The URL drilldown template has three sources for variables:
 
 . *Global* static variables that don’t change depending on the  place where URL drilldown is used or which user interaction executed the drilldown. For example: `{{kibanaUrl}}`.
-. *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. Example: ``{{context.panel.filters}}`` which gives access to filters that applied to the current panel.
+. *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. Example: `{{context.panel.filters}}`, which gives access to filters that applied to the current panel.
 . *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
 
 [[values-in-preview]]
@@ -128,7 +130,7 @@ Because there is no user interaction with a panel in preview, there is no intera
 To work around this, {kib} provides a sample interaction that relies on a picked <<trigger-picker, trigger>>.
 So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
 Such previews can help you make sure that the structure of your URL template is valid.
-However, to ensure that the configured URL drilldown works as expected with your data, you have to retest the drilldown through the panel after saving a dashboard.
+However, to ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
 
 You can access the full list of variables available for the current panel and selected trigger by clicking *Add variable* in the top-right corner of a URL template input.
 
@@ -194,7 +196,7 @@ context.panel.timeRange.indexPatternIds
 
 | *Event*
 | 
-| Variables that depend on a trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
+| Variables that depend on user interaction. These variables are dynamically extracted from the interaction context when the drilldown is executed.
 
 | *Single click* trigger
 | 
@@ -210,7 +212,7 @@ context.panel.timeRange.indexPatternIds
 
 |
 | event.negate
-| If drilldown executed is a "negative" context. (for example, a "filter-out" loop clicked...)
+| Boolean, indicating whether clicked data point resulted in negative filter.
 
 | *Range selection* trigger
 |
