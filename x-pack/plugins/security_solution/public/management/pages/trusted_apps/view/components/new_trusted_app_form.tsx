@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  ChangeEventHandler,
-  memo,
-  ReactEventHandler,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -21,7 +14,6 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSuperSelectProps } from '@elastic/eui/src/components/form/super_select/super_select';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
@@ -29,7 +21,7 @@ import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 export const NewTrustedAppForm = memo(() => {
   const handleAndClick = useCallback(() => {}, []);
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-    // FIXME:PT i18n these or get them from an already i18n place
+    // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
       return {
         value: os,
@@ -40,7 +32,14 @@ export const NewTrustedAppForm = memo(() => {
   const [formValues, setFormValues] = useState<NewTrustedApp>({
     name: '',
     os: 'windows',
-    entries: [],
+    entries: [
+      {
+        operator: 'included',
+        type: 'match',
+        field: 'path',
+        value: 'Microsoft',
+      },
+    ],
     description: '',
   });
   const handleDomChangeEvents = useCallback<
