@@ -13,13 +13,13 @@ import { getSourceAggKey } from '../../../../common/get_agg_key';
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export class AbstractESAggSource extends AbstractESSource {
-  constructor(descriptor, inspectorAdapters) {
+  constructor(descriptor, inspectorAdapters, canReadFromGeoJson = true) {
     super(descriptor, inspectorAdapters);
     this._metricFields = [];
     if (this._descriptor.metrics) {
       this._descriptor.metrics.forEach((aggDescriptor) => {
         this._metricFields.push(
-          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
+          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField(), canReadFromGeoJson)
         );
       });
     }
@@ -48,11 +48,16 @@ export class AbstractESAggSource extends AbstractESSource {
     return FIELD_ORIGIN.SOURCE;
   }
 
-  getMetricFields() {
+  getMetricFields(canReadFromGeoJson = true) {
     const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
     // Handle case where metrics is empty because older saved object state is empty array or there are no valid aggs.
     return metrics.length === 0
-      ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
+      ? esAggFieldsFactory(
+          { type: AGG_TYPE.COUNT },
+          this,
+          this.getOriginForField(),
+          canReadFromGeoJson
+        )
       : metrics;
   }
 

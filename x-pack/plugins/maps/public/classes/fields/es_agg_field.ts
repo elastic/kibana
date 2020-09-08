@@ -30,6 +30,7 @@ export class ESAggField implements IESAggField {
   private readonly _label?: string;
   private readonly _aggType: AGG_TYPE;
   private readonly _esDocField?: IField | undefined;
+  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     label,
@@ -37,6 +38,7 @@ export class ESAggField implements IESAggField {
     aggType,
     esDocField,
     origin,
+    canReadFromGeoJson = true,
   }: {
     label?: string;
     source: IESAggSource;
@@ -49,6 +51,7 @@ export class ESAggField implements IESAggField {
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
+    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   getSource(): IVectorSource {
@@ -132,18 +135,19 @@ export class ESAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return true;
+    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
   }
 
   canReadFromGeoJson(): boolean {
-    return true;
+    return this._canReadFromGeoJson;
   }
 }
 
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
   source: IESAggSource,
-  origin: FIELD_ORIGIN
+  origin: FIELD_ORIGIN,
+  canReadFromGeoJson?: boolean = true
 ): IESAggField[] {
   const aggField = new ESAggField({
     label: aggDescriptor.label,
@@ -153,6 +157,7 @@ export function esAggFieldsFactory(
     aggType: aggDescriptor.type,
     source,
     origin,
+    canReadFromGeoJson,
   });
 
   const aggFields: IESAggField[] = [aggField];

@@ -5,7 +5,11 @@
  */
 
 import { AbstractESAggSource } from '../es_agg_source';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  ESGeoGridSourceDescriptor,
+  MapFilters,
+  MapQuery,
+} from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
 
@@ -18,6 +22,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }: Partial<ESGeoGridSourceDescriptor>): ESGeoGridSourceDescriptor;
 
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
+
+  private readonly _descriptor: ESGeoGridSourceDescriptor;
 
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;

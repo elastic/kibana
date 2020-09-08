@@ -13,7 +13,6 @@ import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
-  GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
   KBN_TOO_MANY_FEATURES_PROPERTY,
   MAX_ZOOM,
@@ -61,7 +60,6 @@ export async function getGridTile({
   logger.warn('getGridTile not implemented');
 
   const esBbox = tileToESBbox(x, y, z);
-  const geojsonPolyhon = tileToGeoJsonPolygon(x, y, z);
 
   try {
     let result;
@@ -94,6 +92,8 @@ export async function getGridTile({
         features,
         type: 'FeatureCollection',
       };
+
+      logger.warn(`first featyreL ${JSON.stringify(featureCollection.features[0], null, '\t')}`);
 
       const tileIndex = geojsonvt(featureCollection, {
         maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24

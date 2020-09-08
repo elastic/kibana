@@ -58,6 +58,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
     };
   }
 
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters, descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE);
+  }
+
   renderSourceSettingsEditor({ onChange, currentLayerType }) {
     return (
       <UpdateSourceEditor
@@ -104,6 +108,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
         value: this._descriptor.geoField,
       },
     ];
+  }
+
+  getMetricFields() {
+    return super.getMetricFields(this._descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE);
   }
 
   getFieldNames() {

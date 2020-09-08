@@ -13,17 +13,21 @@ import { AbstractESAggSourceDescriptor } from '../../../../common/descriptor_typ
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
-  getMetricFields(): IESAggField[];
+  getMetricFields(canReadFromGeoJson?: boolean): IESAggField[];
   hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
 }
 
 export class AbstractESAggSource extends AbstractESSource implements IESAggSource {
-  constructor(sourceDescriptor: AbstractESAggSourceDescriptor, inspectorAdapters: object);
+  constructor(
+    sourceDescriptor: AbstractESAggSourceDescriptor,
+    inspectorAdapters: object,
+    canReadFromGeoJson?
+  );
 
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
-  getMetricFields(): IESAggField[];
+  getMetricFields(canReadFromGeoJson?: boolean): IESAggField[];
   hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
 }
