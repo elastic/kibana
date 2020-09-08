@@ -46,6 +46,7 @@ object DefaultTemplate : Template({
 
   params {
     param("env.CI", "true")
+    param("env.TEAMCITY_CI", "true")
 
     // TODO remove these
     param("env.GCS_UPLOAD_PREFIX", "INVALID_PREFIX")
