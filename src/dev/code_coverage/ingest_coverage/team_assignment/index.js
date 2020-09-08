@@ -17,42 +17,41 @@
  * under the License.
  */
 
-import { run } from '@kbn/dev-utils';
-import { TEAM_ASSIGNMENT_PIPELINE_NAME } from '../constants';
-import { fetch } from './get_data';
-import { update } from './update_ingest_pipeline';
+import { run, createFlagError } from '@kbn/dev-utils';
+import { parse } from './parse_owners';
+import { flush } from './flush';
+import { enumeratePatterns } from './enumerate_patterns';
+import { resolve } from 'path';
 
-const updatePipeline = update(TEAM_ASSIGNMENT_PIPELINE_NAME);
-
-const execute = ({ flags, log }) => {
-  if (flags.verbose) log.verbose(`### Verbose logging enabled`);
-
-  const logLeft = handleErr(log);
-  const updateAndLog = updatePipeline(log);
-
-  const { path } = flags;
-
-  fetch(path).fold(logLeft, updateAndLog);
-};
-
-function handleErr(log) {
-  return (msg) => log.error(msg);
-}
-
-const description = `
-
-Upload the latest team assignment pipeline def from src,
-to the cluster.
-
-      `;
+const ROOT = resolve(__dirname, '../../../../..');
 
 const flags = {
-  string: ['path', 'verbose'],
+  string: ['src', 'dest'],
   help: `
---path             Required, path to painless definition for team assignment.
+--src              Required, path to CODEOWNERS file.
+--dest             Required, destination path of the assignments.
         `,
 };
 
-const usage = 'node scripts/load_team_assignment.js --verbose --path PATH_TO_PAINLESS_SCRIPT.json';
+export const generateTeamAssignments = () => {
+  run(
+    ({ flags, log }) => {
+      if (flags.src === '') throw createFlagError('please provide a single --src flag');
+      if (flags.dest === '') throw createFlagError('please provide a single --dest flag');
+      const parseCodeOwners = parse(flags.src);
+      // TODO: Change the flow such that "Find Definition" easily finds these symbols.
+      // Currently, I'm just passing closures, point free.
+      parseCodeOwners(log)(enumeratePatterns(ROOT))(flush(flags.dest));
+    },
+    {
+      description: `
 
-export const uploadTeamAssignmentJson = () => run(execute, { description, flags, usage });
+Create a file defining the team assignments,
+ parsed from the source of truth in
+ kbn-dev-utils.
+
+      `,
+      flags,
+    }
+  );
+};

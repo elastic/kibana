@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { tryCatch as tc } from '../either';
+import { always } from '../utils';
+import * as Either from '../either';
 
-const ROOT = resolve(__dirname, '../../../../..');
+const coverageDelimRe = /^#CC#\s/;
 
-const resolveFromRoot = resolve.bind(null, ROOT);
+export const empties = (x) => x !== '';
+export const comments = (x) => !/^#\s{1,3}/.test(x);
+const dropDelim = (x) => x.replace(coverageDelimRe, '');
 
-const resolved = (path) => () => resolveFromRoot(path);
-
-const getContents = (path) => tc(() => readFileSync(path, 'utf8'));
-
-// fetch :: String -> Left | Right
-export const fetch = (path) => tc(resolved(path)).chain(getContents);
+export const dropCCDelim = (x) =>
+  Either.fromNullable(coverageDelimRe.test(x)).fold(always(x), always(dropDelim(x)));
