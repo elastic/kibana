@@ -78,9 +78,9 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
 
           this.setTitle(
             i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
-              defaultMessage: 'Elasticsearch - Nodes - {node} - Overview',
+              defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
               values: {
-                node: get(data, 'nodeSummary.name'),
+                nodeName: get(data, 'nodeSummary.name'),
               },
             })
           );

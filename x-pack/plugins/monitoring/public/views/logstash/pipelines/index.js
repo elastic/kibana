@@ -69,7 +69,7 @@ uiRoutes.when('/logstash/pipelines', {
   controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       super({
-        title: i18n.translate('xpack.monitoring.logstash.pipelines.pageTitle', {
+        title: i18n.translate('xpack.monitoring.logstash.pipelines.routeTitle', {
           defaultMessage: 'Logstash Pipelines',
         }),
         pageTitle: i18n.translate('xpack.monitoring.logstash.pipelines.pageTitle', {
