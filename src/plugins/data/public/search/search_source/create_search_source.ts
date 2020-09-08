@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { migrateLegacyQuery } from '../../../../kibana_legacy/common';
+import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';

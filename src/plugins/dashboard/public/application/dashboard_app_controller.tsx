@@ -88,8 +88,8 @@ import {
   AngularHttpError,
   KibanaLegacyStart,
   subscribeWithScope,
-  migrateLegacyQuery,
 } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
