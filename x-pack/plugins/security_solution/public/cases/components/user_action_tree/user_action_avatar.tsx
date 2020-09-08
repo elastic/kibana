@@ -21,7 +21,7 @@ const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps
           data-test-subj={`user-action-avatar`}
         />
       ) : (
-        <EuiLoadingSpinner />
+        <EuiLoadingSpinner data-test-subj={`user-action-avatar-loading-spinner`} />
       )}
     </>
   );

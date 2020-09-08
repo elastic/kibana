@@ -20,9 +20,18 @@ const UserActionUsernameWithAvatarComponent = ({
   fullName,
 }: UserActionUsernameWithAvatarProps) => {
   return (
-    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      responsive={false}
+      alignItems="center"
+      gutterSize="s"
+      data-test-subj="user-action-username-with-avatar"
+    >
       <EuiFlexItem grow={false}>
-        <EuiAvatar size="s" name={isEmpty(fullName) ? username : fullName ?? ''} />
+        <EuiAvatar
+          size="s"
+          name={isEmpty(fullName) ? username : fullName ?? ''}
+          data-test-subj="user-action-username-avatar"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <UserActionUsername username={username} fullName={fullName} />

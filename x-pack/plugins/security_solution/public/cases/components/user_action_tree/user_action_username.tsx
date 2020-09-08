@@ -15,7 +15,11 @@ interface UserActionUsernameProps {
 
 const UserActionUsernameComponent = ({ username, fullName }: UserActionUsernameProps) => {
   return (
-    <EuiToolTip position="top" content={<p>{isEmpty(fullName) ? username : fullName}</p>}>
+    <EuiToolTip
+      position="top"
+      content={<p>{isEmpty(fullName) ? username : fullName}</p>}
+      data-test-subj="user-action-username-tooltip"
+    >
       <strong>{username}</strong>
     </EuiToolTip>
   );
