@@ -257,7 +257,7 @@ export class MapsAppView extends React.Component<Props, State> {
   };
 
   _initMapAndLayerSettings() {
-    const globalState: QueryState = getGlobalState();
+    const globalState: MapsGlobalState = getGlobalState();
     const mapStateJSON = this.props.savedMap.mapStateJSON;
 
     let savedObjectFilters = [];

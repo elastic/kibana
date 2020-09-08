@@ -164,7 +164,7 @@ export class MapsListView extends React.Component {
   };
 
   onTableChange = ({ page, sort }: CriteriaWithPagination<SelectionItem>) => {
-    const { index: pageIndex, size: pageSize } = page!;
+    const { index: pageIndex, size: pageSize } = page;
 
     let { field: sortField, direction: sortDirection } = sort || {};
 

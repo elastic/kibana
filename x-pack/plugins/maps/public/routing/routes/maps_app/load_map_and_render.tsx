@@ -28,7 +28,7 @@ interface State {
 
 export const LoadMapAndRender = class extends React.Component<Props, State> {
   _isMounted: boolean = false;
-  state = {
+  state: State = {
     savedMap: undefined,
     failedToLoad: false,
   };
@@ -74,7 +74,7 @@ export const LoadMapAndRender = class extends React.Component<Props, State> {
 
     return savedMap ? (
       <MapsAppView
-        savedMap={savedMap!}
+        savedMap={savedMap}
         onAppLeave={this.props.onAppLeave}
         stateTransfer={this.props.stateTransfer}
         originatingApp={this.props.originatingApp}
