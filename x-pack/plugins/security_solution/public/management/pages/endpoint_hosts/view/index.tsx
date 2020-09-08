@@ -86,11 +86,11 @@ const TableRowActions = memo<{
 
   return (
     <EuiPopover
-      data-test-subj="endpointTableRowActions"
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
         <EuiButtonIcon
+          data-test-subj="endpointTableRowActions"
           iconType="boxesHorizontal"
           onClick={handleToggleMenu}
           aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
@@ -434,9 +434,9 @@ export const EndpointList = () => {
                         data-test-subj="agentDetailsLink"
                         appId="ingestManager"
                         appPath={`#/fleet/agents/${item.metadata.elastic.agent.id}`}
-                        href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
-                          item.metadata.elastic.agent.id
-                        }`}
+                        href={`${services?.application?.getUrlForApp(
+                          'ingestManager'
+                        )}#/fleet/agents/${item.metadata.elastic.agent.id}`}
                       >
                         <FormattedMessage
                           id="xpack.securitySolution.endpoint.list.actions.agentDetails"

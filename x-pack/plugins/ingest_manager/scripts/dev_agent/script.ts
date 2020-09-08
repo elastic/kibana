@@ -14,8 +14,11 @@ import {
   PostAgentEnrollRequest,
   PostAgentEnrollResponse,
 } from '../../common/types';
-import { version } from '../../package.json';
+import * as kibanaPackage from '../../package.json';
 
+// @ts-ignore
+// Using the ts-ignore because we are importing directly from a json to a script file
+const version = kibanaPackage.version;
 const CHECKIN_INTERVAL = 3000; // 3 seconds
 
 type Agent = Pick<_Agent, 'id' | 'access_api_key'>;

@@ -6,8 +6,6 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { prettyDOM, screen } from '@testing-library/dom';
-
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media.ts';
 import {
@@ -674,6 +672,8 @@ describe('when on the list page', () => {
   describe('when the more actions column is opened', () => {
     let hostInfo: HostInfo;
     let agentId: string;
+    let agentPolicyId: string;
+    const generator = new EndpointDocGenerator('seed');
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
     const mockEndpointListApi = () => {
@@ -684,11 +684,14 @@ describe('when on the list page', () => {
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+      const agentPolicy = generator.generateAgentPolicy();
+      agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [hostInfo],
         endpointPackagePolicies: [packagePolicy],
+        agentPolicy,
       });
     };
 
@@ -705,6 +708,16 @@ describe('when on the list page', () => {
         await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
         return renderResult;
       };
+
+      coreStart.application.getUrlForApp.mockImplementation((appName) => {
+        switch (appName) {
+          case 'securitySolution':
+            return '/app/security';
+          case 'ingestManager':
+            return '/app/ingestManager';
+        }
+        return appName;
+      });
     });
 
     afterEach(() => {
@@ -718,15 +731,35 @@ describe('when on the list page', () => {
       reactTestingLibrary.act(() => {
         reactTestingLibrary.fireEvent.click(endpointActionsButton);
       });
+
       const hostLink = await renderResult.findByTestId('hostLink');
-      const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(hostLink);
-      });
-      const changedUrlAction = await userChangedUrlChecker;
-      expect(changedUrlAction.payload.pathname).toEqual(`hosts/${hostInfo.metadata.host.hostname}`);
+      expect(hostLink.getAttribute('href')).toEqual(
+        `/app/security/hosts/${hostInfo.metadata.host.hostname}`
+      );
     });
-    it.skip('navigates to the Ingest Agent Policy page', () => {});
-    it.skip('navigates to the Ingest Agent Details page', () => {});
+    it('navigates to the Ingest Agent Policy page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
+      expect(agentPolicyLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/policies/${agentPolicyId}`
+      );
+    });
+    it('navigates to the Ingest Agent Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
+      expect(agentDetailsLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}`
+      );
+    });
   });
 });
