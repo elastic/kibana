@@ -26,6 +26,13 @@ describe('Rollup Search Strategy', () => {
       },
     },
   };
+  const getRollupService = jest.fn().mockImplementation(() => {
+    return {
+      callAsCurrentUser: async () => {
+        return rollupResolvedData;
+      },
+    };
+  });
   const indexPattern = 'indexPattern';
 
   beforeEach(() => {
@@ -49,7 +56,8 @@ describe('Rollup Search Strategy', () => {
 
     RollupSearchStrategy = getRollupSearchStrategy(
       AbstractSearchStrategy,
-      RollupSearchCapabilities
+      RollupSearchCapabilities,
+      getRollupService
     );
   });
 
@@ -121,11 +129,7 @@ describe('Rollup Search Strategy', () => {
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
-      expect(
-        request.requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps
-      ).toHaveBeenCalledWith({
-        index: indexPattern,
-      });
+      expect(getRollupService).toHaveBeenCalled({});
       expect(rollupData).toBe('data');
     });
 

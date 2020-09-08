@@ -40,20 +40,27 @@ export async function getTableData(req, panel) {
 
   try {
     const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
-    const [resp] = await searchStrategy.search(req.framework.core, req.requestContext, [
+    const [resp] = await searchStrategy.search(req.framework.core, req, [
       {
         body,
         index: panelIndexPattern,
       },
     ]);
 
-    const buckets = get(resp.rawResponse, 'aggregations.pivot.buckets', []);
+    const buckets = get(
+      resp.rawResponse ? resp.rawResponse : resp,
+      'aggregations.pivot.buckets',
+      []
+    );
+
+    console.log(buckets);
 
     return {
       ...meta,
       series: buckets.map(processBucket(panel)),
     };
   } catch (err) {
+    console.log(err);
     if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
 

@@ -7,13 +7,15 @@ import { registerRollupSearchStrategy } from './register_rollup_search_strategy'
 
 describe('Register Rollup Search Strategy', () => {
   let addSearchStrategy;
+  let getRollupService;
 
   beforeEach(() => {
     addSearchStrategy = jest.fn().mockName('addSearchStrategy');
+    getRollupService = jest.fn().mockName('getRollupService');
   });
 
   test('should run initialization', () => {
-    registerRollupSearchStrategy(addSearchStrategy);
+    registerRollupSearchStrategy(addSearchStrategy, getRollupService);
 
     expect(addSearchStrategy).toHaveBeenCalled();
   });

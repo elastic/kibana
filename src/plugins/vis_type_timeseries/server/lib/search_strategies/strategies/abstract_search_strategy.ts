@@ -56,13 +56,13 @@ export class AbstractSearchStrategy {
     this.additionalParams = additionalParams;
   }
 
-  async search(core: CoreSetup, context: ReqFacade['requestContext'], bodies: any[], options = {}) {
+  async search(core: CoreSetup, req: ReqFacade, bodies: any[], options = {}) {
     const deps = (await core.getStartServices())[1] as VisTypeTimeseriesPluginStartDependencies;
     const requests: any[] = [];
     bodies.forEach((body) => {
       requests.push(
         deps.data.search.search(
-          context,
+          req.requestContext,
           {
             params: {
               ...body,

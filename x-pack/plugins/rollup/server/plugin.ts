@@ -116,8 +116,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (visTypeTimeseries) {
+      const getRollupService = async (request: any) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return this.rollupEsClient.asScoped(request);
+      };
       const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(addSearchStrategy);
+      registerRollupSearchStrategy(addSearchStrategy, getRollupService);
     }
 
     if (usageCollection) {

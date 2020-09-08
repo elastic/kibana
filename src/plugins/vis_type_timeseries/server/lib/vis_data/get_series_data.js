@@ -44,7 +44,7 @@ export async function getSeriesData(req, panel) {
       []
     );
 
-    const data = await searchStrategy.search(req.framework.core, req.requestContext, searches);
+    const data = await searchStrategy.search(req.framework.core, req, searches);
 
     const handleResponseBodyFn = handleResponseBody(panel);
 

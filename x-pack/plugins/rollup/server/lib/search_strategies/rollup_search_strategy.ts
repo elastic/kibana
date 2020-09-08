@@ -5,6 +5,7 @@
  */
 import { keyBy, isString } from 'lodash';
 
+import { CoreSetup } from 'src/core/server';
 import { ReqFacade } from '../../../../../../src/plugins/vis_type_timeseries/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/server';
 import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
@@ -18,7 +19,8 @@ const isIndexPatternValid = (indexPattern: string) =>
 
 export const getRollupSearchStrategy = (
   AbstractSearchStrategy: any,
-  RollupSearchCapabilities: any
+  RollupSearchCapabilities: any,
+  getRollupService: any
 ) =>
   class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';
@@ -27,12 +29,26 @@ export const getRollupSearchStrategy = (
       super(ENHANCED_ES_SEARCH_STRATEGY, 'rollup', { rest_total_hits_as_int: true });
     }
 
-    getRollupData(req: ReqFacade, indexPattern: string) {
-      return req.requestContext.core.elasticsearch.client.asCurrentUser.rollup
-        .getRollupIndexCaps({
-          index: indexPattern,
+    async search(core: CoreSetup, req: ReqFacade, bodies: any[], options = {}) {
+      const rollupService = await getRollupService(req);
+      const requests: any[] = [];
+      bodies.forEach((body) => {
+        requests.push(
+          rollupService.callAsCurrentUser('rollup.search', {
+            ...body,
+            rest_total_hits_as_int: true,
+          })
+        );
+      });
+      return Promise.all(requests);
+    }
+
+    async getRollupData(req: ReqFacade, indexPattern: string) {
+      const rollupService = await getRollupService(req);
+      return rollupService
+        .callAsCurrentUser('rollup.rollupIndexCapabilities', {
+          indexPattern,
         })
-        .then((res) => res.body)
         .catch(() => Promise.resolve({}));
     }
 

@@ -71,7 +71,9 @@ describe('AbstractSearchStrategy', () => {
           ])
         ),
       },
-      {},
+      {
+        requestContext: {},
+      },
       searches
     );
 

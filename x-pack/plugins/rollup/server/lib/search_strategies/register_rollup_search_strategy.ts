@@ -11,11 +11,15 @@ import {
 import { getRollupSearchStrategy } from './rollup_search_strategy';
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
-export const registerRollupSearchStrategy = (addSearchStrategy: (searchStrategy: any) => void) => {
+export const registerRollupSearchStrategy = (
+  addSearchStrategy: (searchStrategy: any) => void,
+  getRollupService: Function
+) => {
   const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
   const RollupSearchStrategy = getRollupSearchStrategy(
     AbstractSearchStrategy,
-    RollupSearchCapabilities
+    RollupSearchCapabilities,
+    getRollupService
   );
 
   addSearchStrategy(new RollupSearchStrategy());
