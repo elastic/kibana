@@ -23,8 +23,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
 
   /**
    * @function parseStyles
-   * Parses a string of inline styles into a javascript object with casing for react
-   *
+   * Parses a string of inline styles into a typescript object with casing for react
    * @param {string} styles
    * @returns {Object}
    */
