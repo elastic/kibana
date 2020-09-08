@@ -184,11 +184,13 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
 
           let availableCharactersLeft =
             URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
-          const queryFields = queryString
+
+          // URL template might contain encoded characters
+          const queryFields = decodeURIComponent(queryString)
             // Split query string by AND operator.
             .split(/\sand\s/i)
             // Get property name from `influencerField:$influencerField$` string.
-            .map((v) => v.split(':')[0]);
+            .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
 
           const queryParts: string[] = [];
           const joinOperator = ' AND ';
