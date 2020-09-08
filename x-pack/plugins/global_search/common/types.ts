@@ -51,12 +51,12 @@ export interface GlobalSearchProviderResult {
   icon?: string;
   /**
    * The url associated with this result.
-   * This can be either an absolute url, a path relative to the basePath, or a structure specifying if the basePath should be prepended.
+   * This can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.
    *
    * @example
    * `result.url = 'https://kibana-instance:8080/base-path/app/my-app/my-result-type/id';`
    * `result.url = '/app/my-app/my-result-type/id';`
-   * `result.url = { path: '/base-path/app/my-app/my-result-type/id', prependBasePath: false };`
+   * `result.url = { path: '/base-path/s/my-other-space/app/my-app/my-result-type/id', prependBasePath: false };`
    */
   url: GlobalSearchProviderResultUrl;
   /** the score of the result, from 1 (lowest) to 100 (highest) */
