@@ -26,7 +26,6 @@ const createPluginSpec = ({ id, path }: { id: string; path: string }): LegacyPlu
     getId: () => id,
     getExpectedKibanaVersion: () => 'kibana',
     getConfigPrefix: () => 'plugin.config',
-    getDeprecationsProvider: () => undefined,
     getPack: () => ({
       getPath: () => path,
     }),
