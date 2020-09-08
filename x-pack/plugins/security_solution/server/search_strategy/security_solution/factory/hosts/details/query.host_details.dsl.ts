@@ -44,6 +44,8 @@ export const buildHostDetailsQuery = ({
       track_total_hits: false,
     },
   };
+  console.log('----dsl----');
+  console.log(JSON.stringify(dslQuery));
 
   return dslQuery;
 };
