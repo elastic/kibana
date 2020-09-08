@@ -50,10 +50,6 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
-    let params;
-    if (previousColumn?.dataType === 'number' && previousColumn?.operationType === 'cardinality') {
-      params = previousColumn.params;
-    }
     return {
       label: ofName(field.displayName),
       dataType: 'number',
@@ -62,7 +58,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       suggestedPriority,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      params,
+      params:
+        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
