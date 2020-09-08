@@ -23,7 +23,6 @@ import {
 
 import { hitsToGeoJson } from '../../common/elasticsearch_geo_utils';
 import { flattenHit } from './util';
-
 // @ts-expect-error
 import { convertRegularRespToGeoJson } from '../../common/convert_to_geojson';
 
@@ -48,6 +47,7 @@ export async function getGridTile({
   z,
   requestBody = {},
   requestType = RENDER_AS.POINT,
+  geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
 }: {
   x: number;
   y: number;
@@ -58,24 +58,37 @@ export async function getGridTile({
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
+  geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
   logger.warn('getGridTile not implemented');
 
   const esBbox = tileToESBbox(x, y, z);
-
   try {
-    let result;
     try {
       // todo: needs to be different from geo_point and geo_shape
-      const geoBoundingBox = {
-        geo_bounding_box: {
-          [geometryFieldName]: esBbox,
-        },
-      };
-      requestBody.query.bool.filter.push(geoBoundingBox);
+      let bboxFilter;
+      if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+        bboxFilter = {
+          geo_bounding_box: {
+            [geometryFieldName]: esBbox,
+          },
+        };
+      } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+        const geojsonPolygon = tileToGeoJsonPolygon(x, y, z);
+        bboxFilter = {
+          geo_shape: {
+            [geometryFieldName]: {
+              shape: geojsonPolygon,
+              relation: 'INTERSECTS',
+            },
+          },
+        };
+      } else {
+        throw new Error(`${geoFieldType} is not valid geo field-type`);
+      }
+      requestBody.query.bool.filter.push(bboxFilter);
 
       const targetPrecision = Math.min(z + SUPER_FINE_ZOOM_DELTA, MAX_ZOOM);
-      logger.warn(`z ${z} -> targetPrecision ${targetPrecision}`);
 
       requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = targetPrecision;
       requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
@@ -85,8 +98,6 @@ export async function getGridTile({
         body: requestBody,
       };
 
-      logger.warn(JSON.stringify(esGeotileGridQuery));
-
       const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
 
       const features = convertRegularRespToGeoJson(gridAggResult, requestType);
@@ -94,8 +105,6 @@ export async function getGridTile({
         features,
         type: 'FeatureCollection',
       };
-
-      logger.warn(`first featyreL ${JSON.stringify(featureCollection.features[0], null, '\t')}`);
 
       const tileIndex = geojsonvt(featureCollection, {
         maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
