@@ -61,7 +61,6 @@ test('can build menu with one action', async () => {
         "id": "mainMenu",
         "items": Array [
           Object {
-            "_order": 0,
             "data-test-subj": "embeddablePanelAction-foo",
             "href": undefined,
             "icon": "empty",
@@ -109,8 +108,8 @@ test('orders items according to "order" field', async () => {
     closeMenu: () => {},
   });
 
-  expect(menu[0].items[0].name).toBe('Bar');
-  expect(menu[0].items[1].name).toBe('Foo');
+  expect(menu[0].items![0].name).toBe('Bar');
+  expect(menu[0].items![1].name).toBe('Foo');
 
   const menu2 = await buildContextMenuForActions({
     actions: [
@@ -144,8 +143,8 @@ test('orders items according to "order" field', async () => {
     closeMenu: () => {},
   });
 
-  expect(menu2[0].items[0].name).toBe('Bar');
-  expect(menu2[0].items[1].name).toBe('Foo');
+  expect(menu2[0].items![0].name).toBe('Bar');
+  expect(menu2[0].items![1].name).toBe('Foo');
 });
 
 test('hides items behind in "More" submenu if there are more than 4 actions', async () => {
@@ -226,7 +225,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
         "id": "mainMenu",
         "items": Array [
           Object {
-            "_order": 1,
             "data-test-subj": "embeddablePanelAction-foo1",
             "href": undefined,
             "icon": "empty",
@@ -235,7 +233,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
             "panel": undefined,
           },
           Object {
-            "_order": 1,
             "data-test-subj": "embeddablePanelAction-foo2",
             "href": undefined,
             "icon": "empty",
@@ -244,7 +241,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
             "panel": undefined,
           },
           Object {
-            "_order": 1,
             "data-test-subj": "embeddablePanelAction-foo3",
             "href": undefined,
             "icon": "empty",
@@ -253,7 +249,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
             "panel": undefined,
           },
           Object {
-            "_order": -1,
             "icon": "boxesHorizontal",
             "name": "More",
             "panel": "mainMenu__more",
@@ -265,7 +260,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
         "id": "mainMenu__more",
         "items": Array [
           Object {
-            "_order": 1,
             "data-test-subj": "embeddablePanelAction-foo4",
             "href": undefined,
             "icon": "empty",
@@ -274,7 +268,6 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
             "panel": undefined,
           },
           Object {
-            "_order": 1,
             "data-test-subj": "embeddablePanelAction-foo5",
             "href": undefined,
             "icon": "empty",

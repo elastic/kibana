@@ -97,6 +97,24 @@ const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: 
   panels[morePanelId] = subPanel;
 };
 
+const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemDescriptor[] => {
+  const euiItems: EuiContextMenuPanelItemDescriptor[] = [];
+  for (const item of items) {
+    const { _order: omit, ...rest } = item;
+    euiItems.push(rest);
+  }
+  return euiItems;
+};
+
+const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
+  const euiPanels: EuiContextMenuPanelDescriptor[] = [];
+  for (const panel of panels) {
+    const { _level: omit, ...rest } = panel;
+    euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
+  }
+  return euiPanels;
+};
+
 export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
@@ -110,7 +128,7 @@ export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
   closeMenu,
-}: BuildContextMenuParams): Promise<PanelDescriptor[]> {
+}: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
       id: 'mainMenu',
@@ -179,5 +197,6 @@ export async function buildContextMenuForActions({
     }
   }
 
-  return Object.values(panels);
+  const panelList = Object.values(panels);
+  return removePanelMetaFields(panelList);
 }
