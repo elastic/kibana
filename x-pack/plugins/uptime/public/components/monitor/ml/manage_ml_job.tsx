@@ -22,7 +22,11 @@ import { useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
 import { ConfirmAlertDeletion } from './confirm_alert_delete';
-import { deleteAnomalyAlertAction, getAnomalyAlertAction } from '../../../state/alerts/alerts';
+import {
+  deleteAnomalyAlertAction,
+  getAnomalyAlertAction,
+  isAnomalyAlertDeleting,
+} from '../../../state/alerts/alerts';
 import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
 
 interface Props {
@@ -41,6 +45,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+  const isAlertDeleting = useSelector(isAnomalyAlertDeleting);
 
   const { loading: isMLJobLoading } = useSelector(hasMLJobSelector);
 
@@ -57,7 +62,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const deleteAnomalyAlert = () =>
     dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
-  const showLoading = isMLJobCreating || isMLJobLoading;
+  const showLoading = isMLJobCreating || isMLJobLoading || isAlertDeleting;
 
   const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
 
@@ -66,7 +71,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
-      isLoading={isMLJobCreating || isMLJobLoading}
+      isLoading={showLoading}
       size="s"
       aria-label={labels.ENABLE_MANAGE_JOB}
     >
@@ -105,6 +110,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
                 onClick: () => {
                   dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
                   dispatch(setAlertFlyoutVisible(true));
+                  setIsPopOverOpen(false);
                 },
               },
             ]),

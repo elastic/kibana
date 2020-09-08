@@ -45,7 +45,6 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteMLJob() {
-      await testSubjects.click('uptimeManageAnomalyAlertBtn');
       await testSubjects.click('uptimeDeleteMLJobBtn');
       return retry.tryForTime(10000, async () => {
         await testSubjects.click('uptimeMLJobDeleteConfirmModel > confirmModalConfirmButton');

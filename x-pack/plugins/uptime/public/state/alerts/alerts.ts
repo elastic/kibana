@@ -163,3 +163,4 @@ export const alertsSelector = ({ alerts }: AppState) => alerts.alerts;
 export const isAlertDeletedSelector = ({ alerts }: AppState) => alerts.alertDeletion;
 
 export const anomalyAlertSelector = ({ alerts }: AppState) => alerts.anomalyAlert;
+export const isAnomalyAlertDeleting = ({ alerts }: AppState) => alerts.anomalyAlertDeletion.loading;
