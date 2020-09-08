@@ -7,20 +7,21 @@
 import { KbnError } from '../../../../../../src/plugins/kibana_utils/public';
 
 export class MLRequestFailure extends KbnError {
-  origError: any;
-  resp: any;
-  stack: any;
   // takes an Error object and and optional response object
-  // if error is falsy (null) the response object will be used
-  // notify will show the full expandable stack trace of the response if a response object is used and no error is passed in.
-  constructor(error: any, resp: any) {
-    error = error || {};
-    super(error.message || JSON.stringify(resp));
 
-    this.origError = error;
-    this.resp = typeof resp === 'string' ? JSON.parse(resp) : resp;
-    if (resp.body) {
-      this.stack = JSON.stringify(resp.body, null, 2);
+  constructor(error: any, resp: any) {
+    super(error.message);
+
+    if (typeof resp === 'object') {
+      if ('body' in resp) {
+        this.stack = JSON.stringify(resp.body, null, 2);
+      } else {
+        try {
+          this.stack = JSON.stringify(resp, null, 2);
+        } catch (e) {
+          // fail silently
+        }
+      }
     }
   }
 }

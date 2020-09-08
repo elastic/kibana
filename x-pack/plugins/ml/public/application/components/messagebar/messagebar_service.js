@@ -9,18 +9,18 @@ import { getToastNotifications } from '../../util/dependency_cache';
 import { MLRequestFailure } from '../../util/ml_error';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
-function errorNotify(text, resp) {
+function errorNotify(error, resp) {
   let err = null;
-  if (typeof text === 'object') {
-    err = new Error(extractErrorMessage(text));
-  } else if (typeof text === 'object' && text.message !== undefined) {
-    err = new Error(text.message);
+  if (typeof error === 'object') {
+    err = new Error(extractErrorMessage(error));
+  } else if (typeof error === 'object' && error.message !== undefined) {
+    err = new Error(error.message);
   } else {
-    err = new Error(text);
+    err = new Error(error);
   }
 
   const toastNotifications = getToastNotifications();
-  toastNotifications.addError(new MLRequestFailure(err, resp ?? text), {
+  toastNotifications.addError(new MLRequestFailure(err, resp ?? error), {
     title: i18n.translate('xpack.ml.messagebarService.errorTitle', {
       defaultMessage: 'An error has occurred',
     }),

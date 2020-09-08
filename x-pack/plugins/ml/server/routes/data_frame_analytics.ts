@@ -348,8 +348,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
                   index: destinationIndex,
                 });
                 destIndexDeleted.success = true;
-              } catch (deleteIndexError) {
-                destIndexDeleted.error = wrapError(deleteIndexError);
+              } catch ({ body }) {
+                destIndexDeleted.error = body;
               }
             } else {
               return response.forbidden();
@@ -365,7 +365,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               }
               destIndexPatternDeleted.success = true;
             } catch (deleteDestIndexPatternError) {
-              destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+              destIndexPatternDeleted.error = deleteDestIndexPatternError;
             }
           }
         }
@@ -377,11 +377,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
             id: analyticsId,
           });
           analyticsJobDeleted.success = true;
-        } catch (deleteDFAError) {
-          analyticsJobDeleted.error = wrapError(deleteDFAError);
-          if (analyticsJobDeleted.error.statusCode === 404) {
-            return response.notFound();
-          }
+        } catch ({ body }) {
+          analyticsJobDeleted.error = body;
         }
         const results = {
           analyticsJobDeleted,

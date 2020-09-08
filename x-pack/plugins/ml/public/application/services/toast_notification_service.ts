@@ -5,78 +5,30 @@
  */
 
 import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
-import { ResponseError } from 'kibana/server';
 import { useMemo } from 'react';
 import { useNotifications } from '../contexts/kibana';
-import {
-  BoomResponse,
-  extractErrorProperties,
-  MLCustomHttpResponseOptions,
-  MLErrorObject,
-  MLResponseError,
-} from '../../../common/util/errors';
+import { MLRequestFailure } from '../util/ml_error';
+import { ErrorType, extractErrorProperties } from '../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 
 export function toastNotificationServiceProvider(toastNotifications: ToastsStart) {
-  return {
-    displayDangerToast(toastOrTitle: ToastInput, options?: ToastOptions) {
-      toastNotifications.addDanger(toastOrTitle, options);
-    },
+  function displayDangerToast(toastOrTitle: ToastInput, options?: ToastOptions) {
+    toastNotifications.addDanger(toastOrTitle, options);
+  }
 
-    displaySuccessToast(toastOrTitle: ToastInput, options?: ToastOptions) {
-      toastNotifications.addSuccess(toastOrTitle, options);
-    },
+  function displaySuccessToast(toastOrTitle: ToastInput, options?: ToastOptions) {
+    toastNotifications.addSuccess(toastOrTitle, options);
+  }
 
-    displayErrorToast(error: any, toastTitle: string) {
-      const errorObj = this.parseErrorMessage(error);
-      if (errorObj.fullErrorMessage !== undefined) {
-        // Provide access to the full error message via the 'See full error' button.
-        toastNotifications.addError(new Error(errorObj.fullErrorMessage), {
-          title: toastTitle,
-          toastMessage: errorObj.message,
-        });
-      } else {
-        toastNotifications.addDanger(
-          {
-            title: toastTitle,
-            text: errorObj.message,
-          },
-          { toastLifeTimeMs: 30000 }
-        );
-      }
-    },
+  function displayErrorToast(error: ErrorType, toastTitle: string) {
+    const errorObj = extractErrorProperties(error);
+    toastNotifications.addError(new MLRequestFailure(errorObj, error), {
+      title: toastTitle,
+    });
+  }
 
-    parseErrorMessage(
-      error:
-        | MLCustomHttpResponseOptions<MLResponseError | ResponseError | BoomResponse>
-        | undefined
-        | string
-        | MLResponseError
-    ): MLErrorObject {
-      if (
-        typeof error === 'object' &&
-        'response' in error &&
-        typeof error.response === 'string' &&
-        error.statusCode !== undefined
-      ) {
-        // MLResponseError which has been received back as part of a 'successful' response
-        // where the error was passed in a separate property in the response.
-        const wrapMlResponseError = {
-          body: error,
-          statusCode: error.statusCode,
-        };
-        return extractErrorProperties(wrapMlResponseError);
-      }
-
-      return extractErrorProperties(
-        error as
-          | MLCustomHttpResponseOptions<MLResponseError | ResponseError | BoomResponse>
-          | undefined
-          | string
-      );
-    },
-  };
+  return { displayDangerToast, displaySuccessToast, displayErrorToast };
 }
 
 /**
