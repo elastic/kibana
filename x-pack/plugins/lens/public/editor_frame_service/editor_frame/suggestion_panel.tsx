@@ -338,7 +338,6 @@ export function SuggestionPanel({
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
-                  trackSuggestionEvent(`position_${index}_of_${suggestions.length}`);
                   setLastSelectedSuggestion(index);
                   switchToSuggestion(dispatch, suggestion);
                 }

@@ -202,9 +202,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
             previousColumn: selectedColumn,
           });
 
-          trackUiEvent(
-            `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
-          );
           setState(
             changeColumn({
               state,
