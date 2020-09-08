@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiLoadingSpinner, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ImportRetry } from '../types';
 import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '..';
