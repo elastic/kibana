@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateADLinks } from '../../../../components/custom_hooks/use_create_ad_links';
+import { Link } from 'react-router-dom';
 
 export function ResultLinks({ jobs }) {
   const openJobsInSingleMetricViewerText = i18n.translate(
@@ -41,25 +42,27 @@ export function ResultLinks({ jobs }) {
     <React.Fragment>
       {singleMetricVisible && (
         <EuiToolTip position="bottom" content={openJobsInSingleMetricViewerText}>
-          <EuiButtonIcon
-            href={createLinkWithUserDefaults('timeseriesexplorer', jobs)}
-            iconType="visLine"
-            aria-label={openJobsInSingleMetricViewerText}
-            className="results-button"
-            isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-            data-test-subj="mlOpenJobsInSingleMetricViewerButton"
-          />
+          <Link to={createLinkWithUserDefaults('timeseriesexplorer', jobs)}>
+            <EuiButtonIcon
+              iconType="visLine"
+              aria-label={openJobsInSingleMetricViewerText}
+              className="results-button"
+              isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
+              data-test-subj="mlOpenJobsInSingleMetricViewerButton"
+            />
+          </Link>
         </EuiToolTip>
       )}
       <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-        <EuiButtonIcon
-          href={createLinkWithUserDefaults('explorer', jobs)}
-          iconType="visTable"
-          aria-label={openJobsInAnomalyExplorerText}
-          className="results-button"
-          isDisabled={jobActionsDisabled === true}
-          data-test-subj="mlOpenJobsInAnomalyExplorerButton"
-        />
+        <Link to={createLinkWithUserDefaults('explorer', jobs)}>
+          <EuiButtonIcon
+            iconType="visTable"
+            aria-label={openJobsInAnomalyExplorerText}
+            className="results-button"
+            isDisabled={jobActionsDisabled === true}
+            data-test-subj="mlOpenJobsInAnomalyExplorerButton"
+          />
+        </Link>
       </EuiToolTip>
       <div className="actions-border" />
     </React.Fragment>
