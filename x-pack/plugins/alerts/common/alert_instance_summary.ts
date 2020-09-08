@@ -7,7 +7,7 @@
 type AlertStatusValues = 'OK' | 'Active' | 'Error';
 type AlertInstanceStatusValues = 'OK' | 'Active';
 
-export interface AlertStatus {
+export interface AlertInstanceSummary {
   id: string;
   name: string;
   tags: string[];
