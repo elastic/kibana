@@ -39,7 +39,7 @@ export function checkViewOrCreateJobs(
           reject();
         }
       })
-      .catch((err: Error) => {
+      .catch(async (err: Error) => {
         // eslint-disable-next-line no-console
         console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
         const toastNotifications = getToastNotifications();
@@ -53,8 +53,7 @@ export function checkViewOrCreateJobs(
               'An error occurred trying to check whether the jobs in the module have been created.',
           }),
         });
-
-        window.location.href = '#/jobs';
+        await navigateToPath(`/jobs`);
         reject();
       });
   });
