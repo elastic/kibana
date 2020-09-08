@@ -26,7 +26,6 @@ import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ApmPluginSetupDeps } from '../plugin';
@@ -101,15 +100,13 @@ export function ApmAppRoot({
             <i18nCore.Context>
               <Router history={history}>
                 <LocationProvider>
-                  <MatchedRouteProvider routes={routes}>
-                    <UrlParamsProvider>
-                      <LoadingIndicatorProvider>
-                        <LicenseProvider>
-                          <App />
-                        </LicenseProvider>
-                      </LoadingIndicatorProvider>
-                    </UrlParamsProvider>
-                  </MatchedRouteProvider>
+                  <UrlParamsProvider>
+                    <LoadingIndicatorProvider>
+                      <LicenseProvider>
+                        <App />
+                      </LicenseProvider>
+                    </LoadingIndicatorProvider>
+                  </UrlParamsProvider>
                 </LocationProvider>
               </Router>
             </i18nCore.Context>
