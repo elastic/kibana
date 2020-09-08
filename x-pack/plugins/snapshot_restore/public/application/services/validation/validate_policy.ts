@@ -41,6 +41,12 @@ export interface ValidatePolicyHelperData {
    * are not configuring this value - like when they are on a previous step.
    */
   validateIndicesCount?: boolean;
+
+  /**
+   * A policy might be configured with a repository that no longer exists. We want the form to
+   * block in this case because just having a repository configured is not enough for validity.
+   */
+  repositoryDoesNotExist?: boolean;
 }
 
 export const validatePolicy = (
