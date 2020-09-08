@@ -63,7 +63,7 @@ interface Props {
   onFilter: DocViewFilterFn;
   showTimeCol: boolean;
   onSort: (props: any) => void;
-  getContextAppHref: (id: string | number | Record<string, unknown>) => string;
+  getContextAppHref: (id: string) => string;
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
   onSetColumns: (columns: string[]) => void;

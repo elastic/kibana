@@ -18,6 +18,7 @@
  */
 import React, { useState } from 'react';
 import moment from 'moment';
+import rison from 'rison-node';
 import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
@@ -26,6 +27,7 @@ import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
 import { getServices } from '../../kibana_services';
+
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
@@ -33,6 +35,7 @@ import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error/fetch_error';
 import './discover.scss';
+import { esFilters } from '../../../../data/public';
 
 export function Discover({
   addColumn,
@@ -42,7 +45,6 @@ export function Discover({
   fetchError,
   fetchCounter,
   fieldCounts,
-  getContextAppHref,
   histogramData,
   hits,
   indexPattern,
@@ -82,7 +84,28 @@ export function Discover({
     return <div>Loading</div>;
   }
   const { TopNavMenu } = getServices().navigation.ui;
-  const { savedSearch } = opts;
+  const { savedSearch, filterManager } = opts;
+
+  const getContextAppHref = (anchorId: string) => {
+    const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
+    const urlSearchParams = new URLSearchParams();
+
+    urlSearchParams.set(
+      'g',
+      rison.encode({
+        filters: filterManager.getGlobalFilters() || [],
+      })
+    );
+
+    urlSearchParams.set(
+      '_a',
+      rison.encode({
+        columns: state.columns,
+        filters: (filterManager.getAppFilters() || []).map(esFilters.disableFilter),
+      })
+    );
+    return `${path}?${urlSearchParams.toString()}`;
+  };
 
   return (
     <I18nProvider>

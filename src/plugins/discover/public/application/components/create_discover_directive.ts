@@ -28,7 +28,6 @@ export function createDiscoverDirective(reactDirective: any) {
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],
     ['fieldCounts', { watchDepth: 'reference' }],
-    ['getContextAppHref', { watchDepth: 'reference' }],
     ['histogramData', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],

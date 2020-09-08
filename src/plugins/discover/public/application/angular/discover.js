@@ -453,13 +453,23 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     };
 
     $scope.getContextAppHref = (anchorId) => {
-      const path = `#/discover/context/${$scope.indexPattern}/${anchorId}`;
+      const path = `#/discover/context/${encodeURIComponent(
+        $scope.indexPattern.id
+      )}/${encodeURIComponent(anchorId)}`;
       const urlSearchParams = new URLSearchParams();
+
+      urlSearchParams.set(
+        'g',
+        rison.encode({
+          filters: filterManager.getGlobalFilters() || [],
+        })
+      );
+
       urlSearchParams.set(
         '_a',
         rison.encode({
           columns: $scope.state.columns,
-          filters: ($scope.filters || []).map(esFilters.disableFilter),
+          filters: (filterManager.getAppFilters() || []).map(esFilters.disableFilter),
         })
       );
       return `${path}?${urlSearchParams.toString()}`;
@@ -635,6 +645,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
+    filterManager,
   };
 
   const shouldSearchOnPageLoad = () => {
