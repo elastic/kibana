@@ -25,6 +25,12 @@ export const I18LABELS = {
   pageLoadTimes: i18n.translate('xpack.apm.rum.dashboard.pageLoadTimes.label', {
     defaultMessage: 'Page load times',
   }),
+  pageLoadDuration: i18n.translate(
+    'xpack.apm.rum.dashboard.pageLoadDuration.label',
+    {
+      defaultMessage: 'Page load duration',
+    }
+  ),
   pageLoadDistribution: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDistribution.label',
     {
@@ -45,6 +51,9 @@ export const I18LABELS = {
   }),
   seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
     defaultMessage: 'seconds',
+  }),
+  coreWebVitals: i18n.translate('xpack.apm.rum.filterGroup.coreWebVitals', {
+    defaultMessage: 'Core web vitals',
   }),
 };
 

@@ -8,8 +8,9 @@ import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
 import { LevelLogger } from '../lib';
+import { ElementsPositionAndAttribute } from '../lib/screenshots';
 import * as contexts from '../lib/screenshots/constants';
-import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
+import { CaptureConfig } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;

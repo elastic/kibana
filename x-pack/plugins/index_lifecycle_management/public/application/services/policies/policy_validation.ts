@@ -5,12 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { validateHotPhase } from './hot_phase';
-import { validateWarmPhase } from './warm_phase';
-import { validateColdPhase } from './cold_phase';
-import { validateDeletePhase } from './delete_phase';
-import { validateFrozenPhase } from './frozen_phase';
-
 import {
   ColdPhase,
   DeletePhase,
@@ -19,7 +13,12 @@ import {
   Policy,
   PolicyFromES,
   WarmPhase,
-} from './types';
+} from '../../../../common/types';
+import { validateHotPhase } from './hot_phase';
+import { validateWarmPhase } from './warm_phase';
+import { validateColdPhase } from './cold_phase';
+import { validateDeletePhase } from './delete_phase';
+import { validateFrozenPhase } from './frozen_phase';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
 
