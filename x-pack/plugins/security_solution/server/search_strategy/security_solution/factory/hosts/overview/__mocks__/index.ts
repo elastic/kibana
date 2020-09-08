@@ -5,7 +5,6 @@
  */
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
-  Direction,
   HostsQueries,
   HostOverviewRequestOptions,
 } from '../../../../../../../common/search_strategy';
