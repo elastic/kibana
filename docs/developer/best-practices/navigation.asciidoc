@@ -83,7 +83,7 @@ Try to avoid hardcoding other app's URL in your app's code:
 
 [source,typescript jsx]
 ----
-const urlToDashboarWithComplexState = `/dashboards#/view/0289f5d0-e61c-11ea-8c31-8bd3114ed023?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'URL%20Drilldown%20Demo',viewMode:view)`
+const urlToDashboarWithComplexState = core.http.basePath.prepend(`/dashboards#/view/0289f5d0-e61c-11ea-8c31-8bd3114ed023?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:'URL%20Drilldown%20Demo',viewMode:view)`)
 ----
 
 Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[a URL generator].
