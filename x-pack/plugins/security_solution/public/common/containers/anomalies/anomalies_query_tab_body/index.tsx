@@ -11,11 +11,12 @@ import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { MatrixHistogram } from '../../../components/matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
-const ID = 'anomaliesOverTimeQuery';
 
-export const AnomaliesQueryTabBody = ({
+const ID = 'anomaliesHistogramQuery';
+
+const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   deleteQuery,
   endDate,
   setQuery,
@@ -28,16 +29,7 @@ export const AnomaliesQueryTabBody = ({
   AnomaliesTableComponent,
   flowTarget,
   ip,
-}: AnomaliesQueryTabBodyProps) => {
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+}) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
@@ -50,16 +42,23 @@ export const AnomaliesQueryTabBody = ({
     ip
   );
 
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         id={ID}
         setQuery={setQuery}
-        sourceId="default"
         startDate={startDate}
-        type={type}
         {...histogramConfigs}
       />
       <AnomaliesTableComponent
@@ -74,5 +73,9 @@ export const AnomaliesQueryTabBody = ({
     </>
   );
 };
+
+AnomaliesQueryTabBodyComponent.displayName = 'AnomaliesQueryTabBodyComponent';
+
+export const AnomaliesQueryTabBody = React.memo(AnomaliesQueryTabBodyComponent);
 
 AnomaliesQueryTabBody.displayName = 'AnomaliesQueryTabBody';
