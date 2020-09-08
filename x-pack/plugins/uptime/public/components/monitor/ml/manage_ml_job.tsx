@@ -93,6 +93,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
               {
                 name: 'Anomaly alert',
                 icon: 'bell',
+                'data-test-subj': 'uptimeManageAnomalyAlertBtn',
                 panel: 1,
               },
             ]
