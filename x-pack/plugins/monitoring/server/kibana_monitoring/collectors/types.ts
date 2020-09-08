@@ -6,10 +6,6 @@
 
 export interface MonitoringUsage {
   isEnabled: boolean;
-  clusters: MonitoringClusterUsage[];
-}
-
-export interface MonitoringClusterUsage {
   clusterUuid: string;
   license: string;
   elasticsearch: StackProductUsage;

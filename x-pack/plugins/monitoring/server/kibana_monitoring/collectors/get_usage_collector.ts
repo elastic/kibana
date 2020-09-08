@@ -26,130 +26,121 @@ export function getMonitoringUsageCollector(
       isEnabled: {
         type: 'boolean',
       },
-      clusters: {
-        license: {
-          type: 'keyword',
-        },
-        clusterUuid: {
-          type: 'keyword',
-        },
-        stackProductCount: {
+      license: {
+        type: 'keyword',
+      },
+      clusterUuid: {
+        type: 'keyword',
+      },
+      stackProductCount: {
+        type: 'long',
+      },
+      stackProductMbCount: {
+        type: 'long',
+      },
+      stackProductMbRatio: {
+        type: 'float',
+      },
+      elasticsearch: {
+        count: {
           type: 'long',
         },
-        stackProductMbCount: {
+        mbCount: {
           type: 'long',
         },
-        stackProductMbRatio: {
+        mbPercentage: {
           type: 'float',
         },
-        elasticsearch: {
-          count: {
-            type: 'long',
-          },
-          mbCount: {
-            type: 'long',
-          },
-          mbPercentage: {
-            type: 'float',
-          },
-          versions: {
-            type: 'keyword',
-          },
+        versions: {
+          type: 'keyword',
         },
-        kibana: {
-          count: {
-            type: 'long',
-          },
-          mbCount: {
-            type: 'long',
-          },
-          mbPercentage: {
-            type: 'float',
-          },
-          versions: {
-            type: 'keyword',
-          },
+      },
+      kibana: {
+        count: {
+          type: 'long',
         },
-        logstash: {
-          count: {
-            type: 'long',
-          },
-          mbCount: {
-            type: 'long',
-          },
-          mbPercentage: {
-            type: 'float',
-          },
-          versions: {
-            type: 'keyword',
-          },
+        mbCount: {
+          type: 'long',
         },
-        beats: {
-          count: {
-            type: 'long',
-          },
-          mbCount: {
-            type: 'long',
-          },
-          mbPercentage: {
-            type: 'float',
-          },
-          versions: {
-            type: 'keyword',
-          },
+        mbPercentage: {
+          type: 'float',
         },
-        apm: {
-          count: {
-            type: 'long',
-          },
-          mbCount: {
-            type: 'long',
-          },
-          mbPercentage: {
-            type: 'float',
-          },
-          versions: {
-            type: 'keyword',
-          },
+        versions: {
+          type: 'keyword',
+        },
+      },
+      logstash: {
+        count: {
+          type: 'long',
+        },
+        mbCount: {
+          type: 'long',
+        },
+        mbPercentage: {
+          type: 'float',
+        },
+        versions: {
+          type: 'keyword',
+        },
+      },
+      beats: {
+        count: {
+          type: 'long',
+        },
+        mbCount: {
+          type: 'long',
+        },
+        mbPercentage: {
+          type: 'float',
+        },
+        versions: {
+          type: 'keyword',
+        },
+      },
+      apm: {
+        count: {
+          type: 'long',
+        },
+        mbCount: {
+          type: 'long',
+        },
+        mbPercentage: {
+          type: 'float',
+        },
+        versions: {
+          type: 'keyword',
         },
       },
     },
     fetch: async () => {
-      const usage = {
-        isEnabled: config.ui.enabled,
-        clusters: [] as MonitoringClusterUsage[],
-      };
-
       const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
       const clusters = await fetchClusters(callCluster, elasticsearchIndex);
-      for (const cluster of clusters) {
-        const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
-        const stackProducts = await getStackProductsUsage(
-          config,
-          callCluster,
-          availableCcs,
-          cluster.clusterUuid
-        );
+      const cluster = clusters[0];
+      const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
+      const stackProducts = await getStackProductsUsage(
+        config,
+        callCluster,
+        availableCcs,
+        cluster.clusterUuid
+      );
 
-        const stackProductCount = Object.values(stackProducts).reduce(
-          (spc, sp) => spc + sp.count,
-          0
-        );
-        const stackProductMbCount = Object.values(stackProducts).reduce(
-          (spc, sp) => spc + sp.mbCount,
-          0
-        );
+      const stackProductCount = Object.values(stackProducts).reduce((spc, sp) => spc + sp.count, 0);
+      const stackProductMbCount = Object.values(stackProducts).reduce(
+        (spc, sp) => spc + sp.mbCount,
+        0
+      );
 
-        usage.clusters.push({
-          clusterUuid: cluster.clusterUuid,
-          license,
-          stackProductCount,
-          stackProductMbCount,
-          stackProductMbRatio: stackProductMbCount / stackProductCount,
-          ...stackProducts,
-        });
-      }
+      const usage = {
+        isEnabled: config.ui.enabled,
+        clusterUuid: cluster.clusterUuid,
+        license,
+        stackProductCount,
+        stackProductMbCount,
+        stackProductMbRatio: stackProductMbCount / stackProductCount,
+        ...stackProducts,
+      };
+
       return usage;
     },
   });
