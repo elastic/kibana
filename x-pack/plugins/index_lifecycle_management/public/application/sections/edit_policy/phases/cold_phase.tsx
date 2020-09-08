@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { ColdPhase as ColdPhaseInterface, Phases } from '../../../services/policies/types';
+import { ColdPhase as ColdPhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
