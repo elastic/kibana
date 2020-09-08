@@ -22,6 +22,16 @@ jest.mock('../contexts/kibana', () => ({
   },
 }));
 
+jest.mock('../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: () => ({
+    services: {
+      share: {
+        urlGenerators: { getUrlGenerator: jest.fn() },
+      },
+    },
+  }),
+}));
+
 describe('Settings', () => {
   function runCheckButtonsDisabledTest(
     canGetFilters: boolean,
