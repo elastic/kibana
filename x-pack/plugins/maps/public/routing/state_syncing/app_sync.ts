@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connectToQueryState, esFilters } from '../../../../../../src/plugins/data/public';
-import { syncState } from '../../../../../../src/plugins/kibana_utils/public';
 import { map } from 'rxjs/operators';
+import { connectToQueryState, esFilters } from '../../../../../../src/plugins/data/public';
+import { syncState, BaseStateContainer } from '../../../../../../src/plugins/kibana_utils/public';
 import { getData } from '../../kibana_services';
 import { kbnUrlStateStorage } from '../maps_router';
+import { AppStateManager } from './app_state_manager';
 
-export function startAppStateSyncing(appStateManager) {
+export function startAppStateSyncing(appStateManager: AppStateManager) {
   // get appStateContainer
   // sync app filters with app state container from data.query to state container
   const { query } = getData();
@@ -19,7 +20,7 @@ export function startAppStateSyncing(appStateManager) {
   // clear app state filters to prevent application filters from other applications being transfered to maps
   query.filterManager.setAppFilters([]);
 
-  const stateContainer = {
+  const stateContainer: BaseStateContainer<any> = {
     get: () => ({
       query: appStateManager.getQuery(),
       filters: appStateManager.getFilters(),
@@ -48,6 +49,7 @@ export function startAppStateSyncing(appStateManager) {
   // merge initial state from app state container and current state in url
   const initialAppState = {
     ...stateContainer.get(),
+    // @ts-ignore
     ...kbnUrlStateStorage.get('_a'),
   };
   // trigger state update. actually needed in case some data was in url

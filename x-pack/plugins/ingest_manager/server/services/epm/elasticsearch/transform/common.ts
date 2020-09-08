@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import * as Registry from '../../registry';
 
-export function getInitialLayers(
-  layerListJSON?: string,
-  initialLayers?: LayerDescriptor[]
-): LayerDescriptor[];
+export const getAsset = (path: string): Buffer => {
+  return Registry.getAsset(path);
+};

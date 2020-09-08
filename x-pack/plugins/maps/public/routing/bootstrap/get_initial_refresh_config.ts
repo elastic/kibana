@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { QueryState } from 'src/plugins/data/public';
 import { getUiSettings } from '../../kibana_services';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
-export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
+export function getInitialRefreshConfig({
+  mapStateJSON,
+  globalState = {},
+}: {
+  mapStateJSON?: string;
+  globalState: QueryState;
+}) {
   const uiSettings = getUiSettings();
 
   if (mapStateJSON) {
