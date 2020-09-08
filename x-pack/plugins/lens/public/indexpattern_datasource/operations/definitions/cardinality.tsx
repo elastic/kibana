@@ -51,11 +51,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
     let params;
-    if (
-      previousColumn?.operationType === 'cardinality' &&
-      previousColumn.dataType === 'number' &&
-      'params' in previousColumn
-    ) {
+    if (previousColumn?.dataType === 'number' && 'params' in previousColumn) {
       params = previousColumn.params;
     }
     return {

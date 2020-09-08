@@ -41,11 +41,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
     let params;
-    if (
-      previousColumn?.operationType === 'count' &&
-      previousColumn.dataType === 'number' &&
-      'params' in previousColumn
-    ) {
+    if (previousColumn?.dataType === 'number' && 'params' in previousColumn) {
       params = previousColumn.params;
     }
     return {
