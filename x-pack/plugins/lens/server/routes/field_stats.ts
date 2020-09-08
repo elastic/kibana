@@ -119,14 +119,7 @@ export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
-  const fieldRef = field.scripted
-    ? {
-        script: {
-          lang: field.lang as string,
-          source: field.script as string,
-        },
-      }
-    : { field: field.name };
+  const fieldRef = getFieldRef(field);
 
   const searchBody = {
     sample: {
@@ -215,14 +208,7 @@ export async function getStringSamples(
   aggSearchWithBody: (body: unknown) => unknown,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
-  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
-    ? {
-        script: {
-          lang: field.lang as string,
-          source: field.script as string,
-        },
-      }
-    : { field: field.name };
+  const fieldRef = getFieldRef(field);
 
   const topValuesBody = {
     sample: {
@@ -283,17 +269,8 @@ export async function getDateHistogram(
   // TODO: Respect rollup intervals
   const fixedInterval = `${interval}ms`;
 
-  const fieldRef: { field: string } | { script: { lang: string; source: string } } = field.scripted
-    ? {
-        script: {
-          lang: field.lang as string,
-          source: field.script as string,
-        },
-      }
-    : { field: field.name };
-
   const histogramBody = {
-    histo: { date_histogram: { ...fieldRef, fixed_interval: fixedInterval } },
+    histo: { date_histogram: { ...getFieldRef(field), fixed_interval: fixedInterval } },
   };
   const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
@@ -310,4 +287,15 @@ export async function getDateHistogram(
       })),
     },
   };
+}
+
+function getFieldRef(field: IFieldType) {
+  return field.scripted
+    ? {
+        script: {
+          lang: field.lang as string,
+          source: field.script as string,
+        },
+      }
+    : { field: field.name };
 }
