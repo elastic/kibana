@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { VisualizationDimensionGroupConfig } from '../../../types';
 import { DimensionPopoverState } from './types';
 
@@ -74,7 +75,9 @@ export function DimensionPopover({
             </EuiFlexItem>
             <EuiFlyoutFooter className="lnsDimensionPopover__footer">
               <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-                Close
+                {i18n.translate('xpack.lens.dimensionFlyout.close', {
+                  defaultMessage: 'Close',
+                })}
               </EuiButtonEmpty>
             </EuiFlyoutFooter>
           </div>

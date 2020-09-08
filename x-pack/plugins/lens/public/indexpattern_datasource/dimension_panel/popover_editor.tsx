@@ -236,7 +236,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormRow
           data-test-subj="indexPattern-field-selection-row"
-          label="Choose a field"
+          label={i18n.translate('xpack.lens.indexPattern.chooseField', {
+            defaultMessage: 'Choose a field',
+          })}
           fullWidth
           isInvalid={Boolean(incompatibleSelectedOperationType)}
           error={
