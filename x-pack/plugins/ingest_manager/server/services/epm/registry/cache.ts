@@ -18,3 +18,6 @@ export const getArchiveLocation = (name: string, version: string) =>
 
 export const setArchiveLocation = (name: string, version: string, location: string) =>
   archiveLocationCache.set(pkgToPkgKey({ name, version }), location);
+
+export const deleteArchiveLocation = (name: string, version: string) =>
+  archiveLocationCache.delete(pkgToPkgKey({ name, version }));
