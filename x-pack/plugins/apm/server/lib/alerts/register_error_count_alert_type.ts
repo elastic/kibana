@@ -7,18 +7,19 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
+import {
+  ESSearchResponse,
+  ESSearchRequest,
+} from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
-  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
@@ -27,27 +28,21 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal('avg'),
-    schema.literal('95th'),
-    schema.literal('99th'),
-  ]),
+  serviceName: schema.string(),
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
-export function registerTransactionDurationAlertType({
+export function registerErrorCountAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
   alerts.registerType({
-    id: AlertType.TransactionDuration,
+    id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
@@ -57,7 +52,6 @@ export function registerTransactionDurationAlertType({
     actionVariables: {
       context: [
         apmActionVariables.serviceName,
-        apmActionVariables.transactionType,
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
@@ -73,9 +67,10 @@ export function registerTransactionDurationAlertType({
       });
 
       const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
+        index: indices['apm_oss.errorIndices'],
         size: 0,
         body: {
+          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -86,55 +81,31 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                { term: { [PROCESSOR_EVENT]: 'error' } },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
-                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },
-          },
-          aggs: {
-            agg:
-              alertParams.aggregationType === 'avg'
-                ? { avg: { field: TRANSACTION_DURATION } }
-                : {
-                    percentiles: {
-                      field: TRANSACTION_DURATION,
-                      percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99,
-                      ],
-                    },
-                  },
           },
         },
       };
 
       const response: ESSearchResponse<
         unknown,
-        typeof searchParams
+        ESSearchRequest
       > = await services.callCluster('search', searchParams);
 
-      if (!response.aggregations) {
-        return;
-      }
+      const errorCount = response.hits.total.value;
 
-      const { agg } = response.aggregations;
-
-      const transactionDuration =
-        'values' in agg ? Object.values(agg.values)[0] : agg?.value;
-
-      const threshold = alertParams.threshold * 1000;
-
-      if (transactionDuration && transactionDuration > threshold) {
+      if (errorCount > alertParams.threshold) {
         const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDuration
+          AlertType.ErrorCount
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          transactionType: alertParams.transactionType,
           serviceName: alertParams.serviceName,
           environment: alertParams.environment,
-          threshold,
-          triggerValue: transactionDuration,
+          threshold: alertParams.threshold,
+          triggerValue: errorCount,
         });
       }
     },

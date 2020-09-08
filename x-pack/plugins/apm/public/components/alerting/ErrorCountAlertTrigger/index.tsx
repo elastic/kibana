@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isFinite } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
+import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
@@ -19,20 +19,21 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 
-export interface ErrorRateAlertTriggerParams {
+export interface AlertParams {
   windowSize: number;
   windowUnit: string;
   threshold: number;
+  serviceName: string;
   environment: string;
 }
 
 interface Props {
-  alertParams: ErrorRateAlertTriggerParams;
+  alertParams: AlertParams;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-export function ErrorRateAlertTrigger(props: Props) {
+export function ErrorCountAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
@@ -54,6 +55,15 @@ export function ErrorRateAlertTrigger(props: Props) {
   const threshold = isFinite(params.threshold) ? params.threshold : '';
 
   const fields = [
+    <EuiExpression
+      description={i18n.translate(
+        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
+        {
+          defaultMessage: 'Service',
+        }
+      )}
+      value={serviceName}
+    />,
     <PopoverExpression
       value={getEnvironmentLabel(params.environment)}
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.environment', {
@@ -66,7 +76,7 @@ export function ErrorRateAlertTrigger(props: Props) {
         onChange={(e) =>
           setAlertParams(
             'environment',
-            e.target.value as ErrorRateAlertTriggerParams['environment']
+            e.target.value as AlertParams['environment']
           )
         }
         compressed
@@ -108,7 +118,7 @@ export function ErrorRateAlertTrigger(props: Props) {
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={ALERT_TYPES_CONFIG['apm.error_rate'].name}
+      alertTypeName={ALERT_TYPES_CONFIG[AlertType.ErrorCount].name}
       defaults={defaults}
       fields={fields}
       setAlertParams={setAlertParams}
@@ -120,4 +130,4 @@ export function ErrorRateAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default ErrorRateAlertTrigger;
+export default ErrorCountAlertTrigger;

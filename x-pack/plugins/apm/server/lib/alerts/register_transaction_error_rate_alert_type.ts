@@ -4,24 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { EventOutcome } from '../../../common/event_outcome';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -29,21 +28,22 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
+  transactionType: schema.string(),
+  serviceName: schema.string(),
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
-export function registerErrorRateAlertType({
+export function registerTransactionErrorRateAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
   alerts.registerType({
-    id: AlertType.ErrorRate,
+    id: AlertType.TransactionErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
@@ -52,37 +52,26 @@ export function registerErrorRateAlertType({
     },
     actionVariables: {
       context: [
-        {
-          description: i18n.translate(
-            'xpack.apm.registerErrorRateAlertType.variables.serviceName',
-            {
-              defaultMessage: 'Service name',
-            }
-          ),
-          name: 'serviceName',
-        },
+        apmActionVariables.transactionType,
+        apmActionVariables.serviceName,
+        apmActionVariables.environment,
+        apmActionVariables.threshold,
+        apmActionVariables.triggerValue,
       ],
     },
     producer: 'apm',
-    executor: async ({ services, params }) => {
+    executor: async ({ services, params: alertParams }) => {
       const config = await config$.pipe(take(1)).toPromise();
-
-      const alertParams = params as TypeOf<typeof paramsSchema>;
-
       const indices = await getApmIndices({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
 
-      const environmentTerm =
-        alertParams.environment === ENVIRONMENT_ALL.value
-          ? []
-          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
-
       const searchParams = {
-        index: indices['apm_oss.errorIndices'],
+        index: indices['apm_oss.transactionIndices'],
         size: 0,
         body: {
+          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -93,41 +82,49 @@ export function registerErrorRateAlertType({
                     },
                   },
                 },
-                {
-                  term: {
-                    [PROCESSOR_EVENT]: 'error',
-                  },
-                },
-                {
-                  term: {
-                    [SERVICE_NAME]: alertParams.serviceName,
-                  },
-                },
-                ...environmentTerm,
+                { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                { term: { [SERVICE_NAME]: alertParams.serviceName } },
+                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
+                ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },
           },
-          track_total_hits: true,
+          aggs: {
+            erroneous_transactions: {
+              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+            },
+          },
         },
       };
 
       const response: ESSearchResponse<
         unknown,
-        ESSearchRequest
+        typeof searchParams
       > = await services.callCluster('search', searchParams);
 
-      const value = response.hits.total.value;
-
-      if (value && value > alertParams.threshold) {
-        const alertInstance = services.alertInstanceFactory(
-          AlertType.ErrorRate
-        );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName,
-        });
+      if (!response.aggregations) {
+        return;
       }
 
-      return {};
+      const errornousTransactionsCount =
+        response.aggregations.erroneous_transactions.doc_count;
+      const totalTransactionCount = response.hits.total.value;
+      const transactionErrorRate =
+        (errornousTransactionsCount / totalTransactionCount) * 100;
+
+      if (transactionErrorRate > alertParams.threshold) {
+        const alertInstance = services.alertInstanceFactory(
+          AlertType.TransactionErrorRate
+        );
+
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+          serviceName: alertParams.serviceName,
+          transactionType: alertParams.transactionType,
+          environment: alertParams.environment,
+          threshold: alertParams.threshold,
+          triggerValue: transactionErrorRate,
+        });
+      }
     },
   });
 }

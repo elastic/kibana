@@ -3,15 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiExpression } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { map } from 'lodash';
 import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import {
-  ALERT_TYPES_CONFIG,
-  TRANSACTION_ALERT_AGGREGATION_TYPES,
-} from '../../../../common/alert_types';
+import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -22,7 +20,7 @@ import {
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
 
-interface Params {
+interface AlertParams {
   windowSize: number;
   windowUnit: string;
   threshold: number;
@@ -32,23 +30,42 @@ interface Params {
   environment: string;
 }
 
+const TRANSACTION_ALERT_AGGREGATION_TYPES = {
+  avg: i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.avg',
+    {
+      defaultMessage: 'Average',
+    }
+  ),
+  '95th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.95th',
+    {
+      defaultMessage: '95th percentile',
+    }
+  ),
+  '99th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.99th',
+    {
+      defaultMessage: '99th percentile',
+    }
+  ),
+};
+
 interface Props {
-  alertParams: Params;
+  alertParams: AlertParams;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { serviceName } = alertParams;
   const { urlParams } = useUrlParams();
-
   const transactionTypes = useServiceTransactionTypes(urlParams);
-
-  const { start, end } = urlParams;
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
-  if (!transactionTypes.length) {
+  if (!transactionTypes.length || !serviceName) {
     return null;
   }
 
@@ -57,7 +74,9 @@ export function TransactionDurationAlertTrigger(props: Props) {
     aggregationType: 'avg',
     windowSize: 5,
     windowUnit: 'm',
-    transactionType: transactionTypes[0],
+
+    // use the current transaction type or default to the first in the list
+    transactionType: transactionType || transactionTypes[0],
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
@@ -67,6 +86,15 @@ export function TransactionDurationAlertTrigger(props: Props) {
   };
 
   const fields = [
+    <EuiExpression
+      description={i18n.translate(
+        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
+        {
+          defaultMessage: 'Service',
+        }
+      )}
+      value={serviceName}
+    />,
     <PopoverExpression
       value={getEnvironmentLabel(params.environment)}
       title={i18n.translate(
@@ -80,7 +108,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
         value={params.environment}
         options={environmentOptions}
         onChange={(e) =>
-          setAlertParams('environment', e.target.value as Params['environment'])
+          setAlertParams(
+            'environment',
+            e.target.value as AlertParams['environment']
+          )
         }
         compressed
       />
@@ -102,7 +133,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
         onChange={(e) =>
           setAlertParams(
             'transactionType',
-            e.target.value as Params['transactionType']
+            e.target.value as AlertParams['transactionType']
           )
         }
         compressed
@@ -125,7 +156,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
         onChange={(e) =>
           setAlertParams(
             'aggregationType',
-            e.target.value as Params['aggregationType']
+            e.target.value as AlertParams['aggregationType']
           )
         }
         compressed

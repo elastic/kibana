@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiExpression, EuiSelect } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
@@ -42,9 +43,9 @@ interface Props {
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { serviceName } = alertParams;
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
   const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
@@ -55,10 +56,13 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     return null;
   }
 
+  // 'page-load' for RUM, 'request' otherwise
+  const transactionType = supportedTransactionTypes[0];
+
   const defaults: Params = {
     windowSize: 15,
     windowUnit: 'm',
-    transactionType: supportedTransactionTypes[0], // 'page-load' for RUM, 'request' otherwise
+    transactionType,
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalyScore: 75,
@@ -78,6 +82,15 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
         }
       )}
       value={serviceName}
+    />,
+    <EuiExpression
+      description={i18n.translate(
+        'xpack.apm.transactionDurationAnomalyAlertTrigger.transactionType',
+        {
+          defaultMessage: 'Transaction Type',
+        }
+      )}
+      value={transactionType}
     />,
     <PopoverExpression
       value={getEnvironmentLabel(params.environment)}
