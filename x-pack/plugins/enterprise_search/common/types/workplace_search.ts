@@ -10,7 +10,7 @@ export interface IAccount {
   isAdmin: boolean;
   isCurated: boolean;
   canCreatePersonalSources: boolean;
-  canCreateInvitations: boolean;
+  canCreateInvitations?: boolean;
   viewedOnboardingPage: boolean;
 }
 
