@@ -5,14 +5,10 @@
  */
 
 import _ from 'lodash';
-import {
-  RENDER_AS,
-  GEOTILE_GRID_AGG_NAME,
-  GEOCENTROID_AGG_NAME,
-} from '../../../../common/constants';
-import { getTileBoundingBox } from '../../../../common/geo_tile_utils';
-import { extractPropertiesFromBucket } from '../../../../common/es_agg_utils';
-import { clamp } from '../../../../common/elasticsearch_geo_utils';
+import { RENDER_AS, GEOTILE_GRID_AGG_NAME, GEOCENTROID_AGG_NAME } from './constants';
+import { getTileBoundingBox } from './geo_tile_utils';
+import { extractPropertiesFromBucket } from './es_agg_utils';
+import { clamp } from './elasticsearch_geo_utils';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
 

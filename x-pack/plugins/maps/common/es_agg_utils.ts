@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../../src/plugins/data/common';
-import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
+import { TOP_TERM_PERCENTAGE_SUFFIX } from './constants';
 
 export function getField(indexPattern: IndexPattern, fieldName: string) {
   const field = indexPattern.fields.getByName(fieldName);

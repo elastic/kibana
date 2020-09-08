@@ -7,7 +7,10 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
+import {
+  convertCompositeRespToGeoJson,
+  convertRegularRespToGeoJson,
+} from '../../../../common/convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
