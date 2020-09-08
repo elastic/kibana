@@ -953,9 +953,7 @@ export class VectorLayer extends AbstractLayer {
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].filterAndFormatPropertiesForTooltip(
-        properties
-      );
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties);
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;
