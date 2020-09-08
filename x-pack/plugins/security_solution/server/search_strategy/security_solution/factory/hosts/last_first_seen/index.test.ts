@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as buildQuery from './query.last_first_seen_host.dsl.ts';
+import * as buildQuery from './query.last_first_seen_host.dsl';
 import { firstLastSeenHost } from '.';
 import {
   mockOptions,

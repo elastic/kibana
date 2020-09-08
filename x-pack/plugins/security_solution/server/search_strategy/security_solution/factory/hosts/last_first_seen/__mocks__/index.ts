@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HostsQueries } from '../../../../../../../common/search_strategy';
+
 export const mockOptions = {
   defaultIndex: [
     'apm-*-transaction*',
@@ -15,7 +17,7 @@ export const mockOptions = {
     'winlogbeat-*',
   ],
   docValueFields: [],
-  factoryQueryType: 'firstLastSeen',
+  factoryQueryType: HostsQueries.firstLastSeen,
   hostName: 'siem-kibana',
 };
 
