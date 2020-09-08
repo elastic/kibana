@@ -105,6 +105,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const target = await testSubjects.find('indexPattern-dimension-field');
       await comboBox.openOptionsList(target);
       await comboBox.setElement(target, opts.field);
+      await testSubjects.click('lns-indexPatternDimension-flyoutTitle');
     },
 
     /**
