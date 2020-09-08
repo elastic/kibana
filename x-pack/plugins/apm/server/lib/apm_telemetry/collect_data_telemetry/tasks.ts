@@ -113,6 +113,7 @@ export const tasks: TelemetryTask[] = [
 
         if (result.aggregations) {
           nextAfter = result.aggregations.transaction_metric_groups.after_key;
+          // eslint-disable-next-line @typescript-eslint/camelcase
           expected_metric_document_count +=
             result.aggregations.transaction_metric_groups.buckets.length;
         }
@@ -131,6 +132,7 @@ export const tasks: TelemetryTask[] = [
         return {
           expected_metric_document_count,
           transaction_count: result.hits.total.value,
+          // eslint-disable-next-line @typescript-eslint/camelcase
           ratio: expected_metric_document_count / result.hits.total.value,
         };
       }
@@ -348,7 +350,9 @@ export const tasks: TelemetryTask[] = [
 
       buckets.forEach((bucket) => {
         const serviceName = bucket.key['service.name'];
-        const environment = bucket.key['service.environment'] as string | null;
+        const environment = (bucket.key['service.environment'] as unknown) as
+          | string
+          | null;
 
         const environments = serviceEnvironments[serviceName] ?? [];
 
