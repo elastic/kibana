@@ -137,23 +137,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
         }
       }
     }
-
-    // This job is temporary
-    buildType {
-      id("Kitchen_Sink")
-      name = "Kitchen Sink"
-      type = BuildTypeSettings.Type.COMPOSITE
-
-      val builds = listOf(
-        AllTests,
-        OssVisualRegression,
-        DefaultVisualRegression,
-        Lint,
-        *ossCiGroups.toTypedArray(),
-        *defaultCiGroups.toTypedArray()
-      )
-
-      dependsOn(*builds.toTypedArray())
-    }
+    
+    buildType(EssentialCi)
   }
 }
