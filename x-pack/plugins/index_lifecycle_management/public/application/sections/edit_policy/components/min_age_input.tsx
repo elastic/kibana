@@ -12,7 +12,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
-import { PhaseWithMinAge, Phases } from '../../../services/policies/types';
+import { PhaseWithMinAge, Phases } from '../../../../../common/types';
 
 function getTimingLabelForPhase(phase: keyof Phases) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
