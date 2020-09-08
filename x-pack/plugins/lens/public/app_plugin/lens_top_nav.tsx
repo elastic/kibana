@@ -6,17 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
-import { LensTopNavMode, LensTopNavActions } from './types';
+import { LensTopNavActions } from './types';
 
 export function getLensTopNavConfig(options: {
-  topNavMode: LensTopNavMode;
+  isLinkedToOriginatingApp: boolean;
   actions: LensTopNavActions;
   savingPermitted: boolean;
 }): TopNavMenuData[] {
-  const { topNavMode, actions, savingPermitted } = options;
-
+  const { isLinkedToOriginatingApp, actions, savingPermitted } = options;
   const topNavMenu: TopNavMenuData[] = [];
-  if (topNavMode === LensTopNavMode.LINKED_TO_CONTAINER) {
+  if (isLinkedToOriginatingApp) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.saveAndReturn', {
         defaultMessage: 'Save and return',
@@ -30,20 +29,20 @@ export function getLensTopNavConfig(options: {
   }
 
   topNavMenu.push({
-    label: LensTopNavMode.LINKED_TO_CONTAINER
+    label: isLinkedToOriginatingApp
       ? i18n.translate('xpack.lens.app.saveAs', {
           defaultMessage: 'Save as',
         })
       : i18n.translate('xpack.lens.app.save', {
           defaultMessage: 'Save',
         }),
-    emphasize: !LensTopNavMode.LINKED_TO_CONTAINER,
+    emphasize: !isLinkedToOriginatingApp,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     disableButton: !savingPermitted,
   });
 
-  if (topNavMode === LensTopNavMode.LINKED_TO_CONTAINER) {
+  if (isLinkedToOriginatingApp) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
         defaultMessage: 'cancel',

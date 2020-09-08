@@ -33,6 +33,7 @@ interface SaveModalDocumentInfo {
 interface OriginSaveModalProps {
   originatingApp?: string;
   getAppNameFromId?: (appId: string) => string | undefined;
+  originatingAppName?: string;
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;

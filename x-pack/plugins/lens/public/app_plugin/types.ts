@@ -12,6 +12,8 @@ import {
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
+  OverlayStart,
+  SavedObjectsStart,
 } from '../../../../../src/core/public';
 import {
   DataPublicPluginStart,
@@ -34,6 +36,8 @@ export interface LensAppState {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPattern[];
+  currentInput?: LensEmbeddableInput;
+  isLinkedToOriginatingApp?: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -58,24 +62,23 @@ export interface LensAppProps {
 }
 
 export interface LensAppServices {
-  data: DataPublicPluginStart;
-  navigation: NavigationPublicPluginStart;
-  notifications: NotificationsStart;
-  attributeService: LensAttributeService;
+  http: HttpStart;
+  chrome: ChromeStart;
+  overlays: OverlayStart;
   storage: IStorageWrapper;
+  data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
-  chrome: ChromeStart;
-  http: HttpStart;
+  notifications: NotificationsStart;
+  navigation: NavigationPublicPluginStart;
+  attributeService: LensAttributeService;
+  savedObjectsClient: SavedObjectsStart['client'];
+  getOriginatingAppName: () => string | undefined;
+
   incomingState?: EmbeddableEditorState;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
-}
-
-export enum LensTopNavMode {
-  LINKED_TO_CONTAINER,
-  UNLINKED,
 }
 
 export interface LensTopNavActions {

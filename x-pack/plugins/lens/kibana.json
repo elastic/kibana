@@ -16,5 +16,5 @@
   "optionalPlugins": ["usageCollection", "taskManager", "uiActions", "embeddable"],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "embeddable"]
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
 }

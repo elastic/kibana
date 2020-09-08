@@ -56,10 +56,17 @@ export async function mountApp(
     attributeService,
     http: coreStart.http,
     chrome: coreStart.chrome,
+    overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
     application: coreStart.application,
     notifications: coreStart.notifications,
     incomingState: embeddableEditorIncomingState,
+    savedObjectsClient: coreStart.savedObjects.client,
+    getOriginatingAppName: () => {
+      return embeddableEditorIncomingState?.originatingApp
+        ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
+        : undefined;
+    },
 
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: await getByValueFeatureFlag(),
