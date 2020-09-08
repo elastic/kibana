@@ -42,6 +42,11 @@ describe('ES search strategy', () => {
   };
   const mockContext = {
     core: {
+      uiSettings: {
+        client: {
+          get: jest.fn(),
+        },
+      },
       elasticsearch: {
         client: {
           asCurrentUser: {

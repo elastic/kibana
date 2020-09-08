@@ -5,6 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
+import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { SharedGlobalConfig, RequestHandlerContext, Logger } from '../../../../../src/core/server';
 import {
@@ -66,39 +67,6 @@ export const enhancedEsSearchStrategyProvider = (
     });
   };
 
-  const rollupSearch = async function (
-    context: RequestHandlerContext,
-    request: IEnhancedEsSearchRequest
-  ): Promise<IEsSearchResponse> {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const uiSettingsClient = await context.core.uiSettings.client;
-    const config = await config$.pipe(first()).toPromise();
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
-    const querystring = toSnakeCase({
-      ...getShardTimeout(config),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
-    });
-
-    const esResponse = await esClient.transport.request({
-      method,
-      path,
-      body,
-      querystring,
-    });
-
-    const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
-    return {
-      id,
-      isPartial,
-      isRunning,
-      rawResponse: response,
-      ...getTotalLoaded(response._shards),
-    };
-  };
-
   async function asyncSearch(
     context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest
@@ -138,6 +106,36 @@ export const enhancedEsSearchStrategyProvider = (
       ...getTotalLoaded(response._shards),
     };
   }
+
+  const rollupSearch = async function (
+    context: RequestHandlerContext,
+    request: IEnhancedEsSearchRequest
+  ): Promise<IEsSearchResponse> {
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const uiSettingsClient = await context.core.uiSettings.client;
+    const config = await config$.pipe(first()).toPromise();
+    const { body, index, ...params } = request.params!;
+    const method = 'POST';
+    const path = encodeURI(`/${index}/_rollup_search`);
+    const querystring = toSnakeCase({
+      ...getShardTimeout(config),
+      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...params,
+    });
+
+    const esResponse = await esClient.transport.request({
+      method,
+      path,
+      body,
+      querystring,
+    });
+
+    const response = esResponse.body as SearchResponse<any>;
+    return {
+      rawResponse: response,
+      ...getTotalLoaded(response._shards),
+    };
+  };
 
   return { search, cancel };
 };
