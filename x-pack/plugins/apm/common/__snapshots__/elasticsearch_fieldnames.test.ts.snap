@@ -34,6 +34,8 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
@@ -68,9 +70,9 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
+exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
-exports[`Error OBSERVER_NAME 1`] = `"an observer"`;
+exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -186,6 +188,8 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
@@ -220,9 +224,9 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
+exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
-exports[`Span OBSERVER_NAME 1`] = `"an observer"`;
+exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -338,6 +342,8 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
@@ -372,9 +378,9 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
+exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
-exports[`Transaction OBSERVER_NAME 1`] = `"an observer"`;
+exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
