@@ -1,9 +1,9 @@
 package builds
 
+import builds.default.DefaultCiGroups
 import builds.default.DefaultVisualRegression
-import builds.default.defaultCiGroups
+import builds.oss.OssCiGroups
 import builds.oss.OssVisualRegression
-import builds.oss.ossCiGroups
 import builds.test.AllTests
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
@@ -18,8 +18,8 @@ object EssentialCi : BuildType({
     OssVisualRegression,
     DefaultVisualRegression,
     Lint,
-    *ossCiGroups.toTypedArray(),
-    *defaultCiGroups.toTypedArray()
+    OssCiGroups,
+    DefaultCiGroups
   )
 
   dependsOn(*builds.toTypedArray())
