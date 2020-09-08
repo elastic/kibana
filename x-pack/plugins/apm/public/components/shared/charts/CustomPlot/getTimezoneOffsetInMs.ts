@@ -6,9 +6,9 @@
 import moment from 'moment-timezone';
 
 export function getTimezoneOffsetInMs(time: number) {
-  // @ts-ignore moment types don't define defaultZone but it's there
+  // @ts-expect-error moment types don't define defaultZone but it's there
   const zone = moment.defaultZone ? moment.defaultZone.name : moment.tz.guess();
 
-  // @ts-ignore
+  // @ts-expect-error
   return moment.tz.zone(zone).parse(time) * 60000;
 }

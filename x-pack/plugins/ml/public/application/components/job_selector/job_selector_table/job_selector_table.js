@@ -174,7 +174,7 @@ export function JobSelectorTable({
         id: 'checkbox',
         isCheckbox: true,
         textOnly: false,
-        width: '24px',
+        width: '32px',
       },
       {
         label: 'group ID',

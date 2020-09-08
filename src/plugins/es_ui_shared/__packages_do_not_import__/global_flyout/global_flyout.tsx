@@ -160,9 +160,7 @@ export const useGlobalFlyout = () => {
         Array.from(getContents()).forEach(removeContent);
       }
     };
-    // https://github.com/elastic/kibana/issues/73970
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [removeContent]);
+  }, [removeContent, getContents]);
 
   return { ...ctx, addContent };
 };
