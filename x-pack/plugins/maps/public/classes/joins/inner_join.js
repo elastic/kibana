@@ -95,7 +95,7 @@ export class InnerJoin {
   }
 
   async filterAndFormatPropertiesForTooltip(properties) {
-    return await this._rightSource.filterAndFormatPropertiesToHtml(properties);
+    return await this._rightSource.getTooltipProperties(properties);
   }
 
   getIndexPatternIds() {
