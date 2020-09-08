@@ -72,16 +72,23 @@ export const createListFailedResourceState = (
   lastLoadedState,
 });
 
+export const createListLoadingResourceState = (
+  previousState: StaleResourceState<TrustedAppsListData> = createUninitialisedResourceState()
+): LoadingResourceState<TrustedAppsListData> => ({
+  type: 'LoadingResourceState',
+  previousState,
+});
+
 export const createListComplexLoadingResourceState = (
   paginationInfo: PaginationInfo,
   totalItemsCount: number
-): LoadingResourceState<TrustedAppsListData> => ({
-  type: 'LoadingResourceState',
-  previousState: createListFailedResourceState(
-    'Internal Server Error',
-    createListLoadedResourceState(paginationInfo, totalItemsCount)
-  ),
-});
+): LoadingResourceState<TrustedAppsListData> =>
+  createListLoadingResourceState(
+    createListFailedResourceState(
+      'Internal Server Error',
+      createListLoadedResourceState(paginationInfo, totalItemsCount)
+    )
+  );
 
 export const createDefaultPaginationInfo = () => ({ index: 0, size: 20 });
 
