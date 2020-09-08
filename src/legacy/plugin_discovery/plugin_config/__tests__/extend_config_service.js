@@ -45,10 +45,6 @@ describe('plugin discovery/extend config service', () => {
             enabled: Joi.boolean().default(true),
             test: Joi.string().default('bonk'),
           }).default(),
-
-        deprecations({ rename }) {
-          return [rename('oldTest', 'test')];
-        },
       }),
   })
     .getPluginSpecs()
@@ -74,16 +70,14 @@ describe('plugin discovery/extend config service', () => {
         getConfigPrefix: sandbox.stub().returns(configPrefix),
       };
 
-      const logDeprecation = sandbox.stub();
-
       const getSettings = sandbox.stub(SettingsNS, 'getSettings').returns(rootSettings.foo.bar);
 
       const getSchema = sandbox.stub(SchemaNS, 'getSchema').returns(schema);
 
-      await extendConfigService(pluginSpec, config, rootSettings, logDeprecation);
+      await extendConfigService(pluginSpec, config, rootSettings);
 
       sinon.assert.calledOnce(getSettings);
-      sinon.assert.calledWithExactly(getSettings, pluginSpec, rootSettings, logDeprecation);
+      sinon.assert.calledWithExactly(getSettings, pluginSpec, rootSettings);
 
       sinon.assert.calledOnce(getSchema);
       sinon.assert.calledWithExactly(getSchema, pluginSpec);
@@ -144,41 +138,6 @@ describe('plugin discovery/extend config service', () => {
       } catch (error) {
         expect(error.message).to.contain('"test" must be a string');
       }
-    });
-
-    it('calls logDeprecation() with deprecation messages', async () => {
-      const config = Config.withDefaultSchema();
-      const logDeprecation = sinon.stub();
-      await extendConfigService(
-        pluginSpec,
-        config,
-        {
-          foo: {
-            bar: {
-              baz: {
-                oldTest: '123',
-              },
-            },
-          },
-        },
-        logDeprecation
-      );
-      sinon.assert.calledOnce(logDeprecation);
-      sinon.assert.calledWithExactly(logDeprecation, sinon.match('"oldTest" is deprecated'));
-    });
-
-    it('uses settings after transforming deprecations', async () => {
-      const config = Config.withDefaultSchema();
-      await extendConfigService(pluginSpec, config, {
-        foo: {
-          bar: {
-            baz: {
-              oldTest: '123',
-            },
-          },
-        },
-      });
-      expect(config.get('foo.bar.baz.test')).to.be('123');
     });
   });
 

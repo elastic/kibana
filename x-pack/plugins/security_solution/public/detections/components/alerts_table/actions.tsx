@@ -9,6 +9,7 @@
 import dateMath from '@elastic/datemath';
 import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
@@ -83,7 +84,18 @@ export const updateAlertStatusAction = async ({
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
-    onAlertStatusUpdateSuccess(response.updated, selectedStatus);
+    if (response.version_conflicts > 0 && alertIds.length === 1) {
+      throw new Error(
+        i18n.translate(
+          'xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert',
+          {
+            defaultMessage: 'Failed to update alert because it was already being modified.',
+          }
+        )
+      );
+    }
+
+    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, selectedStatus);
   } catch (error) {
     onAlertStatusUpdateFailure(selectedStatus, error);
   } finally {

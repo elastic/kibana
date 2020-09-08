@@ -89,7 +89,7 @@ export class FilterListsUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="ml-list-filter-lists">
+        <EuiPage className="ml-list-filter-lists" data-test-subj="mlPageFilterListManagement">
           <EuiPageBody>
             <EuiPageContent
               className="ml-list-filter-lists-content"

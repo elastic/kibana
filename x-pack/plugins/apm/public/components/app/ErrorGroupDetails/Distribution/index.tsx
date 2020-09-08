@@ -14,7 +14,7 @@ import { mean } from 'lodash';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
-// @ts-ignore
+// @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 
