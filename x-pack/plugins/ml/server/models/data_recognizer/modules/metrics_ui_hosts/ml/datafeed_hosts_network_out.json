@@ -25,7 +25,7 @@
                         "bytes_out_derivative": {"derivative": {"buckets_path": "bytes_out_max"}},
                         "positive_only":{
                             "bucket_script": {
-                                "buckets_path": {"in_derivative": "bytes_out_derivative.value"},
+                                "buckets_path": {"out_derivative": "bytes_out_derivative.value"},
                                 "script": "params.out_derivative > 0.0 ? params.out_derivative : 0.0"
                             }
                         }

@@ -9,7 +9,7 @@
       "bucket_span": "15m",
       "detectors": [
         {
-            "detector_description": "max(\"system.memory.actual.used.pct\") partitionfield=\"host.name\"",
+            "detector_description": "max('system.memory.actual.used.pct')",
             "function": "max",
             "field_name": "system.memory.actual.used.pct",
             "custom_rules": [
@@ -31,6 +31,9 @@
       "influencers": [
         "host.name"
       ]
+    },
+    "data_description": {
+      "time_field": "@timestamp"
     },
     "analysis_limits": {
       "model_memory_limit": "64mb"
