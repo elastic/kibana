@@ -20,7 +20,6 @@
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { basename } from 'path';
 import { Server } from 'hapi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';

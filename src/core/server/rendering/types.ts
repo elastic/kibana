@@ -45,7 +45,6 @@ export interface RenderingMetadata {
       mode: EnvironmentMode;
       packageInfo: PackageInfo;
     };
-    legacyMode: boolean;
     anonymousStatusPage: boolean;
     i18n: {
       translationsUrl: string;
