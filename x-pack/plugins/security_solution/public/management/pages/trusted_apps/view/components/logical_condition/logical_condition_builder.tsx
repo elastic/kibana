@@ -5,7 +5,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, CommonProps, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  CommonProps,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
 
@@ -41,24 +48,21 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
             />
           )}
         </div>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              size="s"
-              iconType="plusInCircle"
-              onClick={onAndClicked}
-              data-test-subj={`${dataTestSubj ? `${dataTestSubj}-AndButton` : undefined}`}
-              isDisabled={isAndDisabled}
-              style={BUTTON_MIN_WIDTH}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.trustedapps.logicalConditionBuilder.andOperator"
-                defaultMessage="AND"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiButton
+          fill
+          size="s"
+          iconType="plusInCircle"
+          onClick={onAndClicked}
+          data-test-subj={`${dataTestSubj ? `${dataTestSubj}-AndButton` : undefined}`}
+          isDisabled={isAndDisabled}
+          style={BUTTON_MIN_WIDTH}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.trustedapps.logicalConditionBuilder.andOperator"
+            defaultMessage="AND"
+          />
+        </EuiButton>
       </div>
     );
   }

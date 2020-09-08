@@ -6,8 +6,14 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { TrustedApp } from '../../../../../../../../common/endpoint/types';
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
+import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
+
+const AndBadgeFlexItem = styled(EuiFlexItem)`
+  padding-top: 20px;
+`;
 
 export interface ConditionGroupProps {
   os: TrustedApp['os'];
@@ -18,8 +24,12 @@ export interface ConditionGroupProps {
 export const ConditionGroup = memo<ConditionGroupProps>(
   ({ os, entries, onEntryRemove, onEntryChange }) => {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>{'AND'}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs">
+        {entries.length > 1 && (
+          <AndBadgeFlexItem grow={false}>
+            <AndOrBadge type={'and'} includeAntennas={true} />
+          </AndBadgeFlexItem>
+        )}
         <EuiFlexItem grow={1}>
           {entries.map((entry, index) => (
             <ConditionEntry
