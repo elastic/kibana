@@ -161,16 +161,16 @@ export default function (providerContext: FtrProviderContext) {
               type: 'ingest_pipeline',
             },
             {
-              id: 'logs-all_assets.test_logs-default-0.1.0',
-              type: 'transform',
-            },
-            {
               id: 'logs-all_assets.test_logs',
               type: 'index_template',
             },
             {
               id: 'metrics-all_assets.test_metrics',
               type: 'index_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs-default-0.1.0',
+              type: 'transform',
             },
           ],
           es_index_patterns: {
