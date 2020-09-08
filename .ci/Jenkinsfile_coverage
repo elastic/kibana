@@ -13,7 +13,6 @@ kibanaPipeline(timeoutMinutes: 240) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
         catchError {
           kibanaCoverage.runTests()
-          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
           handleIngestion(TIME_STAMP)
         }
         handleFail()
@@ -30,7 +29,7 @@ def handleIngestion(timestamp) {
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
   kibanaCoverage.generateReports("### Merge coverage reports")
   kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, teamAssignmentsPath(), '### Ingest && Upload')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
@@ -42,11 +41,15 @@ def handlePreviousSha() {
 
 def handleFail() {
   def buildStatus = buildUtils.getBuildStatus()
-  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED' && buildStatus != 'UNSTABLE') {
+  if (params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED' && buildStatus != 'UNSTABLE') {
     slackNotifications.sendFailedBuild(
       channel: '#kibana-qa',
       username: 'Kibana QA'
     )
   }
+}
+
+def teamAssignmentsPath() {
+  return 'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'
 }
 

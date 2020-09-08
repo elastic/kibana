@@ -17,14 +17,27 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import expect from '@kbn/expect';
+import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
+import { resolve } from 'path';
+import { ToolingLog } from '@kbn/dev-utils';
 
-export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
-export const noop = () => {};
-export const green = (x) => chalk.greenBright.bold(x);
-export const pink = (x) => chalk.bgMagenta.bold.cyan.bold(x);
-export const id = (x) => x;
-export const always = (x) => () => x; // Wraps a value in a fn. Eager evaluation if passed a fn.
-export const pretty = (x) => JSON.stringify(x, null, 2);
-export const pluck = (x) => (obj) => obj[x];
-export const flip2 = (f) => (a) => (b) => f(b)(a);
+const ROOT = resolve(__dirname, '../../../../..');
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
+describe(`enumeratePatterns`, () => {
+  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.js to kibana-reporting`, () => {
+    const actual = enumeratePatterns(ROOT)(log)(
+      new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
+    );
+
+    expect(
+      actual[0].includes(
+        'x-pack/plugins/reporting/server/browsers/extract/unzip.js kibana-reporting'
+      )
+    ).to.be(true);
+  });
+});
