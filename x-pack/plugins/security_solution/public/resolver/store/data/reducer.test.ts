@@ -10,8 +10,9 @@ import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
-import { ResolverChildNode, ResolverTree } from '../../../../common/endpoint/types';
+import { ResolverChildNode, ResolverEvent, ResolverTree } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
+import { values } from '../../../../common/endpoint/models/ecs_safety_helpers';
 
 /**
  * Test the data reducer and selector.
@@ -39,7 +40,7 @@ describe('Resolver Data Middleware', () => {
       // Generate a 'tree' using the Resolver generator code. This structure isn't the same as what the API returns.
       const baseTree = generateBaseTree();
       const tree = mockResolverTree({
-        events: baseTree.allEvents,
+        events: baseTree.allEvents as ResolverEvent[],
         cursors: {
           childrenNextChild: 'aValidChildCursor',
           ancestryNextAncestor: 'aValidAncestorCursor',
@@ -88,7 +89,8 @@ describe('Resolver Data Middleware', () => {
           type: 'serverReturnedRelatedEventData',
           payload: {
             entityID: firstChildNodeInTree.id,
-            events: firstChildNodeInTree.relatedEvents,
+            // TODO comment about casting it to unsafe event type
+            events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
             nextEvent: null,
           },
         };
@@ -161,7 +163,7 @@ describe('Resolver Data Middleware', () => {
             type: 'serverReturnedRelatedEventData',
             payload: {
               entityID: firstChildNodeInTree.id,
-              events: firstChildNodeInTree.relatedEvents,
+              events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
               nextEvent: 'aValidNextEventCursor',
             },
           };
@@ -231,7 +233,7 @@ function mockedTree() {
   const statsResults = compileStatsForChild(firstChildNodeInTree);
 
   const tree = mockResolverTree({
-    events: baseTree.allEvents,
+    events: baseTree.allEvents as ResolverEvent[],
     /**
      * Calculate children from the ResolverTree response using the children of the `Tree` we generated using the Resolver data generator code.
      * Compile (and attach) stats to the first child node.
@@ -242,9 +244,8 @@ function mockedTree() {
      * related event limits should be shown.
      */
     children: [...baseTree.children.values()].map((node: TreeNode) => {
-      // Treat each `TreeNode` as a `ResolverChildNode`.
-      // These types are almost close enough to be used interchangably (for the purposes of this test.)
-      const childNode: Partial<ResolverChildNode> = node;
+      const childNode: Partial<ResolverChildNode> = {};
+      childNode.lifecycle = node.lifecycle as ResolverEvent[];
 
       // `TreeNode` has `id` which is the same as `entityID`.
       // The `ResolverChildNode` calls the entityID as `entityID`.
@@ -314,10 +315,8 @@ function compileStatsForChild(
 
   const compiledStats = node.relatedEvents.reduce(
     (counts: Record<string, number>, relatedEvent) => {
-      // `relatedEvent.event.category` is `string | string[]`.
-      // Wrap it in an array and flatten that array to get a `string[] | [string]`
-      // which we can loop over.
-      const categories: string[] = [relatedEvent.event.category].flat();
+      // get an array of categories regardless of whether category is a string or string[]
+      const categories: string[] = values(relatedEvent.event?.category);
 
       for (const category of categories) {
         // Set the first category as 'categoryToOverCount'
