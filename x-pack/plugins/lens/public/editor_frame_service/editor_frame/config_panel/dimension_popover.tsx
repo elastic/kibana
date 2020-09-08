@@ -45,46 +45,40 @@ export function DimensionPopover({
     });
   };
 
-  let flyout;
-  if (
-    popoverState.isOpen &&
-    (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
-  ) {
-    flyout = (
-      <div
-        role="dialog"
-        aria-labelledby="lnsDimensionPopoverFlyoutTitle"
-        className="lnsDimensionPopover"
-      >
-        <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
-          <EuiTitle size="xs">
-            <EuiButtonEmpty
-              onClick={closeFlyout}
-              data-test-subj="lnsDimensionPopoverFlyoutTitle"
-              id="lnsDimensionPopoverFlyoutTitle"
-              iconType="sortLeft"
-              flush="left"
-            >
-              <strong>{panelTitle}</strong>
-            </EuiButtonEmpty>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-          {panel}
-        </EuiFlexItem>
-        <EuiFlyoutFooter className="lnsDimensionPopover__footer">
-          <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-            Close
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="lnsDimensionPopover__trigger">{trigger}</div>
-      {flyout}
+      {popoverState.isOpen &&
+        (popoverState.openId === accessor ||
+          (noMatch && popoverState.addingToGroupId === groupId)) && (
+          <div
+            role="dialog"
+            aria-labelledby="lnsDimensionPopoverFlyoutTitle"
+            className="lnsDimensionPopover"
+          >
+            <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
+              <EuiTitle size="xs">
+                <EuiButtonEmpty
+                  onClick={closeFlyout}
+                  data-test-subj="lnsDimensionPopoverFlyoutTitle"
+                  id="lnsDimensionPopoverFlyoutTitle"
+                  iconType="sortLeft"
+                  flush="left"
+                >
+                  <strong>{panelTitle}</strong>
+                </EuiButtonEmpty>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
+              {panel}
+            </EuiFlexItem>
+            <EuiFlyoutFooter className="lnsDimensionPopover__footer">
+              <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+                Close
+              </EuiButtonEmpty>
+            </EuiFlyoutFooter>
+          </div>
+        )}
     </>
   );
 }

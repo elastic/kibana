@@ -171,35 +171,6 @@ export function LayerPanel(
             >
               <>
                 {group.accessors.map((accessor) => {
-                  const dimensionEditor = (
-                    <NativeRenderer
-                      render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                      nativeProps={{
-                        ...layerDatasourceConfigProps,
-                        core: props.core,
-                        columnId: accessor,
-                        filterOperations: group.filterOperations,
-                      }}
-                    />
-                  );
-
-                  let extraDimensionEditor;
-                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
-                    extraDimensionEditor = (
-                      <div key={accessor} className="lnsLayerPanel__styleEditor">
-                        <NativeRenderer
-                          render={activeVisualization.renderDimensionEditor}
-                          nativeProps={{
-                            ...layerVisualizationConfigProps,
-                            groupId: group.groupId,
-                            accessor,
-                            setState: props.updateVisualization,
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
                   return (
                     <DragDrop
                       key={accessor}
@@ -284,8 +255,29 @@ export function LayerPanel(
                         }
                         panel={
                           <>
-                            {dimensionEditor}
-                            {extraDimensionEditor}
+                            <NativeRenderer
+                              render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                              nativeProps={{
+                                ...layerDatasourceConfigProps,
+                                core: props.core,
+                                columnId: accessor,
+                                filterOperations: group.filterOperations,
+                              }}
+                            />
+                            {activeVisualization.renderDimensionEditor &&
+                            group.enableDimensionEditor ? (
+                              <div key={accessor} className="lnsLayerPanel__styleEditor">
+                                <NativeRenderer
+                                  render={activeVisualization.renderDimensionEditor}
+                                  nativeProps={{
+                                    ...layerVisualizationConfigProps,
+                                    groupId: group.groupId,
+                                    accessor,
+                                    setState: props.updateVisualization,
+                                  }}
+                                />
+                              </div>
+                            ) : null}
                           </>
                         }
                         panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
