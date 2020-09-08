@@ -25,4 +25,4 @@ include::development-visualize-index.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
 
-include::code-exploration.asciidoc[leveloffset=+1]
+include::code-exploration.asciidoc[]
