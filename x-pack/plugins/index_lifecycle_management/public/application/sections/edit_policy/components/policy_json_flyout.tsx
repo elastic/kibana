@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Policy, PolicyFromES } from '../../../services/policies/types';
+import { Policy, PolicyFromES } from '../../../../../common/types';
 import { serializePolicy } from '../../../services/policies/policy_serialization';
 
 interface Props {

@@ -71,6 +71,7 @@
 |  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
+|  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
