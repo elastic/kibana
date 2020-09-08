@@ -43,7 +43,6 @@ describe('rule helpers', () => {
         rule: mockRuleWithEverything('test-id'),
       });
       const defineRuleStepData = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
@@ -93,7 +92,6 @@ describe('rule helpers', () => {
         falsePositives: ['test'],
         isAssociatedToEndpointList: false,
         isBuildingBlock: false,
-        isNew: false,
         license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
@@ -121,11 +119,10 @@ describe('rule helpers', () => {
         ],
         timestampOverride: 'event.ingested',
       };
-      const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
+      const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
         throttle: 'no_actions',
-        isNew: false,
         actions: [],
       };
       const aboutRuleDataDetailsData = {
@@ -202,7 +199,6 @@ describe('rule helpers', () => {
     test('returns with saved_id if value exists on rule', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
       const expected = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         machineLearningJobId: '',
@@ -235,7 +231,6 @@ describe('rule helpers', () => {
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         machineLearningJobId: '',
@@ -311,7 +306,6 @@ describe('rule helpers', () => {
       };
       const result: ScheduleStepRule = getScheduleStepsData(mockedRule);
       const expected = {
-        isNew: false,
         interval: mockedRule.interval,
         from: '0s',
       };
@@ -344,7 +338,6 @@ describe('rule helpers', () => {
           },
         ],
         enabled: mockedRule.enabled,
-        isNew: false,
         throttle: 'no_actions',
       };
 

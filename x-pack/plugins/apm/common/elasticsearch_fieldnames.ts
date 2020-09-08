@@ -31,7 +31,7 @@ export const USER_AGENT_NAME = 'user_agent.name';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
-export const OBSERVER_NAME = 'observer.name';
+export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
@@ -44,6 +44,8 @@ export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+
+export const EVENT_OUTCOME = 'event.outcome';
 
 export const TRACE_ID = 'trace.id';
 
