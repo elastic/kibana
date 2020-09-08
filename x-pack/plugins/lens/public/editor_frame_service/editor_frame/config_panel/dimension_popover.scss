@@ -13,6 +13,10 @@
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
+.lnsDimensionPopover--noAnimation {
+  animation: none;
+}
+
 .lnsDimensionPopover__footer,
 .lnsDimensionPopover__header {
   padding: $euiSizeS;

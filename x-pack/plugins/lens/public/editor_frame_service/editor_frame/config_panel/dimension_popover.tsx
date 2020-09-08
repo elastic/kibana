@@ -5,7 +5,7 @@
  */
 import './dimension_popover.scss';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -13,6 +13,8 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
 } from '@elastic/eui';
+
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { VisualizationDimensionGroupConfig } from '../../../types';
 import { DimensionPopoverState } from './types';
@@ -36,6 +38,8 @@ export function DimensionPopover({
   panel: React.ReactElement;
   panelTitle: React.ReactNode;
 }) {
+  const [openByCreation, setIsOpenByCreation] = React.useState(popoverState.openId === accessor);
+
   const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
 
   const closeFlyout = () => {
@@ -44,6 +48,7 @@ export function DimensionPopover({
       openId: null,
       addingToGroupId: null,
     });
+    setIsOpenByCreation(false);
   };
 
   return (
@@ -55,7 +60,9 @@ export function DimensionPopover({
           <div
             role="dialog"
             aria-labelledby="lnsDimensionPopoverFlyoutTitle"
-            className="lnsDimensionPopover"
+            className={classNames('lnsDimensionPopover', {
+              'lnsDimensionPopover--noAnimation': openByCreation,
+            })}
           >
             <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
               <EuiTitle size="xs">
