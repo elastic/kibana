@@ -59,6 +59,7 @@ export const NewTrustedAppForm = memo(() => {
         ...prevState,
         os: newOsValue as NewTrustedApp['os'],
       };
+      // FIXME:PT need to adjust `entries` (potentially) based on OS being windows
     });
   }, []);
 
