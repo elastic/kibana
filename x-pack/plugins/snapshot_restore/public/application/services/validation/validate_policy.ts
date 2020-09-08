@@ -50,7 +50,13 @@ export const validatePolicy = (
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository, isEditing, policyName, validateIndicesCount } = validationHelperData;
+  const {
+    managedRepository,
+    isEditing,
+    policyName,
+    validateIndicesCount,
+    repositoryDoesNotExist,
+  } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -99,7 +105,7 @@ export const validatePolicy = (
     );
   }
 
-  if (isStringEmpty(repository)) {
+  if (isStringEmpty(repository) || repositoryDoesNotExist) {
     validation.errors.repository.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage', {
         defaultMessage: 'Repository is required.',

@@ -262,6 +262,10 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       !!policy.repository &&
       repositories.some((r: { name: string }) => r.name === policy.repository);
 
+    if (!policyRepositoryExists && !errors.repository) {
+      updatePolicy(policy, { repositoryDoesNotExist: true });
+    }
+
     return (
       <>
         {!policyRepositoryExists && (
@@ -279,7 +283,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
-                defaultMessage="The repository {repo} does not exist. Please select an existing repository."
+                defaultMessage="Repository {repo} does not exist. Please select an existing repository."
                 values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
               />
             </EuiCallOut>
