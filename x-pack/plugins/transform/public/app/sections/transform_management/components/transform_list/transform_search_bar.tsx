@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TermClause, FieldClause, Value } from './common';
@@ -19,12 +20,12 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 import { TRANSFORM_MODE, TransformListRow } from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
 
-const filters = [
+const filters: SearchFilterConfig[] = [
   {
-    type: 'field_value_selection' as const,
+    type: 'field_value_selection',
     field: 'state.state',
     name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
-    multiSelect: 'or' as const,
+    multiSelect: 'or',
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
       name: val,
@@ -32,7 +33,7 @@ const filters = [
     })),
   },
   {
-    type: 'field_value_selection' as const,
+    type: 'field_value_selection',
     field: 'mode',
     name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
     multiSelect: false,
@@ -116,7 +117,7 @@ export const filterTransforms = (
 
 function getError(errorMessage: string | null) {
   if (errorMessage) {
-    return i18n.translate('xpack.ml.transformList.searchBar.invalidSearchErrorMessage', {
+    return i18n.translate('xpack.transform.transformList.searchBar.invalidSearchErrorMessage', {
       defaultMessage: 'Invalid search: {errorMessage}',
       values: { errorMessage },
     });

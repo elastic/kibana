@@ -8,7 +8,6 @@ import { useState } from 'react';
 import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
 import sortBy from 'lodash/sortBy';
 import get from 'lodash/get';
-import { TransformListRow } from '../../../../common';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -17,27 +16,46 @@ const propertyMap = {
   Mode: 'mode',
 };
 
-interface AnalyticsBasicTableSettings {
+// Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
+// Can be removed when https://github.com/elastic/eui/issues/4011 is addressed in EUI
+export interface Criteria<T> {
+  page?: {
+    index: number;
+    size: number;
+  };
+  sort?: {
+    field: keyof T;
+    direction: Direction;
+  };
+}
+export interface CriteriaWithPagination<T> extends Criteria<T> {
+  page: {
+    index: number;
+    size: number;
+  };
+}
+
+interface AnalyticsBasicTableSettings<T> {
   pageIndex: number;
   pageSize: number;
   totalItemCount: number;
   hidePerPageOptions: boolean;
-  sortField: string;
+  sortField: keyof T;
   sortDirection: Direction;
 }
 
-interface UseTableSettingsReturnValue {
-  onTableChange: EuiBasicTableProps<TransformListRow>['onChange'];
-  pageOfItems: TransformListRow[];
-  pagination: EuiBasicTableProps<TransformListRow>['pagination'];
+interface UseTableSettingsReturnValue<T> {
+  onTableChange: EuiBasicTableProps<T>['onChange'];
+  pageOfItems: T[];
+  pagination: EuiBasicTableProps<T>['pagination'];
   sorting: EuiTableSortingType<any>;
 }
 
-export function useTableSettings(
-  sortByField: string,
-  items: TransformListRow[]
-): UseTableSettingsReturnValue {
-  const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings>({
+export function useTableSettings<TypeOfItem>(
+  sortByField: keyof TypeOfItem,
+  items: TypeOfItem[]
+): UseTableSettingsReturnValue<TypeOfItem> {
+  const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings<TypeOfItem>>({
     pageIndex: 0,
     pageSize: PAGE_SIZE,
     totalItemCount: 0,
@@ -47,10 +65,10 @@ export function useTableSettings(
   });
 
   const getPageOfItems = (
-    list: any[],
+    list: TypeOfItem[],
     index: number,
     size: number,
-    sortField: string,
+    sortField: keyof TypeOfItem,
     sortDirection: Direction
   ) => {
     list = sortBy(list, (item) =>
@@ -73,13 +91,10 @@ export function useTableSettings(
     };
   };
 
-  const onTableChange = ({
+  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = ({
     page = { index: 0, size: PAGE_SIZE },
     sort = { field: sortByField, direction: 'asc' },
-  }: {
-    page?: { index: number; size: number };
-    sort?: { field: string; direction: Direction };
-  }) => {
+  }: CriteriaWithPagination<TypeOfItem>) => {
     const { index, size } = page;
     const { field, direction } = sort;
 

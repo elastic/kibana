@@ -82,13 +82,7 @@ export const TransformList: FC<Props> = ({
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
   const [searchQueryText, setSearchQueryText] = useState<string>('');
-  const [filteredTransforms, setFilteredTransforms] = useState<{
-    active: boolean;
-    items: TransformListRow[];
-  }>({
-    active: false,
-    items: [],
-  });
+  const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -109,12 +103,12 @@ export const TransformList: FC<Props> = ({
     transformSelection
   );
 
-  const setQueryClauses = (queryClauses: any) => {
+  const updateFilteredItems = (queryClauses: any) => {
     if (queryClauses.length) {
       const filtered = filterTransforms(transforms, queryClauses);
-      setFilteredTransforms({ active: true, items: filtered });
+      setFilteredTransforms(filtered);
     } else {
-      setFilteredTransforms({ active: false, items: [] });
+      setFilteredTransforms(transforms);
     }
   };
 
@@ -126,18 +120,18 @@ export const TransformList: FC<Props> = ({
         if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
           clauses = query.ast.clauses;
         }
-        setQueryClauses(clauses);
+        updateFilteredItems(clauses);
       } else {
-        setQueryClauses([]);
+        updateFilteredItems([]);
       }
     };
     filterList();
     // eslint-disable-next-line
-  }, [searchQueryText, transforms]); // missing dependency setQueryClauses
+  }, [searchQueryText, transforms]); // missing dependency updateFilteredItems
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
-    filteredTransforms.active ? filteredTransforms.items : transforms
+    filteredTransforms
   );
 
   // Before the transforms have been loaded for the first time, display the loading indicator only.
