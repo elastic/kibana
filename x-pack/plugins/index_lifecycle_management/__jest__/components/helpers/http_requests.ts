@@ -6,7 +6,7 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 
-type HttpResponse = Record<string, any> | any[];
+export type HttpResponse = Record<string, any> | any[];
 
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   const setPoliciesResponse = (response: HttpResponse = []) => {

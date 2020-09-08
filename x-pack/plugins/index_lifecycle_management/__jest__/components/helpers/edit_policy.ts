@@ -6,6 +6,8 @@
 
 import { init as initHttpRequests } from './http_requests';
 
+export type EditPolicySetup = ReturnType<typeof setup>;
+
 export const setup = () => {
   const { httpRequestsMockHelpers, server } = initHttpRequests();
 
@@ -17,6 +19,7 @@ export const setup = () => {
   ) => {
     httpRequestsMockHelpers.setNodesListResponse(response);
   };
+
   return {
     http: {
       setupNodeListResponse,

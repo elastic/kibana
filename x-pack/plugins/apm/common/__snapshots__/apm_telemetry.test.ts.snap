@@ -536,6 +536,9 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             },
                             "transaction_count": {
                               "type": "long"
+                            },
+                            "ratio": {
+                              "type": "long"
                             }
                           }
                         },
@@ -546,48 +549,38 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             },
                             "transaction_count": {
                               "type": "long"
+                            },
+                            "ratio": {
+                              "type": "long"
                             }
                           }
                         },
-                        "no_rum": {
+                        "with_country": {
                           "properties": {
                             "expected_metric_document_count": {
                               "type": "long"
                             },
                             "transaction_count": {
                               "type": "long"
-                            }
-                          }
-                        },
-                        "no_rum_no_observer_name": {
-                          "properties": {
-                            "expected_metric_document_count": {
-                              "type": "long"
                             },
-                            "transaction_count": {
+                            "ratio": {
                               "type": "long"
                             }
                           }
+                        }
+                      }
+                    },
+                    "environments": {
+                      "properties": {
+                        "services_without_environment": {
+                          "type": "long"
                         },
-                        "only_rum": {
-                          "properties": {
-                            "expected_metric_document_count": {
-                              "type": "long"
-                            },
-                            "transaction_count": {
-                              "type": "long"
-                            }
-                          }
+                        "services_with_multiple_environments": {
+                          "type": "long"
                         },
-                        "only_rum_no_observer_name": {
-                          "properties": {
-                            "expected_metric_document_count": {
-                              "type": "long"
-                            },
-                            "transaction_count": {
-                              "type": "long"
-                            }
-                          }
+                        "top_enviroments": {
+                          "type": "keyword",
+                          "ignore_above": 1024
                         }
                       }
                     },
@@ -942,6 +935,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "cloud": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "environments": {
                           "properties": {
                             "took": {
                               "properties": {

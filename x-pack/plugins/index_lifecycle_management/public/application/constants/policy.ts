@@ -11,7 +11,7 @@ import {
   HotPhase,
   WarmPhase,
   FrozenPhase,
-} from '../services/policies/types';
+} from '../../../common/types';
 
 export const defaultNewHotPhase: HotPhase = {
   phaseEnabled: true,

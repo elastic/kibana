@@ -7,3 +7,5 @@
 export * from './api';
 
 export type DataTierNodeRole = 'data' | 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
+
+export * from './policies';

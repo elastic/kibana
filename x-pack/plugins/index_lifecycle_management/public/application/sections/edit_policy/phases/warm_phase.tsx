@@ -18,6 +18,8 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 import {
   LearnMoreLink,
   ActiveBadge,
@@ -31,9 +33,6 @@ import {
   NodesDataProvider,
   DefaultAllocationWarning,
 } from '../components';
-
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
-import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {

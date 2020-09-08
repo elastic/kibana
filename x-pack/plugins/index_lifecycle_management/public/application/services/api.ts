@@ -6,7 +6,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { ListNodesRouteResponse } from '../../../common/types';
+import { PolicyFromES, SerializedPolicy, ListNodesRouteResponse } from '../../../common/types';
 
 import {
   UIM_POLICY_DELETE,
@@ -15,10 +15,8 @@ import {
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
 } from '../constants';
-
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-import { PolicyFromES, SerializedPolicy } from './policies/types';
 
 interface GenericObject {
   [key: string]: any;

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitch, EuiText, EuiFormRow } from '@elastic/eui';
 
-import { PhaseWithAllocationAction } from '../../../../services/policies/types';
+import { PhaseWithAllocationAction } from '../../../../../../common/types';
 import { AdvancedSectionLayout } from '../advanced_section_layout';
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
@@ -40,7 +40,7 @@ const i18nTexts = {
   ),
 };
 
-export const DataTierAllocation = <T extends any>(
+export const DataTierAllocation = (
   props: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>
 ) => {
   const { phaseData, setPhaseData, phase } = props;

@@ -9,30 +9,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiFormRow } from '@elastic/eui';
 
-import { ListNodesRouteResponse } from '../../../../../../common/types';
-import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../../services/policies/policy_validation';
+import { PhaseWithAllocationAction } from '../../../../../../common/types';
+import { propertyof } from '../../../../services/policies/policy_validation';
 
 import { ErrableFormRow } from '../form_errors';
 
 import { NodeAttrsDetails } from './node_attrs_details';
+import { SharedProps } from './types';
 
-interface Props<T extends PhaseWithAllocationAction> {
-  phase: keyof Phases & string;
-  errors?: PhaseValidationErrors<T>;
-  phaseData: T;
-  setPhaseData: (dataKey: keyof T & string, value: string) => void;
-  isShowingErrors: boolean;
-  nodes: ListNodesRouteResponse['nodesByAttributes'];
-}
-export const NodeAllocation = <T extends PhaseWithAllocationAction>({
+export const NodeAllocation = ({
   phase,
   setPhaseData,
   errors,
   phaseData,
   isShowingErrors,
   nodes,
-}: React.PropsWithChildren<Props<T>>) => {
+}: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>) => {
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
   );
@@ -78,7 +70,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
   }
 
   // check that this string is a valid property
-  const nodeAttrsProperty = propertyof<T>('selectedNodeAttrs');
+  const nodeAttrsProperty = propertyof<PhaseWithAllocationAction>('selectedNodeAttrs');
 
   return (
     <Fragment>
