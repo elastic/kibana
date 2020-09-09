@@ -48,7 +48,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria 
       describedByIds={idAria ? [idAria] : undefined}
     >
       <EuiTextArea
-        data-test-subj="EqlQueryBarTextInput"
+        data-test-subj="eqlQueryBarTextInput"
         fullWidth
         isInvalid={isInvalid}
         value={fieldValue}

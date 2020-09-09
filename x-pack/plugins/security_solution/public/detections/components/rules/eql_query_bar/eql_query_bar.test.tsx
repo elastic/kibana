@@ -30,7 +30,7 @@ describe('EqlQueryBar', () => {
     const wrapper = mount(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
 
     wrapper
-      .find('[data-test-subj="EqlQueryBarTextInput"]')
+      .find('[data-test-subj="eqlQueryBarTextInput"]')
       .first()
       .simulate('change', { target: { value: 'newQuery' } });
 
