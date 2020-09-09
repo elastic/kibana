@@ -14,11 +14,9 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   euiDragDropReorder,
   EuiButtonIcon,
-  EuiText,
   EuiButtonEmpty,
   EuiFormRow,
   htmlIdGenerator,
@@ -28,12 +26,7 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
-import {
-  Query,
-  esKuery,
-  esQuery,
-  DataPublicPluginStart,
-} from '../../../../../../../../src/plugins/data/public';
+import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
 
 const generateId = htmlIdGenerator();
 
