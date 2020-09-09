@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
@@ -17,14 +17,25 @@ import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private uiSettingsSub: Subscription;
+  private searchTimeout: number;
+
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param deps `SearchInterceptorDeps`
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @internal
    */
-  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
-    super(deps, requestTimeout);
+  constructor(deps: SearchInterceptorDeps) {
+    super(deps);
+    this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+
+    this.uiSettingsSub = deps.uiSettings
+      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
+      .subscribe((timeout: number) => {
+        this.searchTimeout = timeout;
+      });
+  }
+
+  public stop() {
+    this.uiSettingsSub.unsubscribe();
   }
 
   /**
@@ -69,12 +80,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    request.params = {
-      ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-      ...request.params,
-    };
-
-    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const { combinedSignal, cleanup } = this.setupAbortSignal({
+      abortSignal: options.abortSignal,
+      timeout: this.searchTimeout,
+    });
     const aborted$ = from(toPromise(combinedSignal));
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
@@ -108,7 +117,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/es/${id}`);
+            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
           }
         },
       }),

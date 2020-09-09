@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IFieldType } from 'src/plugins/data/common';
 import { IndexPatternColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 
@@ -22,16 +23,10 @@ export interface IndexPattern {
   hasRestrictions: boolean;
 }
 
-export interface IndexPatternField {
-  name: string;
+export type IndexPatternField = IFieldType & {
   displayName: string;
-  type: string;
-  esTypes?: string[];
-  aggregatable: boolean;
-  scripted?: boolean;
-  searchable: boolean;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-}
+};
 
 export interface IndexPatternLayer {
   columnOrder: string[];
