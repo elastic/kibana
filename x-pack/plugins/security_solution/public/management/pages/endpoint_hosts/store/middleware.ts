@@ -24,7 +24,7 @@ import {
   sendGetAgentPolicyList,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
-import { metadataIndexPattern } from '../../../../../common/endpoint/constants';
+import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
@@ -33,13 +33,16 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 ) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
-    const fields = await indexPatterns.getFieldsForWildcard({ pattern: metadataIndexPattern });
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern: metadataCurrentIndexPattern,
+    });
     const indexPattern: IIndexPattern = {
-      title: metadataIndexPattern,
+      title: metadataCurrentIndexPattern,
       fields,
     };
     return [indexPattern];
   }
+  // eslint-disable-next-line complexity
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
 

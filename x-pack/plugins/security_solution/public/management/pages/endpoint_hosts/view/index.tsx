@@ -16,6 +16,8 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -398,16 +400,16 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: hasListData ? 'flex' : 'none', maxWidth: 200 };
-  }, [hasListData]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
-    return !hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
-  }, [hasListData, hasSelectedEndpoint, isAutoRefreshEnabled]);
+    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
 
   const refreshInterval = useMemo(() => {
-    return !hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
-  }, [hasListData, autoRefreshInterval]);
+    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [endpointsExist, autoRefreshInterval]);
 
   return (
     <AdministrationListPage
@@ -428,18 +430,24 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
-        <AdminSearchBar />
-        <div style={refreshStyle}>
-          <EuiSuperDatePicker
-            onTimeChange={NOOP}
-            isDisabled={hasSelectedEndpoint}
-            onRefresh={onRefresh}
-            isPaused={refreshIsPaused}
-            refreshInterval={refreshInterval}
-            onRefreshChange={onRefreshChange}
-            isAutoRefreshOnly={true}
-          />
-        </div>
+        <EuiFlexGroup>
+          {endpointsExist && (
+            <EuiFlexItem>
+              <AdminSearchBar />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} style={refreshStyle}>
+            <EuiSuperDatePicker
+              onTimeChange={NOOP}
+              isDisabled={hasSelectedEndpoint}
+              onRefresh={onRefresh}
+              isPaused={refreshIsPaused}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChange}
+              isAutoRefreshOnly={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
       </>
       {hasListData && (

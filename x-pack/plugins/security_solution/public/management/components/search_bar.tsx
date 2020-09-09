@@ -16,7 +16,6 @@ import * as selectors from '../pages/endpoint_hosts/store/selectors';
 import { clone } from '../pages/endpoint_hosts/models/index_pattern';
 
 const AdminQueryBar = styled.div`
-  margin-bottom: ${(props) => props.theme.eui.ruleMargins.marginMedium};
   .globalQueryBar {
     padding: 0;
   }
