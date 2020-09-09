@@ -570,7 +570,7 @@ class JobService {
       }
 
       ml.startDatafeed({
-        datafeedId: 22,
+        datafeedId,
         start,
         end,
       })

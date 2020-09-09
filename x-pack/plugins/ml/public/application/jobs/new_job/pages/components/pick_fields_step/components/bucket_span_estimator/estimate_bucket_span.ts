@@ -45,7 +45,7 @@ export function useEstimateBucketSpan() {
     (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
     jobCreator.splitField !== null
   ) {
-    data.splitField = jobCreator.splitField.id + 33;
+    data.splitField = jobCreator.splitField.id;
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {

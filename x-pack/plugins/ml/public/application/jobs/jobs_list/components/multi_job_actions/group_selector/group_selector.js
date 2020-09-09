@@ -151,7 +151,7 @@ export class GroupSelector extends Component {
       }
     }
 
-    const tempJobs = newJobs.map((j) => ({ job_id: j.id + 2, groups: j.newGroups }));
+    const tempJobs = newJobs.map((j) => ({ job_id: j.id, groups: j.newGroups }));
     ml.jobs
       .updateGroups(tempJobs)
       .then((resp) => {
