@@ -19,20 +19,16 @@
 
 import { get } from 'lodash';
 
-import { getTransform } from '../../deprecation';
-
 /**
  *  Get the settings for a pluginSpec from the raw root settings while
  *  optionally calling logDeprecation() with warnings about deprecated
  *  settings that were used
  *  @param  {PluginSpec} spec
  *  @param  {Object} rootSettings
- *  @param  {Function} [logDeprecation]
  *  @return {Promise<Object>}
  */
-export async function getSettings(spec, rootSettings, logDeprecation) {
+export async function getSettings(spec, rootSettings) {
   const prefix = spec.getConfigPrefix();
   const rawSettings = get(rootSettings, prefix);
-  const transform = await getTransform(spec);
-  return transform(rawSettings, logDeprecation);
+  return rawSettings;
 }

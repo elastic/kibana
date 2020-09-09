@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip } from '@elastic/eui';
+import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 
@@ -32,16 +31,14 @@ const ShiftedEuiText = styled(EuiText)`
 `;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;
   }
 
-  const { serviceName, kuery, transactionType } = urlParams;
-  if (!serviceName) {
-    return null;
-  }
+  const { kuery, transactionType } = urlParams;
 
   const hasKuery = !isEmpty(kuery);
   const icon = hasKuery ? (
