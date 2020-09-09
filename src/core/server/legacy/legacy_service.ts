@@ -310,9 +310,17 @@ export class LegacyService implements CoreService {
       status: {
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
-        set: setupDeps.core.status.plugins.set.bind(null, 'legacy'),
-        dependencies$: setupDeps.core.status.plugins.getDependenciesStatus$('legacy'),
-        derivedStatus$: setupDeps.core.status.plugins.getDerivedStatus$('legacy'),
+        set: () => {
+          throw new Error(`core.status.set is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get dependencies$() {
+          throw new Error(`core.status.dependencies$ is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get derivedStatus$() {
+          throw new Error(`core.status.derivedStatus$ is unsupported in legacy`);
+        },
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

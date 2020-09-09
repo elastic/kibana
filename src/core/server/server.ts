@@ -156,12 +156,7 @@ export class Server {
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
-      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy can access plugin status from
-      // any KP plugin
-      pluginDependencies: new Map([
-        ...pluginTree.asNames,
-        ['legacy', [...pluginTree.asNames.keys()]],
-      ]),
+      pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
     });
 
