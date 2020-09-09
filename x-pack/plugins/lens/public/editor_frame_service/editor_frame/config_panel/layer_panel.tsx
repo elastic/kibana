@@ -407,7 +407,12 @@ export function LayerPanel(
                           </EuiButtonEmpty>
                         </div>
                       }
-                      panelTitle={group.groupLabel}
+                      panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                        defaultMessage: '{groupLabel} configuration',
+                        values: {
+                          groupLabel: group.groupLabel,
+                        },
+                      })}
                       panel={
                         <NativeRenderer
                           render={props.datasourceMap[datasourceId].renderDimensionEditor}
