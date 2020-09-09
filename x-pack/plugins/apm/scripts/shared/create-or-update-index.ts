@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { ESClient } from './get_es_client';
 
 export async function createOrUpdateIndex({
   client,
@@ -12,7 +12,7 @@ export async function createOrUpdateIndex({
   indexName,
   template,
 }: {
-  client: Client;
+  client: ESClient;
   clear: boolean;
   indexName: string;
   template: any;

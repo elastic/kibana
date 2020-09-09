@@ -19,7 +19,7 @@ import { LEGACY_LAST_MODIFIED_VERSION } from '../saved_objects/migrations';
 export enum ReadOperations {
   Get = 'get',
   GetAlertState = 'getAlertState',
-  GetAlertStatus = 'getAlertStatus',
+  GetAlertInstanceSummary = 'getAlertInstanceSummary',
   Find = 'find',
 }
 

@@ -8,13 +8,14 @@ import { merge } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { LegacyAPICaller } from 'src/core/server';
 
+import { LegacyTemplateSerialized } from '../../../../../index_management/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function getIndexTemplate(
   callAsCurrentUser: LegacyAPICaller,
   templateName: string
-): Promise<any> {
+): Promise<LegacyTemplateSerialized> {
   const response = await callAsCurrentUser('indices.getTemplate', { name: templateName });
   return response[templateName];
 }

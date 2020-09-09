@@ -17,33 +17,24 @@
  * under the License.
  */
 
-import { ResponseObject, Server } from 'hapi';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { Server } from 'hapi';
 
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
-  ConfigService,
   CoreSetup,
   CoreStart,
-  ElasticsearchServiceSetup,
   EnvironmentMode,
   LoggerFactory,
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
-  SavedObjectsClientProviderOptions,
-  IUiSettingsClient,
   PackageInfo,
-  LegacyRequest,
   LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
+import { LegacyConfig, ILegacyInternals } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
-import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
+import { ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
@@ -61,15 +52,8 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
-    savedObjects: SavedObjectsLegacyService;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
-  }
-
-  interface Request {
-    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
-    getBasePath(): string;
-    getUiSettingsService(): IUiSettingsClient;
   }
 }
 
@@ -86,11 +70,9 @@ export interface KibanaCore {
   __internals: {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-    kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
-    savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
   env: {
     mode: Readonly<EnvironmentMode>;
@@ -149,6 +131,3 @@ export default class KbnServer {
 
 // Re-export commonly used hapi types.
 export { Server, Request, ResponseToolkit } from 'hapi';
-
-// Re-export commonly accessed api types.
-export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';
