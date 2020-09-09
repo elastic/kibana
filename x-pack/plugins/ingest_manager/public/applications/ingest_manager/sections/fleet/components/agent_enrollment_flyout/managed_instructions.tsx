@@ -24,7 +24,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -91,4 +91,4 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       )}
     </>
   );
-};
+});
