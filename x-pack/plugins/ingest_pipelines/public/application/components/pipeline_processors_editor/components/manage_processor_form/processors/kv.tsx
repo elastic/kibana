@@ -33,7 +33,7 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitFieldLabel', {
       defaultMessage: 'Field split',
     }),
-    helpText: () => (
+    helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitHelpText"
         defaultMessage="Regex pattern used to delimit the key-value pairs. Typically a space character ({space})."
@@ -58,7 +58,7 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitFieldLabel', {
       defaultMessage: 'Value split',
     }),
-    helpText: () => (
+    helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitHelpText"
         defaultMessage="Regex pattern used to split keys and values. Typically an assignment operator ({equal})."
