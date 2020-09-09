@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES} from '../../../../common/constants';
+import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
 
 export function getOtherCategoryLabel() {

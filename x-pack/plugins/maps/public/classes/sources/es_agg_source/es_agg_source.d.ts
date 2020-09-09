@@ -22,7 +22,7 @@ export class AbstractESAggSource extends AbstractESSource implements IESAggSourc
   constructor(
     sourceDescriptor: AbstractESAggSourceDescriptor,
     inspectorAdapters: object,
-    canReadFromGeoJson?
+    canReadFromGeoJson?: boolean
   );
 
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;

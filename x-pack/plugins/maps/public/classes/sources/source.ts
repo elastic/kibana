@@ -18,6 +18,7 @@ import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view'
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
+  currentLayerType?: string;
 };
 
 export type ImmutableSourceProperty = {

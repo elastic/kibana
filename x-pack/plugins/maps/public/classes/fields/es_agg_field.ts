@@ -45,7 +45,7 @@ export class ESAggField implements IESAggField {
     aggType: AGG_TYPE;
     esDocField?: IField;
     origin: FIELD_ORIGIN;
-    canReadFromGeoJson: boolean;
+    canReadFromGeoJson?: boolean;
   }) {
     this._source = source;
     this._origin = origin;

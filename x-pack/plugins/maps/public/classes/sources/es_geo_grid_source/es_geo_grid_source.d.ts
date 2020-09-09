@@ -9,6 +9,7 @@ import {
   ESGeoGridSourceDescriptor,
   MapFilters,
   MapQuery,
+  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
