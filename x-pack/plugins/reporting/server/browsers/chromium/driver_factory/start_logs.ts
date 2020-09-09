@@ -97,10 +97,11 @@ export const browserStartLogs = (
     })
   );
 
-  // Some chromium errors don't show up until a few seconds after startup
-  // hence why we wait for at least 5 seconds to let them surface
   const log$ = fromEvent(rl, 'line').pipe(tap((log) => logger.info(`Chromium log "${log}"`)));
 
+  // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
+  // logs as sometimes it's "bind" successfully for remote connections, but later emit
+  // a log indicative of an issue (for example, no default font found).
   return merge(exit$, error$, log$).pipe(
     takeUntil(timer(browserLaunchTimeToWait)),
     reduce((acc, curr) => `${acc}${curr}\n`, ''),
