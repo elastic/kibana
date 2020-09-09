@@ -25,7 +25,7 @@ interface IRequestParams<ResponseBody> {
   hasValidData?: (body?: ResponseBody) => boolean;
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, Readonly<{}>, unknown>;
+  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -52,12 +52,12 @@ export class EnterpriseSearchRequestHandler {
   }: IRequestParams<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
-      request: KibanaRequest<unknown, Readonly<{}>, unknown>,
+      request: KibanaRequest<unknown, unknown, unknown>,
       response: KibanaResponseFactory
     ) => {
       try {
         // Set up API URL
-        const queryParams = { ...request.query, ...params };
+        const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
