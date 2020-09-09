@@ -45,6 +45,15 @@ describe('install', () => {
     it('should return correct type when installing and no other version is currently installed', () => {
       const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
       expect(installTypeInstall).toBe('install');
+
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'update').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'reinstall').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'reupdate').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'rollback').toBe(false);
     });
 
     it('should return correct type when installing the same version', () => {
@@ -53,6 +62,9 @@ describe('install', () => {
         installedPkg: mockInstallation,
       });
       expect(installTypeReinstall).toBe('reinstall');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeReinstall === 'install').toBe(false);
     });
 
     it('should return correct type when moving from one version to another', () => {
@@ -61,6 +73,9 @@ describe('install', () => {
         installedPkg: mockInstallation,
       });
       expect(installTypeUpdate).toBe('update');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeUpdate === 'install').toBe(false);
     });
 
     it('should return correct type when update fails and trys again', () => {
@@ -69,6 +84,9 @@ describe('install', () => {
         installedPkg: mockInstallationUpdateFail,
       });
       expect(installTypeReupdate).toBe('reupdate');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeReupdate === 'install').toBe(false);
     });
 
     it('should return correct type when attempting to rollback from a failed update', () => {
@@ -77,6 +95,9 @@ describe('install', () => {
         installedPkg: mockInstallationUpdateFail,
       });
       expect(installTypeRollback).toBe('rollback');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeRollback === 'install').toBe(false);
     });
   });
 });
