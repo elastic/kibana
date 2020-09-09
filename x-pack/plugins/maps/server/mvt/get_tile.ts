@@ -85,9 +85,10 @@ export async function getGridTile({
       }
       requestBody.query.bool.filter.push(bboxFilter);
 
-      const targetPrecision = Math.min(z + SUPER_FINE_ZOOM_DELTA, MAX_ZOOM);
-
-      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = targetPrecision;
+      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = Math.min(
+        z + SUPER_FINE_ZOOM_DELTA,
+        MAX_ZOOM
+      );
       requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
 
       const esGeotileGridQuery = {
@@ -103,26 +104,7 @@ export async function getGridTile({
         type: 'FeatureCollection',
       };
 
-      const tileIndex = geojsonvt(featureCollection, {
-        maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
-        tolerance: 3, // simplification tolerance (higher means simpler)
-        extent: 4096, // tile extent (both width and height)
-        buffer: 64, // tile buffer on each side
-        debug: 0, // logging level (0 to disable, 1 or 2)
-        lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
-        promoteId: null, // name of a feature property to promote to feature.id. Cannot be used with `generateId`
-        generateId: false, // whether to generate feature ids. Cannot be used with `promoteId`
-        indexMaxZoom: 5, // max zoom in the initial tile index
-        indexMaxPoints: 100000, // max number of points per tile in the index
-      });
-      const tile = tileIndex.getTile(z, x, y);
-
-      if (tile) {
-        const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_LAYER_NAME]: tile }, { version: 2 });
-        return Buffer.from(pbf);
-      } else {
-        return null;
-      }
+      return createMvtTile(featureCollection);
     } catch (e) {
       logger.warn(e.message);
       throw e;
@@ -251,26 +233,7 @@ export async function getTile({
       type: 'FeatureCollection',
     };
 
-    const tileIndex = geojsonvt(featureCollection, {
-      maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
-      tolerance: 3, // simplification tolerance (higher means simpler)
-      extent: 4096, // tile extent (both width and height)
-      buffer: 64, // tile buffer on each side
-      debug: 0, // logging level (0 to disable, 1 or 2)
-      lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
-      promoteId: null, // name of a feature property to promote to feature.id. Cannot be used with `generateId`
-      generateId: false, // whether to generate feature ids. Cannot be used with `promoteId`
-      indexMaxZoom: 5, // max zoom in the initial tile index
-      indexMaxPoints: 100000, // max number of points per tile in the index
-    });
-    const tile = tileIndex.getTile(z, x, y);
-
-    if (tile) {
-      const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_LAYER_NAME]: tile }, { version: 2 });
-      return Buffer.from(pbf);
-    } else {
-      return null;
-    }
+    return createMvtTile(featureCollection);
   } catch (e) {
     logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
     return null;
@@ -337,4 +300,27 @@ function esBboxToGeoJsonPolygon(esBounds: ESBounds): Polygon {
       ],
     ],
   };
+}
+
+function createMvtTile(featureCollection: FeatureCollection): Buffer | null {
+  const tileIndex = geojsonvt(featureCollection, {
+    maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
+    tolerance: 3, // simplification tolerance (higher means simpler)
+    extent: 4096, // tile extent (both width and height)
+    buffer: 64, // tile buffer on each side
+    debug: 0, // logging level (0 to disable, 1 or 2)
+    lineMetrics: false, // whether to enable line metrics tracking for LineString/MultiLineString features
+    promoteId: null, // name of a feature property to promote to feature.id. Cannot be used with `generateId`
+    generateId: false, // whether to generate feature ids. Cannot be used with `promoteId`
+    indexMaxZoom: 5, // max zoom in the initial tile index
+    indexMaxPoints: 100000, // max number of points per tile in the index
+  });
+  const tile = tileIndex.getTile(z, x, y);
+
+  if (tile) {
+    const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_LAYER_NAME]: tile }, { version: 2 });
+    return Buffer.from(pbf);
+  } else {
+    return null;
+  }
 }
