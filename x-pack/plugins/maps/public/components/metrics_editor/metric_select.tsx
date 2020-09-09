@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox } from '@elastic/eui';
-import { AGG_TYPE } from '../../common/constants';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { AGG_TYPE } from '../../../common/constants';
 
 const AGG_OPTIONS = [
   {
@@ -55,17 +54,19 @@ const AGG_OPTIONS = [
   },
 ];
 
-export const METRIC_AGGREGATION_VALUES = AGG_OPTIONS.map(({ value }) => {
-  return value;
-});
+type Props = Omit<EuiComboBoxProps<AGG_TYPE>, 'onChange'> & {
+  value: AGG_TYPE;
+  onChange: (aggType: AGG_TYPE) => void;
+  metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
+};
 
-export function MetricSelect({ value, onChange, metricsFilter, ...rest }) {
-  function onAggChange(selectedOptions) {
+export function MetricSelect({ value, onChange, metricsFilter, ...rest }: Props) {
+  function onAggChange(selectedOptions: Array<EuiComboBoxOptionOption<AGG_TYPE>>) {
     if (selectedOptions.length === 0) {
       return;
     }
 
-    const aggType = selectedOptions[0].value;
+    const aggType = selectedOptions[0].value!;
     onChange(aggType);
   }
 
@@ -87,9 +88,3 @@ export function MetricSelect({ value, onChange, metricsFilter, ...rest }) {
     />
   );
 }
-
-MetricSelect.propTypes = {
-  metricsFilter: PropTypes.func,
-  value: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
-  onChange: PropTypes.func.isRequired,
-};
