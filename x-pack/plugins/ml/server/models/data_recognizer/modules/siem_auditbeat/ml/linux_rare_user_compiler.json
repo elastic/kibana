@@ -18,7 +18,8 @@
       "influencers": [
         "process.title",
         "host.name",
-        "process.working_directory"
+        "process.working_directory",
+        "user.name"
       ]
     },
     "allow_lazy_open": true,

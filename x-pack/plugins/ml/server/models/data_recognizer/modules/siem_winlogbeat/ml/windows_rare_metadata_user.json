@@ -16,7 +16,6 @@
         }
       ],
       "influencers": [
-        "agent.id",
         "host.name",
         "user.name"
       ]
