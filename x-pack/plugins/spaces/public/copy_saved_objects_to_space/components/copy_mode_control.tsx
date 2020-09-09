@@ -37,8 +37,7 @@ const createNewCopiesDisabled = {
   tooltip: i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
     {
-      defaultMessage:
-        'Check if each object was previously copied or imported into the destination space.',
+      defaultMessage: 'Check if objects were previously copied or imported into the space.',
     }
   ),
 };
@@ -50,33 +49,36 @@ const createNewCopiesEnabled = {
   ),
   tooltip: i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
-    { defaultMessage: 'All copied objects will be created with new random IDs.' }
+    {
+      defaultMessage:
+        'Use this option to create one or more copies of the object in the same space.',
+    }
   ),
 };
 const overwriteEnabled = {
   id: 'overwriteEnabled',
   label: i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.enabledLabel',
-    { defaultMessage: 'Automatically try to overwrite conflicts' }
+    { defaultMessage: 'Automatically overwrite conflicts' }
   ),
 };
 const overwriteDisabled = {
   id: 'overwriteDisabled',
   label: i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.disabledLabel',
-    { defaultMessage: 'Request action when conflict occurs' }
+    { defaultMessage: 'Request action on conflict' }
   ),
 };
 const includeRelated = {
   id: 'includeRelated',
   text: i18n.translate('xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.title', {
-    defaultMessage: 'Include related saved objects',
+    defaultMessage: 'Include related objects',
   }),
   tooltip: i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
     {
       defaultMessage:
-        'This will copy any other objects this has references to -- for example, a dashboard may have references to multiple visualizations.',
+        'Copy this object and its related objects. For dashboards, related visualizations, index patterns, and saved searches are also copied.',
     }
   ),
 };
@@ -86,7 +88,7 @@ const copyOptionsTitle = i18n.translate(
 );
 const relationshipOptionsTitle = i18n.translate(
   'xpack.spaces.management.copyToSpace.copyModeControl.relationshipOptionsTitle',
-  { defaultMessage: 'Relationship options' }
+  { defaultMessage: 'Relationship' }
 );
 
 const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (

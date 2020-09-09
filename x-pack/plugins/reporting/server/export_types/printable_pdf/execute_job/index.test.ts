@@ -16,7 +16,7 @@ import {
   createMockReportingCore,
 } from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { ScheduledTaskParamsPDF } from '../types';
+import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
 
 let mockReporting: ReportingCore;
@@ -40,7 +40,7 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsPDF;
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
   const reportingConfig = {
@@ -83,7 +83,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const browserTimezone = 'UTC';
   await runTask(
     'pdfJobId',
-    getScheduledTaskParams({
+    getBasePayload({
       title: 'PDF Params Timezone Test',
       relativeUrl: '/app/kibana#/something',
       browserTimezone,
@@ -106,7 +106,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await runTask(
     'pdfJobId',
-    getScheduledTaskParams({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -121,7 +121,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await runTask(
     'pdfJobId',
-    getScheduledTaskParams({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
     cancellationToken
   );
 

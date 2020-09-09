@@ -11,8 +11,8 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../test_helpers';
-import { ScheduledTaskParams } from '../../types';
-import { ScheduledTaskParamsPDF } from '../printable_pdf/types';
+import { BasePayload } from '../../types';
+import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './';
 
 let mockConfig: ReportingConfig;
@@ -32,8 +32,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const conditionalHeaders = getConditionalHeaders({
-      job: {} as ScheduledTaskParams<any>,
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as BasePayload<any>,
       filteredHeaders: permittedHeaders,
       config: mockConfig,
     });
@@ -59,15 +59,15 @@ test('uses basePath from job when creating saved object service', async () => {
     foo: 'bar',
     baz: 'quix',
   };
-  const conditionalHeaders = getConditionalHeaders({
-    job: {} as ScheduledTaskParams<any>,
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as BasePayload<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
   const jobBasePath = '/sbp/s/marketing';
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: { basePath: jobBasePath } as ScheduledTaskParamsPDF,
+    job: { basePath: jobBasePath } as TaskPayloadPDF,
     conditionalHeaders,
     config: mockConfig,
   });
@@ -88,15 +88,15 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
     foo: 'bar',
     baz: 'quix',
   };
-  const conditionalHeaders = getConditionalHeaders({
-    job: {} as ScheduledTaskParams<any>,
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as BasePayload<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
 
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: {} as ScheduledTaskParamsPDF,
+    job: {} as TaskPayloadPDF,
     conditionalHeaders,
     config: mockConfig,
   });

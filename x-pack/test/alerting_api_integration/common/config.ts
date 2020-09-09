@@ -63,7 +63,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
-          '--xpack.actions.rejectUnauthorizedCertificates=false',
+          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
       : [];
 

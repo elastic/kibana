@@ -10,7 +10,7 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../test_helpers';
-import { ScheduledTaskParamsPDF } from '../printable_pdf/types';
+import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './';
 
 let mockConfig: ReportingConfig;
@@ -39,7 +39,7 @@ test(`gets logo from uiSettings`, async () => {
   });
 
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as ScheduledTaskParamsPDF,
+    job: {} as TaskPayloadPDF,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
@@ -47,7 +47,7 @@ test(`gets logo from uiSettings`, async () => {
   const { logo } = await getCustomLogo({
     reporting: mockReportingPlugin,
     config: mockConfig,
-    job: {} as ScheduledTaskParamsPDF,
+    job: {} as TaskPayloadPDF,
     conditionalHeaders,
   });
 

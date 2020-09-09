@@ -26,11 +26,13 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
+|  [toSnakeCase(obj)](./kibana-plugin-plugins-data-server.tosnakecase.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
@@ -71,6 +73,7 @@
 |  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
+|  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
