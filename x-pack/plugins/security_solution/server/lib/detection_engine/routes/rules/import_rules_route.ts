@@ -47,7 +47,7 @@ import { PartialFilter } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-const CHUNK_PARSED_OBJECT_SIZE = 50;
+const CHUNK_PARSED_OBJECT_SIZE = 100;
 
 export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
   router.post(
