@@ -323,6 +323,9 @@ export class TaskRunner {
             this.logger.debug(message);
           } else {
             this.logger.error(message);
+            if (this.alertType.onError != null) {
+              this.alertType.onError({ alertId, message });
+            }
           }
           return {
             ...originalState,

@@ -241,6 +241,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        securitySavedObjectsClient: (async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.savedObjects.createInternalRepository();
+        })(),
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

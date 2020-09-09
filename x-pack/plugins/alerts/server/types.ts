@@ -102,6 +102,7 @@ export interface AlertType<
     state?: ActionVariable[];
     params?: ActionVariable[];
   };
+  onError?: ({ alertId, message }: { alertId: string; message: string }) => Promise<void>;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {
