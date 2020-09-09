@@ -18,7 +18,7 @@ OVERWRITE=${2:-true}
 
 # Example to not overwrite everything if it exists from ./rules/import/multiple_ruleid_queries.ndjson
 # ./import_rules.sh ./rules/import/multiple_ruleid_queries.ndjson false
-curl -v -k \
+curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_import?overwrite=${OVERWRITE}" \

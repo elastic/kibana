@@ -122,12 +122,10 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
             const foundRule = foundRules?.find((rule) => rule.params.ruleId === ruleId);
             let existingRule = foundRule != null ? [foundRule] : null;
             if (foundRule == null) {
-              // try the id?
+              // try the id
               existingRule = await readRules({ alertsClient, ruleIds: undefined, id });
             }
-            // const existingRule = await readRules({ alertsClient, ruleIds: [ruleId], id });
 
-            // is this a bug?
             if (existingRule != null && existingRule.length > 0 && existingRule[0].params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule[0].params.type));
