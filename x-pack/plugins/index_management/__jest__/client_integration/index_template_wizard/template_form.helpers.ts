@@ -168,6 +168,50 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
   };
 
+  const componentTemplates = {
+    getComponentTemplatesInList() {
+      const { find } = testBed;
+      return find('componentTemplatesList.item.name').map((wrapper) => wrapper.text());
+    },
+    getComponentTemplatesSelected() {
+      const { find } = testBed;
+      return find('componentTemplatesSelection.item.name').map((wrapper) => wrapper.text());
+    },
+    showFilters() {
+      const { find, component } = testBed;
+      act(() => {
+        find('componentTemplates.filterButton').simulate('click');
+      });
+      component.update();
+    },
+    async selectFilter(filter: 'settings' | 'mappings' | 'aliases') {
+      const { find, component } = testBed;
+      const filters = ['settings', 'mappings', 'aliases'];
+      const index = filters.indexOf(filter);
+
+      await act(async () => {
+        find('filterList.filterItem').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async selectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesList.item.action-plusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async unSelectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesSelection.item.action-minusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+  };
+
   return {
     ...testBed,
     actions: {
@@ -184,6 +228,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       completeStepFour,
       selectSummaryTab,
       addMappingField,
+      componentTemplates,
     },
   };
 };
@@ -194,6 +239,17 @@ export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'confirmModalConfirmButton'
+  | 'componentTemplates.filterButton'
+  | 'componentTemplates.emptySearchResult'
+  | 'filterList.filterItem'
+  | 'componentTemplatesList'
+  | 'componentTemplatesList.item.name'
+  | 'componentTemplatesList.item.action-plusInCircle'
+  | 'componentTemplatesSelection'
+  | 'componentTemplatesSelection.item.name'
+  | 'componentTemplatesSelection.item.action-minusInCircle'
+  | 'componentTemplatesSelection.emptyPrompt'
+  | 'componentTemplateSearchBox'
   | 'createFieldForm.addPropertyButton'
   | 'createFieldForm.addButton'
   | 'createFieldForm.addFieldButton'

@@ -19,10 +19,10 @@ interface Props {
 
 export const ComponentTemplatesList = ({ components, listItemProps }: Props) => {
   return (
-    <>
+    <div data-test-subj="componentTemplatesList">
       {components.map((component) => (
         <ComponentTemplatesListItem key={component.name} component={component} {...listItemProps} />
       ))}
-    </>
+    </div>
   );
 };

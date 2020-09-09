@@ -68,11 +68,15 @@ describe('<TemplateCreate />', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
+
+    // disable all react-beautiful-dnd development warnings
+    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
   });
 
   afterAll(() => {
     server.restore();
     jest.useRealTimers();
+    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
 
   describe('on component mount', () => {
@@ -107,16 +111,16 @@ describe('<TemplateCreate />', () => {
     const componentTemplate1 = {
       name: 'test_component_template_1',
       hasMappings: true,
-      hasAliases: true,
-      hasSettings: true,
+      hasAliases: false,
+      hasSettings: false,
       usedBy: [],
       isManaged: false,
     };
 
     const componentTemplate2 = {
       name: 'test_component_template_2',
-      hasMappings: true,
-      hasAliases: true,
+      hasMappings: false,
+      hasAliases: false,
       hasSettings: true,
       usedBy: ['test_index_template_1'],
       isManaged: false,
@@ -146,7 +150,102 @@ describe('<TemplateCreate />', () => {
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
       });
 
-      // TODO add tests for component templates selector
+      it('should list the available component templates', () => {
+        const {
+          actions: {
+            componentTemplates: { getComponentTemplatesInList },
+          },
+        } = testBed;
+        const componentsFound = getComponentTemplatesInList();
+        expect(componentsFound).toEqual(componentTemplates.map((c) => c.name));
+      });
+
+      it('should allow to search for a component', async () => {
+        const {
+          component,
+          form: { setInputValue },
+          actions: {
+            componentTemplates: { getComponentTemplatesInList },
+          },
+        } = testBed;
+
+        await act(async () => {
+          setInputValue('componentTemplateSearchBox', 'template_2');
+        });
+        component.update();
+
+        const componentsFound = getComponentTemplatesInList();
+        expect(componentsFound).toEqual(['test_component_template_2']);
+      });
+
+      it('should allow to filter component by Index settings, mappings and aliases', async () => {
+        const {
+          find,
+          exists,
+          actions: {
+            componentTemplates: { showFilters, selectFilter, getComponentTemplatesInList },
+          },
+        } = testBed;
+
+        showFilters();
+
+        expect(find('filterList.filterItem').map((wrapper) => wrapper.text())).toEqual([
+          'Index settings',
+          'Mappings',
+          'Aliases',
+        ]);
+
+        await selectFilter('settings');
+        expect(getComponentTemplatesInList()).toEqual(['test_component_template_2']); // only this one has settings
+
+        await selectFilter('mappings');
+        expect(exists('componentTemplatesList')).toBe(false); // no component has **both** settings and mappings
+        expect(exists('componentTemplates.emptySearchResult')).toBe(true);
+        expect(find('componentTemplates.emptySearchResult').text()).toContain(
+          'No components match your search'
+        );
+
+        await selectFilter('settings'); // unselect settings
+        expect(getComponentTemplatesInList()).toEqual(['test_component_template_1']); // only this one has mappings
+
+        await selectFilter('mappings'); // unselect mappings (back to start)
+        expect(getComponentTemplatesInList()).toEqual([
+          'test_component_template_1',
+          'test_component_template_2',
+        ]);
+
+        await selectFilter('aliases');
+        expect(exists('componentTemplatesList')).toBe(false); // no component has aliases defined.
+      });
+
+      it('should allow to select and unselect a component template', async () => {
+        const {
+          find,
+          exists,
+          actions: {
+            componentTemplates: {
+              selectComponentAt,
+              unSelectComponentAt,
+              getComponentTemplatesSelected,
+            },
+          },
+        } = testBed;
+
+        // Start with empty selection
+        expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(true);
+        expect(find('componentTemplatesSelection.emptyPrompt').text()).toContain(
+          'Add component template building blocks to this template.'
+        );
+
+        // Select first component in the list
+        await selectComponentAt(0);
+        expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(false);
+        expect(getComponentTemplatesSelected()).toEqual(['test_component_template_1']);
+
+        // Unselect the component
+        await unSelectComponentAt(0);
+        expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(true);
+      });
     });
 
     // describe('index settings (step 3)', () => {

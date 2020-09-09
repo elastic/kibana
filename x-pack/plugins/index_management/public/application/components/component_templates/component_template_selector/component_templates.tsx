@@ -145,12 +145,13 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
             />
           </EuiButton>
         }
+        data-test-subj="emptySearchResult"
       />
     );
   };
 
   return (
-    <div className="componentTemplates">
+    <div className="componentTemplates" data-test-subj="componentTemplates">
       <div className="componentTemplates__header">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
@@ -162,6 +163,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
               }}
               aria-label={i18nTexts.searchBoxPlaceholder}
               className="componentTemplates__searchBox"
+              data-test-subj="componentTemplateSearchBox"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
