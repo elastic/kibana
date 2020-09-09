@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { getIPDetailsUrl } from '../../../common/components/link_to/redirect_to_network';
+import { getNetworkDetailsUrl } from '../../../common/components/link_to/redirect_to_network';
 import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
@@ -46,7 +46,7 @@ export const getBreadcrumbs = (
       {
         text: decodeIpv6(params.detailName),
         href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
-          path: getIPDetailsUrl(
+          path: getNetworkDetailsUrl(
             params.detailName,
             params.flowTarget,
             !isEmpty(search[0]) ? search[0] : ''

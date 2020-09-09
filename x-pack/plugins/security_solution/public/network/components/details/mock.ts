@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IpOverviewData } from '../../../graphql/types';
+import { NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 
-export const mockData: Readonly<Record<string, IpOverviewData>> = {
+export const mockData: Readonly<Record<
+  string,
+  NetworkDetailsStrategyResponse['networkDetails']
+>> = {
   complete: {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',
@@ -16,7 +19,7 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
         continent_name: ['North America'],
         city_name: ['New York'],
         country_iso_code: ['US'],
-        country_name: null,
+        country_name: undefined,
         location: {
           lat: [40.7214],
           lon: [-74.0052],
@@ -33,7 +36,7 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
         continent_name: ['North America'],
         city_name: ['New York'],
         country_iso_code: ['US'],
-        country_name: null,
+        country_name: undefined,
         location: {
           lat: [40.7214],
           lon: [-74.0052],

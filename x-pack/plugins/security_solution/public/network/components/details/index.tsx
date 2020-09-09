@@ -12,7 +12,7 @@ import React from 'react';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
-import { FlowTarget, IpOverviewData, Overview } from '../../../graphql/types';
+import { FlowTarget, NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 
@@ -34,8 +34,8 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 
-interface OwnProps {
-  data: IpOverviewData;
+export interface IpOverviewProps {
+  data: NetworkDetailsStrategyResponse['networkDetails'];
   flowTarget: FlowTarget;
   id: string;
   ip: string;
@@ -48,15 +48,11 @@ interface OwnProps {
   narrowDateRange: NarrowDateRange;
 }
 
-export type IpOverviewProps = OwnProps;
-
-const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
-  return (
-    <EuiFlexItem key={key}>
-      <DescriptionListStyled listItems={descriptionList} />
-    </EuiFlexItem>
-  );
-};
+const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
+  <EuiFlexItem key={key}>
+    <DescriptionListStyled listItems={descriptionList} />
+  </EuiFlexItem>
+);
 
 export const IpOverview = React.memo<IpOverviewProps>(
   ({
@@ -74,7 +70,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const typeData: Overview = data[flowTarget]!;
+    const typeData = data[flowTarget]!;
     const column: DescriptionList[] = [
       {
         title: i18n.LOCATION,
@@ -124,13 +120,14 @@ export const IpOverview = React.memo<IpOverviewProps>(
       [
         {
           title: i18n.HOST_ID,
-          description: typeData
-            ? hostIdRenderer({ host: data.host, ipFilter: ip })
-            : getEmptyTagValue(),
+          description:
+            typeData && data.host
+              ? hostIdRenderer({ host: data.host, ipFilter: ip })
+              : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
-          description: typeData ? hostNameRenderer(data.host, ip) : getEmptyTagValue(),
+          description: typeData && data.host ? hostNameRenderer(data.host, ip) : getEmptyTagValue(),
         },
       ],
       [

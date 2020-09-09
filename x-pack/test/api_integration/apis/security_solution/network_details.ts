@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ipOverviewQuery } from '../../../../plugins/security_solution/public/network/containers/ip_overview/index.gql_query';
+import { ipOverviewQuery } from '../../../../plugins/security_solution/public/network/containers/details/index.gql_query';
 import { GetIpOverviewQuery } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
