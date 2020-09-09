@@ -9,11 +9,12 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
 
-import { metadataIndexPattern } from '../../../../common/endpoint/constants';
+import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
   HostInfo,
   HostMetadata,
+  HostMetadataDetails,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
@@ -22,10 +23,6 @@ import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIDsByStatus } from './support/agent_status';
-
-interface HitSource {
-  _source: HostMetadata;
-}
 
 interface MetadataRequestContext {
   agentService: AgentService;
@@ -127,7 +124,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          metadataIndexPattern,
+          metadataCurrentIndexPattern,
           {
             unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
             statusAgentIDs: statusIDs,
@@ -137,7 +134,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<HostMetadata>;
+        )) as SearchResponse<HostMetadataDetails>;
 
         return res.ok({
           body: await mapToHostResultList(queryParams, response, metadataRequestContext),
@@ -193,17 +190,17 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
+  const query = getESQueryHostMetadataByID(id, metadataCurrentIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
     query
-  )) as SearchResponse<HostMetadata>;
+  )) as SearchResponse<HostMetadataDetails>;
 
   if (response.hits.hits.length === 0) {
     return undefined;
   }
 
-  const hostMetadata: HostMetadata = response.hits.hits[0]._source;
+  const hostMetadata: HostMetadata = response.hits.hits[0]._source.HostDetails;
   const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
@@ -241,19 +238,19 @@ async function findAgent(
 async function mapToHostResultList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<HostMetadata>,
+  searchResponse: SearchResponse<HostMetadataDetails>,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostResultList> {
-  const totalNumberOfHosts = searchResponse?.aggregations?.total?.value || 0;
+  const totalNumberOfHosts =
+    ((searchResponse.hits?.total as unknown) as { value: number; relation: string }).value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
       hosts: await Promise.all(
-        searchResponse.hits.hits
-          .map((response) => response.inner_hits.most_recent.hits.hits)
-          .flatMap((data) => data as HitSource)
-          .map(async (entry) => enrichHostMetadata(entry._source, metadataRequestContext))
+        searchResponse.hits.hits.map(async (entry) =>
+          enrichHostMetadata(entry._source.HostDetails, metadataRequestContext)
+        )
       ),
       total: totalNumberOfHosts,
     };

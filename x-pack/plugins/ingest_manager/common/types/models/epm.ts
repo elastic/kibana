@@ -40,6 +40,7 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {
@@ -73,10 +74,8 @@ export interface RegistryPackage {
 }
 
 interface RegistryImage {
-  // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
-  // says src is potentially missing but I couldn't find any examples
-  // it seems like src should be required. How can you have an image with no reference to the content?
   src: string;
+  path: string;
   title?: string;
   size?: string;
   type?: string;

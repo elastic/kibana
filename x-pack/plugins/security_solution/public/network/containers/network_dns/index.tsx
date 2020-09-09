@@ -175,10 +175,6 @@ export const useNetworkDns = ({
   );
 
   useEffect(() => {
-    if (skip) {
-      return;
-    }
-
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
@@ -193,7 +189,7 @@ export const useNetworkDns = ({
           to: endDate,
         },
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
