@@ -6,12 +6,12 @@
 
 import React, { useState } from 'react';
 
-import { SourceIcon } from 'workplace_search/components';
-import { MAX_TABLE_ROW_ICONS } from 'workplace_search/constants';
+import { SourceIcon } from '../../../components/shared/source_icon';
+import { MAX_TABLE_ROW_ICONS } from '../../../constants';
 
-import { IContentSource } from 'workplace_search/types';
+import { IContentSource } from '../../../types';
 
-import GroupRowSourcesDropdown from './GroupRowSourcesDropdown';
+import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 
 interface IGroupSourcesProps {
   groupSources: IContentSource[];

@@ -10,10 +10,10 @@ import { useActions } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 
-import { GroupsLogic, IGroupsActions } from '../GroupsLogic';
+import { GroupsLogic } from '../groups_logic';
 
 export const ClearFiltersLink: React.FC<{}> = () => {
-  const { resetGroupsFilters } = useActions(GroupsLogic) as IGroupsActions;
+  const { resetGroupsFilters } = useActions(GroupsLogic);
 
   return (
     <EuiLink onClick={resetGroupsFilters}>

@@ -8,16 +8,16 @@ import React from 'react';
 
 import { EuiFilterGroup, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 
-import { IContentSource } from 'workplace_search/types';
+import { IContentSource } from '../../../types';
 
-import SourceOptionItem from './SourceOptionItem';
+import { SourceOptionItem } from './source_option_item';
 
 interface IGroupRowSourcesDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
   groupSources: IContentSource[];
-  onButtonClick();
-  closePopover();
+  onButtonClick(): void;
+  closePopover(): void;
 }
 
 export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = ({

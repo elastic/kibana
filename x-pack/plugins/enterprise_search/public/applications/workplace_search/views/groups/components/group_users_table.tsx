@@ -9,21 +9,23 @@ import React, { useState } from 'react';
 import { useValues } from 'kea';
 
 import { EuiTable, EuiTableBody, EuiTablePagination } from '@elastic/eui';
-import { Pager } from '@elastic/eui/lib/services';
+import { Pager } from '@elastic/eui';
 
-import TableHeader from 'shared/components/TableHeader';
-import { UserRow } from 'workplace_search/components';
+import { IUser } from '../../../types';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { GroupLogic, IGroupValues } from '../GroupLogic';
+import { TableHeader } from '../../../../shared/table_header';
+import { UserRow } from '../../../components/shared/user_row';
+
+import { AppLogic } from '../../../app_logic';
+import { GroupLogic } from '../group_logic';
 
 const USERS_PER_PAGE = 10;
 
 export const GroupUsersTable: React.FC = () => {
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+  const { isFederatedAuth } = useValues(AppLogic);
   const {
     group: { users },
-  } = useValues(GroupLogic) as IGroupValues;
+  } = useValues(GroupLogic);
   const headerItems = ['Username'];
   if (!isFederatedAuth) {
     headerItems.push('Email');
@@ -36,7 +38,7 @@ export const GroupUsersTable: React.FC = () => {
   const numUsers = users.length;
   const pager = new Pager(numUsers, USERS_PER_PAGE);
 
-  const onChangePage = (pageIndex) => {
+  const onChangePage = (pageIndex: number) => {
     pager.goToPageIndex(pageIndex);
     setFirstItem(pager.firstItemIndex);
     setLastItem(pager.lastItemIndex);
@@ -58,7 +60,7 @@ export const GroupUsersTable: React.FC = () => {
       <EuiTable className="table table--emphasized">
         <TableHeader extraCell={isFederatedAuth} headerItems={headerItems} />
         <EuiTableBody>
-          {users.slice(firstItem, lastItem + 1).map((user) => (
+          {users.slice(firstItem, lastItem + 1).map((user: IUser) => (
             <UserRow key={user.id} showEmail={!isFederatedAuth} user={user} />
           ))}
         </EuiTableBody>

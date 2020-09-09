@@ -15,9 +15,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { IUser } from 'workplace_search/types';
+import { IUser } from '../../../types';
 
-import UserOptionItem from './UserOptionItem';
+import { UserOptionItem } from './user_option_item';
 
 const MAX_VISIBLE_USERS = 20;
 
@@ -27,8 +27,8 @@ interface IFilterableUsersListProps {
   itemsClickable?: boolean;
   isPopover?: boolean;
   allGroupUsersLoading?: React.ReactElement;
-  addFilteredUser(userId: string);
-  removeFilteredUser(userId: string);
+  addFilteredUser(userId: string): void;
+  removeFilteredUser(userId: string): void;
 }
 
 export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({

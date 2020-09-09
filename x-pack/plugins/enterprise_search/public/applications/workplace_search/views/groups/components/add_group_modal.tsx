@@ -21,15 +21,13 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
+import { GroupsLogic } from '../groups_logic';
 
 export const AddGroupModal: React.FC<{}> = () => {
-  const { closeNewGroupModal, saveNewGroup, setNewGroupName } = useActions(
-    GroupsLogic
-  ) as IGroupsActions;
-  const { newGroupNameErrors, newGroupName } = useValues(GroupsLogic) as IGroupsValues;
+  const { closeNewGroupModal, saveNewGroup, setNewGroupName } = useActions(GroupsLogic);
+  const { newGroupNameErrors, newGroupName } = useValues(GroupsLogic);
   const isInvalid = newGroupNameErrors.length > 0;
-  const handleFormSumbit = (e) => {
+  const handleFormSumbit = (e: React.FormEvent) => {
     e.preventDefault();
     saveNewGroup();
   };
