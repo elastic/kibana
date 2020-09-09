@@ -28,7 +28,10 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   };
 };
 
-export const NewTrustedAppForm = memo(() => {
+interface NewTrustedAppFormProps {
+  fullWidth?: boolean;
+}
+export const NewTrustedAppForm = memo<NewTrustedAppFormProps>(({ fullWidth = true }) => {
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
@@ -102,22 +105,30 @@ export const NewTrustedAppForm = memo(() => {
         label={i18n.translate('xpack.securitySolution.trustedapps.create.name', {
           defaultMessage: 'Name your trusted app application',
         })}
+        fullWidth={fullWidth}
       >
-        <EuiFieldText name="name" value={formValues.name} onChange={handleDomChangeEvents} />
+        <EuiFieldText
+          name="name"
+          value={formValues.name}
+          onChange={handleDomChangeEvents}
+          fullWidth
+        />
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.securitySolution.trustedapps.create.os', {
           defaultMessage: 'Select operating system',
         })}
+        fullWidth={fullWidth}
       >
         <EuiSuperSelect
           name="os"
           options={osOptions}
           valueOfSelected={formValues.os}
           onChange={handleOsChange}
+          fullWidth
         />
       </EuiFormRow>
-      <EuiFormRow>
+      <EuiFormRow fullWidth={fullWidth}>
         <LogicalConditionBuilder
           entries={formValues.entries}
           os={formValues.os}
@@ -130,11 +141,13 @@ export const NewTrustedAppForm = memo(() => {
         label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
           defaultMessage: 'Description',
         })}
+        fullWidth={fullWidth}
       >
         <EuiTextArea
           name="description"
           value={formValues.description}
           onChange={handleDomChangeEvents}
+          fullWidth
         />
       </EuiFormRow>
     </EuiForm>

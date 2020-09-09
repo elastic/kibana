@@ -3,13 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton } from '@elastic/eui';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
-import { NewTrustedAppForm } from './components/new_trusted_app_form';
+import { NewTrustedAppFlyout } from './components/NewTrustedAppFlyout';
 
 export const TrustedAppsPage = memo(() => {
+  const [isAddFlyoutOpen, setAddFlyoutOpen] = useState<boolean>(false);
+  const handleAddButtonClick = useCallback(() => {
+    setAddFlyoutOpen((prevState) => {
+      return !prevState;
+    });
+  }, []);
+  const handleAddFlyoutClose = useCallback(() => {
+    setAddFlyoutOpen(false);
+  }, []);
+
+  const addButton = (
+    <EuiButton
+      fill
+      iconType="plusInCircle"
+      isDisabled={isAddFlyoutOpen}
+      onClick={handleAddButtonClick}
+    >
+      <FormattedMessage
+        id="xpack.securitySolution.trustedapps.list.addButton"
+        defaultMessage="Add Trusted Application"
+      />
+    </EuiButton>
+  );
+
   return (
     <AdministrationListPage
       beta={true}
@@ -25,9 +50,10 @@ export const TrustedAppsPage = memo(() => {
           defaultMessage="View and configure trusted applications"
         />
       }
+      actions={addButton}
     >
+      {isAddFlyoutOpen && <NewTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
       <TrustedAppsList />
-      <NewTrustedAppForm />
     </AdministrationListPage>
   );
 });
