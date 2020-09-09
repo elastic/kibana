@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { useFetcher } from '../hooks/useFetcher';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -20,9 +20,10 @@ const ChartsSyncContext = React.createContext<{
 function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
   const [time, setTime] = useState<number | null>(null);
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
   const { environment } = uiFilters;
 
   const { data = { annotations: [] } } = useFetcher(
