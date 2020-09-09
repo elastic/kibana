@@ -40,6 +40,7 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {
