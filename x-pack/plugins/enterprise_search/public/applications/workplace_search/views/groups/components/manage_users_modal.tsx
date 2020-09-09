@@ -8,23 +8,23 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { GroupLogic, IGroupValues, IGroupActions } from '../GroupLogic';
-import { GroupsLogic, IGroupsValues } from '../GroupsLogic';
+import { GroupLogic } from '../group_logic';
+import { GroupsLogic } from '../groups_logic';
 
-import FilterableUsersList from './FilterableUsersList';
-import GroupManagerModal from './GroupManagerModal';
+import { FilterableUsersList } from './filterable_users_list';
+import { GroupManagerModal } from './group_manager_modal';
 
-export const ManageUsersModal: React.FC<{}> = () => {
+export const ManageUsersModal: React.FC = () => {
   const {
     addGroupUser,
     removeGroupUser,
     selectAllUsers,
     hideManageUsersModal,
     saveGroupUsers,
-  } = useActions(GroupLogic) as IGroupActions;
+  } = useActions(GroupLogic);
 
-  const { selectedGroupUsers } = useValues(GroupLogic) as IGroupValues;
-  const { users } = useValues(GroupsLogic) as IGroupsValues;
+  const { selectedGroupUsers } = useValues(GroupLogic);
+  const { users } = useValues(GroupsLogic);
 
   return (
     <GroupManagerModal

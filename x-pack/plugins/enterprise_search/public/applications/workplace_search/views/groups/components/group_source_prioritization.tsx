@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -22,22 +22,26 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { Loading, ViewContentHeader, SourceIcon } from 'workplace_search/components';
+import { Loading } from '../../../components/shared/loading';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { SourceIcon } from '../../../components/shared/source_icon';
 
-import TableHeader from 'shared/components/TableHeader';
-import { GroupLogic, IGroupActions, IGroupValues } from '../GroupLogic';
+import { TableHeader } from '../../../../shared/table_header';
+import { GroupLogic } from '../group_logic';
+
+import { IContentSource } from '../../../types';
 
 export const GroupSourcePrioritization: React.FC = () => {
   const { updatePriority, saveGroupSourcePrioritization, showSharedSourcesModal } = useActions(
     GroupLogic
-  ) as IGroupActions;
+  );
 
   const {
     group: { contentSources, name: groupName },
     dataLoading,
     activeSourcePriorities,
     groupPrioritiesUnchanged,
-  } = useValues(GroupLogic) as IGroupValues;
+  } = useValues(GroupLogic);
 
   if (dataLoading) return <Loading />;
 
@@ -52,7 +56,8 @@ export const GroupSourcePrioritization: React.FC = () => {
       Save
     </EuiButton>
   );
-  const handleSliderChange = (id, e) => updatePriority(id, e.target.value);
+  const handleSliderChange = (id: string, e: ChangeEvent<HTMLInputElement>) =>
+    updatePriority(id, (e.target.value as unknown) as number);
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
@@ -78,7 +83,7 @@ export const GroupSourcePrioritization: React.FC = () => {
     <EuiTable className="table table--emphasized" responsive={false}>
       <TableHeader headerItems={headerItems} />
       <EuiTableBody>
-        {contentSources.map(({ id, name, serviceType }) => (
+        {contentSources.map(({ id, name, serviceType }: IContentSource) => (
           <EuiTableRow key={id} data-test-subj="GroupsRow">
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
@@ -99,7 +104,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                     max={10}
                     step={1}
                     value={activeSourcePriorities[id]}
-                    onChange={(e) => handleSliderChange(id, e)}
+                    onChange={(e) => handleSliderChange(id, e as ChangeEvent<HTMLInputElement>)}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ paddingRight: 1 }}>
