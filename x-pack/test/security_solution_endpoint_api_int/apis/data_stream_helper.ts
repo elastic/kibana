@@ -10,6 +10,7 @@ import {
   eventsIndexPattern,
   alertsIndexPattern,
   policyIndexPattern,
+  telemetryIndexPattern,
   metadataCurrentIndexPattern,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 
@@ -74,4 +75,8 @@ export async function deleteAlertsStream(getService: (serviceName: 'es') => Clie
 
 export async function deletePolicyStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, policyIndexPattern);
+}
+
+export async function deleteTelemetryStream(getService: (serviceName: 'es') => Client) {
+  await deleteDataStream(getService, telemetryIndexPattern);
 }
