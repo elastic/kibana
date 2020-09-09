@@ -54,15 +54,6 @@ export function BucketNestingEditor({
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
 
-    if (
-      (column.operationType === 'filters' && target.operationType === 'date_histogram') ||
-      (column.operationType === 'date_histogram' && target.operationType === 'filters') ||
-      (column.operationType === 'filters' && target.operationType === 'filters') ||
-      (column.operationType === 'date_histogram' && target.operationType === 'date_histogram')
-    ) {
-      return null;
-    }
-
     function toggleNesting() {
       if (prevColumn) {
         setColumns(nestColumn(layer.columnOrder, columnId, target.value));
@@ -71,6 +62,7 @@ export function BucketNestingEditor({
       }
     }
 
+    // todo: move the copy to operations
     const topLevelCopy: Record<string, string> = {
       terms: i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
         defaultMessage: 'Overall top {field}',
