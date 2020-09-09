@@ -60,7 +60,6 @@ describe('callClient', () => {
       http: coreMock.createStart().http,
       legacySearchService: {},
       config: { get: jest.fn() },
-      esShardTimeout: 0,
       loadingCount$: new BehaviorSubject(0),
     } as FetchHandlers;
 
