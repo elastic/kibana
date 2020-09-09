@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration } from './types';
-
 import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const connector: ConnectorConfiguration = {
+export const connectorConfiguration = {
   id: '.jira',
   name: i18n.JIRA_TITLE,
   logo,
   enabled: true,
   enabledInConfig: true,
   enabledInLicense: true,
-  minimumLicenseRequired: 'platinum',
+  minimumLicenseRequired: 'gold',
   fields: {
     summary: {
       label: i18n.MAPPING_FIELD_SUMMARY,

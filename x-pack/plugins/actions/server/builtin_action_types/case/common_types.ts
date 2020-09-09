@@ -6,15 +6,11 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-} from './schema';
-import { IncidentConfigurationSchema, MapRecordSchema } from './case_shema';
-import {
-  PushToServiceApiParams,
-  ExternalServiceIncidentResponse,
-  ExternalServiceParams,
-} from './types';
+  IncidentConfigurationSchema,
+  MapRecordSchema,
+  CommentSchema,
+  EntityInformationSchema,
+} from './common_schema';
 
 export interface CreateCommentRequest {
   [key: string]: string;
@@ -22,23 +18,13 @@ export interface CreateCommentRequest {
 
 export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 export type MapRecord = TypeOf<typeof MapRecordSchema>;
+export type Comment = TypeOf<typeof CommentSchema>;
+export type EntityInformation = TypeOf<typeof EntityInformationSchema>;
 
 export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;
   externalCommentId?: string;
-}
-
-export type ExecutorSubActionGetIncidentParams = TypeOf<
-  typeof ExecutorSubActionGetIncidentParamsSchema
->;
-
-export type ExecutorSubActionHandshakeParams = TypeOf<
-  typeof ExecutorSubActionHandshakeParamsSchema
->;
-
-export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
-  comments?: ExternalServiceCommentResponse[];
 }
 
 export interface PipedField {
@@ -48,10 +34,10 @@ export interface PipedField {
   pipes: string[];
 }
 
-export interface TransformFieldsArgs {
-  params: PushToServiceApiParams;
+export interface TransformFieldsArgs<P, S> {
+  params: P;
   fields: PipedField[];
-  currentIncident?: ExternalServiceParams;
+  currentIncident?: S;
 }
 
 export interface TransformerArgs {

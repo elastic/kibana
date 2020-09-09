@@ -13,9 +13,8 @@ import * as i18n from './translations';
 
 import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
 import { ThirdPartyField as ConnectorConfigurationThirdPartyField } from './types';
-import { CasesConfigurationMapping } from '../types';
-import { connectorConfiguration } from '../config';
-import { createDefaultMapping } from '../servicenow_connectors';
+import { CasesConfigurationMapping } from './types';
+import { createDefaultMapping } from './utils';
 
 const FieldRowWrapper = styled.div`
   margin-top: 8px;
@@ -70,15 +69,15 @@ const getThirdPartyOptions = (
 export interface FieldMappingProps {
   disabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
-  connectorActionTypeId: string;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
+  connectorConfiguration: Record<string, any>;
 }
 
 const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   disabled,
   mapping,
   onChangeMapping,
-  connectorActionTypeId,
+  connectorConfiguration,
 }) => {
   const onChangeActionType = useCallback(
     (caseField: string, newActionType: string) => {

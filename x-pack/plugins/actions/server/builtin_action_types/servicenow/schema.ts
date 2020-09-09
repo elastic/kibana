@@ -5,7 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from './case_shema';
+import {
+  CommentSchema,
+  EntityInformation,
+  IncidentConfigurationSchema,
+} from '../case/common_schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),

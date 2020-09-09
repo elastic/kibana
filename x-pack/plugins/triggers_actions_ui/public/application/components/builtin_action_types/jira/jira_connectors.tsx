@@ -12,31 +12,36 @@ import {
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
-  EuiLink,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
 
 import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
+import { JiraActionConnector } from './types';
 import { connectorConfiguration } from './config';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
-  ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
-  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
-  const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
+const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
+  action,
+  editActionSecrets,
+  editActionConfig,
+  errors,
+  consumer,
+  readOnly,
+  docLinks,
+}) => {
+  // TODO: remove incidentConfiguration later, when Case Jira will move their fields to the level of action execution
+  const { apiUrl, projectKey, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
 
-  const { username, password } = action.secrets;
+  const { email, apiToken } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
+  const isProjectKeyInvalid: boolean = errors.projectKey.length > 0 && projectKey != null;
+  const isEmailInvalid: boolean = errors.email.length > 0 && email != null;
+  const isApiTokenInvalid: boolean = errors.apiToken.length > 0 && apiToken != null;
 
   // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
   if (consumer === 'case') {
@@ -82,17 +87,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
             error={errors.apiUrl}
             isInvalid={isApiUrlInvalid}
             label={i18n.API_URL_LABEL}
-            helpText={
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                  defaultMessage="Configure Personal Developer Instance for ServiceNow"
-                />
-              </EuiLink>
-            }
           >
             <EuiFieldText
               fullWidth
@@ -116,23 +110,22 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="connector-servicenow-username"
+            id="connector-jira-project-key"
             fullWidth
-            error={errors.username}
-            isInvalid={isUsernameInvalid}
-            label={i18n.USERNAME_LABEL}
+            error={errors.projectKey}
+            isInvalid={isProjectKeyInvalid}
+            label={i18n.JIRA_PROJECT_KEY_LABEL}
           >
             <EuiFieldText
               fullWidth
-              isInvalid={isUsernameInvalid}
-              readOnly={readOnly}
-              name="connector-servicenow-username"
-              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-username-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('username', evt.target.value)}
+              isInvalid={isProjectKeyInvalid}
+              name="connector-jira-project-key"
+              value={projectKey || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="connector-jira-project-key-form-input"
+              onChange={(evt) => handleOnChangeActionConfig('projectKey', evt.target.value)}
               onBlur={() => {
-                if (!username) {
-                  editActionSecrets('username', '');
+                if (!projectKey) {
+                  editActionConfig('projectKey', '');
                 }
               }}
             />
@@ -143,34 +136,61 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="connector-servicenow-password"
+            id="connector-jira-email"
             fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.PASSWORD_LABEL}
+            error={errors.email}
+            isInvalid={isEmailInvalid}
+            label={i18n.JIRA_EMAIL_LABEL}
           >
-            <EuiFieldPassword
+            <EuiFieldText
               fullWidth
+              isInvalid={isEmailInvalid}
               readOnly={readOnly}
-              isInvalid={isPasswordInvalid}
-              name="connector-servicenow-password"
-              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-password-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
+              name="connector-jira-email"
+              value={email || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="connector-jira-email-form-input"
+              onChange={(evt) => handleOnChangeSecretConfig('email', evt.target.value)}
               onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
+                if (!email) {
+                  editActionSecrets('email', '');
                 }
               }}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="connector-jira-apiToken"
+            fullWidth
+            error={errors.apiToken}
+            isInvalid={isApiTokenInvalid}
+            label={i18n.JIRA_API_TOKEN_LABEL}
+          >
+            <EuiFieldPassword
+              fullWidth
+              readOnly={readOnly}
+              isInvalid={isApiTokenInvalid}
+              name="connector-jira-apiToken"
+              value={apiToken || ''} // Needed to prevent uncontrolled input error when value is undefined
+              data-test-subj="connector-jira-apiToken-form-input"
+              onChange={(evt) => handleOnChangeSecretConfig('apiToken', evt.target.value)}
+              onBlur={() => {
+                if (!apiToken) {
+                  editActionSecrets('apiToken', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {consumer === 'case' && ( // TODO: remove this block later, when Case Jira will move their fields to the level of action execution
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="case-servicenow-mappings">
+            <EuiFlexItem data-test-subj="case-jira-mappings">
               <FieldMapping
                 disabled={true}
                 connectorConfiguration={connectorConfiguration}
@@ -186,4 +206,4 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFields as default };
+export { JiraConnectorFields as default };
