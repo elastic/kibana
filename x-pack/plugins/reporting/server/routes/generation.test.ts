@@ -11,7 +11,7 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockLevelLogger, createMockReportingCore } from '../test_helpers';
+import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
 import { registerJobGenerationRoutes } from './generation';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
