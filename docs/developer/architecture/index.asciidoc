@@ -19,10 +19,10 @@ A few notable services are called out below.
 * <<development-visualize-index>>
 * <<code-exploration>>
 
-include::add-data-tutorials.asciidoc[]
+include::add-data-tutorials.asciidoc[leveloffset=+1]
 
-include::development-visualize-index.asciidoc[]
+include::development-visualize-index.asciidoc[leveloffset=+1]
 
-include::security/index.asciidoc[]
+include::security/index.asciidoc[leveloffset=+1]
 
 include::code-exploration.asciidoc[]
