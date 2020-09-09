@@ -57,6 +57,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
       <EuiPopover
         panelClassName="lnsXyToolbar__popover"
         ownFocus
+        aria-label={title}
         button={
           <ToolbarButton
             fontWeight="normal"

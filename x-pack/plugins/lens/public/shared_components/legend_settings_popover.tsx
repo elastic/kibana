@@ -48,22 +48,30 @@ interface LegendSettingsPopoverProps {
 const toggleButtonsIcons = [
   {
     id: Position.Bottom,
-    label: 'Bottom',
+    label: i18n.translate('xpack.lens.shared.legendPositionBottom', {
+      defaultMessage: 'Bottom',
+    }),
     iconType: 'arrowDown',
   },
   {
     id: Position.Left,
-    label: 'Left',
+    label: i18n.translate('xpack.lens.shared.legendPositionLeft', {
+      defaultMessage: 'Left',
+    }),
     iconType: 'arrowLeft',
   },
   {
     id: Position.Right,
-    label: 'Right',
+    label: i18n.translate('xpack.lens.shared.legendPositionRight', {
+      defaultMessage: 'Right',
+    }),
     iconType: 'arrowRight',
   },
   {
     id: Position.Top,
-    label: 'Top',
+    label: i18n.translate('xpack.lens.shared.legendPositionTop', {
+      defaultMessage: 'Top',
+    }),
     iconType: 'arrowUp',
   },
 ];
@@ -74,13 +82,13 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onDisplayChange,
   position,
   onPositionChange,
-  renderNestedLegendSwitch = false,
-  nestedLegend = false,
+  renderNestedLegendSwitch,
+  nestedLegend,
   onNestedLegendChange = () => {},
 }) => {
   return (
     <ToolbarPopover
-      title={i18n.translate('xpack.lens.xyChart.legendLabel', {
+      title={i18n.translate('xpack.lens.shared.legendLabel', {
         defaultMessage: 'Legend',
       })}
       type="legend"
@@ -88,14 +96,14 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
     >
       <EuiFormRow
         display="columnCompressed"
-        label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+        label={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
           defaultMessage: 'Display',
         })}
       >
         <>
           <EuiButtonGroup
             isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+            legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
               defaultMessage: 'Display',
             })}
             name="legendDisplay"
@@ -112,7 +120,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 defaultMessage: 'Nested legend',
               })}
               disabled={mode === 'hide'}
-              checked={nestedLegend}
+              checked={!!nestedLegend}
               onChange={onNestedLegendChange}
             />
           )}
@@ -120,12 +128,12 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
-        label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+        label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
           defaultMessage: 'Position',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+          legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
             defaultMessage: 'Position',
           })}
           isDisabled={mode === 'hide'}
