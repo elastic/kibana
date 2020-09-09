@@ -88,25 +88,34 @@ In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Han
 
 
 |===
-|Helper |Use case |Examples
+|Helper |Use case
 
 |json
-|Serialize variables in JSON format
-|`{{json event}}` +
+a|Serialize variables in JSON format.
+
+Example:
+
+`{{json event}}` +
 `{{json event.key event.value}}` +
 `{{json filters=context.panel.filters}}`
 
 
 |rison
-|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
-|`{{rison event}}` +
+a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+
+Example:
+
+`{{rison event}}` +
 `{{rison event.key event.value}}` +
-`{{rison filters=context.panel.filters}}` +
+`{{rison filters=context.panel.filters}}`
 
 
 |date
-|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
-|`{{ date event.from “YYYY MM DD”}}` + 
+a|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
+
+Example:
+
+`{{ date event.from “YYYY MM DD”}}` +
 `{{date “now-15”}}`
 |===
 
