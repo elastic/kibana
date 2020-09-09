@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
-export { config, PidConfigType } from './pid_config';
+import { TypeOf, schema } from '@kbn/config-schema';
+
+export const config = {
+  path: 'pid',
+  schema: schema.object({
+    file: schema.maybe(schema.string()),
+    exclusive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export type PidConfigType = TypeOf<typeof config.schema>;
