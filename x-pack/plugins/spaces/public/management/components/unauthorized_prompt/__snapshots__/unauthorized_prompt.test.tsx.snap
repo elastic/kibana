@@ -7,7 +7,7 @@ exports[`UnauthorizedPrompt renders as expected 1`] = `
       data-test-subj="permissionDeniedMessage"
     >
       <FormattedMessage
-        defaultMessage="You do not have permission to manage spaces."
+        defaultMessage="You don't have permission to manage spaces."
         id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
         values={Object {}}
       />

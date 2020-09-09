@@ -430,6 +430,7 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  QueryStateChange,
 } from './query';
 
 export {
