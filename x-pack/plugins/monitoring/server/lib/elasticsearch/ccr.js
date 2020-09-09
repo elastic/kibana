@@ -37,7 +37,7 @@ export async function checkCcrEnabled(req, esIndexPattern) {
         clusterUuid,
         metric: metricFields,
       }),
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
     filterPath: ['hits.hits._source.stack_stats.xpack.ccr'],
   };

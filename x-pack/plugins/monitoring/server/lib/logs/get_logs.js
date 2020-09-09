@@ -82,7 +82,7 @@ export async function getLogs(
     ],
     ignoreUnavailable: true,
     body: {
-      sort: { '@timestamp': { order: 'desc' } },
+      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter,

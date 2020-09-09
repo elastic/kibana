@@ -109,7 +109,7 @@ export function getNodeSummary(
     size: 1,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters }),
     },
   };

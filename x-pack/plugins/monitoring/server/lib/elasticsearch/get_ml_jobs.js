@@ -42,7 +42,7 @@ export function getMlJobs(req, esIndexPattern) {
       'hits.hits._source.job_stats.node.name',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       collapse: { field: 'job_stats.job_id' },
       query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
     },

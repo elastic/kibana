@@ -92,7 +92,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
           },
         },
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
     filterPath: [
       'hits.hits._source.source_node',

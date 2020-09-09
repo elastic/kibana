@@ -65,7 +65,7 @@ export async function getLogTypes(
     filterPath: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignoreUnavailable: true,
     body: {
-      sort: { '@timestamp': { order: 'desc' } },
+      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter,
