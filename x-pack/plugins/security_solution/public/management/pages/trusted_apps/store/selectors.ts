@@ -82,7 +82,7 @@ export const getListUrlSearchParams: (
   (pageIndex, pageSize, showValue) => {
     return {
       page_index: pageIndex,
-      page_size: pageIndex,
+      page_size: pageSize,
       show: showValue,
     };
   }
