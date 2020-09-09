@@ -24,7 +24,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  AlertStatus,
+  AlertInstanceSummary,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -44,7 +44,7 @@ import {
 } from './authorization/alerts_authorization';
 import { IEventLogClient } from '../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
-import { alertStatusFromEventLog } from './lib/alert_status_from_event_log';
+import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../event_log/server';
 import { parseDuration } from '../common/parse_duration';
 
@@ -139,7 +139,7 @@ interface UpdateOptions {
   };
 }
 
-interface GetAlertStatusParams {
+interface GetAlertInstanceSummaryParams {
   id: string;
   dateStart?: string;
 }
@@ -284,16 +284,19 @@ export class AlertsClient {
     }
   }
 
-  public async getAlertStatus({ id, dateStart }: GetAlertStatusParams): Promise<AlertStatus> {
-    this.logger.debug(`getAlertStatus(): getting alert ${id}`);
+  public async getAlertInstanceSummary({
+    id,
+    dateStart,
+  }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
+    this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
     const alert = await this.get({ id });
     await this.authorization.ensureAuthorized(
       alert.alertTypeId,
       alert.consumer,
-      ReadOperations.GetAlertStatus
+      ReadOperations.GetAlertInstanceSummary
     );
 
-    // default duration of status is 60 * alert interval
+    // default duration of instance summary is 60 * alert interval
     const dateNow = new Date();
     const durationMillis = parseDuration(alert.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
@@ -301,7 +304,7 @@ export class AlertsClient {
 
     const eventLogClient = await this.getEventLogClient();
 
-    this.logger.debug(`getAlertStatus(): search the event log for alert ${id}`);
+    this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
       const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
@@ -314,12 +317,12 @@ export class AlertsClient {
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
-        `alertsClient.getAlertStatus(): error searching event log for alert ${id}: ${err.message}`
+        `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
       );
       events = [];
     }
 
-    return alertStatusFromEventLog({
+    return alertInstanceSummaryFromEventLog({
       alert,
       events,
       dateStart: parsedDateStart.toISOString(),
@@ -952,7 +955,7 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   const parsedDate = parseIsoOrRelativeDate(dateString);
   if (parsedDate === undefined) {
     throw Boom.badRequest(
-      i18n.translate('xpack.alerts.alertsClient.getAlertStatus.invalidDate', {
+      i18n.translate('xpack.alerts.alertsClient.invalidDate', {
         defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
         values: {
           field: propertyName,

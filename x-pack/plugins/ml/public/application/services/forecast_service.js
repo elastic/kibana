@@ -153,7 +153,7 @@ function getForecastData(
   entityFields,
   earliestMs,
   latestMs,
-  interval,
+  intervalMs,
   aggType
 ) {
   // Extract the partition, by, over fields on which to filter.
@@ -257,7 +257,7 @@ function getForecastData(
           times: {
             date_histogram: {
               field: 'timestamp',
-              interval: interval,
+              fixed_interval: `${intervalMs}ms`,
               min_doc_count: 1,
             },
             aggs: {
