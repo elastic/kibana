@@ -150,18 +150,26 @@ describe('EnterpriseSearchRequestHandler', () => {
       );
     });
 
-    it('returns an error when user authentication to Enterprise Search fails', async () => {
-      EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
-      const requestHandler = enterpriseSearchRequestHandler.createRequest({
-        path: '/api/unauthenticated',
+    describe('user authentication errors', () => {
+      afterEach(async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/unauthenticated',
+        });
+        await makeAPICall(requestHandler);
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/unauthenticated');
+        expect(responseMock.customError).toHaveBeenCalledWith({
+          body: 'Error connecting to Enterprise Search: Cannot authenticate Enterprise Search user',
+          statusCode: 502,
+        });
       });
 
-      await makeAPICall(requestHandler);
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/unauthenticated');
+      it('errors when redirected to /login', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
+      });
 
-      expect(responseMock.customError).toHaveBeenCalledWith({
-        body: 'Error connecting to Enterprise Search: Cannot authenticate Enterprise Search user',
-        statusCode: 502,
+      it('errors when redirected to /ent/select', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/ent/select' });
       });
     });
   });

@@ -73,7 +73,7 @@ export class EnterpriseSearchRequestHandler {
         // Call the Enterprise Search API and pass back response to the front-end
         const apiResponse = await fetch(url, { method, headers, body });
 
-        if (apiResponse.url.endsWith('/login')) {
+        if (apiResponse.url.endsWith('/login') || apiResponse.url.endsWith('/ent/select')) {
           throw new Error('Cannot authenticate Enterprise Search user');
         }
 
