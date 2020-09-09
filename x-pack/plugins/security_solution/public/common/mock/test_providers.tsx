@@ -95,6 +95,7 @@ export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook
     clearErrors: jest.fn(),
     validate: jest.fn(),
     reset: jest.fn(),
+    __isIncludedInOutput: true,
     __serializeValue: jest.fn(),
     ...options,
   };
