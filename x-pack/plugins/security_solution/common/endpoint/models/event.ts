@@ -8,15 +8,20 @@ import {
   ResolverEvent,
   SafeResolverEvent,
   SafeLegacyEndpointEvent,
+  ECSField,
 } from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
+
+interface LegacyEvent {
+  endgame?: object;
+}
 
 /*
  * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
  */
-export function isLegacyEventSafeVersion(
-  event: SafeResolverEvent
-): event is SafeLegacyEndpointEvent {
+export function isLegacyEventSafeVersion<T extends LegacyEvent>(
+  event: LegacyEvent | {}
+): event is T {
   return 'endgame' in event && event.endgame !== undefined;
 }
 
@@ -27,8 +32,25 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessRunning(event: SafeResolverEvent): boolean {
-  if (isLegacyEventSafeVersion(event)) {
+type LegacyProcessRunningFields = Partial<{
+  endgame: object;
+  event: Partial<{
+    type: ECSField<string>;
+    action: ECSField<string>;
+  }>;
+}>;
+
+type ProcessRunningFields = Partial<
+  | LegacyProcessRunningFields
+  | {
+      event: Partial<{
+        type: ECSField<string>;
+      }>;
+    }
+>;
+
+export function isProcessRunning(event: ProcessRunningFields): boolean {
+  if (isLegacyEventSafeVersion<LegacyProcessRunningFields>(event)) {
     return (
       hasValue(event.event?.type, 'process_start') ||
       hasValue(event.event?.action, 'fork_event') ||
@@ -43,7 +65,9 @@ export function isProcessRunning(event: SafeResolverEvent): boolean {
   );
 }
 
-export function timestampSafeVersion(event: SafeResolverEvent): undefined | number {
+type TimestampFields = Pick<SafeResolverEvent, '@timestamp'>;
+
+export function timestampSafeVersion(event: TimestampFields): undefined | number {
   return firstNonNullValue(event?.['@timestamp']);
 }
 
@@ -51,7 +75,7 @@ export function timestampSafeVersion(event: SafeResolverEvent): undefined | numb
  * The `@timestamp` for the event, as a `Date` object.
  * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
  */
-export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | undefined {
+export function timestampAsDateSafeVersion(event: TimestampFields): Date | undefined {
   const value = timestampSafeVersion(event);
   if (value === undefined) {
     return undefined;
@@ -93,9 +117,22 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
-export function eventSequence(event: SafeResolverEvent): number | undefined {
+type EventSequenceFields = Partial<
+  | {
+      endgame: Partial<{
+        serial_event_id: ECSField<number>;
+      }>;
+    }
+  | {
+      event: Partial<{
+        sequence: ECSField<number>;
+      }>;
+    }
+>;
+
+export function eventSequence(event: EventSequenceFields): number | undefined {
   if (isLegacyEventSafeVersion(event)) {
-    return firstNonNullValue(event.endgame.serial_event_id);
+    return firstNonNullValue(event.endgame?.serial_event_id);
   }
   return firstNonNullValue(event.event?.sequence);
 }
