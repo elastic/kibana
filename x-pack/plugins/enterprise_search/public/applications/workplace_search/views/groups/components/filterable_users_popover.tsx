@@ -10,10 +10,10 @@ import { useActions } from 'kea';
 
 import { EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
-import { IUser } from 'workplace_search/types';
+import { IUser } from '../../../types';
 
-import { GroupsLogic, IGroupsActions } from '../GroupsLogic';
-import FilterableUsersList from './FilterableUsersList';
+import { GroupsLogic } from '../groups_logic';
+import { FilterableUsersList } from './filterable_users_list';
 
 interface IIFilterableUsersPopoverProps {
   users: IUser[];
@@ -23,7 +23,7 @@ interface IIFilterableUsersPopoverProps {
   allGroupUsersLoading?: React.ReactElement;
   className?: string;
   button: React.ReactElement;
-  closePopover();
+  closePopover(): void;
 }
 
 export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = ({
@@ -36,7 +36,7 @@ export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = (
   button,
   closePopover,
 }) => {
-  const { addFilteredUser, removeFilteredUser } = useActions(GroupsLogic) as IGroupsActions;
+  const { addFilteredUser, removeFilteredUser } = useActions(GroupsLogic);
   return (
     <EuiFilterGroup className={className}>
       <EuiPopover

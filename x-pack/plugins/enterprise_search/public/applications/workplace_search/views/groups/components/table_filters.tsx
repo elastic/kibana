@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
+import { AppLogic } from '../../../app_logic';
+import { GroupsLogic } from '../groups_logic';
 
-import TableFilterSourcesDropdown from './TableFilterSourcesDropdown';
-import TableFilterUsersDropdown from './TableFilterUsersDropdown';
+import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
+import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 
 const PLACEHOLDER = 'Filter groups by name...';
 
-export const TableFilters: React.FC<{}> = () => {
-  const { setFilterValue } = useActions(GroupsLogic) as IGroupsActions;
-  const { filterValue } = useValues(GroupsLogic) as IGroupsValues;
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+export const TableFilters: React.FC = () => {
+  const { setFilterValue } = useActions(GroupsLogic);
+  const { filterValue } = useValues(GroupsLogic);
+  const { isFederatedAuth } = useValues(AppLogic);
 
-  const handleSearchChange = (e) => setFilterValue(e.target.value);
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => setFilterValue(e.target.value);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">

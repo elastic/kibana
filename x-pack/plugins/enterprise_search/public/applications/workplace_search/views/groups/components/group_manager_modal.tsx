@@ -25,23 +25,22 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { IObject } from 'shared/types';
-import { IGroup } from 'workplace_search/types';
-import { ORG_SOURCES_PATH } from 'workplace_search/utils/routePaths';
+import { IGroup } from '../../../types';
+import { ORG_SOURCES_PATH } from '../../../routes';
 
-import noSharedSourcesIcon from 'workplace_search/components/assets/shareCircle.svg';
+import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 
-import { GroupLogic, IGroupValues } from '../GroupLogic';
-import { GroupsLogic, IGroupsValues } from '../GroupsLogic';
+import { GroupLogic } from '../group_logic';
+import { GroupsLogic } from '../groups_logic';
 
 interface IGroupManagerModalProps {
   children: React.ReactElement;
   label: string;
-  allItems: IObject[];
+  allItems: object[];
   numSelected: number;
-  hideModal(group: IGroup);
-  selectAll(allItems: IObject[]);
-  saveItems();
+  hideModal(group: IGroup): void;
+  selectAll(allItems: object[]): void;
+  saveItems(): void;
 }
 
 export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
@@ -53,8 +52,8 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   selectAll,
   saveItems,
 }) => {
-  const { group, managerModalFormErrors } = useValues(GroupLogic) as IGroupValues;
-  const { contentSources } = useValues(GroupsLogic) as IGroupsValues;
+  const { group, managerModalFormErrors } = useValues(GroupLogic);
+  const { contentSources } = useValues(GroupsLogic);
 
   const allSelected = numSelected === allItems.length;
   const isSources = label === 'shared content sources';

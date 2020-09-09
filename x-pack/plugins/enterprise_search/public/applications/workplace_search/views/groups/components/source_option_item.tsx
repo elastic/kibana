@@ -8,10 +8,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import TruncatedContent from 'shared/components/TruncatedContent';
+import { TruncatedContent } from '../../../../shared/truncate';
 
-import { SourceIcon } from 'workplace_search/components';
-import { IContentSource } from 'workplace_search/types';
+import { SourceIcon } from '../../../components/shared/source_icon';
+import { IContentSource } from '../../../types';
 
 const MAX_LENGTH = 28;
 

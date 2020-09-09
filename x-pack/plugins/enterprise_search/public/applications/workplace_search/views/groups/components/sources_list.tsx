@@ -6,17 +6,17 @@
 
 import React from 'react';
 
-import { IContentSource } from 'workplace_search/types';
-
 import { EuiFilterSelectItem } from '@elastic/eui';
 
-import SourceOptionItem from './SourceOptionItem';
+import { IContentSource } from '../../../types';
+
+import { SourceOptionItem } from './source_option_item';
 
 interface ISourcesListProps {
   contentSources: IContentSource[];
   filteredSources: string[];
-  addFilteredSource(sourceId: string);
-  removeFilteredSource(sourceId: string);
+  addFilteredSource(sourceId: string): void;
+  removeFilteredSource(sourceId: string): void;
 }
 
 export const SourcesList: React.FC<ISourcesListProps> = ({
