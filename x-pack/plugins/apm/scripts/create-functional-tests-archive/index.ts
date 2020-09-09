@@ -13,10 +13,11 @@ import { stampLogger } from '../shared/stamp-logger';
 
 async function run() {
   stampLogger();
-  const archiveName = (argv.name as string | undefined) ?? 'apm_8.0.0';
 
+  const archiveName = 'apm_8.0.0';
+
+  // include important APM data and ML data
   const indices =
-    (argv.indices as string | undefined) ??
     'apm-*-transaction,apm-*-span,apm-*-error,apm-*-metric,.ml-anomalies*,.ml-config';
 
   const esUrl = argv['es-url'] as string | undefined;
@@ -29,16 +30,13 @@ async function run() {
   if (!kibanaUrl) {
     throw new Error('--kibana-url is not set');
   }
-
-  const gte =
-    (argv.from as string | undefined) ??
-    moment().subtract(1, 'hour').toISOString();
-  const lt =
-    (argv.to as string | undefined) ??
-    moment(gte).add(30, 'minutes').toISOString();
+  const gte = moment().subtract(1, 'hour').toISOString();
+  const lt = moment(gte).add(30, 'minutes').toISOString();
 
   // eslint-disable-next-line no-console
   console.log(`Archiving from ${gte} to ${lt}...`);
+
+  // APM data uses '@timestamp' (ECS), ML data uses 'timestamp'
 
   const rangeQueries = [
     {
@@ -59,6 +57,7 @@ async function run() {
     },
   ];
 
+  // some of the data is timeless/content
   const query = {
     bool: {
       should: [
@@ -87,6 +86,8 @@ async function run() {
   const archivesDir = path.join(__dirname, '.archives');
   const root = path.join(__dirname, '../../../../..');
 
+  // create the archive
+
   execSync(
     `node scripts/es_archiver save ${archiveName} ${indices} --dir=${archivesDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
       query
@@ -99,69 +100,72 @@ async function run() {
 
   const targetDirs = ['trial', 'basic'];
 
-  targetDirs.forEach((target) => {
-    const targetPath = path.resolve(
-      __dirname,
-      '../../../../test/apm_api_integration/',
-      target
-    );
-    const targetArchivesPath = path.resolve(
-      targetPath,
-      'fixtures/es_archiver',
-      archiveName
-    );
+  // copy the archives to the test fixtures
 
-    if (!fs.existsSync(targetArchivesPath)) {
-      fs.mkdirSync(targetArchivesPath);
-    }
-
-    fs.copyFileSync(
-      path.join(archivesDir, archiveName, 'data.json.gz'),
-      path.join(targetArchivesPath, 'data.json.gz')
-    );
-    fs.copyFileSync(
-      path.join(archivesDir, archiveName, 'mappings.json'),
-      path.join(targetArchivesPath, 'mappings.json')
-    );
-
-    const currentConfig = {};
-
-    const configFilePath = path.join(targetPath, 'archives_metadata.json');
-
-    try {
-      Object.assign(
-        currentConfig,
-        JSON.parse(
-          fs.readFileSync(configFilePath, {
-            encoding: 'utf-8',
-          })
-        )
+  await Promise.all(
+    targetDirs.map(async (target) => {
+      const targetPath = path.resolve(
+        __dirname,
+        '../../../../test/apm_api_integration/',
+        target
       );
-    } catch (error) {
-      // do nothing
-    }
+      const targetArchivesPath = path.resolve(
+        targetPath,
+        'fixtures/es_archiver',
+        archiveName
+      );
 
-    fs.writeFileSync(
-      configFilePath,
-      JSON.stringify(
-        {
-          ...currentConfig,
-          [archiveName]: {
-            from: gte,
-            to: lt,
-          },
+      if (!fs.existsSync(targetArchivesPath)) {
+        fs.mkdirSync(targetArchivesPath);
+      }
+
+      fs.copyFileSync(
+        path.join(archivesDir, archiveName, 'data.json.gz'),
+        path.join(targetArchivesPath, 'data.json.gz')
+      );
+      fs.copyFileSync(
+        path.join(archivesDir, archiveName, 'mappings.json'),
+        path.join(targetArchivesPath, 'mappings.json')
+      );
+
+      const currentConfig = {};
+
+      // get the current metadata and extend/override metadata for the new archive
+      const configFilePath = path.join(targetPath, 'archives_metadata.ts');
+
+      try {
+        Object.assign(currentConfig, (await import(configFilePath)).default);
+      } catch (error) {
+        // do nothing
+      }
+
+      const newConfig = {
+        ...currentConfig,
+        [archiveName]: {
+          start: gte,
+          end: lt,
         },
-        null,
-        2
-      ),
-      { encoding: 'utf-8' }
-    );
-  });
+      };
+
+      fs.writeFileSync(
+        configFilePath,
+        `export default ${JSON.stringify(newConfig, null, 2)}`,
+        { encoding: 'utf-8' }
+      );
+    })
+  );
 
   fs.unlinkSync(path.join(archivesDir, archiveName, 'data.json.gz'));
   fs.unlinkSync(path.join(archivesDir, archiveName, 'mappings.json'));
   fs.rmdirSync(path.join(archivesDir, archiveName));
   fs.rmdirSync(archivesDir);
+
+  // run ESLint on the generated metadata files
+
+  execSync('node scripts/eslint **/*/archives_metadata.ts --fix', {
+    cwd: root,
+    stdio: 'inherit',
+  });
 }
 
 run()

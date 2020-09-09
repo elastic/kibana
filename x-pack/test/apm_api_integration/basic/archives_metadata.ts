@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createTestConfig } from '../common/config';
-
-export default createTestConfig({
-  license: 'basic',
-  name: 'X-Pack APM API integration tests (basic)',
-  testFiles: [require.resolve('./tests')],
-});
+export default {
+  'apm_8.0.0': {
+    start: '2020-09-09T06:11:22.998Z',
+    end: '2020-09-09T06:41:22.998Z',
+  },
+};
