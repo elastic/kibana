@@ -83,7 +83,7 @@ export function Header({
   homeHref,
   ...observables
 }: HeaderProps) {
-  const isVisible = useObservable(observables.isVisible$, true);
+  const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
 

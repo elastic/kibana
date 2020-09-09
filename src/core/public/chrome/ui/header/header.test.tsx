@@ -93,14 +93,16 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiHeader').exists()).toBeFalsy();
 
     act(() => isVisible$.next(true));
     component.update();
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiHeader').exists()).toBeTruthy();
+    expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 
     act(() => isLocked$.next(true));
     component.update();
+    expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
   });
 });

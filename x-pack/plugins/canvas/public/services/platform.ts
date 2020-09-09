@@ -10,6 +10,7 @@ import {
   IUiSettingsClient,
   ChromeBreadcrumb,
   IBasePath,
+  ChromeStart,
 } from '../../../../../src/core/public';
 import { CanvasServiceFactory } from '.';
 
@@ -22,6 +23,7 @@ export interface PlatformService {
   getUISetting: (key: string, defaultValue?: any) => any;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   setRecentlyAccessed: (link: string, label: string, id: string) => void;
+  setFullscreen: ChromeStart['setIsVisible'];
 
   // TODO: these should go away.  We want thin accessors, not entire objects.
   // Entire objects are hard to mock, and hide our dependency on the external service.

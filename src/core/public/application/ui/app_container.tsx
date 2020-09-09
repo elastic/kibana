@@ -96,8 +96,8 @@ export const AppContainer: FunctionComponent<Props> = ({
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
+          setIsMounting(false);
         }
-        setIsMounting(false);
       }
     };
 

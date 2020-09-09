@@ -17,26 +17,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useDebounce, useEvent } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
+import useEvent from 'react-use/lib/useEvent';
+import useMountedState from 'react-use/lib/useMountedState';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
-
-const useIfMounted = () => {
-  const isMounted = useRef(true);
-  useEffect(
-    () => () => {
-      isMounted.current = false;
-    },
-    []
-  );
-
-  const ifMounted = useCallback((func) => {
-    if (isMounted.current && func) {
-      func();
-    }
-  }, []);
-
-  return ifMounted;
-};
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
@@ -57,7 +41,7 @@ const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).
 const blurEvent = new FocusEvent('blur');
 
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
-  const ifMounted = useIfMounted();
+  const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
@@ -65,20 +49,20 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   const setOptions = useCallback(
     (_options: GlobalSearchResult[]) => {
-      ifMounted(() =>
-        _setOptions([
-          ..._options.map((option) => ({
-            key: option.id,
-            label: option.title,
-            url: option.url,
-            ...(option.icon && { icon: { type: option.icon } }),
-            ...(option.type &&
-              option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
-          })),
-        ])
-      );
+      if (!isMounted()) return;
+
+      _setOptions([
+        ..._options.map((option) => ({
+          key: option.id,
+          label: option.title,
+          url: option.url,
+          ...(option.icon && { icon: { type: option.icon } }),
+          ...(option.type &&
+            option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
+        })),
+      ]);
     },
-    [ifMounted, _setOptions]
+    [isMounted, _setOptions]
   );
 
   useDebounce(
@@ -192,7 +176,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                 what: <EuiFlexItem grow={false}>Shortcut</EuiFlexItem>,
                 how: (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>
+                    <EuiBadge>{isWindows ? 'Control + /' : 'Command + /'}</EuiBadge>
                   </EuiFlexItem>
                 ),
               }}
