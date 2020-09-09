@@ -5,9 +5,13 @@
  */
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CoreSetup, Logger, SavedObjectsErrorHelpers } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DeepRequired } from 'utility-types';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
 import {
   TaskManagerSetupContract,
