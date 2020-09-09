@@ -42,36 +42,41 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
 };
 describe('install', () => {
   describe('getInstallType', () => {
-    it('should return correct type when installing and no other version is currently installed', () => {});
-    const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
-    expect(installTypeInstall).toBe('install');
-
-    it('should return correct type when installing the same version', () => {});
-    const installTypeReinstall = getInstallType({
-      pkgVersion: '1.0.0',
-      installedPkg: mockInstallation,
+    it('should return correct type when installing and no other version is currently installed', () => {
+      const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
+      expect(installTypeInstall).toBe('install');
     });
-    expect(installTypeReinstall).toBe('reinstall');
 
-    it('should return correct type when moving from one version to another', () => {});
-    const installTypeUpdate = getInstallType({
-      pkgVersion: '1.0.1',
-      installedPkg: mockInstallation,
+    it('should return correct type when installing the same version', () => {
+      const installTypeReinstall = getInstallType({
+        pkgVersion: '1.0.0',
+        installedPkg: mockInstallation,
+      });
+      expect(installTypeReinstall).toBe('reinstall');
     });
-    expect(installTypeUpdate).toBe('update');
 
-    it('should return correct type when update fails and trys again', () => {});
-    const installTypeReupdate = getInstallType({
-      pkgVersion: '1.0.1',
-      installedPkg: mockInstallationUpdateFail,
+    it('should return correct type when moving from one version to another', () => {
+      const installTypeUpdate = getInstallType({
+        pkgVersion: '1.0.1',
+        installedPkg: mockInstallation,
+      });
+      expect(installTypeUpdate).toBe('update');
     });
-    expect(installTypeReupdate).toBe('reupdate');
 
-    it('should return correct type when attempting to rollback from a failed update', () => {});
-    const installTypeRollback = getInstallType({
-      pkgVersion: '1.0.0',
-      installedPkg: mockInstallationUpdateFail,
+    it('should return correct type when update fails and trys again', () => {
+      const installTypeReupdate = getInstallType({
+        pkgVersion: '1.0.1',
+        installedPkg: mockInstallationUpdateFail,
+      });
+      expect(installTypeReupdate).toBe('reupdate');
     });
-    expect(installTypeRollback).toBe('rollback');
+
+    it('should return correct type when attempting to rollback from a failed update', () => {
+      const installTypeRollback = getInstallType({
+        pkgVersion: '1.0.0',
+        installedPkg: mockInstallationUpdateFail,
+      });
+      expect(installTypeRollback).toBe('rollback');
+    });
   });
 });
