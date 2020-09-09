@@ -31,6 +31,7 @@ export function DimensionPopover({
     <EuiPopover
       className="lnsDimensionPopover"
       anchorClassName="lnsDimensionPopover__trigger"
+      panelClassName="lnsDimensionPopover__fixTranslateDnd"
       isOpen={
         popoverState.isOpen &&
         (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
