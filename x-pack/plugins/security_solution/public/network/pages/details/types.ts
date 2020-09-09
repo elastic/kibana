@@ -16,11 +16,6 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
 
-export interface IPDetailsComponentProps {
-  detailName: string;
-  flowTarget: FlowTarget;
-}
-
 export interface OwnProps {
   type: NetworkType;
   startDate: string;

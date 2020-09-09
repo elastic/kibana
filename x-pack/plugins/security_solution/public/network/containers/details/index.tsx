@@ -6,7 +6,6 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -14,113 +13,76 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { PageInfoPaginated } from '../../../graphql/types';
-import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { networkSelectors } from '../../store';
 import {
-  FlowTarget,
+  DocValueFields,
   NetworkQueries,
-  NetworkUsersRequestOptions,
-  NetworkUsersStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/network';
+  NetworkDetailsRequestOptions,
+  NetworkDetailsStrategyResponse,
+} from '../../../../common/search_strategy';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-const ID = 'networkUsersQuery';
+const ID = 'networkDetailsQuery';
 
-export interface NetworkUsersArgs {
+export interface NetworkDetailsArgs {
   id: string;
   inspect: InspectResponse;
-  isInspected: boolean;
-  loadPage: (newActivePage: number) => void;
-  networkUsers: NetworkUsersStrategyResponse['edges'];
-  pageInfo: PageInfoPaginated;
+  networkDetails: NetworkDetailsStrategyResponse['networkDetails'];
   refetch: inputsModel.Refetch;
-  stackByField?: string;
-  totalCount: number;
+  isInspected: boolean;
 }
 
-interface UseNetworkUsers {
+interface UseNetworkDetails {
   id?: string;
-  filterQuery?: ESTermQuery | string;
-  endDate: string;
-  startDate: string;
-  skip: boolean;
-  flowTarget: FlowTarget;
+  docValueFields: DocValueFields[];
   ip: string;
+  filterQuery?: ESTermQuery | string;
+  skip: boolean;
 }
 
-export const useNetworkUsers = ({
-  endDate,
+export const useNetworkDetails = ({
+  docValueFields,
   filterQuery,
-  flowTarget,
   id = ID,
-  ip,
   skip,
-  startDate,
-}: UseNetworkUsers): [boolean, NetworkUsersArgs] => {
-  const getNetworkUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useSelector(getNetworkUsersSelector, shallowEqual);
+  ip,
+}: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions>({
+  const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
     defaultIndex,
-    factoryQueryType: NetworkQueries.users,
+    docValueFields: docValueFields ?? [],
+    factoryQueryType: NetworkQueries.details,
     filterQuery: createFilter(filterQuery),
-    flowTarget,
     ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
   });
 
-  const wrappedLoadMore = useCallback(
-    (newActivePage: number) => {
-      setNetworkUsersRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
-    },
-    [limit]
-  );
-
-  const [networkUsersResponse, setNetworkUsersResponse] = useState<NetworkUsersArgs>({
-    networkUsers: [],
+  const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
+    networkDetails: {},
     id,
     inspect: {
       dsl: [],
       response: [],
     },
     isInspected: false,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
     refetch: refetch.current,
-    totalCount: -1,
   });
 
-  const networkUsersSearch = useCallback(
-    (request: NetworkUsersRequestOptions) => {
+  const networkDetailsSearch = useCallback(
+    (request: NetworkDetailsRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<NetworkUsersRequestOptions, NetworkUsersStrategyResponse>(request, {
+          .search<NetworkDetailsRequestOptions, NetworkDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -129,13 +91,11 @@ export const useNetworkUsers = ({
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   setLoading(false);
-                  setNetworkUsersResponse((prevResponse) => ({
+                  setNetworkDetailsResponse((prevResponse) => ({
                     ...prevResponse,
-                    networkUsers: response.edges,
+                    networkDetails: response.networkDetails,
                     inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
                     refetch: refetch.current,
-                    totalCount: response.totalCount,
                   }));
                 }
                 searchSubscription$.unsubscribe();
@@ -144,14 +104,14 @@ export const useNetworkUsers = ({
                   setLoading(false);
                 }
                 // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_USERS);
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_DETAILS);
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
               if (!(msg instanceof AbortError)) {
                 notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_USERS,
+                  title: i18n.FAIL_NETWORK_DETAILS,
                   text: msg.message,
                 });
               }
@@ -170,29 +130,24 @@ export const useNetworkUsers = ({
   );
 
   useEffect(() => {
-    setNetworkUsersRequest((prevRequest) => {
+    setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex,
+        ip,
+        docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [defaultIndex, filterQuery, skip, ip, docValueFields]);
 
   useEffect(() => {
-    networkUsersSearch(networkUsersRequest);
-  }, [networkUsersRequest, networkUsersSearch]);
+    networkDetailsSearch(networkDetailsRequest);
+  }, [networkDetailsRequest, networkDetailsSearch]);
 
-  return [loading, networkUsersResponse];
+  return [loading, networkDetailsResponse];
 };

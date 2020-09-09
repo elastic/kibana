@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { ActionCreator } from 'typescript-fsa';
+import { Router, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 
@@ -23,14 +21,24 @@ import {
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { IPDetailsComponent, IPDetails } from './index';
+import { NetworkDetails } from './index';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useParams: jest.fn(),
+  };
+});
+jest.mock('../../containers/details', () => ({
+  useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
+}));
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/source');
 jest.mock('../../../common/containers/use_global_time', () => ({
@@ -70,34 +78,7 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
-const to = '2018-03-23T18:49:23.132Z';
-const from = '2018-03-24T03:33:52.253Z';
-const getMockProps = (ip: string) => ({
-  to,
-  from,
-  isInitializing: false,
-  setQuery: jest.fn(),
-  query: { query: 'coolQueryhuh?', language: 'keury' },
-  filters: [],
-  flowTarget: FlowTarget.source,
-  history: getMockHistory(ip),
-  location: {
-    pathname: `/network/ip/${ip}`,
-    search: '',
-    state: '',
-    hash: '',
-  },
-  detailName: ip,
-  match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
-  setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>,
-  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<void>,
-});
-
-describe('Ip Details', () => {
+describe('Network Details', () => {
   const mount = useMountAppended();
   beforeAll(() => {
     (useWithSource as jest.Mock).mockReturnValue({
@@ -139,31 +120,41 @@ describe('Ip Details', () => {
   });
 
   test('it renders', () => {
-    const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
-  });
-
-  test('it matches the snapshot', () => {
-    const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(wrapper).toMatchSnapshot();
+    const ip = '123.456.78.90';
+    (useParams as jest.Mock).mockReturnValue({
+      detailName: ip,
+      flowTarget: FlowTarget.source,
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={getMockHistory(ip)}>
+          <NetworkDetails />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="network-details-page"]').exists()).toBe(true);
   });
 
   test('it renders ipv6 headline', async () => {
+    const ip = 'fe80--24ce-f7ff-fede-a571';
     (useWithSource as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
-    const ip = 'fe80--24ce-f7ff-fede-a571';
+    (useParams as jest.Mock).mockReturnValue({
+      detailName: ip,
+      flowTarget: FlowTarget.source,
+    });
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={getMockHistory(ip)}>
-          <IPDetails {...getMockProps(ip)} />
+          <NetworkDetails />
         </Router>
       </TestProviders>
     );
     expect(
       wrapper
-        .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')
+        .find('[data-test-subj="network-details-headline"] [data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });
