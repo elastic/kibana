@@ -195,11 +195,10 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
-    if (!indexPattern.id) return;
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-
+  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<IndexPattern | Error> {
+    if (!indexPattern.id) {
+      throw new Error('no id');
+    }
     const body = indexPattern.prepBody();
 
     const originalChangedKeys: string[] = [];
@@ -209,77 +208,77 @@ export class IndexPatternsService {
       }
     });
 
-    return this.savedObjectsClient
-      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
-      .then((resp) => {
-        indexPattern.id = resp.id;
-        indexPattern.version = resp.version;
-      })
-      .catch((err) => {
-        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = new IndexPattern(indexPattern.id, {
-            savedObjectsClient: this.savedObjectsClient,
-            apiClient: this.apiClient,
-            patternCache: indexPatternCache,
-            fieldFormats: this.fieldFormats,
-            indexPatternsService: this,
-            onNotification: this.onNotification,
-            onError: this.onError,
-            shortDotsEnable,
-            metaFields,
-          });
-
-          return samePattern.init().then(() => {
-            // What keys changed from now and what the server returned
-            const updatedBody = samePattern.prepBody();
-
-            // Build a list of changed keys from the server response
-            // and ensure we ignore the key if the server response
-            // is the same as the original response (since that is expected
-            // if we made a change in that key)
-
-            const serverChangedKeys: string[] = [];
-            Object.entries(updatedBody).forEach(([key, value]) => {
-              if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
-                serverChangedKeys.push(key);
-              }
-            });
-
-            let unresolvedCollision = false;
-            for (const originalKey of originalChangedKeys) {
-              for (const serverKey of serverChangedKeys) {
-                if (originalKey === serverKey) {
-                  unresolvedCollision = true;
-                  break;
-                }
-              }
-            }
-
-            if (unresolvedCollision) {
-              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
-                defaultMessage:
-                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-              });
-
-              this.onNotification({ title, color: 'danger' });
-              throw err;
-            }
-
-            // Set the updated response on this object
-            serverChangedKeys.forEach((key) => {
-              (indexPattern as any)[key] = (samePattern as any)[key];
-            });
-            indexPattern.version = samePattern.version;
-
-            // Clear cache
-            indexPatternCache.clear(indexPattern.id!);
-
-            // Try the save again
-            return this.save(indexPattern, saveAttempts);
-          });
-        }
-        throw err;
+    try {
+      const resp = await this.savedObjectsClient.update(savedObjectType, this.id, body, {
+        version: indexPattern.version,
       });
+      indexPattern.id = resp.id;
+      indexPattern.version = resp.version;
+    } catch (err) {
+      if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+        const samePattern = new IndexPattern(indexPattern.id, {
+          savedObjectsClient: this.savedObjectsClient,
+          apiClient: this.apiClient,
+          patternCache: this.patternCache,
+          fieldFormats: this.fieldFormats,
+          onNotification: this.onNotification,
+          onError: this.onError,
+          shortDotsEnable: this.shortDotsEnable,
+          metaFields: this.metaFields,
+        });
+
+        await samePattern.init();
+        // What keys changed from now and what the server returned
+        const updatedBody = samePattern.prepBody();
+
+        // Build a list of changed keys from the server response
+        // and ensure we ignore the key if the server response
+        // is the same as the original response (since that is expected
+        // if we made a change in that key)
+
+        const serverChangedKeys: string[] = [];
+        Object.entries(updatedBody).forEach(([key, value]) => {
+          if (value !== (body as any)[key] && value !== this.originalBody[key]) {
+            serverChangedKeys.push(key);
+          }
+        });
+
+        let unresolvedCollision = false;
+        for (const originalKey of originalChangedKeys) {
+          for (const serverKey of serverChangedKeys) {
+            if (originalKey === serverKey) {
+              unresolvedCollision = true;
+              break;
+            }
+          }
+        }
+
+        if (unresolvedCollision) {
+          const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
+            defaultMessage:
+              'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+          });
+
+          this.onNotification({ title, color: 'danger' });
+          throw err;
+        }
+
+        // Set the updated response on this object
+        serverChangedKeys.forEach((key) => {
+          (this as any)[key] = (samePattern as any)[key];
+        });
+        indexPattern.version = samePattern.version;
+
+        // Clear cache
+        this.patternCache.clear(this.id!);
+
+        // Try the save again
+        await this.save(indexPattern, saveAttempts);
+        return indexPattern;
+      }
+      throw err;
+    }
+    return indexPattern;
   }
 
   async make(id?: string): Promise<IndexPattern> {
