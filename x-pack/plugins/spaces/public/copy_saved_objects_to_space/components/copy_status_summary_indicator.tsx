@@ -55,7 +55,7 @@ const renderIcon = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage"
-            defaultMessage="Copied successfully to the {space} space."
+            defaultMessage="Copy to the {space} space was successful."
             values={{ space: space.name }}
           />
         }
@@ -93,7 +93,7 @@ const renderIcon = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.missingReferencesMessage"
-            defaultMessage="One or more missing references detected in the {space} space. Expand this section for details."
+            defaultMessage="Missing references detected in the {space} space. Expand this section for details."
             values={{ space: space.name }}
           />
         }
@@ -119,7 +119,7 @@ const renderIcon = (props: Props) => {
           content={
             <FormattedMessage
               id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"
-              defaultMessage="One or more conflicts detected in the {space} space. Expand this section to resolve."
+              defaultMessage="Conflicts detected in the {space} space. Expand this section to resolve."
               values={{ space: space.name }}
             />
           }
