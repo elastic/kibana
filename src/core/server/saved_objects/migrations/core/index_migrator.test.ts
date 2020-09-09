@@ -367,7 +367,7 @@ describe('IndexMigrator', () => {
   });
 
   test('rejects when the migration function throws an error', async () => {
-    const { client } = testOpts;
+    const { callCluster } = testOpts;
     const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       throw new Error('error migrating document');
     });
@@ -377,7 +377,7 @@ describe('IndexMigrator', () => {
       migrate: migrateDoc,
     };
 
-    withIndex(client, {
+    withIndex(callCluster, {
       numOutOfDate: 1,
       docs: [
         [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
