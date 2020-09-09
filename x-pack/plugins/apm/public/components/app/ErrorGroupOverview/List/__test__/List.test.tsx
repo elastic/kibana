@@ -27,7 +27,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MockUrlParamsContextProvider>
-        <ErrorGroupList items={[]} />
+        <ErrorGroupList items={[]} serviceName="opbeans-python" />
       </MockUrlParamsContextProvider>,
       storeState
     );
@@ -39,7 +39,7 @@ describe('ErrorGroupOverview -> List', () => {
     const wrapper = mount(
       <MockApmPluginContextWrapper>
         <MockUrlParamsContextProvider>
-          <ErrorGroupList items={props.items} />
+          <ErrorGroupList items={props.items} serviceName="opbeans-python" />
         </MockUrlParamsContextProvider>
       </MockApmPluginContextWrapper>
     );
