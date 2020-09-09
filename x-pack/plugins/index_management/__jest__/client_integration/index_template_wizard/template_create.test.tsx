@@ -248,29 +248,30 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    // describe('index settings (step 3)', () => {
-    //   beforeEach(async () => {
-    //     const { actions } = testBed;
-    //     await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-    //   });
+    describe('index settings (step 3)', () => {
+      beforeEach(async () => {
+        const { actions } = testBed;
+        await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        await actions.completeStepTwo();
+      });
 
-    //   it('should set the correct page title', async () => {
-    //     const { exists, find } = testBed;
+      it('should set the correct page title', async () => {
+        const { exists, find } = testBed;
 
-    //     expect(exists('stepSettings')).toBe(true);
-    //     expect(find('stepTitle').text()).toEqual('Index settings (optional)');
-    //   });
+        expect(exists('stepSettings')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Index settings (optional)');
+      });
 
-    //   it('should not allow invalid json', async () => {
-    //     const { form, actions } = testBed;
+      it('should not allow invalid json', async () => {
+        const { form, actions } = testBed;
 
-    //     await act(async () => {
-    //       actions.completeStepTwo('{ invalidJsonString ');
-    //     });
+        await act(async () => {
+          actions.completeStepThree('{ invalidJsonString ');
+        });
 
-    //     expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-    //   });
-    // });
+        expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+      });
+    });
 
     // describe('mappings (step 4)', () => {
     //   beforeEach(async () => {

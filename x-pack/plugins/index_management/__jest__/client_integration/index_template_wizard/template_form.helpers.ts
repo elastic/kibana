@@ -53,6 +53,50 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('createFieldForm.cancelButton').simulate('click');
   };
 
+  const componentTemplates = {
+    getComponentTemplatesInList() {
+      const { find } = testBed;
+      return find('componentTemplatesList.item.name').map((wrapper) => wrapper.text());
+    },
+    getComponentTemplatesSelected() {
+      const { find } = testBed;
+      return find('componentTemplatesSelection.item.name').map((wrapper) => wrapper.text());
+    },
+    showFilters() {
+      const { find, component } = testBed;
+      act(() => {
+        find('componentTemplates.filterButton').simulate('click');
+      });
+      component.update();
+    },
+    async selectFilter(filter: 'settings' | 'mappings' | 'aliases') {
+      const { find, component } = testBed;
+      const filters = ['settings', 'mappings', 'aliases'];
+      const index = filters.indexOf(filter);
+
+      await act(async () => {
+        find('filterList.filterItem').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async selectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesList.item.action-plusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+    async unSelectComponentAt(index: number) {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        find('componentTemplatesSelection.item.action-minusInCircle').at(index).simulate('click');
+      });
+      component.update();
+    },
+  };
+
   const completeStepOne = async ({
     name,
     indexPatterns,
@@ -93,22 +137,48 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
   };
 
-  const completeStepTwo = async (settings?: string) => {
-    const { find, component, waitFor } = testBed;
+  const completeStepTwo = async (componentName?: string) => {
+    const { find, component } = testBed;
 
-    if (settings) {
-      find('mockCodeEditor').simulate('change', {
-        jsonString: settings,
-      }); // Using mocked EuiCodeEditor
-      await nextTick();
-      component.update();
+    if (componentName) {
+      // Find the index of the template in the list
+      const allComponents = find('componentTemplatesList.item.name').map((wrapper) =>
+        wrapper.text()
+      );
+      const index = allComponents.indexOf(componentName);
+      if (index < 0) {
+        throw new Error(
+          `Could not find component "${componentName}" in the list ${JSON.stringify(allComponents)}`
+        );
+      }
+
+      await componentTemplates.selectComponentAt(index);
     }
 
-    clickNextButton();
-    await waitFor('stepMappings');
+    await act(async () => {
+      clickNextButton();
+    });
+
+    component.update();
   };
 
-  const completeStepThree = async (mappingFields?: MappingField[]) => {
+  const completeStepThree = async (settings?: string) => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      if (settings) {
+        find('mockCodeEditor').simulate('change', {
+          jsonString: settings,
+        }); // Using mocked EuiCodeEditor
+      }
+
+      clickNextButton();
+    });
+
+    component.update();
+  };
+
+  const completeStepFour = async (mappingFields?: MappingField[]) => {
     const { waitFor } = testBed;
 
     if (mappingFields) {
@@ -122,7 +192,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await waitFor('stepAliases');
   };
 
-  const completeStepFour = async (aliases?: string, waitForNextStep = true) => {
+  const completeStepFive = async (aliases?: string, waitForNextStep = true) => {
     const { find, component, waitFor } = testBed;
 
     if (aliases) {
@@ -168,50 +238,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
   };
 
-  const componentTemplates = {
-    getComponentTemplatesInList() {
-      const { find } = testBed;
-      return find('componentTemplatesList.item.name').map((wrapper) => wrapper.text());
-    },
-    getComponentTemplatesSelected() {
-      const { find } = testBed;
-      return find('componentTemplatesSelection.item.name').map((wrapper) => wrapper.text());
-    },
-    showFilters() {
-      const { find, component } = testBed;
-      act(() => {
-        find('componentTemplates.filterButton').simulate('click');
-      });
-      component.update();
-    },
-    async selectFilter(filter: 'settings' | 'mappings' | 'aliases') {
-      const { find, component } = testBed;
-      const filters = ['settings', 'mappings', 'aliases'];
-      const index = filters.indexOf(filter);
-
-      await act(async () => {
-        find('filterList.filterItem').at(index).simulate('click');
-      });
-      component.update();
-    },
-    async selectComponentAt(index: number) {
-      const { find, component } = testBed;
-
-      await act(async () => {
-        find('componentTemplatesList.item.action-plusInCircle').at(index).simulate('click');
-      });
-      component.update();
-    },
-    async unSelectComponentAt(index: number) {
-      const { find, component } = testBed;
-
-      await act(async () => {
-        find('componentTemplatesSelection.item.action-minusInCircle').at(index).simulate('click');
-      });
-      component.update();
-    },
-  };
-
   return {
     ...testBed,
     actions: {
@@ -226,6 +252,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       completeStepTwo,
       completeStepThree,
       completeStepFour,
+      completeStepFive,
       selectSummaryTab,
       addMappingField,
       componentTemplates,
