@@ -84,7 +84,9 @@ export interface Settings {
 }
 
 export interface Mappings {
-  [key: string]: any;
+  properties: {
+    [key: string]: any;
+  };
 }
 
 export interface IngestPipelineWrapper {

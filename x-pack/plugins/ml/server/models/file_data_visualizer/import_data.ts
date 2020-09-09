@@ -89,12 +89,12 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   }
 
   async function createIndex(index: string, settings: Settings, mappings: Mappings) {
-    const body: { mappings: Mappings; settings?: Settings } = {
+    const body: { mappings: Mappings } = {
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
         },
-        properties: mappings,
+        properties: mappings.properties,
       },
     };
 
