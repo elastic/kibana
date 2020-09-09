@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export * from './aggs';
-export * from './es_search';
-export * from './expressions';
-export * from './tabify';
-export * from './types';
-export * from './es_search';
+import { mapKeys, snakeCase } from 'lodash';
+
+export function toSnakeCase(obj: Record<string, any>) {
+  return mapKeys(obj, (value, key) => snakeCase(key));
+}
