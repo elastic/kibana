@@ -19,9 +19,9 @@ export async function shouldLegacyRbacApplyBySource(
     ? (
         await unsecuredSavedObjectsClient.get<{
           meta?: {
-            versionLastmodified?: string;
+            versionApiKeyLastmodified?: string;
           };
         }>(ALERT_SAVED_OBJECT_TYPE, executionSource.source.id)
-      ).attributes.meta?.versionLastmodified === LEGACY_VERSION
+      ).attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION
     : false;
 }

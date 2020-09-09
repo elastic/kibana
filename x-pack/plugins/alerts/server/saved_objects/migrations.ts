@@ -20,19 +20,20 @@ export function getMigrations(
   const migrationWhenRBACWasIntroduced = markAsLegacyAndChangeConsumer(encryptedSavedObjects);
 
   return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced),
+    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
   };
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>,
+  version: string
 ) {
   return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
       context.log.error(
-        `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
+        `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
         { alertDocument: doc }
       );
     }
@@ -40,16 +41,15 @@ function executeMigrationWithErrorHandling(
   };
 }
 
+const consumersToChange: Map<string, string> = new Map(
+  Object.entries({
+    alerting: 'alerts',
+    metrics: 'infrastructure',
+  })
+);
 function markAsLegacyAndChangeConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
-  const consumersToChange: Map<string, string> = new Map(
-    Object.entries({
-      alerting: 'alerts',
-      metrics: 'infrastructure',
-    })
-  );
-
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
       // migrate all documents in 7.10 in order to add the "meta" RBAC field
@@ -66,7 +66,7 @@ function markAsLegacyAndChangeConsumer(
           consumer: consumersToChange.get(consumer) ?? consumer,
           // mark any alert predating 7.10 as a legacy alert
           meta: {
-            versionLastmodified: LEGACY_LAST_MODIFIED_VERSION,
+            versionApiKeyLastmodified: LEGACY_LAST_MODIFIED_VERSION,
           },
         },
       };

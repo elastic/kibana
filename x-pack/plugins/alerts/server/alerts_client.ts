@@ -964,8 +964,10 @@ export class AlertsClient {
   }
 
   private updateMeta<T extends Partial<RawAlert>>(alertAttributes: T): T {
-    alertAttributes.meta = alertAttributes.meta ?? {};
-    alertAttributes.meta.versionLastmodified = this.kibanaVersion;
+    if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
+      alertAttributes.meta = alertAttributes.meta ?? {};
+      alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;
+    }
     return alertAttributes;
   }
 }

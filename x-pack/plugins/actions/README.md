@@ -280,7 +280,7 @@ The following table describes the properties of the `options` object.
 | params   | The `params` value to give the action type executor.                                                   | object |
 | spaceId  | The space id the action is within.                                                                     | string |
 | apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
-| source   | The source of the execution, either a reponse to an HTTP request or a references to a Saved Object. | object, optional |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
 
@@ -308,11 +308,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                          | Type   |
-| -------- | ---------------------------------------------------- | ------ |
-| id       | The id of the action you want to execute.            | string |
-| params   | The `params` value to give the action type executor. | object |
-| source   | The source of the execution, either a reponse to an HTTP request or a references to a Saved Object. | object, optional |
+| Property | Description                                                                          | Type   |
+| -------- | ------------------------------------------------------------------------------------ | ------ |
+| id       | The id of the action you want to execute.                                            | string |
+| params   | The `params` value to give the action type executor.                                 | object |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.| object, optional |
 
 ## Example
 

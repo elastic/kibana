@@ -29,7 +29,7 @@ describe('7.10.0', () => {
       attributes: {
         ...alert.attributes,
         meta: {
-          versionLastmodified: 'pre-7.10.0',
+          versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
     });
@@ -46,7 +46,7 @@ describe('7.10.0', () => {
         ...alert.attributes,
         consumer: 'infrastructure',
         meta: {
-          versionLastmodified: 'pre-7.10.0',
+          versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
     });
@@ -63,7 +63,7 @@ describe('7.10.0', () => {
         ...alert.attributes,
         consumer: 'alerts',
         meta: {
-          versionLastmodified: 'pre-7.10.0',
+          versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
     });
@@ -91,7 +91,7 @@ describe('7.10.0 migrates with failure', () => {
       },
     });
     expect(log.error).toHaveBeenCalledWith(
-      `encryptedSavedObject migration failed for alert ${alert.id} with error: Can't migrate!`,
+      `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
       {
         alertDocument: {
           ...alert,

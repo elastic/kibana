@@ -375,7 +375,7 @@ describe('create()', () => {
         "createdBy": "elastic",
         "enabled": true,
         "meta": Object {
-          "versionLastmodified": "v7.10.0",
+          "versionApiKeyLastmodified": "v7.10.0",
         },
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -1003,7 +1003,7 @@ describe('create()', () => {
         updatedBy: 'elastic',
         enabled: true,
         meta: {
-          versionLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: 'v7.10.0',
         },
         schedule: { interval: '10s' },
         throttle: null,
@@ -1119,7 +1119,7 @@ describe('create()', () => {
         updatedBy: 'elastic',
         enabled: false,
         meta: {
-          versionLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: 'v7.10.0',
         },
         schedule: { interval: '10s' },
         throttle: null,
@@ -1247,7 +1247,7 @@ describe('enable()', () => {
         consumer: 'myApp',
         enabled: true,
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
         updatedBy: 'elastic',
         apiKey: null,
@@ -1335,7 +1335,7 @@ describe('enable()', () => {
         consumer: 'myApp',
         enabled: true,
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -1503,7 +1503,7 @@ describe('disable()', () => {
         apiKeyOwner: null,
         enabled: false,
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
         scheduledTaskId: null,
         updatedBy: 'elastic',
@@ -1546,7 +1546,7 @@ describe('disable()', () => {
         apiKeyOwner: null,
         enabled: false,
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
         scheduledTaskId: null,
         updatedBy: 'elastic',
@@ -1656,9 +1656,6 @@ describe('muteAll()', () => {
 
     await alertsClient.muteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      meta: {
-        versionLastmodified: kibanaVersion,
-      },
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1744,9 +1741,6 @@ describe('unmuteAll()', () => {
 
     await alertsClient.unmuteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      meta: {
-        versionLastmodified: kibanaVersion,
-      },
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1830,9 +1824,6 @@ describe('muteInstance()', () => {
       'alert',
       '1',
       {
-        meta: {
-          versionLastmodified: kibanaVersion,
-        },
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
@@ -1966,9 +1957,6 @@ describe('unmuteInstance()', () => {
       'alert',
       '1',
       {
-        meta: {
-          versionLastmodified: kibanaVersion,
-        },
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
@@ -3235,7 +3223,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "enabled": true,
         "meta": Object {
-          "versionLastmodified": "v7.10.0",
+          "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
         "params": Object {
@@ -3395,7 +3383,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "enabled": true,
         "meta": Object {
-          "versionLastmodified": "v7.10.0",
+          "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
         "params": Object {
@@ -3549,7 +3537,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "enabled": false,
         "meta": Object {
-          "versionLastmodified": "v7.10.0",
+          "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
         "params": Object {
@@ -4237,7 +4225,7 @@ describe('updateApiKey()', () => {
           },
         ],
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
       },
       { version: '123' }
@@ -4276,7 +4264,7 @@ describe('updateApiKey()', () => {
           },
         ],
         meta: {
-          versionLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: kibanaVersion,
         },
       },
       { version: '123' }

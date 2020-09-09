@@ -79,7 +79,7 @@
       },
       "meta": {
         "properties": {
-          "versionLastmodified": {
+          "versionApiKeyLastmodified": {
             "type": "keyword"
           }
         }

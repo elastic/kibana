@@ -44,7 +44,7 @@ describe(`#shouldLegacyRbacApplyBySource`, () => {
   test('should return true if source alert is marked as legacy', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(
-      mockAlert({ id, attributes: { meta: { versionLastmodified: 'pre-7.10.0' } } })
+      mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: 'pre-7.10.0' } } })
     );
     expect(
       await shouldLegacyRbacApplyBySource(
@@ -60,7 +60,7 @@ describe(`#shouldLegacyRbacApplyBySource`, () => {
   test('should return false if source alert is marked as modern', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(
-      mockAlert({ id, attributes: { meta: { versionLastmodified: '7.10.0' } } })
+      mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: '7.10.0' } } })
     );
     expect(
       await shouldLegacyRbacApplyBySource(

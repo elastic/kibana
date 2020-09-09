@@ -111,7 +111,7 @@ export class AlertsAuthorization {
   }
 
   public shouldUseLegacyAuthorization(alert: RawAlert): boolean {
-    return alert.meta?.versionLastmodified === LEGACY_LAST_MODIFIED_VERSION;
+    return alert.meta?.versionApiKeyLastmodified === LEGACY_LAST_MODIFIED_VERSION;
   }
 
   private shouldCheckAuthorization(): boolean {

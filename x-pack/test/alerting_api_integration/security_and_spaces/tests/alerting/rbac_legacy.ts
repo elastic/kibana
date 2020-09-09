@@ -156,7 +156,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             // this is important as proper update *should* update the legacy status of the alert
             // and we want to ensure we don't accidentally introduce a change that might break our support of legacy alerts
             expect(swapResponse.body.id).to.eql(alertId);
-            expect(swapResponse.body.attributes.meta.versionLastmodified).to.eql('pre-7.10.0');
+            expect(swapResponse.body.attributes.meta.versionApiKeyLastmodified).to.eql(
+              'pre-7.10.0'
+            );
 
             // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 2 seconds,
             // otherwise this test will stall for 5 minutes

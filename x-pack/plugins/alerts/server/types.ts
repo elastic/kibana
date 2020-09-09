@@ -112,7 +112,7 @@ export interface RawAlertAction extends SavedObjectAttributes {
 }
 
 export interface AlertMeta extends SavedObjectAttributes {
-  versionLastmodified?: string;
+  versionApiKeyLastmodified?: string;
 }
 
 export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
