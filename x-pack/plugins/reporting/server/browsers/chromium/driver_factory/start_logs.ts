@@ -97,7 +97,14 @@ export const browserStartLogs = (
     })
   );
 
-  const log$ = fromEvent(rl, 'line').pipe(tap((log) => logger.info(`Chromium log "${log}"`)));
+  const browserProcessLogger = logger.clone(['chromium-stderr']);
+  const log$ = fromEvent(rl, 'line').pipe(
+    tap((message: unknown) => {
+      if (typeof message === 'string') {
+        browserProcessLogger.info(message);
+      }
+    })
+  );
 
   // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
   // logs as sometimes it's "bind" successfully for remote connections, but later emit
