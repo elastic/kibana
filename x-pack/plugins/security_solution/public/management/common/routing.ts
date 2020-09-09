@@ -90,7 +90,10 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-const isDefaultOrMissing = (value: number | undefined, defaultValue: number) => {
+const isDefaultOrMissing = (
+  value: number | string | undefined,
+  defaultValue: number | undefined
+) => {
   return value === undefined || value === defaultValue;
 };
 
@@ -105,13 +108,19 @@ const normalizeListPaginationParams = (
       ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
         ? { page_size: params.page_size }
         : {}),
+      ...(!isDefaultOrMissing(params.show, undefined) ? { show: params.show } : {}),
     };
   } else {
     return {};
   }
 };
 
-const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+/**
+ * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
+ * @param query
+ * @param key
+ */
+export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
   const value = query[key];
 
   return Array.isArray(value) ? value[value.length - 1] : value;
