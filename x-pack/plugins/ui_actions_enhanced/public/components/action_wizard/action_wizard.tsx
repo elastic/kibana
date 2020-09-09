@@ -30,7 +30,7 @@ import {
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
-import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common/persistable_state';
+import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext

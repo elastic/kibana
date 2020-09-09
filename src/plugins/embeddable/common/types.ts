@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SerializableState } from '../../kibana_utils/common/persistable_state';
+import { SerializableState } from '../../kibana_utils/common';
 import { Query, TimeRange } from '../../data/common/query';
 import { Filter } from '../../data/common/es_query/filters';
 

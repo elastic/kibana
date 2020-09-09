@@ -18,7 +18,7 @@
  */
 
 import { UiComponent } from '../../common/ui/ui_component';
-import { SerializableState } from '../../common/persistable_state';
+import { SerializableState } from '../../common';
 
 /**
  * Represents something that can be configured by user using UI.

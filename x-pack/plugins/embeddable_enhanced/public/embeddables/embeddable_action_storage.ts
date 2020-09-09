@@ -14,7 +14,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common/persistable_state';
+import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {

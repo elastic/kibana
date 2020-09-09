@@ -21,7 +21,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../kibana_utils/common/persistable_state';
+} from '../../kibana_utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;

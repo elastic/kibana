@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { identity } from 'lodash';
+
 import { SavedObjectAttributes } from 'kibana/public';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -49,7 +49,7 @@ export const defaultEmbeddableFactoryProvider = <
     getDisplayName: def.getDisplayName.bind(def),
     savedObjectMetaData: def.savedObjectMetaData,
     telemetry: def.telemetry || (() => ({})),
-    inject: def.inject || identity,
+    inject: def.inject || ((state: EmbeddableInput) => state),
     extract: def.extract || ((state: EmbeddableInput) => ({ state, references: [] })),
   };
   return factory;

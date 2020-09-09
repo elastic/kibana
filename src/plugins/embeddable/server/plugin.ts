@@ -31,7 +31,7 @@ import {
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { SerializableState } from '../../kibana_utils/common/persistable_state';
+import { SerializableState } from '../../kibana_utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export interface EmbeddableSetup {
@@ -82,12 +82,12 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;
-    let refs = baseResponse.references;
+    const refs = baseResponse.references;
 
     if (factory) {
       const factoryResponse = factory.extract(state);
       updatedInput = factoryResponse.state;
-      refs = refs.concat(factoryResponse.references);
+      refs.push(...factoryResponse.references);
     }
 
     updatedInput.enhancements = {};
@@ -96,7 +96,7 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
       const enhancementResult = this.getEnhancement(key).extract(
         enhancements[key] as SerializableState
       );
-      refs = refs.concat(enhancementResult.references);
+      refs.push(...enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });
 

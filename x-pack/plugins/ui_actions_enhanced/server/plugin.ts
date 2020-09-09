@@ -14,7 +14,7 @@ import {
   ActionFactoryDefinition,
   DynamicActionsState,
 } from './types';
-import { PersistableState } from '../../../../src/plugins/kibana_utils/common/persistable_state';
+import { PersistableState } from '../../../../src/plugins/kibana_utils/common';
 
 export interface SetupContract {
   registerActionFactory: any;

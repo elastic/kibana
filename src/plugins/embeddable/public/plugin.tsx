@@ -81,7 +81,6 @@ export interface EmbeddableSetup {
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
-// @ts-ignore
 export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
@@ -220,12 +219,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;
-    let refs = baseResponse.references;
+    const refs = baseResponse.references;
 
     if (factory) {
       const factoryResponse = factory.extract(state);
       updatedInput = factoryResponse.state;
-      refs = refs.concat(factoryResponse.references);
+      refs.push(...factoryResponse.references);
     }
 
     updatedInput.enhancements = {};
@@ -234,7 +233,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       const enhancementResult = this.getEnhancement(key).extract(
         enhancements[key] as SerializableState
       );
-      refs = refs.concat(enhancementResult.references);
+      refs.push(...enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });
 

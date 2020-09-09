@@ -8,7 +8,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../../../src/plugins/kibana_utils/common/persistable_state';
+} from '../../../../src/plugins/kibana_utils/common';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedAction<Config extends SerializableState = SerializableState> = {

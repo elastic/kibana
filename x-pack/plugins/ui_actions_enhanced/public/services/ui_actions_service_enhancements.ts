@@ -187,7 +187,7 @@ export class UiActionsServiceEnhancements
               state: event,
               references: [],
             };
-        result.references.forEach((r) => references.push(r));
+        references.push(...result.references);
         return result.state;
       }),
     };

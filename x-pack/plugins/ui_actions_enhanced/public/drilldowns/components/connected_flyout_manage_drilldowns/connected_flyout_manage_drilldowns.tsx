@@ -31,7 +31,7 @@ import {
   SerializedEvent,
 } from '../../../dynamic_actions';
 import { ActionFactoryPlaceContext } from '../types';
-import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common/persistable_state';
+import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext

@@ -15,7 +15,7 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
 import {
   PersistableStateDefinition,
   SerializableState,
-} from '../../../../../src/plugins/kibana_utils/common/persistable_state';
+} from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
