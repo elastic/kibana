@@ -9,11 +9,8 @@ import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
 
-import {
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -111,10 +108,7 @@ export interface DataFrameAnalyticsListRow {
   checkpointing: object;
   config: DataFrameAnalyticsConfig;
   id: DataFrameAnalyticsId;
-  job_type:
-    | ANALYSIS_CONFIG_TYPE.CLASSIFICATION
-    | ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
-    | ANALYSIS_CONFIG_TYPE.REGRESSION;
+  job_type: DataFrameAnalyticsType;
   mode: string;
   state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;

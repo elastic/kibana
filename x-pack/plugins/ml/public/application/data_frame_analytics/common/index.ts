@@ -14,7 +14,6 @@ export {
   UpdateDataFrameAnalyticsConfig,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
-  ANALYSIS_CONFIG_TYPE,
   OUTLIER_ANALYSIS_METHOD,
   RegressionEvaluateResponse,
   getValuesFromResponse,
@@ -26,6 +25,7 @@ export {
   SEARCH_SIZE,
   defaultSearchQuery,
   SearchQuery,
+  ANALYSIS_CONFIG_TYPE,
 } from './analytics';
 
 export {

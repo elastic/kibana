@@ -16,9 +16,9 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
-import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { DataFrameAnalyticsType } from '../../../../../common/types/data_frame_analytics';
 
 export const analyticsJobExplorationRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/data_frame_analytics/exploration',
@@ -63,7 +63,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     return <></>;
   }
   const jobId: string = globalState.ml.jobId;
-  const analysisType: ANALYSIS_CONFIG_TYPE = globalState.ml.analysisType;
+  const analysisType: DataFrameAnalyticsType = globalState.ml.analysisType;
 
   return (
     <PageLoader context={context}>

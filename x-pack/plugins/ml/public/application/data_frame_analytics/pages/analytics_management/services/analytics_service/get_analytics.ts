@@ -10,11 +10,7 @@ import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import {
-  ANALYSIS_CONFIG_TYPE,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-} from '../../../../common';
+import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -25,6 +21,7 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -143,7 +140,7 @@ export const getAnalyticsFactory = (
               checkpointing: {},
               config,
               id: config.id,
-              job_type: Object.keys(config.analysis)[0] as ANALYSIS_CONFIG_TYPE,
+              job_type: Object.keys(config.analysis)[0] as DataFrameAnalyticsType,
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,

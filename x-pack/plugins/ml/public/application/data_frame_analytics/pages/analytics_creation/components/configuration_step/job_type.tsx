@@ -8,7 +8,7 @@ import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 

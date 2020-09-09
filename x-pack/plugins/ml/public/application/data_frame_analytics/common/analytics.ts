@@ -15,17 +15,12 @@ import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
   ClassificationAnalysis,
+  DataFrameAnalyticsType,
   OutlierAnalysis,
   RegressionAnalysis,
 } from '../../../../common/types/data_frame_analytics';
-
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 export type IndexPattern = string;
-
-export enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-}
 
 export enum ANALYSIS_ADVANCED_FIELDS {
   ETA = 'eta',
@@ -492,7 +487,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalyticsType;
   requiresKeyword?: boolean;
 }
 
@@ -607,3 +602,5 @@ export const loadDocsCount = async ({
     };
   }
 };
+
+export { ANALYSIS_CONFIG_TYPE };
