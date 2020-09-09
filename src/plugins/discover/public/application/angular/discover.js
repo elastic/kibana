@@ -948,9 +948,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource } = $scope;
+    const indexPatternFields = indexPattern.getComputedFields();
+    const fields = [...$scope.state.columns, ...indexPatternFields.docvalueFields];
     searchSource
       .setField('index', $scope.indexPattern)
-      .setField('fields', $scope.state.columns)
+      .setField('fields', fields)
       .setField('source', true)
       .setField('size', $scope.opts.sampleSize)
       .setField(
