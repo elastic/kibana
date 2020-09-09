@@ -6,7 +6,12 @@
 
 import rison from 'rison-node';
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import {
   MVT_GETTILE_API_PATH,
@@ -16,6 +21,10 @@ import {
 import { getGridTile, getTile } from './get_tile';
 
 const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
+
+// context: RequestHandlerContext,
+//   request: KibanaRequest<P, Q, B, Method>,
+//   response: ResponseFactory
 
 export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -32,7 +41,11 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         }),
       },
     },
-    async (context, request, response) => {
+    async (
+      context: RequestHandlerContext,
+      request: KibanaRequest,
+      response: KibanaResponseFactory
+    ) => {
       const { query } = request;
       const requestBodyDSL = rison.decode(query.requestBody);
 
@@ -89,7 +102,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
   );
 }
 
-function sendResponse(response, tile) {
+function sendResponse(response: KibanaResponseFactory, tile: unknown) {
   const headers = {
     'content-disposition': 'inline',
     'content-length': tile ? `${tile.length}` : 0,
@@ -109,8 +122,8 @@ function sendResponse(response, tile) {
   }
 }
 
-function makeCallElasticsearch(context) {
+function makeCallElasticsearch(context: RequestHandlerContext) {
   return async (type: string, ...args: any[]): Promise<unknown> => {
-    return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
+    return context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
   };
 }

@@ -45,6 +45,7 @@ export class ESAggField implements IESAggField {
     aggType: AGG_TYPE;
     esDocField?: IField;
     origin: FIELD_ORIGIN;
+    canReadFromGeoJson: boolean;
   }) {
     this._source = source;
     this._origin = origin;
@@ -142,7 +143,7 @@ export class ESAggField implements IESAggField {
     return this._canReadFromGeoJson;
   }
 
-  getMbPropertyName(styleName): string {
+  getMbPropertyName(styleName: string): string {
     return AbstractField.getMbPropertyName(this, styleName);
   }
 }
@@ -151,7 +152,7 @@ export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
   source: IESAggSource,
   origin: FIELD_ORIGIN,
-  canReadFromGeoJson?: boolean = true
+  canReadFromGeoJson: boolean = true
 ): IESAggField[] {
   const aggField = new ESAggField({
     label: aggDescriptor.label,

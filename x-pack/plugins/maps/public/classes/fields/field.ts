@@ -121,7 +121,7 @@ export class AbstractField implements IField {
     return true;
   }
 
-  getMbPropertyName(styleName): string {
+  getMbPropertyName(styleName: string): string {
     return AbstractField.getMbPropertyName(this, styleName);
   }
 }

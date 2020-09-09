@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESAggField, AbstractField } from './es_agg_field';
+import { IESAggField } from './es_agg_field';
 import { IVectorSource } from '../sources/vector_source';
 // @ts-ignore
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
+import { AbstractField } from './field';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
   private readonly _canReadFromGeoJson: boolean;
 
-  constructor(topTermAggField: IESAggField, canReadFromGeoJson?: boolean = true) {
+  constructor(topTermAggField: IESAggField, canReadFromGeoJson: boolean = true) {
     this._topTermAggField = topTermAggField;
     this._canReadFromGeoJson = canReadFromGeoJson;
   }
