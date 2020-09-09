@@ -60,7 +60,8 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
   );
 }
 
-export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
+export class BookEmbeddable
+  extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
@@ -70,11 +71,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
 
   constructor(
     initialInput: BookEmbeddableInput,
-    private attributeService: AttributeService<
-      BookSavedObjectAttributes,
-      BookByValueInput,
-      BookByReferenceInput
-    >,
+    private attributeService: AttributeService<BookSavedObjectAttributes>,
     {
       parent,
     }: {
@@ -98,18 +95,21 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
     });
   }
 
-  inputIsRefType = (input: BookEmbeddableInput): input is BookByReferenceInput => {
+  readonly inputIsRefType = (input: BookEmbeddableInput): input is BookByReferenceInput => {
     return this.attributeService.inputIsRefType(input);
   };
 
-  getInputAsValueType = async (): Promise<BookByValueInput> => {
+  readonly getInputAsValueType = async (): Promise<BookByValueInput> => {
     const input = this.attributeService.getExplicitInputFromEmbeddable(this);
     return this.attributeService.getInputAsValueType(input);
   };
 
-  getInputAsRefType = async (): Promise<BookByReferenceInput> => {
+  readonly getInputAsRefType = async (): Promise<BookByReferenceInput> => {
     const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsRefType(input, { showSaveModal: true });
+    return this.attributeService.getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
   };
 
   public render(node: HTMLElement) {

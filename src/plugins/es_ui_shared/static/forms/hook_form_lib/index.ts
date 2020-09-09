@@ -19,7 +19,7 @@
 
 // Only export the useForm hook. The "useField" hook is for internal use
 // as the consumer of the library must use the <UseField /> component
-export { useForm } from './hooks';
+export { useForm, useFormData } from './hooks';
 export { getFieldValidityAndErrorMessage } from './helpers';
 
 export * from './form_context';

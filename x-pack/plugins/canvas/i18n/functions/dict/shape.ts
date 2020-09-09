@@ -12,7 +12,7 @@ import { SVG } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
   help: i18n.translate('xpack.canvas.functions.shapeHelpText', {
-    defaultMessage: 'Create a shape.',
+    defaultMessage: 'Creates a shape.',
   }),
   args: {
     shape: i18n.translate('xpack.canvas.functions.shape.args.shapeHelpText', {

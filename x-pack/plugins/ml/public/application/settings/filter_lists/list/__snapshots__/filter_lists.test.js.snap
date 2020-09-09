@@ -7,6 +7,7 @@ exports[`Filter Lists renders a list of filters 1`] = `
   />
   <EuiPage
     className="ml-list-filter-lists"
+    data-test-subj="mlPageFilterListManagement"
   >
     <EuiPageBody>
       <EuiPageContent
