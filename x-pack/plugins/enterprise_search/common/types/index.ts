@@ -26,3 +26,25 @@ export interface IConfiguredLimits {
   appSearch: IAppSearchConfiguredLimits;
   workplaceSearch: IWorkplaceSearchConfiguredLimits;
 }
+
+export interface IMetaPage {
+  current: number;
+  size: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface IMeta {
+  page: IMetaPage;
+}
+
+export interface IMetaPage {
+  current: number;
+  size: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface IMeta {
+  page: IMetaPage;
+}
