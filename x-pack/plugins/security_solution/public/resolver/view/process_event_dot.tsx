@@ -364,8 +364,22 @@ const UnstyledProcessEventDot = React.memo(
               stroke={strokeColor}
               width={markerSize * 1.5}
               height={markerSize * 1.5}
-              className={`backing ${isOrigin ? 'origin' : ''}`}
+              className="backing"
             />
+            {isOrigin && (
+              <use
+                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                fill="transparent" // Transparent so we don't double up on the default hover
+                x={-15.35}
+                y={-15.35}
+                stroke={strokeColor}
+                strokeOpacity={0.35}
+                strokeDashoffset={0}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="origin"
+              />
+            )}
             <use
               role="presentation"
               xlinkHref={cubeSymbol}
@@ -400,10 +414,13 @@ const UnstyledProcessEventDot = React.memo(
             isDisplaying={isShowingDescriptionText}
           >
             {isOrigin && (
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.resolver.analyzedEvent"
-                defaultMessage="Analyzed Event · "
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.resolver.analyzedEvent"
+                  defaultMessage="Analyzed Event"
+                />
+                {' · '}
+              </>
             )}
             {descriptionText}
           </StyledDescriptionText>
@@ -506,17 +523,6 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     transition-property: stroke-dashoffset;
     transition-duration: 1s;
     stroke-dashoffset: 0;
-  }
-
-  &[aria-current] .origin {
-    transition-property: stroke-opacity;
-    transition-duration: 0.5s;
-    stroke-opacity: 1;
-  }
-
-  &:not([aria-current]) .origin {
-    stroke-opacity: 0.2;
-    stroke-dashoffset: 100;
   }
 
   & .euiButton {
