@@ -13,7 +13,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiLink } from '@elastic/eui';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { SavedViewCreateModal } from './create_modal';
@@ -162,13 +162,15 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                       id="xpack.infra.savedView.currentView"
                     />
                   </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    {currentView
-                      ? currentView.name
-                      : i18n.translate('xpack.infra.savedView.unknownView', {
-                          defaultMessage: 'No view selected',
-                        })}
-                  </EuiDescriptionListDescription>
+                  <EuiLink>
+                    <EuiDescriptionListDescription>
+                      {currentView
+                        ? currentView.name
+                        : i18n.translate('xpack.infra.savedView.unknownView', {
+                            defaultMessage: 'No view selected',
+                          })}
+                    </EuiDescriptionListDescription>
+                  </EuiLink>
                 </EuiDescriptionList>
               </EuiFlexItem>
             </EuiFlexGroup>
