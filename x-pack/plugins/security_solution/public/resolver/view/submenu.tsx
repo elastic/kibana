@@ -9,7 +9,7 @@
 /* eslint-disable react/display-name */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 import {
   EuiI18nNumber,
   EuiButton,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { Matrix3 } from '../types';
+import { useResolverTheme } from './assets';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -55,12 +56,14 @@ export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
  */
 const DetailHostButton = React.memo(({hasMenu, menuIsOpen, action, count, title, buttonBorderColor, nodeID}: {hasMenu: boolean, menuIsOpen?: boolean, action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>)=>void, count?: number, title: string, buttonBorderColor: ButtonColor, nodeID: string})=>{
   const hasIcon = hasMenu ?? false;
-  const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
+  const iconType = menuIsOpen === true ? 'minusInCircleFilled' : 'plusInCircleFilled';
   return (
     <EuiButton
       onClick={action}
       iconType={hasIcon ? iconType : 'none'}
-      color={buttonBorderColor}
+      fill={true}
+      color={'secondary'}
+      style={{height: 'fit-content', lineHeight: 1, padding: '.25em', fontSize: '.85rem'}}
       size="s"
       iconSide="right"
       tabIndex={-1}
@@ -148,6 +151,14 @@ const NodeSubMenuComponents = React.memo(
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
 
+    const { colorMap: {full: pillBorderStroke, resolverBackground: pillFill} } = useResolverTheme();
+    const listStylesFromTheme = useMemo(()=>{
+      return {
+        border: `1px solid ${pillBorderStroke}`,
+        backgroundColor: pillFill,
+      }
+    },[pillBorderStroke, pillFill]);
+
     if (!optionsWithActions) {
       /**
        * When called with a `menuAction`
@@ -182,11 +193,11 @@ const NodeSubMenuComponents = React.memo(
           buttonBorderColor={buttonBorderColor} 
           nodeID={nodeID}
         />
-        <ul role="menu" className={className + ' options'} aria-hidden={menuIsOpen} aria-owns={nodeID}>
+        {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={menuIsOpen} aria-owns={nodeID}>
           { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
-            return (<li className="item"><button role="menuitem">{opt.prefix} {opt.optionTitle}</button></li>)
+            return (<li className="item" style={listStylesFromTheme}><button role="menuitem" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
           })}
-        </ul>
+        </ul>) : null}
       </>
     );
   }
@@ -200,25 +211,23 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   flex-flow: column;
 
   &.options {
-    font-size: .8em;
+    font-size: .8rem;
     display: flex;
     flex-flow: row wrap;
     background: transparent;
     position: absolute;
-    top: 6em;
+    top: 6.5em;
     contain: content;
-    width: 13em;
+    width: 12em;
     z-index: 2;
   }
 
   &.options .item {
     margin: .25ch .35ch .35ch 0;
     padding: .25em;
-    border: 1px solid red;
     height: fit-content;
     width: fit-content;
     line-height: .8;
-    background-color: ${(props) => props.buttonFill};
   }
 
   &.options .item button {
