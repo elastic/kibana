@@ -32,7 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('file based', function () {
+  // Failing ES snapshot promotion, see #77069
+  describe.skip('file based', function () {
     this.tags(['mlqa']);
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
