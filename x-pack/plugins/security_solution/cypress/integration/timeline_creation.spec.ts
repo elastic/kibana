@@ -56,7 +56,9 @@ describe('Timelines', () => {
     cy.route('POST', '**/api/solutions/security/graphql').as('persistTimeline');
 
     populateTimeline();
+    addFilter(timeline.filter);
 
+    cy.wait('@persistTimeline');
     cy.wait('@persistTimeline');
     cy.wait('@persistTimeline');
 
@@ -74,7 +76,6 @@ describe('Timelines', () => {
     addDescriptionToTimeline(timeline.description);
     addNotesToTimeline(timeline.notes);
     closeNotes();
-    addFilter(timeline.filter);
     markAsFavorite();
     waitForTimelineChanges();
     createNewTimeline();
