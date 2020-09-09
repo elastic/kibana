@@ -18,7 +18,9 @@ import {
   euiDragDropReorder,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiIcon,
   EuiFormRow,
+  EuiLink,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { updateColumnParam } from '../../../state_helpers';
@@ -236,12 +238,15 @@ export const FilterList = ({
       updateFilters(items);
     }
   };
+
   return (
     <>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
           {localFilters?.map((filter: FilterValue, idx: number) => {
             const { input, label, id } = filter;
+            const queryIsValid = isQueryValid(input, indexPattern);
+
             return (
               <EuiDraggable
                 spacing="m"
@@ -252,7 +257,24 @@ export const FilterList = ({
               >
                 {(provided) => (
                   <EuiPanel paddingSize="none">
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          size="s"
+                          color={queryIsValid ? 'subdued' : 'danger'}
+                          type={queryIsValid ? 'grab' : 'alert'}
+                          title={
+                            queryIsValid
+                              ? i18n.translate('xpack.lens.indexPattern.filters.dragToReorder', {
+                                  defaultMessage: 'Drag to reorder',
+                                })
+                              : i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
+                                  defaultMessage: 'This query is invalid',
+                                })
+                          }
+                        />
+                      </EuiFlexItem>
                       <EuiFlexItem
                         grow={true}
                         data-test-subj="indexPattern-filters-existingFilterContainer"
@@ -263,19 +285,17 @@ export const FilterList = ({
                           indexPattern={indexPattern}
                           filter={filter}
                           Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                            <EuiButtonEmpty
+                            <EuiLink
                               className="lnsFiltersOperation__popoverButton"
                               data-test-subj="indexPattern-filters-existingFilterTrigger"
-                              size="xs"
                               onClick={onClick}
-                              color={isQueryValid(input, indexPattern) ? 'text' : 'danger'}
-                              iconType={isQueryValid(input, indexPattern) ? 'grab' : 'alert'}
-                              contentProps={{
-                                className: 'lnsFiltersOperation__popoverButtonContent',
-                              }}
+                              color={queryIsValid ? 'text' : 'danger'}
+                              title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
+                                defaultMessage: 'Click to edit',
+                              })}
                             >
                               {label || input.query || defaultLabel}
-                            </EuiButtonEmpty>
+                            </EuiLink>
                           )}
                           setFilter={(f: FilterValue) => {
                             onChangeValue(f.id, f.input, f.label);
@@ -292,11 +312,14 @@ export const FilterList = ({
                             onRemoveFilter(filter.id);
                           }}
                           aria-label={i18n.translate(
-                            'xpack.lens.indexPattern.filters.deleteSearchQuery',
+                            'xpack.lens.indexPattern.filters.removeSearchQuery',
                             {
-                              defaultMessage: 'Delete search query',
+                              defaultMessage: 'Remove search query',
                             }
                           )}
+                          title={i18n.translate('xpack.lens.indexPattern.filters.remove', {
+                            defaultMessage: 'Remove',
+                          })}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
