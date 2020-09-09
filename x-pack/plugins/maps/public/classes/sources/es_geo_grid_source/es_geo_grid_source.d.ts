@@ -24,7 +24,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
 
-  private readonly _descriptor: ESGeoGridSourceDescriptor;
+  readonly _descriptor: ESGeoGridSourceDescriptor;
 
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;

@@ -6,9 +6,8 @@
 
 import { IESAggField } from './es_agg_field';
 import { IVectorSource } from '../sources/vector_source';
-// @ts-ignore
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
+import { TOP_TERM_PERCENTAGE_SUFFIX, VECTOR_STYLES } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { AbstractField } from './field';
 
@@ -87,7 +86,7 @@ export class TopTermPercentageField implements IESAggField {
     return this._canReadFromGeoJson;
   }
 
-  getMbPropertyName(styleName: string): string {
+  getMbPropertyName(styleName: VECTOR_STYLES): string {
     return AbstractField.getMbPropertyName(this, styleName);
   }
 }

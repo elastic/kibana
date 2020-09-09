@@ -10,7 +10,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IVectorSource } from '../sources/vector_source';
 import { ESDocField } from './es_doc_field';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { getField, addFieldToDSL } from '../../../common/elasticsearch_util';
 import { TopTermPercentageField } from './top_term_percentage_field';
@@ -143,7 +143,7 @@ export class ESAggField implements IESAggField {
     return this._canReadFromGeoJson;
   }
 
-  getMbPropertyName(styleName: string): string {
+  getMbPropertyName(styleName: VECTOR_STYLES): string {
     return AbstractField.getMbPropertyName(this, styleName);
   }
 }
