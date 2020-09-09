@@ -48,7 +48,6 @@ export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObject
 );
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
-  esShardTimeout: number;
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
