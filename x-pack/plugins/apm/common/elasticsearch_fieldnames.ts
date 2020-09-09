@@ -31,7 +31,7 @@ export const USER_AGENT_NAME = 'user_agent.name';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
-export const OBSERVER_NAME = 'observer.name';
+export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';

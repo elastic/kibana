@@ -101,10 +101,7 @@ export const Header = ({
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
-            defaultMessage="From here you can delete saved objects, such as saved searches.
-            You can also edit the raw data of saved objects.
-            Typically objects are only modified via their associated application,
-            which is probably what you should use instead of this screen."
+            defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
           />
         </EuiTextColor>
       </p>
