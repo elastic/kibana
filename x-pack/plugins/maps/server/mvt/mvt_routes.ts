@@ -17,14 +17,12 @@ import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
+  ES_GEO_FIELD_TYPE,
+  RENDER_AS,
 } from '../../common/constants';
 import { getGridTile, getTile } from './get_tile';
 
 const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
-
-// context: RequestHandlerContext,
-//   request: KibanaRequest<P, Q, B, Method>,
-//   response: ResponseFactory
 
 export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -43,21 +41,21 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
     },
     async (
       context: RequestHandlerContext,
-      request: KibanaRequest,
+      request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
       const { query } = request;
-      const requestBodyDSL = rison.decode(query.requestBody);
+      const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getTile({
         logger,
         callElasticsearch: makeCallElasticsearch(context),
-        geometryFieldName: query.geometryFieldName,
-        x: query.x,
-        y: query.y,
-        z: query.z,
-        index: query.index,
-        requestBody: requestBodyDSL,
+        geometryFieldName: query.geometryFieldName as string,
+        x: query.x as number,
+        y: query.y as number,
+        z: query.z as number,
+        index: query.index as string,
+        requestBody: requestBodyDSL as any,
       });
 
       return sendResponse(response, tile);
@@ -80,21 +78,25 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         }),
       },
     },
-    async (context, request, response) => {
+    async (
+      context: RequestHandlerContext,
+      request: KibanaRequest<unknown, Record<string, any>, unknown>,
+      response: KibanaResponseFactory
+    ) => {
       const { query } = request;
-      const requestBodyDSL = rison.decode(query.requestBody);
+      const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getGridTile({
         logger,
         callElasticsearch: makeCallElasticsearch(context),
-        geometryFieldName: query.geometryFieldName,
-        x: query.x,
-        y: query.y,
-        z: query.z,
-        index: query.index,
-        requestBody: requestBodyDSL,
-        requestType: query.requestType,
-        geoFieldType: query.geoFieldType,
+        geometryFieldName: query.geometryFieldName as string,
+        x: query.x as number,
+        y: query.y as number,
+        z: query.z as number,
+        index: query.index as string,
+        requestBody: requestBodyDSL as any,
+        requestType: query.requestType as RENDER_AS,
+        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
       });
 
       return sendResponse(response, tile);
@@ -102,10 +104,10 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, tile: unknown) {
+function sendResponse(response: KibanaResponseFactory, tile: any) {
   const headers = {
     'content-disposition': 'inline',
-    'content-length': tile ? `${tile.length}` : 0,
+    'content-length': tile ? `${tile.length}` : `0`,
     'Content-Type': 'application/x-protobuf',
     'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
   };

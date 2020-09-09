@@ -31,6 +31,7 @@ const BASE_OPTIONS = [
 ];
 
 export function ResolutionEditor({ resolution, onChange, includeSuperFine }) {
+  console.log('resoliution editor', resolution, onChange, includeSuperFine);
   const options = [...BASE_OPTIONS];
 
   if (includeSuperFine) {

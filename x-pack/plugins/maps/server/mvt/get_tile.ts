@@ -23,7 +23,6 @@ import {
 
 import { hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
-// @ts-expect-error
 import { convertRegularRespToGeoJson } from '../../common/elasticsearch_util';
 
 interface ESBounds {
@@ -307,7 +306,7 @@ function tile2lat(y: number, z: number): number {
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
 
-function tileToESBbox(x, y, z) {
+function tileToESBbox(x: number, y: number, z: number) {
   const wLon = tile2long(x, z);
   const sLat = tile2lat(y + 1, z);
   const eLon = tile2long(x + 1, z);

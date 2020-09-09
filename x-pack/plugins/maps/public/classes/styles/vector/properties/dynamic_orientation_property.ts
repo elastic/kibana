@@ -6,14 +6,12 @@
 
 import { Map as MbMap } from 'mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getComputedFieldName } from '../style_util';
-import { VECTOR_STYLES } from '../../../../../common/constants';
 import { OrientationDynamicOptions } from '../../../../../common/descriptor_types';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty<OrientationDynamicOptions> {
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
-      const targetName = this._field.getMbPropertyName();
+      const targetName = this._field.getMbPropertyName(this.getStyleName());
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', 0);
