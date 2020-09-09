@@ -29,42 +29,35 @@ interface OsCgroupMetricsCollectorOptions {
 }
 
 export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetrics> {
-  // Used to prevent unnecessary file reads on systems not using cgroups
+  /**  Used to prevent unnecessary file reads on systems not using cgroups. */
   private noCgroupPresent = false;
+  private cpuPath?: string;
+  private cpuAcctPath?: string;
 
   constructor(private readonly options: OsCgroupMetricsCollectorOptions) {}
 
   public async collect(): Promise<OsCgroupMetrics> {
-    if (this.noCgroupPresent) {
-      return {};
-    }
-
     try {
-      const cgroups = await readControlGroups();
-      const cpuPath = this.options.cpuPath || cgroups[GROUP_CPU];
-      const cpuAcctPath = this.options.cpuAcctPath || cgroups[GROUP_CPUACCT];
-
-      // prevents undefined cgroup paths
-      if (!cpuPath || !cpuAcctPath) {
-        this.noCgroupPresent = true;
+      await this.initializePaths();
+      if (this.noCgroupPresent || !this.cpuAcctPath || !this.cpuPath) {
         return {};
       }
 
       const [cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat] = await Promise.all([
-        readCPUAcctUsage(cpuAcctPath),
-        readCPUFsPeriod(cpuPath),
-        readCPUFsQuota(cpuPath),
-        readCPUStat(cpuPath),
+        readCPUAcctUsage(this.cpuAcctPath),
+        readCPUFsPeriod(this.cpuPath),
+        readCPUFsQuota(this.cpuPath),
+        readCPUStat(this.cpuPath),
       ]);
 
       return {
         cpuacct: {
-          control_group: cpuAcctPath,
+          control_group: this.cpuAcctPath,
           usage_nanos: cpuAcctUsage,
         },
 
         cpu: {
-          control_group: cpuPath,
+          control_group: this.cpuPath,
           cfs_period_micros: cpuFsPeriod,
           cfs_quota_micros: cpuFsQuota,
           stat: cpuStat,
@@ -72,6 +65,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
       };
     } catch (err) {
       if (err.code === 'ENOENT') {
+        this.noCgroupPresent = true;
         return {};
       } else {
         throw err;
@@ -80,6 +74,29 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
   }
 
   public reset() {}
+
+  private async initializePaths() {
+    // Perform this setup lazily on the first collect call and then memoize the results.
+    // Makes the assumption this data doesn't change while the process is running.
+    if (this.cpuPath && this.cpuAcctPath) {
+      return;
+    }
+
+    // Only read the file if both options are undefined.
+    if (!this.options.cpuPath || !this.options.cpuAcctPath) {
+      const cgroups = await readControlGroups();
+      this.cpuPath = this.options.cpuPath || cgroups[GROUP_CPU];
+      this.cpuAcctPath = this.options.cpuAcctPath || cgroups[GROUP_CPUACCT];
+    } else {
+      this.cpuPath = this.options.cpuPath;
+      this.cpuAcctPath = this.options.cpuAcctPath;
+    }
+
+    // prevents undefined cgroup paths
+    if (!this.cpuPath || !this.cpuAcctPath) {
+      this.noCgroupPresent = true;
+    }
+  }
 }
 
 const CONTROL_GROUP_RE = new RegExp('\\d+:([^:]+):(/.*)');

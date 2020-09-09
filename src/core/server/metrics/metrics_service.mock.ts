@@ -76,8 +76,8 @@ type MetricsServiceContract = PublicMethodsOf<MetricsService>;
 
 const createMock = () => {
   const mocked: jest.Mocked<MetricsServiceContract> = {
-    setup: jest.fn().mockReturnValue(createSetupContractMock()),
-    start: jest.fn().mockReturnValue(createStartContractMock()),
+    setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
+    start: jest.fn().mockReturnValue(createInternalStartContractMock()),
     stop: jest.fn(),
   };
   return mocked;
