@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings/types';
+import { CasesConfigurationMapping } from '../case_mappings';
 
 export interface ServiceNowActionConnector {
   config: ServiceNowConfig;

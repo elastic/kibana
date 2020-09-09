@@ -16,9 +16,7 @@ import {
 
 import { isEmpty } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { CasesConfigurationMapping } from '../case_mappings/types';
-import { FieldMapping } from '../case_mappings/field_mapping';
-import { createDefaultMapping } from '../case_mappings/utils';
+import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
 
 import * as i18n from './translations';
 import { JiraActionConnector } from './types';
