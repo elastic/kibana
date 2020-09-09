@@ -187,7 +187,7 @@ export function PieComponent(
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
-      pattern: `0,0.${'0['.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
+      pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
 

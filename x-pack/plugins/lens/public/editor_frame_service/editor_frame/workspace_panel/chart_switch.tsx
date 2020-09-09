@@ -181,7 +181,7 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
-            icon: t.largeIcon || t.icon,
+            icon: t.icon,
           }))
         )
       ).map((visualizationType) => ({

@@ -103,7 +103,7 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           .map((t) => ({
             id: t.id,
             label: t.label,
-            iconType: t.largeIcon || 'empty',
+            iconType: t.icon || 'empty',
             'data-test-subj': `lnsXY_seriesType-${t.id}`,
           }))}
         idSelected={layer.seriesType}

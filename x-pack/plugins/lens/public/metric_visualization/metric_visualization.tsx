@@ -45,8 +45,7 @@ export const metricVisualization: Visualization<State> = {
   visualizationTypes: [
     {
       id: 'lnsMetric',
-      icon: 'visMetric',
-      largeIcon: LensIconChartMetric,
+      icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),

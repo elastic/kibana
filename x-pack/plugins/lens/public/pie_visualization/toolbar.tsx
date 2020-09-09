@@ -190,7 +190,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               defaultMessage: 'Maximum decimal places for percent',
             })}
             fullWidth
-            display="columnCompressed"
+            display="rowCompressed"
           >
             <EuiRange
               data-test-subj="indexPattern-dimension-formatDecimals"

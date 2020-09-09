@@ -417,8 +417,7 @@ export interface FramePublicAPI {
 
 export interface VisualizationType {
   id: string;
-  icon?: IconType;
-  largeIcon?: IconType;
+  icon: IconType;
   label: string;
 }
 

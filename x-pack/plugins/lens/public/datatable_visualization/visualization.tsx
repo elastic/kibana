@@ -32,7 +32,6 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     {
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
-      largeIcon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),

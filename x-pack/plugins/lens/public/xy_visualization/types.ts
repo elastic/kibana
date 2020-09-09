@@ -357,80 +357,70 @@ export type State = XYState;
 export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
-    icon: 'visBarVertical',
-    largeIcon: LensIconChartBar,
+    icon: LensIconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
   },
   {
     id: 'bar_horizontal',
-    icon: 'visBarHorizontal',
-    largeIcon: LensIconChartBarHorizontal,
+    icon: LensIconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'Horizontal bar',
     }),
   },
   {
     id: 'bar_stacked',
-    icon: 'visBarVerticalStacked',
-    largeIcon: LensIconChartBarStacked,
+    icon: LensIconChartBarStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked bar',
     }),
   },
   {
     id: 'bar_percentage_stacked',
-    icon: 'visBarVerticalStacked',
-    largeIcon: LensIconChartBarPercentage,
+    icon: LensIconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar percentage',
     }),
   },
   {
     id: 'bar_horizontal_stacked',
-    icon: 'visBarHorizontalStacked',
-    largeIcon: LensIconChartBarHorizontalStacked,
+    icon: LensIconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'Stacked horizontal bar',
     }),
   },
   {
     id: 'bar_horizontal_percentage_stacked',
-    icon: 'visBarHorizontalStacked',
-    largeIcon: LensIconChartBarHorizontalPercentage,
+    icon: LensIconChartBarHorizontalPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
       defaultMessage: 'Horizontal bar percentage',
     }),
   },
   {
     id: 'area',
-    icon: 'visArea',
-    largeIcon: LensIconChartArea,
+    icon: LensIconChartArea,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
   },
   {
     id: 'area_stacked',
-    icon: 'visAreaStacked',
-    largeIcon: LensIconChartAreaStacked,
+    icon: LensIconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked area',
     }),
   },
   {
     id: 'area_percentage_stacked',
-    icon: 'empty',
-    largeIcon: LensIconChartAreaPercentage,
+    icon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
     }),
   },
   {
     id: 'line',
-    icon: 'visLine',
-    largeIcon: LensIconChartLine,
+    icon: LensIconChartLine,
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),

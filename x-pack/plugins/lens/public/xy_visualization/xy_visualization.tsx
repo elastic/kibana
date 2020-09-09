@@ -18,6 +18,7 @@ import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -48,29 +49,27 @@ function getDescription(state?: State) {
 
   const visualizationType = getVisualizationType(state);
 
-  if (!state.layers.length) {
-    const preferredType = visualizationType as VisualizationType;
+  if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
-      icon: preferredType.largeIcon || preferredType.icon,
-      label: preferredType.label,
+      icon: LensIconChartBarHorizontal,
+      label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+        defaultMessage: 'Mixed horizontal bar',
+      }),
+    };
+  }
+
+  if (visualizationType === 'mixed') {
+    return {
+      icon: LensIconChartMixedXy,
+      label: i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
+        defaultMessage: 'Mixed XY',
+      }),
     };
   }
 
   return {
-    icon:
-      visualizationType === 'mixed'
-        ? LensIconChartMixedXy
-        : visualizationType.largeIcon || visualizationType.icon,
-    label:
-      visualizationType === 'mixed'
-        ? isHorizontalChart(state.layers)
-          ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-              defaultMessage: 'Mixed horizontal bar',
-            })
-          : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-              defaultMessage: 'Mixed XY',
-            })
-        : visualizationType.label,
+    icon: visualizationType.icon,
+    label: visualizationType.label,
   };
 }
 
@@ -251,7 +250,7 @@ export const xyVisualization: Visualization<State> = {
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.largeIcon;
+    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
   },
 
   renderLayerContextMenu(domElement, props) {
