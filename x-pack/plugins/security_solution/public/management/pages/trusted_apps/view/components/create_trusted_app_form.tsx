@@ -28,10 +28,10 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   };
 };
 
-interface NewTrustedAppFormProps {
+interface CreateTrustedAppFormProps {
   fullWidth?: boolean;
 }
-export const NewTrustedAppForm = memo<NewTrustedAppFormProps>(({ fullWidth = true }) => {
+export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(({ fullWidth = true }) => {
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
@@ -154,4 +154,4 @@ export const NewTrustedAppForm = memo<NewTrustedAppFormProps>(({ fullWidth = tru
   );
 });
 
-NewTrustedAppForm.displayName = 'NewTrustedAppForm';
+CreateTrustedAppForm.displayName = 'NewTrustedAppForm';

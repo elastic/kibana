@@ -18,10 +18,10 @@ import {
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NewTrustedAppForm } from './new_trusted_app_form';
+import { CreateTrustedAppForm } from './create_trusted_app_form';
 
 // FIXME:PT remove the ability o disable the close action on the flyout from props (controlled internally)
-export const NewTrustedAppFlyout = memo<EuiFlyoutProps>(({ onClose, ...flyoutProps }) => {
+export const CreateTrustedAppFlyout = memo<EuiFlyoutProps>(({ onClose, ...flyoutProps }) => {
   const handleCancelClick = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -41,7 +41,7 @@ export const NewTrustedAppFlyout = memo<EuiFlyoutProps>(({ onClose, ...flyoutPro
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <NewTrustedAppForm />
+        <CreateTrustedAppForm />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -67,4 +67,4 @@ export const NewTrustedAppFlyout = memo<EuiFlyoutProps>(({ onClose, ...flyoutPro
     </EuiFlyout>
   );
 });
-NewTrustedAppFlyout.displayName = 'NewTrustedAppFlyout';
+CreateTrustedAppFlyout.displayName = 'NewTrustedAppFlyout';

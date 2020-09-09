@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
-import { NewTrustedAppFlyout } from './components/new_trusted_app_flyout';
+import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
 import { getTrustedAppsListPath } from '../../../common/routing';
 import { useTrustedAppsSelector } from './hooks';
 import { getListCurrentShowValue, getListUrlSearchParams } from '../store/selectors';
@@ -62,7 +62,7 @@ export const TrustedAppsPage = memo(() => {
       }
       actions={addButton}
     >
-      {showAddFlout && <NewTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
+      {showAddFlout && <CreateTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
       <TrustedAppsList />
     </AdministrationListPage>
   );
