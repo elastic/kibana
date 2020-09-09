@@ -40,7 +40,6 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
