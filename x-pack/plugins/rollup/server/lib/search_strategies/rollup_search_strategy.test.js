@@ -125,7 +125,7 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('should return rollup data', async () => {
-      rollupResolvedData = Promise.resolve({ body: 'data' });
+      rollupResolvedData = Promise.resolve('data');
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
@@ -134,7 +134,7 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('should return empty object in case of exception', async () => {
-      rollupResolvedData = Promise.reject({ body: 'data' });
+      rollupResolvedData = Promise.reject('data');
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
