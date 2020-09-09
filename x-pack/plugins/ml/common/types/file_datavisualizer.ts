@@ -84,6 +84,9 @@ export interface Settings {
 }
 
 export interface Mappings {
+  _meta?: {
+    created_by: string;
+  };
   properties: {
     [key: string]: any;
   };
