@@ -13,7 +13,7 @@ object DefaultBuild : BuildType({
 
   artifactRules = """
     +:install/kibana/**/* => kibana-default.tar.gz
-    +:x-pack/test/*/plugins/*/target => plugins-default-test.tar.gz
+    +:x-pack/test/*/plugins/*/target/**/* => plugins-default-test.tar.gz
     target/kibana-*
   """.trimIndent()
 
