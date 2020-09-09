@@ -28,7 +28,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, interval, perPage = 10, fromPage = 1) {
+    getScoresByBucket(jobIds, earliestMs, latestMs, intervalMs, perPage = 10, fromPage = 1) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -116,7 +116,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval: interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                         extended_bounds: {
                           min: earliestMs,
@@ -492,7 +492,7 @@ export function resultsServiceProvider(mlApiServices) {
       influencerFieldValues,
       earliestMs,
       latestMs,
-      interval,
+      intervalMs,
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
@@ -615,7 +615,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                       },
                       aggs: {
@@ -1033,7 +1033,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Extra query object can be supplied, or pass null if no additional query.
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
-    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, interval) {
+    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -1074,7 +1074,7 @@ export function resultsServiceProvider(mlApiServices) {
                 eventRate: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 0,
                     extended_bounds: {
                       min: earliestMs,
@@ -1118,7 +1118,7 @@ export function resultsServiceProvider(mlApiServices) {
       timeFieldName,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     ) {
       return new Promise((resolve, reject) => {
         if (splitField === undefined) {
@@ -1187,7 +1187,7 @@ export function resultsServiceProvider(mlApiServices) {
                 byTime: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: AGGREGATION_MIN_DOC_COUNT,
                   },
                   aggs: {
@@ -1277,7 +1277,7 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
+    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1331,7 +1331,7 @@ export function resultsServiceProvider(mlApiServices) {
                 times: {
                   date_histogram: {
                     field: 'timestamp',
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 1,
                   },
                   aggs: {
