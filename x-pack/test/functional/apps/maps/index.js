@@ -28,7 +28,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup7');
+      this.tags('ciGroup9');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
       loadTestFile(require.resolve('./vector_styling'));
