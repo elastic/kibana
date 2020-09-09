@@ -13,7 +13,7 @@ import { useFormFieldMock } from '../../../../common/mock';
 describe('AddMitreThreat', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const field = useFormFieldMock();
+      const field = useFormFieldMock<unknown>({ value: [] });
 
       return (
         <AddMitreThreat
