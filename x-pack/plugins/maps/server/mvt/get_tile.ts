@@ -24,17 +24,7 @@ import {
 import { hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { convertRegularRespToGeoJson } from '../../common/elasticsearch_util';
-
-interface ESBounds {
-  top_left: {
-    lon: number;
-    lat: number;
-  };
-  bottom_right: {
-    lon: number;
-    lat: number;
-  };
-}
+import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
 
 export async function getGridTile({
   logger,
@@ -59,7 +49,7 @@ export async function getGridTile({
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
-  const esBbox = tileToESBbox(x, y, z);
+  const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
     try {
       // todo: needs to be different from geo_point and geo_shape
@@ -257,27 +247,6 @@ function tileToGeoJsonPolygon(x: number, y: number, z: number): Polygon {
         [wLon, sLat],
       ],
     ],
-  };
-}
-
-function tile2long(x: number, z: number): number {
-  return (x / Math.pow(2, z)) * 360 - 180;
-}
-
-function tile2lat(y: number, z: number): number {
-  const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, z);
-  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-}
-
-function tileToESBbox(x: number, y: number, z: number) {
-  const wLon = tile2long(x, z);
-  const sLat = tile2lat(y + 1, z);
-  const eLon = tile2long(x + 1, z);
-  const nLat = tile2lat(y, z);
-
-  return {
-    top_left: [wLon, nLat],
-    bottom_right: [eLon, sLat],
   };
 }
 
