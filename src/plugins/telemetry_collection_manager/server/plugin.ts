@@ -140,10 +140,9 @@ export class TelemetryCollectionManagerPlugin
       ? collection.esCluster.asScoped(request).callAsCurrentUser
       : collection.esCluster.callAsInternalUser;
     // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    // Problem: I need a Scopeable request to pass to asScoped.
     const esClient = config.unencrypted
-      ? collection.esClientGetter()!.asScoped(config.request).asCurrentUser
-      : collection.esClientGetter()!.asInternalUser;
+      ? collection.esClientGetter().asScoped(config.request).asCurrentUser
+      : collection.esClientGetter().asInternalUser;
 
     return { callCluster, start, end, usageCollection, esClient };
   }

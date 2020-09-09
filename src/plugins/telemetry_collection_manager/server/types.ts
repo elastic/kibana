@@ -140,7 +140,7 @@ export interface CollectionConfig<
   title: string;
   priority: number;
   esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined;
+  esClientGetter: () => IClusterClient;
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -156,6 +156,6 @@ export interface Collection<
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined;
+  esClientGetter: () => IClusterClient;
   title: string;
 }
