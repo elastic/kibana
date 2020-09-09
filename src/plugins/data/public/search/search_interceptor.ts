@@ -18,12 +18,25 @@
  */
 
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  throwError,
+  timer,
+  Subscription,
+  defer,
+  from,
+  Observable,
+  NEVER,
+} from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
-import { ISearchOptions } from './types';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ISearchOptions,
+  ES_SEARCH_STRATEGY,
+} from '../../common/search';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
 
@@ -67,17 +80,10 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
 
-  /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application  The `core.application` service
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+  /*
+   * @internal
    */
-  constructor(
-    protected readonly deps: SearchInterceptorDeps,
-    protected readonly requestTimeout?: number
-  ) {
+  constructor(protected readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
@@ -90,7 +96,6 @@ export class SearchInterceptor {
       .pipe(filter((count) => count === 0))
       .subscribe(this.hideToast);
   }
-
   /**
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
@@ -99,6 +104,9 @@ export class SearchInterceptor {
     return this.pendingCount$.asObservable();
   }
 
+  /**
+   * @internal
+   */
   protected runSearch(
     request: IEsSearchRequest,
     signal: AbortSignal,
@@ -128,11 +136,13 @@ export class SearchInterceptor {
   ): Observable<IEsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
-      if (options?.signal?.aborted) {
+      if (options?.abortSignal?.aborted) {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupTimers(options);
+      const { combinedSignal, cleanup } = this.setupAbortSignal({
+        abortSignal: options?.abortSignal,
+      });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
@@ -144,11 +154,20 @@ export class SearchInterceptor {
     });
   }
 
-  protected setupTimers(options?: ISearchOptions) {
+  /**
+   * @internal
+   */
+  protected setupAbortSignal({
+    abortSignal,
+    timeout,
+  }: {
+    abortSignal?: AbortSignal;
+    timeout?: number;
+  }) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timer(this.requestTimeout);
+    const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });
@@ -164,7 +183,7 @@ export class SearchInterceptor {
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      ...(options?.signal ? [options.signal] : []),
+      ...(abortSignal ? [abortSignal] : []),
     ];
 
     const combinedSignal = getCombinedSignal(signals);

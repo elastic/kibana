@@ -18,6 +18,8 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 import {
   LearnMoreLink,
   ActiveBadge,
@@ -28,9 +30,6 @@ import {
   NodeAllocation,
   MinAgeInput,
 } from '../components';
-
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const shrinkLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
   defaultMessage: 'Shrink index',
@@ -47,9 +46,8 @@ const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.force
   defaultMessage: 'Force merge data',
 });
 
-const warmProperty = propertyof<Phases>('warm');
-const phaseProperty = (propertyName: keyof WarmPhaseInterface) =>
-  propertyof<WarmPhaseInterface>(propertyName);
+const warmProperty: keyof Phases = 'warm';
+const phaseProperty = (propertyName: keyof WarmPhaseInterface) => propertyName;
 
 interface Props {
   setPhaseData: (key: keyof WarmPhaseInterface & string, value: boolean | string) => void;
