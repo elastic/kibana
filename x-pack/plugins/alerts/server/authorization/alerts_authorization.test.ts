@@ -9,12 +9,7 @@ import { securityMock } from '../../../../plugins/security/server/mocks';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import {
-  AlertsAuthorization,
-  ensureFieldIsSafeForQuery,
-  WriteOperations,
-  ReadOperations,
-} from './alerts_authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
@@ -607,9 +602,9 @@ describe('AlertsAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
-        // esKuery.fromKueryExpression(
-        `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-        // )
+        esKuery.fromKueryExpression(
+          `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        )
       );
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();

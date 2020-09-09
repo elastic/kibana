@@ -4,36 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { map, mapValues, remove, fromPairs, has } from 'lodash';
-import { KibanaRequest } from 'src/core/server';
-import { ALERTS_FEATURE_ID } from '../../common';
-import { AlertTypeRegistry } from '../types';
-import { SecurityPluginSetup } from '../../../security/server';
-import { RegistryAlertType } from '../alert_type_registry';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
-import { Space } from '../../../spaces/server';
+import { remove } from 'lodash';
+import { nodeTypes } from '../../../../../src/plugins/data/common';
+import { KueryNode } from '../../../../../src/plugins/data/server';
+import { RegistryAlertTypeWithAuth } from './alerts_authorization';
+
+export const is = (fieldName: string, value: string | KueryNode) =>
+  nodeTypes.function.buildNode('is', fieldName, value);
+
+export const or = ([first, ...args]: KueryNode[]): KueryNode =>
+  args.length ? nodeTypes.function.buildNode('or', [first, or(args)]) : first;
+
+export const and = ([first, ...args]: KueryNode[]): KueryNode =>
+  args.length ? nodeTypes.function.buildNode('and', [first, and(args)]) : first;
 
 export function asFiltersByAlertTypeAndConsumer(
   alertTypes: Set<RegistryAlertTypeWithAuth>
-): string[] {
-  return `(${Array.from(alertTypes)
-    .reduce<string[]>((filters, { id, authorizedConsumers }) => {
+): KueryNode {
+  return or(
+    Array.from(alertTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('alertTypeId', id);
       filters.push(
-        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:(${Object.keys(
-          authorizedConsumers
-        )
-          .map((consumer) => {
-            ensureFieldIsSafeForQuery('alertTypeId', id);
-            return consumer;
-          })
-          .join(' or ')}))`
+        and([
+          is(`alert.attributes.alertTypeId`, id),
+          or(
+            Object.keys(authorizedConsumers).map((consumer) => {
+              ensureFieldIsSafeForQuery('consumer', consumer);
+              return is(`alert.attributes.consumer`, consumer);
+            })
+          ),
+        ])
       );
       return filters;
     }, [])
-    .join(' or ')})`;
+  );
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
