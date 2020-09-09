@@ -16,7 +16,7 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./enable'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
-    loadTestFile(require.resolve('./get_alert_status'));
+    loadTestFile(require.resolve('./get_alert_instance_summary'));
     loadTestFile(require.resolve('./list_alert_types'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));
