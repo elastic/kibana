@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../kibana_services', () => {});
-
 import { parseTileKey, getTileBoundingBox, expandToTileBoundaries } from './geo_tile_utils';
 
 it('Should parse tile key', () => {
