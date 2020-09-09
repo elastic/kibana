@@ -67,11 +67,9 @@ export const createAndActivateRule = () => {
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
 };
 
-export const fillAboutRuleAndContinue = (
-  rule: CustomRule | MachineLearningRule | ThresholdRule
-) => {
-  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
+export const fillAboutRule = (rule: CustomRule | MachineLearningRule | ThresholdRule) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
 
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
@@ -85,12 +83,15 @@ export const fillAboutRuleAndContinue = (
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
   rule.referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
+    cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
 
   rule.falsePositivesExamples.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
+    cy.get(FALSE_POSITIVES_INPUT)
+      .eq(index)
+      .clear({ force: true })
+      .type(falsePositive, { force: true });
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
@@ -99,14 +100,22 @@ export const fillAboutRuleAndContinue = (
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_TECHNIQUES_INPUT)
+        .eq(index)
+        .clear({ force: true })
+        .type(`${technique}{enter}`, { force: true });
     });
 
     cy.get(MITRE_BTN).click({ force: true });
   });
 
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(rule.note, { force: true });
+};
 
+export const fillAboutRuleAndContinue = (
+  rule: CustomRule | MachineLearningRule | ThresholdRule
+) => {
+  fillAboutRule(rule);
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
 };
 

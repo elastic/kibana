@@ -67,12 +67,14 @@ import {
   expectScheduleStepForm,
   goToScheduleStepTab,
   goToActionsStepTab,
+  fillAboutRule,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 import { ACTIONS_THROTTLE_INPUT } from '../screens/create_new_rule';
+import { saveEditedRule, expectRuleDetails } from '../tasks/edit_rule';
 
 describe('Detection rules, custom', () => {
   before(() => {
@@ -251,5 +253,17 @@ describe('Deletes custom rules', () => {
     expectScheduleStepForm(existingRule);
     goToActionsStepTab();
     cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
+
+    goToAboutStepTab();
+
+    const editedRule = {
+      ...existingRule,
+      severity: 'Medium',
+      description: 'Edited Rule description',
+    };
+
+    fillAboutRule(editedRule);
+    saveEditedRule();
+    expectRuleDetails(editedRule);
   });
 });

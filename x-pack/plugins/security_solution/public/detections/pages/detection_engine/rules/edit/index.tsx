@@ -391,6 +391,7 @@ const EditRulePageComponent: FC = () => {
 
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="ruleEditSubmitButton"
               fill
               onClick={onSubmit}
               iconType="save"
