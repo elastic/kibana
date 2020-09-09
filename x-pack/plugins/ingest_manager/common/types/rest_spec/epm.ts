@@ -71,7 +71,7 @@ export interface InstallPackageResponse {
   response: AssetReference[];
 }
 
-export interface InstallTmpPackageResponse {
+export interface MessageResponse {
   response: string;
 }
 

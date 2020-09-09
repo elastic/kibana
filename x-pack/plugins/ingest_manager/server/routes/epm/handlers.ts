@@ -9,7 +9,7 @@ import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
-  InstallTmpPackageResponse,
+  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -190,7 +190,7 @@ export const installPackageByUploadHandler: RequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
-  const body: InstallTmpPackageResponse = {
+  const body: MessageResponse = {
     response: 'package upload was received ok, but not installed (not implemented yet)',
   };
   return response.ok({ body });
