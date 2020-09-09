@@ -52,7 +52,7 @@ export const getSummaryStatus = (
       // TODO: include URL to status page
       detail: `See the status page for more information`,
       meta: {
-        affectedServices: Object.fromEntries([...highestStatuses]),
+        affectedServices: Object.fromEntries(highestStatuses),
       },
     };
   }
