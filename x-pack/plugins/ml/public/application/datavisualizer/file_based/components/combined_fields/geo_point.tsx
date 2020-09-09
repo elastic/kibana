@@ -23,7 +23,7 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 
-import { CombinedField, COMBINED_FIELD_TYPES } from './types';
+import { CombinedField } from './types';
 import { createGeoPointCombinedField, isWithinLatRange, isWithinLonRange } from './utils';
 
 interface Props {

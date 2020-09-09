@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import uuid from 'uuid/v4';
-import { CombinedField, COMBINED_FIELD_TYPES } from './types';
+import { CombinedField } from './types';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];
 const COMMON_LON_NAMES = ['longitude', 'long', 'lon'];
@@ -20,18 +20,10 @@ export function getDefaultCombinedFields(results: unknown) {
   return combinedFields;
 }
 
-export function isGeoPointCombinedField(combinedField: CombinedField) {
-  return (
-    combinedField.type === COMBINED_FIELD_TYPES.GEO_POINT && combinedField.fieldNames.length === 2
-  );
-}
-
 export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: CombinedField[]) {
   const updatedMappings = { ...mappings };
   combinedFields.forEach((combinedField) => {
-    if (isGeoPointCombinedField(combinedField)) {
-      updatedMappings[combinedField.combinedFieldName] = { type: 'geo_point' };
-    }
+    updatedMappings[combinedField.combinedFieldName] = { type: combinedField.mappingType };
   });
   return updatedMappings;
 }
@@ -39,14 +31,16 @@ export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: C
 export function addCombinedFieldsToPipeline(pipeline: unknown, combinedFields: CombinedField[]) {
   const updatedPipeline = _.cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
-    if (isGeoPointCombinedField(combinedField)) {
-      updatedPipeline.processors.push({
-        set: {
-          field: combinedField.combinedFieldName,
-          value: `{{${combinedField.fieldNames[0]}}},{{${combinedField.fieldNames[1]}}}`,
-        },
-      });
-    }
+    updatedPipeline.processors.push({
+      set: {
+        field: combinedField.combinedFieldName,
+        value: combinedField.fieldNames
+          .map((fieldName) => {
+            return `{{${fieldName}}}`;
+          })
+          .join(combinedField.delimiter),
+      },
+    });
   });
   return updatedPipeline;
 }
@@ -77,7 +71,8 @@ export function createGeoPointCombinedField(
   geoPointField: string
 ): CombinedField {
   return {
-    type: COMBINED_FIELD_TYPES.GEO_POINT,
+    mappingType: 'geo_point',
+    delimiter: ',',
     combinedFieldName: geoPointField,
     fieldNames: [latField, lonField],
   };
@@ -86,13 +81,15 @@ export function createGeoPointCombinedField(
 function getGeoPointField(results: unknown) {
   const latField = results.column_names.find((columnName) => {
     return (
-      COMMON_LAT_NAMES.includes(columnName) && isWithinLatRange(columnName, results.field_stats)
+      COMMON_LAT_NAMES.includes(columnName.toLowerCase()) &&
+      isWithinLatRange(columnName, results.field_stats)
     );
   });
 
   const lonField = results.column_names.find((columnName) => {
     return (
-      COMMON_LON_NAMES.includes(columnName) && isWithinLonRange(columnName, results.field_stats)
+      COMMON_LON_NAMES.includes(columnName.toLowerCase()) &&
+      isWithinLonRange(columnName, results.field_stats)
     );
   });
 

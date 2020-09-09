@@ -10,13 +10,9 @@ import React, { Component } from 'react';
 
 import { EuiText, EuiFormRow, EuiPopover, EuiContextMenu, EuiButtonEmpty } from '@elastic/eui';
 
-import { CombinedField, COMBINED_FIELD_TYPES } from './types';
+import { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
-import {
-  addCombinedFieldsToMappings,
-  addCombinedFieldsToPipeline,
-  isGeoPointCombinedField,
-} from './utils';
+import { addCombinedFieldsToMappings, addCombinedFieldsToPipeline } from './utils';
 
 interface Props {
   mappingsString: string;
@@ -145,9 +141,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
 }
 
 function getCombinedFieldLabel(combinedField: CombinedField) {
-  if (isGeoPointCombinedField(combinedField)) {
-    return `geo_point: ${combinedField.fieldNames[0]}, ${combinedField.fieldNames[1]} => ${combinedField.combinedFieldName}`;
-  } else {
-    return combinedField.type;
-  }
+  return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
+    combinedField.combinedFieldName
+  } as ${combinedField.mappingType}`;
 }
