@@ -140,7 +140,7 @@ export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventT
   const relatedEventsStats = useSelector((state: ResolverState) =>
     selectors.relatedEventsStats(state)(nodeID)
   );
-  // TODO, loading and error dialogs. don't use !
+
   return (
     <StyledPanel>
       <NodeEventList
