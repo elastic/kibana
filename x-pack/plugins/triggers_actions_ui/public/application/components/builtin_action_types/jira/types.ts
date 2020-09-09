@@ -6,22 +6,22 @@
 
 import { CasesConfigurationMapping } from '../case_mappings';
 
-export interface ServiceNowActionConnector {
-  config: ServiceNowConfig;
-  secrets: ServiceNowSecrets;
+export interface JiraActionConnector {
+  config: JiraConfig;
+  secrets: JiraSecrets;
 }
 
-export interface ServiceNowActionParams {
+export interface JiraActionParams {
   subAction: string;
   subActionParams: {
     savedObjectId: string;
     title: string;
     description: string;
-    comment: string;
+    comments: Array<{ commentId: string; comment: string }>;
     externalId: string | null;
-    severity: string;
-    urgency: string;
-    impact: string;
+    issueType: string;
+    priority: string;
+    labels: string[];
   };
 }
 
@@ -29,13 +29,16 @@ interface IncidentConfiguration {
   mapping: CasesConfigurationMapping[];
 }
 
-interface ServiceNowConfig {
+interface JiraConfig {
   apiUrl: string;
+  projectKey: string;
   incidentConfiguration?: IncidentConfiguration;
   isCaseOwned?: boolean;
 }
 
-interface ServiceNowSecrets {
-  username: string;
-  password: string;
+interface JiraSecrets {
+  email: string;
+  apiToken: string;
 }
+
+// to remove

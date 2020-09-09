@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from '../../../../../types';
+import { ActionType } from '../../../../types';
 
 export { ActionType };
 
@@ -13,4 +13,9 @@ export interface ThirdPartyField {
   validSourceFields: string[];
   defaultSourceField: string;
   defaultActionType: string;
+}
+export interface CasesConfigurationMapping {
+  source: string;
+  target: string;
+  actionType: string;
 }

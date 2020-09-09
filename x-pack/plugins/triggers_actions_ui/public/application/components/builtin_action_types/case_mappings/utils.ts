@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CasesConfigurationMapping } from '../types';
+import { CasesConfigurationMapping } from './types';
 
 export const setActionTypeToMapping = (
   caseField: string,
@@ -36,3 +36,13 @@ export const setThirdPartyToMapping = (
     }
     return item;
   });
+
+export const createDefaultMapping = (fields: Record<string, any>): CasesConfigurationMapping[] =>
+  Object.keys(fields).map(
+    (key) =>
+      ({
+        source: fields[key].defaultSourceField,
+        target: key,
+        actionType: fields[key].defaultActionType,
+      } as CasesConfigurationMapping)
+  );
