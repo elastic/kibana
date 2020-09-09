@@ -52,7 +52,6 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
       const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const ruleDefinitions = request.body;
-      // const dupes = getDuplicates(ruleDefinitions, 'rule_id');
       const ruleIds = ruleDefinitions.reduce<string[]>((acc, rule) => {
         if (rule != null && rule.rule_id != null) {
           return [rule.rule_id, ...acc];
