@@ -153,13 +153,20 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (_, { transactionErrorRate }) => (
-      <ServiceListMetric
-        series={transactionErrorRate?.over_time}
-        color="euiColorVis7"
-        valueLabel={asPercent(transactionErrorRate?.value || 0, 1)}
-      />
-    ),
+    render: (_, { transactionErrorRate }) => {
+      const value = transactionErrorRate?.value;
+
+      const valueLabel =
+        value !== null && value !== undefined ? asPercent(value, 1) : '';
+
+      return (
+        <ServiceListMetric
+          series={transactionErrorRate?.over_time}
+          color="euiColorVis7"
+          valueLabel={valueLabel}
+        />
+      );
+    },
     align: 'left',
     width: px(unit * 10),
   },

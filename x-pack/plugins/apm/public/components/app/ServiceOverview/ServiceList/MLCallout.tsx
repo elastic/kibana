@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 
 export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
@@ -42,14 +43,14 @@ export function MLCallout({ onDismiss }: { onDismiss: () => void }) {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => onDismiss()}>
+          <EuiButtonEmpty onClick={() => onDismiss()}>
             {i18n.translate(
               'xpack.apm.serviceOverview.mlNudgeMessage.dismissButton',
               {
                 defaultMessage: `Dismiss message`,
               }
             )}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGrid>
     </EuiCallOut>

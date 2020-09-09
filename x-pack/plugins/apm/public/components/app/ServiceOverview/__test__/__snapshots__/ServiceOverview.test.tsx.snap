@@ -271,24 +271,29 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -319,24 +324,29 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -367,32 +377,35 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
-          >
-            0%
-          </div>
+          />
         </div>
       </div>
     </td>
@@ -511,24 +524,29 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -559,24 +577,29 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -607,32 +630,35 @@ NodeList [
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="echChart"
-              style="width: 64px; height: 24px;"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="echChartBackground"
-                style="background-color: transparent;"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
               <div
-                class="echChartStatus"
-                data-ech-render-complete="false"
-                data-ech-render-count="0"
-              />
-              <div
-                class="echChartResizer"
-              />
-              <div
-                class="echContainer"
-              />
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
             style="white-space: nowrap;"
-          >
-            0%
-          </div>
+          />
         </div>
       </div>
     </td>

@@ -5,8 +5,13 @@
  */
 import React from 'react';
 import { ScaleType, Chart, Settings, AreaSeries } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { px } from '../../../../style/variables';
 import { useChartTheme } from '../../../../../../observability/public';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 interface Props {
   color: string;
@@ -15,15 +20,32 @@ interface Props {
 
 export function SparkPlot(props: Props) {
   const { series, color } = props;
-  const theme = useChartTheme();
+  const chartTheme = useChartTheme();
+
+  const isEmpty = series.every((point) => point.y === null);
+
+  if (isEmpty) {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="visLine" color="subdued" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {NOT_AVAILABLE_LABEL}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <Chart size={{ height: px(24), width: px(64) }}>
       <Settings
         theme={{
-          ...theme,
+          ...chartTheme,
           background: {
-            ...theme.background,
+            ...chartTheme.background,
             color: 'transparent',
           },
         }}
