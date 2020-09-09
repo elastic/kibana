@@ -103,10 +103,13 @@ export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsRes
   );
 };
 
+const isGenericSuccessResponseSchema = (arg: any) =>
+  isBasicObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
+
 export const isStartTransformsResponseSchema = (arg: any): arg is StartTransformsResponseSchema => {
-  return isGenericResponseSchema<StartTransformsResponseSchema>(arg);
+  return isGenericSuccessResponseSchema(arg);
 };
 
 export const isStopTransformsResponseSchema = (arg: any): arg is StopTransformsResponseSchema => {
-  return isGenericResponseSchema<StopTransformsResponseSchema>(arg);
+  return isGenericSuccessResponseSchema(arg);
 };
