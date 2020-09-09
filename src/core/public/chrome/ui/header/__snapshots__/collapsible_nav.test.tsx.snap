@@ -657,6 +657,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     aria-controls="mockId"
                     aria-expanded={true}
                     className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                    id="mockId"
                     onClick={[Function]}
                     type="button"
                   >
@@ -910,6 +911,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
@@ -1199,6 +1201,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
@@ -1449,6 +1452,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
@@ -1651,6 +1655,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
@@ -2639,6 +2644,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                     aria-controls="mockId"
                     aria-expanded={true}
                     className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                    id="mockId"
                     onClick={[Function]}
                     type="button"
                   >
@@ -3321,6 +3327,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     aria-controls="mockId"
                     aria-expanded={true}
                     className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                    id="mockId"
                     onClick={[Function]}
                     type="button"
                   >

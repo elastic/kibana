@@ -9305,6 +9305,7 @@ exports[`Header renders 3`] = `
                         aria-controls="mockId"
                         aria-expanded={true}
                         className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                        id="mockId"
                         onClick={[Function]}
                         type="button"
                       >
