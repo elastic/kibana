@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, MouseEventHandler, useCallback } from 'react';
+import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import { useDebounce } from 'react-use';
 import {
   DraggableLocation,
   EuiButtonEmpty,
@@ -203,20 +203,21 @@ export const AdvancedRangeEditor = ({
   // we need to force the open state of the popover from the outside in some scenarios
   // so we need an extra state here
   const [isOpenByCreation, setIsOpenByCreation] = useState(false);
+
   const lastIndex = localRanges.length - 1;
 
-  const updateRanges = useCallback(
-    (updatedRanges: LocalRangeType[]) => {
-      setRanges(updatedRanges.map(({ id, ...rest }) => ({ ...rest })));
-      setLocalRanges(updatedRanges);
+  // Update locally all the time, but bounce the parents prop function
+  // to aviod too many requests
+  useDebounce(
+    () => {
+      setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
-    [setRanges]
+    256,
+    [localRanges]
   );
 
-  const updateRangesDebounced = React.useMemo(() => debounce(updateRanges, 256), [updateRanges]);
-
   const addNewRange = () => {
-    updateRanges([
+    setLocalRanges([
       ...localRanges,
       {
         id: generateId(),
@@ -236,13 +237,15 @@ export const AdvancedRangeEditor = ({
   }) => {
     if (source && destination) {
       const items = euiDragDropReorder(localRanges, source.index, destination.index);
-      updateRangesDebounced(items);
+      setLocalRanges(items);
     }
   };
 
   return (
     <EuiFormRow
-      label="Intervals"
+      label={i18n.translate('xpack.lens.indexPattern.ranges.intervals', {
+        defaultMessage: 'Intervals',
+      })}
       labelAppend={
         <EuiButtonEmpty
           iconType="controlsHorizontal"
@@ -297,7 +300,7 @@ export const AdvancedRangeEditor = ({
                                 } else {
                                   newRanges.push(newRange);
                                 }
-                                updateRangesDebounced(newRanges);
+                                setLocalRanges(newRanges);
                               }}
                               formatter={formatter}
                               Button={({ onClick }: { onClick: MouseEventHandler }) => (
@@ -324,7 +327,7 @@ export const AdvancedRangeEditor = ({
                               color="danger"
                               onClick={() => {
                                 const newRanges = localRanges.filter((_, i) => i !== idx);
-                                updateRangesDebounced(newRanges);
+                                setLocalRanges(newRanges);
                               }}
                               disabled={localRanges.length === 1}
                               aria-label={i18n.translate(
