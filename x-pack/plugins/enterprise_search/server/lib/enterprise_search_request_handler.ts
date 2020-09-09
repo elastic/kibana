@@ -14,6 +14,7 @@ import {
   Logger,
 } from 'src/core/server';
 import { ConfigType } from '../index';
+import { JSON_HEADER } from '../../common/constants';
 
 interface IConstructorDependencies {
   config: ConfigType;
@@ -65,7 +66,7 @@ export class EnterpriseSearchRequestHandler {
 
         // Set up API options
         const { method } = request.route;
-        const headers = { Authorization: request.headers.authorization as string };
+        const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
         const body = !this.isEmptyObj(request.body as object)
           ? JSON.stringify(request.body)
           : undefined;

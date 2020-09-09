@@ -5,6 +5,7 @@
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
+import { JSON_HEADER } from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
@@ -193,7 +194,7 @@ const makeAPICall = (handler: Function, params = {}) => {
 const EnterpriseSearchAPI = {
   shouldHaveBeenCalledWith(expectedUrl: string, expectedParams = {}) {
     expect(fetchMock).toHaveBeenCalledWith(expectedUrl, {
-      headers: { Authorization: 'Basic 123' },
+      headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
       ...expectedParams,
