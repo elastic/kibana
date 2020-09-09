@@ -42,12 +42,12 @@ import { SavedVisualizationsLoader } from '../saved_visualizations';
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
+  savedVisualizationsLoader?: SavedVisualizationsLoader,
   attributeService?: AttributeService<
     VisualizeSavedObjectAttributes,
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >,
-  savedVisualizationsLoader?: SavedVisualizationsLoader,
   parent?: IContainer
 ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
   const savedVisualizations = getSavedVisualizationsLoader();

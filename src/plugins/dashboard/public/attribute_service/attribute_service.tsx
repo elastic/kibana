@@ -57,7 +57,7 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     type: string,
     attributes: A,
     savedObjectId?: string
-  ) => Promise<{ id: string }>;
+  ) => Promise<{ id?: string } | { error: Error}>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
@@ -124,7 +124,10 @@ export class AttributeService<
           newAttributes,
           savedObjectId
         );
-        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        if ('id' in savedItem) {
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        }
+        return { ...originalInput } as RefType;
       }
 
       if (savedObjectId) {
@@ -176,7 +179,6 @@ export class AttributeService<
   getInputAsRefType = async (
     input: ValType | RefType,
     saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string },
-    customSaveMethod?: (props: OnSaveProps) => Promise<SaveResult>
   ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
       return input;
@@ -209,11 +211,10 @@ export class AttributeService<
           return { error };
         }
       };
-      const onSaveMethod = customSaveMethod ? customSaveMethod : onSave;
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
         this.showSaveModal(
           <SavedObjectSaveModal
-            onSave={onSaveMethod}
+            onSave={onSave}
             onClose={() => reject()}
             title={get(saveOptions, 'saveModalTitle', input[ATTRIBUTE_SERVICE_KEY].title)}
             showCopyOnSave={false}
@@ -224,5 +225,9 @@ export class AttributeService<
         );
       }
     });
+  };
+
+  public setOptions = (options: AttributeServiceOptions<SavedObjectAttributes>) => {
+    this.options = options;
   };
 }

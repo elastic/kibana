@@ -149,8 +149,8 @@ export class VisualizeEmbeddableFactory
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        await this.getAttributeService(),
         savedVisualizations,
+        await this.getAttributeService(),
         parent
       );
     } catch (e) {
@@ -170,8 +170,8 @@ export class VisualizeEmbeddableFactory
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        await this.getAttributeService(),
         savedVisualizations,
+        await this.getAttributeService(),
         parent
       );
     } else {

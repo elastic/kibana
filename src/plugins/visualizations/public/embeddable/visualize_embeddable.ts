@@ -54,7 +54,6 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
-import { OnSaveProps, SaveResult } from '../../../saved_objects/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -83,7 +82,11 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
-export type VisualizeSavedObjectAttributes = SavedObjectAttributes & { title: string };
+export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
+  title: string;
+  vis?: Vis;
+  savedVis?: VisSavedObject;
+};
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
@@ -426,33 +429,42 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
+    const savedVis: VisSavedObject = await this.savedVisualizationsLoader?.get({});
+    if (!savedVis) {
+      throw new Error('No Saved Vis');
+    }
     return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
-      const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+      const onSave = async (
+        type: string,
+        attributes: VisualizeSavedObjectAttributes
+      ): Promise<{ id: string }> => {
         try {
-          const savedVis: VisSavedObject = await this.savedVisualizationsLoader?.get({});
+          const { title, vis } = attributes;
           const saveOptions = {
             confirmOverwrite: false,
             returnToOrigin: true,
           };
-          savedVis.title = props.newTitle;
-          savedVis.copyOnSave = props.newCopyOnSave || false;
-          savedVis.description = props.newDescription || '';
-          savedVis.searchSourceFields = this.vis?.data.searchSource?.getSerializedFields();
-          const serializedVis = this.vis.serialize();
-          const { title, type, params, data } = serializedVis;
+          savedVis.title = title;
+          savedVis.copyOnSave = false;
+          savedVis.description = '';
+          savedVis.searchSourceFields = vis?.data.searchSource?.getSerializedFields();
+          const serializedVis = ((vis as unknown) as Vis).serialize();
+          const { params, data } = serializedVis;
           savedVis.visState = {
             title,
-            type,
+            type: serializedVis.type,
             params,
             aggs: data.aggs,
           };
-          savedVis.uiStateJSON = this.vis.uiState.toString();
+          if (vis) {
+            savedVis.uiStateJSON = vis.uiState.toString();
+          }
           const id = await savedVis.save(saveOptions);
           resolve({ savedObjectId: id, id: this.id });
           return { id };
         } catch (error) {
           reject(error);
-          return { error };
+          return { id: '' };
         }
       };
       const saveModalTitle = this.getTitle()
@@ -460,15 +472,21 @@ export class VisualizeEmbeddable
         : i18n.translate('visualize.embeddable.placeholderTitle', {
             defaultMessage: 'Placeholder Title',
           });
+      // @ts-ignore
+      const attributes: VisualizeSavedObjectAttributes = {
+        savedVis,
+        vis: this.vis,
+        title: this.vis.title,
+      };
+      this.attributeService.setOptions({
+        customSaveMethod: onSave,
+      });
       return this.attributeService.getInputAsRefType(
         {
           id: this.id,
-          attributes: {
-            title: this.vis.title,
-          },
+          attributes,
         },
-        { showSaveModal: true, saveModalTitle },
-        onSave
+        { showSaveModal: true, saveModalTitle }
       );
     });
   };
