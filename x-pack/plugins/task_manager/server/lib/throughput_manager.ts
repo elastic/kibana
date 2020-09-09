@@ -10,16 +10,16 @@ import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 const THROUGHPUT_CHECK_INTERVAL = 10 * 1000;
 
-// When errors occur, reduce maxWorkers by MAX_WORKERS_REDUCTION_PERCENTAGE
+// When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
 // When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
 // until starting value is reached
-const MAX_WORKERS_REDUCTION_PERCENTAGE = 0.8;
+const MAX_WORKERS_DECREASE_PERCENTAGE = 0.8;
 const MAX_WORKERS_INCREASE_PERCENTAGE = 1.05;
 
 // When errors occur, increase pollInterval by POLL_INTERVAL_INCREASE_PERCENTAGE
-// When errors no longer occur, start decreasing pollInterval by POLL_INTERVAL_REDUCTION_PERCENTAGE
+// When errors no longer occur, start decreasing pollInterval by POLL_INTERVAL_DECREASE_PERCENTAGE
 // until starting value is reached
-const POLL_INTERVAL_REDUCTION_PERCENTAGE = 0.95;
+const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
 interface DynamicConfiguration<T> {
@@ -96,38 +96,40 @@ export class ThroughputManager {
   }
 
   private checkThroughput() {
-    const newMaxWorkersMultiple =
-      this.errorCountSinceLastInterval > 0
-        ? MAX_WORKERS_REDUCTION_PERCENTAGE
-        : MAX_WORKERS_INCREASE_PERCENTAGE;
-    const newMaxWorkers = Math.max(
-      this.maxWorkers.startingValue,
-      this.maxWorkers.currentValue * newMaxWorkersMultiple
-    );
-
-    const newPollIntervalMultiple =
-      this.errorCountSinceLastInterval > 0
-        ? POLL_INTERVAL_INCREASE_PERCENTAGE
-        : POLL_INTERVAL_REDUCTION_PERCENTAGE;
-    const newPollInterval = Math.min(
-      this.pollInterval.startingValue,
-      this.pollInterval.currentValue * newPollIntervalMultiple
-    );
-
-    if (newMaxWorkers !== this.maxWorkers.currentValue) {
-      this.logger.info(
-        `Throughput manager changing max workers from ${this.maxWorkers.currentValue} to ${newMaxWorkers} after seeing ${this.errorCountSinceLastInterval} errors`
+    if (this.errorCountSinceLastInterval > 0) {
+      // Reduce throughput
+      const newMaxWorkers = Math.max(
+        Math.floor(this.maxWorkers.currentValue * MAX_WORKERS_DECREASE_PERCENTAGE),
+        1
       );
-      this.maxWorkers.observable$.next(newMaxWorkers);
+      const newPollInterval = Math.ceil(
+        this.pollInterval.currentValue * POLL_INTERVAL_INCREASE_PERCENTAGE
+      );
+      this.logger.info(
+        `Throughput being reduced after seeing ${this.errorCountSinceLastInterval} errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+      );
       this.maxWorkers.currentValue = newMaxWorkers;
-    }
-
-    if (newPollInterval !== this.pollInterval.currentValue) {
-      this.logger.info(
-        `Throughput manager changing poll interval from ${this.pollInterval.currentValue} to ${newPollInterval} after seeing ${this.errorCountSinceLastInterval} errors`
-      );
-      this.pollInterval.observable$.next(newPollInterval);
       this.pollInterval.currentValue = newPollInterval;
+      this.maxWorkers.observable$.next(newMaxWorkers);
+      this.pollInterval.observable$.next(newPollInterval);
+    } else {
+      // Bring throughput towards normal configuration
+      const newMaxWorkers = Math.min(
+        this.maxWorkers.startingValue,
+        Math.ceil(this.maxWorkers.currentValue * MAX_WORKERS_INCREASE_PERCENTAGE + 1)
+      );
+      const newPollInterval = Math.max(
+        this.pollInterval.startingValue,
+        Math.floor(this.pollInterval.currentValue * POLL_INTERVAL_DECREASE_PERCENTAGE - 1)
+      );
+      if (
+        newMaxWorkers !== this.maxWorkers.currentValue ||
+        newPollInterval !== this.pollInterval.currentValue
+      ) {
+        this.logger.info(
+          `Throughput increasing after seeing no errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+        );
+      }
     }
 
     this.errorCountSinceLastInterval = 0;
