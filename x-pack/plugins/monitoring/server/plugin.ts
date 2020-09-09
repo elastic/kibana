@@ -234,7 +234,13 @@ export class Plugin {
     };
   }
 
-  start() {}
+  start({ elasticsearch }: CoreStart) {
+    // TODO: For the telemetry plugin to work, we need to provide the new ES client.
+    // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
+    // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
+    // We will update the client in a follow up PR.
+    this.elasticsearchClient = elasticsearch.client;
+  }
 
   stop() {
     if (this.cluster) {
