@@ -199,7 +199,6 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
                 onChange={onComboChange}
                 singleSelection={{ asPlainText: true }}
                 isClearable={true}
-                noSuggestions={error || options.length === 0}
               />
             </EuiFormRow>
           </>

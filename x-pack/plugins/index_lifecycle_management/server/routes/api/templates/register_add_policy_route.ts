@@ -7,6 +7,7 @@
 import { merge } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { LegacyAPICaller } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { TemplateFromEs, TemplateSerialized } from '../../../../../index_management/common/types';
 import { LegacyTemplateSerialized } from '../../../../../index_management/server';
@@ -16,7 +17,7 @@ import { addBasePath } from '../../../services';
 async function getLegacyIndexTemplate(
   callAsCurrentUser: LegacyAPICaller,
   templateName: string
-): Promise<LegacyTemplateSerialized> {
+): Promise<LegacyTemplateSerialized | undefined> {
   const response = await callAsCurrentUser('indices.getTemplate', { name: templateName });
   return response[templateName];
 }
@@ -24,7 +25,7 @@ async function getLegacyIndexTemplate(
 async function getIndexTemplate(
   callAsCurrentUser: LegacyAPICaller,
   templateName: string
-): Promise<TemplateSerialized> {
+): Promise<TemplateSerialized | undefined> {
   const params = {
     method: 'GET',
     path: `/_index_template/${encodeURIComponent(templateName)}`,
@@ -35,7 +36,7 @@ async function getIndexTemplate(
   const { index_templates: templates } = await callAsCurrentUser<{
     index_templates: TemplateFromEs[];
   }>('transport.request', params);
-  return templates.find((template) => template.name === templateName)!.index_template;
+  return templates?.find((template) => template.name === templateName)?.index_template;
 }
 
 async function updateIndexTemplate(
@@ -54,12 +55,15 @@ async function updateIndexTemplate(
     },
   };
 
-  let indexTemplate: TemplateSerialized | LegacyTemplateSerialized;
+  const indexTemplate = isLegacy
+    ? await getLegacyIndexTemplate(callAsCurrentUser, templateName)
+    : await getIndexTemplate(callAsCurrentUser, templateName);
+  if (!indexTemplate) {
+    return false;
+  }
   if (isLegacy) {
-    indexTemplate = await getLegacyIndexTemplate(callAsCurrentUser, templateName);
     merge(indexTemplate, { settings });
   } else {
-    indexTemplate = await getIndexTemplate(callAsCurrentUser, templateName);
     merge(indexTemplate, {
       template: {
         settings,
@@ -96,13 +100,23 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
       const { templateName, policyName, aliasName } = body;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
-        await updateIndexTemplate(
+        const updatedTemplate = await updateIndexTemplate(
           context.core.elasticsearch.legacy.client.callAsCurrentUser,
           isLegacy,
           templateName,
           policyName,
           aliasName
         );
+        if (!updatedTemplate) {
+          return response.notFound({
+            body: i18n.translate('xpack.indexLifecycleMgmt.templateNotFoundMessage', {
+              defaultMessage: `Template {name} not found.`,
+              values: {
+                name: templateName,
+              },
+            }),
+          });
+        }
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
