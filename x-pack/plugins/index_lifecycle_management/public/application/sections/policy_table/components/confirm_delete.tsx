@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 
-import { PolicyFromES } from '../../../services/policies/types';
+import { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
 import { deletePolicy } from '../../../services/api';

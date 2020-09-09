@@ -10,6 +10,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -20,7 +21,6 @@ import {
 } from '../public/extend_index_management';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
-import { Index } from '../public/application/services/policies/types';
 
 // We need to init the http with a mock for any tests that depend upon the http service.
 // For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount

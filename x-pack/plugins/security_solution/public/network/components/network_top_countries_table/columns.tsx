@@ -37,7 +37,7 @@ export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>
 ];
 
-export type NetworkTopCountriesColumnsIpDetails = [
+export type NetworkTopCountriesColumnsNetworkDetails = [
   Columns<NetworkTopCountriesEdges>,
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
@@ -164,7 +164,7 @@ export const getCountriesColumnsCurated = (
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
-): NetworkTopCountriesColumns | NetworkTopCountriesColumnsIpDetails => {
+): NetworkTopCountriesColumns | NetworkTopCountriesColumnsNetworkDetails => {
   const columns = getNetworkTopCountriesColumns(indexPattern, flowTarget, type, tableId);
 
   // Columns to exclude from host details pages
