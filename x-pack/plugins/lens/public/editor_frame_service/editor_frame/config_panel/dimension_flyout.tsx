@@ -56,7 +56,7 @@ export function DimensionFlyout({
     (flyoutState.openId === accessor || (noMatch && flyoutState.addingToGroupId === groupId)) ? (
       <div
         role="dialog"
-        aria-labelledby="lnsDimensionFlyoutFlyoutTitle"
+        aria-labelledby="lnsDimensionFlyoutTitle"
         className={classNames('lnsDimensionFlyout', {
           'lnsDimensionFlyout--noAnimation': openByCreation,
         })}
@@ -66,7 +66,7 @@ export function DimensionFlyout({
             <EuiButtonEmpty
               onClick={closeFlyout}
               data-test-subj="lns-indexPatternDimension-flyoutTitle"
-              id="lnsDimensionFlyoutFlyoutTitle"
+              id="lnsDimensionFlyoutTitle"
               iconType="sortLeft"
               flush="left"
             >
