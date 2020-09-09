@@ -31,7 +31,12 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { isAutoInterval, IFieldFormat } from '../../../../../../../../src/plugins/data/common';
+import { EuiIconTip } from '@elastic/eui';
+import {
+  isAutoInterval,
+  IFieldFormat,
+  UI_SETTINGS,
+} from '../../../../../../../../src/plugins/data/common';
 import {
   RangeTypeLens,
   MODES,
@@ -115,18 +120,48 @@ const BaseRangeEditor = ({
                   })}
                   showLabels
                   showInput="inputWithPopover"
-                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
-                    defaultMessage: 'Max intervals',
-                  })}
+                  prepend={
+                    <>
+                      <EuiText size="s">
+                        {i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
+                          defaultMessage: 'Max intervals',
+                        })}
+                      </EuiText>{' '}
+                      <EuiIconTip
+                        position="right"
+                        content={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervalsHelp', {
+                          defaultMessage:
+                            "Intervals will be selected automatically based on the available data. The maximum number of bars can never be greater than the Advanced Setting's {histogramMaxBars}",
+                          values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
+                        })}
+                        type="questionInCircle"
+                      />
+                    </>
+                  }
                 />
               ) : (
                 <EuiFieldNumber
                   data-test-subj="lns-indexPattern-range-interval-field"
                   value={interval}
                   onChange={({ target }) => onIntervalChange(Number(target.value))}
-                  prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                    defaultMessage: 'Min Interval',
-                  })}
+                  prepend={
+                    <>
+                      <EuiText size="s">
+                        {i18n.translate('xpack.lens.indexPattern.ranges.min', {
+                          defaultMessage: 'Min Interval',
+                        })}
+                      </EuiText>{' '}
+                      <EuiIconTip
+                        position="right"
+                        content={i18n.translate('xpack.lens.indexPattern.ranges.minIntervalsHelp', {
+                          defaultMessage:
+                            "Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}",
+                          values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
+                        })}
+                        type="questionInCircle"
+                      />
+                    </>
+                  }
                   min={0}
                 />
               )}
