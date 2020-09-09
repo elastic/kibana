@@ -198,8 +198,10 @@ export {
   OptionedValueProp,
   ParsedInterval,
   // search
+  ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -208,11 +210,13 @@ export {
 
 export {
   ISearchStrategy,
-  ISearchOptions,
   ISearchSetup,
   ISearchStart,
+  toSnakeCase,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
+  shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';

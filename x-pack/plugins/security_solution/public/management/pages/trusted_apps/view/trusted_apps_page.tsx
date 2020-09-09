@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { TrustedAppsList } from './trusted_apps_list';
 
-export function TrustedAppsPage() {
+export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       beta={true}
@@ -23,6 +24,10 @@ export function TrustedAppsPage() {
           defaultMessage="View and configure trusted applications"
         />
       }
-    />
+    >
+      <TrustedAppsList />
+    </AdministrationListPage>
   );
-}
+});
+
+TrustedAppsPage.displayName = 'TrustedAppsPage';

@@ -1,19 +1,15 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "tsBuildInfoFile": "../build/tsbuildinfo/test",
     "types": [
       "node",
       "mocha",
       "flot"
-    ],
-    "lib": [
-      "esnext",
-      "dom"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "**/*",
     "../typings/elastic__node_crypto.d.ts",
     "typings/**/*"
   ],
