@@ -47,7 +47,7 @@ image::user/security/images/reporting-privileges-example.png["Reporting privileg
 Reporting users typically save searches, create
 visualizations, and build dashboards. They require a space
 that provides read and write privileges in
-*Discover*, *Visualize*, and *Dashboard*.
+*Discover* and *Dashboard*.
 
 . Save your new role.
 

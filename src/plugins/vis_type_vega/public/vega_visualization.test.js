@@ -82,7 +82,6 @@ describe('VegaVisualizations', () => {
     setInjectedVars({
       emsTileLayerId: {},
       enableExternalUrls: true,
-      esShardTimeout: 10000,
     });
     setData(dataPluginStart);
     setSavedObjects(coreStart.savedObjects);

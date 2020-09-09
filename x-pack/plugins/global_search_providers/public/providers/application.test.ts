@@ -25,7 +25,6 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'app1',
   title: 'App 1',
   appRoute: '/app/app1',
-  legacy: false,
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,

@@ -16,7 +16,6 @@ export const getSettingsHandler: RequestHandler = async (context, request, respo
   try {
     const settings = await settingsService.getSettings(soClient);
     const body = {
-      success: true,
       item: settings,
     };
     return response.ok({ body });
@@ -47,7 +46,6 @@ export const putSettingsHandler: RequestHandler<
       user: user || undefined,
     });
     const body = {
-      success: true,
       item: settings,
     };
     return response.ok({ body });
