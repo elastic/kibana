@@ -59,6 +59,7 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
           formattedMessage: 'Add 👻 (2e63475c)',
+          originalMessage: 'Add 👻',
           existingTargetPullRequests: [],
           targetBranchesFromLabels: [],
           sourceBranch: 'master',
@@ -66,6 +67,7 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
           formattedMessage: 'Add witch (#85)',
+          originalMessage: 'Add witch (#85)',
           pullNumber: 85,
           existingTargetPullRequests: [],
           targetBranchesFromLabels: [],
@@ -74,6 +76,8 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
           formattedMessage: 'Add SF mention (#80)',
+          originalMessage:
+            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
           pullNumber: 80,
           existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
           targetBranchesFromLabels: [],
@@ -82,6 +86,7 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '3827bbbaf39914eda4f02f6940189844375fd097',
           formattedMessage: 'Add backport config (3827bbba)',
+          originalMessage: 'Add backport config',
           existingTargetPullRequests: [],
           targetBranchesFromLabels: [],
           sourceBranch: 'master',
@@ -89,6 +94,7 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '5ea0da550ac191029459289d67f99ad7d310812b',
           formattedMessage: 'Initial commit (5ea0da55)',
+          originalMessage: 'Initial commit',
           existingTargetPullRequests: [],
           targetBranchesFromLabels: [],
           sourceBranch: 'master',
@@ -113,6 +119,8 @@ describe('fetchCommitsByAuthor', () => {
         {
           existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
           formattedMessage: 'Add SF mention (#80)',
+          originalMessage:
+            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
           pullNumber: 80,
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
           sourceBranch: 'master',
@@ -128,6 +136,8 @@ describe('fetchCommitsByAuthor', () => {
         {
           existingTargetPullRequests: [],
           formattedMessage: 'Add SF mention (#80)',
+          originalMessage:
+            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
           pullNumber: 80,
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
           sourceBranch: 'master',

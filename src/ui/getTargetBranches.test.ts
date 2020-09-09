@@ -38,6 +38,7 @@ describe('getTargetBranches', () => {
           targetBranchesFromLabels: ['7.x'],
           sha: 'my-sha',
           formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
+          originalMessage: '[backport] Bump to 5.1.3 (#62286)',
           pullNumber: 62286,
           existingTargetPullRequests: [],
         },
@@ -91,6 +92,7 @@ describe('getTargetBranches', () => {
           targetBranchesFromLabels: ['8.0.0'],
           sha: 'my-sha',
           formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
+          originalMessage: '[backport] Bump to 5.1.3 (#62286)',
           pullNumber: 62286,
           existingTargetPullRequests: [],
         },
@@ -123,6 +125,7 @@ describe('getTargetBranches', () => {
       const commits: CommitSelected[] = [
         {
           formattedMessage: 'hey',
+          originalMessage: 'hey',
           targetBranchesFromLabels: [],
           sha: 'abcd',
           sourceBranch: '7.x',

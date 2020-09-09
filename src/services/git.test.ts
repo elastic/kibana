@@ -3,7 +3,7 @@ import * as childProcess from '../services/child-process-promisified';
 import {
   addRemote,
   getUnstagedFiles,
-  finalizeCherrypick,
+  commitChanges,
   deleteRemote,
   cherrypick,
   getConflictingFiles,
@@ -11,6 +11,8 @@ import {
   pushBackportBranch,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
+import { CommitSelected } from '../types/Commit';
+import { SpyHelper } from '../types/SpyHelper';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -175,6 +177,7 @@ describe('cherrypick', () => {
   const commit = {
     sourceBranch: '7.x',
     formattedMessage: '',
+    originalMessage: '',
     sha: 'abcd',
     targetBranchesFromLabels: [],
   };
@@ -326,11 +329,23 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
   });
 });
 
-describe('cherrypickContinue', () => {
+describe('commitChanges', () => {
   const options = {
     repoOwner: 'elastic',
     repoName: 'kibana',
   } as BackportOptions;
+
+  const commit = {
+    originalMessage: 'The original commit message',
+  } as CommitSelected;
+
+  it('should return when changes committed successfully', async () => {
+    jest
+      .spyOn(childProcess, 'exec')
+      .mockResolvedValueOnce({ stderr: '', stdout: '' });
+
+    await expect(await commitChanges(commit, options)).toBe(undefined);
+  });
 
   it('should swallow error if changes have already been committed manaully', async () => {
     const err = {
@@ -344,7 +359,45 @@ describe('cherrypickContinue', () => {
     };
 
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    await expect(await finalizeCherrypick(options)).toBe(undefined);
+    await expect(await commitChanges(commit, options)).toBe(undefined);
+  });
+
+  describe('when commit fails due to empty message', () => {
+    let spy: SpyHelper<typeof childProcess.exec>;
+    let res: void;
+    beforeEach(async () => {
+      const err = {
+        killed: false,
+        code: 1,
+        signal: null,
+        cmd: 'git commit --no-edit --no-verify',
+        stdout: '',
+        stderr: 'Aborting commit due to empty commit message.\n',
+      };
+
+      spy = jest
+        .spyOn(childProcess, 'exec')
+        .mockRejectedValueOnce(err)
+        .mockResolvedValueOnce({ stderr: '', stdout: '' });
+
+      res = await commitChanges(commit, options);
+    });
+
+    it('should manually set the commit message', () => {
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenCalledWith(
+        'git commit --no-edit',
+        expect.any(Object)
+      );
+      expect(spy).toHaveBeenCalledWith(
+        'git commit -m "The original commit message" ',
+        expect.any(Object)
+      );
+    });
+
+    it('should handle the error and resolve successfully', async () => {
+      await expect(res).toBe(undefined);
+    });
   });
 
   it('should re-throw other errors', async () => {
@@ -353,7 +406,7 @@ describe('cherrypickContinue', () => {
     expect.assertions(1);
 
     await expect(
-      finalizeCherrypick(options)
+      commitChanges(commit, options)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"non-cherrypick error"`);
   });
 });

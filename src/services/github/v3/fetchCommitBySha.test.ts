@@ -33,6 +33,7 @@ describe('fetchCommitBySha', () => {
     await expect(await fetchCommitBySha(options)).toEqual({
       sourceBranch: 'master',
       formattedMessage: 'myMessage (sha12345)',
+      originalMessage: 'myMessage',
       pullNumber: undefined,
       sha: 'sha123456789',
       targetBranchesFromLabels: [],
@@ -63,6 +64,7 @@ describe('fetchCommitBySha', () => {
       sourceBranch: 'master',
       formattedMessage:
         '[Chrome] Bootstrap Angular into document.body (myCommit)',
+      originalMessage: '[Chrome] Bootstrap Angular into document.body',
       sha: 'myCommitSha',
       pullNumber: undefined,
       targetBranchesFromLabels: [],

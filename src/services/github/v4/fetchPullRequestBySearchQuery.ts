@@ -72,8 +72,9 @@ export async function fetchPullRequestBySearchQuery(
     });
     const sha = searchNode.mergeCommit.oid;
     const pullNumber = searchNode.number;
+    const commitMessage = searchNode.mergeCommit.message;
     const formattedMessage = getFormattedCommitMessage({
-      message: searchNode.mergeCommit.message,
+      message: commitMessage,
       sha,
       pullNumber,
     });
@@ -83,6 +84,7 @@ export async function fetchPullRequestBySearchQuery(
       targetBranchesFromLabels,
       sha,
       formattedMessage,
+      originalMessage: commitMessage,
       pullNumber,
       existingTargetPullRequests: [],
     };

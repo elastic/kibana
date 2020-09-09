@@ -15,7 +15,7 @@ import {
   pushBackportBranch,
   setCommitAuthor,
   getUnstagedFiles,
-  finalizeCherrypick,
+  commitChanges,
   getConflictingFiles,
   getRepoForkOwner,
 } from '../services/git';
@@ -308,7 +308,7 @@ async function waitForCherrypick(
   const stagingSpinner = ora(`Finalizing cherrypick`).start();
   try {
     // Run `git commit`
-    await finalizeCherrypick(options);
+    await commitChanges(commit, options);
     stagingSpinner.succeed();
   } catch (e) {
     stagingSpinner.fail();

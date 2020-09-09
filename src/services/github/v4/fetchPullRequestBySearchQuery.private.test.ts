@@ -47,6 +47,7 @@ describe('fetchPullRequestBySearchQuery', () => {
         {
           existingTargetPullRequests: [],
           formattedMessage: 'Add sheep emoji (#9)',
+          originalMessage: 'Add sheep emoji (#9)',
           pullNumber: 9,
           sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
           sourceBranch: 'master',
@@ -55,6 +56,7 @@ describe('fetchPullRequestBySearchQuery', () => {
         {
           existingTargetPullRequests: [],
           formattedMessage: 'Add 🍏 emoji (#5)',
+          originalMessage: 'Add 🍏 emoji (#5)',
           pullNumber: 5,
           sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
           sourceBranch: 'master',

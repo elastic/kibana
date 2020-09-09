@@ -180,6 +180,7 @@ export async function fetchCommitsByAuthor(
       targetBranchesFromLabels,
       sha,
       formattedMessage,
+      originalMessage: commitMessage,
       pullNumber,
       existingTargetPullRequests,
     };

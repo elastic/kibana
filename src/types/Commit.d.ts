@@ -4,6 +4,7 @@ export interface CommitSelected {
   targetBranchesFromLabels: string[];
   sha: string;
   formattedMessage: string;
+  originalMessage: string;
   pullNumber?: number;
 }
 

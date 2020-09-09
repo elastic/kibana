@@ -22,6 +22,7 @@ describe('fetchCommitBySha', () => {
       } as BackportOptionsWithSha)
     ).toEqual({
       formattedMessage: '[APM] Add API tests (#70740)',
+      originalMessage: '[APM] Add API tests (#70740)',
       pullNumber: undefined,
       sha: 'cb6fbc0e1b406675724181a3e9f59459b5f8f892',
       sourceBranch: 'master',

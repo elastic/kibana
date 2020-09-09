@@ -151,23 +151,36 @@ export async function cherrypick(
   }
 }
 
-export async function finalizeCherrypick(options: BackportOptions) {
-  try {
-    const noVerify = options.noVerify ? ` --no-verify` : '';
+export async function commitChanges(
+  commit: CommitSelected,
+  options: BackportOptions
+) {
+  const noVerify = options.noVerify ? ` --no-verify` : '';
 
+  try {
     await exec(`git commit --no-edit${noVerify}`, {
       cwd: getRepoPath(options),
     });
   } catch (e) {
-    const isCommitError = e.stdout?.includes('nothing to commit');
-    if (!isCommitError) {
-      throw e;
+    if (e.stdout?.includes('nothing to commit')) {
+      logger.info(
+        `Could not run "git commit". Probably because the changes were manually committed`,
+        e
+      );
+      return;
     }
 
-    logger.info(
-      `git commit failed - probably because the changes were manually committed`,
-      e
-    );
+    // manually set the commit message if the inferred commit message is empty
+    // this can happen if the user runs `git reset HEAD` and thereby aborts the cherrypick process
+    if (e.stderr?.includes('Aborting commit due to empty commit message')) {
+      await exec(`git commit -m "${commit.originalMessage}" ${noVerify}`, {
+        cwd: getRepoPath(options),
+      });
+      return;
+    }
+
+    // rethrow error if it can't be handled
+    throw e;
   }
 }
 

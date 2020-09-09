@@ -21,6 +21,7 @@ describe('fetchCommitByPullNumber', () => {
 
       expect(await fetchCommitByPullNumber(options)).toEqual({
         formattedMessage: 'Add 🍏 emoji (#5)',
+        originalMessage: 'Add 🍏 emoji (#5)',
         pullNumber: 5,
         sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
         sourceBranch: 'master',

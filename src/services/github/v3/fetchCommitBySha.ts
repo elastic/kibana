@@ -44,9 +44,10 @@ export async function fetchCommitBySha(
 
   const commitRes = res.data.items[0];
   const fullSha = commitRes.sha;
+  const commitMessage = commitRes.commit.message;
 
   const formattedMessage = getFormattedCommitMessage({
-    message: commitRes.commit.message,
+    message: commitMessage,
     sha: fullSha,
   });
 
@@ -60,6 +61,7 @@ export async function fetchCommitBySha(
     sourceBranch: 'master',
     targetBranchesFromLabels: [],
     formattedMessage,
+    originalMessage: commitMessage,
     sha: fullSha,
   };
 }
