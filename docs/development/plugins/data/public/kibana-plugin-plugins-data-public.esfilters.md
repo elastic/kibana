@@ -35,7 +35,7 @@ esFilters: {
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
-            value?: string | ((formatter?: import("../common").FilterValueFormatter | undefined) => string) | undefined;
+            value?: string | undefined;
         };
         $state?: import("../common").FilterState | undefined;
         query?: any;

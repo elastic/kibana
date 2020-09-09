@@ -134,8 +134,8 @@ describe('embeddable factory', () => {
   });
 
   test('embeddableFactory telemetry function gets called when calling embeddable telemetry', () => {
-    start.telemetry(embeddableState);
-    expect(embeddableFactory.telemetry).toBeCalledWith(embeddableState);
+    start.telemetry(embeddableState, {});
+    expect(embeddableFactory.telemetry).toBeCalledWith(embeddableState, {});
   });
 });
 
@@ -176,7 +176,7 @@ describe('embeddable enhancements', () => {
   });
 
   test('enhancement telemetry function gets called when calling embeddable telemetry', () => {
-    start.telemetry(embeddableState);
-    expect(embeddableEnhancement.telemetry).toBeCalledWith(embeddableState.enhancements.test);
+    start.telemetry(embeddableState, {});
+    expect(embeddableEnhancement.telemetry).toBeCalledWith(embeddableState.enhancements.test, {});
   });
 });
