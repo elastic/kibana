@@ -105,11 +105,7 @@ export async function getMemoryChartData(
       memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
     },
     additionalFilters: [
-      {
-        exists: {
-          field: METRIC_CGROUP_MEMORY_USAGE_BYTES,
-        },
-      },
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
     ],
   });
 
