@@ -94,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_provider).to.eql('basic');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     it('should properly set cookie and authenticate user', async () => {
