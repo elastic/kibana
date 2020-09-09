@@ -21,7 +21,9 @@ import { TestFailure } from './get_failures';
 import { GithubIssueMini, GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
-const getCiType = () => (process.env.TEAMCITY_CI ? 'TeamCity' : 'Jenkins');
+export function getCiType() {
+  return process.env.TEAMCITY_CI ? 'TeamCity' : 'Jenkins';
+}
 
 export async function createFailureIssue(buildUrl: string, failure: TestFailure, api: GithubApi) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
