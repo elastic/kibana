@@ -6,6 +6,7 @@
 
 import nodeCrypto from '@elastic/node-crypto';
 import { ElasticsearchServiceSetup, IUiSettingsClient } from 'kibana/server';
+import moment from 'moment';
 // @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
@@ -21,8 +22,7 @@ import { LevelLogger } from '../../lib';
 import { setFieldFormats } from '../../services';
 import { createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
-import { ScheduledTaskParamsCSV } from './types';
-import moment from 'moment';
+import { TaskPayloadCSV } from './types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
@@ -31,7 +31,7 @@ const getRandomScrollId = () => {
   return puid.generate();
 };
 
-const getScheduledTaskParams = (baseObj: any) => baseObj as ScheduledTaskParamsCSV;
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadCSV;
 
 describe('CSV Execute Job', function () {
   const encryptionKey = 'testEncryptionKey';
@@ -130,7 +130,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       await runTask(
         'job456',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -148,7 +148,7 @@ describe('CSV Execute Job', function () {
       };
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const job = getScheduledTaskParams({
+      const job = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: {
@@ -177,7 +177,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       await runTask(
         'job456',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -195,7 +195,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       await runTask(
         'job456',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -229,7 +229,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       await runTask(
         'job456',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -268,7 +268,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       await runTask(
         'job456',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -298,7 +298,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: undefined,
@@ -325,7 +325,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -350,7 +350,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
         conflictedTypesFields: [],
@@ -376,7 +376,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -402,7 +402,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
         conflictedTypesFields: [],
@@ -428,7 +428,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -455,7 +455,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -476,7 +476,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -499,7 +499,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -520,7 +520,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -536,7 +536,7 @@ describe('CSV Execute Job', function () {
     it('should reject Promise if search call errors out', async function () {
       callAsCurrentUserStub.rejects(new Error());
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -555,7 +555,7 @@ describe('CSV Execute Job', function () {
       });
       callAsCurrentUserStub.onSecondCall().rejects(new Error());
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -576,7 +576,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -595,7 +595,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -621,7 +621,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -647,7 +647,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
@@ -683,7 +683,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       runTask(
         'job345',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -702,7 +702,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       runTask(
         'job345',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -720,7 +720,7 @@ describe('CSV Execute Job', function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
       runTask(
         'job345',
-        getScheduledTaskParams({
+        getBasePayload({
           headers: encryptedHeaders,
           fields: [],
           searchRequest: { index: null, body: null },
@@ -740,7 +740,7 @@ describe('CSV Execute Job', function () {
   describe('csv content', function () {
     it('should write column headers to output, even if there are no results', async function () {
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
@@ -752,7 +752,7 @@ describe('CSV Execute Job', function () {
     it('should use custom uiSettings csv:separator for header', async function () {
       mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTING).returns(';');
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
@@ -764,7 +764,7 @@ describe('CSV Execute Job', function () {
     it('should escape column headers if uiSettings csv:quoteValues is true', async function () {
       mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTING).returns(true);
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
@@ -776,7 +776,7 @@ describe('CSV Execute Job', function () {
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function () {
       mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTING).returns(false);
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
@@ -794,7 +794,7 @@ describe('CSV Execute Job', function () {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
@@ -815,7 +815,7 @@ describe('CSV Execute Job', function () {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -843,7 +843,7 @@ describe('CSV Execute Job', function () {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -866,7 +866,7 @@ describe('CSV Execute Job', function () {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -902,7 +902,7 @@ describe('CSV Execute Job', function () {
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(1);
 
         const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-        const jobParams = getScheduledTaskParams({
+        const jobParams = getBasePayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           searchRequest: { index: null, body: null },
@@ -932,7 +932,7 @@ describe('CSV Execute Job', function () {
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(9);
 
         const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-        const jobParams = getScheduledTaskParams({
+        const jobParams = getBasePayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           searchRequest: { index: null, body: null },
@@ -969,7 +969,7 @@ describe('CSV Execute Job', function () {
         });
 
         const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-        const jobParams = getScheduledTaskParams({
+        const jobParams = getBasePayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           conflictedTypesFields: [],
@@ -1009,7 +1009,7 @@ describe('CSV Execute Job', function () {
         });
 
         const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-        const jobParams = getScheduledTaskParams({
+        const jobParams = getBasePayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           conflictedTypesFields: [],
@@ -1046,7 +1046,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -1072,7 +1072,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -1098,7 +1098,7 @@ describe('CSV Execute Job', function () {
       });
 
       const runTask = runTaskFnFactory(mockReportingCore, mockLogger);
-      const jobParams = getScheduledTaskParams({
+      const jobParams = getBasePayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],

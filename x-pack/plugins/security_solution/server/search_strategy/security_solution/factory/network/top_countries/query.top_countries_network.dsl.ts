@@ -12,7 +12,7 @@ import {
   NetworkTopTablesFields,
   NetworkTopCountriesRequestOptions,
   SortField,
-} from '../../../../../../common/search_strategy/security_solution';
+} from '../../../../../../common/search_strategy';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_countries_count: {

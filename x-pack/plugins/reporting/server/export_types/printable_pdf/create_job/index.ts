@@ -5,17 +5,17 @@
  */
 
 import { cryptoFactory } from '../../../lib';
-import { CreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF } from '../types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTaskFn(
+  return async function createJob(
     { title, relativeUrls, browserTimezone, layout, objectType },
     context,
     req

@@ -25,7 +25,8 @@ import {
   createMockLayoutInstance,
   createMockLevelLogger,
 } from '../../test_helpers';
-import { ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
+import { ConditionalHeaders } from '../../types';
+import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 

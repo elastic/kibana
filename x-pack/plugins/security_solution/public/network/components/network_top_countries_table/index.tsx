@@ -17,7 +17,7 @@ import {
   NetworkTopCountriesEdges,
   NetworkTopTablesFields,
   SortField,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
@@ -88,8 +88,8 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
     }
 
     return flowTargeted === FlowTargetSourceDest.source
-      ? networkModel.IpDetailsTableType.topCountriesSource
-      : networkModel.IpDetailsTableType.topCountriesDestination;
+      ? networkModel.NetworkDetailsTableType.topCountriesSource
+      : networkModel.NetworkDetailsTableType.topCountriesDestination;
   }, [flowTargeted, type]);
 
   const field =
