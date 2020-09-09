@@ -4,8 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './common';
+export * from './dns';
+export * from './http';
+export * from './overview';
 export * from './tls';
+export * from './top_countries';
+export * from './top_n_flow';
 
 export enum NetworkQueries {
+  dns = 'dns',
+  http = 'http',
+  overview = 'overviewNetwork',
   tls = 'tls',
+  topCountries = 'topCountries',
+  topNFlow = 'topNFlow',
 }

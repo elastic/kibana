@@ -11,7 +11,7 @@ The Webhook action type uses https://github.com/axios/axios[axios] to send a POS
 Webhook connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-URL::       The request URL. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted.
+URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Method::    HTTP request method, either `post`(default) or `put`.
 Headers::   A set of key-value pairs sent as headers with the request
 User::      An optional username. If set, HTTP basic authentication is used. Currently only basic authentication is supported.

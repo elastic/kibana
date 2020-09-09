@@ -10,15 +10,25 @@ Object {
   "body": Object {
     "aggs": Object {
       "backEnd": Object {
-        "avg": Object {
+        "percentiles": Object {
           "field": "transaction.marks.agent.timeToFirstByte",
-          "missing": 0,
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
       "domInteractive": Object {
-        "avg": Object {
+        "percentiles": Object {
           "field": "transaction.marks.agent.domInteractive",
-          "missing": 0,
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
       "pageViews": Object {
@@ -138,7 +148,7 @@ Object {
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
-        "aggs": Object {},
+        "aggs": undefined,
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",
