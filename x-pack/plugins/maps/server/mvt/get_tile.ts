@@ -98,13 +98,13 @@ export async function getGridTile({
 
       const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
 
-      const features = convertRegularRespToGeoJson(gridAggResult, requestType);
-      const featureCollection = {
+      const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
+      const featureCollection: FeatureCollection = {
         features,
         type: 'FeatureCollection',
       };
 
-      return createMvtTile(featureCollection);
+      return createMvtTile(featureCollection, z, x, y);
     } catch (e) {
       logger.warn(e.message);
       throw e;
@@ -233,7 +233,7 @@ export async function getTile({
       type: 'FeatureCollection',
     };
 
-    return createMvtTile(featureCollection);
+    return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
     logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
     return null;
@@ -302,7 +302,12 @@ function esBboxToGeoJsonPolygon(esBounds: ESBounds): Polygon {
   };
 }
 
-function createMvtTile(featureCollection: FeatureCollection): Buffer | null {
+function createMvtTile(
+  featureCollection: FeatureCollection,
+  z: number,
+  x: number,
+  y: number
+): Buffer | null {
   const tileIndex = geojsonvt(featureCollection, {
     maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
     tolerance: 3, // simplification tolerance (higher means simpler)

@@ -61,13 +61,13 @@ function precisionRounding(v, minPrecision, binSize) {
   return _.round(v, precision);
 }
 
-function tileToLatitude(y, tileCount) {
+export function tileToLatitude(y, tileCount) {
   const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y) / tileCount));
   const lat = (180 / Math.PI) * radians;
   return precisionRounding(lat, DECIMAL_DEGREES_PRECISION, 180 / tileCount);
 }
 
-function tileToLongitude(x, tileCount) {
+export function tileToLongitude(x, tileCount) {
   const lon = (x / tileCount) * 360 - 180;
   return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, 360 / tileCount);
 }
