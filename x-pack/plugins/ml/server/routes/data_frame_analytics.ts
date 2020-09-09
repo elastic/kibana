@@ -324,19 +324,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           success: false,
         };
 
-        // Check if analyticsId is valid and get destination index
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          try {
-            const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
-              id: analyticsId,
-            });
-            if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
-              destinationIndex = body.data_frame_analytics[0].dest.index;
-            }
-          } catch (e) {
-            return response.customError(wrapError(e));
+        try {
+          // Check if analyticsId is valid and get destination index
+          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+            id: analyticsId,
+          });
+          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+            destinationIndex = body.data_frame_analytics[0].dest.index;
           }
+        } catch (e) {
+          // exist early if the job doesn't exist
+          return response.customError(wrapError(e));
+        }
 
+        if (deleteDestIndex || deleteDestIndexPattern) {
           // If user checks box to delete the destinationIndex associated with the job
           if (destinationIndex && deleteDestIndex) {
             // Verify if user has privilege to delete the destination index
