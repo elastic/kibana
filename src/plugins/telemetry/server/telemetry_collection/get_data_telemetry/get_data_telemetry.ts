@@ -192,21 +192,18 @@ export async function getDataTelemetry(
       ],
     };
     const indicesStatsParams: RequestParams.IndicesStats = {
-      index: 'index',
+      index,
       level: 'indices',
       metric: ['docs', 'store'],
       filter_path: ['indices.*.total'],
     };
-    const [indexMappingsResponse, indexStatsResponse]: [
+    const [{ body: indexMappings }, { body: indexStats }]: [
       ApiResponse,
       ApiResponse
     ] = await Promise.all([
-      esClient.indices.getMapping(indexMappingsParams),
-      esClient.indices.stats(indicesStatsParams),
+      esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
+      esClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);
-
-    const indexMappings = indexMappingsResponse.body as IndexMappings;
-    const indexStats = indexStatsResponse.body as IndexStats;
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
 

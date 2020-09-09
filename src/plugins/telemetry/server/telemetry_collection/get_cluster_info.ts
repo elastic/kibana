@@ -43,7 +43,7 @@ export interface ESClusterInfoResponse {
   meta: object;
 }
 export async function clusterInfoGetter(esClient: ElasticsearchClient) {
-  const { body } = ((await esClient.info()) as unknown) as ESClusterInfoResponse;
+  const { body } = await esClient.info<ESClusterInfo>();
   return body;
 }
 /**
