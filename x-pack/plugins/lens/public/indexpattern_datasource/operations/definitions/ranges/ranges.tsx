@@ -8,28 +8,26 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 
-import { autoInterval } from '../../../../../../../../src/plugins/data/common';
+import {
+  autoInterval,
+  RangeType,
+  UI_SETTINGS,
+} from '../../../../../../../../src/plugins/data/common';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 
 export const DEFAULT_INTERVAL = 1000;
-// TODO: find a way to read the UI settings config from here
-export const HISTOGRAM_MAX_BARS = 100;
 
 export const MODES = {
   Range: 'range',
   Histogram: 'histogram',
 } as const;
 
-export type MODES_TYPES = typeof MODES.Range | typeof MODES.Histogram;
+export type RangeTypeLens = RangeType & { label: string };
 
-export interface RangeType {
-  from: number;
-  to: number;
-  label: string;
-}
+export type MODES_TYPES = typeof MODES.Range | typeof MODES.Histogram;
 
 export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
@@ -37,8 +35,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     type: MODES_TYPES;
     interval: 'auto' | number;
     maxBars: 'auto' | number;
-    intervalBase?: number;
-    ranges: RangeType[];
+    ranges: RangeTypeLens[];
   };
 }
 
@@ -50,11 +47,38 @@ export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
 
 export const isValidNumber = (value: number | '') =>
   value !== '' && !isNaN(value) && isFinite(value);
-export const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
-export const isValidRange = (range: RangeType): boolean => {
+export const isRangeWithin = (range: RangeTypeLens): boolean => range.from <= range.to;
+const isFullRange = ({ from, to }: RangeType) => isValidNumber(from) && isValidNumber(to);
+export const isValidRange = (range: RangeTypeLens): boolean => {
   const { from, to } = range;
-  return isValidNumber(from) && isValidNumber(to) && isRangeWithin(range);
+  return (isFullRange(range) && isRangeWithin(range)) || isValidNumber(from) || isValidNumber(to);
 };
+
+function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
+  if (params.type === MODES.Range) {
+    return {
+      field: sourceField,
+      keyed: true,
+      ranges: params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
+        if (isFullRange(range)) {
+          return { from: range.from, to: range.to };
+        }
+        // create a copy with only the valid numeric range prop
+        const prop = isValidNumber(range.from) ? 'from' : 'to';
+        const value = isValidNumber(range.from) ? range.from : range.to;
+        return { [prop]: value };
+      }),
+    };
+  }
+  return {
+    field: sourceField,
+    interval: params.interval,
+    maxBars: params.maxBars === 'auto' ? null : params.maxBars,
+    has_extended_bounds: false,
+    min_doc_count: false,
+    extended_bounds: { min: '', max: '' },
+  };
+}
 
 export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   type: 'range',
@@ -116,26 +140,17 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
     };
   },
   toEsAggsConfig: (column, columnId) => {
+    const params = getEsAggsParams(column);
     return {
       id: columnId,
       enabled: true,
       type: column.params.type,
       schema: 'segment',
-      params: {
-        field: column.sourceField,
-        ranges: column.params.ranges
-          .filter(isValidRange)
-          .map(({ label, ...rawRange }) => ({ ...rawRange })),
-        interval: column.params.interval,
-        maxBars: column.params.maxBars === 'auto' ? null : column.params.maxBars,
-        intervalBase: column.params.intervalBase,
-        drop_partials: false,
-        min_doc_count: 0,
-        extended_bounds: {},
-      },
+      params,
     };
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, columnId, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
+    const rangeFormatter = data.fieldFormats.deserialize({ id: 'range' });
     const setParam: UpdateParamsFnType = (paramName, value) => {
       setState(
         updateColumnParam({
@@ -175,6 +190,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
           setParam={setParam}
           params={currentColumn.params}
           onChangeMode={onChangeMode}
+          maxHistogramBars={uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
+          rangeFormatter={rangeFormatter}
         />
       </EuiForm>
     );

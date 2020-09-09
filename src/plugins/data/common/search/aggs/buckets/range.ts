@@ -36,12 +36,14 @@ export interface RangeBucketAggDependencies {
   getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart'];
 }
 
+export interface RangeType {
+  from: number;
+  to: number;
+}
+
 export interface AggParamsRange extends BaseAggParams {
   field: string;
-  ranges?: Array<{
-    from: number;
-    to: number;
-  }>;
+  ranges?: RangeType[];
 }
 
 export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDependencies) => {

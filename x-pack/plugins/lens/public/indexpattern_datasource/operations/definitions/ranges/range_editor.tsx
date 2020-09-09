@@ -6,7 +6,7 @@
 
 import React, { useState, MouseEventHandler, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, debounce } from 'lodash';
 import {
   DraggableLocation,
   EuiButtonEmpty,
@@ -31,41 +31,37 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { debounce } from 'lodash';
-import { isAutoInterval } from '../../../../../../../../src/plugins/data/common';
+import { isAutoInterval, IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import {
-  RangeType,
+  RangeTypeLens,
   MODES,
   RangeColumnParams,
   UpdateParamsFnType,
   MODES_TYPES,
-  HISTOGRAM_MAX_BARS,
   isValidRange,
   isValidNumber,
-  isRangeWithin,
 } from './ranges';
 
 const generateId = htmlIdGenerator();
 
-type LocalRangeType = RangeType & { id: string };
+type LocalRangeType = RangeTypeLens & { id: string };
 
 // Taken from the Visualize editor
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';
 
-const getSafeLabel = (range: RangeType) =>
-  range.label || (isValidRange(range) ? `${range.from} - ${range.to}` : '');
-
-const getBetterLabel = (range: RangeType) =>
+const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
-  `${isValidNumber(range.from) ? range.from : FROM_PLACEHOLDER} - ${
-    isValidNumber(range.to) ? range.to : TO_PLACEHOLDER
-  }`;
+  formatter.convert({
+    gte: isValidNumber(range.from) ? range.from : FROM_PLACEHOLDER,
+    lt: isValidNumber(range.to) ? range.to : TO_PLACEHOLDER,
+  });
 
 const BaseRangeEditor = ({
   autoIntervalEnabled,
   maxBars,
   interval,
+  maxHistogramBars,
   onToggleEditor,
   toggleAutoInterval,
   onMaxBarsChange,
@@ -74,6 +70,7 @@ const BaseRangeEditor = ({
   autoIntervalEnabled: boolean;
   maxBars: 'auto' | number;
   interval: number;
+  maxHistogramBars: number;
   onToggleEditor: () => void;
   toggleAutoInterval: (enabled: boolean) => void;
   onMaxBarsChange: (newMaxBars: number) => void;
@@ -107,11 +104,11 @@ const BaseRangeEditor = ({
               {autoIntervalEnabled ? (
                 <EuiRange
                   min={1}
-                  max={HISTOGRAM_MAX_BARS}
+                  max={maxHistogramBars}
                   step={1}
                   value={maxBars === 'auto' ? '' : maxBars}
                   onChange={({ target }) =>
-                    onMaxBarsChange(Number(get(target, 'value', HISTOGRAM_MAX_BARS)))
+                    onMaxBarsChange(Number(get(target, 'value', maxHistogramBars)))
                   }
                   placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
                     defaultMessage: 'Auto',
@@ -124,7 +121,7 @@ const BaseRangeEditor = ({
                 />
               ) : (
                 <EuiFieldNumber
-                  data-test-subj="lens-range-interval-field"
+                  data-test-subj="lns-indexPattern-range-interval-field"
                   value={interval}
                   onChange={({ target }) => onIntervalChange(Number(target.value))}
                   prepend={i18n.translate('xpack.lens.indexPattern.ranges.min', {
@@ -153,12 +150,14 @@ const RangePopover = ({
   Button,
   isOpenByCreation,
   setIsOpenByCreation,
+  formatter,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
   isOpenByCreation: boolean;
   setIsOpenByCreation: (open: boolean) => void;
+  formatter: IFieldFormat;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
@@ -168,7 +167,7 @@ const RangePopover = ({
     setIsOpenByCreation(isOpen);
   };
 
-  const saveRangeIfValid = (newRange: LocalRangeType, resetRange = false) => {
+  const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
       // reset the temporary range for later use
       setTempRange(range);
@@ -178,15 +177,15 @@ const RangePopover = ({
   };
   const { from, to } = tempRange;
 
-  const safeLabel = getSafeLabel(tempRange);
+  const safeLabel = getBetterLabel(tempRange, formatter);
 
-  const gteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.greaterThanOrEqualAppend', {
+  const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
     defaultMessage: '\u2264',
   });
-  const gteTooltipContent = i18n.translate(
-    'xpack.lens.indexPattern.ranges.greaterThanOrEqualTooltip',
+  const lteTooltipContent = i18n.translate(
+    'xpack.lens.indexPattern.ranges.lessThanOrEqualTooltip',
     {
-      defaultMessage: 'Greater than or equal to',
+      defaultMessage: 'Less than or equal to',
     }
   );
   const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
@@ -202,7 +201,7 @@ const RangePopover = ({
       isOpen={isOpenByCreation || isPopoverOpen}
       closePopover={() => {
         setPopoverOpen(false);
-        saveRangeIfValid(tempRange, true);
+        saveRangeAndReset(tempRange, true);
       }}
       button={<Button onClick={() => setPopoverOpen(!isPopoverOpen)} />}
     >
@@ -215,20 +214,20 @@ const RangePopover = ({
                 onChange={({ target }) => {
                   const newRange = {
                     ...tempRange,
-                    from: target.value ? Number(target.value) : -Infinity,
+                    from: target.value !== '' ? Number(target.value) : -Infinity,
                   };
                   setTempRange(newRange);
-                  saveRangeIfValid(newRange);
+                  saveRangeAndReset(newRange);
                 }}
                 append={
-                  <EuiToolTip content={gteTooltipContent}>
-                    <EuiText size="s">{gteAppendLabel}</EuiText>
+                  <EuiToolTip content={lteTooltipContent}>
+                    <EuiText size="s">{lteAppendLabel}</EuiText>
                   </EuiToolTip>
                 }
                 fullWidth
                 compressed
                 placeholder={FROM_PLACEHOLDER}
-                isInvalid={isValidNumber(from) && !isRangeWithin(tempRange)}
+                isInvalid={!isValidRange(tempRange)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -240,20 +239,20 @@ const RangePopover = ({
                 onChange={({ target }) => {
                   const newRange = {
                     ...tempRange,
-                    to: target.value ? Number(target.value) : -Infinity,
+                    to: target.value !== '' ? Number(target.value) : -Infinity,
                   };
                   setTempRange(newRange);
-                  saveRangeIfValid(newRange);
+                  saveRangeAndReset(newRange);
                 }}
                 prepend={
                   <EuiToolTip content={ltTooltipContent}>
                     <EuiText size="s">{ltPrependLabel}</EuiText>
                   </EuiToolTip>
                 }
-                fullWidth={true}
-                compressed={true}
+                fullWidth
+                compressed
                 placeholder={TO_PLACEHOLDER}
-                isInvalid={isValidNumber(to) && !isRangeWithin(tempRange)}
+                isInvalid={!isValidRange(tempRange)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -271,7 +270,7 @@ const RangePopover = ({
                 label: target.value,
               };
               setTempRange(newRange);
-              saveRangeIfValid(newRange);
+              saveRangeAndReset(newRange);
             }}
           />
         </EuiFormRow>
@@ -284,10 +283,12 @@ const AdvancedRangeEditor = ({
   ranges,
   setRanges,
   onToggleEditor,
+  formatter,
 }: {
-  ranges: RangeType[];
-  setRanges: (newRanges: RangeType[]) => void;
+  ranges: RangeTypeLens[];
+  setRanges: (newRanges: RangeTypeLens[]) => void;
   onToggleEditor: () => void;
+  formatter: IFieldFormat;
 }) => {
   // use a local state to store ids with range objects
   const [localRanges, setLocalRanges] = useState<LocalRangeType[]>(() =>
@@ -392,6 +393,7 @@ const AdvancedRangeEditor = ({
                                 }
                                 updateRangesDebounced(newRanges);
                               }}
+                              formatter={formatter}
                               Button={({ onClick }: { onClick: MouseEventHandler }) => (
                                 <EuiLink
                                   color="text"
@@ -403,7 +405,7 @@ const AdvancedRangeEditor = ({
                                     textAlign="left"
                                     color={isValidRange(range) ? 'default' : 'danger'}
                                   >
-                                    {getBetterLabel(range)}
+                                    {getBetterLabel(range, formatter)}
                                   </EuiText>
                                 </EuiLink>
                               )}
@@ -456,12 +458,16 @@ export const RangeEditor = ({
   onAutoIntervalToggle,
   setParam,
   params,
+  maxHistogramBars,
   onChangeMode,
+  rangeFormatter,
 }: {
   params: RangeColumnParams;
+  maxHistogramBars: number;
   setParam: UpdateParamsFnType;
   onAutoIntervalToggle: (enabled: boolean) => void;
   onChangeMode: (mode: MODES_TYPES) => void;
+  rangeFormatter: IFieldFormat;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
   const isAutoIntervalEnabled = isAutoInterval(params.interval);
@@ -478,6 +484,7 @@ export const RangeEditor = ({
           onChangeMode(MODES.Histogram);
           toggleAdvancedEditor(false);
         }}
+        formatter={rangeFormatter}
       />
     );
   }
@@ -486,6 +493,7 @@ export const RangeEditor = ({
       autoIntervalEnabled={isAutoIntervalEnabled}
       interval={numericIntervalValue}
       maxBars={params.maxBars}
+      maxHistogramBars={maxHistogramBars}
       toggleAutoInterval={onAutoIntervalToggle}
       onMaxBarsChange={(maxBars: number) => {
         setParam('maxBars', maxBars);
