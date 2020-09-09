@@ -189,19 +189,13 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
 }
 
 export async function createIndexPattern(indexPatternName) {
-  const indexPatterns = await indexPatternService.get();
   try {
-    Object.assign(indexPatterns, {
-      id: '',
+    const indexPattern = await indexPatternService.create({
       title: indexPatternName,
     });
-
-    await indexPatterns.create(true);
-    const id = await getIndexPatternId(indexPatternName);
-    const indexPattern = await indexPatternService.get(id);
     return {
       success: true,
-      id,
+      id: indexPattern.id,
       fields: indexPattern.fields,
     };
   } catch (error) {
@@ -209,18 +203,6 @@ export async function createIndexPattern(indexPatternName) {
       success: false,
       error,
     };
-  }
-}
-
-async function getIndexPatternId(name) {
-  const savedObjectSearch = await savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
-  const indexPatternSavedObjects = savedObjectSearch.savedObjects;
-
-  if (indexPatternSavedObjects) {
-    const ip = indexPatternSavedObjects.find((i) => i.attributes.title === name);
-    return ip !== undefined ? ip.id : undefined;
-  } else {
-    return undefined;
   }
 }
 
