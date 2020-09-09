@@ -17,11 +17,11 @@ import {
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { VisualizationDimensionGroupConfig } from '../../../types';
-import { DimensionPopoverState } from './types';
+import { DimensionFlyoutState } from './types';
 
-export function DimensionPopover({
-  popoverState,
-  setPopoverState,
+export function DimensionFlyout({
+  flyoutState,
+  setFlyoutState,
   groups,
   accessor,
   groupId,
@@ -29,8 +29,8 @@ export function DimensionPopover({
   panel,
   panelTitle,
 }: {
-  popoverState: DimensionPopoverState;
-  setPopoverState: (newState: DimensionPopoverState) => void;
+  flyoutState: DimensionFlyoutState;
+  setFlyoutState: (newState: DimensionFlyoutState) => void;
   groups: VisualizationDimensionGroupConfig[];
   accessor: string;
   groupId: string;
@@ -38,12 +38,12 @@ export function DimensionPopover({
   panel: React.ReactElement;
   panelTitle: React.ReactNode;
 }) {
-  const [openByCreation, setIsOpenByCreation] = useState(popoverState.openId === accessor);
+  const [openByCreation, setIsOpenByCreation] = useState(flyoutState.openId === accessor);
 
-  const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
+  const noMatch = flyoutState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
 
   const closeFlyout = () => {
-    setPopoverState({
+    setFlyoutState({
       isOpen: false,
       openId: null,
       addingToGroupId: null,
@@ -52,21 +52,21 @@ export function DimensionPopover({
   };
 
   const flyout =
-    popoverState.isOpen &&
-    (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId)) ? (
+    flyoutState.isOpen &&
+    (flyoutState.openId === accessor || (noMatch && flyoutState.addingToGroupId === groupId)) ? (
       <div
         role="dialog"
-        aria-labelledby="lnsDimensionPopoverFlyoutTitle"
-        className={classNames('lnsDimensionPopover', {
-          'lnsDimensionPopover--noAnimation': openByCreation,
+        aria-labelledby="lnsDimensionFlyoutFlyoutTitle"
+        className={classNames('lnsDimensionFlyout', {
+          'lnsDimensionFlyout--noAnimation': openByCreation,
         })}
       >
-        <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
+        <EuiFlyoutHeader hasBorder className="lnsDimensionFlyout__header">
           <EuiTitle size="xs">
             <EuiButtonEmpty
               onClick={closeFlyout}
               data-test-subj="lns-indexPatternDimension-flyoutTitle"
-              id="lnsDimensionPopoverFlyoutTitle"
+              id="lnsDimensionFlyoutFlyoutTitle"
               iconType="sortLeft"
               flush="left"
             >
@@ -77,7 +77,7 @@ export function DimensionPopover({
         <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
           {panel}
         </EuiFlexItem>
-        <EuiFlyoutFooter className="lnsDimensionPopover__footer">
+        <EuiFlyoutFooter className="lnsDimensionFlyout__footer">
           <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
             {i18n.translate('xpack.lens.dimensionFlyout.close', {
               defaultMessage: 'Close',
@@ -89,7 +89,7 @@ export function DimensionPopover({
 
   return (
     <>
-      <div className="lnsDimensionPopover__trigger">{trigger}</div>
+      <div className="lnsDimensionFlyout__trigger">{trigger}</div>
       {flyout}
     </>
   );

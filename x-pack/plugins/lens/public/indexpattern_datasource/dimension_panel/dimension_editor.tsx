@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './popover_editor.scss';
+import './dimension_editor.scss';
 import _ from 'lodash';
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ import { FormatSelector } from './format_selector';
 
 const operationPanels = getOperationDisplay();
 
-export interface PopoverEditorProps extends IndexPatternDimensionEditorProps {
+export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
   operationFieldSupportMatrix: OperationFieldSupportMatrix;
   currentIndexPattern: IndexPattern;
@@ -78,7 +78,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   );
 };
 
-export function PopoverEditor(props: PopoverEditorProps) {
+export function DimensionEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
     operationFieldSupportMatrix,

@@ -30,7 +30,7 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
 }
 
-export interface DimensionPopoverState {
+export interface DimensionFlyoutState {
   isOpen: boolean;
   openId: string | null;
   addingToGroupId: string | null;

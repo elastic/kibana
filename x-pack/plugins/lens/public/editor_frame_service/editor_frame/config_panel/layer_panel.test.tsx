@@ -221,7 +221,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionFlyout');
       const panel = mount(group.prop('panel'));
 
       expect(panel.children()).toHaveLength(2);
@@ -230,7 +230,7 @@ describe('LayerPanel', () => {
     it('should keep the flyout open when configuring a new dimension', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the popover
+       * this tests that the ID used in the first render is used to keep the flyout
        * open in future renders
        */
       (generateId as jest.Mock).mockReturnValueOnce(`newid`);
@@ -264,7 +264,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionFlyout');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
@@ -274,10 +274,10 @@ describe('LayerPanel', () => {
       expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
     });
 
-    it('should close the popover when the active visualization changes', () => {
+    it('should close the flyout when the active visualization changes', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the popover
+       * this tests that the ID used in the first render is used to keep the flyout
        * open in future renders
        */
 
@@ -312,7 +312,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionFlyout');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');

@@ -112,7 +112,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
-      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimensionPopover-remove`);
+      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimensionFlyout-remove`);
     },
 
     /**

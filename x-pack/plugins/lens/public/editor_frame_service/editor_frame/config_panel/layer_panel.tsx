@@ -23,10 +23,10 @@ import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, DimensionPopoverState } from './types';
-import { DimensionPopover } from './dimension_popover';
+import { ConfigPanelWrapperProps, DimensionFlyoutState } from './types';
+import { DimensionFlyout } from './dimension_flyout';
 
-const initialPopoverState = {
+const initialFlyoutState = {
   isOpen: false,
   openId: null,
   addingToGroupId: null,
@@ -48,13 +48,13 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
+  const [flyoutState, setFlyoutState] = useState<DimensionFlyoutState>(initialFlyoutState);
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
-    setPopoverState(initialPopoverState);
+    setFlyoutState(initialFlyoutState);
   }, [props.activeVisualizationId]);
 
   if (
@@ -250,9 +250,9 @@ export function LayerPanel(
                         }
                       }}
                     >
-                      <DimensionPopover
-                        popoverState={popoverState}
-                        setPopoverState={setPopoverState}
+                      <DimensionFlyout
+                        flyoutState={flyoutState}
+                        setFlyoutState={setFlyoutState}
                         groups={groups}
                         accessor={accessor}
                         groupId={group.groupId}
@@ -264,11 +264,11 @@ export function LayerPanel(
                               columnId: accessor,
                               filterOperations: group.filterOperations,
                               suggestedPriority: group.suggestedPriority,
-                              togglePopover: () => {
-                                if (popoverState.isOpen) {
-                                  setPopoverState(initialPopoverState);
+                              onClick: () => {
+                                if (flyoutState.isOpen) {
+                                  setFlyoutState(initialFlyoutState);
                                 } else {
-                                  setPopoverState({
+                                  setFlyoutState({
                                     isOpen: true,
                                     openId: accessor,
                                     addingToGroupId: null, // not set for existing dimension
@@ -293,7 +293,7 @@ export function LayerPanel(
                       />
 
                       <EuiButtonIcon
-                        data-test-subj="indexPattern-dimensionPopover-remove"
+                        data-test-subj="indexPattern-dimensionFlyout-remove"
                         iconType="cross"
                         iconSize="s"
                         size="s"
@@ -370,9 +370,9 @@ export function LayerPanel(
                       }
                     }}
                   >
-                    <DimensionPopover
-                      popoverState={popoverState}
-                      setPopoverState={setPopoverState}
+                    <DimensionFlyout
+                      flyoutState={flyoutState}
+                      setFlyoutState={setFlyoutState}
                       groups={groups}
                       accessor={newId}
                       groupId={group.groupId}
@@ -388,10 +388,10 @@ export function LayerPanel(
                               defaultMessage: 'Add a configuration',
                             })}
                             onClick={() => {
-                              if (popoverState.isOpen) {
-                                setPopoverState(initialPopoverState);
+                              if (flyoutState.isOpen) {
+                                setFlyoutState(initialFlyoutState);
                               } else {
-                                setPopoverState({
+                                setFlyoutState({
                                   isOpen: true,
                                   openId: newId,
                                   addingToGroupId: group.groupId,
@@ -429,7 +429,7 @@ export function LayerPanel(
                                   prevState: props.visualizationState,
                                 })
                               );
-                              setPopoverState({
+                              setFlyoutState({
                                 isOpen: true,
                                 openId: newId,
                                 addingToGroupId: null, // clear now that dimension exists

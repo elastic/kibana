@@ -345,7 +345,7 @@ describe('terms', () => {
     });
   });
 
-  describe('popover param editor', () => {
+  describe('param editor', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

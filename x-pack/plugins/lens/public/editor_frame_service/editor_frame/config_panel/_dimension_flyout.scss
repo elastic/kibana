@@ -1,7 +1,7 @@
 @import '@elastic/eui/src/components/flyout/variables';
 @import '@elastic/eui/src/components/flyout/mixins';
 
-.lnsDimensionPopover {
+.lnsDimensionFlyout {
   // Use the EuiFlyout style
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
@@ -13,16 +13,16 @@
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
-.lnsDimensionPopover--noAnimation {
+.lnsDimensionFlyout--noAnimation {
   animation: none;
 }
 
-.lnsDimensionPopover__footer,
-.lnsDimensionPopover__header {
+.lnsDimensionFlyout__footer,
+.lnsDimensionFlyout__header {
   padding: $euiSizeS;
 }
 
-.lnsDimensionPopover__trigger {
+.lnsDimensionFlyout__trigger {
   width: 100%;
   display: block;
   word-break: break-word;
