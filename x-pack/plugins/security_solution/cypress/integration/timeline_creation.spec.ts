@@ -41,6 +41,7 @@ import {
   markAsFavorite,
   pinFirstEvent,
   populateTimeline,
+  waitForTimelineChanges,
 } from '../tasks/timeline';
 import { openTimeline } from '../tasks/timelines';
 
@@ -75,6 +76,7 @@ describe('Timelines', () => {
     closeNotes();
     addFilter(timeline.filter);
     markAsFavorite();
+    waitForTimelineChanges();
     createNewTimeline();
     closeTimeline();
     navigateFromHeaderTo(TIMELINES);
