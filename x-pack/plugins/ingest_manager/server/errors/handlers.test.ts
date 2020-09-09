@@ -17,7 +17,7 @@ import {
 } from './index';
 
 const LegacyESErrors = errors as Record<string, any>;
-type ITestEsErrorsFnParams = [errorCode: string, error: any, bodyMessage: string];
+type ITestEsErrorsFnParams = [errorCode: string, error: any, expectedMessage: string];
 
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -33,7 +33,7 @@ describe('defaultIngestErrorHandler', () => {
   });
 
   async function testEsErrorsFn(...args: ITestEsErrorsFnParams) {
-    const [, error, bodyMessage] = args;
+    const [, error, expectedMessage] = args;
     jest.clearAllMocks();
     const response = httpServerMock.createResponseFactory();
     await defaultIngestErrorHandler({ error, response });
@@ -43,12 +43,12 @@ describe('defaultIngestErrorHandler', () => {
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: error.status,
-      body: { message: bodyMessage },
+      body: { message: expectedMessage },
     });
 
     // logging
     expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
-    expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    expect(mockContract.logger?.error).toHaveBeenCalledWith(expectedMessage);
   }
 
   describe('use the HTTP error status code provided by LegacyESErrors', () => {

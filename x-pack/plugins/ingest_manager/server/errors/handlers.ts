@@ -64,13 +64,14 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
   if (isLegacyESClientError(error)) {
     // there was a problem communicating with ES (e.g. via `callCluster`)
     // only log the message
-    logger.error(error.message);
-
     const message =
       error?.path && error?.response
         ? // if possible, return the failing endpoint and its response
           `${error.message} response from ${error.path}: ${error.response}`
         : error.message;
+
+    logger.error(message);
+
     return response.customError({
       statusCode: error?.statusCode || error.status,
       body: { message },
