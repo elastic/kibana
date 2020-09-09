@@ -9,8 +9,16 @@ import { Logger } from '../types';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 const THROUGHPUT_CHECK_INTERVAL = 10 * 1000;
+
+// When errors occur, reduce maxWorkers by MAX_WORKERS_REDUCTION_PERCENTAGE
+// When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
+// until starting value is reached
 const MAX_WORKERS_REDUCTION_PERCENTAGE = 0.8;
 const MAX_WORKERS_INCREASE_PERCENTAGE = 1.05;
+
+// When errors occur, increase pollInterval by POLL_INTERVAL_INCREASE_PERCENTAGE
+// When errors no longer occur, start decreasing pollInterval by POLL_INTERVAL_REDUCTION_PERCENTAGE
+// until starting value is reached
 const POLL_INTERVAL_REDUCTION_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
