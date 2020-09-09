@@ -69,12 +69,21 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   };
 
   return (
-    <EuiFieldText
-      compressed
-      data-test-subj="indexPattern-label-edit"
-      value={inputValue}
-      onChange={handleInputChange}
-    />
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
+        defaultMessage: 'Display name',
+        description: 'Display name of a column of data',
+      })}
+      display="columnCompressed"
+      fullWidth
+    >
+      <EuiFieldText
+        compressed
+        data-test-subj="indexPattern-label-edit"
+        value={inputValue}
+        onChange={handleInputChange}
+      />
+    </EuiFormRow>
   );
 };
 
@@ -344,37 +353,28 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
       <div className="lnsIndexPatternDimensionEditor__section">
         {!incompatibleSelectedOperationType && selectedColumn && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
-              defaultMessage: 'Display name',
-              description: 'Display name of a column of data',
-            })}
-            display="columnCompressed"
-            fullWidth
-          >
-            <LabelInput
-              value={selectedColumn.label}
-              onChange={(value) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: {
-                      ...state.layers[layerId],
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          label: value,
-                          customLabel: true,
-                        },
+          <LabelInput
+            value={selectedColumn.label}
+            onChange={(value) => {
+              setState({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: {
+                    ...state.layers[layerId],
+                    columns: {
+                      ...state.layers[layerId].columns,
+                      [columnId]: {
+                        ...selectedColumn,
+                        label: value,
+                        customLabel: true,
                       },
                     },
                   },
-                });
-              }}
-            />
-          </EuiFormRow>
+                },
+              });
+            }}
+          />
         )}
 
         {!hideGrouping && (

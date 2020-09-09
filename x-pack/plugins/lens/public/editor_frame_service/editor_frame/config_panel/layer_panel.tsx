@@ -161,6 +161,7 @@ export function LayerPanel(
               className="lnsLayerPanel__row"
               fullWidth
               label={group.groupLabel}
+              labelType="legend"
               key={index}
               isInvalid={isMissing}
               error={

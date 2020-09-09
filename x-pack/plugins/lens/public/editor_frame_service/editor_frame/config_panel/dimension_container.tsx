@@ -5,13 +5,14 @@
  */
 import './dimension_popover.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiTitle,
   EuiButtonEmpty,
   EuiFlexItem,
+  EuiFocusTrap,
 } from '@elastic/eui';
 
 import classNames from 'classnames';
@@ -41,6 +42,8 @@ export function DimensionContainer({
   const [openByCreation, setIsOpenByCreation] = useState(
     dimensionContainerState.openId === accessor
   );
+  const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
+  const [flyoutIsVisible, setFlyoutIsVisible] = useState(false);
 
   const noMatch = dimensionContainerState.isOpen
     ? !groups.some((d) => d.accessors.includes(accessor))
@@ -53,12 +56,29 @@ export function DimensionContainer({
       addingToGroupId: null,
     });
     setIsOpenByCreation(false);
+    setFocusTrapIsEnabled(false);
+    setFlyoutIsVisible(false);
   };
 
-  const flyout =
-    dimensionContainerState.isOpen &&
-    (dimensionContainerState.openId === accessor ||
-      (noMatch && dimensionContainerState.addingToGroupId === groupId)) ? (
+  const openFlyout = () => {
+    setFlyoutIsVisible(true);
+    setTimeout(() => {
+      setFocusTrapIsEnabled(true);
+    }, 255);
+  };
+
+  useEffect(() => {
+    if (
+      dimensionContainerState.isOpen &&
+      (dimensionContainerState.openId === accessor ||
+        (noMatch && dimensionContainerState.addingToGroupId === groupId))
+    ) {
+      openFlyout();
+    }
+  });
+
+  const flyout = flyoutIsVisible && (
+    <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
       <div
         role="dialog"
         aria-labelledby="lnsDimensionContainerTitle"
@@ -90,7 +110,8 @@ export function DimensionContainer({
           </EuiButtonEmpty>
         </EuiFlyoutFooter>
       </div>
-    ) : null;
+    </EuiFocusTrap>
+  );
 
   return (
     <>
