@@ -19,7 +19,7 @@
 
 import { SavedObjectsUtils } from './utils';
 
-describe('#SavedObjectsUtils', () => {
+describe('SavedObjectsUtils', () => {
   const { namespaceIdToString, namespaceStringToId } = SavedObjectsUtils;
 
   describe('#namespaceIdToString', () => {

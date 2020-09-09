@@ -159,13 +159,7 @@ describe('SavedObjectsRepository', () => {
     { type, id, references, namespace: objectNamespace, originId },
     namespace
   ) => {
-    const namespaceId =
-      // eslint-disable-next-line no-nested-ternary
-      objectNamespace !== undefined
-        ? objectNamespace !== 'default'
-          ? objectNamespace
-          : undefined
-        : namespace;
+    const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
     return {
       // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
       found: true,
@@ -675,19 +669,19 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkCreateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkCreateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         const objects = [
           { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
           { ...obj2, type: MULTI_NAMESPACE_TYPE },
@@ -994,25 +988,25 @@ describe('SavedObjectsRepository', () => {
 
     describe('client calls', () => {
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkGetSuccess([obj1, obj2], { namespace });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2]);
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2], { namespace: 'default' });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         let objects = [obj1, obj2].map((obj) => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
         await bulkGetSuccess(objects, { namespace });
         _expectClientCallArgs(objects, { getId });
@@ -1355,7 +1349,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkUpdateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
 
@@ -1369,7 +1363,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkUpdateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
 
@@ -1392,7 +1386,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         const overrides = {
           // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
           // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
@@ -1643,25 +1637,25 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await checkConflictsSuccess([obj1, obj2], { namespace });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await checkConflictsSuccess([obj1, obj2]);
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await checkConflictsSuccess([obj1, obj2], { namespace: 'default' });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         // obj3 is multi-namespace, and obj6 is namespace-agnostic
         await checkConflictsSuccess([obj3, obj6], { namespace });
         _expectClientCallArgs([obj3, obj6], { getId });
