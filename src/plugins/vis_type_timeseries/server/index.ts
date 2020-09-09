@@ -27,8 +27,6 @@ export {
   VisTypeTimeseriesPluginStartDependencies,
 } from './plugin';
 
-export { ReqFacade } from './lib/search_strategies/strategies/abstract_search_strategy';
-
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   deprecations: ({ unused, renameFromRoot }) => [
     // In Kibana v7.8 plugin id was renamed from 'metrics' to 'vis_type_timeseries':
@@ -45,8 +43,10 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
 
 export { ValidationTelemetryServiceSetup } from './validation_telemetry';
 
-// @ts-ignore
-export { AbstractSearchStrategy } from './lib/search_strategies/strategies/abstract_search_strategy';
+export {
+  AbstractSearchStrategy,
+  ReqFacade,
+} from './lib/search_strategies/strategies/abstract_search_strategy';
 // @ts-ignore
 export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
 
