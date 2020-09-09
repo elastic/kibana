@@ -57,7 +57,7 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     type: string,
     attributes: A,
     savedObjectId?: string
-  ) => Promise<{ id?: string } | { error: Error}>;
+  ) => Promise<{ id?: string } | { error: Error }>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
@@ -178,7 +178,7 @@ export class AttributeService<
 
   getInputAsRefType = async (
     input: ValType | RefType,
-    saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string },
+    saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string }
   ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
       return input;

@@ -469,7 +469,7 @@ export class VisualizeEmbeddable
       };
       const saveModalTitle = this.getTitle()
         ? this.getTitle()
-        : i18n.translate('visualize.embeddable.placeholderTitle', {
+        : i18n.translate('visualizations.embeddable.placeholderTitle', {
             defaultMessage: 'Placeholder Title',
           });
       // @ts-ignore
