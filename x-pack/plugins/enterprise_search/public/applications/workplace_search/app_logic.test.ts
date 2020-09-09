@@ -22,6 +22,24 @@ describe('AppLogic', () => {
     organization: {},
   };
 
+  const expectedLogicValues = {
+    account: {
+      canCreateInvitations: true,
+      canCreatePersonalSources: true,
+      groups: ['Default', 'Cats'],
+      id: 'some-id-string',
+      isAdmin: true,
+      isCurated: false,
+      viewedOnboardingPage: true,
+    },
+    hasInitialized: true,
+    isFederatedAuth: false,
+    organization: {
+      defaultOrgName: 'My Organization',
+      name: 'ACME Donuts',
+    },
+  };
+
   it('has expected default values', () => {
     expect(AppLogic.values).toEqual(DEFAULT_VALUES);
   });
@@ -30,22 +48,16 @@ describe('AppLogic', () => {
     it('sets values based on passed props', () => {
       AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
+      expect(AppLogic.values).toEqual(expectedLogicValues);
+    });
+
+    it('handles case where workplaceSearch undefined', () => {
+      AppLogic.actions.initializeAppData({ isFederatedAuth: false });
+
       expect(AppLogic.values).toEqual({
-        account: {
-          canCreateInvitations: true,
-          canCreatePersonalSources: true,
-          groups: ['Default', 'Cats'],
-          id: 'some-id-string',
-          isAdmin: true,
-          isCurated: false,
-          viewedOnboardingPage: true,
-        },
-        hasInitialized: true,
-        isFederatedAuth: false,
-        organization: {
-          defaultOrgName: 'My Organization',
-          name: 'ACME Donuts',
-        },
+        ...expectedLogicValues,
+        organization: {},
+        account: {},
       });
     });
   });
