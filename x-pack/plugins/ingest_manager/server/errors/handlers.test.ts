@@ -30,67 +30,52 @@ describe('defaultIngestErrorHandler', () => {
     appContextService.stop();
   });
 
+  async function testEsErrorsFn(errorCode: string, error: any, bodyMessage: string) {
+    jest.clearAllMocks();
+    const response = httpServerMock.createResponseFactory();
+    await defaultIngestErrorHandler({ error, response });
+
+    // response
+    expect(response.ok).toHaveBeenCalledTimes(0);
+    expect(response.customError).toHaveBeenCalledTimes(1);
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: error.status,
+      body: { message: bodyMessage },
+    });
+
+    // logging
+    expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
+    expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+  }
+
   describe('use the HTTP error status code provided by LegacyESErrors', () => {
     const statusCodes = Object.keys(LegacyESErrors).filter((key) => /^\d+$/.test(key));
     const errorCodes = statusCodes.filter((key) => parseInt(key, 10) >= 400);
-    const testCasesWithMeta = errorCodes.map((errorCode) => [
+    const testCasesWithPathResponse = errorCodes.map((errorCode) => [
       errorCode,
-      LegacyESErrors[errorCode],
-      'the root message',
-      {
+      new LegacyESErrors[errorCode]('the root message', {
         path: '/path/to/call',
         response: 'response is here',
-      },
+      }),
+      'the root message response from /path/to/call: response is here',
     ]);
-
-    test.each(testCasesWithMeta)(
-      '%d - with meta',
-      async (statusCode, StatusCodeError, message, meta) => {
-        jest.clearAllMocks();
-        const error = new StatusCodeError(message, meta);
-        const response = httpServerMock.createResponseFactory();
-        await defaultIngestErrorHandler({ error, response });
-
-        // response
-        expect(response.ok).toHaveBeenCalledTimes(0);
-        expect(response.customError).toHaveBeenCalledTimes(1);
-        expect(response.customError).toHaveBeenCalledWith({
-          statusCode: error.status,
-          body: { message: `${error.message} response from ${error.path}: ${error.response}` },
-        });
-
-        // logging
-        expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
-        expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
-      }
-    );
-
-    const testCasesWithoutMeta = errorCodes.map((errorCode) => [
+    const testCasesWithOtherMeta = errorCodes.map((errorCode) => [
       errorCode,
-      LegacyESErrors[errorCode],
+      new LegacyESErrors[errorCode]('the root message', {
+        other: '/path/to/call',
+        props: 'response is here',
+      }),
       'the root message',
     ]);
-    test.each(testCasesWithoutMeta)(
-      '%d - without meta',
-      async (statusCode, StatusCodeError, message) => {
-        jest.clearAllMocks();
-        const error = new StatusCodeError(message);
-        const response = httpServerMock.createResponseFactory();
-        await defaultIngestErrorHandler({ error, response });
+    const testCasesWithoutMeta = errorCodes.map((errorCode) => [
+      errorCode,
+      new LegacyESErrors[errorCode]('some message'),
+      'some message',
+    ]);
 
-        // response
-        expect(response.ok).toHaveBeenCalledTimes(0);
-        expect(response.customError).toHaveBeenCalledTimes(1);
-        expect(response.customError).toHaveBeenCalledWith({
-          statusCode: error.status,
-          body: { message: error.message },
-        });
-
-        // logging
-        expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
-        expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
-      }
-    );
+    test.each(testCasesWithPathResponse)('%d - with path & response', testEsErrorsFn);
+    test.each(testCasesWithOtherMeta)('%d - with other metadata', testEsErrorsFn);
+    test.each(testCasesWithoutMeta)('%d - without metadata', testEsErrorsFn);
   });
 
   describe('IngestManagerError', () => {
