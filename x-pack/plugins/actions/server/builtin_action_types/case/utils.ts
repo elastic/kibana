@@ -51,10 +51,7 @@ export const buildMap = (mapping: MapRecord[]): Map<string, MapRecord> => {
   }, new Map());
 };
 
-export const mapParams = (
-  params: Partial<ExecutorSubActionPushParams>,
-  mapping: Map<string, MapRecord>
-): AnyParams => {
+export const mapParams = <T extends {}>(params: T, mapping: Map<string, MapRecord>): AnyParams => {
   return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
     const field = mapping.get(curr);
     if (field) {
@@ -106,7 +103,10 @@ export const createConnectorExecutor = ({
     const { comments, externalId, ...restParams } = pushToServiceParams;
 
     const mapping = buildMap(config.casesConfiguration.mapping);
-    const externalCase = mapParams(restParams, mapping);
+    const externalCase = mapParams<ExecutorSubActionPushParams>(
+      restParams as ExecutorSubActionPushParams,
+      mapping
+    );
 
     data = await api.pushToService({
       externalService,
