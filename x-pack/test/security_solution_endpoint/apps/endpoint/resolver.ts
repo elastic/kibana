@@ -40,7 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('compare resolver Nodes Table data and Data length', async () => {
       const nodeData: string[] = [];
       const TableData: string[] = [];
-
       const Table = await testSubjects.findAll('resolver:node-list:item');
       for (const value of Table) {
         const text = await value._webElement.getText();
