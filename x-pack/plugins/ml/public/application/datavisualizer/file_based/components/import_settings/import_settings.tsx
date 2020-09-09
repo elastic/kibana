@@ -11,6 +11,7 @@ import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
+import { CombinedField } from '../combined_fields';
 
 interface Props {
   index: string;
@@ -28,6 +29,9 @@ interface Props {
   onPipelineStringChange(): void;
   indexNameError: string;
   indexPatternNameError: string;
+  combinedFields: CombinedField[];
+  onCombinedFieldsChange(combinedFields: CombinedField[]): void;
+  results: unknown;
 }
 
 export const ImportSettings: FC<Props> = ({
@@ -46,6 +50,9 @@ export const ImportSettings: FC<Props> = ({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
+  combinedFields,
+  onCombinedFieldsChange,
+  results,
 }) => {
   const tabs = [
     {
@@ -93,6 +100,9 @@ export const ImportSettings: FC<Props> = ({
             onPipelineStringChange={onPipelineStringChange}
             indexNameError={indexNameError}
             indexPatternNameError={indexPatternNameError}
+            combinedFields={combinedFields}
+            onCombinedFieldsChange={onCombinedFieldsChange}
+            results={results}
           />
         </React.Fragment>
       ),

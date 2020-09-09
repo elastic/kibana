@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { CombinedField, CombinedFieldsForm } from '../combined_fields';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
@@ -36,6 +37,9 @@ interface Props {
   onPipelineStringChange(): void;
   indexNameError: string;
   indexPatternNameError: string;
+  combinedFields: CombinedField[];
+  onCombinedFieldsChange(combinedFields: CombinedField[]): void;
+  results: unknown;
 }
 
 export const AdvancedSettings: FC<Props> = ({
@@ -54,6 +58,9 @@ export const AdvancedSettings: FC<Props> = ({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
+  combinedFields,
+  onCombinedFieldsChange,
+  results,
 }) => {
   return (
     <React.Fragment>
@@ -122,6 +129,16 @@ export const AdvancedSettings: FC<Props> = ({
           isInvalid={indexPatternNameError !== ''}
         />
       </EuiFormRow>
+
+      <CombinedFieldsForm
+        mappingsString={mappingsString}
+        pipelineString={pipelineString}
+        onMappingsStringChange={onMappingsStringChange}
+        onPipelineStringChange={onPipelineStringChange}
+        combinedFields={combinedFields}
+        onCombinedFieldsChange={onCombinedFieldsChange}
+        results={results}
+      />
 
       <EuiFlexGroup>
         <EuiFlexItem>
