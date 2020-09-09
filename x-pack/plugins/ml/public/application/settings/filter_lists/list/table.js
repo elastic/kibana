@@ -98,7 +98,11 @@ function EditFilterLink({ filterListId }) {
     await navigateToUrl(url);
   };
 
-  return <EuiLink onClick={() => redirectToFilterListEditPage()}>{filterListId}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="mlEditFilterListLink" onClick={() => redirectToFilterListEditPage()}>
+      {filterListId}
+    </EuiLink>
+  );
 }
 
 function getColumns() {
@@ -108,7 +112,7 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: (id) => <EditFilterLink filterListId={id} data-test-subj="mlEditFilterListLink" />,
+      render: (id) => <EditFilterLink filterListId={id} />,
       sortable: true,
       scope: 'row',
       'data-test-subj': 'mlFilterListColumnId',
@@ -231,7 +235,7 @@ export function FilterListsTable({
             isSelectable={true}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
-              'data-test-subj': `mlCalendarListRow row-${item.filter_id}`,
+              'data-test-subj': `mlFilterListsTable row-${item.filter_id}`,
             })}
           />
         </div>
