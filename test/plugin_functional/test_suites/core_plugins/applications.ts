@@ -20,7 +20,6 @@ import url from 'url';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
 
@@ -55,12 +54,24 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
   };
 
+  const navigateTo = async (path: string) =>
+    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToApp('foo');
     });
 
     it('starts on home page', async () => {
+      await testSubjects.existOrFail('fooAppHome');
+    });
+
+    it('redirects and renders correctly regardless of trailing slash', async () => {
+      await navigateTo(`/app/foo`);
+      await waitForUrlToBe('/app/foo/home');
+      await testSubjects.existOrFail('fooAppHome');
+      await navigateTo(`/app/foo/`);
+      await waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -73,7 +84,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       // Go to home page
       await testSubjects.click('fooNavHome');
-      await waitForUrlToBe('/app/foo');
+      await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -87,7 +98,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('navigates to app root when navlink is clicked', async () => {
       await appsMenu.clickLink('Foo');
-      await waitForUrlToBe('/app/foo');
+      await waitForUrlToBe('/app/foo/home');
       // await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -106,7 +117,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
-      await waitForUrlToBe('/app/foo');
+      await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -133,17 +144,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowSize()).height;
       expect(wrapperHeight).to.be.below(windowHeight);
-    });
-
-    // Not sure if we need this test or not. If yes, we need to find another legacy app
-    it.skip('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Stack Management');
-      await testSubjects.existOrFail('managementNav');
-    });
-
-    it('can navigate from legacy apps to NP apps', async () => {
-      await appsMenu.clickLink('Foo');
-      await testSubjects.existOrFail('fooAppHome');
     });
   });
 }

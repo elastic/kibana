@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
@@ -24,10 +25,7 @@ function newLayerState(layerId: string): LayerState {
   };
 }
 
-export const datatableVisualization: Visualization<
-  DatatableVisualizationState,
-  DatatableVisualizationState
-> = {
+export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -73,8 +71,6 @@ export const datatableVisualization: Visualization<
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions({
     table,
@@ -147,14 +143,28 @@ export const datatableVisualization: Visualization<
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
-            defaultMessage: 'Columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
+            defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: sortedColumns.filter((c) => datasource.getOperationForColumnId(c)?.isBucketed),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns.filter(
+            (c) => !datasource.getOperationForColumnId(c)?.isBucketed
+          ),
+          supportsMoreColumns: true,
+          filterOperations: (op) => !op.isBucketed,
+          required: true,
+          dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
     };
@@ -185,10 +195,13 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  toExpression(state, frame) {
+  toExpression(state, datasourceLayers): Ast {
     const layer = state.layers[0];
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const operations = layer.columns
+    const datasource = datasourceLayers[layer.layerId];
+    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    // When we add a column it could be empty, and therefore have no order
+    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+    const operations = sortedColumns
       .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 

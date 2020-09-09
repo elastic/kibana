@@ -6,30 +6,44 @@
 import {
   KibanaRequest,
   KibanaResponseFactory,
-  RequestHandler,
   RequestHandlerContext,
+  IScopedClusterClient,
+  RequestHandler,
 } from 'kibana/server';
 
 import { MlLicense } from '../../../common/license';
 
+type Handler = (handlerParams: {
+  client: IScopedClusterClient;
+  request: KibanaRequest<any, any, any, any>;
+  response: KibanaResponseFactory;
+  context: RequestHandlerContext;
+}) => ReturnType<RequestHandler>;
+
 export class MlServerLicense extends MlLicense {
-  public fullLicenseAPIGuard(handler: RequestHandler<any, any, any>) {
+  public fullLicenseAPIGuard(handler: Handler) {
     return guard(() => this.isFullLicense(), handler);
   }
-  public basicLicenseAPIGuard(handler: RequestHandler<any, any, any>) {
+  public basicLicenseAPIGuard(handler: Handler) {
     return guard(() => this.isMinimumLicense(), handler);
   }
 }
 
-function guard(check: () => boolean, handler: RequestHandler<any, any, any>) {
+function guard(check: () => boolean, handler: Handler) {
   return (
     context: RequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<any, any, any, any>,
     response: KibanaResponseFactory
   ) => {
     if (check() === false) {
       return response.forbidden();
     }
-    return handler(context, request, response);
+
+    return handler({
+      client: context.core.elasticsearch.client,
+      request,
+      response,
+      context,
+    });
   };
 }

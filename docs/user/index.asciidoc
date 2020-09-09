@@ -2,8 +2,6 @@ include::introduction.asciidoc[]
 
 include::whats-new.asciidoc[]
 
-include::getting-started.asciidoc[]
-
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
@@ -13,9 +11,11 @@ include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
 
 include::security/securing-kibana.asciidoc[]
 
+include::getting-started.asciidoc[]
+
 include::discover.asciidoc[]
 
-include::dashboard.asciidoc[]
+include::dashboard/dashboard.asciidoc[]
 
 include::canvas.asciidoc[]
 
@@ -25,7 +25,7 @@ include::ml/index.asciidoc[]
 
 include::graph/index.asciidoc[]
 
-include::visualize.asciidoc[]
+include::{kib-repo-dir}/observability/index.asciidoc[]
 
 include::{kib-repo-dir}/logs/index.asciidoc[]
 

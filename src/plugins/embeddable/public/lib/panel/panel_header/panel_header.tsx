@@ -30,7 +30,8 @@ import React from 'react';
 import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
-import { EmbeddableContext } from '../../triggers';
+import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
+import { uiToReactComponent } from '../../../../../kibana_react/public';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -49,11 +50,11 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable })}
-      onClick={() => badge.execute({ embeddable })}
-      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
-      {badge.getDisplayName({ embeddable })}
+      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
   ));
 }
@@ -65,19 +66,24 @@ function renderNotifications(
   return notifications.map((notification) => {
     const context = { embeddable };
 
-    let badge = (
+    let badge = notification.MenuItem ? (
+      React.createElement(uiToReactComponent(notification.MenuItem))
+    ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
         key={notification.id}
         style={{ marginTop: '4px', marginRight: '4px' }}
-        onClick={() => notification.execute(context)}
+        onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
       >
-        {notification.getDisplayName(context)}
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
       </EuiNotificationBadge>
     );
 
     if (notification.getDisplayNameTooltip) {
-      const tooltip = notification.getDisplayNameTooltip(context);
+      const tooltip = notification.getDisplayNameTooltip({
+        ...context,
+        trigger: panelNotificationTrigger,
+      });
 
       if (tooltip) {
         badge = (
@@ -132,6 +138,7 @@ export function PanelHeader({
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
   const showPanelBar = badges.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
 

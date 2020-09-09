@@ -54,14 +54,17 @@ export class MonitoringPlugin
     if (home) {
       home.featureCatalogue.register({
         id,
-        title,
+        title: i18n.translate('xpack.monitoring.featureCatalogueTitle', {
+          defaultMessage: 'Monitor the stack',
+        }),
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
-        description: i18n.translate('xpack.monitoring.monitoringDescription', {
-          defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
+        description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
+          defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),
+        order: 610,
       });
     }
 
@@ -128,7 +131,7 @@ export class MonitoringPlugin
       UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
       JSON.stringify(refreshInterval)
     );
-    uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
+    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
   }
 
   private getExternalConfig() {

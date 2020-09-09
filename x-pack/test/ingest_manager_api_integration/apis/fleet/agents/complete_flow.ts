@@ -62,7 +62,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(enrollmentResponse.success).to.eql(true);
 
       const agentAccessAPIKey = enrollmentResponse.item.access_api_key;
 
@@ -76,14 +75,13 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(checkinApiResponse.success).to.eql(true);
       expect(checkinApiResponse.actions).length(1);
       expect(checkinApiResponse.actions[0].type).be('CONFIG_CHANGE');
-      const configChangeAction = checkinApiResponse.actions[0];
-      const defaultOutputApiKey = configChangeAction.data.config.outputs.default.api_key;
+      const policyChangeAction = checkinApiResponse.actions[0];
+      const defaultOutputApiKey = policyChangeAction.data.config.outputs.default.api_key;
 
       // Ack actions
-      const { body: ackApiResponse } = await supertestWithoutAuth
+      await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
@@ -94,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
               type: 'ACTION_RESULT',
               subtype: 'ACKNOWLEDGED',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
-              action_id: configChangeAction.id,
+              action_id: policyChangeAction.id,
               agent_id: enrollmentResponse.item.id,
               message: 'hello',
               payload: 'payload',
@@ -102,7 +100,6 @@ export default function (providerContext: FtrProviderContext) {
           ],
         })
         .expect(200);
-      expect(ackApiResponse.success).to.eql(true);
 
       // Second agent checkin
       const { body: secondCheckinApiResponse } = await supertestWithoutAuth
@@ -113,7 +110,6 @@ export default function (providerContext: FtrProviderContext) {
           events: [],
         })
         .expect(200);
-      expect(secondCheckinApiResponse.success).to.eql(true);
       expect(secondCheckinApiResponse.actions).length(0);
 
       // Get agent
@@ -121,18 +117,16 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}`)
         .expect(200);
 
-      expect(getAgentApiResponse.success).to.eql(true);
       expect(getAgentApiResponse.item.packages).to.contain(
         'system',
         "Agent should run the 'system' package"
       );
 
       // Unenroll agent
-      const { body: unenrollResponse } = await supertest
+      await supertest
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
         .set('kbn-xsrf', 'xx')
         .expect(200);
-      expect(unenrollResponse.success).to.eql(true);
 
       //  Checkin after unenrollment
       const { body: checkinAfterUnenrollResponse } = await supertestWithoutAuth
@@ -144,13 +138,12 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(checkinAfterUnenrollResponse.success).to.eql(true);
       expect(checkinAfterUnenrollResponse.actions).length(1);
       expect(checkinAfterUnenrollResponse.actions[0].type).be('UNENROLL');
       const unenrollAction = checkinAfterUnenrollResponse.actions[0];
 
       //  ack unenroll actions
-      const { body: ackUnenrollApiResponse } = await supertestWithoutAuth
+      await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
@@ -168,7 +161,6 @@ export default function (providerContext: FtrProviderContext) {
           ],
         })
         .expect(200);
-      expect(ackUnenrollApiResponse.success).to.eql(true);
 
       // Checkin after unenrollment acknowledged
       await supertestWithoutAuth

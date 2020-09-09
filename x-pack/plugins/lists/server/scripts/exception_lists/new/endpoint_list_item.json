@@ -8,8 +8,9 @@
   "entries": [
     {
       "field": "actingProcess.file.signer",
-      "operator": "excluded",
-      "type": "exists"
+      "operator": "included",
+      "type": "match",
+      "value": "test"
     },
     {
       "field": "host.name",

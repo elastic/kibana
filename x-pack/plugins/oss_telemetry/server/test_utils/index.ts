@@ -13,7 +13,6 @@ import {
   ConcreteTaskInstance,
   TaskStatus,
   TaskManagerStartContract,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../task_manager/server';
 
 export const getMockTaskInstance = (

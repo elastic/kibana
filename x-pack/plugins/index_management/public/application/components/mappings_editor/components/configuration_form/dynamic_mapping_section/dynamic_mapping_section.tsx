@@ -55,6 +55,7 @@ export const DynamicMappingSection = () => (
       {(formData) => {
         const {
           'dynamicMapping.enabled': enabled,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dynamicMapping.date_detection': dateDetection,
         } = formData;
 

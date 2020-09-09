@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
-import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;

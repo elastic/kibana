@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import './_index.scss';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
@@ -20,7 +21,8 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share'> & MlStartDependencies;
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
+  MlStartDependencies;
 
 interface AppProps {
   coreStart: CoreStart;

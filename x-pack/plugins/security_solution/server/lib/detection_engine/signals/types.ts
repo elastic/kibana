@@ -6,12 +6,13 @@
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerts/server';
+import { AlertType, AlertTypeState, AlertExecutorOptions } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
 
 // used for gap detection code
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type unitType = 's' | 'm' | 'h';
 export const isValidUnit = (unitParam: string): unitParam is unitType =>
   ['s', 'm', 'h'].includes(unitParam);
@@ -108,7 +109,7 @@ export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is Aler
 };
 
 export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
 };
 
 export interface Ancestor {

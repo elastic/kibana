@@ -14,6 +14,8 @@ import {
   IndexedProcessNode,
   AABB,
   VisibleEntites,
+  SectionData,
+  TreeFetcherParameters,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -28,17 +30,32 @@ import {
   ResolverTree,
   ResolverNodeStats,
   ResolverRelatedEvents,
+  SafeResolverEvent,
+  EndpointEvent,
+  LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import { allEventCategories } from '../../../../common/endpoint/models/event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
+import { formatDate } from '../../view/panels/panel_content_utilities';
 
 /**
  * If there is currently a request.
  */
-export function isLoading(state: DataState): boolean {
-  return state.pendingRequestDatabaseDocumentID !== undefined;
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree.pendingRequestParameters !== undefined;
+}
+
+/**
+ * If a request was made and it threw an error or returned a failure response code.
+ */
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree.lastResponse) {
+    return !state.tree.lastResponse.successful;
+  }
+  return false;
 }
 
 /**
@@ -49,26 +66,11 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * If a request was made and it threw an error or returned a failure response code.
- */
-export function hasError(state: DataState): boolean {
-  if (state.lastResponse && state.lastResponse.successful === false) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
  * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
-  if (state.lastResponse && state.lastResponse.successful) {
-    return state.lastResponse.result;
-  } else {
-    return undefined;
-  }
+  return state.tree.lastResponse?.successful ? state.tree.lastResponse.result : undefined;
 };
 
 /**
@@ -145,7 +147,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeModel.factory(graphableProcesses);
+  return indexedProcessTreeModel.factory(graphableProcesses as SafeResolverEvent[]);
 });
 
 /**
@@ -166,11 +168,125 @@ export const relatedEventsStats: (
 );
 
 /**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: DataState
+) => (entityId: string) => number = createSelector(relatedEventsStats, (relatedStats) => {
+  return (entityId) => {
+    const statsForEntity = relatedStats(entityId);
+    if (statsForEntity === undefined) {
+      return 0;
+    }
+    return Object.values(statsForEntity?.events?.byCategory || {}).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+  };
+});
+
+/**
  * returns a map of entity_ids to related event data.
  */
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
   return data.relatedEvents;
 }
+
+/**
+ * A helper function to turn objects into EuiDescriptionList entries.
+ * This reflects the strategy of more or less "dumping" metadata for related processes
+ * in description lists with little/no 'prettification'. This has the obvious drawback of
+ * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
+ * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
+ *
+ * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
+ * {title: "a.b", description: "1"}, {title: "c", description: "d"}
+ *
+ * @param {object} obj The object to turn into `<dt><dd>` entries
+ */
+const objectToDescriptionListEntries = function* (
+  obj: object,
+  prefix = ''
+): Generator<{ title: string; description: string }> {
+  const nextPrefix = prefix.length ? `${prefix}.` : '';
+  for (const [metaKey, metaValue] of Object.entries(obj)) {
+    if (typeof metaValue === 'number' || typeof metaValue === 'string') {
+      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
+    } else if (metaValue instanceof Array) {
+      yield {
+        title: nextPrefix + metaKey,
+        description: metaValue
+          .filter((arrayEntry) => {
+            return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
+          })
+          .join(','),
+      };
+    } else if (typeof metaValue === 'object') {
+      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
+    }
+  }
+};
+
+/**
+ * Returns a function that returns the information needed to display related event details based on
+ * the related event's entityID and its own ID.
+ */
+export const relatedEventDisplayInfoByEntityAndSelfID: (
+  state: DataState
+) => (
+  entityId: string,
+  relatedEventId: string | number
+) => [
+  EndpointEvent | LegacyEndpointEvent | undefined,
+  number,
+  string | undefined,
+  SectionData,
+  string
+] = createSelector(relatedEventsByEntityId, function relatedEventDetails(
+  /* eslint-disable no-shadow */
+  relatedEventsByEntityId
+  /* eslint-enable no-shadow */
+) {
+  return defaultMemoize((entityId: string, relatedEventId: string | number) => {
+    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityId);
+    if (!relatedEventsForThisProcess) {
+      return [undefined, 0, undefined, [], ''];
+    }
+    const specificEvent = relatedEventsForThisProcess.events.find(
+      (evt) => eventModel.eventId(evt) === relatedEventId
+    );
+    // For breadcrumbs:
+    const specificCategory = specificEvent && eventModel.primaryEventCategory(specificEvent);
+    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
+      return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
+    }, 0);
+
+    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
+    const { agent, ecs, process, ...relevantData } = specificEvent as ResolverEvent & {
+      // Type this with various unknown keys so that ts will let us delete those keys
+      ecs: unknown;
+      process: unknown;
+    };
+
+    let displayDate = '';
+    const sectionData: SectionData = Object.entries(relevantData)
+      .map(([sectionTitle, val]) => {
+        if (sectionTitle === '@timestamp') {
+          displayDate = formatDate(val);
+          return { sectionTitle: '', entries: [] };
+        }
+        if (typeof val !== 'object') {
+          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
+        }
+        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
+      })
+      .filter((v) => v.sectionTitle !== '' && v.entries.length);
+
+    return [specificEvent, countOfCategory, specificCategory, sectionData, displayDate];
+  });
+});
 
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
@@ -194,7 +310,9 @@ export const relatedEventsByCategory: (
         }
         return relatedById.events.reduce(
           (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
-            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+            if (
+              [candidate && eventModel.allEventCategories(candidate)].flat().includes(ecsCategory)
+            ) {
               eventsByCategory.push(candidate);
             }
             return eventsByCategory;
@@ -280,7 +398,7 @@ export const relatedEventInfoByEntityId: (
           return [];
         }
         return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [allEventCategories(resolverEvent)].flat()) {
+          for (const category of [eventModel.allEventCategories(resolverEvent)].flat()) {
             if (category === eventCategory) {
               return true;
             }
@@ -337,18 +455,24 @@ export const relatedEventInfoByEntityId: (
 );
 
 /**
- * If we need to fetch, this is the ID to fetch.
+ * If the tree resource needs to be fetched then these are the parameters that should be used.
  */
-export function databaseDocumentIDToFetch(state: DataState): string | null {
-  // If there is an ID, it must match either the last received version, or the pending version.
-  // Otherwise, we need to fetch it
-  // NB: this technique will not allow for refreshing of data.
+export function treeParametersToFetch(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
+   */
   if (
-    state.databaseDocumentID !== undefined &&
-    state.databaseDocumentID !== state.pendingRequestDatabaseDocumentID &&
-    state.databaseDocumentID !== state.lastResponse?.databaseDocumentID
+    state.tree.currentParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.lastResponse?.parameters
+    ) &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.pendingRequestParameters
+    )
   ) {
-    return state.databaseDocumentID;
+    return state.tree.currentParameters;
   } else {
     return null;
   }
@@ -404,7 +528,7 @@ export const processEventForID: (
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
   tree,
   (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
 );
 
 /**
@@ -415,7 +539,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   processEventForID,
   ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
     const node = processEventGetter(nodeID);
-    return node ? ariaLevels.get(node) ?? null : null;
+    return node ? ariaLevels.get(node as SafeResolverEvent) ?? null : null;
   }
 );
 
@@ -468,10 +592,10 @@ export const ariaFlowtoCandidate: (
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child));
+          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child as ResolverEvent));
         }
         // Set the child as the previous child.
-        previousChild = child;
+        previousChild = child as ResolverEvent;
       }
 
       if (previousChild) {
@@ -486,12 +610,7 @@ export const ariaFlowtoCandidate: (
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
-  function ({
-    /* eslint-disable no-shadow */
-    processNodePositions,
-    edgeLineSegments,
-    /* eslint-enable no-shadow */
-  }) {
+  function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
@@ -558,7 +677,7 @@ export const nodesAndEdgelines: (
       maxX,
       maxY,
     });
-    const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+    const visibleProcessNodePositions = new Map<SafeResolverEvent, Vector2>(
       entities
         .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
         .map((node) => [node.entity, node.position])
@@ -576,15 +695,18 @@ export const nodesAndEdgelines: (
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */
-export function databaseDocumentIDToAbort(state: DataState): string | null {
+export function treeRequestParametersToAbort(state: DataState): TreeFetcherParameters | null {
   /**
-   * If there is a pending request, and its not for the current databaseDocumentID (even, if the current databaseDocumentID is undefined) then we should abort the request.
+   * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.pendingRequestDatabaseDocumentID !== undefined &&
-    state.pendingRequestDatabaseDocumentID !== state.databaseDocumentID
+    state.tree.pendingRequestParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.pendingRequestParameters,
+      state.tree.currentParameters
+    )
   ) {
-    return state.pendingRequestDatabaseDocumentID;
+    return state.tree.pendingRequestParameters;
   } else {
     return null;
   }

@@ -298,7 +298,7 @@ export class ActionsClient {
   public async execute({
     actionId,
     params,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
+  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     await this.authorization.ensureAuthorized('execute');
     return this.actionExecutor.execute({ actionId, params, request: this.request });
   }

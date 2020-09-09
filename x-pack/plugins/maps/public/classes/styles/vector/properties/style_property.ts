@@ -11,7 +11,7 @@ import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 
-type LegendProps = {
+export type LegendProps = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   symbolId?: string;
@@ -20,7 +20,7 @@ type LegendProps = {
 export interface IStyleProperty<T> {
   isDynamic(): boolean;
   isComplete(): boolean;
-  formatField(value: string | undefined): string;
+  formatField(value: string | number | undefined): string | number;
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
@@ -53,7 +53,7 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return true;
   }
 
-  formatField(value: string | undefined): string {
+  formatField(value: string | number | undefined): string | number {
     // eslint-disable-next-line eqeqeq
     return value == undefined ? '' : value;
   }
@@ -66,7 +66,7 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return this._options;
   }
 
-  renderLegendDetailRow() {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps): ReactElement<any> | null {
     return null;
   }
 

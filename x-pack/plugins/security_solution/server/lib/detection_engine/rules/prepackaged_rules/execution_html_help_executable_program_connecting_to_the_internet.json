@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Compiled HTML files (.chm) are commonly distributed as part of the Microsoft HTML Help system. Adversaries may conceal malicious code in a CHM file and deliver it to a victim for execution. CHM content is loaded by the HTML Help executable program (hh.exe).",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -50,5 +52,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

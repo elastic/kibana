@@ -6,6 +6,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
+import {
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+  AGENT_POLLING_REQUEST_TIMEOUT_MS,
+} from '../common';
 export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
   IngestManagerSetupContract,
@@ -25,25 +30,37 @@ export const config = {
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
-      pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
+      pollingRequestTimeout: schema.number({
+        defaultValue: AGENT_POLLING_REQUEST_TIMEOUT_MS,
+        min: 5000,
+      }),
       maxConcurrentConnections: schema.number({ defaultValue: 0 }),
       kibana: schema.object({
-        host: schema.maybe(schema.string()),
+        host: schema.maybe(
+          schema.oneOf([
+            schema.uri({ scheme: ['http', 'https'] }),
+            schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+          ])
+        ),
         ca_sha256: schema.maybe(schema.string()),
       }),
       elasticsearch: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
-      agentConfigRolloutRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
-      agentConfigRolloutRateLimitRequestPerInterval: schema.number({ defaultValue: 5 }),
+      agentPolicyRolloutRateLimitIntervalMs: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+      }),
+      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+      }),
     }),
   }),
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 
-export { PackageConfigServiceInterface } from './services/package_config';
+export { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

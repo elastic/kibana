@@ -36,7 +36,6 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
     search,
   });
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
@@ -46,14 +45,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
     return browser.executeAsync(async (status, cb) => {
-      window.__coreAppStatus.setAppStatus(status);
+      window._coreAppStatus.setAppStatus(status);
       cb();
     }, s);
   };
 
   const navigateToApp = async (id: string) => {
     return await browser.executeAsync(async (appId, cb) => {
-      await window.__coreAppStatus.navigateToApp(appId);
+      await window._coreAppStatus.navigateToApp(appId);
       cb();
     }, id);
   };

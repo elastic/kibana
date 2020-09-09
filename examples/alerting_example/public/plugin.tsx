@@ -46,6 +46,7 @@ export interface AlertingExamplePublicStartDeps {
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { alerts, triggers_actions_ui, developerExamples }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({

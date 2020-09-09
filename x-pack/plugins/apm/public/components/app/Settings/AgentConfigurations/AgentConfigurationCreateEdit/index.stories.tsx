@@ -69,6 +69,11 @@ storiesOf(
     },
     {
       info: {
+        propTablesExclude: [
+          AgentConfigurationCreateEdit,
+          ApmPluginContext.Provider,
+          EuiThemeProvider,
+        ],
         source: false,
       },
     }

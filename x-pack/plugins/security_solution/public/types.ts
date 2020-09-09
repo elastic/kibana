@@ -21,9 +21,11 @@ import {
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { AppFrontendLibs } from './common/lib/lib';
+import { ResolverPluginSetup } from './resolver/types';
+import { Inspect } from '../common/search_strategy';
 
 export interface SetupPlugins {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -46,11 +48,14 @@ export type StartServices = CoreStart &
     storage: Storage;
   };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
+export interface PluginSetup {
+  resolver: () => Promise<ResolverPluginSetup>;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
 export interface AppObservableLibs extends AppFrontendLibs {
   kibana: CoreStart;
 }
+
+export type InspectResponse = Inspect & { response: string[] };

@@ -25,12 +25,3 @@ startServices({
 });
 
 addDecorators();
-
-// Only gather and require CSS files related to Canvas.  The other CSS files
-// are built into the DLL.
-const css = require.context(
-  '../../../../built_assets/css',
-  true,
-  /plugins\/(?=canvas).*light\.css/
-);
-css.keys().forEach((filename) => css(filename));

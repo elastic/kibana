@@ -134,6 +134,7 @@ const getTransformedHits = (
   }
 
   return results.aggregations.threshold.buckets.map(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     ({ key, doc_count }: { key: string; doc_count: number }) => {
       const source = {
         '@timestamp': new Date().toISOString(),

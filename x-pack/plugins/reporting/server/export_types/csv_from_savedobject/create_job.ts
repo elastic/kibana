@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
-import { ScheduleTaskFnFactory, TimeRangeParams } from '../../types';
+import { CreateJobFnFactory, TimeRangeParams } from '../../types';
 import {
   JobParamsPanelCsv,
   SavedObject,
@@ -37,7 +37,7 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
+export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = function createJobFactoryFn(
   reporting,
   parentLogger
 ) {
@@ -45,7 +45,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
-  return async function scheduleTask(jobParams, headers, context, req) {
+  return async function createJob(jobParams, headers, context, req) {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 
@@ -105,9 +105,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ImmediateCreateJobFn> 
         if (errPayload.statusCode === 404) {
           throw notFound(errPayload.message);
         }
-        if (err.stack) {
-          logger.error(err.stack);
-        }
+        logger.error(err);
         throw new Error(`Unable to create a job from saved object data! Error: ${err}`);
       });
 

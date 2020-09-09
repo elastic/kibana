@@ -18,11 +18,6 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    const siemClient = context.securitySolution!.getAppClient();
-    const queryIndices = indices;
-    // if the alert was promoted by a rule it will exist in the signals index so search there too
-    queryIndices.push(siemClient.getSignalsIndex());
-
     /**
      * A safe type for the response based on the semantics of the query.
      * We specify _source, asking for `process.entity_id` and we only
@@ -36,8 +31,8 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
           | [
               {
                 _source: {
-                  process: {
-                    entity_id: string;
+                  process?: {
+                    entity_id?: string;
                   };
                 };
               }
@@ -49,7 +44,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       'search',
       {
         ignoreUnavailable: true,
-        index: queryIndices,
+        index: indices,
         body: {
           // only return process.entity_id
           _source: 'process.entity_id',
@@ -64,19 +59,6 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
                     values: _id,
                   },
                 },
-                {
-                  exists: {
-                    // only return documents that have process.entity_id
-                    field: 'process.entity_id',
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      term: { 'process.entity_id': '' },
-                    },
-                  },
-                },
               ],
             },
           },
@@ -85,14 +67,13 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
     );
 
     const responseBody: ResolverEntityIndex = [];
-    for (const {
-      _source: {
-        process: { entity_id },
-      },
-    } of queryResponse.hits.hits) {
-      responseBody.push({
-        entity_id,
-      });
+    for (const hit of queryResponse.hits.hits) {
+      // check that the field is defined and that is not an empty string
+      if (hit._source.process?.entity_id) {
+        responseBody.push({
+          entity_id: hit._source.process.entity_id,
+        });
+      }
     }
     return response.ok({ body: responseBody });
   };

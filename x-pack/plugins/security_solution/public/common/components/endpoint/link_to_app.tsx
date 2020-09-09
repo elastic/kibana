@@ -35,7 +35,6 @@ export const LinkToApp = memo<LinkToAppProps>(
             {children}
           </EuiButton>
         ) : (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink {...otherProps} onClick={handleOnClick}>
             {children}
           </EuiLink>

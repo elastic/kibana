@@ -22,13 +22,14 @@ import { AddMitreThreat } from '../mitre';
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
   useForm,
+  useFormData,
+  FieldHook,
 } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
+import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema } from './schema';
@@ -68,47 +69,69 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isReadOnlyView,
   isUpdateView = false,
   isLoading,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
+  const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? [],
-    'step_about_rule'
+    RuleStep.aboutRule
   );
   const canUseExceptions =
     defineRuleData?.ruleType &&
     !isMlRule(defineRuleData.ruleType) &&
     !isThresholdRule(defineRuleData.ruleType);
 
-  const { form } = useForm({
+  const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields, getFormData, submit } = form;
+  const [{ severity: formSeverity }] = (useFormData({
+    form,
+    watch: ['severity'],
+  }) as unknown) as [Partial<AboutStepRule>];
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      setStepData(RuleStep.aboutRule, null, false);
-      const { isValid, data } = await submit();
-      if (isValid) {
-        setStepData(RuleStep.aboutRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as AboutStepRule);
+  useEffect(() => {
+    const formSeverityValue = formSeverity?.value;
+    if (formSeverityValue != null && formSeverityValue !== severityValue) {
+      setSeverityValue(formSeverityValue);
+
+      const newRiskScoreValue = defaultRiskScoreBySeverity[formSeverityValue];
+      if (newRiskScoreValue != null) {
+        const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
+        riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScoreValue });
       }
     }
-  }, [setStepData, submit]);
+  }, [formSeverity?.value, getFields, severityValue]);
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
+    }
+  }, [onSubmit]);
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.aboutRule, form);
+      setForm(RuleStep.aboutRule, getData);
     }
-  }, [setForm, form]);
+  }, [getData, setForm]);
 
-  return isReadOnlyView && myStepData.name != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
     </StepContentWrapper>
   ) : (
     <>
@@ -144,7 +167,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="severity"
               component={SeverityField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
+                dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
@@ -158,7 +181,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="riskScore"
               component={RiskScoreField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+                dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
                 indices: indexPatterns,
@@ -305,26 +328,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
           </EuiAccordion>
-          <FormDataProvider pathsToWatch="severity">
-            {({ severity }) => {
-              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = getFields().severity;
-              const riskScoreField = getFields().riskScore;
-              if (
-                severityField.value !== severity &&
-                newRiskScore != null &&
-                riskScoreField.value !== newRiskScore
-              ) {
-                riskScoreField.setValue(newRiskScore);
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="about-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="about-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

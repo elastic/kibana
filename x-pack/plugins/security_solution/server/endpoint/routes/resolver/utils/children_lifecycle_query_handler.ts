@@ -66,6 +66,6 @@ export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<Resolve
     }
 
     this.handleResponse(await this.query.search(client, this.childrenHelper.getEntityIDs()));
-    return this.getResults() || createChildren();
+    return this.getResults() ?? createChildren();
   }
 }

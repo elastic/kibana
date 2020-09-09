@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-// eslint-disable-next-line @typescript-eslint/camelcase
 import { max_signals } from '../common/schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 

@@ -20,7 +20,6 @@
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('./table_vis_response_handler', () => ({

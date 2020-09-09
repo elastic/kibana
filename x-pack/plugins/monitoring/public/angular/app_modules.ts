@@ -23,7 +23,7 @@ import { GlobalState } from '../url_state';
 import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
 
 // @ts-ignore
-import { formatNumber, formatMetric } from '../lib/format_number';
+import { formatMetric, formatNumber } from '../lib/format_number';
 // @ts-ignore
 import { extractIp } from '../lib/extract_ip';
 // @ts-ignore
@@ -65,7 +65,7 @@ export const localAppModule = ({
   createLocalPrivateModule();
   createLocalStorage();
   createLocalConfigModule(core);
-  createLocalStateModule(query);
+  createLocalStateModule(query, core.notifications.toasts);
   createLocalTopNavModule(navigation);
   createHrefModule(core);
   createMonitoringAppServices();
@@ -97,7 +97,10 @@ function createMonitoringAppConfigConstants(
   keys.map(([key, value]) => (constantsModule = constantsModule.constant(key as string, value)));
 }
 
-function createLocalStateModule(query: any) {
+function createLocalStateModule(
+  query: MonitoringStartPluginDependencies['data']['query'],
+  toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts']
+) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
     .service('globalState', function (
@@ -106,7 +109,7 @@ function createLocalStateModule(query: any) {
       $location: ng.ILocationService
     ) {
       function GlobalStateProvider(this: any) {
-        const state = new GlobalState(query, $rootScope, $location, this);
+        const state = new GlobalState(query, toasts, $rootScope, $location, this);
         const initialState: any = state.getState();
         for (const key in initialState) {
           if (!initialState.hasOwnProperty(key)) {

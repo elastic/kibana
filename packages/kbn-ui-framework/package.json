@@ -30,13 +30,13 @@
     "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.2",
+    "@babel/core": "^7.11.1",
     "@elastic/eui": "0.0.55",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/optimizer": "1.0.0",
     "babel-loader": "^8.0.6",
     "brace": "0.11.1",
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.0",
     "chokidar": "3.2.1",
     "core-js": "^3.6.4",
     "css-loader": "^3.4.2",

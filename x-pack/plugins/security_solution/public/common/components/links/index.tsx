@@ -32,7 +32,10 @@ import {
   getCreateCaseUrl,
   useFormatUrl,
 } from '../link_to';
-import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+} from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 import { ExternalLinkIcon } from '../external_link_icon';
@@ -311,9 +314,11 @@ const ReputationLinkComponent: React.FC<{
       ipReputationLinksSetting
         ?.slice(0, allItemsLimit)
         .filter(
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           ({ url_template, name }) =>
             !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
         )
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         .map(({ name, url_template }: { name: string; url_template: string }) => ({
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),

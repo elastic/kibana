@@ -335,6 +335,11 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
+        documentFields: {
+          ...state.documentFields,
+          // If we removed the last field, show the "Create field" form
+          status: updatedFields.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+        },
         // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)
           ? {

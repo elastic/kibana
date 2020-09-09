@@ -6,7 +6,7 @@
 
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../constants';
 
-type jobId = string;
+type JobId = string;
 
 const set = (jobs: any) => {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
@@ -17,13 +17,13 @@ const getAll = () => {
   return sessionValue ? JSON.parse(sessionValue) : [];
 };
 
-export const add = (jobId: jobId) => {
+export const add = (jobId: JobId) => {
   const jobs = getAll();
   jobs.push(jobId);
   set(jobs);
 };
 
-export const remove = (jobId: jobId) => {
+export const remove = (jobId: JobId) => {
   const jobs = getAll();
   const index = jobs.indexOf(jobId);
 

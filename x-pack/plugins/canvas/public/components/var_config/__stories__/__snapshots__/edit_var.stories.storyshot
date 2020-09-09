@@ -253,7 +253,7 @@ Array [
                   type="button"
                 >
                   <span
-                    className="euiButton__content"
+                    className="euiButtonContent euiButton__content"
                   >
                     <span
                       className="euiButton__text"
@@ -282,7 +282,7 @@ Array [
                   type="button"
                 >
                   <span
-                    className="euiButton__content"
+                    className="euiButtonContent euiButton__content"
                   >
                     <span
                       className="euiButton__text"
@@ -312,11 +312,10 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <div
-                aria-hidden="true"
-                className="euiButton__icon"
+                className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -337,7 +336,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButtonEmpty__content"
+              className="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 className="euiButtonEmpty__text"
@@ -614,11 +613,10 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <div
-                aria-hidden="true"
-                className="euiButton__icon"
+                className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -639,7 +637,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButtonEmpty__content"
+              className="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 className="euiButtonEmpty__text"
@@ -916,11 +914,10 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <div
-                aria-hidden="true"
-                className="euiButton__icon"
+                className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -941,7 +938,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButtonEmpty__content"
+              className="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 className="euiButtonEmpty__text"
@@ -1188,17 +1185,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <div
-                aria-hidden="true"
-                className="euiButton__icon"
+                className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -1219,7 +1215,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButtonEmpty__content"
+              className="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 className="euiButtonEmpty__text"

@@ -35,7 +35,7 @@ export interface TimeFilterServiceDependencies {
 export class TimefilterService {
   public setup({ uiSettings, storage }: TimeFilterServiceDependencies): TimefilterSetup {
     const timefilterConfig = {
-      timeDefaults: uiSettings.get('timepicker:timeDefaults'),
+      timeDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS),
       refreshIntervalDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS),
     };
     const history = new TimeHistory(storage);

@@ -13,7 +13,7 @@ export const MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.uploadVa
 export const FILE_PICKER_LABEL = i18n.translate(
   'xpack.securitySolution.lists.uploadValueListDescription',
   {
-    defaultMessage: 'Upload single value lists to use while writing rules or rule exceptions.',
+    defaultMessage: 'Upload single value lists to use while writing rule exceptions.',
   }
 );
 

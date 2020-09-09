@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-shadow */
-
-import { uniquePidForProcess, uniqueParentPidForProcess, orderByTime } from '../process_event';
+import { orderByTime } from '../process_event';
 import { IndexedProcessTree } from '../../types';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
+import * as eventModel from '../../../../common/endpoint/models/event';
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents.
@@ -17,24 +16,25 @@ import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
  */
 export function factory(
   // Array of processes to index as a tree
-  processes: ResolverEvent[]
+  processes: SafeResolverEvent[]
 ): IndexedProcessTree {
-  const idToChildren = new Map<string | undefined, ResolverEvent[]>();
-  const idToValue = new Map<string, ResolverEvent>();
+  const idToChildren = new Map<string | undefined, SafeResolverEvent[]>();
+  const idToValue = new Map<string, SafeResolverEvent>();
 
   for (const process of processes) {
-    const uniqueProcessPid = uniquePidForProcess(process);
-    idToValue.set(uniqueProcessPid, process);
+    const entityID: string | undefined = eventModel.entityIDSafeVersion(process);
+    if (entityID !== undefined) {
+      idToValue.set(entityID, process);
 
-    // NB: If the value was null or undefined, use `undefined`
-    const uniqueParentPid: string | undefined = uniqueParentPidForProcess(process) ?? undefined;
+      const uniqueParentPid: string | undefined = eventModel.parentEntityIDSafeVersion(process);
 
-    let childrenWithTheSameParent = idToChildren.get(uniqueParentPid);
-    if (!childrenWithTheSameParent) {
-      childrenWithTheSameParent = [];
-      idToChildren.set(uniqueParentPid, childrenWithTheSameParent);
+      let childrenWithTheSameParent = idToChildren.get(uniqueParentPid);
+      if (!childrenWithTheSameParent) {
+        childrenWithTheSameParent = [];
+        idToChildren.set(uniqueParentPid, childrenWithTheSameParent);
+      }
+      childrenWithTheSameParent.push(process);
     }
-    childrenWithTheSameParent.push(process);
   }
 
   // sort the children of each node
@@ -51,7 +51,10 @@ export function factory(
 /**
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
-export function children(tree: IndexedProcessTree, parentID: string | undefined): ResolverEvent[] {
+export function children(
+  tree: IndexedProcessTree,
+  parentID: string | undefined
+): SafeResolverEvent[] {
   const currentProcessSiblings = tree.idToChildren.get(parentID);
   return currentProcessSiblings === undefined ? [] : currentProcessSiblings;
 }
@@ -59,7 +62,7 @@ export function children(tree: IndexedProcessTree, parentID: string | undefined)
 /**
  * Get the indexed process event for the ID
  */
-export function processEvent(tree: IndexedProcessTree, entityID: string): ResolverEvent | null {
+export function processEvent(tree: IndexedProcessTree, entityID: string): SafeResolverEvent | null {
   return tree.idToProcess.get(entityID) ?? null;
 }
 
@@ -68,9 +71,9 @@ export function processEvent(tree: IndexedProcessTree, entityID: string): Resolv
  */
 export function parent(
   tree: IndexedProcessTree,
-  childProcess: ResolverEvent
-): ResolverEvent | undefined {
-  const uniqueParentPid = uniqueParentPidForProcess(childProcess);
+  childProcess: SafeResolverEvent
+): SafeResolverEvent | undefined {
+  const uniqueParentPid = eventModel.parentEntityIDSafeVersion(childProcess);
   if (uniqueParentPid === undefined) {
     return undefined;
   } else {
@@ -93,7 +96,7 @@ export function root(tree: IndexedProcessTree) {
     return null;
   }
   // any node will do
-  let current: ResolverEvent = tree.idToProcess.values().next().value;
+  let current: SafeResolverEvent = tree.idToProcess.values().next().value;
 
   // iteratively swap current w/ its parent
   while (parent(tree, current) !== undefined) {
@@ -108,8 +111,8 @@ export function root(tree: IndexedProcessTree) {
 export function* levelOrder(tree: IndexedProcessTree) {
   const rootNode = root(tree);
   if (rootNode !== null) {
-    yield* baseLevelOrder(rootNode, (parentNode: ResolverEvent): ResolverEvent[] =>
-      children(tree, uniquePidForProcess(parentNode))
+    yield* baseLevelOrder(rootNode, (parentNode: SafeResolverEvent): SafeResolverEvent[] =>
+      children(tree, eventModel.entityIDSafeVersion(parentNode))
     );
   }
 }

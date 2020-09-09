@@ -40,7 +40,7 @@ export interface FrameworkAdapter {
   callWithRequest(
     req: FrameworkRequest,
     method: 'indices.getMapping',
-    options?: IndicesGetMappingParams // eslint-disable-line
+    options?: IndicesGetMappingParams
   ): Promise<MappingResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
 }

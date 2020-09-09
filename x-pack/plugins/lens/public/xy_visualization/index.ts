@@ -10,7 +10,7 @@ import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public'
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
-import { legendConfig, layerConfig, yAxisConfig } from './types';
+import { legendConfig, layerConfig, yAxisConfig, tickLabelsConfig, gridlinesConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
@@ -39,6 +39,8 @@ export class XyVisualization {
   ) {
     expressions.registerFunction(() => legendConfig);
     expressions.registerFunction(() => yAxisConfig);
+    expressions.registerFunction(() => tickLabelsConfig);
+    expressions.registerFunction(() => gridlinesConfig);
     expressions.registerFunction(() => layerConfig);
     expressions.registerFunction(() => xyChart);
 

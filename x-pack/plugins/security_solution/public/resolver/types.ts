@@ -9,12 +9,13 @@
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
+import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
-  ResolverEvent,
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../common/endpoint/types';
 
 /**
@@ -49,6 +50,16 @@ export interface ResolverUIState {
    * `nodeID` of the selected node
    */
   readonly selectedNode: string | null;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   */
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -155,8 +166,24 @@ export interface IndexedEdgeLineSegment extends BBox {
  */
 export interface IndexedProcessNode extends BBox {
   type: 'processNode';
-  entity: ResolverEvent;
+  entity: SafeResolverEvent;
   position: Vector2;
+}
+
+/**
+ * A type describing the shape of section titles and entries for description lists
+ */
+export type SectionData = Array<{
+  sectionTitle: string;
+  entries: Array<{ title: string; description: string }>;
+}>;
+
+/**
+ * The two query parameters we read/write on to control which view the table presents:
+ */
+export interface CrumbInfo {
+  crumbId: string;
+  crumbEvent: string;
 }
 
 /**
@@ -167,48 +194,68 @@ export interface VisibleEntites {
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
+export interface TreeFetcherParameters {
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  databaseDocumentID: string;
+
+  /**
+   * The indices that the backend will use to search for the document ID.
+   */
+  indices: string[];
+}
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
-  /**
-   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
-   */
-  readonly databaseDocumentID?: string;
-  /**
-   * The id used for the pending request, if there is one.
-   */
-  readonly pendingRequestDatabaseDocumentID?: string;
-  readonly resolverComponentInstanceID: string | undefined;
+
+  readonly tree: {
+    /**
+     * The parameters passed from the resolver properties
+     */
+    readonly currentParameters?: TreeFetcherParameters;
+
+    /**
+     * The id used for the pending request, if there is one.
+     */
+    readonly pendingRequestParameters?: TreeFetcherParameters;
+    /**
+     * The parameters and response from the last successful request.
+     */
+    readonly lastResponse?: {
+      /**
+       * The id used in the request.
+       */
+      readonly parameters: TreeFetcherParameters;
+    } & (
+      | {
+          /**
+           * If a response with a success code was received, this is `true`.
+           */
+          readonly successful: true;
+          /**
+           * The ResolverTree parsed from the response.
+           */
+          readonly result: ResolverTree;
+        }
+      | {
+          /**
+           * If the request threw an exception or the response had a failure code, this will be false.
+           */
+          readonly successful: false;
+        }
+    );
+  };
 
   /**
-   * The parameters and response from the last successful request.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
    */
-  readonly lastResponse?: {
-    /**
-     * The id used in the request.
-     */
-    readonly databaseDocumentID: string;
-  } & (
-    | {
-        /**
-         * If a response with a success code was received, this is `true`.
-         */
-        readonly successful: true;
-        /**
-         * The ResolverTree parsed from the response.
-         */
-        readonly result: ResolverTree;
-      }
-    | {
-        /**
-         * If the request threw an exception or the response had a failure code, this will be false.
-         */
-        readonly successful: false;
-      }
-  );
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -221,7 +268,7 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
+   * Vector whose `x` component represents the minimum side of the box and whose 'y' component represents the maximum side of the box.
    **/
   readonly minimum: Vector2;
   /**
@@ -245,14 +292,14 @@ export type Matrix3 = readonly [
   number
 ];
 
-type eventSubtypeFull =
+type EventSubtypeFull =
   | 'creation_event'
   | 'fork_event'
   | 'exec_event'
   | 'already_running'
   | 'termination_event';
 
-type eventTypeFull = 'process_event';
+type EventTypeFull = 'process_event';
 
 /**
  * The 'events' which contain process data and are used to model Resolver.
@@ -263,8 +310,8 @@ export interface ProcessEvent {
   readonly machine_id: string;
   readonly data_buffer: {
     timestamp_utc: string;
-    event_subtype_full: eventSubtypeFull;
-    event_type_full: eventTypeFull;
+    event_subtype_full: EventSubtypeFull;
+    event_type_full: EventTypeFull;
     node_id: number;
     source_id?: number;
     process_name: string;
@@ -280,21 +327,21 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, ResolverEvent[]>;
+  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, ResolverEvent>;
+  idToProcess: Map<string, SafeResolverEvent>;
 }
 
 /**
  * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ResolverEvent, number>;
+export type ProcessWidths = Map<SafeResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ResolverEvent, Vector2>;
+export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -346,11 +393,11 @@ export interface EdgeLineSegment {
  * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ResolverEvent;
+  process: SafeResolverEvent;
   width: number;
 } & (
   | {
-      parent: ResolverEvent;
+      parent: SafeResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -410,7 +457,7 @@ export interface SideEffectSimulator {
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**
@@ -433,7 +480,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  processNodePositions: Map<ResolverEvent, Vector2>;
+  processNodePositions: Map<SafeResolverEvent, Vector2>;
   /**
    * A map of edge-line segments, which graphically connect nodes.
    */
@@ -442,7 +489,7 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  ariaLevels: Map<ResolverEvent, number>;
+  ariaLevels: Map<SafeResolverEvent, number>;
 }
 
 /**
@@ -461,11 +508,6 @@ export interface DataAccessLayer {
    * Fetch a ResolverTree for a entityID
    */
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
-
-  /**
-   * Get an array of index patterns that contain events.
-   */
-  indexPatterns: () => string[];
 
   /**
    * Get entities matching a document.
@@ -492,12 +534,18 @@ export interface ResolverProps {
    * The `_id` value of an event in ES.
    * Used as the origin of the Resolver graph.
    */
-  databaseDocumentID?: string;
+  databaseDocumentID: string;
+
   /**
-   * A string literal describing where in the application resolver is located.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
+
+  /**
+   * Indices that the backend should use to find the originating document.
+   */
+  indices: string[];
 }
 
 /**
@@ -531,4 +579,43 @@ export interface SpyMiddleware {
    * Call the returned function to stop debugging.
    */
   debugActions: () => () => void;
+}
+
+/**
+ * values of this type are exposed by the Security Solution plugin's setup phase.
+ */
+export interface ResolverPluginSetup {
+  /**
+   * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
+   */
+  Provider: typeof Provider;
+  /**
+   * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
+   * All data acess (e.g. HTTP requests) are done through the store.
+   */
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+
+  /**
+   * The Resolver component without the required Providers.
+   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * and the `Provider` component provided by this object.
+   */
+  ResolverWithoutProviders: React.MemoExoticComponent<
+    React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
+  >;
+
+  /**
+   * A collection of mock objects that can be used in examples or in testing.
+   */
+  mocks: {
+    /**
+     * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
+     */
+    dataAccessLayer: {
+      /**
+       * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       */
+      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+    };
+  };
 }

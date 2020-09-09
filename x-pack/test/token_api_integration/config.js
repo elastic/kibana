@@ -32,7 +32,6 @@ export default async function ({ readConfigFile }) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--optimize.enabled=false',
         '--xpack.security.authc.providers=["token"]',
       ],
     },

@@ -82,7 +82,7 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
           <FormattedMessage
             id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText"
             defaultMessage="The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts.
-                You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy configurations across your infrastructure.
+                You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy policies across your infrastructure.
                 For more information, read our {blogPostLink}."
             values={{
               blogPostLink: (

@@ -19,6 +19,10 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+
+export type EpmPackageInstallStatus = 'installed' | 'installing';
+
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
@@ -36,6 +40,7 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {
@@ -234,6 +239,9 @@ export interface Installation extends SavedObjectAttributes {
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
+  install_status: EpmPackageInstallStatus;
+  install_version: string;
+  install_started_at: string;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;

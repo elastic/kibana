@@ -16,12 +16,12 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
 }));
 
 import * as Rx from 'rxjs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LevelLogger } from '../';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { LevelLogger } from '../';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../test_helpers';
-import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
+import { CaptureConfig, ConditionalHeaders } from '../../types';
+import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 
@@ -281,7 +281,7 @@ describe('Screenshot Observable Pipeline', () => {
             `);
     });
 
-    it('recovers if exit$ fires a timeout signal', async () => {
+    it('observes page exit', async () => {
       // mocks
       const mockGetCreatePage = (driver: HeadlessChromiumDriver) =>
         jest
@@ -311,38 +311,7 @@ describe('Screenshot Observable Pipeline', () => {
         }).toPromise();
       };
 
-      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 200,
-                          "left": 0,
-                          "top": 0,
-                          "width": 200,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": "Instant timeout has fired!",
-                  "screenshots": Array [
-                    Object {
-                      "base64EncodedData": "allyourBase64",
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": null,
-                },
-              ]
-            `);
+      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {

@@ -26,3 +26,8 @@ export enum AlertParamType {
   Duration = 'duration',
   Percentage = 'percentage',
 }
+
+export enum SetupModeFeature {
+  MetricbeatMigration = 'metricbeatMigration',
+  Alerts = 'alerts',
+}

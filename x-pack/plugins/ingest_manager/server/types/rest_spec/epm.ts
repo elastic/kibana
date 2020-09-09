@@ -36,6 +36,11 @@ export const InstallPackageRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };
 
 export const DeletePackageRequestSchema = {

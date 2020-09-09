@@ -7,23 +7,23 @@
 export default function ({ loadTestFile }) {
   describe('Ingest Manager Endpoints', function () {
     this.tags('ciGroup7');
-
+    // Ingest Manager setup
+    loadTestFile(require.resolve('./setup'));
     // Fleet
     loadTestFile(require.resolve('./fleet/index'));
 
     // EPM
-    loadTestFile(require.resolve('./epm/list'));
-    loadTestFile(require.resolve('./epm/file'));
-    //loadTestFile(require.resolve('./epm/template'));
-    loadTestFile(require.resolve('./epm/ilm'));
-    loadTestFile(require.resolve('./epm/install_overrides'));
-    loadTestFile(require.resolve('./epm/install_remove_assets'));
+    loadTestFile(require.resolve('./epm/index'));
 
-    // Package configs
-    loadTestFile(require.resolve('./package_config/create'));
-    loadTestFile(require.resolve('./package_config/update'));
-    loadTestFile(require.resolve('./package_config/get'));
-    // Agent config
-    loadTestFile(require.resolve('./agent_config/index'));
+    // Package policies
+    loadTestFile(require.resolve('./package_policy/create'));
+    loadTestFile(require.resolve('./package_policy/update'));
+    loadTestFile(require.resolve('./package_policy/get'));
+
+    // Agent policies
+    loadTestFile(require.resolve('./agent_policy/index'));
+
+    // Settings
+    loadTestFile(require.resolve('./settings/index'));
   });
 }

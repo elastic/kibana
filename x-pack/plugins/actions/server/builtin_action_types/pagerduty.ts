@@ -16,6 +16,18 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 // https://v2.developer.pagerduty.com/docs/events-api-v2
 const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 
+export type PagerDutyActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type PagerDutyActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 // config definition
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -100,7 +112,7 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType {
+}): PagerDutyActionType {
   return {
     id: '.pagerduty',
     minimumLicenseRequired: 'gold',
@@ -123,12 +135,12 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   try {
-    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -142,13 +154,14 @@ function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: PagerDutyActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
   const services = execOptions.services;
+  const proxySettings = execOptions.proxySettings;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -159,7 +172,7 @@ async function executor(
 
   let response;
   try {
-    response = await postPagerduty({ apiUrl, data, headers, services });
+    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings }, logger);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',
