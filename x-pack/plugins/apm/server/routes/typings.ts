@@ -13,7 +13,6 @@ import {
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
-import { Server } from 'hapi';
 import { ObservabilityPluginSetup } from '../../../observability/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
@@ -56,12 +55,6 @@ export interface Route<
     request: KibanaRequest;
   }) => Promise<TReturn>;
 }
-
-export type APMLegacyServer = Pick<Server, 'savedObjects' | 'log'> & {
-  plugins: {
-    elasticsearch: Server['plugins']['elasticsearch'];
-  };
-};
 
 export type APMRequestHandlerContext<
   TDecodedParams extends { [key in keyof Params]: any } = {}
