@@ -31,7 +31,7 @@ import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
-import { KibanaMigrator } from '../../migrations';
+import { IKibanaMigrator } from '../../migrations';
 import {
   SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
@@ -85,7 +85,7 @@ export interface SavedObjectsRepositoryOptions {
   client: ElasticsearchClient;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
-  migrator: KibanaMigrator;
+  migrator: IKibanaMigrator;
   allowedTypes: string[];
 }
 
@@ -120,7 +120,7 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
  * @public
  */
 export class SavedObjectsRepository {
-  private _migrator: KibanaMigrator;
+  private _migrator: IKibanaMigrator;
   private _index: string;
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
@@ -137,7 +137,7 @@ export class SavedObjectsRepository {
    * @internal
    */
   public static createRepository(
-    migrator: KibanaMigrator,
+    migrator: IKibanaMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     client: ElasticsearchClient,

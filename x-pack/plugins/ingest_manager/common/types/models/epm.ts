@@ -19,6 +19,8 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
@@ -38,6 +40,7 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {

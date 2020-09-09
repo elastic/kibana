@@ -63,6 +63,7 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  InstallType,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,

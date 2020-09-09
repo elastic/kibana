@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiLoadingSpinner, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ImportRetry } from '../types';
 import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '..';
@@ -36,13 +36,13 @@ export const CopyStatusIndicator = (props: Props) => {
       // the object was overwritten
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.successAutomaticOverwriteMessage"
-        defaultMessage="Saved object overwritten successfully."
+        defaultMessage="Object was overwritten."
       />
     ) : (
       // the object was not overwritten
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.successMessage"
-        defaultMessage="Saved object copied successfully."
+        defaultMessage="Object was copied."
       />
     );
     return <EuiIconTip type={'checkInCircleFilled'} color={'success'} content={message} />;
@@ -53,19 +53,19 @@ export const CopyStatusIndicator = (props: Props) => {
       // this is an "automatic overwrite", e.g., the "Overwrite all conflicts" option was selected
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.pendingAutomaticOverwriteMessage"
-        defaultMessage="Saved object will be overwritten."
+        defaultMessage="Object will be overwritten."
       />
     ) : pendingObjectRetry?.overwrite ? (
       // this is a manual overwrite, e.g., the individual "Overwrite?" switch was enabled
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
-        defaultMessage="Saved object will be overwritten. Disable 'Overwrite' to cancel this operation."
+        defaultMessage="Object will be overwritten. Disable 'Overwrite' to skip."
       />
     ) : (
       // this object is pending success, but it will not result in an overwrite
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.pendingMessage"
-        defaultMessage="Saved object will be copied."
+        defaultMessage="Object will be copied."
       />
     );
     return <EuiIconTip type={'check'} color={'warning'} content={message} />;
@@ -80,7 +80,7 @@ export const CopyStatusIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
-            defaultMessage="There was an error copying this saved object."
+            defaultMessage="An error occurred copying this object."
           />
         }
       />
@@ -88,28 +88,38 @@ export const CopyStatusIndicator = (props: Props) => {
   }
 
   if (hasConflicts) {
-    return (
-      <EuiIconTip
-        type={'alert'}
-        color={'warning'}
-        content={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
-              defaultMessage="A saved object with a matching id ({id}) already exists in this space."
-              values={{
-                id: objectResult.conflict!.obj.id,
-              }}
-            />
-            <EuiSpacer />
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
-              defaultMessage="Enable 'Overwrite' to replace this version with the copied one."
-            />
-          </Fragment>
-        }
-      />
-    );
+    switch (conflict!.error.type) {
+      case 'conflict':
+        return (
+          <EuiIconTip
+            type={'alert'}
+            color={'warning'}
+            content={
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpace.copyStatus.conflictMessage"
+                  defaultMessage="This conflicts with an existing object. Enable ‘Overwrite’ to replace it."
+                />
+              </Fragment>
+            }
+          />
+        );
+      case 'ambiguous_conflict':
+        return (
+          <EuiIconTip
+            type={'alert'}
+            color={'warning'}
+            content={
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpace.copyStatus.ambiguousConflictMessage"
+                  defaultMessage="This conflicts with multiple existing objects. Enable ‘Overwrite’ to replace one."
+                />
+              </Fragment>
+            }
+          />
+        );
+    }
   }
 
   return hasMissingReferences ? (
@@ -121,17 +131,17 @@ export const CopyStatusIndicator = (props: Props) => {
         overwrite ? (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesAutomaticOverwriteMessage"
-            defaultMessage="This object has missing references; it will be overwritten, but one or more of its references are broken."
+            defaultMessage="Object will be overwritten, but one or more references are missing."
           />
         ) : conflict ? (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesOverwriteMessage"
-            defaultMessage="This object has missing references; it will be overwritten, but one or more of its references are broken. Disable 'Overwrite' to cancel this operation."
+            defaultMessage="Object will be overwritten, but one or more references are missing. Disable 'Overwrite' to skip."
           />
         ) : (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
-            defaultMessage="Saved object has missing references; it will be copied, but one or more of its references are broken."
+            defaultMessage="Object will be copied, but one or more references are missing."
           />
         )
       }

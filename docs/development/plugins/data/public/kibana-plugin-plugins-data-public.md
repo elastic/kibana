@@ -69,6 +69,7 @@
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
+|  [QueryStateChange](./kibana-plugin-plugins-data-public.querystatechange.md) |  |
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
