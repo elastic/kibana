@@ -6,7 +6,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
 import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
@@ -167,21 +167,18 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           </EuiTab>
         ) : (
           <div className="euiTab" key={`div-${id}-key`}>
-            <EuiLink
+            <EuiTab
               data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-              onClick={() => redirectToTab(defaultPathId)}
-              key={`${id}-key`}
-              color="text"
+              className={'mlNavigationMenu__mainTab'}
+              onClick={() => {
+                onSelectedTabChanged(id);
+                redirectToTab(defaultPathId);
+              }}
+              isSelected={id === selectedTabId}
+              key={`tab-${id}-key`}
             >
-              <EuiTab
-                className={'mlNavigationMenu__mainTab'}
-                onClick={() => onSelectedTabChanged(id)}
-                isSelected={id === selectedTabId}
-                key={`tab-${id}-key`}
-              >
-                {tab.name}
-              </EuiTab>
-            </EuiLink>
+              {tab.name}
+            </EuiTab>
           </div>
         );
       })}

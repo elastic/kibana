@@ -17,7 +17,7 @@ export function JobDescription({ job, isManagementTable }) {
         {job.description} &nbsp;
         {job.groups.map((group) => {
           if (isManagementTable === true) {
-            return <ADJobIdLink groupId={group} />;
+            return <ADJobIdLink key={group} groupId={group} />;
           }
           return <JobGroup key={group} name={group} />;
         })}

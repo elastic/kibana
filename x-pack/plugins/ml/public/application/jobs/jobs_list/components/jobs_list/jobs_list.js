@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <ADJobIdLink id={id} />;
+    return <ADJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {

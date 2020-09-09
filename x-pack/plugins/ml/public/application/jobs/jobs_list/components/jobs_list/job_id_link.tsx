@@ -54,6 +54,10 @@ export const ADJobIdLink = (props: ADJobIdLinkProps) => {
       </EuiLink>
     );
   } else {
-    return <EuiLink onClick={() => redirectToJobsManagementPage()}>{props.id}</EuiLink>;
+    return (
+      <EuiLink key={props.id} onClick={() => redirectToJobsManagementPage()}>
+        {props.id}
+      </EuiLink>
+    );
   }
 };
