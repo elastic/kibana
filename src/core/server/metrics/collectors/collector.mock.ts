@@ -17,7 +17,17 @@
  * under the License.
  */
 
-export { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics, MetricsCollector } from './types';
-export { OsMetricsCollector, OpsMetricsCollectorOptions } from './os';
-export { ProcessMetricsCollector } from './process';
-export { ServerMetricsCollector } from './server';
+import { MetricsCollector } from './types';
+
+const createCollector = (collectReturnValue: any = {}): jest.Mocked<MetricsCollector<any>> => {
+  const collector: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn().mockResolvedValue(collectReturnValue),
+    reset: jest.fn(),
+  };
+
+  return collector;
+};
+
+export const metricsCollectorMock = {
+  create: createCollector,
+};
