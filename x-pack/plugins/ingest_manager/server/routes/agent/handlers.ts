@@ -279,6 +279,9 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       kuery: request.query.kuery,
     });
+    const totalInactive = await AgentService.countInactiveAgents(soClient, {
+      kuery: request.query.kuery,
+    });
 
     const body: GetAgentsResponse = {
       list: agents.map((agent) => ({
@@ -286,6 +289,7 @@ export const getAgentsHandler: RequestHandler<
         status: AgentService.getAgentStatus(agent),
       })),
       total,
+      totalInactive,
       page,
       perPage,
     };

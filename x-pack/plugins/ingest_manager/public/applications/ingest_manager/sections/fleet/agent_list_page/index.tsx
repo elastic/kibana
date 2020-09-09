@@ -238,6 +238,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const agents = agentsRequest.data ? agentsRequest.data.list : [];
   const totalAgents = agentsRequest.data ? agentsRequest.data.total : 0;
+  const totalInactiveAgents = agentsRequest.data ? agentsRequest.data.totalInactive : 0;
   const { isLoading } = agentsRequest;
 
   const agentPoliciesRequest = useGetAgentPolicies({
@@ -526,7 +527,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent total and bulk actions */}
       <AgentBulkActions
         totalAgents={totalAgents}
-        shownAgents={agents?.length || 0}
+        totalInactiveAgents={totalInactiveAgents}
+        selectableAgents={agents?.filter((agent) => agent.active).length || 0}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
         currentQuery={kuery}
@@ -591,6 +593,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   setSelectedAgents(newAgents);
                   setSelectionMode('manual');
                 },
+                selectable: (agent: Agent) => agent.active,
               }
             : undefined
         }

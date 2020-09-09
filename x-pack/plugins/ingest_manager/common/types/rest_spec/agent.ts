@@ -26,6 +26,7 @@ export interface GetAgentsRequest {
 export interface GetAgentsResponse {
   list: Agent[];
   total: number;
+  totalInactive: number;
   page: number;
   perPage: number;
 }

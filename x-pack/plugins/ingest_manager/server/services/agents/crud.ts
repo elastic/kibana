@@ -28,6 +28,23 @@ type ListAgentsResponse<P extends boolean> = P extends false
       perPage: number;
     };
 
+const AGENT_ACTIVE_CONDITITON = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
+const RECENTLY_SEEN_EPHEMERAL_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${
+  Date.now() - 3 * AGENT_POLLING_THRESHOLD_MS
+}`;
+const ACTIVE_AGENT_CONDITION = `(${AGENT_ACTIVE_CONDITITON}) OR (${RECENTLY_SEEN_EPHEMERAL_AGENT_CONDITION})`;
+const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
+
+function _joinFilters(filters: string[], operator = 'AND') {
+  return filters.reduce((acc: string | undefined, filter) => {
+    if (acc) {
+      return `${acc} ${operator} (${filter})`;
+    }
+
+    return `(${filter})`;
+  }, undefined);
+}
+
 export async function listAgents<P extends boolean>(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
@@ -58,11 +75,7 @@ export async function listAgents<P extends boolean>(
   }
 
   if (showInactive === false) {
-    const agentActiveCondition = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
-    const recentlySeenEphemeralAgent = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${
-      Date.now() - 3 * AGENT_POLLING_THRESHOLD_MS
-    }`;
-    filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
+    filters.push(ACTIVE_AGENT_CONDITION);
   }
 
   let agentSOs: Array<SavedObjectsFindResult<AgentSOAttributes>> = [];
@@ -88,8 +101,8 @@ export async function listAgents<P extends boolean>(
 
   agentSOs = saved_objects;
 
-  // If not using pagination and we have more than 10000 agents found, make sure to page through
-  // rest of results
+  // If not using pagination and we have more than 10000 agents found,
+  // page through rest of results and return all found agents
   if (!usePagination && total > 10000) {
     const remainingPages = Math.ceil((total - 10000) / 10000);
     for (let currentPage = 2; currentPage <= remainingPages + 1; currentPage++) {
@@ -118,6 +131,32 @@ export async function listAgents<P extends boolean>(
       } as ListAgentsResponse<P>);
 
   return response;
+}
+
+export async function countInactiveAgents(
+  soClient: SavedObjectsClientContract,
+  options: Pick<ListWithKuery, 'kuery'>
+): Promise<number> {
+  const { kuery } = options;
+  const filters = [INACTIVE_AGENT_CONDITION];
+
+  if (kuery && kuery !== '') {
+    // To ensure users dont need to know about SO data structure...
+    filters.push(
+      kuery.replace(
+        new RegExp(`${AGENT_SAVED_OBJECT_TYPE}\.`, 'g'),
+        `${AGENT_SAVED_OBJECT_TYPE}.attributes.`
+      )
+    );
+  }
+
+  const { total } = await soClient.find<AgentSOAttributes>({
+    type: AGENT_SAVED_OBJECT_TYPE,
+    filter: _joinFilters(filters),
+    perPage: 0,
+  });
+
+  return total;
 }
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
@@ -201,14 +240,4 @@ export async function deleteAgent(soClient: SavedObjectsClientContract, agentId:
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     active: false,
   });
-}
-
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
-
-    return `(${filter})`;
-  }, undefined);
 }

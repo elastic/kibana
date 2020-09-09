@@ -39,7 +39,8 @@ export type SelectionMode = 'manual' | 'query';
 
 export const AgentBulkActions: React.FunctionComponent<{
   totalAgents: number;
-  shownAgents: number;
+  totalInactiveAgents: number;
+  selectableAgents: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
   currentQuery: string;
@@ -48,10 +49,11 @@ export const AgentBulkActions: React.FunctionComponent<{
   refreshAgents: () => void;
 }> = ({
   totalAgents,
+  totalInactiveAgents,
+  selectableAgents,
   selectionMode,
   setSelectionMode,
   currentQuery,
-  shownAgents,
   selectedAgents,
   setSelectedAgents,
   refreshAgents,
@@ -63,6 +65,12 @@ export const AgentBulkActions: React.FunctionComponent<{
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
+
+  // Check if user is working with only inactive agents
+  const atLeastOneActiveAgentSelected =
+    selectionMode === 'manual'
+      ? !!selectedAgents.find((agent) => agent.active)
+      : totalAgents > totalInactiveAgents;
 
   const panels = [
     {
@@ -76,6 +84,7 @@ export const AgentBulkActions: React.FunctionComponent<{
             />
           ),
           icon: <EuiIcon type="pencil" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
           onClick: () => {
             closeMenu();
             setIsReassignFlyoutOpen(true);
@@ -89,22 +98,24 @@ export const AgentBulkActions: React.FunctionComponent<{
             />
           ),
           icon: <EuiIcon type="trash" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
           onClick: () => {
             closeMenu();
           },
         },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.upgradeAgents"
-              defaultMessage="Upgrade agent binary"
-            />
-          ),
-          icon: <EuiIcon type="refresh" size="m" />,
-          onClick: () => {
-            closeMenu();
-          },
-        },
+        // {
+        //   name: (
+        //     <FormattedMessage
+        //       id="xpack.ingestManager.agentBulkActions.upgradeAgents"
+        //       defaultMessage="Upgrade agent binary"
+        //     />
+        //   ),
+        //   icon: <EuiIcon type="refresh" size="m" />,
+        //   disabled: !atLeastOneActiveAgentSelected,
+        //   onClick: () => {
+        //     closeMenu();
+        //   },
+        // },
         {
           name: (
             <FormattedMessage
@@ -167,7 +178,10 @@ export const AgentBulkActions: React.FunctionComponent<{
                       id="xpack.ingestManager.agentBulkActions.agentsSelected"
                       defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
                       values={{
-                        count: selectionMode === 'manual' ? selectedAgents.length : totalAgents,
+                        count:
+                          selectionMode === 'manual'
+                            ? selectedAgents.length
+                            : totalAgents - totalInactiveAgents,
                       }}
                     />
                   </Button>
@@ -181,8 +195,8 @@ export const AgentBulkActions: React.FunctionComponent<{
               </EuiPopover>
             </EuiFlexItem>
             {selectionMode === 'manual' &&
-            selectedAgents.length === shownAgents &&
-            shownAgents < totalAgents ? (
+            selectedAgents.length === selectableAgents &&
+            selectableAgents < totalAgents ? (
               <EuiFlexItem grow={false}>
                 <Button
                   size="xs"
