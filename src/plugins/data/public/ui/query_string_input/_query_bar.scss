@@ -39,7 +39,6 @@
   &:focus {
     overflow-x: auto;
     overflow-y: auto;
-    // width: calc(100% + 1px); // To overtake the group's fake border
     white-space: normal;
   }
 }
