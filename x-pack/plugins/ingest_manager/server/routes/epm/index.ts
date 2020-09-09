@@ -89,7 +89,8 @@ export const registerRoutes = (router: IRouter) => {
       options: {
         tags: [`access:${PLUGIN_ID}-all`],
         body: {
-          accepts: ['application/octet-stream'],
+          accepts: ['application/gzip', 'application/zip'],
+          parse: false,
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
