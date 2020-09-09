@@ -380,7 +380,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.setSecurityUser', {
       defaultMessage:
-        'Adds details about the current user, such user name and email address, to incoming documents.',
+        'Adds details about the current user, such user name and email address, to incoming documents. Requires an authenticated user for the indexing request.',
     }),
   },
   sort: {
