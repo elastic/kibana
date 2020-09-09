@@ -22,7 +22,7 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-interface InternalConfig<T> {
+export interface InternalFieldConfig<T> {
   initialValue?: T;
   isIncludedInOutput?: boolean;
 }
@@ -30,7 +30,7 @@ interface InternalConfig<T> {
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> & InternalConfig<T> = {},
+  config: FieldConfig<any, T> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {

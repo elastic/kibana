@@ -22,7 +22,7 @@ import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { FormHook, FieldConfig } from '../types';
 import { getFieldValidityAndErrorMessage } from '../helpers';
 import { useFormContext } from '../form_context';
-import { useField } from '../hooks';
+import { useField, InternalFieldConfig } from '../hooks';
 
 interface Props {
   path: string;
@@ -101,13 +101,13 @@ export const UseArray = ({
 
   // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
-  const fieldConfigBase = {
+  const fieldConfigBase: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
     errorDisplayDelay: 0,
-    hasValue: false,
+    isIncludedInOutput: false,
   };
 
-  const fieldConfig: FieldConfig<any, ArrayItem[]> & { hasValue?: boolean } = validations
+  const fieldConfig: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
     ? { validations, ...fieldConfigBase }
     : fieldConfigBase;
 
