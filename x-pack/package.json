@@ -207,7 +207,7 @@
     "mocha": "^7.1.1",
     "mocha-junit-reporter": "^1.23.1",
     "mochawesome": "^4.1.0",
-    "mochawesome-merge": "^2.0.1",
+    "mochawesome-merge": "^4.1.0",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.6.0",
@@ -268,7 +268,7 @@
     "vinyl-fs": "^3.0.3",
     "whatwg-fetch": "^3.0.0",
     "xml-crypto": "^1.4.0",
-    "yargs": "4.8.1"
+    "yargs": "^15.4.1"
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
