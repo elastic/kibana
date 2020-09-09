@@ -123,8 +123,20 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const rightAxisLayer = state?.layers.filter(
-    (layer) => layer.yConfig && layer.yConfig.length > 0 && layer.yConfig[0].axisMode === 'right'
+  const rightAxisLayers = state?.layers.filter(
+    (layer) =>
+      layer.yConfig &&
+      layer.yConfig.length &&
+      layer.yConfig.some(({ axisMode }) => axisMode === 'right')
+  );
+
+  const leftAxisLayers = state?.layers.filter(
+    (layer) =>
+      !layer.yConfig ||
+      (layer.yConfig && layer.accessors.length !== layer.yConfig.length) ||
+      (layer.yConfig &&
+        layer.accessors.length === layer.yConfig.length &&
+        layer.yConfig.some(({ axisMode }) => axisMode === 'left'))
   );
 
   const tickLabelsVisibilitySettings = {
@@ -286,6 +298,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            isDisabled={leftAxisLayers?.length === 0 ?? true}
             isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
           />
@@ -325,7 +338,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yRight}
               toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
-              isDisabled={rightAxisLayer?.length === 0 ?? true}
+              isDisabled={rightAxisLayers?.length === 0 ?? true}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             />

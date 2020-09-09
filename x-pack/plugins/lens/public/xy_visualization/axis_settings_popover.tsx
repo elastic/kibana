@@ -103,6 +103,7 @@ const popoverConfig = (
       };
   }
 };
+
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   popoverTitle,
@@ -123,42 +124,60 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
 
   const getAxisTitle = useCallback(() => {
     const defaultTitle = axisTitle;
-
-    const initialLayer = layers?.[0];
-    if (!initialLayer || !initialLayer.accessors.length) {
-      return defaultTitle;
-    }
-    const datasource = frame.datasourceLayers[initialLayer.layerId];
-    if (!datasource) {
-      return defaultTitle;
-    }
     switch (axis) {
-      case 'yLeft':
-        const yLeft = initialLayer.accessors[0]
-          ? datasource.getOperationForColumnId(initialLayer.accessors[0])
-          : null;
-        return defaultTitle || yLeft?.label;
       case 'x':
       default:
+        const initialLayer = layers?.[0];
+        if (!initialLayer || !initialLayer.accessors.length) {
+          return defaultTitle;
+        }
+        const datasource = frame.datasourceLayers[initialLayer.layerId];
+        if (!datasource) {
+          return defaultTitle;
+        }
         const x = initialLayer.xAccessor
           ? datasource.getOperationForColumnId(initialLayer.xAccessor)
           : null;
         return defaultTitle || x?.label;
       case 'yRight':
-        let yRightTitle: string = '';
-        const rightAxisLayer = layers?.filter(
+        const rightAxisLayers = layers?.filter(
           (layer) =>
-            layer.yConfig && layer.yConfig.length > 0 && layer.yConfig[0].axisMode === 'right'
+            layer.yConfig &&
+            layer.yConfig.length &&
+            layer.yConfig.some(({ axisMode }) => axisMode === 'right')
         );
-        if (rightAxisLayer && rightAxisLayer.length > 0) {
-          const yConfig = rightAxisLayer[0].yConfig;
-          const dataSourceNewLayer = frame.datasourceLayers[rightAxisLayer[0].layerId];
-          const y = yConfig
-            ? dataSourceNewLayer.getOperationForColumnId(yConfig[0].forAccessor)
-            : null;
-          yRightTitle = y?.label || '';
+        const initialRightLayer = rightAxisLayers?.[0];
+        if (!initialRightLayer || !initialRightLayer.accessors.length) {
+          return defaultTitle;
         }
-        return defaultTitle || yRightTitle;
+        const dataSourceRightLayer = frame.datasourceLayers[initialRightLayer.layerId];
+        const yRight = initialRightLayer.yConfig
+          ? dataSourceRightLayer.getOperationForColumnId(initialRightLayer.yConfig[0].forAccessor)
+          : null;
+        return defaultTitle || yRight?.label;
+      case 'yLeft':
+        const leftAxisLayers = layers?.filter(
+          (layer) =>
+            !layer.yConfig ||
+            (layer.yConfig && layer.accessors.length !== layer.yConfig.length) ||
+            (layer.yConfig &&
+              layer.accessors.length === layer.yConfig.length &&
+              layer.yConfig.some(({ axisMode }) => axisMode === 'left'))
+        );
+        const initialLeftLayer = leftAxisLayers?.[0];
+        if (!initialLeftLayer || !initialLeftLayer.accessors.length) {
+          return defaultTitle;
+        }
+        const dataSourceLeftLayer = frame.datasourceLayers[initialLeftLayer.layerId];
+        const accessors = initialLeftLayer.accessors.filter((accessor) =>
+          initialLeftLayer.yConfig?.some(
+            ({ forAccessor, axisMode }) => forAccessor !== accessor || axisMode === 'left'
+          )
+        );
+        const yLeft = dataSourceLeftLayer.getOperationForColumnId(
+          accessors[0] || initialLeftLayer.accessors[0]
+        );
+        return defaultTitle || yLeft?.label;
     }
     /* We want this callback to run only if open changes its state. What we want to accomplish here is to give the user a better UX.
        By default these input fields have the axis legends. If the user changes the input text, the axis legends should also change.
