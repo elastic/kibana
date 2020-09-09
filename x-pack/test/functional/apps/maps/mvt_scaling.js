@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('mvt geoshape layer', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'geoshape_data_reader']);
+      await security.testUser.setRoles(['global_maps_all', 'geoshape_data_reader'], false);
       await PageObjects.maps.loadSavedMap('geo_shape_mvt');
     });
 
