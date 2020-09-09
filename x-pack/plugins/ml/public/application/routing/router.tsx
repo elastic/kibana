@@ -39,6 +39,7 @@ interface PageDependencies {
   history: AppMountParameters['history'];
   indexPatterns: IndexPatternsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

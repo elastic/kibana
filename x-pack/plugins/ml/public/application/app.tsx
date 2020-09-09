@@ -50,11 +50,17 @@ export interface MlServicesContext {
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+  const redirectToMlAccessDeniedPage = async () => {
+    const accessDeniedPageUrl = `${coreStart.http.basePath.get()}/app/ml/access-denied`;
+    await coreStart.application.navigateToUrl(accessDeniedPageUrl);
+  };
+
   const pageDeps = {
     history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    redirectToMlAccessDeniedPage,
   };
   const services = {
     appName: 'ML',

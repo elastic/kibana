@@ -26,6 +26,8 @@ import {
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 enum MODE {
   NEW,
@@ -72,10 +74,11 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
+  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     checkMlNodesAvailable,
   });
 

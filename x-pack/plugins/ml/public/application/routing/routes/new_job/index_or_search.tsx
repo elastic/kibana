@@ -19,6 +19,8 @@ import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,
@@ -74,6 +76,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
       application: { navigateToUrl },
     },
   } = useMlKibana();
+  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
 
   const newJobResolvers = {
     ...basicResolvers(deps),
@@ -83,7 +86,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   const dataVizResolvers = {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     checkMlNodesAvailable,
   };
 

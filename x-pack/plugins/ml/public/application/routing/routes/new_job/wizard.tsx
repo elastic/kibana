@@ -19,6 +19,8 @@ import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -111,10 +113,14 @@ export const categorizationRouteFactory = (navigateToPath: NavigateToPath): MlRo
 });
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
+
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
-    privileges: checkCreateJobsCapabilitiesResolver,
+    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
     jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });

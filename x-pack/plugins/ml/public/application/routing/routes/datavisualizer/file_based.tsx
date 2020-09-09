@@ -23,6 +23,8 @@ import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/c
 import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const fileBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/filedatavisualizer',
@@ -40,10 +42,13 @@ export const fileBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute =
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+
   const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkFindFileStructurePrivilege: checkFindFileStructurePrivilegeResolver,
+    checkFindFileStructurePrivilege: () =>
+      checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });
   return (
     <PageLoader context={context}>
