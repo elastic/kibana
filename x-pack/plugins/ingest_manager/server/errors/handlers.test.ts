@@ -17,6 +17,8 @@ import {
 } from './index';
 
 const LegacyESErrors = errors as Record<string, any>;
+type ITestEsErrorsFnParams = [errorCode: string, error: any, bodyMessage: string];
+
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   beforeEach(async () => {
@@ -30,7 +32,8 @@ describe('defaultIngestErrorHandler', () => {
     appContextService.stop();
   });
 
-  async function testEsErrorsFn(errorCode: string, error: any, bodyMessage: string) {
+  async function testEsErrorsFn(...args: ITestEsErrorsFnParams) {
+    const [, error, bodyMessage] = args;
     jest.clearAllMocks();
     const response = httpServerMock.createResponseFactory();
     await defaultIngestErrorHandler({ error, response });
@@ -51,7 +54,7 @@ describe('defaultIngestErrorHandler', () => {
   describe('use the HTTP error status code provided by LegacyESErrors', () => {
     const statusCodes = Object.keys(LegacyESErrors).filter((key) => /^\d+$/.test(key));
     const errorCodes = statusCodes.filter((key) => parseInt(key, 10) >= 400);
-    const testCasesWithPathResponse = errorCodes.map((errorCode) => [
+    const casesWithPathResponse: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
       errorCode,
       new LegacyESErrors[errorCode]('the root message', {
         path: '/path/to/call',
@@ -59,7 +62,7 @@ describe('defaultIngestErrorHandler', () => {
       }),
       'the root message response from /path/to/call: response is here',
     ]);
-    const testCasesWithOtherMeta = errorCodes.map((errorCode) => [
+    const casesWithOtherMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
       errorCode,
       new LegacyESErrors[errorCode]('the root message', {
         other: '/path/to/call',
@@ -67,15 +70,15 @@ describe('defaultIngestErrorHandler', () => {
       }),
       'the root message',
     ]);
-    const testCasesWithoutMeta = errorCodes.map((errorCode) => [
+    const casesWithoutMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
       errorCode,
       new LegacyESErrors[errorCode]('some message'),
       'some message',
     ]);
 
-    test.each(testCasesWithPathResponse)('%d - with path & response', testEsErrorsFn);
-    test.each(testCasesWithOtherMeta)('%d - with other metadata', testEsErrorsFn);
-    test.each(testCasesWithoutMeta)('%d - without metadata', testEsErrorsFn);
+    test.each(casesWithPathResponse)('%d - with path & response', testEsErrorsFn);
+    test.each(casesWithOtherMeta)('%d - with other metadata', testEsErrorsFn);
+    test.each(casesWithoutMeta)('%d - without metadata', testEsErrorsFn);
   });
 
   describe('IngestManagerError', () => {
