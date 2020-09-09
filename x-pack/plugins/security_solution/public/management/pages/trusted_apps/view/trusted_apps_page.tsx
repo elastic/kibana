@@ -3,29 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
-import { NewTrustedAppFlyout } from './components/NewTrustedAppFlyout';
+import { NewTrustedAppFlyout } from './components/new_trusted_app_flyout';
+import { getTrustedAppsListPath } from '../../../common/routing';
+import { useTrustedAppsSelector } from './hooks';
+import { getListCurrentShowValue, getListUrlSearchParams } from '../store/selectors';
 
 export const TrustedAppsPage = memo(() => {
-  const [isAddFlyoutOpen, setAddFlyoutOpen] = useState<boolean>(false);
+  const history = useHistory();
+  const urlParams = useTrustedAppsSelector(getListUrlSearchParams);
+  const showAddFlout = useTrustedAppsSelector(getListCurrentShowValue) === 'create';
   const handleAddButtonClick = useCallback(() => {
-    setAddFlyoutOpen((prevState) => {
-      return !prevState;
-    });
-  }, []);
+    history.push(
+      getTrustedAppsListPath({
+        ...urlParams,
+        show: 'create',
+      })
+    );
+  }, [history, urlParams]);
   const handleAddFlyoutClose = useCallback(() => {
-    setAddFlyoutOpen(false);
-  }, []);
+    const { show, ...paginationParamsOnly } = urlParams;
+    history.push(getTrustedAppsListPath(paginationParamsOnly));
+  }, [history, urlParams]);
 
   const addButton = (
     <EuiButton
       fill
       iconType="plusInCircle"
-      isDisabled={isAddFlyoutOpen}
+      isDisabled={showAddFlout}
       onClick={handleAddButtonClick}
     >
       <FormattedMessage
@@ -52,7 +62,7 @@ export const TrustedAppsPage = memo(() => {
       }
       actions={addButton}
     >
-      {isAddFlyoutOpen && <NewTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
+      {showAddFlout && <NewTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
       <TrustedAppsList />
     </AdministrationListPage>
   );

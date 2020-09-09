@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
@@ -17,6 +18,7 @@ import {
   TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state';
+import { TrustedAppsUrlParams } from '../types';
 
 const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
   pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;
@@ -64,6 +66,27 @@ export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState
     getLastLoadedResourceState(state.listView.currentListResourceState)?.data.totalItemsCount || 0
   );
 };
+
+export const getListCurrentShowValue: (
+  state: Immutable<TrustedAppsListPageState>
+) => TrustedAppsListPageState['listView']['show'] = (state) => {
+  return state.listView.show;
+};
+
+export const getListUrlSearchParams: (
+  state: Immutable<TrustedAppsListPageState>
+) => TrustedAppsUrlParams = createSelector(
+  getListCurrentPageIndex,
+  getListCurrentPageSize,
+  getListCurrentShowValue,
+  (pageIndex, pageSize, showValue) => {
+    return {
+      page_index: pageIndex,
+      page_size: pageIndex,
+      show: showValue,
+    };
+  }
+);
 
 export const getListErrorMessage = (
   state: Immutable<TrustedAppsListPageState>

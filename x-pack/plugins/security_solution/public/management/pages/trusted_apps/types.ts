@@ -7,4 +7,5 @@
 export interface TrustedAppsUrlParams {
   page_index: number;
   page_size: number;
+  show?: 'create';
 }

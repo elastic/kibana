@@ -11,7 +11,7 @@ import { ImmutableReducer } from '../../../../common/store';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { AppAction } from '../../../../common/store/actions';
-import { extractListPaginationParams } from '../../../common/routing';
+import { extractFirstParamValue, extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_DEFAULT_PAGE,
@@ -51,7 +51,8 @@ const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceSt
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isTrustedAppsPageLocation(action.payload)) {
-    const paginationParams = extractListPaginationParams(parse(action.payload.search.slice(1)));
+    const parsedUrlsParams = parse(action.payload.search.slice(1));
+    const paginationParams = extractListPaginationParams(parsedUrlsParams);
 
     return {
       ...state,
@@ -61,6 +62,7 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
           index: paginationParams.page_index,
           size: paginationParams.page_size,
         },
+        show: extractFirstParamValue(parsedUrlsParams, 'show') === 'create' ? 'create' : undefined,
       },
       active: true,
     };
@@ -76,6 +78,7 @@ export const initialTrustedAppsPageState: TrustedAppsListPageState = {
       index: MANAGEMENT_DEFAULT_PAGE,
       size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     },
+    show: undefined,
   },
   active: false,
 };

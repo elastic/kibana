@@ -6,6 +6,7 @@
 
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
+import { TrustedAppsUrlParams } from '../types';
 
 export interface PaginationInfo {
   index: number;
@@ -22,6 +23,7 @@ export interface TrustedAppsListPageState {
   listView: {
     currentListResourceState: AsyncResourceState<TrustedAppsListData>;
     currentPaginationInfo: PaginationInfo;
+    show: TrustedAppsUrlParams['show'] | undefined;
   };
   active: boolean;
 }
