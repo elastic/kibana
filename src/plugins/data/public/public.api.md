@@ -693,7 +693,6 @@ export const getKbnTypeNames: () => string[];
 //
 // @public (undocumented)
 export function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
-    esShardTimeout: number;
     getConfig: GetConfigFn;
 }): ISearchRequestParams;
 
@@ -1734,7 +1733,7 @@ export interface SearchError {
 //
 // @public (undocumented)
 export class SearchInterceptor {
-    constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
+    constructor(deps: SearchInterceptorDeps);
     // @internal
     protected abortController: AbortController;
     // @internal (undocumented)
@@ -1748,13 +1747,14 @@ export class SearchInterceptor {
     protected longRunningToast?: Toast;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
-    // (undocumented)
-    protected readonly requestTimeout?: number | undefined;
-    // (undocumented)
+    // @internal (undocumented)
     protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
-    // (undocumented)
-    protected setupTimers(options?: ISearchOptions): {
+    // @internal (undocumented)
+    protected setupAbortSignal({ abortSignal, timeout, }: {
+        abortSignal?: AbortSignal;
+        timeout?: number;
+    }): {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
@@ -1925,6 +1925,7 @@ export const UI_SETTINGS: {
     readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: "courier:maxConcurrentShardRequests";
     readonly COURIER_BATCH_SEARCHES: "courier:batchSearches";
     readonly SEARCH_INCLUDE_FROZEN: "search:includeFrozen";
+    readonly SEARCH_TIMEOUT: "search:timeout";
     readonly HISTOGRAM_BAR_TARGET: "histogram:barTarget";
     readonly HISTOGRAM_MAX_BARS: "histogram:maxBars";
     readonly HISTORY_LIMIT: "history:limit";
