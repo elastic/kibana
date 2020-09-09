@@ -4,86 +4,96 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  BoomResponse,
-  extractErrorMessage,
-  MLCustomHttpResponseOptions,
-  MLResponseError,
-} from './errors';
-import { ResponseError } from 'kibana/server';
+import Boom from 'boom';
+
+import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './errors';
 
 describe('ML - error message utils', () => {
   describe('extractErrorMessage', () => {
     test('returns just the error message', () => {
-      const testMsg = 'Saved object [index-pattern/blahblahblah] not found';
+      const testMsg = 'Saved object [index-pattern/indexpattern] not found';
 
-      const bodyWithNestedErrorMsg: MLCustomHttpResponseOptions<MLResponseError> = {
-        body: {
-          message: {
-            msg: testMsg,
-          },
+      // bad error, return empty string
+      const badError = {} as any;
+      expect(extractErrorMessage(badError)).toBe('');
+
+      // raw es error
+      const esErrorMsg: EsErrorBody = {
+        error: {
+          root_cause: [
+            {
+              type: 'type',
+              reason: 'reason',
+            },
+          ],
+          type: 'type',
+          reason: testMsg,
         },
-        statusCode: 404,
+        status: 404,
       };
-      expect(extractErrorMessage(bodyWithNestedErrorMsg)).toBe(testMsg);
+      expect(extractErrorMessage(esErrorMsg)).toBe(testMsg);
 
-      const bodyWithStringMsg: MLCustomHttpResponseOptions<MLResponseError> = {
+      // error is basic string
+      const stringMessage = testMsg;
+      expect(extractErrorMessage(stringMessage)).toBe(testMsg);
+
+      // kibana error without attributes
+      const bodyWithoutAttributes: MLHttpFetchError<MLResponseError> = {
+        name: 'name',
+        req: {} as Request,
+        request: {} as Request,
+        message: 'Something else',
         body: {
-          msg: testMsg,
           statusCode: 404,
-          response: `{"error":{"reason":"${testMsg}"}}`,
-        },
-        statusCode: 404,
-      };
-      expect(extractErrorMessage(bodyWithStringMsg)).toBe(testMsg);
-
-      const bodyWithStringMessage: MLCustomHttpResponseOptions<ResponseError> = {
-        body: {
+          error: 'error',
           message: testMsg,
         },
-        statusCode: 404,
       };
-      expect(extractErrorMessage(bodyWithStringMessage)).toBe(testMsg);
+      expect(extractErrorMessage(bodyWithoutAttributes)).toBe(testMsg);
 
-      const bodyWithAttributes: MLCustomHttpResponseOptions<ResponseError> = {
+      // kibana error with attributes
+      const bodyWithAttributes: MLHttpFetchError<MLResponseError> = {
+        name: 'name',
+        req: {} as Request,
+        request: {} as Request,
+        message: 'Something else',
         body: {
+          statusCode: 404,
+          error: 'error',
           message: 'Something else',
-          attributes: { body: { status: 404, error: { reason: testMsg } } },
+          attributes: {
+            body: {
+              status: 404,
+              error: {
+                reason: testMsg,
+                type: 'type',
+                root_cause: [{ type: 'type', reason: 'reason' }],
+              },
+            },
+          },
         },
-        statusCode: 404,
       };
       expect(extractErrorMessage(bodyWithAttributes)).toBe(testMsg);
 
-      const bodyWithString: MLCustomHttpResponseOptions<ResponseError> = {
-        body: testMsg,
-        statusCode: 404,
-      };
-      expect(extractErrorMessage(bodyWithString)).toBe(testMsg);
-
-      const bodyWithError: MLCustomHttpResponseOptions<ResponseError> = {
-        body: new Error(testMsg),
-        statusCode: 404,
-      };
-      expect(extractErrorMessage(bodyWithError)).toBe(testMsg);
-
-      const bodyWithBoomError: MLCustomHttpResponseOptions<BoomResponse> = {
-        statusCode: 404,
-        body: {
-          data: [],
-          isBoom: true,
-          isServer: false,
-          output: {
+      // boom error
+      const boomError: Boom<any> = {
+        message: '',
+        reformat: () => '',
+        name: '',
+        data: [],
+        isBoom: true,
+        isServer: false,
+        output: {
+          statusCode: 404,
+          payload: {
             statusCode: 404,
-            payload: {
-              statusCode: 404,
-              error: testMsg,
-              message: testMsg,
-            },
-            headers: {},
+            error: testMsg,
+            message: testMsg,
           },
+          headers: {},
         },
       };
-      expect(extractErrorMessage(bodyWithBoomError)).toBe(testMsg);
+      expect(extractErrorMessage(boomError)).toBe(testMsg);
     });
   });
 });
