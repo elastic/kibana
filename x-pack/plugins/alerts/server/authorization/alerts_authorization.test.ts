@@ -6,6 +6,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
+import { esKuery } from '../../../../../src/plugins/data/server';
 import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -605,8 +606,10 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-        `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
+      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
+        // esKuery.fromKueryExpression(
+        `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        // )
       );
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1219,38 +1222,6 @@ describe('AlertsAuthorization', () => {
                 },
               }
             `);
-    });
-  });
-
-  describe('ensureFieldIsSafeForQuery', () => {
-    test('throws if field contains character that isnt safe in a KQL query', () => {
-      expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrowError(
-        `expected id not to include invalid character: *`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
-        `expected id not to include invalid character: <=`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
-        `expected id not to include invalid character: >=`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
-        `expected id not to include whitespace and invalid character: :`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrowError(
-        `expected id not to include whitespace and invalid characters: ), :`
-      );
-
-      expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
-        `expected id not to include whitespace`
-      );
-    });
-
-    test('doesnt throws if field is safe as part of a KQL query', () => {
-      expect(() => ensureFieldIsSafeForQuery('id', '123-0456-678')).not.toThrow();
     });
   });
 });
