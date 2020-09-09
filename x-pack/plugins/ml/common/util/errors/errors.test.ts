@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './errors';
+import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './index';
 
 describe('ML - error message utils', () => {
   describe('extractErrorMessage', () => {

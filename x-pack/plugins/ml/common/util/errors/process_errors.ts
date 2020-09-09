@@ -4,59 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchError } from 'kibana/public';
-import Boom from 'boom';
-
-export interface EsErrorRootCause {
-  type: string;
-  reason: string;
-}
-
-export interface EsErrorBody {
-  error: {
-    root_cause?: EsErrorRootCause[];
-    type: string;
-    reason: string;
-  };
-  status: number;
-}
-
-export interface MLResponseError {
-  statusCode: number;
-  error: string;
-  message: string;
-  attributes?: {
-    body: EsErrorBody;
-  };
-}
-
-export interface MLHttpFetchError<T> extends HttpFetchError {
-  body: T;
-}
-
-export type ErrorType = MLHttpFetchError<MLResponseError> | EsErrorBody | Boom | string | undefined;
-
-function isEsErrorBody(error: any): error is EsErrorBody {
-  return error && error.error?.reason !== undefined;
-}
-
-function isErrorString(error: any): error is string {
-  return typeof error === 'string';
-}
-
-function isMLResponseError(error: any): error is MLResponseError {
-  return typeof error.body === 'object' && 'message' in error.body;
-}
-
-function isBoomError(error: any): error is Boom {
-  return error.isBoom === true;
-}
-
-export interface MLErrorObject {
-  message: string;
-  statusCode?: number;
-  fullError?: EsErrorBody;
-}
+import {
+  ErrorType,
+  MLErrorObject,
+  isBoomError,
+  isErrorString,
+  isEsErrorBody,
+  isMLResponseError,
+} from './types';
 
 export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   // extract properties of the error object from within the response error

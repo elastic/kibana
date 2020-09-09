@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KbnError } from '../../../../../../src/plugins/kibana_utils/public';
+import { MLErrorObject, ErrorType } from './types';
 
-export class MLRequestFailure extends KbnError {
-  // takes an Error object and and optional response object
-
-  constructor(error: any, resp: any) {
+export class MLRequestFailure extends Error {
+  constructor(error: MLErrorObject, resp: ErrorType) {
     super(error.message);
+    Object.setPrototypeOf(this, new.target.prototype);
 
-    if (typeof resp === 'object') {
+    if (typeof resp !== 'string' && typeof resp !== 'undefined') {
       if ('body' in resp) {
         this.stack = JSON.stringify(resp.body, null, 2);
       } else {

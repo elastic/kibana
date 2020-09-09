@@ -9,8 +9,11 @@ import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
 import { useMemo } from 'react';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { useNotifications } from '../../contexts/kibana';
-import { MLRequestFailure } from '../../util/ml_error';
-import { ErrorType, extractErrorProperties } from '../../../../common/util/errors';
+import {
+  ErrorType,
+  extractErrorProperties,
+  MLRequestFailure,
+} from '../../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 
