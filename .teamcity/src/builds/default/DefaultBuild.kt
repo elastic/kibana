@@ -7,7 +7,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
 
 object DefaultBuild : BuildType({
-  name = "Build"
+  name = "Build Default"
   paused = true
   description = "Generates Default Build Distribution artifact"
 

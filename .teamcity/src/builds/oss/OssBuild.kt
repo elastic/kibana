@@ -7,7 +7,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
 
 object OssBuild : BuildType({
-  name = "Build"
+  name = "Build OSS"
   paused = true
   description = "Generates OSS Build Distribution artifact"
 

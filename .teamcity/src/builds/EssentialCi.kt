@@ -13,7 +13,7 @@ object EssentialCi : BuildType({
   name = "Essential CI"
   type = Type.COMPOSITE
 
-  val builds = listOf(
+  dependsOn(
     AllTests,
     OssVisualRegression,
     DefaultVisualRegression,
@@ -21,6 +21,4 @@ object EssentialCi : BuildType({
     OssCiGroups,
     DefaultCiGroups
   )
-
-  dependsOn(*builds.toTypedArray())
 })
