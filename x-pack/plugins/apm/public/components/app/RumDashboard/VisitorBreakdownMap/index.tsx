@@ -3,3 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import React from 'react';
+import { EmbeddedMap } from './EmbeddedMap';
+
+export function VisitorBreakdownMap() {
+  return (
+    <div style={{ height: 400 }}>
+      <EmbeddedMap />
+    </div>
+  );
+}

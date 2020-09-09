@@ -26,7 +26,7 @@ import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 
@@ -70,11 +70,13 @@ export function CsmAppRoot({
   deps,
   history,
   config,
+  corePlugins: { embeddable },
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   history: AppMountParameters['history'];
   config: ConfigSchema;
+  corePlugins: ApmPluginStartDeps;
 }) {
   const i18nCore = core.i18n;
   const plugins = deps;
@@ -86,7 +88,7 @@ export function CsmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...core, ...plugins, embeddable }}>
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
@@ -110,12 +112,19 @@ export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element, history }: AppMountParameters,
-  config: ConfigSchema
+  config: ConfigSchema,
+  corePlugins: ApmPluginStartDeps
 ) => {
   createCallApmApi(core.http);
 
   ReactDOM.render(
-    <CsmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <CsmAppRoot
+      core={core}
+      deps={deps}
+      history={history}
+      config={config}
+      corePlugins={corePlugins}
+    />,
     element
   );
   return () => {

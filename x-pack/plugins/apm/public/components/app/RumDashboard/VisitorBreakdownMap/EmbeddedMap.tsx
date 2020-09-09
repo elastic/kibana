@@ -4,35 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   MapEmbeddable,
   MapEmbeddableInput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../maps/public/embeddable';
-import * as i18n from './translations';
-import { GeoPoint } from '../../../../../../common/runtime_types';
-import { getLayerList } from './map_config';
-import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../../contexts';
+} from '../../../../../../maps/public/embeddable';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  isErrorEmbeddable,
-  ViewMode,
   ErrorEmbeddable,
-} from '../../../../../../../../../src/plugins/embeddable/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
-import { MapToolTipComponent } from './map_tool_tip';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
-
-export interface EmbeddedMapProps {
-  upPoints: LocationPoint[];
-  downPoints: LocationPoint[];
-}
-
-export type LocationPoint = Required<GeoPoint>;
+  ViewMode,
+  isErrorEmbeddable,
+} from '../../../../../../../../src/plugins/embeddable/public';
+import { getLayerList } from './LayerList';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -52,67 +41,49 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
-  const { colors } = useContext(UptimeThemeContext);
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const { embeddable: embeddablePlugin } = useContext(UptimeStartupPluginsContext);
+interface KibanaDeps {
+  embeddable: any;
+}
+export const EmbeddedMap = React.memo(() => {
+  const { urlParams } = useUrlParams();
+
+  const { start, end } = urlParams;
+
+  const [embeddable, setEmbeddable] = useState<
+    MapEmbeddable | ErrorEmbeddable | undefined
+  >();
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<
+    HTMLDivElement
+  >(null);
+
+  const {
+    services: { embeddable: embeddablePlugin },
+  } = useKibana<KibanaDeps>();
+
   if (!embeddablePlugin) {
     throw new Error('Embeddable start plugin not found');
   }
-  const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
-
-  const portalNode = React.useMemo(() => createPortalNode(), []);
+  const factory: any = embeddablePlugin.getEmbeddableFactory(
+    MAP_SAVED_OBJECT_TYPE
+  );
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
     filters: [],
-    hidePanelTitles: true,
     refreshConfig: {
       value: 0,
       pause: false,
     },
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
-    hideFilterActions: true,
-    // Zoom Lat/Lon values are set to make sure map is in center in the panel
-    // It wil also omit Greenland/Antarctica etc
-    mapCenter: {
-      lon: 11,
-      lat: 20,
-      zoom: 0,
+    query: {
+      query: 'transaction.type : "page-load"',
+      language: 'kuery',
     },
-    disableInteractive: true,
-    hideToolbarOverlay: true,
-    hideLayerControl: true,
-    hideViewControl: true,
-  };
-
-  const renderTooltipContent = ({
-    addFilters,
-    closeTooltip,
-    features,
-    isLocked,
-    getLayerName,
-    loadFeatureProperties,
-    loadFeatureGeometry,
-  }: RenderTooltipContentParams) => {
-    const props = {
-      addFilters,
-      closeTooltip,
-      isLocked,
-      getLayerName,
-      loadFeatureProperties,
-      loadFeatureGeometry,
-    };
-    const relevantFeatures = features.filter(
-      (item: any) => item.layerId === 'up_points' || item.layerId === 'down_points'
-    );
-    if (relevantFeatures.length > 0) {
-      return <OutPortal {...props} node={portalNode} features={relevantFeatures} />;
-    }
-    closeTooltip();
-    return null;
+    timeRange: {
+      from: new Date(start!).toISOString(),
+      to: new Date(end!).toISOString(),
+    },
   };
 
   useEffect(() => {
@@ -122,12 +93,11 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       }
       const embeddableObject: any = await factory.create({
         ...input,
-        title: i18n.MAP_TITLE,
+        title: 'Visitors by region',
       });
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+        await embeddableObject.setLayerList(getLayerList());
       }
 
       setEmbeddable(embeddableObject);
@@ -138,13 +108,6 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
     // we want this effect to execute exactly once after the component mounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // update map layers based on points
-  useEffect(() => {
-    if (embeddable && !isErrorEmbeddable(embeddable)) {
-      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
-    }
-  }, [upPoints, downPoints, embeddable, colors]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
@@ -160,9 +123,6 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
         className="embPanel__content"
         ref={embeddableRoot}
       />
-      <InPortal node={portalNode}>
-        <MapToolTipComponent />
-      </InPortal>
     </EmbeddedPanel>
   );
 });

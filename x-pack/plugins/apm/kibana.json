@@ -7,7 +7,8 @@
     "apmOss",
     "data",
     "licensing",
-    "triggers_actions_ui"
+    "triggers_actions_ui",
+    "embeddable"
   ],
   "optionalPlugins": [
     "cloud",
@@ -22,17 +23,13 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
-  "extraPublicDirs": [
-    "public/style/variables"
-  ],
+  "configPath": ["xpack", "apm"],
+  "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
     "kibanaReact",
     "kibanaUtils",
     "observability",
-    "home"
+    "home",
+    "maps"
   ]
 }
