@@ -44,6 +44,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { isThresholdRule } from '../../../../common/detection_engine/utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -245,7 +246,7 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-        } else if (type === 'threshold' && threshold) {
+        } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
