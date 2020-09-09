@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import moment from 'moment';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -103,7 +102,6 @@ export function DiscoverLegacy({
   onChangeInterval,
   onMoveColumn,
   onRemoveColumn,
-  onSetColumns,
   onSkipBottomButtonClick,
   onSort,
   opts,
@@ -122,16 +120,13 @@ export function DiscoverLegacy({
   vis,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const toMoment = function (datetime: string) {
-    if (!datetime) {
-      return '';
-    }
-    return moment(datetime).format(opts.config.get('dateFormat'));
-  };
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
-  // @ts-ignore
-  const bucketInterval = vis?.data?.aggs?.aggs[1]?.buckets?.getInterval();
+  const bucketAggConfig = vis?.data?.aggs?.aggs[1];
+  const bucketInterval =
+    bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+      ? bucketAggConfig.buckets?.getInterval()
+      : undefined;
 
   return (
     <I18nProvider>
@@ -212,16 +207,14 @@ export function DiscoverLegacy({
                     showResetButton={!!(savedSearch && savedSearch.id)}
                     onResetQuery={resetQuery}
                   />
-                  {timeRange && bucketInterval && (
+                  {opts.timefield && (
                     <TimechartHeader
-                      from={toMoment(timeRange.from)}
-                      to={toMoment(timeRange.to)}
+                      dateFormat={opts.config.get('dateFormat')}
+                      timeRange={timeRange}
                       options={search.aggs.intervalOptions}
                       onChangeInterval={onChangeInterval}
                       stateInterval={state.interval || ''}
-                      showScaledInfo={bucketInterval.scaled}
-                      bucketIntervalDescription={bucketInterval.description}
-                      bucketIntervalScale={bucketInterval.scale}
+                      bucketInterval={bucketInterval}
                     />
                   )}
 

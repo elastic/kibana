@@ -29,8 +29,11 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
-      from: 'May 14, 2020 @ 11:05:13.590',
-      to: 'May 14, 2020 @ 11:20:13.590',
+      dateFormat: '',
+      timeRange: {
+        from: 'May 14, 2020 @ 11:05:13.590',
+        to: 'May 14, 2020 @ 11:20:13.590',
+      },
       stateInterval: 's',
       options: [
         {
@@ -47,9 +50,11 @@ describe('timechart header', function () {
         },
       ],
       onChangeInterval: jest.fn(),
-      showScaledInfo: undefined,
-      bucketIntervalDescription: 'second',
-      bucketIntervalScale: undefined,
+      bucketInterval: {
+        scaled: undefined,
+        description: 'second',
+        scale: undefined,
+      },
     };
   });
 

@@ -48,7 +48,6 @@ import { createRenderCompleteDirective } from './application/angular/directives/
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
   registerListenEventListener,
@@ -142,7 +141,6 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
