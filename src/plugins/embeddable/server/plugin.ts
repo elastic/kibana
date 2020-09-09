@@ -66,17 +66,11 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
 
     const telemetryData = telemetryBaseEmbeddableInput(state);
     if (factory) {
-      const factoryTelemetry = factory.telemetry(state);
-      Object.keys(factoryTelemetry).forEach((key) => {
-        telemetryData[key] = factoryTelemetry[key];
-      });
+      factory.telemetry(state, telemetryData);
     }
     Object.keys(enhancements).map((key) => {
       if (!enhancements[key]) return;
-      const enhancementTelemetry = this.getEnhancement(key).telemetry(enhancements[key]);
-      Object.keys(enhancementTelemetry).forEach((k) => {
-        telemetryData[k] = enhancementTelemetry[k];
-      });
+      this.getEnhancement(key).telemetry(enhancements[key], telemetryData);
     });
 
     return telemetryData;

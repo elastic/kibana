@@ -129,8 +129,8 @@ export class ActionFactory<
       });
   }
 
-  public telemetry(state: SerializedEvent) {
-    return this.def.telemetry ? this.def.telemetry(state) : {};
+  public telemetry(state: SerializedEvent, telemetryData: Record<string, any>) {
+    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : {};
   }
 
   public extract(state: SerializedEvent) {

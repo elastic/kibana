@@ -15,8 +15,8 @@ export const dynamicActionEnhancement = (
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (state: SerializableState) => {
-      return uiActionsEnhanced.telemetry(state as DynamicActionsState);
+    telemetry: (state: SerializableState, telemetryData: Record<string, any>) => {
+      return uiActionsEnhanced.telemetry(state as DynamicActionsState, telemetryData);
     },
     extract: (state: SerializableState) => {
       return uiActionsEnhanced.extract(state as DynamicActionsState);

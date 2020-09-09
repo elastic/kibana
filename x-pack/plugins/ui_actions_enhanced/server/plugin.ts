@@ -81,15 +81,11 @@ export class AdvancedUiActionsPublicPlugin
     return actionFactory;
   };
 
-  public readonly telemetry = (state: DynamicActionsState) => {
-    const telemetry: Record<string, any> = {};
+  public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {
     state.events.forEach((event: SerializedEvent) => {
-      const eventTelemetry = this.actionFactories.has(event.action.factoryId)
-        ? this.actionFactories.get(event.action.factoryId)!.telemetry(event)
-        : {};
-      Object.keys(eventTelemetry).forEach((key) => {
-        telemetry[key] = eventTelemetry[key];
-      });
+      if (this.actionFactories.has(event.action.factoryId)) {
+        this.actionFactories.get(event.action.factoryId)!.telemetry(event, telemetry);
+      }
     });
     return telemetry;
   };
