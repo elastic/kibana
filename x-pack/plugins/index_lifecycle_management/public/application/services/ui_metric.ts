@@ -18,9 +18,9 @@ import {
   defaultNewWarmPhase,
 } from '../constants';
 
-import { Phases } from './policies/types';
+import { Phases } from '../../../common/types';
 
-export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
+export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
 
 export function init(usageCollection?: UsageCollectionSetup): void {
   if (usageCollection) {
@@ -28,7 +28,7 @@ export function init(usageCollection?: UsageCollectionSetup): void {
   }
 }
 
-export function getUiMetricsForPhases(phases: Phases): any {
+export function getUiMetricsForPhases(phases: Phases): string[] {
   const phaseUiMetrics = [
     {
       metric: UIM_CONFIG_COLD_PHASE,
@@ -72,7 +72,7 @@ export function getUiMetricsForPhases(phases: Phases): any {
     },
   ];
 
-  return phaseUiMetrics.reduce((tracked: any, { metric, isTracked }) => {
+  return phaseUiMetrics.reduce((tracked: string[], { metric, isTracked }) => {
     if (isTracked()) {
       tracked.push(metric);
     }
