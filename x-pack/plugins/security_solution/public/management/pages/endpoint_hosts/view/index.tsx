@@ -27,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
+import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
+import { NavigateToAppOptions } from 'kibana/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -397,21 +399,21 @@ export const EndpointList = () => {
               return (
                 <TableRowActions
                   items={[
-                    <EuiContextMenuItem icon="logoSecurity" key="hostDetailsLink">
-                      <LinkToApp
-                        data-test-subj="hostLink"
-                        appId="securitySolution"
-                        appPath={`hosts/${item.metadata.host.hostname}`}
-                        href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
-                          item.metadata.host.hostname
-                        }`}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.list.actions.hostDetails"
-                          defaultMessage="View Host Details"
-                        />
-                      </LinkToApp>
-                    </EuiContextMenuItem>,
+                    <EuiContextMenuItemNavByRouter
+                      data-test-subj="hostLink"
+                      icon="logoSecurity"
+                      key="hostDetailsLink"
+                      navigateAppId="securitySolution"
+                      navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
+                      href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
+                        item.metadata.host.hostname
+                      }`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+                        defaultMessage="View Host Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
                     <EuiContextMenuItem icon="logoObservability" key="agentConfigLink">
                       <LinkToApp
                         data-test-subj="agentPolicyLink"
@@ -563,3 +565,20 @@ export const EndpointList = () => {
     </AdministrationListPage>
   );
 };
+
+const EuiContextMenuItemNavByRouter = memo<
+  Omit<EuiContextMenuItemProps, 'onClick'> & {
+    navigateAppId: string;
+    navigateOptions: NavigateToAppOptions;
+    children: React.ReactNode;
+  }
+>(({ navigateAppId, navigateOptions, children, ...otherMenuItemProps }) => {
+  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, navigateOptions);
+
+  return (
+    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
+      {children}
+    </EuiContextMenuItem>
+  );
+});
+EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';
