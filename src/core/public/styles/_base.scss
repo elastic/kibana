@@ -1,4 +1,10 @@
+// Charts themes available app-wide
+@import '@elastic/charts/dist/theme';
+@import '@elastic/eui/src/themes/charts/theme';
+
+// Grab some nav-specific EUI vars
 @import '@elastic/eui/src/components/collapsible_nav/variables';
+
 // Application Layout
 
 // chrome-context

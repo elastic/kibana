@@ -32,6 +32,7 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
+import { CoreStart } from 'src/core/server';
 import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
@@ -170,6 +171,7 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
+  coreStart: CoreStart;
   kbnServer: KbnServer;
   stop: () => Promise<void>;
 }
@@ -289,13 +291,14 @@ export function createTestServers({
       const root = createRootWithCorePlugins(kbnSettings);
 
       await root.setup();
-      await root.start();
+      const coreStart = await root.start();
 
       const kbnServer = getKbnServer(root);
 
       return {
         root,
         kbnServer,
+        coreStart,
         stop: async () => await root.shutdown(),
       };
     },
