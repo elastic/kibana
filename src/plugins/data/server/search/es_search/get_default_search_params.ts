@@ -17,12 +17,28 @@
  * under the License.
  */
 
-import { SharedGlobalConfig } from '../../../../../core/server';
+import { SharedGlobalConfig, IUiSettingsClient } from '../../../../../core/server';
+import { UI_SETTINGS } from '../../../common/constants';
 
-export function getDefaultSearchParams(config: SharedGlobalConfig) {
+export function getShardTimeout(config: SharedGlobalConfig) {
+  const timeout = config.elasticsearch.shardTimeout.asMilliseconds();
+  return timeout
+    ? {
+        timeout: `${timeout}ms`,
+      }
+    : {};
+}
+
+export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient) {
+  const ignoreThrottled = !(await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN));
+  const maxConcurrentShardRequests = await uiSettingsClient.get<number>(
+    UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
+  );
   return {
-    timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
+    maxConcurrentShardRequests:
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
+    ignoreThrottled,
     ignoreUnavailable: true, // Don't fail if the index/indices don't exist
-    restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+    trackTotalHits: true,
   };
 }
