@@ -87,6 +87,11 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
               aggs: {
+                jobsCardinality: {
+                  cardinality: {
+                    field: 'job_id',
+                  },
+                },
                 jobId: {
                   terms: {
                     field: 'job_id',
@@ -147,6 +152,7 @@ export function resultsServiceProvider(mlApiServices) {
               });
               obj.results[jobId] = resultsForTime;
             });
+            obj.cardinality = resp.aggregations?.jobsCardinality?.value ?? 0;
 
             resolve(obj);
           })
