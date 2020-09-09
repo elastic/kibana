@@ -54,35 +54,40 @@ export const percentSystemMemoryUsedScript = {
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
   source: `
-    boolean isFieldAvailable(def doc, def x) {
-      return doc.containsKey(x) 
-        && !doc[x].empty
-    }
+  boolean isFieldAvailable(def doc, def x) {
+    return doc.containsKey(x) 
+      && !doc[x].empty
+  }
+  if(!isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_USAGE_BYTES}')) {
+    return null;
+  }
 
-    if(!isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_USAGE_BYTES}')) {
-      return null;     
-    }
-    
-    double total = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
+  double total = -1;
+  // uses cgroup.memory.mem.limit as total when it is available and not empty
+  if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}')){
+    total = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value
+  //Otherwise uses system.memory.total as total
+  }else if (isFieldAvailable(doc, '${METRIC_SYSTEM_TOTAL_MEMORY}')){
+    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value
+  }
+  
+  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
+  if(total == -1) {
+    return null;
+  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+  } else if(total == 9223372036854771712L){
+    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
+  }
 
-    double limit = -1;
-    if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}')){
-      limit = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value
-    }else if (isFieldAvailable(doc, '${METRIC_SYSTEM_TOTAL_MEMORY}')){
-      limit = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value
-    }
-    
-    if(limit == -1) {
-      return null;
-    }
-    
-    double inactive_files = 0;
-    if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}')){
-      inactive_files = doc['${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}'].value
-    }
-    
-    return (total - inactive_files) / limit;
-  `,
+  double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
+  
+  double inactive_files = 0;
+  if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}')){
+    inactive_files = doc['${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}'].value
+  }
+  
+  return (used - inactive_files) / total;
+    `,
 };
 
 export async function getMemoryChartData(
