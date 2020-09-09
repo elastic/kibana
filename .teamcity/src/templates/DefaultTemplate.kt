@@ -32,8 +32,8 @@ object DefaultTemplate : Template({
   vcs {
     root(DefaultRoot)
 
-//    checkoutDir = "kibana"
-    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"
+    checkoutDir = "kibana"
+//    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"
   }
 
   requirements {
