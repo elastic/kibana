@@ -10,15 +10,15 @@ import { useActions, useValues } from 'kea';
 
 import { EuiLoadingContent } from '@elastic/eui';
 
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
-import FilterableUsersPopover from './FilterableUsersPopover';
+import { GroupsLogic } from '../groups_logic';
+import { FilterableUsersPopover } from './filterable_users_popover';
 
 interface IGroupRowUsersDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
   groupId: string;
-  onButtonClick();
-  closePopover();
+  onButtonClick(): void;
+  closePopover(): void;
 }
 
 export const GroupRowUsersDropdown: React.FC<IGroupRowUsersDropdownProps> = ({
@@ -28,8 +28,8 @@ export const GroupRowUsersDropdown: React.FC<IGroupRowUsersDropdownProps> = ({
   onButtonClick,
   closePopover,
 }) => {
-  const { fetchGroupUsers } = useActions(GroupsLogic) as IGroupsActions;
-  const { allGroupUsersLoading, allGroupUsers } = useValues(GroupsLogic) as IGroupsValues;
+  const { fetchGroupUsers } = useActions(GroupsLogic);
+  const { allGroupUsersLoading, allGroupUsers } = useValues(GroupsLogic);
 
   const handleLinkClick = () => {
     fetchGroupUsers(groupId);

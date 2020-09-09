@@ -16,24 +16,24 @@ import {
   EuiTableHeaderCell,
 } from '@elastic/eui';
 
-import { TablePaginationBar } from 'workplace_search/components';
+import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
-import GroupRow from './GroupRow';
+import { AppLogic } from '../../../app_logic';
+import { GroupsLogic } from '../groups_logic';
+import { GroupRow } from './group_row';
 
-import ClearFiltersLink from './ClearFiltersLink';
+import { ClearFiltersLink } from './clear_filters_link';
 
 export const GroupsTable: React.FC<{}> = () => {
-  const { setActivePage } = useActions(GroupsLogic) as IGroupsActions;
+  const { setActivePage } = useActions(GroupsLogic);
   const {
     groupsMeta: {
       page: { total_pages: totalPages, total_results: totalItems, current: activePage },
     },
     groups,
     hasFiltersSet,
-  } = useValues(GroupsLogic) as IGroupsValues;
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+  } = useValues(GroupsLogic);
+  const { isFederatedAuth } = useValues(AppLogic);
 
   const clearFiltersLink = hasFiltersSet ? <ClearFiltersLink /> : undefined;
 

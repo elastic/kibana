@@ -7,21 +7,31 @@
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 
-import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
 
-import ConfirmModal from 'shared/components/ConfirmModal';
-import TruncatedContent from 'shared/components/TruncatedContent';
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { Loading, ContentSection, SourcesTable } from 'workplace_search/components';
-import { IRouter } from 'workplace_search/types';
+import { AppLogic } from '../../../app_logic';
+import { TruncatedContent } from '../../../../shared/truncate';
+import { ContentSection } from '../../../components/shared/content_section';
+import { Loading } from '../../../components/shared/loading';
+import { SourcesTable } from '../../../components/shared/sources_table';
 
-import GroupUsersTable from './GroupUsersTable';
+import { GroupUsersTable } from './group_users_table';
 
-import { GroupLogic, IGroupActions, IGroupValues, MAX_NAME_LENGTH } from '../GroupLogic';
+import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
-export const GroupOverview: React.FC<IRouter> = ({ history }) => {
+export const GroupOverview: React.FC = () => {
+  const history = useHistory() as History;
   const {
     deleteGroup,
     showSharedSourcesModal,
@@ -30,15 +40,15 @@ export const GroupOverview: React.FC<IRouter> = ({ history }) => {
     hideConfirmDeleteModal,
     updateGroupName,
     onGroupNameInputChange,
-  } = useActions(GroupLogic) as IGroupActions;
+  } = useActions(GroupLogic);
   const {
     group: { name, contentSources, users, canDeleteGroup },
     groupNameInputValue,
     dataLoading,
     confirmDeleteModalVisible,
-  } = useValues(GroupLogic) as IGroupValues;
+  } = useValues(GroupLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+  const { isFederatedAuth } = useValues(AppLogic);
 
   if (dataLoading) return <Loading />;
 
@@ -81,7 +91,7 @@ export const GroupOverview: React.FC<IRouter> = ({ history }) => {
     </ContentSection>
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateGroupName();
   };
@@ -117,16 +127,21 @@ export const GroupOverview: React.FC<IRouter> = ({ history }) => {
   const deleteSection = (
     <ContentSection title="Remove this group" description="This action cannot be undone.">
       {confirmDeleteModalVisible && (
-        <ConfirmModal
-          onCancel={hideConfirmDeleteModal}
-          onConfirm={() => {
-            deleteGroup(history);
-          }}
-          confirmButtonText={`Delete ${name}`}
-        >
-          Your group will be deleted from Workplace Search. <br />
-          Are you sure you want to remove {name}?
-        </ConfirmModal>
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            onCancel={hideConfirmDeleteModal}
+            onConfirm={() => {
+              deleteGroup(history);
+            }}
+            confirmButtonText={`Delete ${name}`}
+            title="Confirm"
+            cancelButtonText="Cancel"
+            defaultFocusedButton="confirm"
+          >
+            Your group will be deleted from Workplace Search. <br />
+            Are you sure you want to remove {name}?
+          </EuiConfirmModal>
+        </EuiOverlayMask>
       )}
       <EuiButton color="danger" data-test-subj="DeleteGroup" fill onClick={showConfirmDeleteModal}>
         Remove {truncatedName}

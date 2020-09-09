@@ -6,12 +6,12 @@
 
 import React, { useState } from 'react';
 
-import { UserIcon } from 'workplace_search/components';
-import { MAX_TABLE_ROW_ICONS } from 'workplace_search/constants';
+import { UserIcon } from '../../../components/shared/user_icon';
+import { MAX_TABLE_ROW_ICONS } from '../../../constants';
 
-import { IUser } from 'workplace_search/types';
+import { IUser } from '../../../types';
 
-import GroupRowUsersDropdown from './GroupRowUsersDropdown';
+import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 
 interface IGroupUsersProps {
   groupUsers: IUser[];

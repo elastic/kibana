@@ -10,14 +10,12 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFilterButton } from '@elastic/eui';
 
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
-import FilterableUsersPopover from './FilterableUsersPopover';
+import { GroupsLogic } from '../groups_logic';
+import { FilterableUsersPopover } from './filterable_users_popover';
 
 export const TableFilterUsersDropdown: React.FC<{}> = () => {
-  const { closeFilterUsersDropdown, toggleFilterUsersDropdown } = useActions(
-    GroupsLogic
-  ) as IGroupsActions;
-  const { filteredUsers, filterUsersDropdownOpen, users } = useValues(GroupsLogic) as IGroupsValues;
+  const { closeFilterUsersDropdown, toggleFilterUsersDropdown } = useActions(GroupsLogic);
+  const { filteredUsers, filterUsersDropdownOpen, users } = useValues(GroupsLogic);
 
   const filterButton = (
     <EuiFilterButton

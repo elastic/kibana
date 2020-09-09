@@ -5,29 +5,25 @@
  */
 
 import React from 'react';
-
 import moment from 'moment';
-
 import { Link } from 'react-router-dom';
-
 import { useValues } from 'kea';
-
-import TruncatedContent from 'shared/components/TruncatedContent';
-
-import { getGroupPath } from 'workplace_search/utils/routePaths';
 
 import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 
-import { IGroup } from 'workplace_search/types';
+import { TruncatedContent } from '../../../../shared/truncate';
 
-import { AppLogic, IAppValues } from 'workplace_search/App/AppLogic';
-import { MAX_NAME_LENGTH } from '../GroupLogic';
-import GroupSources from './GroupSources';
-import GroupUsers from './GroupUsers';
+import { IGroup } from '../../../types';
+
+import { AppLogic } from '../../../app_logic';
+import { getGroupPath } from '../../../routes';
+import { MAX_NAME_LENGTH } from '../group_logic';
+import { GroupSources } from './group_sources';
+import { GroupUsers } from './group_users';
 
 const DAYS_CUTOFF = 8;
 
-const dateDisplay = (date) =>
+const dateDisplay = (date: string) =>
   moment(date).isAfter(moment().subtract(DAYS_CUTOFF, 'days'))
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
@@ -40,7 +36,7 @@ export const GroupRow: React.FC<IGroup> = ({
   users,
   usersCount,
 }) => {
-  const { isFederatedAuth } = useValues(AppLogic) as IAppValues;
+  const { isFederatedAuth } = useValues(AppLogic);
 
   return (
     <EuiTableRow data-test-subj="GroupsRow">

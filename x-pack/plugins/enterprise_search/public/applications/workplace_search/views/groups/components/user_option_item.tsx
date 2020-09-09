@@ -8,8 +8,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UserIcon } from 'workplace_search/components';
-import { IUser } from 'workplace_search/types';
+import { UserIcon } from '../../../components/shared/user_icon';
+import { IUser } from '../../../types';
 
 interface IUserOptionItemProps {
   user: IUser;

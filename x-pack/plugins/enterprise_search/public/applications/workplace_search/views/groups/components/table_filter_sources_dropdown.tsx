@@ -10,8 +10,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
-import { GroupsLogic, IGroupsActions, IGroupsValues } from '../GroupsLogic';
-import SourcesList from './SourcesList';
+import { GroupsLogic } from '../groups_logic';
+import { SourcesList } from './sources_list';
 
 export const TableFilterSourcesDropdown: React.FC = () => {
   const {
@@ -19,10 +19,8 @@ export const TableFilterSourcesDropdown: React.FC = () => {
     removeFilteredSource,
     toggleFilterSourcesDropdown,
     closeFilterSourcesDropdown,
-  } = useActions(GroupsLogic) as IGroupsActions;
-  const { contentSources, filterSourcesDropdownOpen, filteredSources } = useValues(
-    GroupsLogic
-  ) as IGroupsValues;
+  } = useActions(GroupsLogic);
+  const { contentSources, filterSourcesDropdownOpen, filteredSources } = useValues(GroupsLogic);
 
   const sourceIds = contentSources.map(({ id }) => id);
 

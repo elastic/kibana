@@ -8,11 +8,11 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { GroupLogic, IGroupActions, IGroupValues } from '../GroupLogic';
-import { GroupsLogic, IGroupsValues } from '../GroupsLogic';
+import { GroupLogic } from '../group_logic';
+import { GroupsLogic } from '../groups_logic';
 
-import GroupManagerModal from './GroupManagerModal';
-import SourcesList from './SourcesList';
+import { GroupManagerModal } from './group_manager_modal';
+import { SourcesList } from './sources_list';
 
 export const SharedSourcesModal: React.FC = () => {
   const {
@@ -21,11 +21,11 @@ export const SharedSourcesModal: React.FC = () => {
     hideSharedSourcesModal,
     removeGroupSource,
     saveGroupSources,
-  } = useActions(GroupLogic) as IGroupActions;
+  } = useActions(GroupLogic);
 
-  const { selectedGroupSources, group } = useValues(GroupLogic) as IGroupValues;
+  const { selectedGroupSources, group } = useValues(GroupLogic);
 
-  const { contentSources } = useValues(GroupsLogic) as IGroupsValues;
+  const { contentSources } = useValues(GroupsLogic);
 
   return (
     <GroupManagerModal
