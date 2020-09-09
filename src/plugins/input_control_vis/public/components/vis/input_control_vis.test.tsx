@@ -21,7 +21,6 @@ import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { InputControlVis } from './input_control_vis';

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { XJsonLang } from '@kbn/monaco';
 import React, { FunctionComponent, useCallback } from 'react';
 import { FieldHook, Monaco } from '../../../../../../shared_imports';
@@ -14,6 +13,11 @@ interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
 }
+
+const defaultEditorOptions = {
+  minimap: { enabled: false },
+  lineNumbers: 'off',
+};
 
 export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
   const { value, setValue } = field;
@@ -32,10 +36,7 @@ export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) =>
       editorProps={{
         value: xJson,
         languageId: XJsonLang.ID,
-        options: { minimap: { enabled: false } },
-        editorDidMount: (m: any) => {
-          XJsonLang.registerGrammarChecker(m);
-        },
+        options: defaultEditorOptions,
         onChange,
         ...editorProps,
       }}

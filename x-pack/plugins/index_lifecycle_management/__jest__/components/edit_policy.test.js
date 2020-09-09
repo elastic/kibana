@@ -7,7 +7,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
-import { Provider } from 'react-redux';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
@@ -21,9 +20,7 @@ import {
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
-import { fetchedPolicies } from '../../public/application/store/actions';
-import { indexLifecycleManagementStore } from '../../public/application/store';
-import { EditPolicy } from '../../public/application/sections/edit_policy';
+import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
@@ -40,7 +37,7 @@ import {
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
-} from '../../public/application/store/selectors';
+} from '../../public/application/services/policies/policy_validation';
 
 initHttp(axios.create({ adapter: axiosXhrAdapter }));
 initUiMetric(usageCollectionPluginMock.createSetupContract());
@@ -51,7 +48,6 @@ initNotification(
 
 let server;
 let httpRequestsMockHelpers;
-let store;
 const policy = {
   phases: {
     hot: {
@@ -128,13 +124,14 @@ const save = (rendered) => {
 };
 describe('edit policy', () => {
   beforeEach(() => {
-    store = indexLifecycleManagementStore();
     component = (
-      <Provider store={store}>
-        <EditPolicy history={{ push: () => {} }} getUrlForApp={() => {}} />
-      </Provider>
+      <EditPolicy
+        history={{ push: () => {} }}
+        getUrlForApp={() => {}}
+        policies={policies}
+        policyName={''}
+      />
     );
-    store.dispatch(fetchedPolicies(policies));
     ({ server, httpRequestsMockHelpers } = initHttpRequests());
 
     httpRequestsMockHelpers.setPoliciesResponse(policies);
@@ -162,9 +159,12 @@ describe('edit policy', () => {
     });
     test('should show error when trying to save as new policy but using the same name', () => {
       component = (
-        <Provider store={store}>
-          <EditPolicy match={{ params: { policyName: 'testy0' } }} getUrlForApp={() => {}} />
-        </Provider>
+        <EditPolicy
+          policyName={'testy0'}
+          policies={policies}
+          getUrlForApp={() => {}}
+          history={{ push: () => {} }}
+        />
       );
       const rendered = mountWithIntl(component);
       findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
@@ -186,6 +186,34 @@ describe('edit policy', () => {
       setPolicyName(rendered, '_mypolicy');
       save(rendered);
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
+    });
+    test('should show correct json in policy flyout', () => {
+      const rendered = mountWithIntl(component);
+      findTestSubject(rendered, 'requestButton').simulate('click');
+      const json = rendered.find(`code`).text();
+      const expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(
+        {
+          policy: {
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_size: '50gb',
+                  },
+                  set_priority: {
+                    priority: 100,
+                  },
+                },
+              },
+            },
+          },
+        },
+        null,
+        2
+      )}`;
+      expect(json).toBe(expected);
     });
   });
   describe('hot phase', () => {

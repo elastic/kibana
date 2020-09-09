@@ -19,7 +19,6 @@ export interface GetEnrollmentAPIKeysResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOneEnrollmentAPIKeyRequest {
@@ -30,7 +29,6 @@ export interface GetOneEnrollmentAPIKeyRequest {
 
 export interface GetOneEnrollmentAPIKeyResponse {
   item: EnrollmentAPIKey;
-  success: boolean;
 }
 
 export interface DeleteEnrollmentAPIKeyRequest {
@@ -41,13 +39,12 @@ export interface DeleteEnrollmentAPIKeyRequest {
 
 export interface DeleteEnrollmentAPIKeyResponse {
   action: string;
-  success: boolean;
 }
 
 export interface PostEnrollmentAPIKeyRequest {
   body: {
     name?: string;
-    config_id: string;
+    policy_id: string;
     expiration?: string;
   };
 }
@@ -55,5 +52,4 @@ export interface PostEnrollmentAPIKeyRequest {
 export interface PostEnrollmentAPIKeyResponse {
   action: string;
   item: EnrollmentAPIKey;
-  success: boolean;
 }

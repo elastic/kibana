@@ -75,7 +75,7 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      scheduleTaskFnFactory: () => () => ({ scheduleParamsTest: { test1: 'yes' } }),
+      createJobFnFactory: () => () => ({ jobParamsTest: { test1: 'yes' } }),
       runTaskFnFactory: () => () => ({ runParamsTest: { test2: 'yes' } }),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;
@@ -138,8 +138,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 500 if job handler throws an error', async () => {
-    // throw an error from enqueueJob
-    core.getEnqueueJob = jest.fn().mockRejectedValue('Sorry, this tests says no');
+    callClusterStub.withArgs('index').rejects('silly');
 
     registerJobGenerationRoutes(core, mockLogger);
 

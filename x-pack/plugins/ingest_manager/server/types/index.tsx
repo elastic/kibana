@@ -17,18 +17,18 @@ export {
   AgentEventSOAttributes,
   AgentAction,
   AgentActionSOAttributes,
-  PackageConfig,
-  PackageConfigInput,
-  PackageConfigInputStream,
-  NewPackageConfig,
-  UpdatePackageConfig,
-  PackageConfigSOAttributes,
-  FullAgentConfigInput,
-  FullAgentConfig,
-  AgentConfig,
-  AgentConfigSOAttributes,
-  NewAgentConfig,
-  AgentConfigStatus,
+  PackagePolicy,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicySOAttributes,
+  FullAgentPolicyInput,
+  FullAgentPolicy,
+  AgentPolicy,
+  AgentPolicySOAttributes,
+  NewAgentPolicy,
+  AgentPolicyStatus,
   DataStream,
   Output,
   NewOutput,
@@ -37,6 +37,7 @@ export {
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  EpmPackageInstallStatus,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,
@@ -62,13 +63,16 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  // Agent Request types
+  PostAgentEnrollRequest,
+  PostAgentCheckinRequest,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
-export type AgentConfigUpdateHandler = (
+export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
-  agentConfigId: string
+  agentPolicyId: string
 ) => Promise<void>;
 
 export * from './models';

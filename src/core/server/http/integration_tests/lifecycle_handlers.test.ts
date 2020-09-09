@@ -62,6 +62,10 @@ describe('core lifecycle handlers', () => {
           'some-header': 'some-value',
         },
         xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: [],
+        },
       } as any)
     );
     server = createHttpServer({ configService });

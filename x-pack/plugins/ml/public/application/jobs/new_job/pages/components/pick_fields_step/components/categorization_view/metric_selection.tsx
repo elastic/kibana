@@ -12,6 +12,8 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
+import { CategorizationPerPartitionField } from '../categorization_partition_field';
+
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import {
@@ -126,6 +128,8 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           <FieldExamples fieldExamples={fieldExamples} />
         </>
       )}
+      <EuiHorizontalRule />
+      <CategorizationPerPartitionField />
     </>
   );
 };

@@ -7,6 +7,7 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -21,6 +22,7 @@ interface PluginsSetup {
   expressions: ExpressionsServerSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
+  bfetch: BfetchServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -67,7 +69,13 @@ export class CanvasPlugin implements Plugin {
 
     const canvasRouter = coreSetup.http.createRouter();
 
-    initRoutes({ router: canvasRouter, logger: this.logger });
+    initRoutes({
+      router: canvasRouter,
+      expressions: plugins.expressions,
+      bfetch: plugins.bfetch,
+      elasticsearch: coreSetup.elasticsearch,
+      logger: this.logger,
+    });
 
     loadSampleData(
       plugins.home.sampleData.addSavedObjectsToSampleDataset,

@@ -6,11 +6,10 @@
 
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
 
-import { useForm, OnFormUpdateArg, FormData } from '../../../../../shared_imports';
+import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
 import { ManageProcessorForm as ViewComponent } from './manage_processor_form';
-import { usePipelineProcessorsContext } from '../../context';
 
 export type ManageProcessorFormOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
@@ -33,9 +32,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
   onSubmit,
   ...rest
 }) => {
-  const {
-    links: { esDocsBasePath },
-  } = usePipelineProcessorsContext();
+  const { services } = useKibana();
 
   const handleSubmit = useCallback(
     async (data: FormData, isValid: boolean) => {
@@ -67,6 +64,11 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
   }, [onFormUpdate]);
 
   return (
-    <ViewComponent {...rest} processor={processor} form={form} esDocsBasePath={esDocsBasePath} />
+    <ViewComponent
+      {...rest}
+      processor={processor}
+      form={form}
+      esDocsBasePath={services.documentation.getEsDocsBasePath()}
+    />
   );
 };

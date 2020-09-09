@@ -18,16 +18,9 @@
  */
 
 import { of } from 'rxjs';
-import { LegacyApp, App, AppStatus, AppNavLinkStatus } from './types';
+import { App, AppNavLinkStatus, AppStatus } from './types';
 import { BasePath } from '../http/base_path';
-import {
-  removeSlashes,
-  appendAppPath,
-  isLegacyApp,
-  relativeToAbsolute,
-  parseAppUrl,
-  getAppInfo,
-} from './utils';
+import { appendAppPath, getAppInfo, parseAppUrl, relativeToAbsolute, removeSlashes } from './utils';
 
 describe('removeSlashes', () => {
   it('only removes duplicates by default', () => {
@@ -70,36 +63,15 @@ describe('appendAppPath', () => {
     expect(appendAppPath('/app/my-app', '')).toEqual('/app/my-app');
   });
 
-  it('preserves the trailing slash only if included in the hash', () => {
+  it('preserves the trailing slash only if included in the hash or appPath', () => {
     expect(appendAppPath('/app/my-app', '/some-path/')).toEqual('/app/my-app/some-path');
     expect(appendAppPath('/app/my-app', '/some-path#/')).toEqual('/app/my-app/some-path#/');
+    expect(appendAppPath('/app/my-app#/', '')).toEqual('/app/my-app#/');
+    expect(appendAppPath('/app/my-app#', '/')).toEqual('/app/my-app#/');
     expect(appendAppPath('/app/my-app', '/some-path#/hash/')).toEqual(
       '/app/my-app/some-path#/hash/'
     );
     expect(appendAppPath('/app/my-app', '/some-path#/hash')).toEqual('/app/my-app/some-path#/hash');
-  });
-});
-
-describe('isLegacyApp', () => {
-  it('returns true for legacy apps', () => {
-    expect(
-      isLegacyApp({
-        id: 'legacy',
-        title: 'Legacy App',
-        appUrl: '/some-url',
-        legacy: true,
-      })
-    ).toEqual(true);
-  });
-  it('returns false for non-legacy apps', () => {
-    expect(
-      isLegacyApp({
-        id: 'legacy',
-        title: 'Legacy App',
-        mount: () => () => undefined,
-        legacy: false,
-      })
-    ).toEqual(false);
   });
 });
 
@@ -113,7 +85,7 @@ describe('relativeToAbsolute', () => {
 });
 
 describe('parseAppUrl', () => {
-  let apps: Map<string, App<any> | LegacyApp>;
+  let apps: Map<string, App<any>>;
   let basePath: BasePath;
 
   const getOrigin = () => 'https://kibana.local:8080';
@@ -124,19 +96,6 @@ describe('parseAppUrl', () => {
       title: 'some-title',
       mount: () => () => undefined,
       ...props,
-      legacy: false,
-    };
-    apps.set(app.id, app);
-    return app;
-  };
-
-  const createLegacyApp = (props: Partial<LegacyApp>): LegacyApp => {
-    const app: LegacyApp = {
-      id: 'some-id',
-      title: 'some-title',
-      appUrl: '/my-url',
-      ...props,
-      legacy: true,
     };
     apps.set(app.id, app);
     return app;
@@ -152,10 +111,6 @@ describe('parseAppUrl', () => {
     createApp({
       id: 'bar',
       appRoute: '/custom-bar',
-    });
-    createLegacyApp({
-      id: 'legacy',
-      appUrl: '/app/legacy',
     });
   });
 
@@ -234,18 +189,6 @@ describe('parseAppUrl', () => {
       ).toEqual({
         app: 'bar',
         path: '/path#hash/bang?hello=dolly',
-      });
-    });
-    it('works with legacy apps', () => {
-      expect(parseAppUrl('/base-path/app/legacy', basePath, apps, getOrigin)).toEqual({
-        app: 'legacy',
-        path: undefined,
-      });
-      expect(
-        parseAppUrl('/base-path/app/legacy/path#hash?query=bar', basePath, apps, getOrigin)
-      ).toEqual({
-        app: 'legacy',
-        path: '/path#hash?query=bar',
       });
     });
     it('returns undefined when the app is not known', () => {
@@ -409,25 +352,6 @@ describe('parseAppUrl', () => {
         path: '/path#hash/bang?hello=dolly',
       });
     });
-    it('works with legacy apps', () => {
-      expect(
-        parseAppUrl('https://kibana.local:8080/base-path/app/legacy', basePath, apps, getOrigin)
-      ).toEqual({
-        app: 'legacy',
-        path: undefined,
-      });
-      expect(
-        parseAppUrl(
-          'https://kibana.local:8080/base-path/app/legacy/path#hash?query=bar',
-          basePath,
-          apps,
-          getOrigin
-        )
-      ).toEqual({
-        app: 'legacy',
-        path: '/path#hash?query=bar',
-      });
-    });
     it('returns undefined when the app is not known', () => {
       expect(
         parseAppUrl(
@@ -471,18 +395,6 @@ describe('getAppInfo', () => {
     status: AppStatus.accessible,
     navLinkStatus: AppNavLinkStatus.default,
     appRoute: `/app/some-id`,
-    legacy: false,
-    ...props,
-  });
-
-  const createLegacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
-    appUrl: '/my-app-url',
-    updater$: of(() => undefined),
-    id: 'some-id',
-    title: 'some-title',
-    status: AppStatus.accessible,
-    navLinkStatus: AppNavLinkStatus.default,
-    legacy: true,
     ...props,
   });
 
@@ -494,23 +406,35 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      legacy: false,
     });
   });
 
-  it('converts a legacy application and remove sensitive properties', () => {
-    const app = createLegacyApp();
-    const info = getAppInfo(app);
-
-    expect(info).toEqual({
-      appUrl: '/my-app-url',
-      id: 'some-id',
-      title: 'some-title',
-      status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.default,
-      legacy: true,
-    });
+  it('computes the navLinkStatus depending on the app status', () => {
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.inaccessible,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        navLinkStatus: AppNavLinkStatus.visible,
+      })
+    );
   });
 });

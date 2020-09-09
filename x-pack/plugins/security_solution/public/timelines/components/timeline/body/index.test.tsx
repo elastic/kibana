@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -64,7 +64,6 @@ describe('Body', () => {
     data: mockTimelineData,
     docValueFields: [],
     eventIdToNoteIds: {},
-    id: 'timeline-test',
     isSelectAllChecked: false,
     getNotesByIds: mockGetNotesByIds,
     loadingEventIds: [],
@@ -78,11 +77,13 @@ describe('Body', () => {
     onUnPinEvent: jest.fn(),
     onUpdateColumns: jest.fn(),
     pinnedEventIds: {},
+    refetch: jest.fn(),
     rowRenderers,
     selectedEventIds: {},
     show: true,
     sort: mockSort,
     showCheckboxes: false,
+    timelineId: 'timeline-test',
     timelineType: TimelineType.default,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),

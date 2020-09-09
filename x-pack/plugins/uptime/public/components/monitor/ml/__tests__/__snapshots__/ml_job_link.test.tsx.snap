@@ -8,7 +8,7 @@ exports[`ML JobLink renders without errors 1`] = `
   target="_blank"
 >
   <span
-    class="euiButtonEmpty__content"
+    class="euiButtonContent euiButtonEmpty__content"
   >
     <span
       class="euiButtonEmpty__text"

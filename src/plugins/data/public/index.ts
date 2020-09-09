@@ -262,7 +262,7 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  FieldList,
+  fieldList,
 } from '../common';
 
 /*
@@ -294,15 +294,6 @@ import {
   propFilter,
   siblingPipelineType,
   termsAggFilter,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
-} from './search';
-
-import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
@@ -312,9 +303,13 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
-
-export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
   // aggs
@@ -326,6 +321,7 @@ export {
   AggParamType,
   AggConfigOptions,
   BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
@@ -334,36 +330,42 @@ export {
   METRIC_TYPES,
   OptionedParamType,
   OptionedValueProp,
-  // search
-  ES_SEARCH_STRATEGY,
-  getEsPreference,
-  ISearch,
-  ISearchOptions,
-  ISearchGeneric,
-  IEsSearchResponse,
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  SearchRequest,
-  SearchResponse,
-  SearchError,
-  ISearchSource,
-  parseSearchSourceJSON,
-  injectSearchSourceReferences,
-  getSearchParamsFromRequest,
-  extractSearchSourceReferences,
-  SearchSourceFields,
-  EsQuerySortValue,
-  SortDirection,
-  FetchOptions,
+  ParsedInterval,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+} from '../common';
+
+export {
+  // search
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractSearchSourceReferences,
+  getEsPreference,
+  getSearchParamsFromRequest,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectSearchSourceReferences,
+  ISearch,
+  ISearchGeneric,
+  ISearchSource,
+  parseSearchSourceJSON,
+  RequestTimeoutError,
+  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
-  RequestTimeoutError,
+  SearchRequest,
+  SearchSourceFields,
+  SortDirection,
+  // expression functions and types
+  EsdslExpressionFunctionDefinition,
+  EsRawResponseExpressionTypeDefinition,
 } from './search';
+
+export { ISearchOptions } from '../common';
 
 // Search namespace
 export const search = {
@@ -438,7 +440,7 @@ export {
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
-export { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 

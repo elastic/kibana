@@ -30,6 +30,7 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
+  contextMenuTrigger,
 } from '../triggers';
 import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
@@ -93,7 +94,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const viewMode = embeddable.getInput().viewMode
       ? embeddable.getInput().viewMode
       : ViewMode.EDIT;
-    debugger;
     const hidePanelTitles = embeddable.parent
       ? Boolean(embeddable.parent.getInput().hidePanelTitles)
       : false;
@@ -215,6 +215,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       <EuiPanel
         className={classes}
         data-test-subj="embeddablePanel"
+        data-test-embeddable-id={this.props.embeddable.id}
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
@@ -276,7 +277,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined, hideTitle?: boolean }>((resolve) => {
+        return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
           const session = overlays.openModal(
             toMountPoint(
               <CustomizePanelModal
@@ -317,7 +318,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions: sortedActions.map((action) => [action, { embeddable: this.props.embeddable }]),
+      actions: sortedActions.map((action) => ({
+        action,
+        context: { embeddable: this.props.embeddable },
+        trigger: contextMenuTrigger,
+      })),
       closeMenu: this.closeMyContextMenuPanel,
     });
   };

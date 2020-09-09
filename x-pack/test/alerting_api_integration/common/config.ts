@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -15,6 +16,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  enableActionsProxy: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -56,6 +58,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
+    const proxyPort =
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
+    const actionsProxyUrl = options.enableActionsProxy
+      ? [
+          `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
+        ]
+      : [];
+
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
@@ -79,12 +90,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          ...actionsProxyUrl,
+
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {

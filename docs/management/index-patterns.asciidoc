@@ -7,7 +7,7 @@ you want to work with.
 Once you create an index pattern, you're ready to:
 
 * Interactively explore your data in <<discover, Discover>>.
-* Analyze your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
+* Analyze your data in charts, tables, gauges, tag clouds, and more in <<dashboard, Dashboard>>.
 * Show off your data in a <<canvas, Canvas>> workpad.
 * If your data includes geo data, visualize it with <<maps, Maps>>.
 

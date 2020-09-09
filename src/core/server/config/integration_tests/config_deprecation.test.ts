@@ -19,10 +19,14 @@
 
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   afterEach(async () => {
     if (root) {
@@ -36,13 +40,7 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingSystemMock.collect(mockLoggingSystem);
-    const warnings = logs.warn.flatMap((i) => i);
-    expect(warnings).not.toContain(
-      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
-    );
-    expect(warnings).not.toContain(
-      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
-    );
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`Array []`);
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
@@ -56,12 +54,11 @@ describe('configuration deprecations', () => {
     await root.setup();
 
     const logs = loggingSystemMock.collect(mockLoggingSystem);
-    const warnings = logs.warn.flatMap((i) => i);
-    expect(warnings).toContain(
-      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
-    );
-    expect(warnings).toContain(
-      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
-    );
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`
+      Array [
+        "optimize.lazy is deprecated and is no longer used",
+        "optimize.lazyPort is deprecated and is no longer used",
+      ]
+    `);
   });
 });

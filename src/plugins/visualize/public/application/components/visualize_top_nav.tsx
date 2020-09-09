@@ -25,7 +25,7 @@ import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
+  VisualizeEditorVisInstance,
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
@@ -38,10 +38,11 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
+  visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
-  savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
 }
 
 const TopNav = ({
@@ -53,27 +54,28 @@ const TopNav = ({
   hasUnappliedChanges,
   originatingApp,
   setOriginatingApp,
-  savedVisInstance,
+  visInstance,
   stateContainer,
   visualizationIdFromUrl,
+  embeddableId,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { embeddableHandler, vis } = savedVisInstance;
+  const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
-
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
       if (isUpdate === false) {
-        savedVisInstance.embeddableHandler.reload();
+        visInstance.embeddableHandler.reload();
       }
     },
-    [savedVisInstance.embeddableHandler]
+    [visInstance.embeddableHandler]
   );
+  const stateTransfer = services.embeddable.getStateTransfer();
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -85,9 +87,11 @@ const TopNav = ({
           openInspector,
           originatingApp,
           setOriginatingApp,
-          savedVisInstance,
+          visInstance,
           stateContainer,
           visualizationIdFromUrl,
+          stateTransfer,
+          embeddableId,
         },
         services
       );
@@ -99,11 +103,13 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
+    visInstance,
     setOriginatingApp,
-    savedVisInstance,
     stateContainer,
     visualizationIdFromUrl,
     services,
+    embeddableId,
+    stateTransfer,
   ]);
   const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
   const showDatePicker = () => {

@@ -21,14 +21,11 @@ import {
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../../explorer_utils';
-import { Annotations, EsAggregationResult } from '../../../../../common/types/annotations';
+import { AnnotationsTable } from '../../../../../common/types/annotations';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
-  annotations: {
-    annotationsData: Annotations;
-    aggregations: EsAggregationResult;
-  };
+  annotations: AnnotationsTable;
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -67,6 +64,7 @@ function getDefaultIndexPattern() {
 export function getExplorerDefaultState(): ExplorerState {
   return {
     annotations: {
+      error: undefined,
       annotationsData: [],
       aggregations: {},
     },

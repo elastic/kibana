@@ -5,7 +5,7 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_CONFIGS } from './services/ingest';
+import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
 import { GetPackagesResponse } from '../../../../../../../ingest_manager/common';
@@ -57,14 +57,13 @@ export const mockPolicyResultList: (options?: {
 
   const policies = [];
   for (let index = 0; index < actualCountToReturn; index++) {
-    policies.push(generator.generatePolicyPackageConfig());
+    policies.push(generator.generatePolicyPackagePolicy());
   }
   const mock: GetPolicyListResponse = {
     items: policies,
     total,
     page: requestPageIndex,
     perPage: requestPageSize,
-    success: true,
   };
   return mock;
 };
@@ -75,13 +74,12 @@ export const mockPolicyResultList: (options?: {
  */
 export const policyListApiPathHandlers = (totalPolicies: number = 1) => {
   return {
-    [INGEST_API_PACKAGE_CONFIGS]: () => {
+    [INGEST_API_PACKAGE_POLICIES]: () => {
       return mockPolicyResultList({ total: totalPolicies });
     },
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
         response: [generator.generateEpmPackage()],
-        success: true,
       };
     },
   };

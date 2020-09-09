@@ -112,7 +112,7 @@ describe('savedObjectsResultProvider', () => {
     expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
       page: 1,
       perPage: defaultOption.maxResults,
-      search: 'term',
+      search: 'term*',
       preference: 'pref',
       searchFields: ['title', 'description'],
       type: ['typeA', 'typeB'],

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
 import { Dispatch } from 'redux';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
@@ -53,7 +54,7 @@ import {
   MapRefreshConfig,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds } from '../../common/elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -204,12 +205,12 @@ export function setQuery({
   query,
   timeFilters,
   filters = [],
-  refresh = false,
+  forceRefresh = false,
 }: {
-  filters: Filter[];
+  filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
-  refresh?: boolean;
+  forceRefresh?: boolean;
 }) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const prevQuery = getQuery(getState());
@@ -218,15 +219,30 @@ export function setQuery({
         ? prevQuery.queryLastTriggeredAt
         : generateQueryTimestamp();
 
-    dispatch({
-      type: SET_QUERY,
+    const nextQueryContext = {
       timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
       query: {
         ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
-        queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
+        queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
+    };
+
+    const prevQueryContext = {
+      timeFilters: getTimeFilters(getState()),
+      query: getQuery(getState()),
+      filters: getFilters(getState()),
+    };
+
+    if (_.isEqual(nextQueryContext, prevQueryContext)) {
+      // do nothing if query context has not changed
+      return;
+    }
+
+    dispatch({
+      type: SET_QUERY,
+      ...nextQueryContext,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
@@ -255,7 +271,7 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateDrawState(drawState: DrawState) {
+export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way

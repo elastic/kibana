@@ -61,10 +61,15 @@ export class Plugin {
       featureRegistry: this.featureRegistry,
     });
 
+    const getFeaturesUICapabilities = () =>
+      uiCapabilitiesForFeatures(this.featureRegistry.getAll());
+
+    core.capabilities.registerProvider(getFeaturesUICapabilities);
+
     return deepFreeze({
       registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
       getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
+      getFeaturesUICapabilities,
     });
   }
 

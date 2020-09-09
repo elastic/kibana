@@ -105,6 +105,11 @@ describe('VegaVisualizations', () => {
 
       vis = {
         type: vegaVisType,
+        API: {
+          events: {
+            applyFilter: jest.fn(),
+          },
+        },
       };
     });
 

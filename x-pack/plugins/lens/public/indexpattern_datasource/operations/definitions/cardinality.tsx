@@ -51,7 +51,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
     return {
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -75,7 +75,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       sourceField: field.name,
     };
   },
