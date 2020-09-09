@@ -332,13 +332,11 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                     <button
                       aria-haspopup="true"
                       aria-labelledby="generated-id generated-id"
-                      aria-selected={true}
                       className="euiSuperSelectControl euiSuperSelectControl--compressed"
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
                       onKeyDown={[Function]}
-                      role="option"
                       type="button"
                     >
                       <div
@@ -804,13 +802,11 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
                   <button
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
-                    aria-selected={true}
                     className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    role="option"
                     type="button"
                   >
                     <div
@@ -1288,13 +1284,11 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                     <button
                       aria-haspopup="true"
                       aria-labelledby="generated-id generated-id"
-                      aria-selected={true}
                       className="euiSuperSelectControl euiSuperSelectControl--compressed"
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
                       onKeyDown={[Function]}
-                      role="option"
                       type="button"
                     >
                       <div

@@ -127,13 +127,11 @@ Array [
                   <button
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
-                    aria-selected={true}
                     className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    role="option"
                     type="button"
                   >
                     <div
@@ -479,13 +477,11 @@ Array [
                   <button
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
-                    aria-selected={true}
                     className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    role="option"
                     type="button"
                   >
                     <div
@@ -780,13 +776,11 @@ Array [
                   <button
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
-                    aria-selected={true}
                     className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    role="option"
                     type="button"
                   >
                     <div
@@ -1057,13 +1051,11 @@ Array [
                   <button
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
-                    aria-selected={true}
                     className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    role="option"
                     type="button"
                   >
                     <div

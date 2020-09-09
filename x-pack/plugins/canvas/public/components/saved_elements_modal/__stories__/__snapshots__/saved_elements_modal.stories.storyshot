@@ -57,7 +57,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth"
+                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"
@@ -197,7 +197,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth"
+                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"
@@ -628,7 +628,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth"
+                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"

@@ -11,6 +11,10 @@ import { mountWithTheme } from '../../../../utils/testHelpers';
 import { Stackframe as StackframeComponent } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
+jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () =>
+  `generated-id`
+);
+
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
     let wrapper: ReactWrapper;

@@ -38,12 +38,10 @@ exports[`Storyshots components/Color/PalettePicker clearable 1`] = `
           <button
             aria-haspopup="true"
             aria-labelledby="undefined generated-id"
-            aria-selected={true}
             className="euiSuperSelectControl euiSuperSelectControl--compressed"
             onClick={[Function]}
             onKeyDown={[Function]}
             readOnly={false}
-            role="option"
             type="button"
           >
             None
@@ -115,12 +113,10 @@ exports[`Storyshots components/Color/PalettePicker default 1`] = `
           <button
             aria-haspopup="true"
             aria-labelledby="undefined generated-id"
-            aria-selected={true}
             className="euiSuperSelectControl euiSuperSelectControl--compressed"
             onClick={[Function]}
             onKeyDown={[Function]}
             readOnly={false}
-            role="option"
             type="button"
           >
             <div
@@ -199,12 +195,10 @@ exports[`Storyshots components/Color/PalettePicker interactive 1`] = `
           <button
             aria-haspopup="true"
             aria-labelledby="undefined generated-id"
-            aria-selected={true}
             className="euiSuperSelectControl euiSuperSelectControl--compressed"
             onClick={[Function]}
             onKeyDown={[Function]}
             readOnly={false}
-            role="option"
             type="button"
           >
             <div

@@ -22,7 +22,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
         >
           <input
             aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-            className="euiFieldSearch euiFieldSearch--fullWidth"
+            className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
             defaultValue=""
             onKeyUp={[Function]}
             placeholder="Find template"
