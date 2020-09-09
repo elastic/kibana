@@ -129,7 +129,7 @@ describe('Rollup Search Strategy', () => {
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
-      expect(getRollupService).toHaveBeenCalled({});
+      expect(getRollupService).toHaveBeenCalled();
       expect(rollupData).toBe('data');
     });
 
