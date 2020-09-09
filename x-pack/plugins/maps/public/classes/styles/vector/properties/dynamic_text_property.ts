@@ -14,7 +14,7 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
     if (this._field && this._field.isValid()) {
       // Fields that support auto-domain are normalized with a field-formatter and stored into a computed-field
       // Otherwise, the raw value is just carried over and no computed field is created.
-      const targetName = this._field.getMbPropertyNameField();
+      const targetName = this._field.getMbPropertyName();
       mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
     } else {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', null);

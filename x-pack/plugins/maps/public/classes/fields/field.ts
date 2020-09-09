@@ -40,10 +40,22 @@ export interface IField {
   // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
   // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
   // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
-  getMbPropertyNameField(styleName: string): string;
+  getMbPropertyName(styleName: string): string;
 }
 
 export class AbstractField implements IField {
+  static getMbPropertyName(field: IField, styleName: string) {
+    let targetName;
+    if (field.canReadFromGeoJson()) {
+      targetName = field.supportsAutoDomain()
+        ? getComputedFieldName(styleName, field.getName())
+        : field.getName();
+    } else {
+      targetName = field.getName();
+    }
+    return targetName;
+  }
+
   private readonly _fieldName: string;
   private readonly _origin: FIELD_ORIGIN;
 
@@ -109,15 +121,7 @@ export class AbstractField implements IField {
     return true;
   }
 
-  getMbPropertyNameField(styleName): string {
-    let targetName;
-    if (this.canReadFromGeoJson()) {
-      targetName = this.supportsAutoDomain()
-        ? getComputedFieldName(styleName, this.getName())
-        : this.getName();
-    } else {
-      targetName = this.getName();
-    }
-    return targetName;
+  getMbPropertyName(styleName): string {
+    return AbstractField.getMbPropertyName(this, styleName);
   }
 }

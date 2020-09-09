@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESAggField } from './es_agg_field';
+import { IESAggField, AbstractField } from './es_agg_field';
 import { IVectorSource } from '../sources/vector_source';
 // @ts-ignore
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { getComputedFieldName } from '../styles/vector/style_util';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
@@ -87,15 +86,7 @@ export class TopTermPercentageField implements IESAggField {
     return this._canReadFromGeoJson;
   }
 
-  getMbPropertyNameField(styleName): string {
-    let targetName;
-    if (this.canReadFromGeoJson()) {
-      targetName = this.supportsAutoDomain()
-        ? getComputedFieldName(styleName, this._field.getName())
-        : this.getName();
-    } else {
-      targetName = this._field.getName();
-    }
-    return targetName;
+  getMbPropertyName(styleName: string): string {
+    return AbstractField.getMbPropertyName(this, styleName);
   }
 }
