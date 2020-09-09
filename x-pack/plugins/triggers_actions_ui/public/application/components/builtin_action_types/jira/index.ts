@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getActionType as resilientActionType } from './resilient';
+export { getActionType as getJiraActionType } from './jira';

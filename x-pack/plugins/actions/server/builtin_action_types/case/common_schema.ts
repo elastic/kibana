@@ -22,12 +22,19 @@ export const IncidentConfigurationSchema = schema.object({
   mapping: schema.arrayOf(MapRecordSchema),
 });
 
+export const UserSchema = schema.object({
+  fullName: schema.nullable(schema.string()),
+  username: schema.nullable(schema.string()),
+});
+
 export const EntityInformation = {
-  createdAt: schema.maybe(schema.string()),
-  createdBy: schema.maybe(schema.any()),
+  createdAt: schema.nullable(schema.string()),
+  createdBy: schema.nullable(UserSchema),
   updatedAt: schema.nullable(schema.string()),
-  updatedBy: schema.nullable(schema.any()),
+  updatedBy: schema.nullable(UserSchema),
 };
+
+export const EntityInformationSchema = schema.object(EntityInformation);
 
 export const CommentSchema = schema.object({
   commentId: schema.string(),
