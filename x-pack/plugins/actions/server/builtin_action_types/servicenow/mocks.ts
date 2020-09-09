@@ -5,7 +5,7 @@
  */
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
-import { MapRecord } from './case_types';
+import { MapRecord } from '../case/common_types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {

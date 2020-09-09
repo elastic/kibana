@@ -8,9 +8,9 @@ import {
   NetworkModel,
   NetworkType,
   NetworkTableType,
-  IpDetailsTableType,
+  NetworkDetailsTableType,
   NetworkQueries,
-  IpOverviewQueries,
+  NetworkDetailsQueries,
 } from './model';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
@@ -48,34 +48,34 @@ export const setNetworkPageQueriesActivePageToZero = (state: NetworkModel): Netw
 
 export const setNetworkDetailsQueriesActivePageToZero = (
   state: NetworkModel
-): IpOverviewQueries => ({
+): NetworkDetailsQueries => ({
   ...state.details.queries,
-  [IpDetailsTableType.topCountriesSource]: {
-    ...state.details.queries[IpDetailsTableType.topCountriesSource],
+  [NetworkDetailsTableType.topCountriesSource]: {
+    ...state.details.queries[NetworkDetailsTableType.topCountriesSource],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.topCountriesDestination]: {
-    ...state.details.queries[IpDetailsTableType.topCountriesDestination],
+  [NetworkDetailsTableType.topCountriesDestination]: {
+    ...state.details.queries[NetworkDetailsTableType.topCountriesDestination],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.topNFlowSource]: {
-    ...state.details.queries[IpDetailsTableType.topNFlowSource],
+  [NetworkDetailsTableType.topNFlowSource]: {
+    ...state.details.queries[NetworkDetailsTableType.topNFlowSource],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.topNFlowDestination]: {
-    ...state.details.queries[IpDetailsTableType.topNFlowDestination],
+  [NetworkDetailsTableType.topNFlowDestination]: {
+    ...state.details.queries[NetworkDetailsTableType.topNFlowDestination],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.tls]: {
-    ...state.details.queries[IpDetailsTableType.tls],
+  [NetworkDetailsTableType.tls]: {
+    ...state.details.queries[NetworkDetailsTableType.tls],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.users]: {
-    ...state.details.queries[IpDetailsTableType.users],
+  [NetworkDetailsTableType.users]: {
+    ...state.details.queries[NetworkDetailsTableType.users],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [IpDetailsTableType.http]: {
-    ...state.details.queries[IpDetailsTableType.http],
+  [NetworkDetailsTableType.http]: {
+    ...state.details.queries[NetworkDetailsTableType.http],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
@@ -83,7 +83,7 @@ export const setNetworkDetailsQueriesActivePageToZero = (
 export const setNetworkQueriesActivePageToZero = (
   state: NetworkModel,
   type: NetworkType
-): NetworkQueries | IpOverviewQueries => {
+): NetworkQueries | NetworkDetailsQueries => {
   if (type === NetworkType.page) {
     return setNetworkPageQueriesActivePageToZero(state);
   } else if (type === NetworkType.details) {

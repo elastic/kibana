@@ -5,14 +5,18 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import {
-  Maybe,
-  CursorType,
-  Inspect,
-  RequestOptionsPaginated,
-  PageInfoPaginated,
-  GenericBuckets,
-} from '../..';
+import { Maybe, CursorType, Inspect, PageInfoPaginated, GenericBuckets } from '../../../common';
+import { RequestOptionsPaginated } from '../..';
+
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
 
 export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
   ip?: string;
