@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
-  EuiSelect,
-  EuiSelectOption,
+  EuiComboBox,
   EuiForm,
   EuiFormRow,
   EuiOverlayMask,
@@ -20,13 +19,14 @@ import {
   EuiText,
   EuiSwitch,
   EuiButton,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
-import { LearnMoreLink } from '../../edit_policy/components';
 import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
+import { LearnMoreLink } from '../../edit_policy/components';
 
 interface Props {
   policy: PolicyFromES;
@@ -95,7 +95,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
           <p>
             {message} ({statusCode})
           </p>
-          <EuiButton color="danger" onClick={sendRequest}>
+          <EuiButton isLoading={isLoading} color="danger" onClick={sendRequest}>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
               defaultMessage="Try again"
@@ -132,24 +132,22 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   };
 
   const renderForm = () => {
-    let options: EuiSelectOption[] = [];
+    let options: EuiComboBoxOptionOption[] = [];
     if (templates) {
       options = templates.map(({ name }) => {
         return {
-          value: name,
-          text: name,
+          label: name,
         };
       });
-      options.unshift({
-        value: '',
-        text: i18n.translate(
-          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
-          {
-            defaultMessage: 'Select an index template',
-          }
-        ),
-      });
     }
+    const onComboChange = (comboOptions: EuiComboBoxOptionOption[]) => {
+      let value = '';
+      if (comboOptions.length > 0) {
+        value = comboOptions[0].label;
+      }
+      setTemplateError(undefined);
+      setTemplateName(value);
+    };
     return (
       <EuiForm>
         <EuiFormRow>
@@ -167,7 +165,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
             }}
           />
         </EuiFormRow>
-        {!error && templates ? (
+        {!error ? (
           <>
             {renderTemplateHasPolicyWarning()}
             <EuiFormRow
@@ -180,14 +178,28 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
                 />
               }
             >
-              <EuiSelect
+              <EuiComboBox
                 isLoading={isLoading}
+                placeholder={i18n.translate(
+                  'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
+                  {
+                    defaultMessage: 'Select an index template',
+                  }
+                )}
                 options={options}
-                value={templateName}
-                onChange={(e) => {
-                  setTemplateError(undefined);
-                  setTemplateName(e.target.value);
-                }}
+                selectedOptions={
+                  templateName
+                    ? [
+                        {
+                          label: templateName,
+                        },
+                      ]
+                    : []
+                }
+                onChange={onComboChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={true}
+                noSuggestions={error || options.length === 0}
               />
             </EuiFormRow>
           </>
