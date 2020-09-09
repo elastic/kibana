@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
@@ -310,15 +310,17 @@ export const redirectToDetections = (
 const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
 
-  if (isMlRule(ruleType)) {
-    return ['anomaly_threshold', 'machine_learning_job_id'];
+  switch (ruleType) {
+    case 'machine_learning':
+      return ['anomaly_threshold', 'machine_learning_job_id'];
+    case 'threshold':
+      return ['threshold', ...queryRuleParams];
+    case 'query':
+    case 'saved_query':
+    case 'eql':
+      return queryRuleParams;
   }
-
-  if (ruleType === 'threshold') {
-    return ['threshold', ...queryRuleParams];
-  }
-
-  return queryRuleParams;
+  assertUnreachable(ruleType);
 };
 
 export const getActionMessageRuleParams = (ruleType: Type): string[] => {

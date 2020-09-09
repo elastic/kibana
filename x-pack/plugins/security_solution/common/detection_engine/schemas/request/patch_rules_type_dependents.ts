@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateQuery = (rule: PatchRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.query != null) {
       return ['when "type" is "machine_learning", "query" cannot be set'];
     } else {
@@ -19,7 +21,7 @@ export const validateQuery = (rule: PatchRulesSchema): string[] => {
 };
 
 export const validateLanguage = (rule: PatchRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.language != null) {
       return ['when "type" is "machine_learning", "language" cannot be set'];
     } else {
@@ -67,7 +69,7 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
 };
 
 export const validateThreshold = (rule: PatchRulesSchema): string[] => {
-  if (rule.type === 'threshold') {
+  if (isThresholdRule(rule.type)) {
     if (!rule.threshold) {
       return ['when "type" is "threshold", "threshold" is required'];
     } else if (rule.threshold.value <= 0) {
