@@ -15,56 +15,69 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateTrustedAppForm } from './create_trusted_app_form';
+import {
+  CreateTrustedAppForm,
+  CreateTrustedAppFormProps,
+  TrustedAppFormState,
+} from './create_trusted_app_form';
 
-// FIXME:PT remove the ability o disable the close action on the flyout from props (controlled internally)
-export const CreateTrustedAppFlyout = memo<EuiFlyoutProps>(({ onClose, ...flyoutProps }) => {
-  const handleCancelClick = useCallback(() => {
-    onClose();
-  }, [onClose]);
-  const handleSaveClick = useCallback(() => {}, []);
+type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
+export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
+  ({ onClose, ...flyoutProps }) => {
+    const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
+    const handleCancelClick = useCallback(() => {
+      onClose();
+    }, [onClose]);
+    const handleSaveClick = useCallback(() => {}, []);
+    const handleFormOnChange = useCallback<CreateTrustedAppFormProps['onChange']>(
+      (newFormState) => {
+        setFormState(newFormState);
+      },
+      []
+    );
 
-  return (
-    <EuiFlyout onClose={onClose} {...flyoutProps}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
-              defaultMessage="Add trusted application"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
-        <CreateTrustedAppForm />
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={handleCancelClick} flush="left">
+    return (
+      <EuiFlyout onClose={onClose} {...flyoutProps}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
               <FormattedMessage
-                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.cancelButton"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSaveClick} fill>
-              <FormattedMessage
-                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
+                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
                 defaultMessage="Add trusted application"
               />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
-});
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody>
+          <CreateTrustedAppForm fullWidth onChange={handleFormOnChange} />
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={handleCancelClick} flush="left">
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={handleSaveClick} fill isDisabled={!formState?.isValid}>
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
+                  defaultMessage="Add trusted application"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
+);
 CreateTrustedAppFlyout.displayName = 'NewTrustedAppFlyout';

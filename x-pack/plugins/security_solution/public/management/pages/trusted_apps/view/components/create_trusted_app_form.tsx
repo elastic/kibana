@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -28,10 +28,45 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   };
 };
 
-interface CreateTrustedAppFormProps {
-  fullWidth?: boolean;
+const validateFormValues = (values: NewTrustedApp) => {
+  const errors = {};
+
+  if (!values.name.trim()) {
+    errors.name = 'Name is required';
+  }
+
+  if (!values.os) {
+    errors.os = 'OS is required';
+  }
+
+  if (!values.entries.length) {
+    errors.entries = 'At least one Field definition is required';
+  } else {
+    values.entries.some((entry, index) => {
+      if (!entry.field || !entry.value.trim()) {
+        errors.entries = `Field entry ${index + 1} must have a value`;
+        return true;
+      }
+      return false;
+    });
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
+
+export interface TrustedAppFormState {
+  isValid: boolean;
+  item: NewTrustedApp;
 }
-export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(({ fullWidth = true }) => {
+export interface CreateTrustedAppFormProps {
+  /** if form should be shown full width of parent container */
+  fullWidth?: boolean;
+  onChange: (state: TrustedAppFormState) => void;
+}
+export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(({ fullWidth, onChange }) => {
   const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
     return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
@@ -98,6 +133,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(({ fullWidth
     },
     []
   );
+
+  // Anytime the form values change - validate and notify
+  useEffect(() => {
+    onChange({
+      isValid: validateFormValues(formValues).isValid,
+      item: formValues,
+    });
+  }, [formValues, onChange]);
 
   return (
     <EuiForm>
