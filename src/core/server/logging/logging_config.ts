@@ -96,7 +96,9 @@ export const config = {
   }),
 };
 
-export type LoggingConfigType = TypeOf<typeof config.schema>;
+export type LoggingConfigType = Omit<TypeOf<typeof config.schema>, 'appenders'> & {
+  appenders: Map<string, AppenderConfigType>;
+};
 
 /**
  * Config schema for validating the inputs to the {@link LoggingServiceStart.configure} API.
