@@ -17,8 +17,17 @@
  * under the License.
  */
 
-import { relative } from 'path';
+import { MetricsCollector } from './types';
 
-export default function pathContains(root, child) {
-  return relative(child, root).slice(0, 2) !== '..';
-}
+const createCollector = (collectReturnValue: any = {}): jest.Mocked<MetricsCollector<any>> => {
+  const collector: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn().mockResolvedValue(collectReturnValue),
+    reset: jest.fn(),
+  };
+
+  return collector;
+};
+
+export const metricsCollectorMock = {
+  create: createCollector,
+};
