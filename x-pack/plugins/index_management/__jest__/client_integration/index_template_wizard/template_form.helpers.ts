@@ -7,7 +7,6 @@ import { act } from 'react-dom/test-utils';
 
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { TemplateDeserialized } from '../../../common';
-import { nextTick } from '../helpers';
 
 interface MappingField {
   name: string;
@@ -199,10 +198,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       find('mockCodeEditor').simulate('change', {
         jsonString: aliases,
       }); // Using mocked EuiCodeEditor
-      await nextTick();
-      component.update();
     }
 
+    component.update();
     clickNextButton();
 
     if (waitForNextStep) {
@@ -221,20 +219,20 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   const addMappingField = async (name: string, type: string) => {
     const { find, form, component } = testBed;
 
-    form.setInputValue('nameParameterInput', name);
-    find('createFieldForm.mockComboBox').simulate('change', [
-      {
-        label: type,
-        value: type,
-      },
-    ]);
+    await act(async () => {
+      form.setInputValue('nameParameterInput', name);
+      find('createFieldForm.mockComboBox').simulate('change', [
+        {
+          label: type,
+          value: type,
+        },
+      ]);
+    });
 
-    await nextTick(50);
-    component.update();
+    await act(async () => {
+      find('createFieldForm.addButton').simulate('click');
+    });
 
-    find('createFieldForm.addButton').simulate('click');
-
-    await nextTick();
     component.update();
   };
 

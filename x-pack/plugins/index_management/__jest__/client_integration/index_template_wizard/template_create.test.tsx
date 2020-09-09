@@ -273,55 +273,47 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    // describe('mappings (step 4)', () => {
-    //   beforeEach(async () => {
-    //     const { actions } = testBed;
+    describe('mappings (step 4)', () => {
+      beforeEach(async () => {
+        const { actions } = testBed;
 
-    //     await act(async () => {
-    //       // Complete step 1 (logistics)
-    //       await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        await actions.completeStepTwo();
+        await actions.completeStepThree('{}');
+      });
 
-    //       // Complete step 2 (index settings)
-    //       await actions.completeStepTwo('{}');
-    //     });
-    //   });
+      it('should set the correct page title', () => {
+        const { exists, find } = testBed;
 
-    //   it('should set the correct page title', () => {
-    //     const { exists, find } = testBed;
+        expect(exists('stepMappings')).toBe(true);
+        expect(find('stepTitle').text()).toEqual('Mappings (optional)');
+      });
 
-    //     expect(exists('stepMappings')).toBe(true);
-    //     expect(find('stepTitle').text()).toEqual('Mappings (optional)');
-    //   });
+      it('should allow the user to define document fields for a mapping', async () => {
+        const { actions, find } = testBed;
 
-    //   it('should allow the user to define document fields for a mapping', async () => {
-    //     const { actions, find } = testBed;
+        await actions.addMappingField('field_1', 'text');
+        await actions.addMappingField('field_2', 'text');
+        await actions.addMappingField('field_3', 'text');
 
-    //     await act(async () => {
-    //       await actions.addMappingField('field_1', 'text');
-    //       await actions.addMappingField('field_2', 'text');
-    //       await actions.addMappingField('field_3', 'text');
-    //     });
+        expect(find('fieldsListItem').length).toBe(3);
+      });
 
-    //     expect(find('fieldsListItem').length).toBe(3);
-    //   });
+      it('should allow the user to remove a document field from a mapping', async () => {
+        const { actions, find } = testBed;
 
-    //   it('should allow the user to remove a document field from a mapping', async () => {
-    //     const { actions, find } = testBed;
+        await actions.addMappingField('field_1', 'text');
+        await actions.addMappingField('field_2', 'text');
 
-    //     await act(async () => {
-    //       await actions.addMappingField('field_1', 'text');
-    //       await actions.addMappingField('field_2', 'text');
-    //     });
+        expect(find('fieldsListItem').length).toBe(2);
 
-    //     expect(find('fieldsListItem').length).toBe(2);
+        actions.clickCancelCreateFieldButton();
+        // Remove first field
+        actions.deleteMappingsFieldAt(0);
 
-    //     actions.clickCancelCreateFieldButton();
-    //     // Remove first field
-    //     actions.deleteMappingsFieldAt(0);
-
-    //     expect(find('fieldsListItem').length).toBe(1);
-    //   });
-    // });
+        expect(find('fieldsListItem').length).toBe(1);
+      });
+    });
 
     // describe('aliases (step 5)', () => {
     //   beforeEach(async () => {
