@@ -40,7 +40,7 @@ const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeInd
 const i18nTexts = {
   defaultAllocationNotAvailable: {
     title: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
+      'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableTitle',
       { defaultMessage: 'No cold tier nodes found' }
     ),
     body: i18n.translate(
