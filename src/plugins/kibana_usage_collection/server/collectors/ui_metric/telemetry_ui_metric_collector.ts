@@ -66,9 +66,9 @@ export function registerUiMetricUsageCollector(
           attributes: { count },
         } = rawUiMetric;
 
-        const [appName, metricType] = id.split(':');
+        const [appName, ...metricType] = id.split(':');
 
-        const pair = { key: metricType, value: count };
+        const pair = { key: metricType.join(':'), value: count };
         return {
           ...accum,
           [appName]: [...(accum[appName] || []), pair],

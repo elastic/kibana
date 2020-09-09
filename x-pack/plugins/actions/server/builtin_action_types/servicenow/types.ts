@@ -16,8 +16,8 @@ import {
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { IncidentConfigurationSchema } from './case_shema';
-import { PushToServiceResponse } from './case_types';
+import { ExternalServiceCommentResponse } from '../case/common_types';
+import { IncidentConfigurationSchema } from '../case/common_schema';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -51,6 +51,9 @@ export interface ExternalServiceIncidentResponse {
   title: string;
   url: string;
   pushedDate: string;
+}
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
 }
 
 export type ExternalServiceParams = Record<string, unknown>;

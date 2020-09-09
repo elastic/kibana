@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller } from 'src/core/server';
+import { LegacyTemplateSerialized } from '../../../../../index_management/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -27,7 +28,9 @@ function isReservedSystemTemplate(templateName: string, indexPatterns: string[])
   );
 }
 
-function filterAndFormatTemplates(templates: any): any {
+function filterAndFormatTemplates(templates: {
+  [templateName: string]: LegacyTemplateSerialized;
+}): Array<{}> {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
@@ -38,10 +41,10 @@ function filterAndFormatTemplates(templates: any): any {
     }
     const formattedTemplate = {
       index_lifecycle_name:
-        settings.index && settings.index.lifecycle ? settings.index.lifecycle.name : undefined,
+        settings!.index && settings!.index.lifecycle ? settings!.index.lifecycle.name : undefined,
       index_patterns,
       allocation_rules:
-        settings.index && settings.index.routing ? settings.index.routing : undefined,
+        settings!.index && settings!.index.routing ? settings!.index.routing : undefined,
       settings,
       name: templateName,
     };
@@ -50,7 +53,9 @@ function filterAndFormatTemplates(templates: any): any {
   return formattedTemplates;
 }
 
-async function fetchTemplates(callAsCurrentUser: LegacyAPICaller): Promise<any> {
+async function fetchTemplates(
+  callAsCurrentUser: LegacyAPICaller
+): Promise<{ [templateName: string]: LegacyTemplateSerialized }> {
   const params = {
     method: 'GET',
     path: '/_template',
