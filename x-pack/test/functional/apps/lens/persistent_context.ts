@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker', 'common']);
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const appsMenu = getService('appsMenu');
@@ -16,12 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens query context', () => {
     before(async () => {
-      await security.testUser.setRoles([
-        'global_discover_read',
-        'global_visualize_read',
-        'test_logstash_reader',
-      ]);
-      await PageObjects.visualize.navigateToNewVisualization();
+      await security.testUser.setRoles(
+        ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
+        false
+      );
     });
 
     after(async () => {
@@ -29,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should carry over time range and pinned filters to discover', async () => {
-      // await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange(
         'Sep 06, 2015 @ 06:31:44.000',
