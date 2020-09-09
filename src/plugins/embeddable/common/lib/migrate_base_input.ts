@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectReference } from '../../../../../core/types';
-import { EmbeddableInput } from './i_embeddable';
+import { SavedObjectReference } from '../../../../core/types';
+import { EmbeddableInput } from '../types';
 
 export const telemetryBaseEmbeddableInput = (state: EmbeddableInput) => {
   return {} as Record<string, any>;

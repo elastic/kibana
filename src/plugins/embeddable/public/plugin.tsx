@@ -54,7 +54,7 @@ import {
   extractBaseEmbeddableInput,
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
-} from './lib/embeddables/migrate_base_input';
+} from '../common/lib/migrate_base_input';
 import { PersistableState, SerializableState } from '../../kibana_utils/common';
 
 export interface EmbeddableSetupDependencies {

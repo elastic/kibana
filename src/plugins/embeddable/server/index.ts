@@ -17,20 +17,10 @@
  * under the License.
  */
 
-import { Adapters } from './inspector';
+import { EmbeddableServerPlugin, EmbeddableSetup } from './plugin';
 
-export interface Trigger {
-  id: string;
-  title?: string;
-  description?: string;
-}
+export { EmbeddableSetup };
 
-export interface PropertySpec {
-  displayName: string;
-  accessPath: string;
-  id: string;
-  description: string;
-  value?: string;
-}
-export { ViewMode } from '../../common/types';
-export { Adapters };
+export { EnhancementRegistryDefinition, EmbeddableRegistryDefinition } from './types';
+
+export const plugin = () => new EmbeddableServerPlugin();

@@ -43,7 +43,7 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexP
   if (typeof filter.meta.value === 'function') {
     const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
     const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
-    return filter.meta.value(valueFormatter);
+    return (filter.meta.value as any)(valueFormatter);
   } else {
     return filter.meta.value || '';
   }
