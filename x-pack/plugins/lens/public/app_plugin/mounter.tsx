@@ -12,7 +12,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
-import { Optional } from '@kbn/utility-types';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -28,7 +27,7 @@ import {
   LensByValueInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
-import { LensAppServices } from './types';
+import { LensAppServices, RedirectToOriginProps } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export async function mountApp(
@@ -103,14 +102,15 @@ export async function mountApp(
     }
   };
 
-  const redirectToOrigin = (input?: Optional<LensEmbeddableInput, 'id'>) => {
+  const redirectToOrigin = (props?: RedirectToOriginProps) => {
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
-    if (stateTransfer && input) {
+    if (stateTransfer && props?.input) {
+      const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
         state: {
-          embeddableId: embeddableEditorIncomingState.embeddableId,
+          embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
           input,
         },

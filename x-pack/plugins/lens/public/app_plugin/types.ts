@@ -35,6 +35,7 @@ export interface LensAppState {
   indicateNoData: boolean;
   isLoading: boolean;
   isSaveModalVisible: boolean;
+  validateOnAppLeave: boolean;
   indexPatternsForTopNav: IndexPattern[];
   currentInput?: LensEmbeddableInput;
   isLinkedToOriginatingApp?: boolean;
@@ -52,12 +53,17 @@ export interface LensAppState {
   isSaveable: boolean;
 }
 
+export interface RedirectToOriginProps {
+  input?: LensEmbeddableInput;
+  isCopied?: boolean;
+}
+
 export interface LensAppProps {
   history: History;
   editorFrame: EditorFrameInstance;
   onAppLeave: AppMountParameters['onAppLeave'];
   redirectTo: (savedObjectId?: string) => void;
-  redirectToOrigin?: (input?: LensEmbeddableInput) => void;
+  redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   initialInput?: LensEmbeddableInput;
 }
 

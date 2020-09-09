@@ -201,7 +201,9 @@ export class AttributeService<
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
-          resolve(wrappedInput);
+
+          // Combine input and wrapped input to preserve any passed in explicit Input.
+          resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject(error);

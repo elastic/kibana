@@ -74,6 +74,7 @@ export function App({
       },
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveModalVisible: false,
+      validateOnAppLeave: true,
       indicateNoData: false,
       isSaveable: false,
     };
@@ -184,6 +185,7 @@ export function App({
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
+        state.validateOnAppLeave &&
         application.capabilities.visualize.save &&
         !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
         (state.isSaveable || state.persistedDoc)
@@ -201,12 +203,13 @@ export function App({
       }
     });
   }, [
-    lastKnownDoc,
     onAppLeave,
-    state.persistedDoc,
+    lastKnownDoc,
     state.isSaveable,
-    application.capabilities.visualize.save,
+    state.persistedDoc,
+    state.validateOnAppLeave,
     getLastKnownDocWithoutPinnedFilters,
+    application.capabilities.visualize.save,
   ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
@@ -241,7 +244,7 @@ export function App({
     });
     if (state.persistedDoc) {
       currentDocTitle = byValueMode
-        ? i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' })
+        ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit Visualization' })
         : state.persistedDoc.title;
     }
     breadcrumbs.push({ text: currentDocTitle });
@@ -260,7 +263,8 @@ export function App({
   useEffect(() => {
     if (
       !initialInput ||
-      (initialInput as LensByReferenceInput).savedObjectId === state.persistedDoc?.savedObjectId
+      (attributeService.inputIsRefType(initialInput) &&
+        initialInput.savedObjectId === state.persistedDoc?.savedObjectId)
     ) {
       return;
     }
@@ -319,6 +323,7 @@ export function App({
     attributeService,
     redirectTo,
     state.persistedDoc?.savedObjectId,
+    state.persistedDoc?.state,
   ]);
 
   const runSave = async (
@@ -366,27 +371,36 @@ export function App({
         options.saveToLibrary,
         originalInput
       )) as LensEmbeddableInput;
+
       if (saveProps.returnToOrigin && redirectToOrigin) {
-        redirectToOrigin(newInput);
-      } else {
-        const newDoc = {
-          ...docToSave,
-          ...newInput,
-        };
+        redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
+        return;
+      }
+
+      if (
+        attributeService.inputIsRefType(newInput) &&
+        newInput.savedObjectId !== originalSavedObjectId
+      ) {
         setState((s) => ({
           ...s,
-          persistedDoc: newDoc,
-          lastKnownDoc: newDoc,
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
-        if (
-          attributeService.inputIsRefType(newInput) &&
-          newInput.savedObjectId !== originalSavedObjectId
-        ) {
-          redirectTo(newInput.savedObjectId);
-        }
+        redirectTo(newInput.savedObjectId);
+        return;
       }
+
+      const newDoc = {
+        ...docToSave,
+        ...newInput,
+      };
+      setState((s) => ({
+        ...s,
+        persistedDoc: newDoc,
+        lastKnownDoc: newDoc,
+        isSaveModalVisible: false,
+        isLinkedToOriginatingApp: false,
+      }));
     } catch (e) {
       // eslint-disable-next-line no-console
       console.dir(e);
@@ -409,12 +423,19 @@ export function App({
     actions: {
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
-          runSave({
-            newTitle: lastKnownDoc.title,
-            newCopyOnSave: false,
-            isTitleDuplicateConfirmed: false,
-            returnToOrigin: true,
-          });
+          setState((s) => ({ ...s, validateOnAppLeave: false }));
+          runSave(
+            {
+              newTitle: lastKnownDoc.title,
+              newCopyOnSave: false,
+              isTitleDuplicateConfirmed: false,
+              returnToOrigin: true,
+            },
+            {
+              saveToLibrary:
+                (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+            }
+          );
         }
       },
       showSaveModal: () => {
