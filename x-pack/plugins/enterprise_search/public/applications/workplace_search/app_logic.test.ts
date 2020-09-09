@@ -16,7 +16,10 @@ describe('AppLogic', () => {
   });
 
   const DEFAULT_VALUES = {
+    account: {},
     hasInitialized: false,
+    isFederatedAuth: true,
+    organization: {},
   };
 
   it('has expected default values', () => {
@@ -28,7 +31,21 @@ describe('AppLogic', () => {
       AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
       expect(AppLogic.values).toEqual({
+        account: {
+          canCreateInvitations: true,
+          canCreatePersonalSources: true,
+          groups: ['Default', 'Cats'],
+          id: 'some-id-string',
+          isAdmin: true,
+          isCurated: false,
+          viewedOnboardingPage: true,
+        },
         hasInitialized: true,
+        isFederatedAuth: false,
+        organization: {
+          defaultOrgName: 'My Organization',
+          name: 'ACME Donuts',
+        },
       });
     });
   });
