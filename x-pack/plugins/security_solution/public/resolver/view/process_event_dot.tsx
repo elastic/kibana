@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
@@ -105,7 +106,9 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
-    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+    const resolverComponentInstanceID = useSelector((state: ResolverState) =>
+      selectors.resolverComponentInstanceID(state)
+    );
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
@@ -117,8 +120,11 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
-    const selectedNode = useSelector(selectors.selectedNode);
+    const ariaActiveDescendant = useSelector((state: ResolverState) =>
+      selectors.ariaActiveDescendant(state)
+    );
+    const selectedNode = useSelector((state: ResolverState) => selectors.selectedNode(state));
+    const originID = useSelector((state: ResolverState) => selectors.originID(state));
     const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
     if (nodeID === undefined) {
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
@@ -231,6 +237,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
+    const isOrigin = nodeID === originID;
 
     const dispatch = useResolverDispatch();
 
@@ -357,7 +364,7 @@ const UnstyledProcessEventDot = React.memo(
               stroke={strokeColor}
               width={markerSize * 1.5}
               height={markerSize * 1.5}
-              className="backing"
+              className={`backing ${isOrigin ? 'origin' : ''}`}
             />
             <use
               role="presentation"
@@ -392,6 +399,12 @@ const UnstyledProcessEventDot = React.memo(
             color={colorMap.descriptionText}
             isDisplaying={isShowingDescriptionText}
           >
+            {isOrigin && (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.resolver.analyzedEvent"
+                defaultMessage="Analyzed Event · "
+              />
+            )}
             {descriptionText}
           </StyledDescriptionText>
           <div
@@ -493,6 +506,17 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     transition-property: stroke-dashoffset;
     transition-duration: 1s;
     stroke-dashoffset: 0;
+  }
+
+  &[aria-current] .origin {
+    transition-property: stroke-opacity;
+    transition-duration: 0.5s;
+    stroke-opacity: 1;
+  }
+
+  &:not([aria-current]) .origin {
+    stroke-opacity: 0.2;
+    stroke-dashoffset: 100;
   }
 
   & .euiButton {
