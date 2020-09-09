@@ -14098,8 +14098,6 @@
     "xpack.reporting.screencapture.waitingForRenderComplete": "正在等候渲染完成",
     "xpack.reporting.screencapture.waitingForRenderedElements": "正在等候 {itemsCount} 个已渲染元素进入 DOM",
     "xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel": "打印优化",
-    "xpack.reporting.selfCheck.ok": "Reporting 插件自检正常！",
-    "xpack.reporting.selfCheck.warning": "Reporting 插件自检生成警告：{err}",
     "xpack.reporting.serverConfig.autoSet.sandboxDisabled": "Chromium 沙盒提供附加保护层，但不受 {osName} OS 支持。自动设置“{configKey}: true”。",
     "xpack.reporting.serverConfig.autoSet.sandboxEnabled": "Chromium 沙盒提供附加保护层，受 {osName} OS 支持。自动启用 Chromium 沙盒。",
     "xpack.reporting.serverConfig.invalidServerHostname": "在 Kibana 配置中找到“server.host:\"0\"”。其不与 Reporting 兼容。要使 Reporting 运行，“{configKey}:0.0.0.0”将自动添加到配置中。可以将该设置更改为“server.host:0.0.0.0”或在 kibana.yml 中添加“{configKey}:0.0.0.0”，以阻止此消息。",
