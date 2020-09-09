@@ -65,6 +65,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return createDataFrameAnalyticsJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:

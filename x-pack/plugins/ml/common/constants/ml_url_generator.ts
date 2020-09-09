@@ -31,6 +31,7 @@ export const ML_PAGES = {
    * Open index data visualizer viewer page
    */
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
+  ANOMALY_DETECTION_CREATE_JOB: `jobs/new_job`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: `jobs/new_job/step/job_type`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: `jobs/new_job/step/index_or_search`,
   SETTINGS: 'settings',
