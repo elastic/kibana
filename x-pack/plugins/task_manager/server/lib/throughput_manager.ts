@@ -73,6 +73,11 @@ export class ThroughputManager {
       clearInterval(this.throughputCheckIntervalId);
       delete this.throughputCheckIntervalId;
     }
+
+    // Reset observable values
+    this.maxWorkers.observable$.next(this.maxWorkers.startingValue);
+    this.pollInterval.observable$.next(this.pollInterval.startingValue);
+
     this.isStarted = false;
   }
 
