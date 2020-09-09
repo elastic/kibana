@@ -18,17 +18,58 @@
  */
 import { ApiResponse, RequestParams } from '@elastic/elasticsearch';
 import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
-import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
+
 import {
-  DataDescriptor,
-  AtLeastOne,
-  DataTelemetryDocument,
-  DataTelemetryBasePayload,
-  DataTelemetryPayload,
-  IndexMappings,
-  IndexStats,
-  DataTelemetryIndex,
-} from './types';
+  DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
+  DataPatternName,
+  DataTelemetryType,
+} from './constants';
+
+export interface DataTelemetryBasePayload {
+  index_count: number;
+  ecs_index_count?: number;
+  doc_count?: number;
+  size_in_bytes?: number;
+}
+
+export interface DataTelemetryDocument extends DataTelemetryBasePayload {
+  data_stream?: {
+    dataset?: string;
+    type?: DataTelemetryType | string; // The union of types is to help autocompletion with some known `data_stream.type`s
+  };
+  package?: {
+    name: string;
+  };
+  shipper?: string;
+  pattern_name?: DataPatternName;
+}
+
+export type DataTelemetryPayload = DataTelemetryDocument[];
+
+export interface DataTelemetryIndex {
+  name: string;
+  packageName?: string; // Populated by Ingest Manager at `_meta.package.name`
+  managedBy?: string; // Populated by Ingest Manager at `_meta.managed_by`
+  dataStreamDataset?: string; // To be obtained from `mappings.data_stream.dataset` if it's a constant keyword
+  dataStreamType?: string; // To be obtained from `mappings.data_stream.type` if it's a constant keyword
+  shipper?: string; // To be obtained from `_meta.beat` if it's set
+  isECS?: boolean; // Optional because it can't be obtained via Monitoring.
+
+  // The fields below are optional because we might not be able to obtain them if the user does not
+  // have access to the index.
+  docCount?: number;
+  sizeInBytes?: number;
+}
+
+type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+
+type DataDescriptor = AtLeastOne<{
+  packageName: string;
+  dataStreamDataset: string;
+  dataStreamType: string;
+  shipper: string;
+  patternName: DataPatternName; // When found from the list of the index patterns
+}>;
 
 function findMatchingDescriptors({
   name,
@@ -129,6 +170,59 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   }
 
   return [...acc.values()];
+}
+
+interface IndexStats {
+  indices: {
+    [indexName: string]: {
+      total: {
+        docs: {
+          count: number;
+          deleted: number;
+        };
+        store: {
+          size_in_bytes: number;
+        };
+      };
+    };
+  };
+}
+
+interface IndexMappings {
+  [indexName: string]: {
+    mappings: {
+      _meta?: {
+        beat?: string;
+
+        // Ingest Manager provided metadata
+        package?: {
+          name?: string;
+        };
+        managed_by?: string; // Typically "ingest-manager"
+      };
+      properties: {
+        data_stream?: {
+          properties: {
+            dataset?: {
+              type: string;
+              value?: string;
+            };
+            type?: {
+              type: string;
+              value?: string;
+            };
+          };
+        };
+        ecs?: {
+          properties: {
+            version?: {
+              type: string;
+            };
+          };
+        };
+      };
+    };
+  };
 }
 
 export async function getDataTelemetry(
