@@ -21,10 +21,11 @@ export interface Connector {
   password: string;
 }
 
-const caseTimeline: Timeline = {
+export const caseTimeline: Timeline = {
   title: 'SIEM test',
   description: 'description',
   query: 'host.name:*',
+  id: '0162c130-78be-11ea-9718-118a926974a4',
 };
 
 export const case1: TestCase = {

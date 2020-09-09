@@ -8,4 +8,5 @@ export interface Timeline {
   title: string;
   description: string;
   query: string;
+  id?: string;
 }
