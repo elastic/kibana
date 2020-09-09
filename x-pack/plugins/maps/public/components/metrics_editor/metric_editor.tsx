@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
-import { SingleFieldSelect } from './single_field_select';
-import { AGG_TYPE } from '../../common/constants';
-import { getTermsFields } from '../index_pattern_util';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { MetricSelect } from './metric_select';
+import { SingleFieldSelect } from '../single_field_select';
+import { AggDescriptor } from '../../../common/descriptor_types';
+import { AGG_TYPE } from '../../../common/constants';
+import { getTermsFields } from '../../index_pattern_util';
+import { IFieldType } from '../../../../../../src/plugins/data/public';
 
-function filterFieldsForAgg(fields, aggType) {
+function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {
     return [];
   }
@@ -34,8 +36,27 @@ function filterFieldsForAgg(fields, aggType) {
   });
 }
 
-export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
-  const onAggChange = (metricAggregationType) => {
+interface Props {
+  metric: AggDescriptor;
+  fields: IFieldType[];
+  onChange: (metric: AggDescriptor) => void;
+  onRemove: () => void;
+  metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
+  showRemoveButton: boolean;
+}
+
+export function MetricEditor({
+  fields,
+  metricsFilter,
+  metric,
+  onChange,
+  showRemoveButton,
+  onRemove,
+}: Props) {
+  const onAggChange = (metricAggregationType?: AGG_TYPE) => {
+    if (!metricAggregationType) {
+      return;
+    }
     const newMetricProps = {
       ...metric,
       type: metricAggregationType,
@@ -54,13 +75,16 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
     onChange(newMetricProps);
   };
-  const onFieldChange = (fieldName) => {
+  const onFieldChange = (fieldName?: string) => {
+    if (!fieldName) {
+      return;
+    }
     onChange({
       ...metric,
       field: fieldName,
     });
   };
-  const onLabelChange = (e) => {
+  const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({
       ...metric,
       label: e.target.value,
@@ -80,7 +104,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
             defaultMessage: 'Select field',
           })}
-          value={metric.field}
+          value={metric.field ? metric.field : null}
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
@@ -108,6 +132,28 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
     );
   }
 
+  let removeButton;
+  if (showRemoveButton) {
+    removeButton = (
+      <div className="mapMetricEditorPanel__metricRemoveButton">
+        <EuiButtonEmpty
+          iconType="trash"
+          size="xs"
+          color="danger"
+          onClick={onRemove}
+          aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+            defaultMessage: 'Delete metric',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.maps.metricsEditor.deleteMetricButtonLabel"
+            defaultMessage="Delete metric"
+          />
+        </EuiButtonEmpty>
+      </div>
+    );
+  }
+
   return (
     <Fragment>
       <EuiFormRow
@@ -130,14 +176,3 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
     </Fragment>
   );
 }
-
-MetricEditor.propTypes = {
-  metric: PropTypes.shape({
-    type: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
-    field: PropTypes.string,
-    label: PropTypes.string,
-  }),
-  fields: PropTypes.array,
-  onChange: PropTypes.func.isRequired,
-  metricsFilter: PropTypes.func,
-};

@@ -16,8 +16,9 @@ exports[`should add default count metric when metrics is empty array 1`] = `
             "type": "count",
           }
         }
-        metricsFilter={[Function]}
         onChange={[Function]}
+        onRemove={[Function]}
+        showRemoveButton={false}
       />
     </div>
   </div>
@@ -59,8 +60,9 @@ exports[`should render metrics editor 1`] = `
             "type": "sum",
           }
         }
-        metricsFilter={[Function]}
         onChange={[Function]}
+        onRemove={[Function]}
+        showRemoveButton={false}
       />
     </div>
   </div>
