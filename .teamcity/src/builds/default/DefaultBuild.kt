@@ -13,6 +13,7 @@ object DefaultBuild : BuildType({
 
   artifactRules = """
     +:install/kibana/**/* => kibana-default.tar.gz
+    +:x-pack/plugins/*/target/**/* => plugins-default.tar.gz
     +:x-pack/test/*/plugins/*/target/**/* => plugins-default-test.tar.gz
     target/kibana-*
   """.trimIndent()
@@ -48,6 +49,7 @@ fun Dependencies.defaultBuildWithPlugins() {
   defaultBuild("""
       +:kibana-default.tar.gz!** => build/kibana-build-default
       +:plugins-default-test.tar.gz!** => x-pack/test/
+      +:plugins-default.tar.gz!** => x-pack/plugins/ 
     """.trimIndent()
   )
 }
