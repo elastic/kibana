@@ -6,15 +6,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { archives } from '../../config';
+import archives from '../../archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // url parameters
-  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
-  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const range = archives['apm_8.0.0'];
+  const start = encodeURIComponent(range.start);
+  const end = encodeURIComponent(range.end);
 
   describe('Agent name', () => {
     describe('when data is not loaded ', () => {
@@ -32,13 +32,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('apm_8.0.0'));
       after(() => esArchiver.unload('apm_8.0.0'));
 
-      const { from, to } = archives['apm_8.0.0'];
-
       it('returns the agent name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/agent_name?start=${encodeURIComponent(
-            from
-          )}&end=${encodeURIComponent(to)}`
+          `/api/apm/services/opbeans-node/agent_name?start=${start}&end=${end}`
         );
 
         expect(response.status).to.be(200);
