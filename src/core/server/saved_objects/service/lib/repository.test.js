@@ -153,7 +153,6 @@ describe('SavedObjectsRepository', () => {
     typeRegistry: registry,
     kibanaVersion: '2.0.0',
     log: {},
-    validateDoc: jest.fn(),
   });
 
   const getMockGetResponse = (

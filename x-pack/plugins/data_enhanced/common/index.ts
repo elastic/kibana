@@ -5,7 +5,6 @@
  */
 
 export {
-  EnhancedSearchParams,
   IEnhancedEsSearchRequest,
   IAsyncSearchRequest,
   ENHANCED_ES_SEARCH_STRATEGY,

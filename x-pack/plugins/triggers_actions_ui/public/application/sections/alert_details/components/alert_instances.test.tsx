@@ -7,7 +7,7 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
-import { Alert, AlertStatus, AlertInstanceStatus } from '../../../../types';
+import { Alert, AlertInstanceSummary, AlertInstanceStatus } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -34,7 +34,7 @@ jest.mock('../../../app_context', () => {
 describe('alert_instances', () => {
   it('render a list of alert instances', () => {
     const alert = mockAlert();
-    const alertStatus = mockAlertStatus({
+    const alertInstanceSummary = mockAlertInstanceSummary({
       instances: {
         first_instance: {
           status: 'OK',
@@ -52,19 +52,24 @@ describe('alert_instances', () => {
         fakeNow.getTime(),
         alert,
         'first_instance',
-        alertStatus.instances.first_instance
+        alertInstanceSummary.instances.first_instance
       ),
       alertInstanceToListItem(
         fakeNow.getTime(),
         alert,
         'second_instance',
-        alertStatus.instances.second_instance
+        alertInstanceSummary.instances.second_instance
       ),
     ];
 
     expect(
       shallow(
-        <AlertInstances {...mockAPIs} alert={alert} alertStatus={alertStatus} readOnly={false} />
+        <AlertInstances
+          {...mockAPIs}
+          alert={alert}
+          alertInstanceSummary={alertInstanceSummary}
+          readOnly={false}
+        />
       )
         .find(EuiBasicTable)
         .prop('items')
@@ -73,7 +78,7 @@ describe('alert_instances', () => {
 
   it('render a hidden field with duration epoch', () => {
     const alert = mockAlert();
-    const alertStatus = mockAlertStatus();
+    const alertInstanceSummary = mockAlertInstanceSummary();
 
     expect(
       shallow(
@@ -82,7 +87,7 @@ describe('alert_instances', () => {
           {...mockAPIs}
           alert={alert}
           readOnly={false}
-          alertStatus={alertStatus}
+          alertInstanceSummary={alertInstanceSummary}
         />
       )
         .find('[name="alertInstancesDurationEpoch"]')
@@ -108,7 +113,7 @@ describe('alert_instances', () => {
           {...mockAPIs}
           alert={alert}
           readOnly={false}
-          alertStatus={mockAlertStatus({
+          alertInstanceSummary={mockAlertInstanceSummary({
             instances,
           })}
         />
@@ -134,7 +139,7 @@ describe('alert_instances', () => {
           {...mockAPIs}
           alert={alert}
           readOnly={false}
-          alertStatus={mockAlertStatus({
+          alertInstanceSummary={mockAlertInstanceSummary({
             instances: {
               'us-west': {
                 status: 'OK',
@@ -253,8 +258,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockAlertStatus(overloads: Partial<AlertStatus> = {}): AlertStatus {
-  const status: AlertStatus = {
+function mockAlertInstanceSummary(
+  overloads: Partial<AlertInstanceSummary> = {}
+): AlertInstanceSummary {
+  const summary: AlertInstanceSummary = {
     id: 'alert-id',
     name: 'alert-name',
     tags: ['tag-1', 'tag-2'],
@@ -274,5 +281,5 @@ function mockAlertStatus(overloads: Partial<AlertStatus> = {}): AlertStatus {
       },
     },
   };
-  return { ...status, ...overloads };
+  return { ...summary, ...overloads };
 }
