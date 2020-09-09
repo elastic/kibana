@@ -2,7 +2,6 @@
 === Dashboard Drilldown
 
 The dashboard drilldown allows you to navigate from one dashboard to another dashboard.
-
 For example, you might have a dashboard that shows the overall status of multiple data centers.
 You can create a drilldown that navigates from this dashboard to a dashboard
 that shows a single data center or server.
@@ -16,8 +15,7 @@ image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to
 [[drilldowns-example]]
 ==== Try it: Create a dashboard drilldown
 
-This example shows how to create the *Host Overview* drilldown shown earlier.
-
+Create the *Host Overview* drilldown shown above.
 
 *Set up the dashboards*
 
