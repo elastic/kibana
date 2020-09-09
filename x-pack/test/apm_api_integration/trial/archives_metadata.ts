@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppLocation, Immutable } from '../../../../common/endpoint/types';
-
-export interface UserChangedUrl {
-  readonly type: 'userChangedUrl';
-  readonly payload: Immutable<AppLocation>;
-}
-
-export type RoutingAction = UserChangedUrl;
+export default {
+  'apm_8.0.0': {
+    start: '2020-09-09T06:11:22.998Z',
+    end: '2020-09-09T06:41:22.998Z',
+  },
+};

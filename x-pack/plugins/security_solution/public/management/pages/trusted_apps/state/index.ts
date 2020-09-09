@@ -4,11 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppLocation, Immutable } from '../../../../common/endpoint/types';
-
-export interface UserChangedUrl {
-  readonly type: 'userChangedUrl';
-  readonly payload: Immutable<AppLocation>;
-}
-
-export type RoutingAction = UserChangedUrl;
+export * from './async_resource_state';
+export * from './trusted_apps_list_page_state';
