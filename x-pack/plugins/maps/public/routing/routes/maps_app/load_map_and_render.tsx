@@ -19,6 +19,7 @@ interface Props {
   onAppLeave: AppMountParameters['onAppLeave'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {

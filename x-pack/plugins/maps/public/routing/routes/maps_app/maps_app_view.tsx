@@ -88,6 +88,7 @@ interface Props {
   setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
   setOpenTOCDetails: (openTOCDetails: string[]) => void;
   query: MapQuery | undefined;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {
