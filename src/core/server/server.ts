@@ -142,7 +142,6 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
