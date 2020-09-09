@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
