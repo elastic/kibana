@@ -5,48 +5,43 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
-import { DEFAULT_METRIC } from '../classes/sources/es_agg_source';
+// @ts-expect-error
+import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
+import { IFieldType } from '../../../../../../src/plugins/data/public';
+import { AggDescriptor } from '../../../common/descriptor_types';
+import { AGG_TYPE } from '../../../common/constants';
 
-export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
+interface Props {
+  allowMultipleMetrics: boolean;
+  metrics: AggDescriptor[];
+  fields: IFieldType[];
+  onChange: (metrics: AggDescriptor[]) => void;
+  metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
+}
+
+export function MetricsEditor({
+  fields,
+  metrics = [DEFAULT_METRIC],
+  onChange,
+  allowMultipleMetrics = true,
+  metricsFilter,
+}: Props) {
   function renderMetrics() {
     // There was a bug in 7.8 that initialized metrics to [].
     // This check is needed to handle any saved objects created before the bug was patched.
     const nonEmptyMetrics = metrics.length === 0 ? [DEFAULT_METRIC] : metrics;
     return nonEmptyMetrics.map((metric, index) => {
-      const onMetricChange = (metric) => {
-        onChange([...metrics.slice(0, index), metric, ...metrics.slice(index + 1)]);
+      const onMetricChange = (updatedMetric: AggDescriptor) => {
+        onChange([...metrics.slice(0, index), updatedMetric, ...metrics.slice(index + 1)]);
       };
 
       const onRemove = () => {
         onChange([...metrics.slice(0, index), ...metrics.slice(index + 1)]);
       };
 
-      let removeButton;
-      if (index > 0) {
-        removeButton = (
-          <div className="mapMetricEditorPanel__metricRemoveButton">
-            <EuiButtonEmpty
-              iconType="trash"
-              size="xs"
-              color="danger"
-              onClick={onRemove}
-              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
-                defaultMessage: 'Delete metric',
-              })}
-            >
-              <FormattedMessage
-                id="xpack.maps.metricsEditor.deleteMetricButtonLabel"
-                defaultMessage="Delete metric"
-              />
-            </EuiButtonEmpty>
-          </div>
-        );
-      }
       return (
         <div key={index} className="mapMetricEditorPanel__metricEditor">
           <MetricEditor
@@ -54,7 +49,8 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             metric={metric}
             fields={fields}
             metricsFilter={metricsFilter}
-            removeButton={removeButton}
+            showRemoveButton={index > 0}
+            onRemove={onRemove}
           />
         </div>
       );
@@ -62,7 +58,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
   }
 
   function addMetric() {
-    onChange([...metrics, {}]);
+    onChange([...metrics, { type: AGG_TYPE.AVG }]);
   }
 
   function renderAddMetricButton() {
@@ -71,7 +67,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
     }
 
     return (
-      <>
+      <Fragment>
         <EuiSpacer size="xs" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty onClick={addMetric} size="xs" iconType="plusInCircleFilled">
@@ -81,7 +77,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             />
           </EuiButtonEmpty>
         </EuiTextAlign>
-      </>
+      </Fragment>
     );
   }
 
@@ -93,16 +89,3 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
     </Fragment>
   );
 }
-
-MetricsEditor.propTypes = {
-  metrics: PropTypes.array,
-  fields: PropTypes.array,
-  onChange: PropTypes.func.isRequired,
-  allowMultipleMetrics: PropTypes.bool,
-  metricsFilter: PropTypes.func,
-};
-
-MetricsEditor.defaultProps = {
-  metrics: [DEFAULT_METRIC],
-  allowMultipleMetrics: true,
-};
