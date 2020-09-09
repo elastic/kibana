@@ -11,7 +11,8 @@ import {
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
-  installPackageHandler,
+  installPackageFromRegistryHandler,
+  installPackageByUploadHandler,
   deletePackageHandler,
 } from './handlers';
 import {
@@ -19,9 +20,12 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
+
+const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
@@ -71,11 +75,26 @@ export const registerRoutes = (router: IRouter) => {
 
   router.post(
     {
-      path: EPM_API_ROUTES.INSTALL_PATTERN,
-      validate: InstallPackageRequestSchema,
+      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
+      validate: InstallPackageFromRegistryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    installPackageHandler
+    installPackageFromRegistryHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
+      validate: InstallPackageByUploadRequestSchema,
+      options: {
+        tags: [`access:${PLUGIN_ID}-all`],
+        body: {
+          accepts: ['application/octet-stream'],
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+      },
+    },
+    installPackageByUploadHandler
   );
 
   router.delete(
