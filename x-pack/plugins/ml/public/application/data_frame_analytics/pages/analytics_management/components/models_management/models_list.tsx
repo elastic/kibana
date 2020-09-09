@@ -299,12 +299,7 @@ export const ModelsList: FC = () => {
       isPrimary: true,
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        await navigateToUrl(
-          getJobMapUrl(
-            item.metadata?.analytics_config.id,
-            Object.keys(item.metadata?.analytics_config.analysis)[0]
-          )
-        );
+        await navigateToUrl(getJobMapUrl(item.metadata?.analytics_config.id));
       },
     },
     {

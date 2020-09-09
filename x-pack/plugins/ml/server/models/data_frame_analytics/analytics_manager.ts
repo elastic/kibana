@@ -46,6 +46,14 @@ export class AnalyticsManager {
     return isDuplicate;
   }
 
+  private async getAnalyticsModelData(modelId: string) {
+    const resp = await this._client.ml.getTrainedModels({
+      model_id: modelId,
+    });
+    const modelData = resp?.body?.trained_model_configs[0];
+    return modelData;
+  }
+
   private async getAnalyticsJobData(analyticsId: string) {
     const resp = await this._client.ml.getDataFrameAnalytics({
       id: analyticsId,

@@ -5,8 +5,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-
-import { getAnalysisType } from '../../../../common/analytics';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 import {
@@ -22,8 +20,7 @@ export const useMapAction = () => {
   const navigateToPath = useNavigateToPath();
 
   const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => {
-    const analysisType = getAnalysisType(item.config.analysis);
-    navigateToPath(getJobMapUrl(item.id, analysisType));
+    navigateToPath(getJobMapUrl(item.id));
   }, []);
 
   const action: DataFrameAnalyticsListAction = useMemo(

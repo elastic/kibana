@@ -141,7 +141,7 @@ export function getResultsUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE 
   return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }
 
-export function getJobMapUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
+export function getJobMapUrl(jobId: string) {
   return `#/data_frame_analytics/map?_g=(ml:(jobId:${jobId}))`;
 }
 

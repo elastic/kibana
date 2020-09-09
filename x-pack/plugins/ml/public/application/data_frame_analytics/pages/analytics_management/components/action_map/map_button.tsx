@@ -9,14 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import {
-  getAnalysisType,
   isRegressionAnalysis,
   isOutlierAnalysis,
   isClassificationAnalysis,
 } from '../../../../common/analytics';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
 
-import { getJobMapUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 export const mapActionButtonText = i18n.translate(
   'xpack.ml.dataframe.analyticsList.mapActionName',
@@ -42,7 +40,7 @@ export const MapButton: FC<MapButtonProps> = ({ item }) => {
 
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={tooltipContent}>
+      <EuiToolTip position="top" content={toolTipContent}>
         <>{mapActionButtonText}</>
       </EuiToolTip>
     );
