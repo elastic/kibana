@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import * as t from 'io-ts';
+import { Severity } from '../../../../../plugins/apm/common/anomaly_detection';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { decodeOrThrow } from '../../../../../plugins/apm/common/utils/decode_or_throw';
 import archives_metadata from '../../archives_metadata';
@@ -23,22 +24,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   describe('APM Services Overview', () => {
-    describe('when data is not loaded ', () => {
-      it('handles the empty state', async () => {
-        const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
-
-        expect(response.status).to.be(200);
-        expect(response.body).to.eql({ hasHistoricalData: false, hasLegacyData: false, items: [] });
-      });
-    });
-
     describe('when data is loaded', () => {
       before(() => esArchiver.load('apm_8.0.0'));
       after(() => esArchiver.unload('apm_8.0.0'));
 
-      it('returns a list of services', async () => {
+      it('returns a list of services with anomaly scores', async () => {
         const response = await supertest.get(
           `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
@@ -63,8 +53,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           // the RUM service will not have transaction error data
           transactionErrorRate: t.union([metricType, t.undefined]),
           environments: t.array(t.string),
-          // basic license should not have anomaly scores
-          severity: t.undefined,
+          severity: t.union([
+            t.literal(Severity.critical),
+            t.literal(Severity.major),
+            t.literal(Severity.minor),
+            t.literal(Severity.warning),
+            t.undefined,
+          ]),
         });
 
         const responseType = t.type({
@@ -75,16 +70,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const data = decodeOrThrow(responseType, response.body);
 
-        const rumService = data.items.find((item) => item.serviceName === 'client');
+        expect(data.items.length).to.be.greaterThan(0);
 
-        expect(rumService!.transactionErrorRate).to.be(undefined);
-
-        const nonRumServices = data.items.filter((item) => item.serviceName !== 'client');
-
-        // all other services should have a transaction error rate
-        expect(
-          nonRumServices.every((item) => typeof item.transactionErrorRate?.value === 'number')
-        );
+        expect(data.items.some((item) => item.severity !== undefined)).to.be(true);
       });
     });
   });
