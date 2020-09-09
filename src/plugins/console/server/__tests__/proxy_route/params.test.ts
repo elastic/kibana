@@ -36,7 +36,7 @@ describe('Console Proxy Route', () => {
       describe('no matches', () => {
         it('rejects with 403', async () => {
           handler = createHandler(
-            getProxyRouteHandlerDeps({ pathFilters: [/^\/foo\//, /^\/bar\//] })
+            getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//, /^\/bar\//] } })
           );
 
           const { status } = await handler(
@@ -51,7 +51,7 @@ describe('Console Proxy Route', () => {
       describe('one match', () => {
         it('allows the request', async () => {
           handler = createHandler(
-            getProxyRouteHandlerDeps({ pathFilters: [/^\/foo\//, /^\/bar\//] })
+            getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//, /^\/bar\//] } })
           );
 
           (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
@@ -68,7 +68,9 @@ describe('Console Proxy Route', () => {
       });
       describe('all match', () => {
         it('allows the request', async () => {
-          handler = createHandler(getProxyRouteHandlerDeps({ pathFilters: [/^\/foo\//] }));
+          handler = createHandler(
+            getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//] } })
+          );
 
           (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
 

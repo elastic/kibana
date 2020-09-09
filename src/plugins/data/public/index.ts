@@ -262,7 +262,7 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  FieldList,
+  fieldList,
 } from '../common';
 
 /*
@@ -342,7 +342,6 @@ export {
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
   extractSearchSourceReferences,
-  FetchOptions,
   getEsPreference,
   getSearchParamsFromRequest,
   IEsSearchRequest,
@@ -352,7 +351,6 @@ export {
   injectSearchSourceReferences,
   ISearch,
   ISearchGeneric,
-  ISearchOptions,
   ISearchSource,
   parseSearchSourceJSON,
   RequestTimeoutError,
@@ -360,13 +358,14 @@ export {
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
-  SearchResponse,
   SearchSourceFields,
   SortDirection,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
 } from './search';
+
+export { ISearchOptions } from '../common';
 
 // Search namespace
 export const search = {
@@ -430,6 +429,7 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  QueryStateChange,
 } from './query';
 
 export {
@@ -441,7 +441,7 @@ export {
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
-export { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 

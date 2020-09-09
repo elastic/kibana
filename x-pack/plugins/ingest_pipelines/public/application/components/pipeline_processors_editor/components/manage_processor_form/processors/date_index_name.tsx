@@ -18,7 +18,7 @@ import {
   SelectField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, isArrayOfStrings } from './shared';
+import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
@@ -36,7 +36,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateRoundingFieldHelpText',
       {
-        defaultMessage: 'How to round the date when formatting the date into the index name.',
+        defaultMessage:
+          'Time period used to round the date when formatting the date into the index name.',
       }
     ),
     validations: [
@@ -64,7 +65,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldHelpText',
-      { defaultMessage: 'A prefix of the index name to be prepended before the printed date.' }
+      { defaultMessage: 'Prefix to add before the printed date in the index name.' }
     ),
   },
   index_name_format: {
@@ -79,7 +80,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldHelpText"
-        defaultMessage="The format to be used when printing the parsed date into the index name. Default value is {value}."
+        defaultMessage="Date format used to print the parsed date into the index name. Defaults to {value}."
         values={{ value: <EuiCode inline>{'yyyy-MM-dd'}</EuiCode> }}
       />
     ),
@@ -89,9 +90,7 @@ const fieldsConfig: FieldsConfig = {
     serializer: (v: string[]) => {
       return v.length ? v : undefined;
     },
-    deserializer: (v) => {
-      return isArrayOfStrings(v) ? v : [];
-    },
+    deserializer: to.arrayOfStrings,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsFieldLabel',
       {
@@ -101,7 +100,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsHelpText"
-        defaultMessage="An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Default value is {value}."
+        defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats. Defaults to {value}."
         values={{ value: <EuiCode inline>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
       />
     ),
@@ -118,7 +117,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneHelpText"
-        defaultMessage="The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names. Default value is {timezone}."
+        defaultMessage="Timezone used when parsing the date and constructing the index name expression. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
     ),
@@ -135,7 +134,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
-        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}"
+        defaultMessage="Locale to use when parsing the date. Useful when parsing month or day names. Defaults to {locale}."
         values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),
@@ -151,7 +150,7 @@ export const DateIndexName: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.fieldNameHelpText',
-          { defaultMessage: 'The field to get the date or timestamp from.' }
+          { defaultMessage: 'Field containing the date or timestamp.' }
         )}
       />
 

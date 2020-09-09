@@ -100,7 +100,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     isLoading: false,
   });
 
-  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableName = wrapOnDot(field.displayName)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -117,14 +117,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     );
 
   function fetchData() {
-    if (
-      state.isLoading ||
-      (field.type !== 'number' &&
-        field.type !== 'string' &&
-        field.type !== 'date' &&
-        field.type !== 'boolean' &&
-        field.type !== 'ip')
-    ) {
+    if (state.isLoading) {
       return;
     }
 
@@ -186,8 +179,12 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
               defaultMessage: 'Drag and drop to visualize.',
             })
-          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+          : exists
+          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
               defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
+              defaultMessage: "This field doesn't have data. Drag and drop to visualize.",
             })
       }
       type="iInCircle"
@@ -204,7 +201,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
-          label={field.name}
+          label={field.displayName}
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
@@ -217,15 +214,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             isDraggable
             isActive={infoIsOpen}
             data-test-subj={`lnsFieldListPanelField-${field.name}`}
-            onClick={() => {
-              if (exists) {
-                togglePopover();
-              }
-            }}
+            onClick={togglePopover}
             aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
               defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
               values: {
-                fieldName: field.name,
+                fieldName: field.displayName,
                 fieldType: field.type,
               },
             })}
@@ -313,7 +306,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display.',
+          defaultMessage:
+            'This field is empty because it doesn’t exist in the 500 sampled documents.',
         })}
       </EuiText>
     );

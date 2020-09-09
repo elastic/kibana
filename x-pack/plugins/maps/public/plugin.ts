@@ -44,17 +44,17 @@ import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: { config: MapsLegacyConfigType };
+  mapsLegacy: { config: MapsLegacyConfig };
   share: SharePluginSetup;
 }
 
@@ -108,7 +108,9 @@ export class MapsPlugin
     );
 
     plugins.inspector.registerView(MapView);
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
     plugins.visualizations.registerAlias(
       getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
     );
@@ -121,7 +123,6 @@ export class MapsPlugin
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      // @ts-expect-error
       async mount(context, params) {
         const { renderApp } = await lazyLoadMapModules();
         return renderApp(context, params);

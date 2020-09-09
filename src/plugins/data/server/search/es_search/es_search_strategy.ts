@@ -22,7 +22,8 @@ import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
+import { toSnakeCase } from './to_snake_case';
+import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -31,9 +32,9 @@ export const esSearchStrategyProvider = (
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.info(`search ${request.params?.index}`);
+      logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
-      const defaultParams = getDefaultSearchParams(config);
+      const uiSettingsClient = await context.core.uiSettings.client;
 
       // Only default index pattern type is supported here.
       // See data_enhanced for other type support.
@@ -41,10 +42,14 @@ export const esSearchStrategyProvider = (
         throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
 
-      const params = {
+      // ignoreThrottled is not supported in OSS
+      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
+
+      const params = toSnakeCase({
         ...defaultParams,
+        ...getShardTimeout(config),
         ...request.params,
-      };
+      });
 
       try {
         const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(

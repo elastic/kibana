@@ -24,4 +24,5 @@ export {
   fullAgentPolicyToYaml,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
+  isValidNamespace,
 } from '../../../../common';

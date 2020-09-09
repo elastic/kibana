@@ -30,6 +30,7 @@ export interface FormHook<T extends FormData = FormData> {
   readonly isValid: boolean | undefined;
   readonly id: string;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  validate: () => Promise<boolean>;
   subscribe: (handler: OnUpdateHandler<T>) => Subscription;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
@@ -38,7 +39,7 @@ export interface FormHook<T extends FormData = FormData> {
   getFieldDefaultValue: (fieldName: string) => unknown;
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
-  reset: (options?: { resetValues?: boolean; defaultValue?: FormData }) => void;
+  reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
   __addField: (field: FieldHook) => void;
@@ -102,7 +103,6 @@ export interface FieldHook<T = unknown> {
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
-  readonly form: FormHook<any>;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
     errorCode?: string;
@@ -117,7 +117,7 @@ export interface FieldHook<T = unknown> {
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  __serializeOutput: (rawValue?: unknown) => unknown;
+  __serializeValue: (rawValue?: unknown) => unknown;
 }
 
 export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
@@ -148,13 +148,17 @@ export interface ValidationError<T = string> {
   message: string;
   code?: T;
   validationType?: string;
+  __isBlocking__?: boolean;
   [key: string]: any;
 }
 
 export interface ValidationFuncArg<T extends FormData, V = unknown> {
   path: string;
   value: V;
-  form: FormHook<T>;
+  form: {
+    getFormData: FormHook<T>['getFormData'];
+    getFields: FormHook<T>['getFields'];
+  };
   formData: T;
   errors: readonly ValidationError[];
 }
@@ -183,5 +187,11 @@ type FieldValue = unknown;
 export interface ValidationConfig<T extends FormData = any> {
   validator: ValidationFunc<T>;
   type?: string;
+  /**
+   * By default all validation are blockers, which means that if they fail, the field is invalid.
+   * In some cases, like when trying to add an item to the ComboBox, if the item is not valid we want
+   * to show a validation error. But this validation is **not** blocking. Simply, the item has not been added.
+   */
+  isBlocking?: boolean;
   exitOnFail?: boolean;
 }

@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { NewAgentPolicy, AgentPolicy } from '../../../types';
+import { isValidNamespace } from '../../../services';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 interface ValidationResults {
@@ -55,6 +56,13 @@ export const agentPolicyFormValidation = (
       <FormattedMessage
         id="xpack.ingestManager.agentPolicyForm.namespaceRequiredErrorMessage"
         defaultMessage="A namespace is required"
+      />,
+    ];
+  } else if (!isValidNamespace(agentPolicy.namespace)) {
+    errors.namespace = [
+      <FormattedMessage
+        id="xpack.ingestManager.agentPolicyForm.namespaceInvalidErrorMessage"
+        defaultMessage="Namespace contains invalid characters"
       />,
     ];
   }

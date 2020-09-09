@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
-import { getFlattenedObject } from '../../../../services';
+import { getFlattenedObject, isValidNamespace } from '../../../../services';
 import {
   NewPackagePolicy,
   PackagePolicyInput,
@@ -63,6 +63,12 @@ export const validatePackagePolicy = (
     validationResults.namespace = [
       i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceRequiredErrorMessage', {
         defaultMessage: 'Namespace is required',
+      }),
+    ];
+  } else if (!isValidNamespace(packagePolicy.namespace)) {
+    validationResults.namespace = [
+      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceInvalidErrorMessage', {
+        defaultMessage: 'Namespace contains invalid characters',
       }),
     ];
   }

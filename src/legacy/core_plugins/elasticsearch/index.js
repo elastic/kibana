@@ -16,19 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
 import { Cluster } from './server/lib/cluster';
 import { createProxy } from './server/lib/create_proxy';
-import { handleESError } from './server/lib/handle_es_error';
-import { versionHealthCheck } from './lib/version_health_check';
 
 export default function (kibana) {
-  let defaultVars;
-
   return new kibana.Plugin({
-    require: ['kibana'],
-
-    uiExports: { injectDefaultVars: () => defaultVars },
+    require: [],
 
     async init(server) {
       // All methods that ES plugin exposes are synchronous so we should get the first
@@ -37,16 +30,6 @@ export default function (kibana) {
       const { client } = server.newPlatform.setup.core.elasticsearch.legacy;
       const adminCluster = new Cluster(client);
       const dataCluster = new Cluster(client);
-
-      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
-        .pipe(first())
-        .toPromise();
-
-      defaultVars = {
-        esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
-        esShardTimeout: esConfig.shardTimeout.asMilliseconds(),
-        esApiVersion: esConfig.apiVersion,
-      };
 
       const clusters = new Map();
       server.expose('getCluster', (name) => {
@@ -61,25 +44,6 @@ export default function (kibana) {
         return clusters.get(name);
       });
 
-      server.expose('createCluster', (name, clientConfig = {}) => {
-        // NOTE: Not having `admin` and `data` clients provided by the core in `clusters`
-        // map implicitly allows to create custom `data` and `admin` clients. This is
-        // allowed intentionally to support custom `admin` cluster client created by the
-        // x-pack/monitoring bulk uploader. We should forbid that as soon as monitoring
-        // bulk uploader is refactored, see https://github.com/elastic/kibana/issues/31934.
-        if (clusters.has(name)) {
-          throw new Error(`cluster '${name}' already exists`);
-        }
-
-        const cluster = new Cluster(
-          server.newPlatform.setup.core.elasticsearch.legacy.createClient(name, clientConfig)
-        );
-
-        clusters.set(name, cluster);
-
-        return cluster;
-      });
-
       server.events.on('stop', () => {
         for (const cluster of clusters.values()) {
           cluster.close();
@@ -88,17 +52,7 @@ export default function (kibana) {
         clusters.clear();
       });
 
-      server.expose('handleESError', handleESError);
-
       createProxy(server);
-
-      const waitUntilHealthy = versionHealthCheck(
-        this,
-        server.logWithMetadata,
-        server.newPlatform.__internals.elasticsearch.esNodesCompatibility$
-      );
-
-      server.expose('waitUntilReady', () => waitUntilHealthy);
     },
   });
 }

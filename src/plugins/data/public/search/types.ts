@@ -19,7 +19,6 @@
 
 import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { LegacyApiCaller } from './legacy/es_client';
 import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
@@ -29,28 +28,23 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchOptions,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-
-export interface ISearchOptions {
-  signal?: AbortSignal;
-  strategy?: string;
-}
 
 export type ISearch = (
   request: IKibanaSearchRequest,
   options?: ISearchOptions
 ) => Observable<IKibanaSearchResponse>;
 
-export type ISearchGeneric = (
-  request: IEsSearchRequest,
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
   options?: ISearchOptions
-) => Observable<IEsSearchResponse>;
-
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
-}
+) => Observable<SearchStrategyResponse>;
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
@@ -75,11 +69,6 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  /**
-   * @deprecated
-   * @internal
-   */
-  __LEGACY: ISearchStartLegacy;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

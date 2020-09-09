@@ -23,7 +23,7 @@ import { esSearchStrategyProvider } from './es_search_strategy';
 
 describe('ES search strategy', () => {
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
   const mockApiCaller = jest.fn().mockResolvedValue({
     body: {
@@ -36,7 +36,14 @@ describe('ES search strategy', () => {
     },
   });
   const mockContext = {
-    core: { elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } } },
+    core: {
+      uiSettings: {
+        client: {
+          get: () => {},
+        },
+      },
+      elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } },
+    },
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
@@ -59,14 +66,13 @@ describe('ES search strategy', () => {
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
-      timeout: '0ms',
-      ignoreUnavailable: true,
-      restTotalHitsAsInt: true,
+      ignore_unavailable: true,
+      track_total_hits: true,
     });
   });
 
   it('calls the API caller with overridden defaults', async () => {
-    const params = { index: 'logstash-*', ignoreUnavailable: false, timeout: '1000ms' };
+    const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
@@ -74,7 +80,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
-      restTotalHitsAsInt: true,
+      track_total_hits: true,
     });
   });
 

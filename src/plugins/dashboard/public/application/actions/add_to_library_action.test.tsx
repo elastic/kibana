@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+import {
+  isErrorEmbeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
+  EmbeddableInput,
+} from '../../embeddable_plugin';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
 import {
@@ -145,7 +150,7 @@ test('Add to library returns reference type input', async () => {
 
   embeddable = embeddablePluginMock.mockRefOrValEmbeddable<ContactCardEmbeddable>(embeddable, {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
-    mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
+    mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id } as EmbeddableInput,
   });
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));

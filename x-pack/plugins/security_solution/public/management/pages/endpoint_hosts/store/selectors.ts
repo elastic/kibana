@@ -16,10 +16,13 @@ import {
   HostPolicyResponseActionStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
-import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
+import { extractListPaginationParams } from '../../../common/routing';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+} from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
-
-const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -136,15 +139,18 @@ export const uiQueryParams: (
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
   (state: Immutable<EndpointState>) => state.location,
   (location: Immutable<EndpointState>['location']) => {
-    const data: EndpointIndexUIQueryParams = { page_index: '0', page_size: '10' };
+    const data: EndpointIndexUIQueryParams = {
+      page_index: String(MANAGEMENT_DEFAULT_PAGE),
+      page_size: String(MANAGEMENT_DEFAULT_PAGE_SIZE),
+    };
+
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
+      const paginationParams = extractListPaginationParams(query);
 
       const keys: Array<keyof EndpointIndexUIQueryParams> = [
         'selected_endpoint',
-        'page_size',
-        'page_index',
         'show',
         'admin_query',
       ];
@@ -168,17 +174,10 @@ export const uiQueryParams: (
         }
       }
 
-      // Check if page size is an expected size, otherwise default to 10
-      if (!PAGE_SIZES.includes(Number(data.page_size))) {
-        data.page_size = '10';
-      }
-
-      // Check if page index is a valid positive integer, otherwise default to 0
-      const pageIndexAsNumber = Number(data.page_index);
-      if (!Number.isFinite(pageIndexAsNumber) || pageIndexAsNumber < 0) {
-        data.page_index = '0';
-      }
+      data.page_size = String(paginationParams.page_size);
+      data.page_index = String(paginationParams.page_index);
     }
+
     return data;
   }
 );

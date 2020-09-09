@@ -19,18 +19,28 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
-import { GetConfigFn, UI_SETTINGS } from '../../../common';
+import { FetchHandlers } from '../fetch/types';
+import { SearchRequest } from '../index';
+import { SearchResponse } from 'elasticsearch';
+import { GetConfigFn, UI_SETTINGS, ISearchOptions } from '../../../common';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];
 }
 
-const mockResponses: Record<string, SearchResponse> = {
-  foo: {},
-  bar: {},
-  baz: {},
+const mockResponses: Record<string, SearchResponse<any>> = {
+  foo: {
+    took: 1,
+    timed_out: false,
+  } as SearchResponse<any>,
+  bar: {
+    took: 2,
+    timed_out: false,
+  } as SearchResponse<any>,
+  baz: {
+    took: 3,
+    timed_out: false,
+  } as SearchResponse<any>,
 };
 
 jest.useFakeTimers();
@@ -92,7 +102,7 @@ describe('fetchSoon', () => {
     const options = [{ bar: 1 }, { bar: 2 }];
 
     requests.forEach((request, i) => {
-      fetchSoon(request, options[i] as FetchOptions, { config } as FetchHandlers);
+      fetchSoon(request, options[i] as ISearchOptions, { config } as FetchHandlers);
     });
 
     jest.advanceTimersByTime(50);

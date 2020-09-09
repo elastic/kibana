@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mean } from 'lodash';
+import { EventOutcome } from '../../../common/event_outcome';
 import {
-  HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
   SERVICE_NAME,
+  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getErrorRate({
   serviceName,
@@ -42,7 +43,9 @@ export async function getErrorRate({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+    {
+      terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
+    },
     ...transactionNamefilter,
     ...transactionTypefilter,
     ...uiFiltersES,
@@ -57,10 +60,15 @@ export async function getErrorRate({
       query: { bool: { filter } },
       aggs: {
         total_transactions: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: getBucketSize(start, end, 'auto').intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
           aggs: {
             erroneous_transactions: {
-              filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
             },
           },
         },

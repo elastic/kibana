@@ -22,11 +22,11 @@ const ClFlexGroup = styled(EuiFlexGroup)`
 export function ClientMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (start && end) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
@@ -36,7 +36,7 @@ export function ClientMetrics() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [start, end, uiFilters]
   );
 
   const STAT_STYLE = { width: '240px' };
@@ -45,23 +45,25 @@ export function ClientMetrics() {
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
-          title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
+          titleSize="l"
+          title={
+            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
+          }
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
-          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
+          titleSize="l"
+          title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
+          titleSize="l"
           title={
             <EuiToolTip content={data?.pageViews?.value}>
               <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
