@@ -38,6 +38,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   position: absolute;
   top: ${(props) => `${props.topPct}%`};
   width: auto;
+  pointer-events: all;
 `;
 
 interface StyledDescriptionText {
@@ -329,6 +330,7 @@ const UnstyledProcessEventDot = React.memo(
           }
           role="img"
           aria-labelledby={labelHTMLID}
+          fill="none"
           style={{
             display: 'block',
             width: '100%',
@@ -338,9 +340,10 @@ const UnstyledProcessEventDot = React.memo(
             left: '0',
             outline: 'transparent',
             border: 'none',
+            pointerEvents: 'none',
           }}
         >
-          <g>
+          <g fill="none" style={{pointerEvents: 'visiblePainted'}}>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -464,6 +467,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;
+  pointer-events: none;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.

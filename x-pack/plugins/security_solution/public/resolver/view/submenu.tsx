@@ -183,8 +183,8 @@ const NodeSubMenuComponents = React.memo(
           nodeID={nodeID}
         />
         <ul role="menu" className={className + ' options'} aria-hidden={menuIsOpen} aria-owns={nodeID}>
-          { optionsWithActions.map((opt)=>{
-            return (<li className="item">{opt.optionTitle}</li>)
+          { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
+            return (<li className="item"><button role="menuitem">{opt.prefix} {opt.optionTitle}</button></li>)
           })}
         </ul>
       </>
@@ -206,13 +206,25 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     background: transparent;
     position: absolute;
     top: 6em;
+    contain: content;
+    width: 13em;
+    z-index: 2;
   }
 
   &.options .item {
     margin: .25ch .35ch .35ch 0;
     padding: .25em;
-    outline: 1px solid red;
-    height: min-content;
+    border: 1px solid red;
+    height: fit-content;
+    width: fit-content;
+    line-height: .8;
+    background-color: ${(props) => props.buttonFill};
+  }
+
+  &.options .item button {
+    appearance: none;
+    height: fit-content;
+    width: fit-content;
     line-height: .8;
   }
 
