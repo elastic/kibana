@@ -15,7 +15,7 @@ import { useKibana } from '../../lib/kibana';
 export { getDetectionEngineUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
-export { getNetworkUrl, getIPDetailsUrl } from './redirect_to_network';
+export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
 export { getTimelinesUrl, getTimelineTabsUrl } from './redirect_to_timelines';
 export {
   getCaseDetailsUrl,
