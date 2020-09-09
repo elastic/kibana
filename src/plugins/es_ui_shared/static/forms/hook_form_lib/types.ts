@@ -117,7 +117,9 @@ export interface FieldHook<T = unknown> {
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  __hasValue: boolean;
+  // Flag to indicate if the field value will be included in the form data outputted
+  // when calling form.getFormData();
+  __isIncludedInOutput: boolean;
   __serializeValue: (rawValue?: unknown) => unknown;
 }
 

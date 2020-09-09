@@ -98,7 +98,7 @@ export function useForm<T extends FormData = FormData>(
   const getFieldsForOutput = useCallback(
     (fields: FieldsMap, opts: { stripEmptyFields: boolean }): FieldsMap => {
       return Object.entries(fields).reduce((acc, [key, field]) => {
-        if (!field.__hasValue) {
+        if (!field.__isIncludedInOutput) {
           return acc;
         }
 

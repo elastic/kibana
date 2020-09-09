@@ -24,7 +24,7 @@ import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 interface InternalConfig<T> {
   initialValue?: T;
-  hasValue?: boolean;
+  isIncludedInOutput?: boolean;
 }
 
 export const useField = <T>(
@@ -37,7 +37,7 @@ export const useField = <T>(
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
     initialValue = config.defaultValue ?? '', // The value explicitly passed
-    hasValue = true,
+    isIncludedInOutput = true,
     label = '',
     labelAppend = '',
     helpText = '',
@@ -508,7 +508,7 @@ export const useField = <T>(
       clearErrors,
       validate,
       reset,
-      __hasValue: hasValue,
+      __isIncludedInOutput: isIncludedInOutput,
       __serializeValue: serializeValue,
     };
   }, [
@@ -524,7 +524,7 @@ export const useField = <T>(
     isValidating,
     isValidated,
     isChangingValue,
-    hasValue,
+    isIncludedInOutput,
     onChange,
     getErrorsMessages,
     setValue,
