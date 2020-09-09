@@ -13,18 +13,19 @@ import {
   EuiText,
   EuiHealth,
   EuiToolTip,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
+import styled from 'styled-components';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
-import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
@@ -99,6 +100,10 @@ interface GetColumns {
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
 }
+
+const TagWrapper = styled(EuiBadgeGroup)`
+  width: 100%;
+`;
 
 export const getColumns = ({
   dispatch,
@@ -212,15 +217,24 @@ export const getColumns = ({
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
-      render: (value: Rule['tags']) => (
-        <TruncatableText data-test-subj="tags">
-          {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={`${tag}-${i}`}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </TruncatableText>
-      ),
+      render: (value: Rule['tags']) => {
+        if (value != null && value.length > 0) {
+          return (
+            <TagWrapper data-test-subj="tags">
+              {value.map((tag: string, i: number) => (
+                <EuiBadge
+                  color="hollow"
+                  key={`${tag}-${i}`}
+                  data-test-subj={`rules-table-column-tags-${i}`}
+                >
+                  {tag}
+                </EuiBadge>
+              ))}
+            </TagWrapper>
+          );
+        }
+        return getEmptyTagValue();
+      },
       truncateText: true,
       width: '14%',
     },
