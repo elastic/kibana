@@ -72,15 +72,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
     } catch (error) {
-      // catch and display all job creation errors
-      const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        })
-      );
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
   }
 
@@ -91,16 +83,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       await jobCreator.createDatafeed();
       advancedStartDatafeed(jobCreator, navigateToPath);
     } catch (error) {
-      // catch and display all job creation errors
-      const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        })
-      );
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
+  }
+
+  function handleJobCreationError(error: any) {
+    const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
+    displayErrorToast(
+      error,
+      i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+        defaultMessage: `Job creation error`,
+      })
+    );
+    setCreatingJob(false);
   }
 
   function viewResults() {
