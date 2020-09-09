@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics, MetricsCollector } from './types';
-export { OsMetricsCollector, OpsMetricsCollectorOptions } from './os';
-export { ProcessMetricsCollector } from './process';
-export { ServerMetricsCollector } from './server';
+import { metricsCollectorMock } from './collector.mock';
+
+export const cgroupCollectorMock = metricsCollectorMock.create();
+jest.doMock('./cgroup', () => ({
+  OsCgroupMetricsCollector: jest.fn(() => cgroupCollectorMock),
+}));
