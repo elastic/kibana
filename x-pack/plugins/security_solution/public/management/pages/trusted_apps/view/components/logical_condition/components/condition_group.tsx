@@ -33,6 +33,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
         <EuiFlexItem grow={1}>
           {entries.map((entry, index) => (
             <ConditionEntry
+              key={`${index}-${entry.field}`}
               os={os}
               entry={entry}
               showLabels={index === 0}
