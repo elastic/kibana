@@ -406,6 +406,7 @@ export {
   StatefulSearchBarProps,
   FilterBar,
   QueryStringInput,
+  QueryStringInputProps,
   IndexPatternSelect,
 } from './ui';
 
