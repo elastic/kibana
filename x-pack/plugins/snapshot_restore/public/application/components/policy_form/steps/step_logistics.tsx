@@ -56,6 +56,10 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
 
   const { i18n, history } = useServices();
 
+  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
+    false
+  );
+
   // State for touched inputs
   const [touched, setTouched] = useState({
     name: false,
@@ -258,62 +262,42 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       }
     }
 
-    const policyRepositoryExists =
+    const doesRepositoryExist =
       !!policy.repository &&
       repositories.some((r: { name: string }) => r.name === policy.repository);
 
-    if (!policyRepositoryExists && !errors.repository) {
+    if (!doesRepositoryExist && !errors.repository) {
       updatePolicy(policy, { repositoryDoesNotExist: true });
     }
 
+    if (showRepositoryNotFoundWarning !== !doesRepositoryExist) {
+      setShowRepositoryNotFoundWarning(!doesRepositoryExist);
+    }
+
     return (
-      <>
-        {!policyRepositoryExists && (
-          <>
-            <EuiCallOut
-              data-test-subj="repositoryNotFoundWarning"
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
-                  defaultMessage="Repository not found"
-                />
-              }
-              color="danger"
-              iconType="alert"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
-                defaultMessage="Repository {repo} does not exist. Please select an existing repository."
-                values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
-              />
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <EuiSelect
-          options={repositories.map(({ name }: Repository) => ({
-            value: name,
-            text: name,
-          }))}
-          hasNoInitialSelection={!policyRepositoryExists}
-          value={!policyRepositoryExists ? '' : policy.repository}
-          onBlur={() => setTouched({ ...touched, repository: true })}
-          onChange={(e) => {
-            updatePolicy(
-              {
-                repository: e.target.value,
-              },
-              {
-                managedRepository,
-                isEditing,
-                policyName: policy.name,
-              }
-            );
-          }}
-          fullWidth
-          data-test-subj="repositorySelect"
-        />
-      </>
+      <EuiSelect
+        options={repositories.map(({ name }: Repository) => ({
+          value: name,
+          text: name,
+        }))}
+        hasNoInitialSelection={!doesRepositoryExist}
+        value={!doesRepositoryExist ? '' : policy.repository}
+        onBlur={() => setTouched({ ...touched, repository: true })}
+        onChange={(e) => {
+          updatePolicy(
+            {
+              repository: e.target.value,
+            },
+            {
+              managedRepository,
+              isEditing,
+              policyName: policy.name,
+            }
+          );
+        }}
+        fullWidth
+        data-test-subj="repositorySelect"
+      />
     );
   };
 
@@ -576,8 +560,31 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
 
+      {showRepositoryNotFoundWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            data-test-subj="repositoryNotFoundWarning"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
+                defaultMessage="Repository not found"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
+              defaultMessage="Repository {repo} does not exist. Please select an existing repository."
+              values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
+            />
+          </EuiCallOut>
+        </>
+      )}
+
+      <EuiSpacer size="l" />
       {renderNameField()}
       {renderSnapshotNameField()}
       {renderRepositoryField()}
