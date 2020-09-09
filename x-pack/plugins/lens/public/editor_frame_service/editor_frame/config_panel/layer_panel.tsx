@@ -216,7 +216,7 @@ export function LayerPanel(
                         return '';
                       }}
                       data-test-subj={group.dataTestSubj}
-                      draggable={true}
+                      draggable={!flyoutState.isOpen}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
                       label={group.groupLabel}
                       droppable={
