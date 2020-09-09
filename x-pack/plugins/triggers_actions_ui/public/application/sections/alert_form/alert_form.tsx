@@ -189,39 +189,6 @@ export const AlertForm = ({
         )
     : [];
 
-  const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
-    return (
-      <EuiFlexItem>
-        <EuiCard
-          key={index}
-          data-test-subj={`${item.id}-SelectOption`}
-          layout="horizontal"
-          icon={null}
-          title={item.name}
-          description={
-            <EuiText color="subdued" size="s">
-              Need to add descriptions
-            </EuiText>
-          }
-          titleSize="xs"
-          textAlign="left"
-          onClick={() => {
-            setAlertProperty('alertTypeId', item.id);
-            setAlertTypeModel(item);
-            setAlertProperty('params', {});
-            if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-              setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
-            }
-          }}
-        />
-      </EuiFlexItem>
-    );
-  });
-
-  const alertTypeOptions = alertTypeRegistryList.map(function (item, index) {
-    return { label: item.name };
-  });
-
   const alertTypeDetails = (
     <Fragment>
       <EuiHorizontalRule />
@@ -330,6 +297,32 @@ export const AlertForm = ({
       />
     </>
   );
+
+  // Incorrect
+  const alertTypeOptions = alertTypeRegistryList.map((item) => ({ label: item.name, id: item.id }));
+
+  // Incorrect
+  const alertTypeOnChange = (alertTypeSelectedOption) => {
+    setAlertProperty('alertTypeId', alertTypeSelectedOption.id);
+    setAlertTypeModel(alertTypeSelectedOption);
+    setAlertProperty('params', {});
+    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption.id)) {
+      setDefaultActionGroupId(
+        alertTypesIndex.get(alertTypeSelectedOption.id)!.defaultActionGroupId
+      );
+    }
+  };
+
+  // Incorrect
+  const alertTypeRenderOption = (option) => {
+    const { name } = option;
+    option.label = name;
+    return (
+      <EuiText color="default" size="m">
+        {option.label}
+      </EuiText>
+    );
+  };
 
   return (
     <EuiForm>
@@ -512,16 +505,21 @@ export const AlertForm = ({
             </p>
           </EuiText>
           <EuiSpacer size="m" />
+          {/* 
+            Combobox is not getting the correct list of options (perhaps AlertTypeRegistryList not populated yet?)
+            I'm not sure if the renderOption is correct
+            The onChange call likely needs to be fixed
+            I think I need to have the selection saved to state as well?
+            */}
           <EuiComboBox
             noSuggestions
             fullWidth
             data-test-subj="alertTypesComboBox"
             singleSelection={{ asPlainText: true }}
+            onChange={alertTypeOnChange}
             options={alertTypeOptions}
+            renderOption={alertTypeRenderOption}
           />
-          {/* <EuiFlexGrid gutterSize="s" columns={1}>
-            {alertTypeNodes}
-          </EuiFlexGrid> */}
           <EuiSpacer size="l" />
         </Fragment>
       ) : alertTypesIndex ? (
