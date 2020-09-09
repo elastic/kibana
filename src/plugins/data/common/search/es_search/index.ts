@@ -17,10 +17,4 @@
  * under the License.
  */
 
-export {
-  ISearchRequestParams,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-  ISearchOptions,
-} from './types';
+export * from './types';

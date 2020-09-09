@@ -65,12 +65,7 @@ export const Json: FunctionComponent = () => {
         )}
       />
 
-      <TargetField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.jsonForm.targetFieldHelpText',
-          { defaultMessage: 'Field used to contain the JSON object.' }
-        )}
-      />
+      <TargetField />
 
       <UseField
         config={fieldsConfig.add_to_root}

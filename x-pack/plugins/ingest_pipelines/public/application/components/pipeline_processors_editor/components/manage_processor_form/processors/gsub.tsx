@@ -6,8 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
@@ -87,17 +85,7 @@ export const Gsub: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.replacement} component={Field} path="fields.replacement" />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText"
-            defaultMessage="Field used to contain updated text. Defaults to {field}."
-            values={{
-              field: <EuiCode>{'field'}</EuiCode>,
-            }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>
