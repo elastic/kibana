@@ -485,7 +485,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliest?: number;
       latest?: number;
       samplerShardSize?: number;
-      interval?: string;
+      interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
     }) {

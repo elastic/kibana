@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Policy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
+
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
@@ -12,8 +14,6 @@ import {
   defaultNewFrozenPhase,
   serializedPhaseInitialization,
 } from '../../constants';
-
-import { Policy, PolicyFromES, SerializedPolicy } from './types';
 
 import { hotPhaseFromES, hotPhaseToES } from './hot_phase';
 import { warmPhaseFromES, warmPhaseToES } from './warm_phase';

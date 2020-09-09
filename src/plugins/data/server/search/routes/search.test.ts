@@ -48,7 +48,24 @@ describe('Search service', () => {
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {
-    const response = { id: 'yay' };
+    const response = {
+      id: 'yay',
+      rawResponse: {
+        took: 100,
+        timed_out: true,
+        _shards: {
+          total: 0,
+          successful: 0,
+          failed: 0,
+          skipped: 0,
+        },
+        hits: {
+          total: 0,
+          max_score: 0,
+          hits: [],
+        },
+      },
+    };
     mockDataStart.search.search.mockResolvedValue(response);
     const mockContext = {};
     const mockBody = { id: undefined, params: {} };
