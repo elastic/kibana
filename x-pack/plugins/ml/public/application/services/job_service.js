@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
-import { mlMessageBarService } from '../components/messagebar';
+import { getToastNotificationService } from '../services/toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
@@ -172,7 +172,7 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        mlMessageBarService.error(err);
+        getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -253,7 +253,7 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        mlMessageBarService.error(err);
+        getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -265,9 +265,6 @@ class JobService {
 
       ml.getDatafeeds(sId)
         .then((resp) => {
-          // console.log('loadDatafeeds query response:', resp);
-
-          // make deep copy of datafeeds
           const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
@@ -294,7 +291,7 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        mlMessageBarService.error(err);
+        getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -573,7 +570,7 @@ class JobService {
       }
 
       ml.startDatafeed({
-        datafeedId,
+        datafeedId: 22,
         start,
         end,
       })
@@ -582,45 +579,6 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error starting datafeed:', err);
-          mlMessageBarService.error(
-            i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
-              defaultMessage: 'Could not start datafeed for {jobId}',
-              values: { jobId },
-            }),
-            err
-          );
-          reject(err);
-        });
-    });
-  }
-
-  // stop the datafeed for a given job
-  // refresh the job state on stop success
-  stopDatafeed(datafeedId, jobId) {
-    return new Promise((resolve, reject) => {
-      ml.stopDatafeed({
-        datafeedId,
-      })
-        .then((resp) => {
-          resolve(resp);
-        })
-        .catch((err) => {
-          console.log('jobService error stopping datafeed:', err);
-          mlMessageBarService.error(
-            i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
-              defaultMessage: 'Could not stop datafeed for {jobId}',
-              values: { jobId },
-            }),
-            err
-          );
-          if (err.statusCode === 500) {
-            mlMessageBarService.error(
-              i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
-                defaultMessage:
-                  'Request may have timed out and may still be running in the background.',
-              })
-            );
-          }
           reject(err);
         });
     });

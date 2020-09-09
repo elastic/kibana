@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
 import { useMemo } from 'react';
-import { useNotifications } from '../contexts/kibana';
-import { MLRequestFailure } from '../util/ml_error';
-import { ErrorType, extractErrorProperties } from '../../../common/util/errors';
+import { getToastNotifications } from '../../util/dependency_cache';
+import { useNotifications } from '../../contexts/kibana';
+import { MLRequestFailure } from '../../util/ml_error';
+import { ErrorType, extractErrorProperties } from '../../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 
@@ -21,14 +23,23 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
     toastNotifications.addSuccess(toastOrTitle, options);
   }
 
-  function displayErrorToast(error: ErrorType, toastTitle: string) {
+  function displayErrorToast(error: ErrorType, title?: string) {
     const errorObj = extractErrorProperties(error);
     toastNotifications.addError(new MLRequestFailure(errorObj, error), {
-      title: toastTitle,
+      title:
+        title ??
+        i18n.translate('xpack.ml.toastNotificationService.errorTitle', {
+          defaultMessage: 'An error has occurred',
+        }),
     });
   }
 
   return { displayDangerToast, displaySuccessToast, displayErrorToast };
+}
+
+export function getToastNotificationService() {
+  const toastNotifications = getToastNotifications();
+  return toastNotificationServiceProvider(toastNotifications);
 }
 
 /**

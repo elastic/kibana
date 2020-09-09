@@ -22,13 +22,13 @@ import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
   resetJob,
@@ -73,13 +73,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       setJobRunner(jr);
     } catch (error) {
       // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+      const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
-        }),
-        text: extractErrorMessage(error),
-      });
+        })
+      );
       setCreatingJob(false);
     }
   }
@@ -92,13 +92,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       advancedStartDatafeed(jobCreator, navigateToPath);
     } catch (error) {
       // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+      const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
-        }),
-        text: extractErrorMessage(error),
-      });
+        })
+      );
       setCreatingJob(false);
     }
   }

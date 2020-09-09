@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/job_creator';
 import { ml, BucketSpanEstimatorData } from '../../../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../../../contexts/ml';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,
@@ -45,7 +45,7 @@ export function useEstimateBucketSpan() {
     (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
     jobCreator.splitField !== null
   ) {
-    data.splitField = jobCreator.splitField.id;
+    data.splitField = jobCreator.splitField.id + 33;
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {
@@ -68,7 +68,7 @@ export function useEstimateBucketSpan() {
     const { name, error, message } = await ml.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
-      mlMessageBarService.error(message);
+      getToastNotificationService().displayErrorToast(message);
     } else {
       jobCreator.bucketSpan = name;
       jobCreatorUpdate();

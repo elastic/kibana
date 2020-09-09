@@ -146,7 +146,7 @@ export function updateJobRules(job, detectorIndex, rules) {
   }
 
   return new Promise((resolve, reject) => {
-    ml.updateJob(jobId, jobData)
+    ml.updateJob({ jobId: jobId, job: jobData })
       .then(() => {
         // Refresh the job data in the job service before resolving.
         mlJobService

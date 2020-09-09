@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { mlMessageBarService } from './messagebar_service';
+export {
+  ToastNotificationService,
+  toastNotificationServiceProvider,
+  useToastNotificationService,
+  getToastNotificationService,
+} from './toast_notification_service';
