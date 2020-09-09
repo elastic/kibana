@@ -25,6 +25,8 @@ import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Link } from 'react-router-dom';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 
 function EditHeader({ calendarId, description }) {
   return (
@@ -215,12 +217,14 @@ export const CalendarForm = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton isDisabled={saving} href={'#/settings/calendars_list'}>
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButton>
+          <Link to={`/${ML_PAGES.CALENDARS_MANAGE}`}>
+            <EuiButton isDisabled={saving}>
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          </Link>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton

@@ -25,6 +25,7 @@ import {
   createDataFrameAnalyticsExplorationUrl,
 } from './data_frame_analytics_urls_generator';
 import { createGenericMlUrl } from './common';
+import { createEditCalendarUrl, createEditFilterUrl } from './settings_urls_generator';
 
 declare module '../../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
@@ -73,10 +74,8 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
-      case ML_PAGES.FILTER_LISTS_EDIT:
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
-      case ML_PAGES.CALENDARS_EDIT:
       case ML_PAGES.CALENDARS_NEW:
       case ML_PAGES.ACCESS_DENIED:
         return createGenericMlUrl(
@@ -84,6 +83,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
           mlUrlGeneratorState.page,
           mlUrlGeneratorState.pageState
         );
+      case ML_PAGES.FILTER_LISTS_EDIT:
+        return createEditFilterUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.CALENDARS_EDIT:
+        return createEditCalendarUrl(appBasePath, mlUrlGeneratorState.pageState);
+
       default:
         throw new Error('Page type is not provided or unknown');
     }

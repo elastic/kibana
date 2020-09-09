@@ -77,6 +77,9 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     },
   } = useMlKibana();
   const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
 
   const newJobResolvers = {
     ...basicResolvers(deps),
@@ -87,7 +90,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable,
+    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   };
 
   const { context } = useResolver(

@@ -40,13 +40,16 @@ export const indexBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute 
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(index, savedSearchId, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable,
+    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   });
 
   return (

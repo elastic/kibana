@@ -43,10 +43,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
-  | typeof ML_PAGES.CALENDARS_EDIT
   | typeof ML_PAGES.CALENDARS_NEW
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
-  | typeof ML_PAGES.FILTER_LISTS_EDIT
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
   | typeof ML_PAGES.ACCESS_DENIED
@@ -165,7 +163,6 @@ export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
     analysisType: DataFrameAnalyticsType;
-    globalState?: MlCommonGlobalState;
   };
 }
 
@@ -174,6 +171,22 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
   {
     jobId: JobId;
     analysisType: DataFrameAnalyticsType;
+    globalState?: MlCommonGlobalState;
+  }
+>;
+
+export type CalendarEditUrlState = MLPageState<
+  typeof ML_PAGES.CALENDARS_EDIT,
+  {
+    calendarId: string;
+    globalState?: MlCommonGlobalState;
+  }
+>;
+
+export type FilterEditUrlState = MLPageState<
+  typeof ML_PAGES.FILTER_LISTS_EDIT,
+  {
+    filterId: string;
     globalState?: MlCommonGlobalState;
   }
 >;
@@ -187,4 +200,6 @@ export type MlUrlGeneratorState =
   | TimeSeriesExplorerUrlState
   | DataFrameAnalyticsUrlState
   | DataFrameAnalyticsExplorationUrlState
+  | CalendarEditUrlState
+  | FilterEditUrlState
   | MlGenericUrlState;

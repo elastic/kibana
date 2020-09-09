@@ -10,6 +10,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -17,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -26,12 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
-import {
-  useCreateAndNavigateToMlLink,
-  useMlUrlGenerator,
-} from '../../../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
-import { useMlKibana } from '../../../contexts/kibana';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
@@ -84,27 +80,6 @@ function NewFilterButton({ canCreateFilter }) {
   );
 }
 
-function EditFilterLink({ filterListId }) {
-  const mlUrlGenerator = useMlUrlGenerator();
-  const {
-    services: {
-      application: { navigateToUrl },
-    },
-  } = useMlKibana();
-
-  const redirectToFilterListEditPage = async () => {
-    let url = await mlUrlGenerator.createUrl({ page: ML_PAGES.FILTER_LISTS_EDIT });
-    url = `${url}/${filterListId}`;
-    await navigateToUrl(url);
-  };
-
-  return (
-    <EuiLink data-test-subj="mlEditFilterListLink" onClick={() => redirectToFilterListEditPage()}>
-      {filterListId}
-    </EuiLink>
-  );
-}
-
 function getColumns() {
   const columns = [
     {
@@ -112,7 +87,11 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: (id) => <EditFilterLink filterListId={id} />,
+      render: (id) => (
+        <Link to={`/${ML_PAGES.FILTER_LISTS_EDIT}/${id}`} data-test-subj="mlEditFilterListLink">
+          {id}
+        </Link>
+      ),
       sortable: true,
       scope: 'row',
       'data-test-subj': 'mlFilterListColumnId',

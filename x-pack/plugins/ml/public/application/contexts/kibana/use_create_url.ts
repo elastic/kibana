@@ -65,5 +65,5 @@ export const useCreateAndNavigateToMlLink = (
   };
 
   // returns the onClick callback
-  return useCallback(() => redirectToMlPage(page), [mlUrlGenerator]);
+  return useCallback(() => redirectToMlPage(page), [mlUrlGenerator, page]);
 };

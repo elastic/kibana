@@ -296,7 +296,6 @@ export class JobsList extends Component {
         ),
       });
     }
-    console.log('this.props', this.props);
 
     const { pageIndex, pageSize, sortField, sortDirection } = this.state;
 

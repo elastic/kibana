@@ -76,11 +76,14 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
   const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable,
+    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

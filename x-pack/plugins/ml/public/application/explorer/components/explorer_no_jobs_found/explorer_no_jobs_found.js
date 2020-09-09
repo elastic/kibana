@@ -12,7 +12,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { Link } from 'react-router-dom';
 export const ExplorerNoJobsFound = () => (
   <EuiEmptyPrompt
     iconType="alert"
@@ -22,9 +23,14 @@ export const ExplorerNoJobsFound = () => (
       </h2>
     }
     actions={
-      <EuiButton color="primary" fill href="ml#/jobs">
-        <FormattedMessage id="xpack.ml.explorer.createNewJobLinkText" defaultMessage="Create job" />
-      </EuiButton>
+      <Link to={`/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`}>
+        <EuiButton color="primary" fill>
+          <FormattedMessage
+            id="xpack.ml.explorer.createNewJobLinkText"
+            defaultMessage="Create job"
+          />
+        </EuiButton>
+      </Link>
     }
     data-test-subj="mlNoJobsFound"
   />
