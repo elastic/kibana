@@ -10,14 +10,13 @@ import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
-interface EqlQueryBarProps {
+export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
-  idAria: string;
-  isLoading: boolean;
+  idAria?: string;
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, isLoading }) => {
+export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
   const { setValue } = field;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const fieldValue = field.value.query.query as string;
@@ -48,7 +47,13 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiTextArea fullWidth isInvalid={isInvalid} value={fieldValue} onChange={handleChange} />
+      <EuiTextArea
+        data-test-subj="EqlQueryBarTextInput"
+        fullWidth
+        isInvalid={isInvalid}
+        value={fieldValue}
+        onChange={handleChange}
+      />
     </EuiFormRow>
   );
 };
