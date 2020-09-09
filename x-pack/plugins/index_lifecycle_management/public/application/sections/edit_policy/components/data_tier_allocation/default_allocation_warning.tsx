@@ -27,7 +27,7 @@ export const DefaultAllocationWarning: FunctionComponent<Props> = ({
   currentAllocationType,
 }) => {
   const isCompatible = isPhaseDefaultDataAllocationCompatible(phase, nodesByRoles);
-  return currentAllocationType === 'default' && !isCompatible ? (
+  return currentAllocationType === 'default' && isCompatible ? (
     <>
       <EuiSpacer size="m" />
       <EuiCallOut

@@ -35,8 +35,8 @@ const i18nTexts = {
     { defaultMessage: 'Enable data tier allocation' }
   ),
   useCustomDataTierAllocation: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useCustomDataTierSwitchLabel',
-    { defaultMessage: 'Use custom data tier allocation' }
+    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useCustomSwitchLabel',
+    { defaultMessage: 'Custom attribute-based allocation' }
   ),
 };
 

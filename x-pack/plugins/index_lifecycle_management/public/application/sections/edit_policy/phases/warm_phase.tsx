@@ -50,13 +50,13 @@ const i18nTexts = {
   defaultAllocationNotAvailable: {
     title: i18n.translate(
       'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'No warm tier nodes found' }
+      { defaultMessage: 'No nodes assigned to the warm tier' }
     ),
     body: i18n.translate(
       'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
       {
         defaultMessage:
-          'This policy will not complete allocation because no node was found for data allocation.',
+          'This policy will not complete allocation because there are no warm nodes. Assign at least one node to the warm tier.',
       }
     ),
   },
@@ -179,7 +179,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                     <>
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription"
-                        defaultMessage="Allocate warm phase data to nodes in the cluster."
+                        defaultMessage="Allocate warm data to nodes in the cluster."
                       />
                       {
                         <DefaultAllocationWarning
@@ -220,7 +220,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasDescription',
                 {
                   defaultMessage:
-                    'Set the number of replicas. By default, the number of replicas remains the same.',
+                    'Set the number of replicas. Remains the same as the hot tier by default.',
                 }
               )}
               switchProps={{

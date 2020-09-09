@@ -62,7 +62,7 @@ export const NodeAllocation = ({
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
-            defaultMessage="You can't control shard allocation without node attributes."
+            defaultMessage="You must define custom node attributes to control shard allocation."
           />
         </EuiCallOut>
       </EuiFormRow>
@@ -92,7 +92,7 @@ export const NodeAllocation = ({
             >
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
-                defaultMessage="View a list of nodes attached to this configuration"
+                defaultMessage="View nodes with the selected attribute"
               />
             </EuiButtonEmpty>
           ) : null
