@@ -17,11 +17,11 @@ import {
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { VisualizationDimensionGroupConfig } from '../../../types';
-import { FlyoutState } from './types';
+import { DimensionContainerState } from './types';
 
 export function DimensionContainer({
-  flyoutState,
-  setFlyoutState,
+  dimensionContainerState,
+  setDimensionContainerState,
   groups,
   accessor,
   groupId,
@@ -29,8 +29,8 @@ export function DimensionContainer({
   panel,
   panelTitle,
 }: {
-  flyoutState: FlyoutState;
-  setFlyoutState: (newState: FlyoutState) => void;
+  dimensionContainerState: DimensionContainerState;
+  setDimensionContainerState: (newState: DimensionContainerState) => void;
   groups: VisualizationDimensionGroupConfig[];
   accessor: string;
   groupId: string;
@@ -38,12 +38,16 @@ export function DimensionContainer({
   panel: React.ReactElement;
   panelTitle: React.ReactNode;
 }) {
-  const [openByCreation, setIsOpenByCreation] = useState(flyoutState.openId === accessor);
+  const [openByCreation, setIsOpenByCreation] = useState(
+    dimensionContainerState.openId === accessor
+  );
 
-  const noMatch = flyoutState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
+  const noMatch = dimensionContainerState.isOpen
+    ? !groups.some((d) => d.accessors.includes(accessor))
+    : false;
 
   const closeFlyout = () => {
-    setFlyoutState({
+    setDimensionContainerState({
       isOpen: false,
       openId: null,
       addingToGroupId: null,
@@ -52,8 +56,9 @@ export function DimensionContainer({
   };
 
   const flyout =
-    flyoutState.isOpen &&
-    (flyoutState.openId === accessor || (noMatch && flyoutState.addingToGroupId === groupId)) ? (
+    dimensionContainerState.isOpen &&
+    (dimensionContainerState.openId === accessor ||
+      (noMatch && dimensionContainerState.addingToGroupId === groupId)) ? (
       <div
         role="dialog"
         aria-labelledby="lnsDimensionContainerTitle"

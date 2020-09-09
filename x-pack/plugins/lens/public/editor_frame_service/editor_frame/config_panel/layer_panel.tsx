@@ -23,10 +23,10 @@ import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, FlyoutState } from './types';
+import { ConfigPanelWrapperProps, DimensionContainerState } from './types';
 import { DimensionContainer } from './dimension_container';
 
-const initialFlyoutState = {
+const initialDimensionContainerState = {
   isOpen: false,
   openId: null,
   addingToGroupId: null,
@@ -48,13 +48,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [flyoutState, setFlyoutState] = useState<FlyoutState>(initialFlyoutState);
+  const [dimensionContainerState, setDimensionContainerState] = useState<DimensionContainerState>(
+    initialDimensionContainerState
+  );
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
-    setFlyoutState(initialFlyoutState);
+    setDimensionContainerState(initialDimensionContainerState);
   }, [props.activeVisualizationId]);
 
   if (
@@ -216,7 +218,7 @@ export function LayerPanel(
                         return '';
                       }}
                       data-test-subj={group.dataTestSubj}
-                      draggable={!flyoutState.isOpen}
+                      draggable={!dimensionContainerState.isOpen}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
                       label={group.groupLabel}
                       droppable={
@@ -251,8 +253,8 @@ export function LayerPanel(
                       }}
                     >
                       <DimensionContainer
-                        flyoutState={flyoutState}
-                        setFlyoutState={setFlyoutState}
+                        dimensionContainerState={dimensionContainerState}
+                        setDimensionContainerState={setDimensionContainerState}
                         groups={groups}
                         accessor={accessor}
                         groupId={group.groupId}
@@ -265,10 +267,10 @@ export function LayerPanel(
                               filterOperations: group.filterOperations,
                               suggestedPriority: group.suggestedPriority,
                               onClick: () => {
-                                if (flyoutState.isOpen) {
-                                  setFlyoutState(initialFlyoutState);
+                                if (dimensionContainerState.isOpen) {
+                                  setDimensionContainerState(initialDimensionContainerState);
                                 } else {
-                                  setFlyoutState({
+                                  setDimensionContainerState({
                                     isOpen: true,
                                     openId: accessor,
                                     addingToGroupId: null, // not set for existing dimension
@@ -371,8 +373,8 @@ export function LayerPanel(
                     }}
                   >
                     <DimensionContainer
-                      flyoutState={flyoutState}
-                      setFlyoutState={setFlyoutState}
+                      dimensionContainerState={dimensionContainerState}
+                      setDimensionContainerState={setDimensionContainerState}
                       groups={groups}
                       accessor={newId}
                       groupId={group.groupId}
@@ -388,10 +390,10 @@ export function LayerPanel(
                               defaultMessage: 'Add a configuration',
                             })}
                             onClick={() => {
-                              if (flyoutState.isOpen) {
-                                setFlyoutState(initialFlyoutState);
+                              if (dimensionContainerState.isOpen) {
+                                setDimensionContainerState(initialDimensionContainerState);
                               } else {
-                                setFlyoutState({
+                                setDimensionContainerState({
                                   isOpen: true,
                                   openId: newId,
                                   addingToGroupId: group.groupId,
@@ -434,7 +436,7 @@ export function LayerPanel(
                                   prevState: props.visualizationState,
                                 })
                               );
-                              setFlyoutState({
+                              setDimensionContainerState({
                                 isOpen: true,
                                 openId: newId,
                                 addingToGroupId: null, // clear now that dimension exists

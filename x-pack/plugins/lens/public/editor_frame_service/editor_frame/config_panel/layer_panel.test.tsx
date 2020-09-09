@@ -203,7 +203,7 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
-    it('should render the datasource and visualization panels inside the dimension flyout', () => {
+    it('should render the datasource and visualization panels inside the dimension container', () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
           {
@@ -227,10 +227,10 @@ describe('LayerPanel', () => {
       expect(panel.children()).toHaveLength(2);
     });
 
-    it('should keep the flyout open when configuring a new dimension', () => {
+    it('should keep the DimensionContainer open when configuring a new dimension', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the flyout
+       * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
       (generateId as jest.Mock).mockReturnValueOnce(`newid`);
@@ -274,10 +274,10 @@ describe('LayerPanel', () => {
       expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
     });
 
-    it('should close the flyout when the active visualization changes', () => {
+    it('should close the DimensionContainer when the active visualization changes', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the flyout
+       * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
 
