@@ -17,9 +17,9 @@ import {
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { VisualizationDimensionGroupConfig } from '../../../types';
-import { DimensionFlyoutState } from './types';
+import { FlyoutState } from './types';
 
-export function DimensionFlyout({
+export function DimensionContainer({
   flyoutState,
   setFlyoutState,
   groups,
@@ -29,8 +29,8 @@ export function DimensionFlyout({
   panel,
   panelTitle,
 }: {
-  flyoutState: DimensionFlyoutState;
-  setFlyoutState: (newState: DimensionFlyoutState) => void;
+  flyoutState: FlyoutState;
+  setFlyoutState: (newState: FlyoutState) => void;
   groups: VisualizationDimensionGroupConfig[];
   accessor: string;
   groupId: string;
@@ -56,17 +56,17 @@ export function DimensionFlyout({
     (flyoutState.openId === accessor || (noMatch && flyoutState.addingToGroupId === groupId)) ? (
       <div
         role="dialog"
-        aria-labelledby="lnsDimensionFlyoutTitle"
-        className={classNames('lnsDimensionFlyout', {
-          'lnsDimensionFlyout--noAnimation': openByCreation,
+        aria-labelledby="lnsDimensionContainerTitle"
+        className={classNames('lnsDimensionContainer', {
+          'lnsDimensionContainer--noAnimation': openByCreation,
         })}
       >
-        <EuiFlyoutHeader hasBorder className="lnsDimensionFlyout__header">
+        <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
           <EuiTitle size="xs">
             <EuiButtonEmpty
               onClick={closeFlyout}
-              data-test-subj="lns-indexPatternDimension-flyoutTitle"
-              id="lnsDimensionFlyoutTitle"
+              data-test-subj="lns-indexPattern-dimensionContainerTitle"
+              id="lnsDimensionContainerTitle"
               iconType="sortLeft"
               flush="left"
             >
@@ -77,9 +77,9 @@ export function DimensionFlyout({
         <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
           {panel}
         </EuiFlexItem>
-        <EuiFlyoutFooter className="lnsDimensionFlyout__footer">
+        <EuiFlyoutFooter className="lnsDimensionContainer__footer">
           <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-            {i18n.translate('xpack.lens.dimensionFlyout.close', {
+            {i18n.translate('xpack.lens.dimensionContainer.close', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
@@ -89,7 +89,7 @@ export function DimensionFlyout({
 
   return (
     <>
-      <div className="lnsDimensionFlyout__trigger">{trigger}</div>
+      <div className="lnsDimensionContainer__trigger">{trigger}</div>
       {flyout}
     </>
   );

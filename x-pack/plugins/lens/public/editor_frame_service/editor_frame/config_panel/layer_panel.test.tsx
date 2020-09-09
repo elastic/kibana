@@ -221,7 +221,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionFlyout');
+      const group = component.find('DimensionContainer');
       const panel = mount(group.prop('panel'));
 
       expect(panel.children()).toHaveLength(2);
@@ -264,7 +264,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionFlyout');
+      const group = component.find('DimensionContainer');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
@@ -312,7 +312,7 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionFlyout');
+      const group = component.find('DimensionContainer');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');

@@ -23,8 +23,8 @@ import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, DimensionFlyoutState } from './types';
-import { DimensionFlyout } from './dimension_flyout';
+import { ConfigPanelWrapperProps, FlyoutState } from './types';
+import { DimensionContainer } from './dimension_container';
 
 const initialFlyoutState = {
   isOpen: false,
@@ -48,7 +48,7 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [flyoutState, setFlyoutState] = useState<DimensionFlyoutState>(initialFlyoutState);
+  const [flyoutState, setFlyoutState] = useState<FlyoutState>(initialFlyoutState);
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
@@ -250,7 +250,7 @@ export function LayerPanel(
                         }
                       }}
                     >
-                      <DimensionFlyout
+                      <DimensionContainer
                         flyoutState={flyoutState}
                         setFlyoutState={setFlyoutState}
                         groups={groups}
@@ -293,7 +293,7 @@ export function LayerPanel(
                       />
 
                       <EuiButtonIcon
-                        data-test-subj="indexPattern-dimensionFlyout-remove"
+                        data-test-subj="indexPattern-dimension-remove"
                         iconType="cross"
                         iconSize="s"
                         size="s"
@@ -370,7 +370,7 @@ export function LayerPanel(
                       }
                     }}
                   >
-                    <DimensionFlyout
+                    <DimensionContainer
                       flyoutState={flyoutState}
                       setFlyoutState={setFlyoutState}
                       groups={groups}

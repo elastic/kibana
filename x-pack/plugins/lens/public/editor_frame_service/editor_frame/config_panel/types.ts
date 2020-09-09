@@ -30,7 +30,7 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
 }
 
-export interface DimensionFlyoutState {
+export interface FlyoutState {
   isOpen: boolean;
   openId: string | null;
   addingToGroupId: string | null;
