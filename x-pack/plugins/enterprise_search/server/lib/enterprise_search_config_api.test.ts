@@ -67,7 +67,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         },
         role: {
           id: 'account_id:somestring|user_oid:somestring',
-          roleType: 'owner',
+          role_type: 'owner',
           ability: {
             access_all_engines: true,
             destroy: ['session'],

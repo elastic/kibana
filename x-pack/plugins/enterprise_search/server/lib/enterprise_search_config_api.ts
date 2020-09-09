@@ -92,7 +92,7 @@ export const callEnterpriseSearchConfigAPI = async ({
         onBoardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
         role: {
           id: data?.current_user?.app_search?.role?.id,
-          roleType: data?.current_user?.app_search?.role?.roleType,
+          roleType: data?.current_user?.app_search?.role?.role_type,
           ability: {
             accessAllEngines: !!data?.current_user?.app_search?.role?.ability?.access_all_engines,
             destroy: data?.current_user?.app_search?.role?.ability?.destroy || [],
