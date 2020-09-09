@@ -75,11 +75,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const data = decodeOrThrow(responseType, response.body);
 
-        const rumService = data.items.find((item) => item.serviceName === 'client');
+        const rumService = data.items.find((item) => item.agentName === 'rum-js');
 
         expect(rumService!.transactionErrorRate).to.be(undefined);
 
-        const nonRumServices = data.items.filter((item) => item.serviceName !== 'client');
+        const nonRumServices = data.items.filter((item) => item.agentName === 'rum-js');
 
         // all other services should have a transaction error rate
         expect(
