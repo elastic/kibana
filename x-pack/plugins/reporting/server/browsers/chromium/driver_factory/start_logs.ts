@@ -99,7 +99,7 @@ export const browserStartLogs = (
 
   // Some chromium errors don't show up until a few seconds after startup
   // hence why we wait for at least 5 seconds to let them surface
-  const log$ = fromEvent(rl, 'line');
+  const log$ = fromEvent(rl, 'line').pipe(tap((log) => logger.info(`Chromium log "${log}"`)));
 
   return merge(exit$, error$, log$).pipe(
     takeUntil(timer(browserLaunchTimeToWait)),
