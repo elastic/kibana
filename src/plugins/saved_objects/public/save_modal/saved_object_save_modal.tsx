@@ -294,7 +294,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                 id="savedObjects.saveModal.duplicateTitleDescription"
                 defaultMessage="Saving '{title}' creates a duplicate title."
                 values={{
-                  title: this.props.title,
+                  title: this.state.title,
                 }}
               />
             </p>
