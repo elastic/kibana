@@ -170,7 +170,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const sorting = useMemo(
       (): SortingType => ({
         sort: {
-          field: filterOptions.sortField as RulesSortingFields,
+          field: filterOptions.sortField,
           direction: filterOptions.sortOrder,
         },
       }),
@@ -224,7 +224,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: sort?.field ?? INITIAL_SORT_FIELD,
+            sortField: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },

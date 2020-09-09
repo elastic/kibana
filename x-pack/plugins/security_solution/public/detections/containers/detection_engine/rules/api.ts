@@ -126,13 +126,14 @@ export const fetchRules = async ({
       ? `${filtersWithoutTags} AND (${tags})`
       : filtersWithoutTags + tags;
 
+  const getFieldNameForSortField = (field: string) => {
+    return field === 'name' ? `${field}.keyword` : field;
+  };
+
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field:
-      filterOptions.sortField === 'name'
-        ? `${filterOptions.sortField}.keyword`
-        : filterOptions.sortField,
+    sort_field: getFieldNameForSortField(filterOptions.sortField),
     sort_order: filterOptions.sortOrder,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
