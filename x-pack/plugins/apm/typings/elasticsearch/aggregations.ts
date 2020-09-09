@@ -146,7 +146,7 @@ export interface AggregationOptionsByType {
     buckets: number;
   } & AggregationSourceOptions;
   percentile_ranks: {
-    values: string[];
+    values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
