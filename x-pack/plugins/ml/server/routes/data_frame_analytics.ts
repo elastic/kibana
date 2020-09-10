@@ -20,6 +20,7 @@ import {
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { analyticsFeatureImportanceProvider } from '../models/data_frame_analytics/feature_importance';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -539,6 +540,40 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({
           body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/baseline Get analytics's feature importance baseline
+   * @apiName GetDataFrameAnalyticsBaseline
+   * @apiDescription Returns the baseline for data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
+      validate: {
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const { getRegressionAnalyticsBaseline } = analyticsFeatureImportanceProvider(client);
+        const baseline = await getRegressionAnalyticsBaseline(analyticsId);
+
+        return response.ok({
+          body: { baseline },
         });
       } catch (e) {
         return response.customError(wrapError(e));

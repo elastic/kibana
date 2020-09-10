@@ -192,7 +192,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  async filterAndFormatPropertiesToHtml(
+  async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number
   ): Promise<ITooltipProperty[]> {
