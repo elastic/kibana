@@ -141,7 +141,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'bar' }] }],
           }}
         />
       );

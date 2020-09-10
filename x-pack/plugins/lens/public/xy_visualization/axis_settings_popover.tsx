@@ -20,6 +20,7 @@ import { FramePublicAPI } from '../types';
 import { ToolbarPopover } from '../shared_components';
 import { ToolbarButtonProps } from '../toolbar_button';
 import { isHorizontalChart } from './state_helpers';
+import { getAxesConfiguration } from './axes_configuration';
 // @ts-ignore
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 // @ts-ignore
@@ -124,6 +125,23 @@ const popoverConfig = (
   }
 };
 
+const yAxisTitle = (
+  groupId: 'left' | 'right',
+  layers: LayerConfig[] | undefined,
+  isHorizontal: boolean,
+  frame: FramePublicAPI
+) => {
+  const axisGroups = layers ? getAxesConfiguration(layers, isHorizontal) : [];
+  const activeGroup = axisGroups.find((group) => group.groupId === groupId);
+  const initialSeries = activeGroup?.series[0];
+  if (!initialSeries) {
+    return;
+  }
+  const dataSourceRightLayer = frame.datasourceLayers[initialSeries.layer];
+  const y = dataSourceRightLayer.getOperationForColumnId(initialSeries.accessor) || null;
+  return y?.label;
+};
+
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   axis,
@@ -162,44 +180,12 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           : null;
         return defaultTitle || x?.label;
       case 'yRight':
-        const rightAxisLayers = layers?.filter(
-          (layer) =>
-            layer.yConfig &&
-            layer.yConfig.length &&
-            layer.yConfig.some(({ axisMode }) => axisMode === 'right')
-        );
-        const initialRightLayer = rightAxisLayers?.[0];
-        if (!initialRightLayer || !initialRightLayer.accessors.length) {
-          return defaultTitle;
-        }
-        const dataSourceRightLayer = frame.datasourceLayers[initialRightLayer.layerId];
-        const yRight = initialRightLayer.yConfig
-          ? dataSourceRightLayer.getOperationForColumnId(initialRightLayer.yConfig[0].forAccessor)
-          : null;
-        return defaultTitle || yRight?.label;
+        const yRight = yAxisTitle('right', layers, isHorizontal, frame);
+        return defaultTitle || yRight;
+
       case 'yLeft':
-        const leftAxisLayers = layers?.filter(
-          (layer) =>
-            !layer.yConfig ||
-            (layer.yConfig && layer.accessors.length !== layer.yConfig.length) ||
-            (layer.yConfig &&
-              layer.accessors.length === layer.yConfig.length &&
-              layer.yConfig.some(({ axisMode }) => axisMode === 'left'))
-        );
-        const initialLeftLayer = leftAxisLayers?.[0];
-        if (!initialLeftLayer || !initialLeftLayer.accessors.length) {
-          return defaultTitle;
-        }
-        const dataSourceLeftLayer = frame.datasourceLayers[initialLeftLayer.layerId];
-        const accessors = initialLeftLayer.accessors.filter((accessor) =>
-          initialLeftLayer.yConfig?.some(
-            ({ forAccessor, axisMode }) => forAccessor !== accessor || axisMode === 'left'
-          )
-        );
-        const yLeft = dataSourceLeftLayer.getOperationForColumnId(
-          accessors[0] || initialLeftLayer.accessors[0]
-        );
-        return defaultTitle || yLeft?.label;
+        const yLeft = yAxisTitle('left', layers, isHorizontal, frame);
+        return defaultTitle || yLeft;
     }
     /* We want this callback to run only if open changes its state. What we want to accomplish here is to give the user a better UX.
        By default these input fields have the axis legends. If the user changes the input text, the axis legends should also change.
