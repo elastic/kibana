@@ -69,6 +69,7 @@ const DetailHostButton = React.memo(({hasMenu, menuIsOpen, action, count, title,
       tabIndex={-1}
       data-test-subj="resolver:submenu:button"
       data-test-resolver-node-id={nodeID}
+      id={nodeID}
     >
       {count ? <EuiI18nNumber value={count} /> : ''} {title}
     </EuiButton>
@@ -193,9 +194,9 @@ const NodeSubMenuComponents = React.memo(
           buttonBorderColor={buttonBorderColor} 
           nodeID={nodeID}
         />
-        {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={menuIsOpen} aria-owns={nodeID}>
+        {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={!menuIsOpen} aria-owns={nodeID} aria-describedby={nodeID}>
           { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
-            return (<li className="item" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button role="menuitem" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
+            return (<li className="item" role="menuitem" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
           })}
         </ul>) : null}
       </>
