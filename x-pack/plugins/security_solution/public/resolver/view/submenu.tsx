@@ -47,14 +47,13 @@ export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
  * This will be the "host button" that displays the "total number of related events" and opens
  * the sumbmenu (with counts by category) when clicked.
  */
-const DetailHostButton = React.memo(
+const SubButton = React.memo(
   ({
     hasMenu,
     menuIsOpen,
     action,
     count,
     title,
-    buttonBorderColor,
     nodeID,
   }: {
     hasMenu: boolean;
@@ -62,7 +61,6 @@ const DetailHostButton = React.memo(
     action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     count?: number;
     title: string;
-    buttonBorderColor: ButtonColor;
     nodeID: string;
   }) => {
     const hasIcon = hasMenu ?? false;
@@ -198,13 +196,12 @@ const NodeSubMenuComponents = React.memo(
 
     return (
       <>
-        <DetailHostButton
+        <SubButton
           hasMenu={true}
           menuIsOpen={menuIsOpen}
           action={handleMenuOpenClick}
           count={count}
           title={menuTitle}
-          buttonBorderColor={buttonBorderColor}
           nodeID={nodeID}
         />
         {menuIsOpen ? (
