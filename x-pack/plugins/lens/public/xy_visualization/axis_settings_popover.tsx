@@ -19,6 +19,7 @@ import { LayerConfig, AxesSettingsConfig } from './types';
 import { FramePublicAPI } from '../types';
 import { ToolbarPopover } from '../shared_components';
 import { ToolbarButtonProps } from '../toolbar_button';
+import { isHorizontalChart } from './state_helpers';
 // @ts-ignore
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 // @ts-ignore
@@ -28,10 +29,6 @@ import { EuiIconAxisRight } from '../assets/axis_right';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 export interface AxisSettingsPopoverProps {
-  /**
-   * Determines the popover title
-   */
-  popoverTitle: string;
   /**
    * Determines the axis
    */
@@ -82,31 +79,53 @@ export interface AxisSettingsPopoverProps {
   toggleAxisTitleVisibility: (axis: AxesSettingsConfigKeys, checked: boolean) => void;
 }
 const popoverConfig = (
-  axis: AxesSettingsConfigKeys
-): { icon: IconType; groupPosition: ToolbarButtonProps['groupPosition'] } => {
+  axis: AxesSettingsConfigKeys,
+  isHorizontal: boolean
+): { icon: IconType; groupPosition: ToolbarButtonProps['groupPosition']; popoverTitle: string } => {
   switch (axis) {
     case 'yLeft':
       return {
-        icon: EuiIconAxisLeft,
+        icon: isHorizontal ? EuiIconAxisBottom : EuiIconAxisLeft,
         groupPosition: 'left',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+              defaultMessage: 'Bottom axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+              defaultMessage: 'Left axis',
+            }),
       };
     case 'yRight':
       return {
-        icon: EuiIconAxisRight,
+        // should be top, missing icon
+        icon: isHorizontal ? EuiIconAxisBottom : EuiIconAxisRight,
         groupPosition: 'right',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.topAxisLabel', {
+              defaultMessage: 'Top axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
+              defaultMessage: 'Right axis',
+            }),
       };
     case 'x':
     default:
       return {
-        icon: EuiIconAxisBottom,
+        icon: isHorizontal ? EuiIconAxisLeft : EuiIconAxisBottom,
         groupPosition: 'center',
+        popoverTitle: isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
+              defaultMessage: 'Left axis',
+            })
+          : i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
+              defaultMessage: 'Bottom axis',
+            }),
       };
   }
 };
 
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
-  popoverTitle,
   axis,
   axisTitle,
   frame,
@@ -121,6 +140,9 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
 }) => {
   const [popoversOpenState, setPopoversOpenState] = useState(false);
   const [title, setTitle] = useState<string | undefined>(axisTitle);
+
+  const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
+  const config = popoverConfig(axis, isHorizontal);
 
   const getAxisTitle = useCallback(() => {
     const defaultTitle = axisTitle;
@@ -196,10 +218,10 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   };
   return (
     <ToolbarPopover
-      title={popoverTitle}
+      title={config.popoverTitle}
       handlePopoverState={setPopoversOpenState}
-      type={popoverConfig(axis).icon}
-      groupPosition={popoverConfig(axis).groupPosition}
+      type={config.icon}
+      groupPosition={config.groupPosition}
       isDisabled={isDisabled}
     >
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">

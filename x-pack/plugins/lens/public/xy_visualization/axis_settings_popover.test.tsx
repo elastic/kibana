@@ -30,7 +30,6 @@ describe('Axes Settings', () => {
           accessors: ['bar'],
         },
       ],
-      popoverTitle: 'Bottom Axes',
       updateTitleState: jest.fn(),
       axisTitle: 'My custom X axis title',
       axis: 'x',

@@ -274,9 +274,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <AxisSettingsPopover
-            popoverTitle={i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
-              defaultMessage: 'Left axis',
-            })}
             axis="yLeft"
             layers={state?.layers}
             frame={frame}
@@ -293,9 +290,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
           />
           <AxisSettingsPopover
-            popoverTitle={i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
-              defaultMessage: 'Bottom axis',
-            })}
             axis="x"
             layers={state?.layers}
             frame={frame}
@@ -316,9 +310,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             delay="long"
           >
             <AxisSettingsPopover
-              popoverTitle={i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
-                defaultMessage: 'Right axis',
-              })}
               axis="yRight"
               layers={state?.layers}
               frame={frame}
