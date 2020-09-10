@@ -88,7 +88,7 @@ export const FilterPopover = ({
   );
 };
 
-const QueryInput = ({
+export const QueryInput = ({
   value,
   onChange,
   indexPattern,
@@ -138,13 +138,12 @@ const QueryInput = ({
               values: { example: 'method:GET OR status:404' },
             })
       }
-      dataTestSubj="lns-indexPattern-searchQueryInput"
       languageSwitcherPopoverAnchorPosition="rightDown"
     />
   );
 };
 
-const LabelInput = ({
+export const LabelInput = ({
   value,
   onChange,
   placeholder,
