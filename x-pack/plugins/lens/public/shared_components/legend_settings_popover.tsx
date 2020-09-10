@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
 
@@ -100,31 +100,17 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           defaultMessage: 'Display',
         })}
       >
-        <>
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
-              defaultMessage: 'Display',
-            })}
-            name="legendDisplay"
-            buttonSize="compressed"
-            options={legendOptions}
-            idSelected={legendOptions.find(({ value }) => value === mode)!.id}
-            onChange={onDisplayChange}
-          />
-          <EuiSpacer size="s" />
-          {renderNestedLegendSwitch && (
-            <EuiSwitch
-              compressed
-              label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-                defaultMessage: 'Nested legend',
-              })}
-              disabled={mode === 'hide'}
-              checked={!!nestedLegend}
-              onChange={onNestedLegendChange}
-            />
-          )}
-        </>
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
+            defaultMessage: 'Display',
+          })}
+          name="legendDisplay"
+          buttonSize="compressed"
+          options={legendOptions}
+          idSelected={legendOptions.find(({ value }) => value === mode)!.id}
+          onChange={onDisplayChange}
+        />
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
@@ -145,6 +131,25 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           isIconOnly
         />
       </EuiFormRow>
+      {renderNestedLegendSwitch && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
+            defaultMessage: 'Nested',
+          })}
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+              defaultMessage: 'Nested',
+            })}
+            showLabel={false}
+            disabled={mode === 'hide'}
+            checked={!!nestedLegend}
+            onChange={onNestedLegendChange}
+          />
+        </EuiFormRow>
+      )}
     </ToolbarPopover>
   );
 };

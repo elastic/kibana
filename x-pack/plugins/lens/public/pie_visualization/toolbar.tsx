@@ -92,21 +92,21 @@ const legendOptions: Array<{
     id: 'pieLegendDisplay-default',
     value: 'default',
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
-      defaultMessage: 'auto',
+      defaultMessage: 'Auto',
     }),
   },
   {
     id: 'pieLegendDisplay-show',
     value: 'show',
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
-      defaultMessage: 'show',
+      defaultMessage: 'Show',
     }),
   },
   {
     id: 'pieLegendDisplay-hide',
     value: 'hide',
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
-      defaultMessage: 'hide',
+      defaultMessage: 'Hide',
     }),
   },
 ];
