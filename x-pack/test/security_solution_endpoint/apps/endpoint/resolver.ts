@@ -23,8 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('header-page-title');
       await (await testSubjects.find('navigation-events')).click();
       await testSubjects.existOrFail('events-viewer-panel');
-      await (await testSubjects.findAll('investigate-in-resolver-button'))[0].click();
       await testSubjects.exists('investigate-in-resolver-button', { timeout: 4000 });
+      await (await testSubjects.findAll('investigate-in-resolver-button'))[0].click();
     });
 
     after(async () => {
