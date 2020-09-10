@@ -106,9 +106,7 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
-    const resolverComponentInstanceID = useSelector((state: ResolverState) =>
-      selectors.resolverComponentInstanceID(state)
-    );
+    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
@@ -120,11 +118,9 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const ariaActiveDescendant = useSelector((state: ResolverState) =>
-      selectors.ariaActiveDescendant(state)
-    );
-    const selectedNode = useSelector((state: ResolverState) => selectors.selectedNode(state));
-    const originID = useSelector((state: ResolverState) => selectors.originID(state));
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
+    const originID = useSelector(selectors.originID);
     const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
     if (nodeID === undefined) {
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
