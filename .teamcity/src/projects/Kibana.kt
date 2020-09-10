@@ -106,6 +106,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
         buildType(OssCiGroups)
         buildType(OssVisualRegression)
+        buildType(OssFirefox)
 
         subProject {
           id("CIGroups")
@@ -128,6 +129,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
         buildType(DefaultCiGroups)
         buildType(DefaultVisualRegression)
+        buildType(DefaultFirefox)
 
         subProject {
           id("Default_CIGroups")

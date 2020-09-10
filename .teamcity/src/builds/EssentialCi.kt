@@ -2,9 +2,11 @@ package builds
 
 import builds.default.DefaultBuild
 import builds.default.DefaultCiGroups
+import builds.default.DefaultFirefox
 import builds.default.DefaultVisualRegression
 import builds.oss.OssBuild
 import builds.oss.OssCiGroups
+import builds.oss.OssFirefox
 import builds.oss.OssVisualRegression
 import builds.test.AllTests
 import dependsOn
@@ -23,6 +25,8 @@ object EssentialCi : BuildType({
     DefaultVisualRegression,
     Lint,
     OssCiGroups,
-    DefaultCiGroups
+    DefaultCiGroups,
+    OssFirefox,
+    DefaultFirefox
   )
 })
