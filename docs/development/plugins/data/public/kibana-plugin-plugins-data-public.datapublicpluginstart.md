@@ -22,5 +22,5 @@ export interface DataPublicPluginStart
 |  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> | index patterns service [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |
 |  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> | query service [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |
 |  [search](./kibana-plugin-plugins-data-public.datapublicpluginstart.search.md) | <code>ISearchStart</code> | search service [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) |
-|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>DataPublicPluginStartUi</code> | prewired ui components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) |
+|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>DataPublicPluginStartUi</code> | prewired UI components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) |
 

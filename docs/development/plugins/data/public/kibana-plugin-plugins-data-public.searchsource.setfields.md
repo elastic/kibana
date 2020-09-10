@@ -4,7 +4,8 @@
 
 ## SearchSource.setFields() method
 
-internal, dont use overrides all fields with the new field array
+Internal, do not use. Overrides all search source fields with the new field array.
+
 
 <b>Signature:</b>
 

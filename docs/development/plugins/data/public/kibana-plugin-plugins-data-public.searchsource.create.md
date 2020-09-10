@@ -4,7 +4,10 @@
 
 ## SearchSource.create() method
 
-deprecated, don't use
+> Warning: This API is now obsolete.
+> 
+> Don't use.
+> 
 
 <b>Signature:</b>
 

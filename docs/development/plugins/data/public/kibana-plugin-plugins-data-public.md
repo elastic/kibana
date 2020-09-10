@@ -53,7 +53,7 @@
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) | Data plugin public Setup contract |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) | Data plugin public Start contract |
 |  [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) | utilities to generate filters from action context |
-|  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | data plugin prewired UI components |
+|  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |

@@ -4,7 +4,7 @@
 
 ## DataPublicPluginStart.ui property
 
-prewired ui components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md)
+prewired UI components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md)
 
 <b>Signature:</b>
 

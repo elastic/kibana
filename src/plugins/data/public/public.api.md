@@ -1986,6 +1986,7 @@ export type SearchRequest = Record<string, any>;
 export class SearchSource {
     // Warning: (ae-forgotten-export) The symbol "SearchSourceDependencies" needs to be exported by the entry point index.d.ts
     constructor(fields: SearchSourceFields | undefined, dependencies: SearchSourceDependencies);
+    // @deprecated (undocumented)
     create(): SearchSource;
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;

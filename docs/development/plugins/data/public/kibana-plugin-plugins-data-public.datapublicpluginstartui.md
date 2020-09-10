@@ -4,7 +4,7 @@
 
 ## DataPublicPluginStartUi interface
 
-data plugin prewired UI components
+Data plugin prewired UI components
 
 <b>Signature:</b>
 
