@@ -24,6 +24,7 @@ import {
   Rule,
   PaginationOptions,
   exportRules,
+  RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
@@ -38,11 +39,7 @@ import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
 import { GenericDownloader } from '../../../../../common/components/generic_downloader';
-import {
-  AllRulesTables,
-  RulesSortingFields,
-  SortingType,
-} from '../../../../components/rules/all_rules_tables';
+import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';

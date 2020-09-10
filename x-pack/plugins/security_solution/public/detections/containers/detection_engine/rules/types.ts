@@ -149,7 +149,7 @@ export interface FetchRulesProps {
   signal: AbortSignal;
 }
 
-export type RulesSortingFields = 'enabled' | 'updated_at' | 'name';
+export type RulesSortingFields = 'enabled' | 'updated_at' | 'name' | 'created_at';
 export interface FilterOptions {
   filter: string;
   sortField: RulesSortingFields;

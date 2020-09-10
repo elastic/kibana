@@ -20,15 +20,13 @@ import {
   RulesColumns,
   RuleStatusRowItemType,
 } from '../../../pages/detection_engine/rules/all/columns';
-import { Rule, Rules } from '../../../containers/detection_engine/rules/types';
+import { Rule, Rules, RulesSortingFields } from '../../../containers/detection_engine/rules/types';
 import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
 // after few hours of fight with typescript !!!! I lost :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
-
-export type RulesSortingFields = 'enabled' | 'updated_at' | 'name';
 
 export interface SortingType {
   sort: {
