@@ -26,7 +26,7 @@ tc_set_env FORCE_COLOR 1
 tc_set_env TEST_BROWSER_HEADLESS 1
 tc_set_env CHECKS_REPORTER_ACTIVE false # TODO
 
-tc_sent_env INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT 6104 # Any unused port is fine, used by ingest manager tests
+tc_set_env INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT 6104 # Any unused port is fine, used by ingest manager tests
 
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
