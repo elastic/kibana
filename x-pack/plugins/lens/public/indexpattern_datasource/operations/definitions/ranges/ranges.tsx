@@ -82,7 +82,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.ranges', {
     defaultMessage: 'Ranges',
   }),
-  priority: 3, // Higher than any metric
+  priority: 4, // Higher than any metric
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&
