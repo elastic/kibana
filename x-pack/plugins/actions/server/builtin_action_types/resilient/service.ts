@@ -113,10 +113,6 @@ export const createExternalService = (
     auth: { username: apiKeyId, password: apiKeySecret },
   });
 
-  const findIncidents = async (params?: Record<string, string>) => {
-    return undefined;
-  };
-
   const getIncidentViewURL = (key: string) => {
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   };
@@ -308,7 +304,6 @@ export const createExternalService = (
   };
 
   return {
-    findIncidents,
     getIncident,
     createIncident,
     updateIncident,

@@ -87,7 +87,6 @@ export type GetSeverityResponse = Array<{ id: string; name: string }>;
 
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
-  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
