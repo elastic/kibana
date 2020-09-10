@@ -281,6 +281,13 @@ export interface DataPublicPluginStart {
     };
 }
 
+// Warning: (ae-missing-release-tag) "DuplicateIndexPatternError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class DuplicateIndexPatternError extends Error {
+    constructor(message: string);
+}
+
 // @public (undocumented)
 export enum ES_FIELD_TYPES {
     // (undocumented)
