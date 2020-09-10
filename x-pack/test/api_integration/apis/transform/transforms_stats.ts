@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
+
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { generateTransformConfig } from './common';
 
@@ -18,8 +22,8 @@ export default ({ getService }: FtrProviderContext) => {
   const expected = {
     apiTransformTransforms: {
       count: 2,
-      transform1: { id: 'the-transform-1', state: 'stopped' },
-      transform2: { id: 'the-transform-2', state: 'stopped' },
+      transform1: { id: 'the-transform-1', state: TRANSFORM_STATE.STOPPED },
+      transform2: { id: 'the-transform-2', state: TRANSFORM_STATE.STOPPED },
       typeOfStats: 'object',
       typeOfCheckpointing: 'object',
     },

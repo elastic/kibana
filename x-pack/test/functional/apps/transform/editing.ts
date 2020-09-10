@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
@@ -52,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         messageText: 'updated transform.',
         row: {
-          status: 'stopped',
+          status: TRANSFORM_STATE.STOPPED,
           mode: 'batch',
           progress: '100',
         },

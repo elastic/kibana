@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+
 import { DeleteTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/delete_transforms';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
+
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { asyncForEach, generateDestIndex, generateTransformConfig } from './common';
 
@@ -46,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete transform by transformId', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: transformId, state: 'stopped' }],
+          transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -67,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 403 for unauthorized user', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: transformId, state: 'stopped' }],
+          transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         await supertest
           .post(`/api/transform/delete_transforms`)
@@ -86,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('single transform deletion with invalid transformId', function () {
       it('should return 200 with error in response if invalid transformId', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: 'invalid_transform_id', state: 'stopped' }],
+          transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -105,8 +109,8 @@ export default ({ getService }: FtrProviderContext) => {
     describe('bulk deletion', function () {
       const reqBody: DeleteTransformsRequestSchema = {
         transformsInfo: [
-          { id: 'bulk_delete_test_1', state: 'stopped' },
-          { id: 'bulk_delete_test_2', state: 'stopped' },
+          { id: 'bulk_delete_test_1', state: TRANSFORM_STATE.STOPPED },
+          { id: 'bulk_delete_test_2', state: TRANSFORM_STATE.STOPPED },
         ],
       };
       const destinationIndices = reqBody.transformsInfo.map((d) => generateDestIndex(d.id));
@@ -160,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...reqBody,
             transformsInfo: [
               ...reqBody.transformsInfo,
-              { id: invalidTransformId, state: 'stopped' },
+              { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             ],
           })
           .expect(200);
@@ -196,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete transform and destination index', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: transformId, state: 'stopped' }],
+          transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: true,
         };
         const { body } = await supertest
@@ -234,7 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete transform and destination index pattern', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: transformId, state: 'stopped' }],
+          transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: false,
           deleteDestIndexPattern: true,
         };
@@ -274,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete transform, destination index, & destination index pattern', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
-          transformsInfo: [{ id: transformId, state: 'stopped' }],
+          transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: true,
           deleteDestIndexPattern: true,
         };

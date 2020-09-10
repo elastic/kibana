@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 
 import { StartTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/start_transforms';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('string');
 
-        await transform.api.waitForTransformState(transformId, 'stopped');
+        await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
       });
     });

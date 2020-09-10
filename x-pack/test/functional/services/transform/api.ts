@@ -5,11 +5,11 @@
  */
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
 import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 import type { TransformStats } from '../../../../plugins/transform/common/types/transform_stats';
+
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -94,7 +94,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         await esSupertest
           .post(`/_transform/${transformId}/_stop?force=true&wait_for_completion`)
           .expect(200);
-        await this.waitForTransformState(transformId, 'stopped');
+        await this.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
 
         await esSupertest.delete(`/_transform/${transformId}`).expect(200);
         await this.waitForTransformNotToExist(transformId);

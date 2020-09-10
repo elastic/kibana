@@ -5,8 +5,9 @@
  */
 import expect from '@kbn/expect';
 
-import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
 import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -58,7 +59,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should stop the transform by transformId', async () => {
-        const reqBody: StopTransformsRequestSchema = [{ id: transformId, state: 'started' }];
+        const reqBody: StopTransformsRequestSchema = [
+          { id: transformId, state: TRANSFORM_STATE.STARTED },
+        ];
         const { body } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
@@ -75,9 +78,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 200 with success:false for unauthorized user', async () => {
-        await transform.api.waitForTransformStateNotToBe(transformId, 'stopped');
+        await transform.api.waitForTransformStateNotToBe(transformId, TRANSFORM_STATE.STOPPED);
 
-        const reqBody: StopTransformsRequestSchema = [{ id: transformId, state: 'started' }];
+        const reqBody: StopTransformsRequestSchema = [
+          { id: transformId, state: TRANSFORM_STATE.STARTED },
+        ];
         const { body } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
@@ -91,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('string');
 
-        await transform.api.waitForTransformStateNotToBe(transformId, 'stopped');
+        await transform.api.waitForTransformStateNotToBe(transformId, TRANSFORM_STATE.STOPPED);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
     });
@@ -99,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('single transform stop with invalid transformId', function () {
       it('should return 200 with error in response if invalid transformId', async () => {
         const reqBody: StopTransformsRequestSchema = [
-          { id: 'invalid_transform_id', state: 'started' },
+          { id: 'invalid_transform_id', state: TRANSFORM_STATE.STARTED },
         ];
         const { body } = await supertest
           .post(`/api/transform/stop_transforms`)
@@ -118,8 +123,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('bulk stop', function () {
       const reqBody: StopTransformsRequestSchema = [
-        { id: 'bulk_stop_test_1', state: 'started' },
-        { id: 'bulk_stop_test_2', state: 'started' },
+        { id: 'bulk_stop_test_1', state: TRANSFORM_STATE.STARTED },
+        { id: 'bulk_stop_test_2', state: TRANSFORM_STATE.STARTED },
       ];
       const destinationIndices = reqBody.map((d) => generateDestIndex(d.id));
 
@@ -164,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .send([
             { id: reqBody[0].id, state: reqBody[0].state },
-            { id: invalidTransformId, state: 'stopped' },
+            { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             { id: reqBody[1].id, state: reqBody[1].state },
           ])
           .expect(200);
