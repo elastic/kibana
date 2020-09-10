@@ -47,6 +47,7 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
+  pagePathGetters,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
@@ -56,6 +57,7 @@ import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
+import { APP_ID } from '../../../../../common/constants';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -403,7 +405,7 @@ export const EndpointList = () => {
                       data-test-subj="hostLink"
                       icon="logoSecurity"
                       key="hostDetailsLink"
-                      navigateAppId="securitySolution"
+                      navigateAppId={APP_ID}
                       navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
                       href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
                         item.metadata.host.hostname
@@ -414,38 +416,54 @@ export const EndpointList = () => {
                         defaultMessage="View Host Details"
                       />
                     </EuiContextMenuItemNavByRouter>,
-                    <EuiContextMenuItem icon="logoObservability" key="agentConfigLink">
-                      <LinkToApp
-                        data-test-subj="agentPolicyLink"
-                        appId="ingestManager"
-                        appPath={`#/policies/${
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentConfigLink"
+                      data-test-subj="agentPolicyLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#/policies/${
                           agentPolicies[item.metadata.Endpoint.policy.applied.id]
-                        }`}
-                        href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
-                          agentPolicies[item.metadata.Endpoint.policy.applied.id]
-                        }`}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
-                          defaultMessage="View Agent Policy"
-                        />
-                      </LinkToApp>
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem icon="logoObservability" key="agentDetailsLink">
-                      <LinkToApp
-                        data-test-subj="agentDetailsLink"
-                        appId="ingestManager"
-                        appPath={`#/fleet/agents/${item.metadata.elastic.agent.id}`}
-                        href={`${services?.application?.getUrlForApp(
-                          'ingestManager'
-                        )}#/fleet/agents/${item.metadata.elastic.agent.id}`}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.list.actions.agentDetails"
-                          defaultMessage="View Agent Details"
-                        />
-                      </LinkToApp>
-                    </EuiContextMenuItem>,
+                        }`,
+                      }}
+                      href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
+                        agentPolicies[item.metadata.Endpoint.policy.applied.id]
+                      }`}
+                      disabled={
+                        agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
+                      }
+                      // href={`${services?.application?.getUrlForApp(
+                      //  'ingestManager'
+                      // )}#${pagePathGetters.policy_details({
+                      // policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                      // })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
+                        defaultMessage="View Agent Policy"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentDetailsLink"
+                      data-test-subj="agentDetailsLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#${pagePathGetters.fleet_agent_details({
+                          agentId: item.metadata.elastic.agent.id,
+                        })}`,
+                      }}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_details({
+                        agentId: item.metadata.elastic.agent.id,
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentDetails"
+                        defaultMessage="View Agent Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
                   ]}
                 />
               );

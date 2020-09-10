@@ -50,9 +50,9 @@ export interface EndpointState {
   selectedPolicyId?: string;
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** tracks the list of policies IDs used in Host metadata that may no longer exist */
+  /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
-  /** List of Agent Policies Ids*/
+  /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
   agentPolicies: PolicyIds['agentPolicy'];
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
