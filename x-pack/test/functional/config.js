@@ -324,6 +324,7 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
@@ -338,20 +339,6 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
-<<<<<<< HEAD
-        global_remote_cluster_role: {
-          kibana: [
-            {
-              feature: {
-                advancedSettings: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-
-=======
->>>>>>> 0207f82e801e70641f9b1b820e0425187aae0b22
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {

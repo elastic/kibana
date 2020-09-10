@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     before(async () => {
-      await security.testUser.setRoles(['global_remote_cluster_role']);
+      await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('remoteClusters');
     });
 
