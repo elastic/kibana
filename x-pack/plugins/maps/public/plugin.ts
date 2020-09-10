@@ -123,7 +123,6 @@ export class MapsPlugin
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      // @ts-expect-error
       async mount(context, params) {
         const { renderApp } = await lazyLoadMapModules();
         return renderApp(context, params);

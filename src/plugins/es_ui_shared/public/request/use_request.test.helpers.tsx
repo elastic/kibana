@@ -106,7 +106,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     };
 
     const TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
-      const { isInitialRequest, isLoading, error, data, sendRequest } = useRequest(
+      const { isInitialRequest, isLoading, error, data, resendRequest } = useRequest(
         httpClient as HttpSetup,
         requestConfig
       );
@@ -115,7 +115,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
       hookResult.isLoading = isLoading;
       hookResult.error = error;
       hookResult.data = data;
-      hookResult.sendRequest = sendRequest;
+      hookResult.resendRequest = resendRequest;
 
       return null;
     };
