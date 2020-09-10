@@ -36,8 +36,8 @@ import {
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { AttributeService } from '../../../dashboard/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
@@ -69,15 +69,6 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
     const indexPattern = vis.data.indexPattern;
     const indexPatterns = indexPattern ? [indexPattern] : [];
     const editable = getCapabilities().visualize.save as boolean;
-
-    if (!attributeService) {
-      const dashboard = deps.start().plugins.dashboard;
-      attributeService = await dashboard!.getAttributeService<
-        VisualizeSavedObjectAttributes,
-        VisualizeByValueInput,
-        VisualizeByReferenceInput
-      >('visualization');
-    }
 
     return new VisualizeEmbeddable(
       getTimeFilter(),

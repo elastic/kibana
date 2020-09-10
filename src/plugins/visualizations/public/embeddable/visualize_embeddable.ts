@@ -110,7 +110,7 @@ export class VisualizeEmbeddable
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService: AttributeService<
+  private attributeService?: AttributeService<
     VisualizeSavedObjectAttributes,
     VisualizeByValueInput,
     VisualizeByReferenceInput
@@ -121,7 +121,7 @@ export class VisualizeEmbeddable
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService: AttributeService<
+    attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
       VisualizeByReferenceInput
@@ -414,6 +414,9 @@ export class VisualizeEmbeddable
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
     return this.attributeService.inputIsRefType(input as VisualizeByReferenceInput);
   };
 
@@ -429,65 +432,30 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const savedVis: VisSavedObject = await this.savedVisualizationsLoader?.get({});
+    const savedVis = await this.savedVisualizationsLoader?.get({});
     if (!savedVis) {
-      throw new Error('No Saved Vis');
+      throw new Error('Error creating a saved vis object');
     }
-    return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
-      const onSave = async (
-        type: string,
-        attributes: VisualizeSavedObjectAttributes
-      ): Promise<{ id: string }> => {
-        try {
-          const { title, vis } = attributes;
-          const saveOptions = {
-            confirmOverwrite: false,
-            returnToOrigin: true,
-          };
-          savedVis.title = title;
-          savedVis.copyOnSave = false;
-          savedVis.description = '';
-          savedVis.searchSourceFields = vis?.data.searchSource?.getSerializedFields();
-          const serializedVis = ((vis as unknown) as Vis).serialize();
-          const { params, data } = serializedVis;
-          savedVis.visState = {
-            title,
-            type: serializedVis.type,
-            params,
-            aggs: data.aggs,
-          };
-          if (vis) {
-            savedVis.uiStateJSON = vis.uiState.toString();
-          }
-          const id = await savedVis.save(saveOptions);
-          resolve({ savedObjectId: id, id: this.id });
-          return { id };
-        } catch (error) {
-          reject(error);
-          return { id: '' };
-        }
-      };
-      const saveModalTitle = this.getTitle()
-        ? this.getTitle()
-        : i18n.translate('visualizations.embeddable.placeholderTitle', {
-            defaultMessage: 'Placeholder Title',
-          });
-      // @ts-ignore
-      const attributes: VisualizeSavedObjectAttributes = {
-        savedVis,
-        vis: this.vis,
-        title: this.vis.title,
-      };
-      this.attributeService.setOptions({
-        customSaveMethod: onSave,
-      });
-      return this.attributeService.getInputAsRefType(
-        {
-          id: this.id,
-          attributes,
-        },
-        { showSaveModal: true, saveModalTitle }
-      );
-    });
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
+    const saveModalTitle = this.getTitle()
+      ? this.getTitle()
+      : i18n.translate('visualizations.embeddable.placeholderTitle', {
+          defaultMessage: 'Placeholder Title',
+        });
+    // @ts-ignore
+    const attributes: VisualizeSavedObjectAttributes = {
+      savedVis,
+      vis: this.vis,
+      title: this.vis.title,
+    };
+    return this.attributeService.getInputAsRefType(
+      {
+        id: this.id,
+        attributes,
+      },
+      { showSaveModal: true, saveModalTitle }
+    );
   };
 }

@@ -226,8 +226,4 @@ export class AttributeService<
       }
     });
   };
-
-  public setOptions = (options: AttributeServiceOptions<SavedObjectAttributes>) => {
-    this.options = options;
-  };
 }

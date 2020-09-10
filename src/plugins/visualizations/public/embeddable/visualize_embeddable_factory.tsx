@@ -129,7 +129,7 @@ export class VisualizeEmbeddableFactory
           VisualizeSavedObjectAttributes,
           VisualizeByValueInput,
           VisualizeByReferenceInput
-        >(this.type);
+        >(this.type, { customSaveMethod: this.onSave });
     }
     return this.attributeService!;
   }
@@ -180,6 +180,42 @@ export class VisualizeEmbeddableFactory
         outsideVisualizeApp: true,
       });
       return undefined;
+    }
+  }
+
+  private async onSave(
+    type: string,
+    attributes: VisualizeSavedObjectAttributes
+  ): Promise<{ id: string }> {
+    try {
+      const { title, savedVis } = attributes;
+      const visObj = attributes.vis;
+      if (!savedVis) {
+        throw new Error('No Saved Vis');
+      }
+      const saveOptions = {
+        confirmOverwrite: false,
+        returnToOrigin: true,
+      };
+      savedVis.title = title;
+      savedVis.copyOnSave = false;
+      savedVis.description = '';
+      savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
+      const serializedVis = ((visObj as unknown) as Vis).serialize();
+      const { params, data } = serializedVis;
+      savedVis.visState = {
+        title,
+        type: serializedVis.type,
+        params,
+        aggs: data.aggs,
+      };
+      if (visObj) {
+        savedVis.uiStateJSON = visObj?.uiState.toString();
+      }
+      const id = await savedVis.save(saveOptions);
+      return { id };
+    } catch (error) {
+      return { id: '' };
     }
   }
 }
