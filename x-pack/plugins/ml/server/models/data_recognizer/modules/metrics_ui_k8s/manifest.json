@@ -1,5 +1,5 @@
 {
-    "id": "metrics_k8s",
+    "id": "metrics_ui_k8s",
     "title": "Metrics Kubernetes",
     "description": "",
     "type": "Metricbeat Data",

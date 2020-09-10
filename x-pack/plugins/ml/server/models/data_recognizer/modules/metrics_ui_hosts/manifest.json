@@ -1,5 +1,5 @@
 {
-    "id": "metrics_hosts",
+    "id": "metrics_ui_hosts",
     "title": "Metrics Hosts",
     "description": "",
     "type": "Metricbeat Data",
