@@ -17,5 +17,5 @@ export interface OnPreResponseToolkit
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [next](./kibana-plugin-core-server.onpreresponsetoolkit.next.md) | <code>(responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult</code> | To pass request to the next handler |
-|  [redirect](./kibana-plugin-core-server.onpreresponsetoolkit.redirect.md) | <code>(uri?: string &#124; undefined) =&gt; OnPreResponseResult</code> |  |
+|  [render](./kibana-plugin-core-server.onpreresponsetoolkit.render.md) | <code>(html: string) =&gt; OnPreResponseResult</code> |  |
 

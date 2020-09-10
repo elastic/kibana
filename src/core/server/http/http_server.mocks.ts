@@ -175,7 +175,7 @@ type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreR
 
 const createToolkitMock = (): ToolkitMock => {
   return {
-    redirect: jest.fn(),
+    render: jest.fn(),
     next: jest.fn(),
     rewriteUrl: jest.fn(),
   };

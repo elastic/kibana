@@ -45,8 +45,11 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const expectRbacForbiddenResponse = (resp: { [key: string]: any }) => {
-    expect(resp.headers.location).to.eql('/security/reset_session?next=%2Fapi%2Fspaces%2Fspace');
-    expect(resp.body).to.eql({});
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Unauthorized to create spaces',
+    });
   };
 
   const expectReservedSpecifiedResult = (resp: { [key: string]: any }) => {

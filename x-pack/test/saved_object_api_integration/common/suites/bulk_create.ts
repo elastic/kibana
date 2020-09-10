@@ -45,11 +45,11 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
   const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
-    statusCode: 200 | 302,
+    statusCode: 200 | 403,
     user?: TestUser
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 302) {
+    if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
       await expectForbidden(types)(response);
     } else {
@@ -89,7 +89,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     }
   ): BulkCreateTestDefinition[] => {
     const cases = Array.isArray(testCases) ? testCases : [testCases];
-    const responseStatusCode = forbidden ? 302 : 200;
+    const responseStatusCode = forbidden ? 403 : 200;
     if (!options?.singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
@@ -132,22 +132,12 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
           const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
           const query = test.overwrite ? '?overwrite=true' : '';
-          const url = `${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create${query}`;
-
-          let assertion = supertest
-            .post(url)
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create${query}`)
             .auth(user?.username, user?.password)
             .send(requestBody)
-            .expect(test.responseStatusCode);
-
-          if (test.responseStatusCode === 302) {
-            assertion = assertion.expect(
-              'Location',
-              `/security/reset_session?next=${encodeURIComponent(url)}`
-            );
-          }
-
-          await assertion.then(test.responseBody);
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
       }
     });

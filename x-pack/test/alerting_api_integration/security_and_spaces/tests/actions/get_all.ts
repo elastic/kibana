@@ -47,11 +47,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(302);
-              expect(response.headers.location).to.eql(
-                '/security/reset_session?next=%2Fapi%2Factions'
-              );
-              expect(response.body).to.eql({});
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
@@ -153,11 +154,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(302);
-              expect(response.headers.location).to.eql(
-                '/security/reset_session?next=%2Fapi%2Factions'
-              );
-              expect(response.body).to.eql({});
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
@@ -237,11 +239,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(302);
-              expect(response.headers.location).to.eql(
-                '/security/reset_session?next=%2Fapi%2Factions'
-              );
-              expect(response.body).to.eql({});
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':

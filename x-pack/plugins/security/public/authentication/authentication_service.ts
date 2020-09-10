@@ -18,7 +18,6 @@ import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { loggedOutApp } from './logged_out';
 import { overwrittenSessionApp } from './overwritten_session';
-import { resetSessionApp } from './reset_session';
 import { captureURLApp } from './capture_url';
 
 interface SetupParams {
@@ -62,7 +61,6 @@ export class AuthenticationService {
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });
     overwrittenSessionApp.create({ application, authc: { getCurrentUser }, getStartServices });
-    resetSessionApp.create({ application, getStartServices });
 
     return { getCurrentUser, areAPIKeysEnabled };
   }

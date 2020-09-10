@@ -6,8 +6,13 @@
 
 import querystring from 'querystring';
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Subscription, Observable } from 'rxjs';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
+
 import {
   LoggerFactory,
   KibanaRequest,
@@ -46,6 +51,7 @@ import { SecurityLicense } from '../../common/licensing';
 import { CheckPrivilegesWithRequest } from './types';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { canRedirectRequest } from '../authentication';
+import { ResetSessionPage } from './reset_session_page';
 import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
@@ -54,6 +60,7 @@ export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
+  buildNumber: number;
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
   clusterClient: ILegacyClusterClient;
@@ -92,6 +99,7 @@ export class AuthorizationService {
     http,
     capabilities,
     packageVersion,
+    buildNumber,
     clusterClient,
     license,
     loggers,
@@ -159,10 +167,30 @@ export class AuthorizationService {
 
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
-        const next = `${http.basePath.get(request)}${request.url.path}`;
-        return toolkit.redirect(
-          http.basePath.prepend(`/security/reset_session?${querystring.stringify({ next })}`)
+        const basePath = http.basePath.get(request);
+        const next = `${basePath}${request.url.path}`;
+        const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
+
+        const logoutUrl = http.basePath.prepend(
+          `/api/security/logout?${querystring.stringify({ next })}`
         );
+        const styleSheetPaths = [
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+          `${basePath}/ui/legacy_light_theme.css`,
+        ];
+        const uiPublicUrl = `${basePath}/ui`;
+
+        const body = renderToStaticMarkup(
+          <ResetSessionPage
+            logoutUrl={logoutUrl}
+            styleSheetPaths={styleSheetPaths}
+            uiPublicUrl={uiPublicUrl}
+          />
+        );
+
+        return toolkit.render(body);
       }
       return toolkit.next();
     });

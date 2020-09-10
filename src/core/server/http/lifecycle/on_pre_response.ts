@@ -24,13 +24,14 @@ import { Logger } from '../../logging';
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
 
 enum ResultType {
-  redirect = 'redirect',
+  render = 'render',
   next = 'next',
 }
 
-interface Redirect {
-  type: ResultType.redirect;
-  uri?: string | undefined;
+interface Render {
+  type: ResultType.render;
+  body: string;
+  statusCode?: number | undefined;
 }
 
 interface Next {
@@ -41,7 +42,7 @@ interface Next {
 /**
  * @internal
  */
-type OnPreResponseResult = Redirect | Next;
+type OnPreResponseResult = Render | Next;
 
 /**
  * Additional data to extend a response.
@@ -61,11 +62,11 @@ export interface OnPreResponseInfo {
 }
 
 const preResponseResult = {
-  redirect(uri?: string | undefined): OnPreResponseResult {
-    return { type: ResultType.redirect, uri };
+  render(body: string, statusCode?: number | undefined): OnPreResponseResult {
+    return { type: ResultType.render, body, statusCode };
   },
-  isRedirect(result: OnPreResponseResult): result is Redirect {
-    return result && result.type === ResultType.redirect;
+  isRender(result: OnPreResponseResult): result is Render {
+    return result && result.type === ResultType.render;
   },
   next(responseExtensions?: OnPreResponseExtensions): OnPreResponseResult {
     return { type: ResultType.next, headers: responseExtensions?.headers };
@@ -80,13 +81,13 @@ const preResponseResult = {
  * @public
  */
 export interface OnPreResponseToolkit {
-  redirect: (uri?: string | undefined) => OnPreResponseResult;
+  render: (html: string) => OnPreResponseResult;
   /** To pass request to the next handler */
   next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
 }
 
 const toolkit: OnPreResponseToolkit = {
-  redirect: preResponseResult.redirect,
+  render: preResponseResult.render,
   next: preResponseResult.next,
 };
 
@@ -137,8 +138,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
               }
             }
           }
-        } else if (preResponseResult.isRedirect(result)) {
-          return responseToolkit.redirect(result.uri);
+        } else if (preResponseResult.isRender(result)) {
+          return responseToolkit.response(result.body).code(result.statusCode || statusCode);
         } else {
           throw new Error(
             `Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: ${result}.`
