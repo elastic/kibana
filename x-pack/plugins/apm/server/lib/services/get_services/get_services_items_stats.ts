@@ -70,7 +70,7 @@ export const getTransactionDurationAverages = async ({
                   field: TRANSACTION_DURATION,
                 },
               },
-              over_time: {
+              timeseries: {
                 date_histogram: getDateHistogramOpts(start, end),
                 aggs: {
                   average: {
@@ -97,7 +97,7 @@ export const getTransactionDurationAverages = async ({
     serviceName: serviceBucket.key as string,
     avgResponseTime: {
       value: serviceBucket.average.value,
-      over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
+      timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => ({
         x: dateBucket.key,
         y: dateBucket.average.value,
       })),
@@ -173,7 +173,7 @@ export const getTransactionRates = async ({
               size: MAX_NUMBER_OF_SERVICES,
             },
             aggs: {
-              over_time: {
+              timeseries: {
                 date_histogram: getDateHistogramOpts(start, end),
               },
             },
@@ -197,7 +197,7 @@ export const getTransactionRates = async ({
       serviceName: serviceBucket.key as string,
       transactionsPerMinute: {
         value: transactionsPerMinute,
-        over_time: serviceBucket.over_time.buckets.map((dateBucket) => ({
+        timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key,
           y: dateBucket.doc_count / deltaAsMinutes,
         })),
@@ -245,7 +245,7 @@ export const getTransactionErrorRates = async ({
             },
             aggs: {
               outcomes,
-              over_time: {
+              timeseries: {
                 date_histogram: getDateHistogramOpts(start, end),
                 aggs: {
                   outcomes,
@@ -287,7 +287,7 @@ export const getTransactionErrorRates = async ({
       serviceName: serviceBucket.key as string,
       transactionErrorRate: {
         value: transactionErrorRate,
-        over_time: serviceBucket.over_time.buckets.map((dateBucket) => {
+        timeseries: serviceBucket.timeseries.buckets.map((dateBucket) => {
           return {
             x: dateBucket.key,
             y: calculateTransactionErrorPercentage(dateBucket.outcomes),

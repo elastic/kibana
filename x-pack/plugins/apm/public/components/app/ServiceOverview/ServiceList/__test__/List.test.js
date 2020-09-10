@@ -31,15 +31,15 @@ describe('ServiceOverview -> List', () => {
       agentName: 'python',
       transactionsPerMinute: {
         value: 86.93333333333334,
-        over_time: [],
+        timeseries: [],
       },
       errorsPerMinute: {
         value: 12.6,
-        over_time: [],
+        timeseries: [],
       },
       avgResponseTime: {
         value: 91535.42944785276,
-        over_time: [],
+        timeseries: [],
       },
       environments: ['test'],
     };

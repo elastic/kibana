@@ -6,9 +6,39 @@
 
 import expect from '@kbn/expect';
 import * as t from 'io-ts';
+import { isEmpty } from 'lodash';
+import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getValueOrThrow } from '../../../../../plugins/apm/common/utils/get_value_or_throw';
 import archives_metadata from '../../archives_metadata';
+
+const metricType = t.strict({
+  value: t.number,
+  timeseries: t.array(
+    t.type({
+      x: t.number,
+      y: t.union([t.number, t.null]),
+    })
+  ),
+});
+
+const serviceType = t.strict({
+  serviceName: t.string,
+  agentName: t.string,
+  transactionsPerMinute: metricType,
+  avgResponseTime: metricType,
+  // the RUM service will not have transaction error data
+  transactionErrorRate: t.union([metricType, t.undefined]),
+  environments: t.array(t.string),
+  // basic license should not have anomaly scores
+  severity: t.undefined,
+});
+
+const responseType = t.type({
+  items: t.array(serviceType),
+  hasHistoricalData: t.literal(true),
+  hasLegacyData: t.literal(false),
+});
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -16,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const archiveName = 'apm_8.0.0';
 
-  const range = archives_metadata['apm_8.0.0'];
+  const range = archives_metadata[archiveName];
 
   // url parameters
   const start = encodeURIComponent(range.start);
@@ -40,55 +70,51 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
 
-      it('returns a list of services', async () => {
-        const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+      describe('and fetching a list of services', () => {
+        let response: PromiseReturnType<typeof supertest.get>;
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          );
+        });
 
-        expect(response.status).to.eql(200, 'Response status should be 200');
+        it('the response is successful', () => {
+          expect(response.status).to.eql(200);
+        });
 
-        const metricType = t.strict({
-          value: t.number,
-          over_time: t.array(
-            t.type({
-              x: t.number,
-              y: t.union([t.number, t.null]),
+        it('the response outline matches the shape we expect', () => {
+          expect(() => {
+            getValueOrThrow(responseType, response.body);
+          }).not.throwError();
+        });
+
+        it(`RUM services don't report any transaction error rates`, () => {
+          // RUM transactions don't have event.outcome set,
+          // so they should not have an error rate
+
+          const data = getValueOrThrow(responseType, response.body);
+
+          const rumServices = data.items.filter((item) => item.agentName === 'rum-js');
+
+          expect(rumServices.length).to.be.greaterThan(0);
+
+          expect(rumServices.every((item) => isEmpty(item.transactionErrorRate?.value)));
+        });
+
+        it('non-RUM services all report transaction error rates', () => {
+          const data = getValueOrThrow(responseType, response.body);
+
+          const nonRumServices = data.items.filter((item) => item.agentName !== 'rum-js');
+
+          expect(
+            nonRumServices.every((item) => {
+              return (
+                typeof item.transactionErrorRate?.value === 'number' &&
+                item.transactionErrorRate.timeseries.length > 0
+              );
             })
-          ),
+          ).to.be(true);
         });
-
-        const serviceType = t.strict({
-          serviceName: t.string,
-          agentName: t.string,
-          transactionsPerMinute: metricType,
-          avgResponseTime: metricType,
-          // the RUM service will not have transaction error data
-          transactionErrorRate: t.union([metricType, t.undefined]),
-          environments: t.array(t.string),
-          // basic license should not have anomaly scores
-          severity: t.undefined,
-        });
-
-        const responseType = t.type({
-          items: t.array(serviceType),
-          hasHistoricalData: t.literal(true),
-          hasLegacyData: t.literal(false),
-        });
-
-        const data = getValueOrThrow(responseType, response.body);
-
-        const rumService = data.items.find((item) => item.agentName === 'rum-js');
-
-        // RUM transactions don't have event.outcome set,
-        // so they should not have an error rate
-        expect(rumService!.transactionErrorRate).to.be(undefined);
-
-        const nonRumServices = data.items.filter((item) => item.agentName !== 'rum-js');
-
-        // All non-RUM services should report an error rate
-        expect(
-          nonRumServices.every((item) => typeof item.transactionErrorRate?.value === 'number')
-        ).to.be(true);
       });
     });
   });

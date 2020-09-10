@@ -111,7 +111,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     dataType: 'number',
     render: (_, { avgResponseTime }) => (
       <ServiceListMetric
-        series={avgResponseTime?.over_time}
+        series={avgResponseTime?.timeseries}
         color="euiColorVis1"
         valueLabel={asMillisecondDuration(avgResponseTime?.value || 0)}
       />
@@ -131,7 +131,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
     dataType: 'number',
     render: (_, { transactionsPerMinute }) => (
       <ServiceListMetric
-        series={transactionsPerMinute?.over_time}
+        series={transactionsPerMinute?.timeseries}
         color="euiColorVis0"
         valueLabel={`${formatNumber(
           transactionsPerMinute?.value || 0
@@ -161,7 +161,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
 
       return (
         <ServiceListMetric
-          series={transactionErrorRate?.over_time}
+          series={transactionErrorRate?.timeseries}
           color="euiColorVis7"
           valueLabel={valueLabel}
         />

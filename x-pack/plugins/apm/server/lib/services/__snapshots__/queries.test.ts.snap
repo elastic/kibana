@@ -105,7 +105,7 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
-            "over_time": Object {
+            "timeseries": Object {
               "aggs": Object {
                 "average": Object {
                   "avg": Object {
@@ -213,7 +213,7 @@ Array [
       "aggs": Object {
         "services": Object {
           "aggs": Object {
-            "over_time": Object {
+            "timeseries": Object {
               "date_histogram": Object {
                 "extended_bounds": Object {
                   "max": 1528977600000,
@@ -269,7 +269,7 @@ Array [
                 "field": "event.outcome",
               },
             },
-            "over_time": Object {
+            "timeseries": Object {
               "aggs": Object {
                 "outcomes": Object {
                   "terms": Object {
