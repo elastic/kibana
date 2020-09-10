@@ -46,13 +46,16 @@ export const createLogEntryAnomaliesQuery = (
     ...createDatasetsFilters(datasets),
   ];
 
-  const sourceFields = [
+  const fields = [
     'job_id',
     'record_score',
     'typical',
     'actual',
     'partition_field_value',
-    'timestamp',
+    {
+      field: 'timestamp',
+      format: 'epoch_millis',
+    },
     'bucket_span',
     'by_field_value',
   ];
@@ -75,7 +78,8 @@ export const createLogEntryAnomaliesQuery = (
       search_after: queryCursor,
       sort: sortOptions,
       size: pageSize,
-      _source: sourceFields,
+      _source: false,
+      fields,
     },
   };
 
@@ -84,18 +88,18 @@ export const createLogEntryAnomaliesQuery = (
 
 export const logEntryAnomalyHitRT = rt.type({
   _id: rt.string,
-  _source: rt.intersection([
+  fields: rt.intersection([
     rt.type({
-      job_id: rt.string,
-      record_score: rt.number,
+      job_id: rt.array(rt.string),
+      record_score: rt.array(rt.number),
       typical: rt.array(rt.number),
       actual: rt.array(rt.number),
-      partition_field_value: rt.string,
-      bucket_span: rt.number,
-      timestamp: rt.number,
+      partition_field_value: rt.array(rt.string),
+      bucket_span: rt.array(rt.number),
+      timestamp: rt.array(rt.string),
     }),
     rt.partial({
-      by_field_value: rt.string,
+      by_field_value: rt.array(rt.string),
     }),
   ]),
   sort: rt.tuple([rt.union([rt.string, rt.number]), rt.union([rt.string, rt.number])]),

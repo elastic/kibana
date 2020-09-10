@@ -262,18 +262,18 @@ async function fetchLogEntryAnomalies(
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
-    } = result._source;
+    } = result.fields;
 
     return {
       id: result._id,
-      anomalyScore,
-      dataset,
+      anomalyScore: anomalyScore[0],
+      dataset: dataset[0],
       typical: typical[0],
       actual: actual[0],
-      jobId: job_id,
-      startTime: anomalyStartTime,
-      duration: duration * 1000,
-      categoryId,
+      jobId: job_id[0],
+      startTime: parseInt(anomalyStartTime[0], 10),
+      duration: duration[0] * 1000,
+      categoryId: categoryId?.[0],
     };
   });
 
