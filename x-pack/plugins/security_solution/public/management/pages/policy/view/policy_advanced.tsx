@@ -26,19 +26,19 @@ import { AdvancedOSes, OS } from '../types';
 function setAgain(obj: Record<string, unknown>, value: string, path: string[]) {
   // console.log("path.length: ", path.length);
   let whatever = obj;
-  while (path.length > 1) {
-    whatever = whatever[path.shift()!] as Record<string, unknown>;
-    // console.log("whatever: ", whatever);
+  for (let i = 0; i < path.length - 1; i++) {
+    whatever = whatever[path[i]] as Record<string, unknown>;
   }
-  whatever[path[0]] = value;
+  whatever[path[path.length - 1]] = value;
 }
 
 function getValue(obj: Record<string, unknown>, path: string[]) {
   let whatever = obj;
-  while (path.length > 1) {
-    whatever = whatever[path.shift()!] as Record<string, unknown>;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    whatever = whatever[path[i]] as Record<string, unknown>;
   }
-  return whatever[path[0]];
+  return whatever[path[path.length - 1]];
 }
 
 export const PolicyAdvanced = React.memo(({ configPath }: { configPath: string[] }) => {
@@ -47,7 +47,7 @@ export const PolicyAdvanced = React.memo(({ configPath }: { configPath: string[]
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   // console.log(policyDetailsConfig);
   const OSes: Immutable<AdvancedOSes[]> = [OS.windows, OS.linux, OS.mac];
-
+  // console.log("configPath: ", configPath);
   const onChange = useCallback(
     (event) => {
       // console.log(event.target.value)
@@ -75,7 +75,10 @@ export const PolicyAdvanced = React.memo(({ configPath }: { configPath: string[]
     <>
       <EuiText>
         <h1>
-          <FormattedMessage id="xpack.securitySolution.policyAdvanced.field" defaultMessage="hi!" />
+          <FormattedMessage
+            id="xpack.securitySolution.policyAdvanced.field"
+            defaultMessage={configPath[configPath.length - 1]}
+          />
         </h1>
       </EuiText>
       <EuiFieldText value={value as string} onChange={onChange} />
