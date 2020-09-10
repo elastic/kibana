@@ -40,12 +40,12 @@ interface Props {
 
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
-
+  const { serviceName } = alertParams;
   const { urlParams } = useUrlParams();
 
   const transactionTypes = useServiceTransactionTypes(urlParams);
 
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
   if (!transactionTypes.length) {

@@ -17,7 +17,15 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { cacheGet, cacheSet, cacheHas, getArchiveLocation, setArchiveLocation } from './cache';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDelete,
+  cacheHas,
+  getArchiveLocation,
+  setArchiveLocation,
+  deleteArchiveLocation,
+} from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
@@ -241,3 +249,17 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
+
+export const deletePackageCache = (name: string, version: string, paths: string[]) => {
+  const archiveLocation = getArchiveLocation(name, version);
+  if (archiveLocation) {
+    // delete cached archive
+    cacheDelete(archiveLocation);
+
+    // delete cached archive location
+    deleteArchiveLocation(name, version);
+  }
+  // delete cached archive contents
+  // this has been populated in Registry.getArchiveInfo()
+  paths.forEach((path) => cacheDelete(path));
+};
