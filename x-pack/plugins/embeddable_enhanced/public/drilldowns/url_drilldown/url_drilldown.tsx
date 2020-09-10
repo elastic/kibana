@@ -31,6 +31,7 @@ interface UrlDrilldownDeps {
   navigateToUrl: (url: string) => Promise<void>;
   getOpenModal: () => Promise<OverlayStart['openModal']>;
   getSyntaxHelpDocsLink: () => string;
+  getVariablesHelpDocsLink: () => string;
 }
 
 export type ActionContext = ChartActionContext;
@@ -74,6 +75,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
         onConfig={onConfig}
         scope={scope}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
+        variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
       />
     );
   };

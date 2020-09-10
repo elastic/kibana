@@ -38,6 +38,9 @@ export class DocLinksService {
       links: {
         dashboard: {
           drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
+          drilldownsTriggerPicker: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#trigger-picker`,
+          urlDrilldownTemplateSyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#templating`,
+          urlDrilldownVariables: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#variables`,
         },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
@@ -143,6 +146,9 @@ export interface DocLinksStart {
   readonly links: {
     readonly dashboard: {
       readonly drilldowns: string;
+      readonly drilldownsTriggerPicker: string;
+      readonly urlDrilldownTemplateSyntax: string;
+      readonly urlDrilldownVariables: string;
     };
     readonly filebeat: {
       readonly base: string;
