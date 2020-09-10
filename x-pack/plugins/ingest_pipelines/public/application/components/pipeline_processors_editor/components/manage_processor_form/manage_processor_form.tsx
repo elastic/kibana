@@ -220,7 +220,12 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
                 <EuiButtonEmpty onClick={onClose}>{cancelButtonLabel}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill data-test-subj="submitButton" onClick={form.submit}>
+                <EuiButton
+                  disabled={(!form.isValid && form.isSubmitted) || form.isSubmitting}
+                  fill
+                  data-test-subj="submitButton"
+                  onClick={form.submit}
+                >
                   {processor ? updateButtonLabel : addButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
@@ -229,8 +234,5 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
         </EuiFlyout>
       </Form>
     );
-  },
-  (previous, current) => {
-    return previous.processor === current.processor;
   }
 );

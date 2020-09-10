@@ -56,12 +56,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
   useEffect(() => {
     const subscription = form.subscribe(onFormUpdate);
     return subscription.unsubscribe;
-
-    // TODO: Address this issue
-    // For some reason adding `form` object to the dependencies array here is causing an
-    // infinite update loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onFormUpdate]);
+  }, [onFormUpdate, form]);
 
   return (
     <ViewComponent
