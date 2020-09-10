@@ -23,7 +23,9 @@ export function getDefaultCombinedFields(results: unknown) {
 export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: CombinedField[]) {
   const updatedMappings = { ...mappings };
   combinedFields.forEach((combinedField) => {
-    updatedMappings[combinedField.combinedFieldName] = { type: combinedField.mappingType };
+    updatedMappings.properties[combinedField.combinedFieldName] = {
+      type: combinedField.mappingType,
+    };
   });
   return updatedMappings;
 }
