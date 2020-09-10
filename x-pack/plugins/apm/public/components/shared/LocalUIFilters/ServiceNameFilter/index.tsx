@@ -50,6 +50,9 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     if (serviceNames?.length > 0 && serviceName !== serviceNames[0]) {
       updateServiceName(serviceNames[0]);
     }
+    if (serviceName && serviceNames.length === 0) {
+      updateServiceName('');
+    }
   }, [serviceNames, serviceName, updateServiceName]);
 
   return (
