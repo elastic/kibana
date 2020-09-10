@@ -109,7 +109,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
 
   const onFocusClick = isAlreadyFocused
     ? centerSelectedNode
-    : (event: MouseEvent<HTMLAnchorElement>) => deselect();
+    : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
   return (
     <EuiPopover
