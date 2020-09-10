@@ -122,7 +122,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   isGeoGridPrecisionAware() {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // MVT gridded data should not bootstrap each time the precision changes
-      // MBtiles needs to handle this
+      // mapbox-gl needs to handle this
       return false;
     } else {
       // Should requery each time grid-precision changes

@@ -51,54 +51,48 @@ export async function getGridTile({
 }): Promise<Buffer | null> {
   const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
-    try {
-      // todo: needs to be different from geo_point and geo_shape
-      let bboxFilter;
-      if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-        bboxFilter = {
-          geo_bounding_box: {
-            [geometryFieldName]: esBbox,
-          },
-        };
-      } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-        const geojsonPolygon = tileToGeoJsonPolygon(x, y, z);
-        bboxFilter = {
-          geo_shape: {
-            [geometryFieldName]: {
-              shape: geojsonPolygon,
-              relation: 'INTERSECTS',
-            },
-          },
-        };
-      } else {
-        throw new Error(`${geoFieldType} is not valid geo field-type`);
-      }
-      requestBody.query.bool.filter.push(bboxFilter);
-
-      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = Math.min(
-        z + SUPER_FINE_ZOOM_DELTA,
-        MAX_ZOOM
-      );
-      requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
-
-      const esGeotileGridQuery = {
-        index,
-        body: requestBody,
+    let bboxFilter;
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      bboxFilter = {
+        geo_bounding_box: {
+          [geometryFieldName]: esBbox,
+        },
       };
-
-      const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
-
-      const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
-      const featureCollection: FeatureCollection = {
-        features,
-        type: 'FeatureCollection',
+    } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+      const geojsonPolygon = tileToGeoJsonPolygon(x, y, z);
+      bboxFilter = {
+        geo_shape: {
+          [geometryFieldName]: {
+            shape: geojsonPolygon,
+            relation: 'INTERSECTS',
+          },
+        },
       };
-
-      return createMvtTile(featureCollection, z, x, y);
-    } catch (e) {
-      logger.warn(e.message);
-      throw e;
+    } else {
+      throw new Error(`${geoFieldType} is not valid geo field-type`);
     }
+    requestBody.query.bool.filter.push(bboxFilter);
+
+    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = Math.min(
+      z + SUPER_FINE_ZOOM_DELTA,
+      MAX_ZOOM
+    );
+    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
+
+    const esGeotileGridQuery = {
+      index,
+      body: requestBody,
+    };
+
+    const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
+
+    const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
+    const featureCollection: FeatureCollection = {
+      features,
+      type: 'FeatureCollection',
+    };
+
+    return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
     logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
     return null;
