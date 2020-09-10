@@ -59,7 +59,6 @@ describe('<TemplateEdit />', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
-
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
   });
 
