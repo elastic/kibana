@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { PropertyActions } from '../property_actions';
@@ -28,22 +28,25 @@ const UserActionPropertyActionsComponent = ({
   onEdit,
   onQuote,
 }: UserActionPropertyActionsProps) => {
+  const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
+  const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
+
   const propertyActions = useMemo(() => {
     return [
       {
         disabled,
         iconType: 'pencil',
         label: editLabel,
-        onClick: () => onEdit(id),
+        onClick: onEditClick,
       },
       {
         disabled,
         iconType: 'quote',
         label: quoteLabel,
-        onClick: () => onQuote(id),
+        onClick: onQuoteClick,
       },
     ];
-  }, [disabled, id, editLabel, onEdit, quoteLabel, onQuote]);
+  }, [disabled, editLabel, quoteLabel, onEditClick, onQuoteClick]);
   return (
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}
