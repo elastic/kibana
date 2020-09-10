@@ -1,5 +1,5 @@
 [[dashboard-drilldown]]
-=== Dashboard Drilldown
+=== Dashboard drilldown
 
 The dashboard drilldown allows you to navigate from one dashboard to another dashboard.
 For example, you might have a dashboard that shows the overall status of multiple data centers.
