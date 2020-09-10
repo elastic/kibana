@@ -175,10 +175,18 @@ export const reducer = (state: State, action: Action): State => {
         fields: action.value.fields,
         configuration: {
           ...state.configuration,
+          data: {
+            raw: action.value.configuration,
+            format: () => action.value.configuration,
+          },
           defaultValue: action.value.configuration,
         },
         templates: {
           ...state.templates,
+          data: {
+            raw: action.value.templates,
+            format: () => action.value.templates,
+          },
           defaultValue: action.value.templates,
         },
         documentFields: {

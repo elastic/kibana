@@ -149,15 +149,22 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = (name: string, type: string) => {
-    form.setInputValue('nameParameterInput', name);
-    find('createFieldForm.fieldType').simulate('change', [
-      {
-        label: type,
-        value: type,
-      },
-    ]);
-    find('createFieldForm.addButton').simulate('click');
+  const addField = async (name: string, type: string) => {
+    await act(async () => {
+      form.setInputValue('nameParameterInput', name);
+      find('createFieldForm.fieldType').simulate('change', [
+        {
+          label: type,
+          value: type,
+        },
+      ]);
+    });
+
+    await act(async () => {
+      find('createFieldForm.addButton').simulate('click');
+    });
+
+    component.update();
   };
 
   const startEditField = (path: string) => {
@@ -194,14 +201,18 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
-  const selectTab = (tab: 'fields' | 'templates' | 'advanced') => {
+  const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
     const index = ['fields', 'templates', 'advanced'].indexOf(tab);
 
     const tabElement = find('formTab').at(index);
     if (tabElement.length === 0) {
       throw new Error(`Tab not found: "${tab}"`);
     }
-    tabElement.simulate('click');
+
+    await act(async () => {
+      tabElement.simulate('click');
+    });
+    component.update();
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
