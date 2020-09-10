@@ -23,6 +23,7 @@ import { TrustedAppsUrlParams } from '../types';
 import {
   isTrustedAppCreateFailureState,
   isTrustedAppCreatePendingState,
+  isTrustedAppCreateSuccessState,
 } from '../state/type_guards';
 
 const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
@@ -119,4 +120,10 @@ export const getApiCreateErrors: (
   state: Immutable<TrustedAppsListPageState>
 ) => undefined | ApiError = ({ createView }) => {
   return isTrustedAppCreateFailureState(createView) && createView.data;
+};
+
+export const wasCreateSuccessful: (state: Immutable<TrustedAppsListPageState>) => boolean = ({
+  createView,
+}) => {
+  return isTrustedAppCreateSuccessState(createView);
 };

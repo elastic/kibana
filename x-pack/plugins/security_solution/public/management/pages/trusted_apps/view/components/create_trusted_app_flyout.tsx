@@ -15,26 +15,30 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import {
   CreateTrustedAppForm,
   CreateTrustedAppFormProps,
   TrustedAppFormState,
 } from './create_trusted_app_form';
 import { useTrustedAppsSelector } from '../hooks';
-import { getApiCreateErrors, isCreatePending } from '../../store/selectors';
+import { getApiCreateErrors, isCreatePending, wasCreateSuccessful } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
     const dispatch = useDispatch<(action: AppAction) => void>();
+    const toasts = useToasts();
 
     const pendingCreate = useTrustedAppsSelector(isCreatePending);
     const apiErrors = useTrustedAppsSelector(getApiCreateErrors);
+    const wasCreated = useTrustedAppsSelector(wasCreateSuccessful);
 
     const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
 
@@ -61,6 +65,22 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       },
       []
     );
+
+    // If it was created, then close flyout
+    useEffect(() => {
+      if (wasCreated) {
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.securitySolution.trustedapps.createTrustedAppFlyout.successToastTitle',
+            {
+              defaultMessage: '"{name}" has been added to the Trusted Applications list.',
+              values: { name: formState?.item.name },
+            }
+          )
+        );
+        onClose();
+      }
+    }, [formState?.item?.name, onClose, toasts, wasCreated]);
 
     return (
       <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={pendingCreate}>
