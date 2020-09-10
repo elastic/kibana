@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     sessionCookie: Cookie,
     username: string,
     providerName: string,
-    authenticationRealm: { name: string; type: string },
+    authenticationRealm: { name: string; type: string } | null,
     authenticationType: string
   ) {
     expect(sessionCookie.key).to.be('sid');
@@ -67,7 +67,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.be(providerName);
-    expect(apiResponse.body.authentication_realm).to.eql(authenticationRealm);
+    if (authenticationRealm) {
+      expect(apiResponse.body.authentication_realm).to.eql(authenticationRealm);
+    }
     expect(apiResponse.body.authentication_type).to.be(authenticationType);
   }
 
@@ -228,16 +230,9 @@ export default function ({ getService }: FtrProviderContext) {
           const basicSessionCookie = request.cookie(
             basicAuthenticationResponse.headers['set-cookie'][0]
           )!;
-          await checkSessionCookie(
-            basicSessionCookie,
-            'elastic',
-            'basic1',
-            {
-              name: 'reserved',
-              type: 'reserved',
-            },
-            'realm'
-          );
+          // Skip auth provider check since this comes from the reserved realm,
+          // which is not available when running on ESS
+          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1', null, 'realm');
 
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
