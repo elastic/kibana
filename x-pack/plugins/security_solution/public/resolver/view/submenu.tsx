@@ -215,7 +215,7 @@ const NodeSubMenuComponents = React.memo(
           >
             {optionsWithActions
               .sort((opta, optb) => {
-                return opta.optionTitle < optb.optionTitle ? -1 : 1;
+                return opta.optionTitle.localeCompare(optb.optionTitle);
               })
               .map((opt) => {
                 return (
