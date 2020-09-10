@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiPopover } from '@elastic/eui';
@@ -24,7 +24,7 @@ const defaultProps = {
   },
   setFilter: jest.fn(),
   indexPattern: createMockedIndexPattern(),
-  Button: (onClick) => (
+  Button: (onClick: MouseEventHandler) => (
     <div onClick={onClick} onKeyPress={onClick}>
       trigger
     </div>
