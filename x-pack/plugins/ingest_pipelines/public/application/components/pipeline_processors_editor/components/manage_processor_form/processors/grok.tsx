@@ -11,11 +11,9 @@ import { EuiFormRow } from '@elastic/eui';
 import {
   FIELD_TYPES,
   UseField,
-  FieldConfig,
   UseArray,
   ToggleField,
   fieldValidators,
-  getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 
 import { XJsonEditor, DragAndDropTextList } from '../field_components';
@@ -36,8 +34,6 @@ const i18nTexts = {
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
   patterns: {
-    type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel', {
       defaultMessage: 'Patterns',
     }),
@@ -48,8 +44,7 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: ({ value }) => {
-          const maybeArray = value as string[] | undefined;
-          if (!maybeArray || maybeArray.length === 0 || maybeArray.every((v) => !v)) {
+          if ((value as any[]).length === 0) {
             return {
               message: i18n.translate(
                 'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
@@ -118,15 +113,14 @@ export const Grok: FunctionComponent = () => {
         )}
       />
 
-      <UseArray path="fields.patterns" config={fieldsConfig.patterns as FieldConfig<any, string[]>}>
-        {({ field, items, addItem, removeItem, moveItem }) => {
-          const { errorMessage } = getFieldValidityAndErrorMessage(field);
+      <UseArray path="fields.patterns" validations={fieldsConfig.patterns.validations}>
+        {({ items, addItem, removeItem, moveItem, error }) => {
           return (
             <EuiFormRow
-              label={field.label}
-              helpText={field.helpText}
-              isInvalid={typeof errorMessage === 'string'}
-              error={errorMessage}
+              label={fieldsConfig.patterns.label}
+              helpText={fieldsConfig.patterns.helpText}
+              isInvalid={typeof error === 'string'}
+              error={error}
               fullWidth
             >
               <DragAndDropTextList

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, memo } from 'react';
 import uuid from 'uuid';
 import {
@@ -12,7 +13,6 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UseField, ArrayItem } from '../../../../../../shared_imports';
+import { UseField, ArrayItem, Field } from '../../../../../../shared_imports';
 
 import './drag_and_drop_text_list.scss';
 
@@ -31,6 +31,13 @@ interface Props {
   onRemove: (id: number) => void;
   addLabel: string;
 }
+
+const i18nTexts = {
+  removeItemButtonAriaLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText',
+    { defaultMessage: 'Remove item' }
+  ),
+};
 
 function DragAndDropTextListComponent({
   value,
@@ -79,21 +86,14 @@ function DragAndDropTextListComponent({
                       <EuiFlexItem>
                         <UseField<string>
                           path={item.path}
+                          component={Field}
                           componentProps={{ euiFieldProps: { compressed: true } }}
                           readDefaultValueOnForm={!item.isNew}
-                        >
-                          {(patternField) => (
-                            <EuiFieldText
-                              value={patternField.value}
-                              onChange={(e) => patternField.setValue(e.target.value)}
-                              compressed
-                              fullWidth
-                            />
-                          )}
-                        </UseField>
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          aria-label={i18nTexts.removeItemButtonAriaLabel}
                           className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
                           iconType="minusInCircle"
                           color="danger"
