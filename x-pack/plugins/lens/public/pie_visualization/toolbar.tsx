@@ -198,7 +198,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               setValue={(value) =>
                 setState({
                   ...state,
-                  layers: [{ ...layer, percentDecimals: Number(value) }],
+                  layers: [{ ...layer, percentDecimals: value }],
                 })
               }
             />
