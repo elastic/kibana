@@ -229,6 +229,20 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "number",
               "isBucketed": true,
+              "scale": "interval",
+            },
+            "operations": Array [
+              Object {
+                "field": "bytes",
+                "operationType": "range",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": true,
               "scale": "ordinal",
             },
             "operations": Array [
@@ -263,20 +277,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "timestamp",
                 "operationType": "date_histogram",
-                "type": "field",
-              },
-            ],
-          },
-          Object {
-            "operationMetaData": Object {
-              "dataType": "number",
-              "isBucketed": true,
-              "scale": "interval",
-            },
-            "operations": Array [
-              Object {
-                "field": "bytes",
-                "operationType": "range",
                 "type": "field",
               },
             ],
