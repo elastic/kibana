@@ -95,6 +95,11 @@ import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { Logger } from '@kbn/logging';
+import { LoggerFactory } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
+import { LogRecord } from '@kbn/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -1441,18 +1446,7 @@ export interface LegacyUiExports {
 // @public
 export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
-// @public
-export interface Logger {
-    debug(message: string, meta?: LogMeta): void;
-    error(errorOrMessage: string | Error, meta?: LogMeta): void;
-    fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
-    get(...childContextPaths: string[]): Logger;
-    info(message: string, meta?: LogMeta): void;
-    // @internal (undocumented)
-    log(record: LogRecord): void;
-    trace(message: string, meta?: LogMeta): void;
-    warn(errorOrMessage: string | Error, meta?: LogMeta): void;
-}
+export { Logger }
 
 // Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
 //
@@ -1467,69 +1461,18 @@ export interface LoggerContextConfigInput {
     loggers?: LoggerConfigType[];
 }
 
-// @public
-export interface LoggerFactory {
-    get(...contextParts: string[]): Logger;
-}
+export { LoggerFactory }
 
 // @public
 export interface LoggingServiceSetup {
     configure(config$: Observable<LoggerContextConfigInput>): void;
 }
 
-// @internal
-export class LogLevel {
-    // (undocumented)
-    static readonly All: LogLevel;
-    // (undocumented)
-    static readonly Debug: LogLevel;
-    // (undocumented)
-    static readonly Error: LogLevel;
-    // (undocumented)
-    static readonly Fatal: LogLevel;
-    static fromId(level: LogLevelId): LogLevel;
-    // Warning: (ae-forgotten-export) The symbol "LogLevelId" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    readonly id: LogLevelId;
-    // (undocumented)
-    static readonly Info: LogLevel;
-    // (undocumented)
-    static readonly Off: LogLevel;
-    supports(level: LogLevel): boolean;
-    // (undocumented)
-    static readonly Trace: LogLevel;
-    // (undocumented)
-    readonly value: number;
-    // (undocumented)
-    static readonly Warn: LogLevel;
-}
+export { LogLevel }
 
-// @public
-export interface LogMeta {
-    // (undocumented)
-    [key: string]: any;
-}
+export { LogMeta }
 
-// @internal
-export interface LogRecord {
-    // (undocumented)
-    context: string;
-    // (undocumented)
-    error?: Error;
-    // (undocumented)
-    level: LogLevel;
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    meta?: {
-        [name: string]: any;
-    };
-    // (undocumented)
-    pid: number;
-    // (undocumented)
-    timestamp: Date;
-}
+export { LogRecord }
 
 // @public
 export interface MetricsServiceSetup {
