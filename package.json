@@ -191,7 +191,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "mustache": "2.3.2",
-    "node-fetch": "1.7.3",
+    "node-fetch": "2.6.1",
     "node-forge": "^0.10.0",
     "opn": "^5.5.0",
     "oppsy": "^2.0.0",

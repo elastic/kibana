@@ -14,7 +14,7 @@
     "execa": "^4.0.2",
     "getopts": "^2.2.4",
     "glob": "^7.1.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "simple-git": "^1.91.0",
     "tar-fs": "^2.1.0",
     "tree-kill": "^1.2.2",
