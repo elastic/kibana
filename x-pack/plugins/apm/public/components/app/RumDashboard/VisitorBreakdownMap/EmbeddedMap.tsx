@@ -13,7 +13,8 @@ import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../maps/public';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../maps/public/embeddable';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
