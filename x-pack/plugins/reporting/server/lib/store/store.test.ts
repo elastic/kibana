@@ -7,8 +7,7 @@
 import sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { ReportingConfig, ReportingCore } from '../..';
-import { createMockReportingCore } from '../../test_helpers';
-import { createMockLevelLogger } from '../../test_helpers/create_mock_levellogger';
+import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
 import { Report } from './report';
 import { ReportingStore } from './store';
 
