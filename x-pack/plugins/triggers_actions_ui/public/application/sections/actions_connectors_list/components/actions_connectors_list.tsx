@@ -304,28 +304,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     />
   );
 
-  const noPermissionPrompt = (
-    <EuiEmptyPrompt
-      iconType="securityApp"
-      title={
-        <h1>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
-            defaultMessage="No permissions to create connectors"
-          />
-        </h1>
-      }
-      body={
-        <p data-test-subj="permissionDeniedMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateDescription"
-            defaultMessage="Contact your system administrator."
-          />
-        </p>
-      }
-    />
-  );
-
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
@@ -371,7 +349,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
         <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
       )}
-      {data.length === 0 && !canSave && noPermissionPrompt}
+      {data.length === 0 && !canSave && <NoPermissionPrompt />}
       <ActionsConnectorsContextProvider
         value={{
           actionTypeRegistry,
@@ -453,3 +431,25 @@ const DeleteOperation: React.FunctionComponent<{
     </EuiFlexItem>
   );
 };
+
+const NoPermissionPrompt: React.FunctionComponent<{}> = () => (
+  <EuiEmptyPrompt
+    iconType="securityApp"
+    title={
+      <h1>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
+          defaultMessage="No permissions to create connectors"
+        />
+      </h1>
+    }
+    body={
+      <p data-test-subj="permissionDeniedMessage">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateDescription"
+          defaultMessage="Contact your system administrator."
+        />
+      </p>
+    }
+  />
+);
