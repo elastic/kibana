@@ -48,7 +48,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   public async isCompatible({ embeddable }: EmbeddableContext) {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
     if (!isEnhancedEmbeddable(embeddable)) return false;
-    return true;
+    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
   }
 
   public async execute(context: EmbeddableContext) {
