@@ -68,7 +68,27 @@ function CytoscapeComponent({
     ...getCytoscapeOptions(theme),
     elements,
   });
-  useCytoscapeEventHandlers({ cy, elements, serviceName, theme });
+  useCytoscapeEventHandlers({ cy, serviceName, theme });
+
+  // Add items from the elements prop to the cytoscape collection and remove
+  // items that no longer are in the list, then trigger an event to notify
+  // the handlers that data has changed.
+  useEffect(() => {
+    if (cy && elements.length > 0) {
+      // We do a fit if we're going from 0 to >0 elements
+      const fit = cy.elements().length === 0;
+
+      cy.add(elements);
+      // Remove any old elements that don't exist in the new set of elements.
+      const elementIds = elements.map((element) => element.data.id);
+      cy.elements().forEach((element) => {
+        if (!elementIds.includes(element.data('id'))) {
+          cy.remove(element);
+        }
+      });
+      cy.trigger('custom:data', [fit]);
+    }
+  }, [cy, elements]);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.

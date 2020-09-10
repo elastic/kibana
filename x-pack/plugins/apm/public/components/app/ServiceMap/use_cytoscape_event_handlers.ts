@@ -64,12 +64,10 @@ function getLayoutOptions({
 
 export function useCytoscapeEventHandlers({
   cy,
-  elements,
   serviceName,
   theme,
 }: {
   cy?: cytoscape.Core;
-  elements: cytoscape.ElementDefinition[];
   serviceName?: string;
   theme: EuiTheme;
 }) {
@@ -162,19 +160,6 @@ export function useCytoscapeEventHandlers({
       cy.on('unselect', 'node', unselectHandler);
       cy.one('drag', 'node', firstDragHandler);
       cy.on('drag', 'node', dragHandler);
-
-      // We do a fit if we're going from 0 to >0 elements
-      const fit = cy.elements().length === 0 && elements.length > 0;
-
-      // Remove any old elements that don't exist in the new set of elements.
-      const elementIds = elements.map((element) => element.data.id);
-      cy.elements().forEach((element) => {
-        if (!elementIds.includes(element.data('id'))) {
-          cy.remove(element);
-        }
-      });
-      cy.add(elements);
-      cy.trigger('custom:data', [fit]);
     }
 
     return () => {
@@ -194,5 +179,5 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('drag', 'node', firstDragHandler);
       }
     };
-  }, [cy, elements, serviceName, trackApmEvent, theme]);
+  }, [cy, serviceName, trackApmEvent, theme]);
 }
