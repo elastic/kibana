@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable, NewTrustedApp } from '../../../../../common/endpoint/types';
+import { Immutable, PostTrustedAppCreateRequest } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -90,7 +90,9 @@ const createTrustedApp = async (
   if (isCreatePending(getState())) {
     try {
       const newTrustedApp = getTrustedAppCreateData(getState());
-      const createdTrustedApp = (await trustedAppsService.createTrustedApp(newTrustedApp)).data;
+      const createdTrustedApp = (
+        await trustedAppsService.createTrustedApp(newTrustedApp as PostTrustedAppCreateRequest)
+      ).data;
       dispatch({
         type: 'serverReturnedCreateTrustedAppSuccess',
         payload: {

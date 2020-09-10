@@ -26,19 +26,28 @@ import {
   createSampleTrustedApps,
   createUninitialisedResourceState,
 } from '../test_utils';
+import { initialTrustedAppsPageState } from './reducer';
 
 describe('selectors', () => {
   describe('needsRefreshOfListData()', () => {
     it('returns false for outdated resource state and inactive state', () => {
-      expect(needsRefreshOfListData({ listView: createDefaultListView(), active: false })).toBe(
-        false
-      );
+      expect(
+        needsRefreshOfListData({
+          listView: createDefaultListView(),
+          active: false,
+          createView: undefined,
+        })
+      ).toBe(false);
     });
 
     it('returns true for outdated resource state and active state', () => {
-      expect(needsRefreshOfListData({ listView: createDefaultListView(), active: true })).toBe(
-        true
-      );
+      expect(
+        needsRefreshOfListData({
+          listView: createDefaultListView(),
+          active: true,
+          createView: undefined,
+        })
+      ).toBe(true);
     });
 
     it('returns true when current loaded page index is outdated', () => {
@@ -88,7 +97,9 @@ describe('selectors', () => {
 
   describe('getListItems()', () => {
     it('returns empty list when no valid data loaded', () => {
-      expect(getListItems({ listView: createDefaultListView(), active: false })).toStrictEqual([]);
+      expect(
+        getListItems({ listView: createDefaultListView(), active: false, createView: undefined })
+      ).toStrictEqual([]);
     });
 
     it('returns last loaded list items', () => {
@@ -98,6 +109,7 @@ describe('selectors', () => {
           200
         ),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
       expect(getListItems({ listView, active: false })).toStrictEqual(
@@ -108,7 +120,13 @@ describe('selectors', () => {
 
   describe('getListTotalItemsCount()', () => {
     it('returns 0 when no valid data loaded', () => {
-      expect(getListTotalItemsCount({ listView: createDefaultListView(), active: false })).toBe(0);
+      expect(
+        getListTotalItemsCount({
+          listView: createDefaultListView(),
+          active: false,
+          createView: undefined,
+        })
+      ).toBe(0);
     });
 
     it('returns last loaded total items count', () => {
@@ -126,13 +144,25 @@ describe('selectors', () => {
 
   describe('getListCurrentPageIndex()', () => {
     it('returns page index', () => {
-      expect(getListCurrentPageIndex({ listView: createDefaultListView(), active: false })).toBe(0);
+      expect(
+        getListCurrentPageIndex({
+          listView: createDefaultListView(),
+          active: false,
+          createView: undefined,
+        })
+      ).toBe(0);
     });
   });
 
   describe('getListCurrentPageSize()', () => {
     it('returns page index', () => {
-      expect(getListCurrentPageSize({ listView: createDefaultListView(), active: false })).toBe(20);
+      expect(
+        getListCurrentPageSize({
+          listView: createDefaultListView(),
+          active: false,
+          createView: undefined,
+        })
+      ).toBe(20);
     });
   });
 
@@ -161,7 +191,9 @@ describe('selectors', () => {
 
   describe('isListLoading()', () => {
     it('returns false when no loading is happening', () => {
-      expect(isListLoading({ listView: createDefaultListView(), active: false })).toBe(false);
+      expect(
+        isListLoading({ listView: createDefaultListView(), active: false, createView: undefined })
+      ).toBe(false);
     });
 
     it('returns true when loading is in progress', () => {

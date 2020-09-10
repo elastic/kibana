@@ -113,13 +113,13 @@ export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => bo
 export const getTrustedAppCreateData: (
   state: Immutable<TrustedAppsListPageState>
 ) => undefined | Immutable<NewTrustedApp> = ({ createView }) => {
-  return isTrustedAppCreatePendingState(createView) && createView.data;
+  return (isTrustedAppCreatePendingState(createView) && createView.data) || undefined;
 };
 
 export const getApiCreateErrors: (
   state: Immutable<TrustedAppsListPageState>
 ) => undefined | ApiError = ({ createView }) => {
-  return isTrustedAppCreateFailureState(createView) && createView.data;
+  return (isTrustedAppCreateFailureState(createView) && createView.data) || undefined;
 };
 
 export const wasCreateSuccessful: (state: Immutable<TrustedAppsListPageState>) => boolean = ({

@@ -21,6 +21,7 @@ import {
 } from '../state';
 
 import { TrustedAppsListResourceStateChanged } from '../store/action';
+import { initialTrustedAppsPageState } from '../store/reducer';
 
 const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
 
@@ -93,6 +94,7 @@ export const createListComplexLoadingResourceState = (
 export const createDefaultPaginationInfo = () => ({ index: 0, size: 20 });
 
 export const createDefaultListView = () => ({
+  ...initialTrustedAppsPageState.listView,
   currentListResourceState: createUninitialisedResourceState(),
   currentPaginationInfo: createDefaultPaginationInfo(),
 });
@@ -101,6 +103,7 @@ export const createLoadingListViewWithPagination = (
   currentPaginationInfo: PaginationInfo,
   previousState: StaleResourceState<TrustedAppsListData> = createUninitialisedResourceState()
 ): TrustedAppsListPageState['listView'] => ({
+  ...initialTrustedAppsPageState.listView,
   currentListResourceState: { type: 'LoadingResourceState', previousState },
   currentPaginationInfo,
 });
@@ -110,6 +113,7 @@ export const createLoadedListViewWithPagination = (
   currentPaginationInfo: PaginationInfo = createDefaultPaginationInfo(),
   totalItemsCount: number = 200
 ): TrustedAppsListPageState['listView'] => ({
+  ...initialTrustedAppsPageState.listView,
   currentListResourceState: createListLoadedResourceState(paginationInfo, totalItemsCount),
   currentPaginationInfo,
 });
@@ -119,6 +123,7 @@ export const createFailedListViewWithPagination = (
   error: ServerApiError,
   lastLoadedState?: LoadedResourceState<TrustedAppsListData>
 ): TrustedAppsListPageState['listView'] => ({
+  ...initialTrustedAppsPageState.listView,
   currentListResourceState: { type: 'FailedResourceState', error, lastLoadedState },
   currentPaginationInfo,
 });

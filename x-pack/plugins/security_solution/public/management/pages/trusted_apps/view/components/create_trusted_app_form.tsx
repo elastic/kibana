@@ -30,8 +30,12 @@ const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   };
 };
 
-const validateFormValues = (values: NewTrustedApp) => {
-  const errors = {};
+interface ValidationResult {
+  isValid: boolean;
+  errors: Partial<{ [k in keyof NewTrustedApp]: string }>;
+}
+const validateFormValues = (values: NewTrustedApp): ValidationResult => {
+  const errors: ValidationResult['errors'] = {};
 
   if (!values.name.trim()) {
     errors.name = 'Name is required';
@@ -63,7 +67,10 @@ export interface TrustedAppFormState {
   isValid: boolean;
   item: NewTrustedApp;
 }
-export type CreateTrustedAppFormProps = Omit<EuiFormProps, 'component'> & {
+export type CreateTrustedAppFormProps = Pick<
+  EuiFormProps,
+  'className' | 'data-test-subj' | 'isInvalid' | 'error' | 'invalidCallout'
+> & {
   /** if form should be shown full width of parent container */
   fullWidth?: boolean;
   onChange: (state: TrustedAppFormState) => void;
@@ -145,7 +152,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     }, [formValues, onChange]);
 
     return (
-      <EuiForm {...formProps}>
+      <EuiForm {...formProps} component="div">
         <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.name', {
             defaultMessage: 'Name your trusted app application',
