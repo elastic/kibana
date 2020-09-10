@@ -22,14 +22,22 @@ export const i18nTexts = {
     { defaultMessage: 'Data tier allocation' }
   ),
   allocationOptions: {
-    auto: {
-      inputDisplay: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.input',
-        { defaultMessage: 'Node role (recommended)' }
+    default: {
+      warm: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
+        { defaultMessage: 'Warm tier nodes (recommended)' }
+      ),
+      cold: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
+        { defaultMessage: 'Cold tier nodes (recommended)' }
+      ),
+      frozen: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
+        { defaultMessage: 'Frozen tier nodes (recommended)' }
       ),
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.helpText',
-        { defaultMessage: 'Node role-based allocation.' }
+        { defaultMessage: 'Data role-based allocation.' }
       ),
     },
     custom: {
@@ -49,7 +57,7 @@ export const i18nTexts = {
       ),
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.helpText',
-        { defaultMessage: 'Do not allocate data in this phase.' }
+        { defaultMessage: 'Do not re-allocate data in this phase.' }
       ),
     },
   },
@@ -72,13 +80,13 @@ export const DataTierAllocation = (
             [
               {
                 value: 'default',
-                inputDisplay: i18nTexts.allocationOptions.auto.inputDisplay,
+                inputDisplay: i18nTexts.allocationOptions.default[phase],
                 dropdownDisplay: (
                   <>
-                    <strong>{i18nTexts.allocationOptions.auto.inputDisplay}</strong>
+                    <strong>{i18nTexts.allocationOptions.default[phase]}</strong>
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions.auto.helpText}
+                        {i18nTexts.allocationOptions.default.helpText}
                       </p>
                     </EuiText>
                   </>

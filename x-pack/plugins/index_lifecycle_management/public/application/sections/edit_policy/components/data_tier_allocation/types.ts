@@ -6,13 +6,13 @@
 
 import {
   ListNodesRouteResponse,
+  PhaseWithAllocation,
   PhaseWithAllocationAction,
-  Phases,
 } from '../../../../../../common/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
 export interface SharedProps<T extends PhaseWithAllocationAction> {
-  phase: keyof Phases & string;
+  phase: PhaseWithAllocation;
   errors?: PhaseValidationErrors<T>;
   phaseData: T;
   setPhaseData: (dataKey: keyof T, value: string) => void;
