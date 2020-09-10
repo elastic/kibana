@@ -22,6 +22,10 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
     toastNotifications.addDanger(toastOrTitle, options);
   }
 
+  function displayWarningToast(toastOrTitle: ToastInput, options?: ToastOptions) {
+    toastNotifications.addWarning(toastOrTitle, options);
+  }
+
   function displaySuccessToast(toastOrTitle: ToastInput, options?: ToastOptions) {
     toastNotifications.addSuccess(toastOrTitle, options);
   }
@@ -37,7 +41,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
     });
   }
 
-  return { displayDangerToast, displaySuccessToast, displayErrorToast };
+  return { displayDangerToast, displayWarningToast, displaySuccessToast, displayErrorToast };
 }
 
 export function getToastNotificationService() {

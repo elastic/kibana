@@ -15,6 +15,7 @@ export interface EsErrorRootCause {
 export interface EsErrorBody {
   error: {
     root_cause?: EsErrorRootCause[];
+    caused_by?: EsErrorRootCause;
     type: string;
     reason: string;
   };
