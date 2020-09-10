@@ -30,10 +30,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('backButton').simulate('click');
   };
 
-  const clickSubmitButton = () => {
-    testBed.find('submitButton').simulate('click');
-  };
-
   const clickEditButtonAtField = (index: number) => {
     testBed.find('editFieldButton').at(index).simulate('click');
   };
@@ -52,6 +48,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('createFieldForm.cancelButton').simulate('click');
   };
 
+  // Step component templates actions
   const componentTemplates = {
     getComponentTemplatesInList() {
       const { find } = testBed;
@@ -93,6 +90,42 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         find('componentTemplatesSelection.item.action-minusInCircle').at(index).simulate('click');
       });
       component.update();
+    },
+  };
+
+  // Step Mappings actions
+  const mappings = {
+    async addField(name: string, type: string) {
+      const { find, form, component } = testBed;
+
+      await act(async () => {
+        form.setInputValue('nameParameterInput', name);
+        find('createFieldForm.mockComboBox').simulate('change', [
+          {
+            label: type,
+            value: type,
+          },
+        ]);
+      });
+
+      await act(async () => {
+        find('createFieldForm.addButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
+  // Step Review actions
+  const review = {
+    async selectTab(tab: 'summary' | 'preview' | 'request') {
+      const tabs = ['summary', 'preview', 'request'];
+
+      await act(async () => {
+        testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
+      });
+
+      testBed.component.update();
     },
   };
 
@@ -178,59 +211,36 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   };
 
   const completeStepFour = async (mappingFields?: MappingField[]) => {
-    const { waitFor } = testBed;
+    const { component } = testBed;
 
     if (mappingFields) {
       for (const field of mappingFields) {
         const { name, type } = field;
-        await addMappingField(name, type);
+        await mappings.addField(name, type);
       }
     }
 
-    clickNextButton();
-    await waitFor('stepAliases');
-  };
-
-  const completeStepFive = async (aliases?: string, waitForNextStep = true) => {
-    const { find, component, waitFor } = testBed;
-
-    if (aliases) {
-      find('mockCodeEditor').simulate('change', {
-        jsonString: aliases,
-      }); // Using mocked EuiCodeEditor
-    }
-
-    component.update();
-    clickNextButton();
-
-    if (waitForNextStep) {
-      await waitFor('summaryTab');
-    } else {
-      component.update();
-    }
-  };
-
-  const selectSummaryTab = (tab: 'summary' | 'request') => {
-    const tabs = ['summary', 'request'];
-
-    testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
-  };
-
-  const addMappingField = async (name: string, type: string) => {
-    const { find, form, component } = testBed;
-
     await act(async () => {
-      form.setInputValue('nameParameterInput', name);
-      find('createFieldForm.mockComboBox').simulate('change', [
-        {
-          label: type,
-          value: type,
-        },
-      ]);
+      clickNextButton();
     });
 
+    component.update();
+  };
+
+  const completeStepFive = async (aliases?: string) => {
+    const { find, component } = testBed;
+
+    if (aliases) {
+      await act(async () => {
+        find('mockCodeEditor').simulate('change', {
+          jsonString: aliases,
+        }); // Using mocked EuiCodeEditor
+      });
+      component.update();
+    }
+
     await act(async () => {
-      find('createFieldForm.addButton').simulate('click');
+      clickNextButton();
     });
 
     component.update();
@@ -241,7 +251,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     actions: {
       clickNextButton,
       clickBackButton,
-      clickSubmitButton,
       clickEditButtonAtField,
       clickEditFieldUpdateButton,
       deleteMappingsFieldAt,
@@ -251,9 +260,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       completeStepThree,
       completeStepFour,
       completeStepFive,
-      selectSummaryTab,
-      addMappingField,
       componentTemplates,
+      mappings,
+      review,
     },
   };
 };
@@ -298,6 +307,7 @@ export type TestSubjects =
   | 'orderField'
   | 'orderField.input'
   | 'pageTitle'
+  | 'previewTab'
   | 'removeFieldButton'
   | 'requestTab'
   | 'saveTemplateError'
