@@ -80,36 +80,36 @@ export function useCytoscapeEventHandlers({
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
 
-    const resetConnectedEdgeStyle = (node?: cytoscape.NodeSingular) => {
-      if (cy) {
-        cy.edges().removeClass('highlight');
-
-        if (node) {
-          node.connectedEdges().addClass('highlight');
-        }
+    const resetConnectedEdgeStyle = (
+      cytoscapeInstance: cytoscape.Core,
+      node?: cytoscape.NodeSingular
+    ) => {
+      cytoscapeInstance.edges().removeClass('highlight');
+      if (node) {
+        node.connectedEdges().addClass('highlight');
       }
     };
 
     const dataHandler: cytoscape.EventHandler = (event, fit) => {
-      if (cy && cy.elements().length > 0) {
-        if (serviceName) {
-          resetConnectedEdgeStyle(cy.getElementById(serviceName));
-          // Add the "primary" class to the node if its id matches the serviceName.
-          if (cy.nodes().length > 0) {
-            cy.nodes().removeClass('primary');
-            cy.getElementById(serviceName).addClass('primary');
-          }
-        } else {
-          resetConnectedEdgeStyle();
+      if (serviceName) {
+        const node = event.cy.getElementById(serviceName);
+        resetConnectedEdgeStyle(event.cy, node);
+        // Add the "primary" class to the node if its id matches the serviceName.
+        if (event.cy.nodes().length > 0) {
+          event.cy.nodes().removeClass('primary');
+          node.addClass('primary');
         }
-
-        // Run the layout on nodes that are not selected and have not been manually
-        // positioned.
-        cy.elements('[!hasBeenDragged]')
-          .difference('node:selected')
-          .layout(getLayoutOptions({ fit, nodeHeight, theme }))
-          .run();
+      } else {
+        resetConnectedEdgeStyle(event.cy);
       }
+
+      // Run the layout on nodes that are not selected and have not been manually
+      // positioned.
+      event.cy
+        .elements('[!hasBeenDragged]')
+        .difference('node:selected')
+        .layout(getLayoutOptions({ fit, nodeHeight, theme }))
+        .run();
     };
 
     const layoutstopHandler: cytoscape.EventHandler = (event) => {
@@ -137,6 +137,7 @@ export function useCytoscapeEventHandlers({
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
+        event.cy,
         serviceName ? event.cy.getElementById(serviceName) : undefined
       );
     };
