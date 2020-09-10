@@ -1,5 +1,6 @@
 package builds
 
+import addSlackNotifications
 import builds.default.DefaultBuild
 import builds.default.DefaultVisualRegression
 import builds.oss.OssBuild
@@ -26,4 +27,6 @@ object BaselineCi : BuildType({
     OssVisualRegression,
     DefaultVisualRegression
   )
+
+  addSlackNotifications()
 })
