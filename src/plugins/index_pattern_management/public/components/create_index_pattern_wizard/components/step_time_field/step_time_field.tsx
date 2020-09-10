@@ -108,8 +108,9 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     const { indexPattern: pattern } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
 
-    const indexPattern = await this.context.services.data.indexPatterns.make();
-    indexPattern.title = pattern;
+    const indexPattern = await this.context.services.data.indexPatterns.newIndexPattern({
+      title: pattern,
+    });
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(

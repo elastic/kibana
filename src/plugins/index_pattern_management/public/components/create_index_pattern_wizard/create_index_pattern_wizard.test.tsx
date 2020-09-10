@@ -154,9 +154,10 @@ describe('CreateIndexPatternWizard', () => {
       create,
       _fetchFields: jest.fn(),
     } as unknown) as IndexPattern;
-    mockContext.data.indexPatterns.make = async () => {
+    mockContext.data.indexPatterns.create = async () => {
       return indexPattern;
     };
+    mockContext.data.indexPatterns.setDefault = jest.fn();
 
     const component = createComponentWithContext(
       CreateIndexPatternWizard,

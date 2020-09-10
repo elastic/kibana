@@ -601,34 +601,18 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(
-  indexPatternName,
-  indexPatterns,
-  timeFieldName,
-  kibanaConfig
-) {
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName) {
   try {
-    const emptyPattern = await indexPatterns.make();
-
-    Object.assign(emptyPattern, {
-      id: '',
+    const emptyPattern = await indexPatterns.newIndexPatternAndSave({
       title: indexPatternName,
       timeFieldName,
     });
 
-    const id = await emptyPattern.create();
-
     await indexPatterns.clearCache();
-
-    // check if there's a default index pattern, if not,
-    // set the newly created one as the default index pattern.
-    if (!kibanaConfig.get('defaultIndex')) {
-      await kibanaConfig.set('defaultIndex', id);
-    }
 
     return {
       success: true,
-      id,
+      id: emptyPattern.id,
     };
   } catch (error) {
     return {
