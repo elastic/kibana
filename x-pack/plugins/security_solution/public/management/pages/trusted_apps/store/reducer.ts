@@ -58,6 +58,8 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isTrustedAppsPageLocation(action.payload)) {
     const parsedUrlsParams = parse(action.payload.search.slice(1));
     const paginationParams = extractListPaginationParams(parsedUrlsParams);
+    const show =
+      extractFirstParamValue(parsedUrlsParams, 'show') === 'create' ? 'create' : undefined;
 
     return {
       ...state,
@@ -67,8 +69,9 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
           index: paginationParams.page_index,
           size: paginationParams.page_size,
         },
-        show: extractFirstParamValue(parsedUrlsParams, 'show') === 'create' ? 'create' : undefined,
+        show,
       },
+      createView: show ? state.createView : undefined,
       active: true,
     };
   } else {
