@@ -13,13 +13,12 @@ interface UserActionAvatarProps {
 }
 
 const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps) => {
+  const avatarName = fullName && fullName.length > 0 ? fullName : username ?? null;
+
   return (
     <>
-      {(fullName && fullName.length > 0) || (username && username.length > 0) ? (
-        <EuiAvatar
-          name={fullName && fullName.length > 0 ? fullName : username ?? ''}
-          data-test-subj={`user-action-avatar`}
-        />
+      {avatarName ? (
+        <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} />
       ) : (
         <EuiLoadingSpinner data-test-subj={`user-action-avatar-loading-spinner`} />
       )}
