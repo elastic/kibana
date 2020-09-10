@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CasesConfigurationMapping } from '../case_mappings';
+
 export interface ResilientActionConnector {
   config: ResilientConfig;
   secrets: ResilientSecrets;
@@ -36,11 +38,4 @@ interface ResilientConfig {
 interface ResilientSecrets {
   apiKeyId: string;
   apiKeySecret: string;
-}
-
-// to remove
-export interface CasesConfigurationMapping {
-  source: string;
-  target: string;
-  actionType: string;
 }
