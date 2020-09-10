@@ -50,15 +50,5 @@ describe('AppLogic', () => {
 
       expect(AppLogic.values).toEqual(expectedLogicValues);
     });
-
-    it('handles case where workplaceSearch undefined', () => {
-      AppLogic.actions.initializeAppData({ isFederatedAuth: false });
-
-      expect(AppLogic.values).toEqual({
-        ...expectedLogicValues,
-        organization: {},
-        account: {},
-      });
-    });
   });
 });
