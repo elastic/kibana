@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { ApiError } from '@elastic/elasticsearch';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
@@ -19,7 +20,10 @@ import {
   TrustedAppsListPageState,
 } from '../state';
 import { TrustedAppsUrlParams } from '../types';
-import { isTrustedAppCreatePendingState } from '../state/type_guards';
+import {
+  isTrustedAppCreateFailureState,
+  isTrustedAppCreatePendingState,
+} from '../state/type_guards';
 
 const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): boolean =>
   pageInfo1.index === pageInfo2.index && pageInfo1.size === pageInfo2.size;
@@ -108,7 +112,11 @@ export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => bo
 export const getTrustedAppCreateData: (
   state: Immutable<TrustedAppsListPageState>
 ) => undefined | Immutable<NewTrustedApp> = ({ createView }) => {
-  if (isTrustedAppCreatePendingState(createView)) {
-    return createView.data;
-  }
+  return isTrustedAppCreatePendingState(createView) && createView.data;
+};
+
+export const getApiCreateErrors: (
+  state: Immutable<TrustedAppsListPageState>
+) => undefined | ApiError = ({ createView }) => {
+  return isTrustedAppCreateFailureState(createView) && createView.data;
 };

@@ -62,7 +62,7 @@ export interface TrustedAppFormState {
   isValid: boolean;
   item: NewTrustedApp;
 }
-export type CreateTrustedAppFormProps = EuiFormProps & {
+export type CreateTrustedAppFormProps = Omit<EuiFormProps, 'component'> & {
   /** if form should be shown full width of parent container */
   fullWidth?: boolean;
   onChange: (state: TrustedAppFormState) => void;

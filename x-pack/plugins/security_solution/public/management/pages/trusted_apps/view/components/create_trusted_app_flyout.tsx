@@ -25,15 +25,19 @@ import {
   TrustedAppFormState,
 } from './create_trusted_app_form';
 import { useTrustedAppsSelector } from '../hooks';
-import { isCreatePending } from '../../store/selectors';
+import { getApiCreateErrors, isCreatePending } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
     const dispatch = useDispatch<(action: AppAction) => void>();
+
     const pendingCreate = useTrustedAppsSelector(isCreatePending);
+    const apiErrors = useTrustedAppsSelector(getApiCreateErrors);
+
     const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
+
     const handleCancelClick = useCallback(() => {
       if (pendingCreate) {
         return;
@@ -72,7 +76,12 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <CreateTrustedAppForm fullWidth onChange={handleFormOnChange} />
+          <CreateTrustedAppForm
+            fullWidth
+            onChange={handleFormOnChange}
+            isInvalid={!!apiErrors}
+            error={apiErrors?.message}
+          />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
