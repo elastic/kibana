@@ -1,10 +1,10 @@
 # search
 
-The `search` service provides you with APIs to query elasticsearch.
+The `search` service provides you with APIs to query Elasticsearch.
 
-The services are split into two parts:
+The services are split into two parts: (1) low-level API; and (2) high-level API.
 
-# low level API
+## Low-level API
 
 With low level API you work directly with elasticsearch DSL
 
@@ -12,9 +12,9 @@ With low level API you work directly with elasticsearch DSL
 const results = await data.search.search(request, params);
 ```
 
-# high level API
+## High-level API
 
-With high level API you work with kibana abstractions around elasticsearch DSL: filters, queries and aggregations.
+Using high-level API you work with Kibana abstractions around Elasticsearch DSL: filters, queries, and aggregations. Provided by the *Search Source* service.
 
 ```typescript
 const search = data.search.searchSource.createEmpty();

@@ -61,7 +61,7 @@ export interface DataPublicPluginSetup {
 }
 
 /**
- * data plugin prewired UI components
+ * Data plugin prewired UI components
  */
 export interface DataPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
@@ -111,7 +111,7 @@ export interface DataPublicPluginStart {
    */
   query: QueryStart;
   /**
-   * prewired ui components
+   * prewired UI components
    * {@link DataPublicPluginStartUi}
    */
   ui: DataPublicPluginStartUi;

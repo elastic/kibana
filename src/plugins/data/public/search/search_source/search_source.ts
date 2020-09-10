@@ -166,9 +166,10 @@ export class SearchSource {
   }
 
   /**
-   * internal, dont use
-   * overrides all fields with the new field array
-   * @param newFields
+   * Internal, do not use. Overrides all search source fields with the new field array.
+   *
+   * @private
+   * @param newFields New field array.
    */
   setFields(newFields: SearchSourceFields) {
     this.fields = newFields;
@@ -208,7 +209,7 @@ export class SearchSource {
   }
 
   /**
-   * deprecated, don't use
+   * @deprecated Don't use.
    */
   create() {
     return new SearchSource({}, this.dependencies);
@@ -296,7 +297,7 @@ export class SearchSource {
   }
 
   /**
-   * get resulting DSL
+   * Returns body contents of the search request, often referred as query DSL.
    */
   async getSearchRequestBody() {
     const searchRequest = await this.flatten();
