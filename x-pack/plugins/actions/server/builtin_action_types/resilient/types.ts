@@ -21,8 +21,8 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
-import { IncidentConfigurationSchema } from './case_schema';
-import { PushToServiceResponse, Comment } from './case_types';
+import { IncidentConfigurationSchema } from '../case/schema';
+import { Comment } from '../case/types';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -141,6 +141,10 @@ export interface GetIncidentTypesHandlerArgs {
 export interface GetSeverityHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionGetSeverityParams;
+}
+
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
 }
 
 export interface ExternalServiceApi {

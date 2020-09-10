@@ -14,16 +14,12 @@ import {
   Incident,
   GetIncidentTypesHandlerArgs,
   GetSeverityHandlerArgs,
+  PushToServiceApiParams,
+  PushToServiceResponse,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import {
-  PushToServiceResponse,
-  TransformFieldsArgs,
-  Comment,
-  EntityInformation,
-} from './case_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({

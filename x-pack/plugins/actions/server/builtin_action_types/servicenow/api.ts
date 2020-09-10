@@ -12,11 +12,11 @@ import {
   ExternalServiceApi,
   PushToServiceApiParams,
   PushToServiceResponse,
+  Incident,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import { TransformFieldsArgs, Comment, EntityInformation } from '../case/common_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
