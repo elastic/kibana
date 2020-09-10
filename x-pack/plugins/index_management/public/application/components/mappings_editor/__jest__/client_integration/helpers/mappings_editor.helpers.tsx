@@ -167,11 +167,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
-  const startEditField = (path: string) => {
+  const startEditField = async (path: string) => {
     const { testSubject } = getFieldAt(path);
-    find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
-    act(() => {
-      jest.advanceTimersByTime(1000);
+    await act(async () => {
+      find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
     });
     component.update();
   };
@@ -181,23 +180,18 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
     });
     component.update();
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
   };
 
-  const showAdvancedSettings = () => {
+  const showAdvancedSettings = async () => {
     if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {
       // Already opened, nothing else to do
       return;
     }
 
-    find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
+    await act(async () => {
+      find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
     });
+
     component.update();
   };
 
