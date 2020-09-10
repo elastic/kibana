@@ -15,6 +15,7 @@ describe('existingFields', () => {
       name,
       isScript: false,
       isAlias: false,
+      isMeta: false,
       path: name.split('.'),
       ...obj,
     };
@@ -101,6 +102,15 @@ describe('existingFields', () => {
 
     expect(result).toEqual(['baz']);
   });
+
+  it('supports meta fields', () => {
+    const result = existingFields(
+      [{ _mymeta: 'abc', ...indexPattern({}, { bar: 'scriptvalue' }) }],
+      [field({ name: '_mymeta', isMeta: true, path: ['_mymeta'] })]
+    );
+
+    expect(result).toEqual(['_mymeta']);
+  });
 });
 
 describe('buildFieldList', () => {
@@ -116,6 +126,7 @@ describe('buildFieldList', () => {
         { name: 'bar' },
         { name: '@bar' },
         { name: 'baz' },
+        { name: '_mymeta' },
       ]),
     },
     references: [],
@@ -142,7 +153,7 @@ describe('buildFieldList', () => {
   ];
 
   it('uses field descriptors to determine the path', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors, []);
     expect(fields.find((f) => f.name === 'baz')).toMatchObject({
       isAlias: false,
       isScript: false,
@@ -152,7 +163,7 @@ describe('buildFieldList', () => {
   });
 
   it('uses aliases to determine the path', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors, []);
     expect(fields.find((f) => f.isAlias)).toMatchObject({
       isAlias: true,
       isScript: false,
@@ -162,7 +173,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports scripted fields', () => {
-    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isAlias: false,
       isScript: true,
@@ -173,13 +184,24 @@ describe('buildFieldList', () => {
     });
   });
 
+  it('supports meta fields', () => {
+    const fields = buildFieldList(indexPattern, mappings, fieldDescriptors, ['_mymeta']);
+    expect(fields.find((f) => f.isMeta)).toMatchObject({
+      isAlias: false,
+      isScript: false,
+      isMeta: true,
+      name: '_mymeta',
+      path: ['_mymeta'],
+    });
+  });
+
   it('handles missing mappings', () => {
-    const fields = buildFieldList(indexPattern, {}, fieldDescriptors);
+    const fields = buildFieldList(indexPattern, {}, fieldDescriptors, []);
     expect(fields.every((f) => f.isAlias === false)).toEqual(true);
   });
 
   it('handles empty fieldDescriptors by skipping multi-mappings', () => {
-    const fields = buildFieldList(indexPattern, mappings, []);
+    const fields = buildFieldList(indexPattern, mappings, [], []);
     expect(fields.find((f) => f.name === 'baz')).toMatchObject({
       isAlias: false,
       isScript: false,
