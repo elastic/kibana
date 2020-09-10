@@ -40,7 +40,11 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  constructor(private client: SavedObjectsClientContract) {}
+  private client: SavedObjectsClientContract;
+
+  constructor(client: SavedObjectsClientContract) {
+    this.client = client;
+  }
 
   async save(vis: Document) {
     const { id, type, references, ...rest } = vis;
@@ -53,6 +57,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       : this.client.create(DOC_TYPE, attributes, {
           references,
         }));
+
     return { ...vis, id: result.id };
   }
 
@@ -85,12 +90,12 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     if (error) {
       throw error;
     }
-    const document = {
+
+    return {
       ...(attributes as SavedObjectAttributes),
       references,
       id,
       type,
     } as Document;
-    return document;
   }
 }
