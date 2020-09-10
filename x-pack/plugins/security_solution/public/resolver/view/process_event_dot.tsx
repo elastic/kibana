@@ -409,16 +409,10 @@ const UnstyledProcessEventDot = React.memo(
             color={colorMap.descriptionText}
             isDisplaying={isShowingDescriptionText}
           >
-            {isOrigin && (
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.analyzedEvent"
-                  defaultMessage="Analyzed Event"
-                />
-                {' · '}
-              </>
-            )}
-            {descriptionText}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.processDescription"
+              defaultMessage={`${isOrigin ? 'Analyzed Event · ' : ''}${descriptionText}`}
+            />
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
