@@ -424,7 +424,7 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     for (const jobId of jobIds) {
       try {
         const jobsInfo = (await callAsInternalUser('ml.jobs', {
-          jobId: jobId,
+          jobId,
         })) as MlJobsResponse;
 
         results[jobId] = jobsInfo.count > 0;
