@@ -9,9 +9,8 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
+import { useFormatUrl } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
-import { navTabs } from '../../../app/home/home_navigations';
 import * as i18n from './translations';
 
 interface UserActionCopyLinkProps {
@@ -20,13 +19,11 @@ interface UserActionCopyLinkProps {
 
 const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
   const { detailName: caseId } = useParams<{ detailName: string }>();
-  const urlSearch = useGetUrlSearch(navTabs.case);
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
 
   const handleAnchorLink = useCallback(() => {
-    copy(
-      `${window.location.origin}${window.location.pathname}#${SecurityPageName.case}/${caseId}/${id}${urlSearch}`
-    );
-  }, [caseId, id, urlSearch]);
+    copy(formatUrl(`#${SecurityPageName.case}/${caseId}/${id}${urlSearch}`));
+  }, [caseId, id, urlSearch, formatUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

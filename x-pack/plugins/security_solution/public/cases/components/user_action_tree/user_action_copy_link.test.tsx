@@ -31,6 +31,23 @@ jest.mock('copy-to-clipboard', () => {
 
 jest.mock('../../../common/components/navigation/use_get_url_search');
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, options?: { path?: string; absolute?: boolean }) =>
+    `${appId}${options?.path ?? ''}`
+);
+
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    }),
+  };
+});
+
 const props = {
   id: 'copy-link-id',
 };
@@ -51,7 +68,7 @@ describe('UserActionCopyLink ', () => {
   it('calls copy clipboard correctly', async () => {
     wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().simulate('click');
     expect(copy).toHaveBeenCalledWith(
-      'http://localhost/#case/case-1/copy-link-id?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))'
+      'securitySolution:case#case/case-1/copy-link-idtimerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))&?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))'
     );
   });
 });
