@@ -8,6 +8,6 @@ import { RuleEcs } from '../rule';
 
 export interface SignalEcs {
   rule?: RuleEcs;
-
   original_time?: string[];
+  status?: string[];
 }

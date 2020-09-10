@@ -38,7 +38,7 @@ import {
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**

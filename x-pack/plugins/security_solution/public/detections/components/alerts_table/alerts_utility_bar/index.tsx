@@ -24,7 +24,7 @@ import {
 } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 

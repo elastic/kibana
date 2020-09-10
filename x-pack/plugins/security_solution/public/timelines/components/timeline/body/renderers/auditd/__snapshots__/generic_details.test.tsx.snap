@@ -3,7 +3,6 @@
 exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetails 1`] = `
 <Details>
   <AuditdGenericLine
-    args={null}
     contextId="contextid-123"
     hostName="suricata-bangalore"
     id="22"
@@ -53,7 +52,6 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
             "how": Array [
               "/usr/sbin/sshd",
             ],
-            "message_type": null,
             "object": Object {
               "primary": Array [
                 "ssh",
@@ -65,10 +63,8 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
                 "user-session",
               ],
             },
-            "sequence": null,
           },
         },
-        "destination": null,
         "event": Object {
           "action": Array [
             "disposed-credentials",
@@ -76,14 +72,10 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
           "category": Array [
             "user-login",
           ],
-          "dataset": null,
-          "id": null,
           "module": Array [
             "auditd",
           ],
-          "severity": null,
         },
-        "geo": null,
         "host": Object {
           "id": Array [
             "0a63559c1acf4c419d979c4b4d8b83ff",
@@ -97,31 +89,20 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
             "suricata-bangalore",
           ],
         },
-        "http": null,
-        "network": null,
         "process": Object {
-          "args": null,
           "executable": Array [
             "/usr/sbin/sshd",
           ],
-          "name": null,
           "pid": Array [
             21202,
           ],
-          "ppid": null,
-          "title": null,
-          "working_directory": null,
         },
-        "source": null,
-        "suricata": null,
         "timestamp": "2019-03-13T03:35:21.614Z",
-        "url": null,
         "user": Object {
           "name": Array [
             "root",
           ],
         },
-        "zeek": null,
       }
     }
     timelineId="test"

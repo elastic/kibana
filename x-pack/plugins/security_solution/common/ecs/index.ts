@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AgentEcs } from './agent';
 import { AuditdEcs } from './auditd';
 import { DestinationEcs } from './destination';
 import { DnsEcs } from './dns';
 import { EndgameEcs } from './endgame';
 import { EventEcs } from './event';
+import { FileEcs } from './file';
 import { GeoEcs } from './geo';
 import { HostEcs } from './host';
 import { NetworkEcs } from './network';
@@ -28,6 +30,7 @@ import { SystemEcs } from './system';
 export interface Ecs {
   _id: string;
   _index?: string;
+  agent?: AgentEcs;
   auditd?: AuditdEcs;
   destination?: DestinationEcs;
   dns?: DnsEcs;
@@ -49,6 +52,6 @@ export interface Ecs {
   user?: UserEcs;
   winlog?: WinlogEcs;
   process?: ProcessEcs;
-  file?: File;
+  file?: FileEcs;
   system?: SystemEcs;
 }

@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { Direction } from '../../../../graphql/types';
+import { Direction } from '../../../../../common/search_strategy';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
@@ -70,7 +70,6 @@ describe('Body', () => {
     onColumnRemoved: jest.fn(),
     onColumnResized: jest.fn(),
     onColumnSorted: jest.fn(),
-    onFilterChange: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),

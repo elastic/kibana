@@ -87,17 +87,14 @@ export const useAllHost = ({
       direction,
       field: sortField,
     },
-    // inspect: isInspected,
   });
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setHostRequest((prevRequest) => ({
+        ...prevRequest,
+        pagination: generateTablePaginationOptions(newActivePage, limit),
+      }));
     },
     [limit]
   );

@@ -16,7 +16,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 

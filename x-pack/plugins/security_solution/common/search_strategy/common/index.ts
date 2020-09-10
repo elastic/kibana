@@ -113,3 +113,13 @@ export interface GenericBuckets {
 }
 
 export type StringOrNumber = string | number;
+
+export interface TimerangeFilter {
+  range: {
+    [timestamp: string]: {
+      gte: string;
+      lte: string;
+      format: string;
+    };
+  };
+}

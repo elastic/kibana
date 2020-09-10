@@ -8,7 +8,8 @@ import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { useSelector, shallowEqual } from 'react-redux';
 
-import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
+import { Ecs } from '../../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';

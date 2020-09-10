@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -16,14 +15,14 @@ import { mockData } from './mock';
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const onChangeItemsPerPage = jest.fn();
-  const getUpdatedAt = () => 1546878704036;
+  const updatedAt = 1546878704036;
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
       const wrapper = shallow(
         <FooterComponent
-          getUpdatedAt={getUpdatedAt}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+          activePage={0}
+          updatedAt={updatedAt}
           height={100}
           id={'timeline-id'}
           isLive={false}
@@ -31,11 +30,10 @@ describe('Footer Timeline Component', () => {
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
+          onChangePage={loadMore}
           serverSideEventCount={mockData.Events.totalCount}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+          totalPages={2}
         />
       );
 
@@ -45,8 +43,8 @@ describe('Footer Timeline Component', () => {
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
         <FooterComponent
-          getUpdatedAt={getUpdatedAt}
-          hasNextPage={false}
+          activePage={0}
+          updatedAt={updatedAt}
           height={100}
           id={'timeline-id'}
           isLive={false}
@@ -54,11 +52,10 @@ describe('Footer Timeline Component', () => {
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
+          onChangePage={loadMore}
           serverSideEventCount={mockData.Events.totalCount}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+          totalPages={2}
         />
       );
 
@@ -69,8 +66,8 @@ describe('Footer Timeline Component', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -78,50 +75,50 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="TimelineMoreButton"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeTruthy();
     });
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
       const wrapper = shallow(
         <PagingControlComponent
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          loadMore={loadMore}
+          activePage={0}
+          totalPages={3}
+          onPageClick={loadMore}
           isLoading={true}
         />
       );
 
-      const loadButton = wrapper.find('[data-test-subj="TimelineMoreButton"]').dive().text();
+      const loadButton = wrapper.text();
       expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeFalsy();
       expect(loadButton).toContain('Loading...');
     });
 
-    test('it renders the Load More in the more load button when fetching new data', () => {
+    test('it renders the Pagination in the more load button when fetching new data', () => {
       const wrapper = shallow(
         <PagingControlComponent
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          loadMore={loadMore}
+          activePage={0}
+          totalPages={3}
+          onPageClick={loadMore}
           isLoading={false}
         />
       );
 
-      const loadButton = wrapper.find('[data-test-subj="TimelineMoreButton"]').dive().text();
-      expect(loadButton).toContain('Load more');
+      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeTruthy();
     });
 
     test('it does NOT render the loadMore button because there is nothing else to fetch', () => {
       const wrapper = mount(
         <FooterComponent
-          getUpdatedAt={getUpdatedAt}
-          hasNextPage={false}
+          activePage={0}
+          updatedAt={updatedAt}
           height={100}
           id={'timeline-id'}
           isLive={false}
@@ -129,23 +126,22 @@ describe('Footer Timeline Component', () => {
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
+          onChangePage={loadMore}
           serverSideEventCount={mockData.Events.totalCount}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+          totalPages={2}
         />
       );
 
-      expect(wrapper.find('[data-test-subj="TimelineMoreButton"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeFalsy();
     });
 
     test('it render popover to select new itemsPerPage in timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -153,11 +149,10 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={1}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );
@@ -172,8 +167,8 @@ describe('Footer Timeline Component', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -181,17 +176,15 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="TimelineMoreButton"]').first().simulate('click');
-
+      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(loadMore).toBeCalled();
     });
 
@@ -199,8 +192,8 @@ describe('Footer Timeline Component', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -208,11 +201,10 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={1}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );
@@ -227,8 +219,8 @@ describe('Footer Timeline Component', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={true}
@@ -236,11 +228,10 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );
@@ -253,8 +244,8 @@ describe('Footer Timeline Component', () => {
       const wrapper = mount(
         <TestProviders>
           <FooterComponent
-            getUpdatedAt={getUpdatedAt}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            activePage={0}
+            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -262,11 +253,10 @@ describe('Footer Timeline Component', () => {
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
+            onChangePage={loadMore}
             serverSideEventCount={mockData.Events.totalCount}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)}
+            totalPages={2}
           />
         </TestProviders>
       );

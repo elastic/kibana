@@ -10,7 +10,7 @@ import React from 'react';
 
 import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';

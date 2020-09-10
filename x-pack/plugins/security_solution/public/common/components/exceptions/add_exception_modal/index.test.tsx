@@ -18,7 +18,8 @@ import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_p
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';

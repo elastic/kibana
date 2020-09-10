@@ -5,7 +5,6 @@
  */
 
 import { noop } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,32 +13,27 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
-  DetailItem,
-  TimelineQueries,
-  TimelineDetailsRequestOptions,
-  TimelineDetailsStrategyResponse,
+  TimelineEventsDetailsItem,
+  TimelineEventsQueries,
+  TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 export interface EventsArgs {
-  detailsData: DetailItem[] | null;
-  loading: boolean;
+  detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface TimelineDetailsProps {
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
-  executeQuery: boolean;
+  skip: boolean;
 }
-
-const getDetailsEvent = memoizeOne(
-  (variables: string, detail: DetailItem[]): DetailItem[] => detail
-);
 
 export const useTimelineDetails = ({
   docValueFields,
   indexName,
   eventId,
-  executeQuery,
+  skip,
 }: TimelineDetailsProps): [boolean, EventsArgs['detailsData']] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -47,14 +41,13 @@ export const useTimelineDetails = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [timelineDetailsRequest, setTimelineDetailsRequest] = useState<
-    TimelineDetailsRequestOptions
+    TimelineEventsDetailsRequestOptions
   >({
     defaultIndex,
     docValueFields,
-    executeQuery,
     indexName,
     eventId,
-    factoryQueryType: TimelineQueries.details,
+    factoryQueryType: TimelineEventsQueries.details,
   });
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
@@ -62,25 +55,26 @@ export const useTimelineDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            request,
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+              abortSignal: abortCtrl.current.signal,
+            }
+          )
           .subscribe({
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
                   setLoading(false);
-                  setTimelineDetailsResponse(
-                    getDetailsEvent(JSON.stringify(timelineDetailsRequest), response.data || [])
-                  );
+                  setTimelineDetailsResponse(response.data || []);
                 }
                 searchSubscription$.unsubscribe();
               } else if (response.isPartial && !response.isRunning) {
@@ -105,7 +99,7 @@ export const useTimelineDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts, timelineDetailsRequest]
+    [data.search, notifications.toasts]
   );
 
   useEffect(() => {
@@ -117,16 +111,16 @@ export const useTimelineDetails = ({
         indexName,
         eventId,
       };
-      if (!deepEqual(prevRequest, myRequest)) {
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName]);
+  }, [defaultIndex, docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
-    if (executeQuery) timelineDetailsSearch(timelineDetailsRequest);
-  }, [executeQuery, timelineDetailsRequest, timelineDetailsSearch]);
+    timelineDetailsSearch(timelineDetailsRequest);
+  }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];
 };

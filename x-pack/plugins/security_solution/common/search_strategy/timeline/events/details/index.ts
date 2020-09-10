@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe } from '../../common';
-import { TimelineRequestOptionsPaginated } from '..';
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { Inspect, Maybe } from '../../../common';
+import { TimelineRequestOptionsPaginated } from '../..';
 
-export interface DetailItem {
+export interface TimelineEventsDetailsItem {
   field: string;
   values?: Maybe<string[]>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   originalValue?: Maybe<any>;
 }
 
-export interface TimelineDetailsStrategyResponse extends IEsSearchResponse {
-  data?: Maybe<DetailItem[]>;
+export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse {
+  data?: Maybe<TimelineEventsDetailsItem[]>;
   inspect?: Maybe<Inspect>;
 }
 
-export interface TimelineDetailsRequestOptions extends Partial<TimelineRequestOptionsPaginated> {
+export interface TimelineEventsDetailsRequestOptions
+  extends Partial<TimelineRequestOptionsPaginated> {
   defaultIndex: string[];
-  executeQuery: boolean;
   indexName: string;
   eventId: string;
 }

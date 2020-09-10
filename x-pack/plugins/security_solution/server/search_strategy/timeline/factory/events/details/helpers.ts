@@ -6,8 +6,8 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
-import { DetailItem } from '../../../../../common/search_strategy/timeline';
-import { baseCategoryFields } from '../../../../utils/beat_schema/8.0.0';
+import { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy/timeline';
+import { baseCategoryFields } from '../../../../../utils/beat_schema/8.0.0';
 
 export const getFieldCategory = (field: string): string => {
   const fieldCategory = field.split('.')[0];
@@ -21,8 +21,8 @@ export const getDataFromHits = (
   sources: EventSource,
   category?: string,
   path?: string
-): DetailItem[] =>
-  Object.keys(sources).reduce<DetailItem[]>((accumulator, source) => {
+): TimelineEventsDetailsItem[] =>
+  Object.keys(sources).reduce<TimelineEventsDetailsItem[]>((accumulator, source) => {
     const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
@@ -43,7 +43,7 @@ export const getDataFromHits = (
               })
             : [item],
           originalValue: item,
-        } as DetailItem,
+        } as TimelineEventsDetailsItem,
       ];
     } else if (isObject(item)) {
       return [

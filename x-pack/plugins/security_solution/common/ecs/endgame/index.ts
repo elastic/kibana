@@ -5,29 +5,29 @@
  */
 
 export interface EndgameEcs {
-  exit_code?: number;
+  exit_code?: number[];
 
-  file_name?: string;
+  file_name?: string[];
 
-  file_path?: string;
+  file_path?: string[];
 
-  logon_type?: number;
+  logon_type?: number[];
 
-  parent_process_name?: string;
+  parent_process_name?: string[];
 
-  pid?: number;
+  pid?: number[];
 
-  process_name?: string;
+  process_name?: string[];
 
-  subject_domain_name?: string;
+  subject_domain_name?: string[];
 
-  subject_logon_id?: string;
+  subject_logon_id?: string[];
 
-  subject_user_name?: string;
+  subject_user_name?: string[];
 
-  target_domain_name?: string;
+  target_domain_name?: string[];
 
-  target_logon_id?: string;
+  target_logon_id?: string[];
 
-  target_user_name?: string;
+  target_user_name?: string[];
 }

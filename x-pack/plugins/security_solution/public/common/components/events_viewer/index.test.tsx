@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
@@ -19,6 +18,11 @@ import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
+import { useTimelineEvents } from '../../../timelines/containers';
+
+jest.mock('../../../timelines/containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
@@ -41,17 +45,17 @@ const to = '2019-08-26T22:10:56.791Z';
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();
 
+  (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 
@@ -66,14 +70,12 @@ describe('StatefulEventsViewer', () => {
   test('it renders InspectButtonContainer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer
+          defaultModel={eventsDefaultModel}
+          end={to}
+          id={'test-stateful-events-viewer'}
+          start={from}
+        />
       </TestProviders>
     );
 

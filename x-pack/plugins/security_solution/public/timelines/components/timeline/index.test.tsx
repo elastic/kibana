@@ -20,7 +20,6 @@ import { mocksSource } from '../../../common/containers/source/mock';
 import { wait as waitFor } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { Direction } from '../../../graphql/types';
-import { timelineQuery } from '../../containers/index.gql_query';
 import { timelineActions } from '../../store/timeline';
 
 import { Sort } from './body/sort';
@@ -28,6 +27,11 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { useTimelineEvents } from '../../containers/index';
+
+jest.mock('../../containers/index', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
@@ -63,12 +67,10 @@ describe('StatefulTimeline', () => {
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
 
-  const mocks = [
-    { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
-    ...mocksSource,
-  ];
+  const mocks = mocksSource;
 
   beforeEach(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
     props = {
       addProvider: timelineActions.addProvider,
       columns: defaultHeaders,
