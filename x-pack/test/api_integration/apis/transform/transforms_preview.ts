@@ -26,7 +26,10 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   function getTransformPreviewConfig() {
-    const { dest, ...config } = generateTransformConfig('the-dummy-id');
+    // passing in an empty string for transform id since we will not use
+    // it as part of the config request schema. Destructuring will
+    // remove the `dest` part of the config.
+    const { dest, ...config } = generateTransformConfig('');
     return config as PostTransformsPreviewRequestSchema;
   }
 
