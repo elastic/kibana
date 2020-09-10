@@ -9,23 +9,16 @@ import cytoscape from 'cytoscape';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCodeEditor,
-  EuiDataGrid,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  ANALYSIS_CONFIG_TYPE,
-  getAnalysisType,
-  getDependentVar,
-  getPredictionFieldName,
-  loadEvalData,
-} from '../../../common/analytics';
-import { getColumnData } from '../../analytics_exploration/components/classification_exploration/column_data';
 import { CytoscapeContext } from './cytoscape';
 import { JOB_MAP_NODE_TYPES } from '../common';
 import { DeleteButton } from './delete_button';
@@ -36,17 +29,22 @@ interface Props {
   getNodeData: any;
 }
 
+// TODO move list items to shared place as we use them in the details bit of the wizard
+export interface ListItems {
+  title: string;
+  description: string | JSX.Element;
+}
+
+function getListItems(details: object): ListItems[] {
+  return Object.entries(details).map(([key, value]) => ({
+    title: key,
+    description: typeof value === 'object' ? JSON.stringify(value, null, 2) : value,
+  }));
+}
+
 export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>(undefined);
-  const [evalData, setEvalData] = useState<any>(undefined);
-  const [columns, setColumns] = useState<any>([]);
-  const [popoverContents, setPopoverContents] = useState<any>([]);
-  const [columnsData, setColumnsData] = useState<any>([]);
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(() =>
-    columns.map(({ id }: { id: string }) => id)
-  );
 
   const cy = useContext(CytoscapeContext);
   const deselect = useCallback(() => {
@@ -60,44 +58,6 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   const nodeId = selectedNode?.data('id');
   const nodeLabel = selectedNode?.data('label');
   const nodeType = selectedNode?.data('type');
-
-  const fetchEvalData = async () => {
-    try {
-      const jobConfig = details[nodeId];
-      const index = Array.isArray(jobConfig?.dest?.index)
-        ? jobConfig?.dest?.index[0]
-        : jobConfig?.dest?.index;
-      const dependentVariable = getDependentVar(jobConfig?.analysis);
-      const resultsField = jobConfig?.dest?.results_field;
-      const predictionFieldName = getPredictionFieldName(jobConfig?.analysis);
-      const jobType = getAnalysisType(jobConfig?.analysis) as ANALYSIS_CONFIG_TYPE;
-
-      const results = await loadEvalData({
-        isTraining: false,
-        index,
-        dependentVariable,
-        resultsField,
-        predictionFieldName,
-        jobType,
-        requiresKeyword: true,
-      });
-
-      if (results.error) {
-        // eslint-disable-next-line
-        console.log('EVAL ERROR ', results.error);
-      }
-
-      if (results.success && results.eval) {
-        const confusionMatrix =
-          // @ts-ignore
-          results.eval.classification?.multiclass_confusion_matrix?.confusion_matrix;
-        setEvalData(confusionMatrix);
-      }
-    } catch (error) {
-      // eslint-disable-next-line
-      console.log('--- ERROR YO ----', error); // remove
-    }
-  };
 
   // Set up Cytoscape event handlers
   useEffect(() => {
@@ -121,53 +81,9 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
     };
   }, [cy, deselect]);
 
-  useEffect(() => {
-    if (evalData && evalData.length > 0) {
-      const { columns: derivedColumns, columnData } = getColumnData(evalData);
-      // Initialize all columns as visible
-      setVisibleColumns(() => derivedColumns.map(({ id }: { id: string }) => id));
-      setColumns(derivedColumns);
-      setColumnsData(columnData);
-      setPopoverContents({
-        numeric: ({
-          cellContentsElement,
-          children,
-        }: {
-          cellContentsElement: any;
-          children: any;
-        }) => {
-          const rowIndex = children?.props?.rowIndex;
-          const colId = children?.props?.columnId;
-          const gridItem = columnData[rowIndex];
-
-          if (gridItem !== undefined) {
-            const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
-            return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
-          }
-
-          return cellContentsElement.textContent;
-        },
-      });
-    }
-  }, [evalData]);
-
-  useEffect(() => {
-    setEvalData([]);
-    if (
-      selectedNode !== undefined &&
-      selectedNode.data().type === 'analytics' &&
-      selectedNode.data().analysisType !== 'outlier_detection'
-    ) {
-      fetchEvalData();
-    }
-  }, [selectedNode]);
-
   if (showFlyout === false) {
     return null;
   }
-
-  // @ts-ignore
-  const content = JSON.stringify(details[nodeId], null, 2);
 
   const nodeDataButton =
     analyticsId !== nodeLabel && nodeType === JOB_MAP_NODE_TYPES.ANALYTICS ? (
@@ -184,106 +100,52 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
       </EuiButtonEmpty>
     ) : null;
 
-  const renderCellValue = ({
-    rowIndex,
-    columnId,
-    setCellProps,
-  }: {
-    rowIndex: number;
-    columnId: string;
-    setCellProps: any;
-  }) => {
-    const cellValue = columnsData[rowIndex][columnId];
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      setCellProps({
-        style: {
-          backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
-        },
-      });
-    }, [rowIndex, columnId, setCellProps]);
-    return (
-      <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
-    );
-  };
-
   return (
-    <EuiFlyout
-      size="m"
-      onClose={() => setShowFlyout(false)}
-      data-test-subj="mlAnalyticsJobMapFlyout"
-    >
-      <EuiFlyoutHeader>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h3 data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
-                {i18n.translate('xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle', {
-                  defaultMessage: 'Details for {type} {id}',
-                  values: { id: nodeLabel, type: nodeType },
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DeleteButton id={nodeLabel} type={nodeType} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {evalData !== undefined && evalData.length > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <span>
-                    {i18n.translate('xpack.ml.dataframe.analyticsMap.confusionMatrixHelpText', {
-                      defaultMessage: 'Normalized confusion matrix',
-                    })}
-                  </span>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiDataGrid
-                  data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                  aria-label="Classification confusion matrix"
-                  columns={columns}
-                  columnVisibility={{ visibleColumns, setVisibleColumns }}
-                  rowCount={columnsData.length}
-                  renderCellValue={renderCellValue}
-                  inMemory={{ level: 'sorting' }}
-                  toolbarVisibility={false}
-                  popoverContents={popoverContents}
-                  gridStyle={{ rowHover: 'none' }}
-                />
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiCodeEditor
-              mode="json"
-              width="100%"
-              value={content}
-              setOptions={{
-                fontSize: '12px',
-              }}
-              theme="textmate"
-              isReadOnly
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analyticsMap.flyout.codeEditorAriaLabel',
-                {
-                  defaultMessage: 'Analytics job map node details',
+    <EuiPortal>
+      <EuiFlyout
+        ownFocus
+        size="m"
+        onClose={() => setShowFlyout(false)}
+        data-test-subj="mlAnalyticsJobMapFlyout"
+      >
+        <EuiFlyoutHeader>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3 data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
+                  {i18n.translate('xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle', {
+                    defaultMessage: 'Details for {type} {id}',
+                    values: { id: nodeLabel, type: nodeType },
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                compressed
+                type="column"
+                listItems={
+                  nodeType === 'index-pattern'
+                    ? getListItems(details[nodeId][nodeLabel])
+                    : getListItems(details[nodeId])
                 }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DeleteButton id={nodeLabel} type={nodeType} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };
