@@ -62,7 +62,7 @@ export const endpointPackageVersion = createSelector(
 /**
  * Returns the index patterns for the SearchBar to use for autosuggest
  */
-export const patterns = (state: Immutable<EndpointState>): IIndexPattern[] => state.patterns;
+export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
 export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
@@ -232,11 +232,12 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
   ({ admin_query: adminQuery }) => {
     const decodedQuery: Query = { query: '', language: 'kuery' };
     if (adminQuery) {
-      const urlDecodedQuery = decode(adminQuery);
-      if (typeof urlDecodedQuery.query === 'string') {
+      const urlDecodedQuery = (decode(adminQuery) as unknown) as Query;
+      if (urlDecodedQuery && typeof urlDecodedQuery.query === 'string') {
         decodedQuery.query = urlDecodedQuery.query;
       }
       if (
+        urlDecodedQuery &&
         typeof urlDecodedQuery.language === 'string' &&
         (urlDecodedQuery.language === 'kuery' || urlDecodedQuery.language === 'lucene')
       ) {

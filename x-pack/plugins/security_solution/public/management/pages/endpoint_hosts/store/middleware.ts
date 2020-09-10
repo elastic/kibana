@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decode } from 'rison-node';
 import { HttpStart } from 'kibana/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
