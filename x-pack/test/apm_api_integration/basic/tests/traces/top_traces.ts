@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy, omit } from 'lodash';
+import { expectToMatchSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import expectTopTraces from './expectation/top_traces.expectation.json';
 
@@ -19,13 +20,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('Top traces', () => {
     describe('when data is not loaded ', () => {
-      it('handles empty state', async () => {
+      it('handles empty state', async function () {
         const response = await supertest.get(
           `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
+        expectToMatchSnapshot(response.body);
       });
     });
 

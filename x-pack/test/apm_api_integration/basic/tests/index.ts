@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import * as matchSnapshot from '../../common/match_snapshot';
 
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (basic)', function () {
+    beforeEach(matchSnapshot.init);
+    afterEach(matchSnapshot.teardown);
+
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));

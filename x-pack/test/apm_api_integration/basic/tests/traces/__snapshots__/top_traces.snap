@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM specs (basic) Traces Top traces when data is not loaded  handles empty state 1`] = `
+Object {
+  "bucketSize": 1000,
+  "isAggregationAccurate": true,
+  "items": Array [],
+}
+`;
