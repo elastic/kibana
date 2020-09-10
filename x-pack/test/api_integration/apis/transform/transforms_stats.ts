@@ -24,8 +24,8 @@ export default ({ getService }: FtrProviderContext) => {
   const expected = {
     apiTransformTransforms: {
       count: 2,
-      transform1: { id: 'the-transform-1', state: TRANSFORM_STATE.STOPPED },
-      transform2: { id: 'the-transform-2', state: TRANSFORM_STATE.STOPPED },
+      transform1: { id: 'transform-test-stats-1', state: TRANSFORM_STATE.STOPPED },
+      transform2: { id: 'transform-test-stats-2', state: TRANSFORM_STATE.STOPPED },
       typeOfStats: 'object',
       typeOfCheckpointing: 'object',
     },
@@ -62,8 +62,8 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
-      await createTransform('the-transform-1');
-      await createTransform('the-transform-2');
+      await createTransform('transform-test-stats-1');
+      await createTransform('transform-test-stats-2');
     });
 
     after(async () => {

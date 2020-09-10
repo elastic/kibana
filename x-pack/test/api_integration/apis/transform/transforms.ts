@@ -22,14 +22,14 @@ export default ({ getService }: FtrProviderContext) => {
   const expected = {
     apiTransformTransforms: {
       count: 2,
-      transform1: { id: 'the-transform-1', destIndex: 'user-the-transform-1' },
-      transform2: { id: 'the-transform-2', destIndex: 'user-the-transform-2' },
+      transform1: { id: 'transform-test-get-1', destIndex: 'user-transform-test-get-1' },
+      transform2: { id: 'transform-test-get-2', destIndex: 'user-transform-test-get-2' },
       typeOfVersion: 'string',
       typeOfCreateTime: 'number',
     },
     apiTransformTransformsTransformId: {
       count: 1,
-      transform1: { id: 'the-transform-1', destIndex: 'user-the-transform-1' },
+      transform1: { id: 'transform-test-get-1', destIndex: 'user-transform-test-get-1' },
       typeOfVersion: 'string',
       typeOfCreateTime: 'number',
     },
@@ -82,8 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
-      await createTransform('the-transform-1');
-      await createTransform('the-transform-2');
+      await createTransform('transform-test-get-1');
+      await createTransform('transform-test-get-2');
     });
 
     after(async () => {
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('/transforms/{transformId}', function () {
       it('should return a specific transform configuration for super-user', async () => {
         const { body } = await supertest
-          .get('/api/transform/transforms/the-transform-1')
+          .get('/api/transform/transforms/transform-test-get-1')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a specific transform configuration transform view-only user', async () => {
         const { body } = await supertest
-          .get(`/api/transform/transforms/the-transform-1`)
+          .get(`/api/transform/transforms/transform-test-get-1`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)

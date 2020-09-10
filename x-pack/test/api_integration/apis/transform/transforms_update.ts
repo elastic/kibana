@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const expected = {
     transformOriginalConfig: {
       count: 1,
-      id: 'the-transform-1',
+      id: 'transform-test-update-1',
       source: {
         index: ['ft_farequote'],
         query: { match_all: {} },
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
-      await createTransform('the-transform-1');
+      await createTransform('transform-test-update-1');
     });
 
     after(async () => {
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should update a transform', async () => {
       // assert the original transform for comparison
       const { body: transformOriginalBody } = await supertest
-        .get('/api/transform/transforms/the-transform-1')
+        .get('/api/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // update the transform and assert the response
       const { body: transformUpdateResponseBody } = await supertest
-        .post('/api/transform/transforms/the-transform-1/_update')
+        .post('/api/transform/transforms/transform-test-update-1/_update')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // assert the updated transform for comparison
       const { body: transformUpdatedBody } = await supertest
-        .get('/api/transform/transforms/the-transform-1')
+        .get('/api/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 403 for transform view-only user', async () => {
       await supertest
-        .post('/api/transform/transforms/the-transform-1/_update')
+        .post('/api/transform/transforms/transform-test-update-1/_update')
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
