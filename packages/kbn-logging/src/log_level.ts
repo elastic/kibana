@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assertNever } from '../../utils';
+import { assertNever } from './utils';
 
 /**
  * Possible log level string values.

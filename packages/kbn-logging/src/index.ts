@@ -17,29 +17,9 @@
  * under the License.
  */
 
-export {
-  DisposableAppender,
-  Appender,
-  LogRecord,
-  Layout,
-  LoggerFactory,
-  LogMeta,
-  Logger,
-  LogLevelId,
-  LogLevel,
-} from '@kbn/logging';
-export {
-  config,
-  LoggingConfigType,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging_config';
-export { LoggingSystem, ILoggingSystem } from './logging_system';
-export {
-  InternalLoggingServiceSetup,
-  LoggingServiceSetup,
-  LoggingService,
-} from './logging_service';
-export { appendersSchema, AppenderConfigType } from './appenders/appenders';
+export { LogLevel, LogLevelId } from './log_level';
+export { LogRecord } from './log_record';
+export { Logger, LogMeta } from './logger';
+export { LoggerFactory } from './logger_factory';
+export { Layout } from './layout';
+export { Appender, DisposableAppender } from './appenders';

@@ -17,29 +17,12 @@
  * under the License.
  */
 
-export {
-  DisposableAppender,
-  Appender,
-  LogRecord,
-  Layout,
-  LoggerFactory,
-  LogMeta,
-  Logger,
-  LogLevelId,
-  LogLevel,
-} from '@kbn/logging';
-export {
-  config,
-  LoggingConfigType,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging_config';
-export { LoggingSystem, ILoggingSystem } from './logging_system';
-export {
-  InternalLoggingServiceSetup,
-  LoggingServiceSetup,
-  LoggingService,
-} from './logging_service';
-export { appendersSchema, AppenderConfigType } from './appenders/appenders';
+/**
+ * Can be used in switch statements to ensure we perform exhaustive checks, see
+ * https://www.typescriptlang.org/docs/handbook/advanced-types.html#exhaustiveness-checking
+ *
+ * @public
+ */
+export function assertNever(x: never): never {
+  throw new Error(`Unexpected object: ${x}`);
+}

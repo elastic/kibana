@@ -18,11 +18,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import { createWriteStream, WriteStream } from 'fs';
 
-import { Layout, Layouts, LayoutConfigType } from '../../layouts/layouts';
-import { LogRecord } from '../../log_record';
-import { DisposableAppender } from '../appenders';
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 export interface FileAppenderConfig {
   kind: 'file';
