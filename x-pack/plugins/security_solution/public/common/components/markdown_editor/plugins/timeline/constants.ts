@@ -6,3 +6,4 @@
 
 export const ID = 'timeline';
 export const PREFIX = `!{${ID}`;
+export const OLD_PREFIX = `[`;

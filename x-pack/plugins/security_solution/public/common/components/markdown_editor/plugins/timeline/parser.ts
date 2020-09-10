@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash';
 import { Plugin } from '@elastic/eui/node_modules/unified';
 import { RemarkTokenizer } from '@elastic/eui';
-import { ID, PREFIX } from './constants';
+import { ID, PREFIX, OLD_PREFIX } from './constants';
 import { TimelineConfiguration } from './types';
 
 const START_POS = PREFIX.length;
@@ -26,10 +26,87 @@ export const TimelineParser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
+  let oldFormat = false;
 
-  const tokenizeTimeline: RemarkTokenizer = function tokenizeTimeline(eat, value, silent) {
-    if (value.startsWith(PREFIX) === false) return false;
+  const parseOldFormat: RemarkTokenizer = function (eat, value, silent) {
+    let index = 0;
+    const nextChar = value[index];
 
+    if (nextChar !== '[') return false; // this isn't actually a  timeline
+
+    if (silent) {
+      return true;
+    }
+
+    function readArg(open: string, close: string) {
+      if (value[index] !== open) throw new Error('Expected left bracket');
+      index++;
+
+      let body = '';
+      let openBrackets = 0;
+
+      for (; index < value.length; index++) {
+        const char = value[index];
+
+        if (char === close && openBrackets === 0) {
+          index++;
+          return body;
+        } else if (char === close) {
+          openBrackets--;
+        } else if (char === open) {
+          openBrackets++;
+        }
+
+        body += char;
+      }
+
+      return '';
+    }
+
+    const timelineTitle = readArg('[', ']');
+    const timelineUrl = readArg('(', ')');
+
+    const now = eat.now();
+
+    if (!timelineTitle) {
+      this.file.info('No timeline name found', {
+        line: now.line,
+        column: now.column,
+      });
+    }
+
+    if (!timelineUrl) {
+      this.file.info('No timeline url found', {
+        line: now.line,
+        column: now.column + 2 + timelineUrl.length,
+      });
+    }
+
+    if (!timelineTitle || !timelineUrl) return false;
+
+    const timelineId = timelineUrl.split('timeline=(id:')[1].split("'")[1] ?? '';
+    const graphEventId = timelineUrl.includes('graphEventId:')
+      ? timelineUrl.split('graphEventId:')[1].split("'")[1] ?? ''
+      : '';
+
+    if (!timelineId) {
+      this.file.info('No timeline id found', {
+        line: now.line,
+        column: now.column + 2 + timelineId.length,
+      });
+    }
+
+    if (!timelineId) return false;
+
+    return eat(`[${timelineTitle}](${timelineUrl})`)({
+      type: ID,
+      id: timelineId,
+      title: timelineTitle,
+      graphEventId,
+    });
+  };
+
+  const parseNewFormat: RemarkTokenizer = function (eat, value, silent) {
     const nextChar = value[START_POS];
 
     if (nextChar !== '{' && nextChar !== '}') return false; // this isn't actually a timeline
@@ -85,10 +162,21 @@ export const TimelineParser: Plugin = function () {
     });
   };
 
+  const tokenizeTimeline: RemarkTokenizer = function tokenizeTimeline(eat, value, silent) {
+    if (value.startsWith(PREFIX) === false && value.startsWith(OLD_PREFIX) === false) return false;
+
+    if (value.startsWith(OLD_PREFIX)) {
+      oldFormat = true;
+      parseOldFormat.call(this, eat, value, silent);
+    }
+
+    parseNewFormat.call(this, eat, value, silent);
+  };
+
   tokenizeTimeline.locator = (value: string, fromIndex: number) => {
-    return value.indexOf(PREFIX, fromIndex);
+    return value.indexOf(oldFormat ? OLD_PREFIX : PREFIX, fromIndex);
   };
 
   tokenizers.timeline = tokenizeTimeline;
-  methods.splice(methods.indexOf('text'), 0, ID);
+  methods.splice(methods.indexOf('url'), 0, ID);
 };
