@@ -49,7 +49,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       scale: 'ratio',
       sourceField: field.name,
       params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
+        previousColumn?.dataType === 'number' &&
+        previousColumn.params &&
+        'format' in previousColumn.params
+          ? previousColumn.params
+          : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
