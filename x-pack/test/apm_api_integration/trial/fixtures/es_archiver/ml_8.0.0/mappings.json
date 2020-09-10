@@ -2,87 +2,6 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".ml-annotations-read": {
-        "is_hidden": true
-      },
-      ".ml-annotations-write": {
-        "is_hidden": true
-      }
-    },
-    "index": ".ml-annotations-6",
-    "mappings": {
-      "_meta": {
-        "version": "8.0.0"
-      },
-      "properties": {
-        "annotation": {
-          "type": "text"
-        },
-        "by_field_name": {
-          "type": "keyword"
-        },
-        "by_field_value": {
-          "type": "keyword"
-        },
-        "create_time": {
-          "type": "date"
-        },
-        "create_username": {
-          "type": "keyword"
-        },
-        "detector_index": {
-          "type": "integer"
-        },
-        "end_timestamp": {
-          "type": "date"
-        },
-        "event": {
-          "type": "keyword"
-        },
-        "job_id": {
-          "type": "keyword"
-        },
-        "modified_time": {
-          "type": "date"
-        },
-        "modified_username": {
-          "type": "keyword"
-        },
-        "over_field_name": {
-          "type": "keyword"
-        },
-        "over_field_value": {
-          "type": "keyword"
-        },
-        "partition_field_name": {
-          "type": "keyword"
-        },
-        "partition_field_value": {
-          "type": "keyword"
-        },
-        "timestamp": {
-          "type": "date"
-        },
-        "type": {
-          "type": "keyword"
-        }
-      }
-    },
-    "settings": {
-      "index": {
-        "auto_expand_replicas": "0-1",
-        "hidden": "true",
-        "number_of_replicas": "1",
-        "number_of_shards": "1"
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "aliases": {
       ".ml-anomalies-.write-android_homepage_high_latency_by_geo": {
         "is_hidden": true
       },
@@ -96,6 +15,9 @@
         "is_hidden": true
       },
       ".ml-anomalies-.write-auto_http_0x73c4bc9426fb6908_high_latency_by_geo": {
+        "is_hidden": true
+      },
+      ".ml-anomalies-.write-auto_http_0xa1e2426c5b01459d_high_latency_by_geo": {
         "is_hidden": true
       },
       ".ml-anomalies-.write-kibana-logs-ui-default-default-log-entry-categories-count": {
@@ -154,6 +76,17 @@
             "job_id": {
               "boost": 1,
               "value": "auto_http_0x73c4bc9426fb6908_high_latency_by_geo"
+            }
+          }
+        },
+        "is_hidden": true
+      },
+      ".ml-anomalies-auto_http_0xa1e2426c5b01459d_high_latency_by_geo": {
+        "filter": {
+          "term": {
+            "job_id": {
+              "boost": 1,
+              "value": "auto_http_0xa1e2426c5b01459d_high_latency_by_geo"
             }
           }
         },
@@ -1194,36 +1127,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "max_result_window": "10000",
-        "number_of_replicas": "1",
-        "number_of_shards": "1"
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "aliases": {
-      ".ml-state-write": {
-        "is_hidden": true
-      }
-    },
-    "index": ".ml-state-000001",
-    "mappings": {
-      "_meta": {
-        "version": "8000099"
-      },
-      "enabled": false
-    },
-    "settings": {
-      "index": {
-        "auto_expand_replicas": "0-1",
-        "hidden": "true",
-        "lifecycle": {
-          "name": "ml-size-based-ilm-policy",
-          "rollover_alias": ".ml-state-write"
-        },
         "number_of_replicas": "1",
         "number_of_shards": "1"
       }
@@ -63031,6 +62934,14 @@
                       "type": "scaled_float"
                     },
                     "domInteractive": {
+                      "scaling_factor": 1000000,
+                      "type": "scaled_float"
+                    },
+                    "firstContentfulPaint": {
+                      "scaling_factor": 1000000,
+                      "type": "scaled_float"
+                    },
+                    "largestContentfulPaint": {
                       "scaling_factor": 1000000,
                       "type": "scaled_float"
                     },
