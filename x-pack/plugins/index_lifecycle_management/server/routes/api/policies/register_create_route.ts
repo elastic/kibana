@@ -50,6 +50,12 @@ const allocateSchema = schema.maybe(
   })
 );
 
+const forcemergeSchema = schema.maybe(
+  schema.object({
+    max_num_segments: schema.number(),
+  })
+);
+
 const hotPhaseSchema = schema.object({
   min_age: minAgeSchema,
   actions: schema.object({
@@ -62,6 +68,7 @@ const hotPhaseSchema = schema.object({
         max_docs: schema.maybe(schema.number()),
       })
     ),
+    forcemerge: forcemergeSchema,
   }),
 });
 
@@ -78,11 +85,7 @@ const warmPhaseSchema = schema.maybe(
           number_of_shards: schema.number(),
         })
       ),
-      forcemerge: schema.maybe(
-        schema.object({
-          max_num_segments: schema.number(),
-        })
-      ),
+      forcemerge: forcemergeSchema,
     }),
   })
 );

@@ -20,6 +20,8 @@ export const defaultNewHotPhase: HotPhase = {
   selectedMaxAgeUnits: 'd',
   selectedMaxSizeStored: '50',
   selectedMaxSizeStoredUnits: 'gb',
+  forceMergeEnabled: false,
+  selectedForceMergeSegments: '',
   phaseIndexPriority: '100',
   selectedMaxDocuments: '',
 };

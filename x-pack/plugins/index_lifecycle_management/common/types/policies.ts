@@ -41,6 +41,9 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_age?: string;
       max_docs?: number;
     };
+    forcemerge?: {
+      max_num_segments: number;
+    };
     set_priority?: {
       priority: number | null;
     };
@@ -131,7 +134,15 @@ export interface PhaseWithIndexPriority {
   phaseIndexPriority: string;
 }
 
-export interface HotPhase extends CommonPhaseSettings, PhaseWithIndexPriority {
+export interface PhaseWithForcemergeAction {
+  forceMergeEnabled: boolean;
+  selectedForceMergeSegments: string;
+}
+
+export interface HotPhase
+  extends CommonPhaseSettings,
+    PhaseWithIndexPriority,
+    PhaseWithForcemergeAction {
   rolloverEnabled: boolean;
   selectedMaxSizeStored: string;
   selectedMaxSizeStoredUnits: string;
@@ -144,12 +155,11 @@ export interface WarmPhase
   extends CommonPhaseSettings,
     PhaseWithMinAge,
     PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
+    PhaseWithIndexPriority,
+    PhaseWithForcemergeAction {
   warmPhaseOnRollover: boolean;
   shrinkEnabled: boolean;
   selectedPrimaryShardCount: string;
-  forceMergeEnabled: boolean;
-  selectedForceMergeSegments: string;
 }
 
 export interface ColdPhase
