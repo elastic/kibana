@@ -151,7 +151,7 @@ export const FrozenPhase: FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.frozenPhase.numberOfReplicasDescription',
                 {
                   defaultMessage:
-                    'Set the number of replicas. Remains the same as the previous tier by default.',
+                    'Set the number of replicas. Remains the same as the previous phase by default.',
                 }
               )}
               switchProps={{
