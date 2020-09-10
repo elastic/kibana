@@ -6,28 +6,35 @@
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
+import { JsonObject } from '../../../../../infra/common/typed_json';
+import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
   statusAgentIDs?: string[];
 }
 
-export async function kibanaRequestToMetadataListESQuery(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext,
-  index: string,
-  queryBuilderOptions?: QueryBuilderOptions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<Record<string, any>> {
-  const pagingProperties = await getPagingProperties(request, endpointAppContext);
+export interface MetadataQueryConfig {
+  index: string;
+  elasticAgentIdProperty: string;
+  hostIdProperty: string;
+  sortProperty: JsonObject[];
+  extraBodyProperties?: JsonObject;
+}
+
+export function metadataQueryConfigV1(): MetadataQueryConfig {
   return {
-    body: {
-      query: buildQueryBody(
-        request,
-        queryBuilderOptions?.unenrolledAgentIds!,
-        queryBuilderOptions?.statusAgentIDs!
-      ),
+    index: metadataIndexPattern,
+    elasticAgentIdProperty: 'elastic.agent.id',
+    hostIdProperty: 'host.id',
+    sortProperty: [
+      {
+        'event.created': {
+          order: 'desc',
+        },
+      },
+    ],
+    extraBodyProperties: {
       collapse: {
         field: 'host.id',
         inner_hits: {
@@ -43,17 +50,34 @@ export async function kibanaRequestToMetadataListESQuery(
           },
         },
       },
-      sort: [
-        {
-          'event.created': {
-            order: 'desc',
-          },
-        },
-      ],
+    },
+  };
+}
+
+export async function kibanaRequestToMetadataListESQuery(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext,
+  metadataConfig: MetadataQueryConfig,
+  queryBuilderOptions?: QueryBuilderOptions
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<Record<string, any>> {
+  const pagingProperties = await getPagingProperties(request, endpointAppContext);
+
+  return {
+    body: {
+      query: buildQueryBody(
+        request,
+        metadataConfig,
+        queryBuilderOptions?.unenrolledAgentIds!,
+        queryBuilderOptions?.statusAgentIDs!
+      ),
+      ...metadataConfig.extraBodyProperties,
+      sort: metadataConfig.sortProperty,
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index,
+    index: metadataConfig.index,
   };
 }
 
@@ -81,6 +105,7 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
+  metadataConfig: MetadataQueryConfig,
   unerolledAgentIds: string[] | undefined,
   statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,7 +115,7 @@ function buildQueryBody(
       ? {
           must_not: {
             terms: {
-              'elastic.agent.id': unerolledAgentIds,
+              [metadataConfig.elasticAgentIdProperty]: unerolledAgentIds,
             },
           },
         }
@@ -99,7 +124,7 @@ function buildQueryBody(
     ? {
         must: {
           terms: {
-            'elastic.agent.id': statusAgentIDs,
+            [metadataConfig.elasticAgentIdProperty]: statusAgentIDs,
           },
         },
       }
@@ -132,23 +157,17 @@ function buildQueryBody(
       };
 }
 
-export function getESQueryHostMetadataByID(hostID: string, index: string) {
+export function getESQueryHostMetadataByID(hostID: string, metadataConfig: MetadataQueryConfig) {
   return {
     body: {
       query: {
         match: {
-          'host.id': hostID,
+          [metadataConfig.hostIdProperty]: hostID,
         },
       },
-      sort: [
-        {
-          'event.created': {
-            order: 'desc',
-          },
-        },
-      ],
+      sort: metadataConfig.sortProperty,
       size: 1,
     },
-    index,
+    index: metadataConfig.index,
   };
 }

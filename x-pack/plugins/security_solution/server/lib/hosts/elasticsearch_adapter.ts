@@ -34,7 +34,7 @@ import {
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
-import { getHostData } from '../../endpoint/routes/metadata';
+import { getHostData } from '../../endpoint/routes/metadata/handlers';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(

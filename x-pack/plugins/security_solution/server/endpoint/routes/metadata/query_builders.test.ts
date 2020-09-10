@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import {
+  kibanaRequestToMetadataListESQuery,
+  getESQueryHostMetadataByID,
+  metadataQueryConfigV1,
+} from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
@@ -22,7 +26,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataIndexPattern
+        metadataQueryConfigV1()
       );
       expect(query).toEqual({
         body: {
@@ -74,12 +78,13 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataIndexPattern,
+          metadataQueryConfigV1(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
-
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(query));
         expect(query).toEqual({
           body: {
             query: {
@@ -137,7 +142,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataIndexPattern
+        metadataQueryConfigV1()
       );
 
       expect(query).toEqual({
@@ -211,7 +216,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataIndexPattern,
+          metadataQueryConfigV1(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -285,7 +290,7 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataIndexPattern);
+      const query = getESQueryHostMetadataByID(mockID, metadataQueryConfigV1());
 
       expect(query).toEqual({
         body: {
