@@ -62,8 +62,7 @@ export function runFailedTestsReporterCli() {
         }
 
         const isPr = !!process.env.ghprbPullId; // TODO add teamcity check once determined
-        const isMasterOrVersion =
-          branch === 'master' || branch === 'master_teamcity' || branch.match(/^\d+\.(x|\d+)$/); // TODO remove master_teamcity check
+        const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
           updateGithub = false;
