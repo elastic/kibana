@@ -133,6 +133,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     name,
     indexPatterns,
     order,
+    priority,
     version,
   }: Partial<TemplateDeserialized> = {}) => {
     const { component, form, find } = testBed;
@@ -157,6 +158,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await act(async () => {
       if (order) {
         form.setInputValue('orderField.input', JSON.stringify(order));
+      }
+
+      if (priority) {
+        form.setInputValue('priorityField.input', JSON.stringify(priority));
       }
 
       if (version) {
@@ -306,6 +311,7 @@ export type TestSubjects =
   | 'nextButton'
   | 'orderField'
   | 'orderField.input'
+  | 'priorityField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'

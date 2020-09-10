@@ -12,7 +12,6 @@ import { setupEnvironment } from '../helpers';
 import {
   TEMPLATE_NAME,
   SETTINGS,
-  MAPPINGS,
   ALIASES,
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
