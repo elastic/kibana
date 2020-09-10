@@ -6,6 +6,7 @@
 
 import querystring from 'querystring';
 import expect from '@kbn/expect';
+import { isEmpty } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
@@ -283,6 +284,24 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             },
           });
         });
+      });
+    });
+
+    describe('when there is data with anomalies', () => {
+      before(() => esArchiver.load('apm_8.0.0'));
+      after(() => esArchiver.unload('apm_8.0.0'));
+
+      it('returns service map elements', async () => {
+        const start = encodeURIComponent('2020-09-10T06:00:00.000Z');
+        const end = encodeURIComponent('2020-09-10T07:00:00.000Z');
+
+        const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+
+        expect(response.status).to.be(200);
+        const anomalies = response.body.elements.filter(
+          (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+        );
+        expect(anomalies).to.not.empty();
       });
     });
   });
