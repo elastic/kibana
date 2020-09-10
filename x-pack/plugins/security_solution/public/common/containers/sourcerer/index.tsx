@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+import isEqual from 'lodash/isEqual';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY, SecurityPageName } from '../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../lib/kibana';
+import { useUiSetting$ } from '../../lib/kibana';
 
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { KibanaIndexPatterns } from '../../store/sourcerer/model';
+import { KibanaIndexPatterns, ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
+import { State } from '../../store';
 
 export const dedupeIndexName = (kibanaIndex: string[], configIndex: string[]) => {
   return [
@@ -45,22 +48,19 @@ export const getSourcererScopeName = (pageName: string): sourcererModel.Sourcere
 };
 
 export const useInitSourcerer = () => {
-  const {
-    services: {
-      data: { indexPatterns: indexPatternsService },
-    },
-  } = useKibana();
   const dispatch = useDispatch();
   const [{ pageName }] = useRouteSpy();
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const getkibanaIndexPatternsSelector = useMemo(() => sourcererSelectors.kibanaIndexPatternsSelector(), []);
+  const kibanaIndexPatterns = useSelector(getkibanaIndexPatternsSelector, isEqual);
   useIndexFields(getSourcererScopeName(pageName));
 
   const setIndexPatternsList = useCallback(
-    (kibanaIndexPatterns: KibanaIndexPatterns, allIndexPatterns: string[]) => {
+    (kibanaIndexPatternsToPersist: KibanaIndexPatterns, allIndexPatternsToPersist: string[]) => {
       dispatch(
         sourcererActions.setIndexPatternsList({
-          kibanaIndexPatterns,
-          allIndexPatterns,
+          kibanaIndexPatterns: kibanaIndexPatternsToPersist,
+          allIndexPatterns: allIndexPatternsToPersist,
         })
       );
     },
@@ -68,20 +68,19 @@ export const useInitSourcerer = () => {
   );
 
   useEffect(() => {
-    let didCancel = false;
-    async function fetchTitles() {
-      const kibanaIndexPatterns = await indexPatternsService.getIdsWithTitle();
-      const allIndexPatterns = dedupeIndexName(
-        kibanaIndexPatterns.map((kip) => kip.title),
-        configIndex
-      );
-      if (!didCancel) {
-        setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
-      }
-    }
-    fetchTitles();
-    return () => {
-      didCancel = true;
-    };
-  }, [configIndex, indexPatternsService, setIndexPatternsList]);
+    const allIndexPatterns = dedupeIndexName(
+      kibanaIndexPatterns.map((kip) => kip.title),
+      configIndex
+    );
+    setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
+  }, [configIndex, kibanaIndexPatterns, setIndexPatternsList]);
+};
+
+export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const SourcererScope = useSelector<State, ManageScope>(
+    (state) => sourcererScopeSelector(state, scope),
+    deepEqual
+  );
+  return SourcererScope;
 };

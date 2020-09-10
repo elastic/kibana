@@ -7,7 +7,6 @@
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import {
   GetLastEventTimeQuery,
   LastEventIndexKey,
@@ -15,11 +14,10 @@ import {
 } from '../../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
-import { useUiSetting$ } from '../../../lib/kibana';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
 import { useApolloClient } from '../../../utils/apollo_context';
-import { useWithSource } from '../../source';
+import { useSourcererScope } from '../../sourcerer';
 
 export interface LastEventTimeArgs {
   id: string;
@@ -43,9 +41,8 @@ export function useLastEventTimeQuery(
   const [lastSeen, updateLastSeen] = useState<number | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
-  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const apolloClient = useApolloClient();
-  const { docValueFields } = useWithSource(sourceId);
+  const { docValueFields, selectedPatterns } = useSourcererScope();
 
   async function fetchLastEventTime(signal: AbortSignal) {
     updateLoading(true);
@@ -59,7 +56,7 @@ export function useLastEventTimeQuery(
             sourceId,
             indexKey,
             details,
-            defaultIndex,
+            defaultIndex: selectedPatterns,
           },
           context: {
             fetchOptions: {

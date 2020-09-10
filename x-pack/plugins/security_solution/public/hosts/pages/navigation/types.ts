@@ -34,6 +34,7 @@ export interface QueryTabBodyProps {
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   docValueFields?: DocValueFields[];
+  indexesName: string[];
   pageFilters?: Filter[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];

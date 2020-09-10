@@ -54,6 +54,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexesName,
   pageFilters,
   setQuery,
   startDate,
@@ -85,6 +86,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           setQuery={setQuery}
           startDate={startDate}
           id={EVENTS_HISTOGRAM_ID}
+          indexesName={indexesName}
           {...histogramConfigs}
         />
       )}

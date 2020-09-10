@@ -29,7 +29,6 @@ import { WrapperPage } from '../../../common/components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useWithSource } from '../../../common/containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -52,6 +51,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -91,7 +91,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { docValueFields, indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -119,6 +119,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 />
 
                 <HostOverviewByNameQuery
+                  indexesName={selectedPatterns}
                   sourceId="default"
                   hostName={detailName}
                   skip={isInitializing}
@@ -161,6 +162,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 <EuiHorizontalRule />
 
                 <KpiHostDetailsQuery
+                  indexesName={selectedPatterns}
                   sourceId="default"
                   filterQuery={filterQuery}
                   skip={isInitializing}
@@ -193,6 +195,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
 
               <HostDetailsTabs
                 docValueFields={docValueFields}
+                indexesName={selectedPatterns}
                 isInitializing={isInitializing}
                 deleteQuery={deleteQuery}
                 pageFilters={hostDetailsPageFilters}

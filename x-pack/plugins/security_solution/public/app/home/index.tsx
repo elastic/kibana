@@ -14,11 +14,10 @@ import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
-import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useInitSourcerer } from '../../common/containers/sourcerer';
+import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
 import { useUserInfo } from '../../detections/components/user_info';
 
 const SecuritySolutionAppWrapper = styled.div`
@@ -43,20 +42,20 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const { signalIndexExists, signalIndexName } = useSignalIndex();
   useInitSourcerer();
+  const { isSignalIndexExists, signalIndexName } = useUserInfo();
+
+  // TODO manage detection !!!!!
   const indexToAdd = useMemo<string[] | null>(() => {
-    if (signalIndexExists && signalIndexName != null) {
+    if (isSignalIndexExists && signalIndexName != null) {
       return [signalIndexName];
     }
     return null;
-  }, [signalIndexExists, signalIndexName]);
+  }, [isSignalIndexExists, signalIndexName]);
 
   const [showTimeline] = useShowTimeline();
-  const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
-  // side effect: this will attempt to create the signals index if it doesn't exist
-  useUserInfo();
+  const { browserFields, indexPattern, indicesExist } = useSourcererScope();
 
   return (
     <SecuritySolutionAppWrapper>
@@ -68,7 +67,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
+              {/** This is temporary to make sure I do not see any use of useWithSource */}
+              {/* <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} /> */}
             </>
           )}
 

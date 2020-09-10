@@ -15,6 +15,8 @@ import { Title } from './title';
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
+import { Sourcerer } from '../sourcerer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface HeaderProps {
   border?: boolean;
@@ -138,6 +140,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           </FlexItem>
         )}
       </EuiFlexGroup>
+      <Sourcerer scope={SourcererScopeName.default} />
     </Header>
   );
 };

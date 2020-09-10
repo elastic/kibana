@@ -228,7 +228,7 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.sourcerer) {
-    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+    // const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
     // console.log('replace sourcerer in url', sourcererState);
     // if (sourcererState != null && Object.keys(sourcererState).length > 0) {
     //   return replaceStateInLocation({

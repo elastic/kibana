@@ -281,14 +281,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             { indices: indicesName },
             {
               strategy: 'securitySolutionIndexFields',
-              signal: abortCtrl.current.signal,
+              abortSignal: abortCtrl.current.signal,
             }
           )
           .subscribe({
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 if (!didCancel) {
-                  const stringifyIndices = indicesName.sort().join();
+                  const stringifyIndices = response.indicesExists.sort().join();
                   previousIndexesName.current = response.indicesExists;
                   dispatch(
                     sourcererActions.setSource({
@@ -301,7 +301,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                         indexPattern: getIndexFields(stringifyIndices, response.indexFields),
                         indicesExist: response.indicesExists.length > 0,
                         loading: false,
-                        selectedPatterns: [],
                         allExistingIndexPatterns: response.indicesExists.sort(),
                       },
                     })

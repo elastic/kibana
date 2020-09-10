@@ -18,6 +18,7 @@ export type HostsTabsProps = HostsComponentProps &
   GlobalTimeArgs & {
     docValueFields: DocValueFields[];
     filterQuery: string;
+    indexesName: string[];
     type: hostsModel.HostsType;
     setAbsoluteRangeDatePicker: ActionCreator<{
       id: InputsModelId;

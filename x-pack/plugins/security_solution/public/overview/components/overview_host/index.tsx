@@ -22,7 +22,6 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
-import { Sourcerer } from '../../../common/components/sourcerer';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];
@@ -109,10 +108,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
               />
             }
           >
-            <>
-              <Sourcerer />
-              {hostPageButton}
-            </>
+            <>{hostPageButton}</>
           </HeaderSection>
 
           <OverviewHostStatsManage

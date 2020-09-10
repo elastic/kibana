@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, KibanaIndexPatterns, SourcererScopeName } from './model';
+import { SourcererScopeById, KibanaIndexPatterns, SourcererScopeName, ManageScope } from './model';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -41,6 +41,15 @@ export const getIndexesNameSelectedSelector = () => {
 
     return scope.selectedPatterns.length === 0 ? allExistingIndexPatterns : scope.selectedPatterns;
   };
+
+  return mapStateToProps;
+};
+
+export const getSourcererScopeSelector = () => {
+  const getScopesSelector = scopesSelector();
+
+  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope =>
+    getScopesSelector(state)[scopeId];
 
   return mapStateToProps;
 };

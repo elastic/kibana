@@ -9,7 +9,7 @@ import {
   IEsSearchResponse,
   IFieldSubType,
 } from '../../../../../../src/plugins/data/common';
-import { Maybe } from '../security_solution';
+import { Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 

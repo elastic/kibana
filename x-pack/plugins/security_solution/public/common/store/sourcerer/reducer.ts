@@ -33,7 +33,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          ...selectedPatterns,
+          selectedPatterns,
         },
       },
     };
@@ -42,12 +42,17 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     const { allExistingIndexPatterns, ...sourcererScopes } = payload;
     return {
       ...state,
-      allIndexPatterns: allExistingIndexPatterns,
+      ...(state.sourcererScopes[id].selectedPatterns.length === 0
+        ? { allIndexPatterns: allExistingIndexPatterns }
+        : {}),
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
           ...sourcererScopes,
+          ...(state.sourcererScopes[id].selectedPatterns.length === 0
+            ? { selectedPatterns: allExistingIndexPatterns }
+            : {}),
         },
       },
     };

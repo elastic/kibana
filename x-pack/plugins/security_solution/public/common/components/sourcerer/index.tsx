@@ -14,7 +14,7 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import isEqual from 'lodash/isEqual';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -40,15 +40,10 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { allExistingIndexPatterns, sourcererScope } = useSelector<State, SourcererScopeSelector>(
     (state) => sourcererScopeSelector(state, scopeId),
-    isEqual
+    deepEqual
   );
 
   const { selectedPatterns: selectedOptions, loading } = sourcererScope;
-
-  const indexPatternsSelection = useMemo(
-    () => (selectedOptions.length === 0 ? allExistingIndexPatterns : selectedOptions),
-    [selectedOptions, allExistingIndexPatterns]
-  );
 
   const onChangeIndexPattern = useCallback(
     (selectedPatterns: string[]) => {
@@ -86,14 +81,14 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
       loading
         ? []
         : [
-            ...indexPatternsSelection.sort().map((title, id) => ({
+            ...allExistingIndexPatterns.sort().map((title, id) => ({
               label: title,
               key: `${title}-${id}`,
               value: title,
               checked: selectedOptions.includes(title) ? ON : undefined,
             })),
           ],
-    [indexPatternsSelection, loading, selectedOptions]
+    [allExistingIndexPatterns, loading, selectedOptions]
   );
   // TO DO check if index pattern has results and if it does not, make it unselectable
   // const unSelectableOptions: EuiSelectableOption[] = useMemo(

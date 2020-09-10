@@ -388,15 +388,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins, storage: Storage) {
-    const { composeLibs } = await this.downloadAssets();
+    const [
+      { composeLibs },
+      kibanaIndexPatterns,
+      {
+        detectionsSubPlugin,
+        hostsSubPlugin,
+        networkSubPlugin,
+        timelinesSubPlugin,
+        managementSubPlugin,
+      },
+    ] = await Promise.all([
+      this.downloadAssets(),
+      startPlugins.data.indexPatterns.getIdsWithTitle(),
+      this.downloadSubPlugins(),
+    ]);
 
-    const {
-      detectionsSubPlugin,
-      hostsSubPlugin,
-      networkSubPlugin,
-      timelinesSubPlugin,
-      managementSubPlugin,
-    } = await this.downloadSubPlugins();
     const { apolloClient } = composeLibs(coreStart);
     const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
     const libs$ = new BehaviorSubject(appLibs);
@@ -420,12 +427,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     this.store = createStore(
-      createInitialState({
-        ...hostsStart.store.initialState,
-        ...networkStart.store.initialState,
-        ...timelineInitialState,
-        ...managementSubPluginStart.store.initialState,
-      }),
+      createInitialState(
+        {
+          ...hostsStart.store.initialState,
+          ...networkStart.store.initialState,
+          ...timelineInitialState,
+          ...managementSubPluginStart.store.initialState,
+        },
+        kibanaIndexPatterns
+      ),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,

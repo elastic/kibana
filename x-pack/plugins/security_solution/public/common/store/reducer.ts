@@ -19,6 +19,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
+import { KibanaIndexPatterns } from './sourcerer/model';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
@@ -29,14 +30,18 @@ export type SubPluginsInitReducer = HostsPluginReducer &
  * Factory for the 'initialState' that is used to preload state into the Security App's redux store.
  */
 export const createInitialState = (
-  pluginsInitState: SecuritySubPlugins['store']['initialState']
+  pluginsInitState: SecuritySubPlugins['store']['initialState'],
+  kibanaIndexPatterns: KibanaIndexPatterns
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
     app: initialAppState,
     dragAndDrop: initialDragAndDropState,
     ...pluginsInitState,
     inputs: createInitialInputsState(),
-    sourcerer: sourcererModel.initialSourcererState,
+    sourcerer: {
+      ...sourcererModel.initialSourcererState,
+      kibanaIndexPatterns,
+    },
   };
   return preloadedState;
 };

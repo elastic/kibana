@@ -58,7 +58,8 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
 }
 export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
-  const { indicesExist } = useWithSource();
+  // const { indicesExist } = useWithSource();
+  const indicesExist = true;
   const { globalHeaderPortalNode } = useGlobalHeaderPortal();
   const { globalFullScreen } = useFullScreen();
   const search = useGetUrlSearch(navTabs.overview);
