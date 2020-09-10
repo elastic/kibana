@@ -66,7 +66,7 @@ export interface DataPublicPluginSetup {
 export interface DataPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
-};
+}
 
 /**
  * utilities to generate filters from action context
