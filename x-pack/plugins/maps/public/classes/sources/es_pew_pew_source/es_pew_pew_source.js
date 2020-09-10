@@ -223,10 +223,6 @@ export class ESPewPewSource extends AbstractESAggSource {
   canFormatFeatureProperties() {
     return true;
   }
-
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
 }
 
 registerSource({

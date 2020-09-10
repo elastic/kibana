@@ -52,7 +52,7 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
   const unauthorizedCount = (namespaces?.filter((namespace) => namespace === '?') ?? []).length;
   const unauthorizedTooltip = i18n.translate(
     'xpack.spaces.management.shareToSpace.columnUnauthorizedLabel',
-    { defaultMessage: 'You do not have permission to view these spaces' }
+    { defaultMessage: `You don't have permission to view these spaces.` }
   );
 
   const displayedSpaces = isExpanded
