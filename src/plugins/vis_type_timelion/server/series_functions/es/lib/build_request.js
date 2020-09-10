@@ -93,5 +93,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
     request.timeout = `${timeout}ms`;
   }
 
-  return request;
+  return {
+    params: request,
+  };
 }

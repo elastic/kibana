@@ -24,8 +24,7 @@ import styled from 'styled-components';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RuleType } from '../../../../../common/detection_engine/types';
+import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -357,7 +356,7 @@ export const buildNoteDescription = (label: string, note: string): ListItems[] =
   return [];
 };
 
-export const buildRuleTypeDescription = (label: string, ruleType: RuleType): ListItems[] => {
+export const buildRuleTypeDescription = (label: string, ruleType: Type): ListItems[] => {
   switch (ruleType) {
     case 'machine_learning': {
       return [

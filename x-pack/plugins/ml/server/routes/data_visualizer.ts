@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import { Field, HistogramField } from '../models/data_visualizer/data_visualizer';
@@ -17,7 +17,7 @@ import {
 import { RouteInitialization } from '../types';
 
 function getOverallStats(
-  legacyClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: object,
   aggregatableFields: string[],
@@ -27,7 +27,7 @@ function getOverallStats(
   earliestMs: number,
   latestMs: number
 ) {
-  const dv = new DataVisualizer(legacyClient);
+  const dv = new DataVisualizer(client);
   return dv.getOverallStats(
     indexPatternTitle,
     query,
@@ -41,7 +41,7 @@ function getOverallStats(
 }
 
 function getStatsForFields(
-  legacyClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: Field[],
@@ -52,7 +52,7 @@ function getStatsForFields(
   interval: number,
   maxExamples: number
 ) {
-  const dv = new DataVisualizer(legacyClient);
+  const dv = new DataVisualizer(client);
   return dv.getStatsForFields(
     indexPatternTitle,
     query,
@@ -67,13 +67,13 @@ function getStatsForFields(
 }
 
 function getHistogramsForFields(
-  legacyClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number
 ) {
-  const dv = new DataVisualizer(legacyClient);
+  const dv = new DataVisualizer(client);
   return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
 }
 
@@ -84,7 +84,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get histograms for fields
+   * @api {post} /api/ml/data_visualizer/get_field_histograms/:indexPatternTitle Get histograms for fields
    * @apiName GetHistogramsForFields
    * @apiDescription Returns the histograms on a list fields in the specified index pattern.
    *
@@ -104,7 +104,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -112,7 +112,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         } = request;
 
         const results = await getHistogramsForFields(
-          legacyClient,
+          client,
           indexPatternTitle,
           query,
           fields,
@@ -151,7 +151,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -168,7 +168,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         } = request;
 
         const results = await getStatsForFields(
-          legacyClient,
+          client,
           indexPatternTitle,
           query,
           fields,
@@ -216,7 +216,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -232,7 +232,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         } = request;
 
         const results = await getOverallStats(
-          legacyClient,
+          client,
           indexPatternTitle,
           query,
           aggregatableFields,

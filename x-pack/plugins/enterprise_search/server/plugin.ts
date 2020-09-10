@@ -26,12 +26,18 @@ import {
 } from '../common/constants';
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
+import {
+  EnterpriseSearchRequestHandler,
+  IEnterpriseSearchRequestHandler,
+} from './lib/enterprise_search_request_handler';
+
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerEnginesRoute } from './routes/app_search/engines';
+import { registerCredentialsRoutes } from './routes/app_search/credentials';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
@@ -47,6 +53,7 @@ export interface IRouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;
+  enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
 }
 
@@ -64,6 +71,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     { usageCollection, security, features }: PluginsSetup
   ) {
     const config = await this.config.pipe(first()).toPromise();
+    const log = this.logger;
 
     /**
      * Register space/feature control
@@ -83,7 +91,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register user access to the Enterprise Search plugins
      */
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const dependencies = { config, security, request, log: this.logger };
+      const dependencies = { config, security, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
 
@@ -104,10 +112,12 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register routes
      */
     const router = http.createRouter();
-    const dependencies = { router, config, log: this.logger };
+    const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
+    const dependencies = { router, config, log, enterpriseSearchRequestHandler };
 
     registerConfigDataRoute(dependencies);
     registerEnginesRoute(dependencies);
+    registerCredentialsRoutes(dependencies);
     registerWSOverviewRoute(dependencies);
 
     /**

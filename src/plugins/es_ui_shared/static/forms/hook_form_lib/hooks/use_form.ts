@@ -95,19 +95,25 @@ export function useForm<T extends FormData = FormData>(
 
   const fieldsToArray = useCallback(() => Object.values(fieldsRefs.current), []);
 
-  const stripEmptyFields = useCallback(
-    (fields: FieldsMap): FieldsMap => {
-      if (formOptions.stripEmptyFields) {
-        return Object.entries(fields).reduce((acc, [key, field]) => {
-          if (typeof field.value !== 'string' || field.value.trim() !== '') {
-            acc[key] = field;
-          }
+  const getFieldsForOutput = useCallback(
+    (fields: FieldsMap, opts: { stripEmptyFields: boolean }): FieldsMap => {
+      return Object.entries(fields).reduce((acc, [key, field]) => {
+        if (!field.__isIncludedInOutput) {
           return acc;
-        }, {} as FieldsMap);
-      }
-      return fields;
+        }
+
+        if (opts.stripEmptyFields) {
+          const isFieldEmpty = typeof field.value === 'string' && field.value.trim() === '';
+          if (isFieldEmpty) {
+            return acc;
+          }
+        }
+
+        acc[key] = field;
+        return acc;
+      }, {} as FieldsMap);
     },
-    [formOptions]
+    []
   );
 
   const updateFormDataAt: FormHook<T>['__updateFormDataAt'] = useCallback(
@@ -133,8 +139,10 @@ export function useForm<T extends FormData = FormData>(
   const getFormData: FormHook<T>['getFormData'] = useCallback(
     (getDataOptions: Parameters<FormHook<T>['getFormData']>[0] = { unflatten: true }) => {
       if (getDataOptions.unflatten) {
-        const nonEmptyFields = stripEmptyFields(fieldsRefs.current);
-        const fieldsValue = mapFormFields(nonEmptyFields, (field) => field.__serializeValue());
+        const fieldsToOutput = getFieldsForOutput(fieldsRefs.current, {
+          stripEmptyFields: formOptions.stripEmptyFields,
+        });
+        const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
         return serializer
           ? (serializer(unflattenObject(fieldsValue)) as T)
           : (unflattenObject(fieldsValue) as T);
@@ -148,7 +156,7 @@ export function useForm<T extends FormData = FormData>(
         {} as T
       );
     },
-    [stripEmptyFields, serializer]
+    [getFieldsForOutput, formOptions.stripEmptyFields, serializer]
   );
 
   const getErrors: FormHook['getErrors'] = useCallback(() => {
@@ -240,6 +248,12 @@ export function useForm<T extends FormData = FormData>(
 
       if (!field.isValidated) {
         setIsValid(undefined);
+
+        // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.
+        // If a field is added and it is not validated it means that we have swapped fields and added new ones:
+        // --> we have basically have a new form in front of us.
+        // For that reason we make sure that the "isSubmitted" state is false.
+        setIsSubmitted(false);
       }
     },
     [updateFormDataAt]
@@ -389,6 +403,7 @@ export function useForm<T extends FormData = FormData>(
       isValid,
       id,
       submit: submitForm,
+      validate: validateAllFields,
       subscribe,
       setFieldValue,
       setFieldErrors,
@@ -428,6 +443,7 @@ export function useForm<T extends FormData = FormData>(
     addField,
     removeField,
     validateFields,
+    validateAllFields,
   ]);
 
   useEffect(() => {

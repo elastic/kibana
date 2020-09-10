@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import { coreMock } from '../../../../../core/public/mocks';
 import { callClient } from './call_client';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { FetchHandlers } from '../fetch';
 import { handleResponse } from '../fetch/handle_response';
+import { BehaviorSubject } from 'rxjs';
 
 const mockAbortFn = jest.fn();
 jest.mock('../fetch/handle_response', () => ({
@@ -54,7 +56,12 @@ describe('callClient', () => {
 
   test('Passes the additional arguments it is given to the search strategy', () => {
     const searchRequests = [{ _searchStrategyId: 0 }];
-    const args = { legacySearchService: {}, config: {}, esShardTimeout: 0 } as FetchHandlers;
+    const args = {
+      http: coreMock.createStart().http,
+      legacySearchService: {},
+      config: { get: jest.fn() },
+      loadingCount$: new BehaviorSubject(0),
+    } as FetchHandlers;
 
     callClient(searchRequests, [], args);
 

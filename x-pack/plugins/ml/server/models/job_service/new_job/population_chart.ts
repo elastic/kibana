@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
@@ -29,7 +29,7 @@ interface ProcessedResults {
   totalResults: number;
 }
 
-export function newJobPopulationChartProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterClient) {
   async function newJobPopulationChart(
     indexPatternTitle: string,
     timeField: string,
@@ -51,15 +51,11 @@ export function newJobPopulationChartProvider({ callAsCurrentUser }: ILegacyScop
       splitFieldName
     );
 
-    try {
-      const results = await callAsCurrentUser('search', json);
-      return processSearchResults(
-        results,
-        aggFieldNamePairs.map((af) => af.field)
-      );
-    } catch (error) {
-      return { error };
-    }
+    const { body } = await asCurrentUser.search(json);
+    return processSearchResults(
+      body,
+      aggFieldNamePairs.map((af) => af.field)
+    );
   }
 
   return {
@@ -146,7 +142,7 @@ function getPopulationSearchJsonFromConfig(
         times: {
           date_histogram: {
             field: timeField,
-            interval: intervalMs,
+            fixed_interval: `${intervalMs}ms`,
             min_doc_count: 0,
             extended_bounds: {
               min: start,

@@ -30,6 +30,9 @@
           "properties": {
             "cannot_connect": {
               "type": "long"
+            },
+            "not_found": {
+              "type": "long"
             }
           }
         },
@@ -63,6 +66,9 @@
         "ui_error": {
           "properties": {
             "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
               "type": "long"
             }
           }
