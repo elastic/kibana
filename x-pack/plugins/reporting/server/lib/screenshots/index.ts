@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { LevelLogger } from '../';
-import { ConditionalHeaders } from '../../types';
+import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
 
 export { screenshotsObservableFactory } from './observable';

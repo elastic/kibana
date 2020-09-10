@@ -9,7 +9,7 @@ Object {
       "maxSizeReached": false,
       "status": "completed",
       "title": "specimen",
-      "type": "spectacular",
+      "type": undefined,
     },
   ],
   "failed": Array [
@@ -19,7 +19,7 @@ Object {
       "maxSizeReached": false,
       "status": "failed",
       "title": "specimen",
-      "type": "spectacular",
+      "type": undefined,
     },
   ],
 }

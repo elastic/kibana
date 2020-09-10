@@ -6,7 +6,8 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { JobSummary, SourceJob } from '../../common/types';
+import { JobSummary } from '../';
+import { ReportDocument } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -23,7 +24,7 @@ const mockJobsFound = [
     _source: {
       status: 'completed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -31,7 +32,7 @@ const mockJobsFound = [
     _source: {
       status: 'failed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -39,14 +40,14 @@ const mockJobsFound = [
     _source: {
       status: 'pending',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
 ];
 
 const jobQueueClientMock: ReportingAPIClient = {
   findForJobIds: async (jobIds: string[]) => {
-    return mockJobsFound as SourceJob[];
+    return mockJobsFound as ReportDocument[];
   },
   getContent: (): Promise<any> => {
     return Promise.resolve({ content: 'this is the completed report data' });

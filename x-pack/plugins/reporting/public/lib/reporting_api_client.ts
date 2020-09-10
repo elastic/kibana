@@ -7,10 +7,11 @@
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
-import { JobId, SourceJob } from '../../common/types';
+import { DownloadReportFn, ManagementLinkFn } from '../';
+import { JobId, ReportDocument, ReportSource } from '../../common/types';
 import {
-  API_BASE_URL,
   API_BASE_GENERATE,
+  API_BASE_URL,
   API_LIST_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../constants';
@@ -18,7 +19,7 @@ import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;
-  _source: any;
+  _source: ReportSource;
 }
 
 export interface JobContent {
@@ -127,7 +128,7 @@ export class ReportingAPIClient {
     });
   }
 
-  public findForJobIds = (jobIds: JobId[]): Promise<SourceJob[]> => {
+  public findForJobIds = (jobIds: JobId[]): Promise<ReportDocument[]> => {
     return this.http.fetch(`${API_LIST_URL}/list`, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
@@ -159,9 +160,10 @@ export class ReportingAPIClient {
     return resp;
   };
 
-  public getManagementLink = () => this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
+  public getManagementLink: ManagementLinkFn = () =>
+    this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
-  public getDownloadLink = (jobId: JobId) =>
+  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
   /*

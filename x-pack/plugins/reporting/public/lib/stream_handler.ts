@@ -8,7 +8,8 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup } from 'src/core/public';
-import { JobId, JobStatusBuckets, JobSummary, SourceJob } from '../../common/types';
+import { JobStatusBuckets, JobSummary } from '../';
+import { JobId, ReportDocument } from '../../common/types';
 import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
   JOB_STATUS_COMPLETED,
@@ -28,14 +29,14 @@ function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
 }
 
-function summarizeJob(src: SourceJob): JobSummary {
+function summarizeJob(src: ReportDocument): JobSummary {
   return {
     id: src._id,
     status: src._source.status,
     title: src._source.payload.title,
-    type: src._source.payload.type,
-    maxSizeReached: src._source.output.max_size_reached,
-    csvContainsFormulas: src._source.output.csv_contains_formulas,
+    type: src._source.jobtype,
+    maxSizeReached: src._source.output?.max_size_reached,
+    csvContainsFormulas: src._source.output?.csv_contains_formulas,
   };
 }
 
@@ -94,7 +95,7 @@ export class ReportingNotifierStreamHandler {
    */
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
     return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
-      map((jobs: SourceJob[]) => {
+      map((jobs: ReportDocument[]) => {
         const completedJobs: JobSummary[] = [];
         const failedJobs: JobSummary[] = [];
         const pending: JobId[] = [];

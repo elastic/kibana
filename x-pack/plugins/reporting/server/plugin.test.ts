@@ -15,9 +15,14 @@ jest.mock('./browsers/install', () => ({
 }));
 
 import { coreMock } from 'src/core/server/mocks';
+import { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { LicensingPluginSetup } from '../../licensing/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { ReportingSetupDeps, ReportingStartDeps } from './types';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -26,22 +31,23 @@ describe('Reporting Plugin', () => {
   let initContext: any;
   let coreSetup: any;
   let coreStart: any;
-  let pluginSetup: any;
-  let pluginStart: any;
+  let pluginSetup: ReportingSetupDeps;
+  let pluginStart: ReportingStartDeps;
 
   beforeEach(async () => {
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
-    pluginSetup = ({
-      licensing: {},
+
+    pluginSetup = {
+      licensing: {} as LicensingPluginSetup,
       features: featuresPluginMock.createSetup(),
-      usageCollection: {
+      usageCollection: ({
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
-      },
-      security: {
+      } as unknown) as UsageCollectionSetup,
+      security: ({
         authc: {
           getCurrentUser: () => ({
             id: '123',
@@ -49,13 +55,12 @@ describe('Reporting Plugin', () => {
             username: 'Tom Riddle',
           }),
         },
-      },
-    } as unknown) as any;
-    pluginStart = ({
-      data: {
-        fieldFormats: {},
-      },
-    } as unknown) as any;
+      } as unknown) as SecurityPluginSetup,
+    };
+
+    pluginStart = {
+      data: { fieldFormats: {} } as DataPluginStart,
+    } as ReportingStartDeps;
   });
 
   it('has a sync setup process', () => {

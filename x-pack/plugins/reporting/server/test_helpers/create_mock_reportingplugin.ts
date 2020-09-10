@@ -9,8 +9,10 @@ jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
 
+import { IUiSettingsClient } from 'kibana/public';
 import _ from 'lodash';
 import * as Rx from 'rxjs';
+import { SavedObjectsServiceStart, UiSettingsServiceStart } from 'src/core/server';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -52,10 +54,16 @@ const createMockPluginStart = (
 ): ReportingInternalStart => {
   const store = new ReportingStore(mockReportingCore, logger);
   return {
-    browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
-    savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
-    uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    browserDriverFactory: startMock.browserDriverFactory!,
+    esqueue: startMock.esqueue!,
+    savedObjects:
+      startMock.savedObjects ||
+      (({ getScopedClient: jest.fn() } as unknown) as SavedObjectsServiceStart),
+    uiSettings:
+      startMock.uiSettings ||
+      (({
+        asScopedToClient: () => (({ get: jest.fn() } as unknown) as IUiSettingsClient),
+      } as unknown) as UiSettingsServiceStart),
     store,
   };
 };
