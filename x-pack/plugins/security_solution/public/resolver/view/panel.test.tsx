@@ -165,6 +165,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         ['process.args', 'args'],
       ]);
     });
+    it("should have the first node's ID in the query string", async () => {
+      await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
+        urlSearch(resolverComponentInstanceID, {
+          panelView: 'nodeDetail',
+          panelParameters: {
+            nodeID: entityIDs.origin,
+          },
+        })
+      );
+    });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {
         const nodeListLink = await simulator().resolve(
