@@ -35,17 +35,16 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'ciscoLogs',
     name: i18n.translate('home.tutorials.ciscoLogs.nameTitle', {
-      defaultMessage: 'Cisco',
+      defaultMessage: 'Cisco logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.ciscoLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',
+      defaultMessage: 'Collect Cisco network device logs over syslog or from a file.',
     }),
     longDescription: i18n.translate('home.tutorials.ciscoLogs.longDescription', {
       defaultMessage:
-        'This is a module for Cisco network device’s logs. Currently \
-supports the "asa" fileset for Cisco ASA firewall logs received over syslog or read from a file. \
+        'This is a module for Cisco network devices logs (ASA, FTD, IOS, Nexus). It includes the following filesets for receiving logs over syslog or read from a file: \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cisco.html',
@@ -53,13 +52,15 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
     }),
     euiIconType: '/plugins/home/assets/logos/cisco.svg',
     artifacts: {
-      dashboards: [],
-      application: {
-        path: '/app/security',
-        label: i18n.translate('home.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'Security App',
-        }),
-      },
+      dashboards: [
+        {
+          id: 'a555b160-4987-11e9-b8ce-ed898b5ef295',
+          linkLabel: i18n.translate('home.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'ASA Firewall Dashboard',
+          }),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-cisco.html',
       },
