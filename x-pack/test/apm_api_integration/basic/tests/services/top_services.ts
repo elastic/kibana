@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import * as t from 'io-ts';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { decodeOrThrow } from '../../../../../plugins/apm/common/utils/decode_or_throw';
+import { getValueOrThrow } from '../../../../../plugins/apm/common/utils/get_value_or_throw';
 import archives_metadata from '../../archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
-        expect(response.status).to.be(200);
+        expect(response.status).to.eql(200, 'Response status should be 200');
 
         const metricType = t.strict({
           value: t.number,
@@ -73,18 +73,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           hasLegacyData: t.literal(false),
         });
 
-        const data = decodeOrThrow(responseType, response.body);
+        const data = getValueOrThrow(responseType, response.body);
 
         const rumService = data.items.find((item) => item.agentName === 'rum-js');
 
+        // RUM transactions don't have event.outcome set,
+        // so they should not have an error rate
         expect(rumService!.transactionErrorRate).to.be(undefined);
 
-        const nonRumServices = data.items.filter((item) => item.agentName === 'rum-js');
+        const nonRumServices = data.items.filter((item) => item.agentName !== 'rum-js');
 
-        // all other services should have a transaction error rate
+        // All non-RUM services should report an error rate
         expect(
           nonRumServices.every((item) => typeof item.transactionErrorRate?.value === 'number')
-        );
+        ).to.be(true);
       });
     });
   });

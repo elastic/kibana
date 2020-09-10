@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import * as t from 'io-ts';
 import { Severity } from '../../../../../plugins/apm/common/anomaly_detection';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { decodeOrThrow } from '../../../../../plugins/apm/common/utils/decode_or_throw';
+import { getValueOrThrow } from '../../../../../plugins/apm/common/utils/get_value_or_throw';
 import archives_metadata from '../../archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -68,10 +68,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           hasLegacyData: t.literal(false),
         });
 
-        const data = decodeOrThrow(responseType, response.body);
+        const data = getValueOrThrow(responseType, response.body);
 
+        // there should be at least one service
         expect(data.items.length).to.be.greaterThan(0);
 
+        // at least one item should have a severity set
         expect(data.items.some((item) => item.severity !== undefined)).to.be(true);
       });
     });

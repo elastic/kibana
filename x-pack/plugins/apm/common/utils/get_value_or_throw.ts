@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '../../../infra/common/runtime_types';
 
-export const decodeOrThrow = <A>(
+export const getValueOrThrow = <A>(
   runtimeType: t.Type<A, any, any>,
   inputValue: any
 ): A =>
