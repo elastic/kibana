@@ -7,6 +7,7 @@
 import { AbstractESAggSource } from '../es_agg_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
+import { IField } from '../../fields/field';
 
 export class ESGeoGridSource extends AbstractESAggSource {
   static createDescriptor({
@@ -21,4 +22,5 @@ export class ESGeoGridSource extends AbstractESAggSource {
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
+  createField({ fieldName }: { fieldName: string }): IField;
 }
