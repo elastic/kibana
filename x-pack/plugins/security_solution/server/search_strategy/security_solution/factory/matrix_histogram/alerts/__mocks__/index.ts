@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
+
 export const mockOptions = {
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  timerange: { from: '2020-09-08T13:32:02.875Z', to: '2020-09-09T13:32:02.875Z' },
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -16,6 +16,10 @@ export const mockOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+  filterQuery:
+    '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+  histogramType: MatrixHistogramType.alerts,
+  timerange: { interval: '12h', from: '2020-09-08T14:23:04.482Z', to: '2020-09-09T14:23:04.482Z' },
   stackByField: 'event.module',
 };
 
@@ -46,7 +50,7 @@ export const expectedDsl = {
               field: '@timestamp',
               fixed_interval: '2700000ms',
               min_doc_count: 0,
-              extended_bounds: { min: 1599571922875, max: 1599658322875 },
+              extended_bounds: { min: 1599574984482, max: 1599661384482 },
             },
           },
         },
@@ -55,7 +59,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
           {
             bool: {
               filter: [
@@ -68,8 +72,8 @@ export const expectedDsl = {
           {
             range: {
               '@timestamp': {
-                gte: '2020-09-08T13:32:02.875Z',
-                lte: '2020-09-09T13:32:02.875Z',
+                gte: '2020-09-08T14:23:04.482Z',
+                lte: '2020-09-09T14:23:04.482Z',
                 format: 'strict_date_optional_time',
               },
             },

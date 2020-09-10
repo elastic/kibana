@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
+
 export const mockOptions = {
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  timerange: { from: '2020-09-08T14:18:23.719Z', to: '2020-09-09T14:18:23.719Z' },
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -16,6 +16,9 @@ export const mockOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+  histogramType: MatrixHistogramType.dns,
+  timerange: { interval: '12h', from: '2020-09-08T15:41:15.528Z', to: '2020-09-09T15:41:15.529Z' },
   stackByField: 'dns.question.registered_domain',
 };
 
@@ -54,8 +57,8 @@ export const expectedDsl = {
           {
             range: {
               '@timestamp': {
-                gte: '2020-09-08T14:18:23.719Z',
-                lte: '2020-09-09T14:18:23.719Z',
+                gte: '2020-09-08T15:41:15.528Z',
+                lte: '2020-09-09T15:41:15.529Z',
                 format: 'strict_date_optional_time',
               },
             },

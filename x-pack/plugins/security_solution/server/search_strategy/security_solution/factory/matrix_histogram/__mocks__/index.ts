@@ -4,33 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
-import {
-  Direction,
-  HostAggEsItem,
-  HostsFields,
-  HostsQueries,
-  HostsRequestOptions,
-} from '../../../../../../common/search_strategy';
-
-export const mockAlertsOptions = {
-  defaultIndex: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  factoryQueryType: 'matrixHistogram',
-  filterQuery:
-    '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
-  histogramType: 'alerts',
-  timerange: { interval: '12h', from: '2020-09-08T14:23:04.482Z', to: '2020-09-09T14:23:04.482Z' },
-  stackByField: 'event.module',
-};
+import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
 export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
@@ -39,7 +15,7 @@ export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
     took: 11,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    hits: { total: 0, max_score: 0, hits: [] },
     aggregations: {
       alertsGroup: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
     },
@@ -48,20 +24,8 @@ export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   loaded: 21,
 };
 
-export const formattedAlertsSearchStrategyResponse = {
-  isPartial: false,
-  isRunning: false,
-  rawResponse: {
-    took: 11,
-    timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-    aggregations: {
-      alertsGroup: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-    },
-  },
-  total: 21,
-  loaded: 21,
+export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyResponse = {
+  ...mockAlertsSearchStrategyResponse,
   inspect: {
     dsl: [
       '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "alertsGroup": {\n        "terms": {\n          "field": "event.module",\n          "missing": "All others",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "alerts": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599574984482,\n                "max": 1599661384482\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"host.name\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "bool": {\n              "filter": [\n                {\n                  "bool": {\n                    "should": [\n                      {\n                        "match": {\n                          "event.kind": "alert"\n                        }\n                      }\n                    ],\n                    "minimum_should_match": 1\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T14:23:04.482Z",\n                "lte": "2020-09-09T14:23:04.482Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
@@ -121,24 +85,6 @@ export const expectedDsl = {
   ],
 };
 
-export const mockAnomaliesOptions = {
-  defaultIndex: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  factoryQueryType: 'matrixHistogram',
-  filterQuery:
-    '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"must_not":[],"minimum_should_match":1}}',
-  histogramType: 'anomalies',
-  timerange: { interval: '12h', from: '2020-09-08T15:14:35.566Z', to: '2020-09-09T15:14:35.566Z' },
-  stackByField: 'job_id',
-};
-
 export const mockAnomaliesSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
   isRunning: false,
@@ -146,7 +92,7 @@ export const mockAnomaliesSearchStrategyResponse: IEsSearchResponse<unknown> = {
     took: 9,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    hits: { total: 0, max_score: 0, hits: [] },
     aggregations: {
       anomalyActionGroup: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
     },
@@ -154,20 +100,9 @@ export const mockAnomaliesSearchStrategyResponse: IEsSearchResponse<unknown> = {
   total: 21,
   loaded: 21,
 };
-export const formattedAnomaliesSearchStrategyResponse = {
-  isPartial: false,
-  isRunning: false,
-  rawResponse: {
-    took: 9,
-    timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-    aggregations: {
-      anomalyActionGroup: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-    },
-  },
-  total: 21,
-  loaded: 21,
+
+export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyResponse = {
+  ...mockAnomaliesSearchStrategyResponse,
   inspect: {
     dsl: [
       '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "anomalyActionGroup": {\n        "terms": {\n          "field": "job_id",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "anomalies": {\n            "date_histogram": {\n              "field": "timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599578075566,\n                "max": 1599664475566\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"should\\":[],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"result_type\\":\\"record\\"}},null,{\\"range\\":{\\"record_score\\":{\\"gte\\":50}}}],\\"should\\":[{\\"exists\\":{\\"field\\":\\"source.ip\\"}},{\\"exists\\":{\\"field\\":\\"destination.ip\\"}}],\\"must_not\\":[],\\"minimum_should_match\\":1}}",\n          {\n            "range": {\n              "timestamp": {\n                "gte": "2020-09-08T15:14:35.566Z",\n                "lte": "2020-09-09T15:14:35.566Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
@@ -177,23 +112,6 @@ export const formattedAnomaliesSearchStrategyResponse = {
   totalCount: 0,
 };
 
-export const mockAuthenticationsOptions = {
-  defaultIndex: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  factoryQueryType: 'matrixHistogram',
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  histogramType: 'authentications',
-  timerange: { interval: '12h', from: '2020-09-08T15:22:00.325Z', to: '2020-09-09T15:22:00.325Z' },
-  stackByField: 'event.outcome',
-};
-
 export const mockAuthenticationsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
   isRunning: false,
@@ -201,7 +119,7 @@ export const mockAuthenticationsSearchStrategyResponse: IEsSearchResponse<unknow
     took: 6,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 570, relation: 'eq' }, max_score: null, hits: [] },
+    hits: { total: 0, max_score: 0, hits: [] },
     aggregations: {
       eventActionGroup: {
         doc_count_error_upper_bound: 0,
@@ -296,107 +214,9 @@ export const mockAuthenticationsSearchStrategyResponse: IEsSearchResponse<unknow
   total: 21,
   loaded: 21,
 };
-export const formattedAuthenticationsSearchStrategyResponse = {
-  isPartial: false,
-  isRunning: false,
-  rawResponse: {
-    took: 6,
-    timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 570, relation: 'eq' }, max_score: null, hits: [] },
-    aggregations: {
-      eventActionGroup: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'failure',
-            doc_count: 379,
-            events: {
-              buckets: [
-                { key_as_string: '2020-09-08T15:00:00.000Z', key: 1599577200000, doc_count: 1 },
-                { key_as_string: '2020-09-08T15:45:00.000Z', key: 1599579900000, doc_count: 4 },
-                { key_as_string: '2020-09-08T16:30:00.000Z', key: 1599582600000, doc_count: 34 },
-                { key_as_string: '2020-09-08T17:15:00.000Z', key: 1599585300000, doc_count: 1 },
-                { key_as_string: '2020-09-08T18:00:00.000Z', key: 1599588000000, doc_count: 3 },
-                { key_as_string: '2020-09-08T18:45:00.000Z', key: 1599590700000, doc_count: 20 },
-                { key_as_string: '2020-09-08T19:30:00.000Z', key: 1599593400000, doc_count: 24 },
-                { key_as_string: '2020-09-08T20:15:00.000Z', key: 1599596100000, doc_count: 37 },
-                { key_as_string: '2020-09-08T21:00:00.000Z', key: 1599598800000, doc_count: 4 },
-                { key_as_string: '2020-09-08T21:45:00.000Z', key: 1599601500000, doc_count: 22 },
-                { key_as_string: '2020-09-08T22:30:00.000Z', key: 1599604200000, doc_count: 3 },
-                { key_as_string: '2020-09-08T23:15:00.000Z', key: 1599606900000, doc_count: 0 },
-                { key_as_string: '2020-09-09T00:00:00.000Z', key: 1599609600000, doc_count: 2 },
-                { key_as_string: '2020-09-09T00:45:00.000Z', key: 1599612300000, doc_count: 21 },
-                { key_as_string: '2020-09-09T01:30:00.000Z', key: 1599615000000, doc_count: 28 },
-                { key_as_string: '2020-09-09T02:15:00.000Z', key: 1599617700000, doc_count: 30 },
-                { key_as_string: '2020-09-09T03:00:00.000Z', key: 1599620400000, doc_count: 19 },
-                { key_as_string: '2020-09-09T03:45:00.000Z', key: 1599623100000, doc_count: 4 },
-                { key_as_string: '2020-09-09T04:30:00.000Z', key: 1599625800000, doc_count: 1 },
-                { key_as_string: '2020-09-09T05:15:00.000Z', key: 1599628500000, doc_count: 6 },
-                { key_as_string: '2020-09-09T06:00:00.000Z', key: 1599631200000, doc_count: 18 },
-                { key_as_string: '2020-09-09T06:45:00.000Z', key: 1599633900000, doc_count: 5 },
-                { key_as_string: '2020-09-09T07:30:00.000Z', key: 1599636600000, doc_count: 23 },
-                { key_as_string: '2020-09-09T08:15:00.000Z', key: 1599639300000, doc_count: 15 },
-                { key_as_string: '2020-09-09T09:00:00.000Z', key: 1599642000000, doc_count: 2 },
-                { key_as_string: '2020-09-09T09:45:00.000Z', key: 1599644700000, doc_count: 0 },
-                { key_as_string: '2020-09-09T10:30:00.000Z', key: 1599647400000, doc_count: 5 },
-                { key_as_string: '2020-09-09T11:15:00.000Z', key: 1599650100000, doc_count: 2 },
-                { key_as_string: '2020-09-09T12:00:00.000Z', key: 1599652800000, doc_count: 4 },
-                { key_as_string: '2020-09-09T12:45:00.000Z', key: 1599655500000, doc_count: 6 },
-                { key_as_string: '2020-09-09T13:30:00.000Z', key: 1599658200000, doc_count: 11 },
-                { key_as_string: '2020-09-09T14:15:00.000Z', key: 1599660900000, doc_count: 0 },
-                { key_as_string: '2020-09-09T15:00:00.000Z', key: 1599663600000, doc_count: 24 },
-              ],
-            },
-          },
-          {
-            key: 'success',
-            doc_count: 191,
-            events: {
-              buckets: [
-                { key_as_string: '2020-09-08T15:00:00.000Z', key: 1599577200000, doc_count: 2 },
-                { key_as_string: '2020-09-08T15:45:00.000Z', key: 1599579900000, doc_count: 5 },
-                { key_as_string: '2020-09-08T16:30:00.000Z', key: 1599582600000, doc_count: 5 },
-                { key_as_string: '2020-09-08T17:15:00.000Z', key: 1599585300000, doc_count: 2 },
-                { key_as_string: '2020-09-08T18:00:00.000Z', key: 1599588000000, doc_count: 4 },
-                { key_as_string: '2020-09-08T18:45:00.000Z', key: 1599590700000, doc_count: 6 },
-                { key_as_string: '2020-09-08T19:30:00.000Z', key: 1599593400000, doc_count: 4 },
-                { key_as_string: '2020-09-08T20:15:00.000Z', key: 1599596100000, doc_count: 13 },
-                { key_as_string: '2020-09-08T21:00:00.000Z', key: 1599598800000, doc_count: 6 },
-                { key_as_string: '2020-09-08T21:45:00.000Z', key: 1599601500000, doc_count: 3 },
-                { key_as_string: '2020-09-08T22:30:00.000Z', key: 1599604200000, doc_count: 1 },
-                { key_as_string: '2020-09-08T23:15:00.000Z', key: 1599606900000, doc_count: 9 },
-                { key_as_string: '2020-09-09T00:00:00.000Z', key: 1599609600000, doc_count: 5 },
-                { key_as_string: '2020-09-09T00:45:00.000Z', key: 1599612300000, doc_count: 6 },
-                { key_as_string: '2020-09-09T01:30:00.000Z', key: 1599615000000, doc_count: 8 },
-                { key_as_string: '2020-09-09T02:15:00.000Z', key: 1599617700000, doc_count: 2 },
-                { key_as_string: '2020-09-09T03:00:00.000Z', key: 1599620400000, doc_count: 9 },
-                { key_as_string: '2020-09-09T03:45:00.000Z', key: 1599623100000, doc_count: 2 },
-                { key_as_string: '2020-09-09T04:30:00.000Z', key: 1599625800000, doc_count: 5 },
-                { key_as_string: '2020-09-09T05:15:00.000Z', key: 1599628500000, doc_count: 2 },
-                { key_as_string: '2020-09-09T06:00:00.000Z', key: 1599631200000, doc_count: 14 },
-                { key_as_string: '2020-09-09T06:45:00.000Z', key: 1599633900000, doc_count: 7 },
-                { key_as_string: '2020-09-09T07:30:00.000Z', key: 1599636600000, doc_count: 13 },
-                { key_as_string: '2020-09-09T08:15:00.000Z', key: 1599639300000, doc_count: 10 },
-                { key_as_string: '2020-09-09T09:00:00.000Z', key: 1599642000000, doc_count: 5 },
-                { key_as_string: '2020-09-09T09:45:00.000Z', key: 1599644700000, doc_count: 2 },
-                { key_as_string: '2020-09-09T10:30:00.000Z', key: 1599647400000, doc_count: 6 },
-                { key_as_string: '2020-09-09T11:15:00.000Z', key: 1599650100000, doc_count: 7 },
-                { key_as_string: '2020-09-09T12:00:00.000Z', key: 1599652800000, doc_count: 5 },
-                { key_as_string: '2020-09-09T12:45:00.000Z', key: 1599655500000, doc_count: 6 },
-                { key_as_string: '2020-09-09T13:30:00.000Z', key: 1599658200000, doc_count: 5 },
-                { key_as_string: '2020-09-09T14:15:00.000Z', key: 1599660900000, doc_count: 10 },
-                { key_as_string: '2020-09-09T15:00:00.000Z', key: 1599663600000, doc_count: 2 },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  },
-  total: 21,
-  loaded: 21,
+
+export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStrategyResponse = {
+  ...mockAuthenticationsSearchStrategyResponse,
   inspect: {
     dsl: [
       '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "eventActionGroup": {\n        "terms": {\n          "field": "event.outcome",\n          "include": [\n            "success",\n            "failure"\n          ],\n          "order": {\n            "_count": "desc"\n          },\n          "size": 2\n        },\n        "aggs": {\n          "events": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599578520325,\n                "max": 1599664920325\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "bool": {\n              "must": [\n                {\n                  "term": {\n                    "event.category": "authentication"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T15:22:00.325Z",\n                "lte": "2020-09-09T15:22:00.325Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
@@ -470,33 +290,17 @@ export const formattedAuthenticationsSearchStrategyResponse = {
     { x: 1599660900000, y: 10, g: 'success' },
     { x: 1599663600000, y: 2, g: 'success' },
   ],
-  totalCount: 570,
+  totalCount: 0,
 };
 
-export const mockEventsOptions = {
-  defaultIndex: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  factoryQueryType: 'matrixHistogram',
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  histogramType: 'events',
-  timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
-  stackByField: 'event.action',
-};
-export const mockEventsSearchStrategyResponse = {
+export const mockEventsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
   isRunning: false,
   rawResponse: {
     took: 198,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 1628598, relation: 'eq' }, max_score: null, hits: [] },
+    hits: { total: 0, max_score: 0, hits: [] },
     aggregations: {
       eventActionGroup: {
         doc_count_error_upper_bound: 3,
@@ -920,13 +724,14 @@ export const mockEventsSearchStrategyResponse = {
   loaded: 21,
 };
 
-export const formattedEventsSearchStrategyResponse = {
+export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyResponse = {
+  ...mockEventsSearchStrategyResponse,
   inspect: {
     dsl: [
       '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "eventActionGroup": {\n        "terms": {\n          "field": "event.action",\n          "missing": "All others",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "events": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599581486215,\n                "max": 1599667886215\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T16:11:26.215Z",\n                "lte": "2020-09-09T16:11:26.215Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
     ],
   },
-  totalCount: 1628598,
+  totalCount: 0,
   matrixHistogramData: [
     { x: 1599579900000, y: 26124, g: 'All others' },
     { x: 1599582600000, y: 62910, g: 'All others' },
@@ -1260,30 +1065,15 @@ export const formattedEventsSearchStrategyResponse = {
     { x: 1599666300000, y: 21, g: 'session_id_change' },
   ],
 };
-export const mockDnsOptions = {
-  defaultIndex: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  factoryQueryType: 'matrixHistogram',
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  histogramType: 'dns',
-  timerange: { interval: '12h', from: '2020-09-08T15:41:15.528Z', to: '2020-09-09T15:41:15.529Z' },
-  stackByField: 'dns.question.registered_domain',
-};
-export const mockDnsSearchStrategyResponse = {
+
+export const mockDnsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
   isRunning: false,
   rawResponse: {
     took: 150,
     timed_out: false,
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 1705016, relation: 'eq' }, max_score: null, hits: [] },
+    hits: { total: 0, max_score: 0, hits: [] },
     aggregations: {
       NetworkDns: {
         buckets: [
@@ -1499,228 +1289,9 @@ export const mockDnsSearchStrategyResponse = {
   total: 21,
   loaded: 21,
 };
-export const formattedDnsSearchStrategyResponse = {
-  isPartial: false,
-  isRunning: false,
-  rawResponse: {
-    took: 150,
-    timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: { value: 1705016, relation: 'eq' }, max_score: null, hits: [] },
-    aggregations: {
-      NetworkDns: {
-        buckets: [
-          {
-            key_as_string: '2020-09-08T15:00:00.000Z',
-            key: 1599577200000,
-            doc_count: 7083,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T15:45:00.000Z',
-            key: 1599579900000,
-            doc_count: 146148,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T16:30:00.000Z',
-            key: 1599582600000,
-            doc_count: 65025,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T17:15:00.000Z',
-            key: 1599585300000,
-            doc_count: 62317,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T18:00:00.000Z',
-            key: 1599588000000,
-            doc_count: 58223,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T18:45:00.000Z',
-            key: 1599590700000,
-            doc_count: 55712,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T19:30:00.000Z',
-            key: 1599593400000,
-            doc_count: 55328,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T20:15:00.000Z',
-            key: 1599596100000,
-            doc_count: 63878,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T21:00:00.000Z',
-            key: 1599598800000,
-            doc_count: 54151,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T21:45:00.000Z',
-            key: 1599601500000,
-            doc_count: 55170,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T22:30:00.000Z',
-            key: 1599604200000,
-            doc_count: 43115,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T23:15:00.000Z',
-            key: 1599606900000,
-            doc_count: 52204,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T00:00:00.000Z',
-            key: 1599609600000,
-            doc_count: 43609,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T00:45:00.000Z',
-            key: 1599612300000,
-            doc_count: 44825,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T01:30:00.000Z',
-            key: 1599615000000,
-            doc_count: 52374,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T02:15:00.000Z',
-            key: 1599617700000,
-            doc_count: 44667,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T03:00:00.000Z',
-            key: 1599620400000,
-            doc_count: 45231,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T03:45:00.000Z',
-            key: 1599623100000,
-            doc_count: 42871,
-            dns: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                { key: 'google.com', doc_count: 1, orderAgg: { value: 1 } },
-                { key: 'google.internal', doc_count: 1, orderAgg: { value: 1 } },
-              ],
-            },
-          },
-          {
-            key_as_string: '2020-09-09T04:30:00.000Z',
-            key: 1599625800000,
-            doc_count: 41327,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T05:15:00.000Z',
-            key: 1599628500000,
-            doc_count: 39860,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T06:00:00.000Z',
-            key: 1599631200000,
-            doc_count: 44061,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T06:45:00.000Z',
-            key: 1599633900000,
-            doc_count: 39193,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T07:30:00.000Z',
-            key: 1599636600000,
-            doc_count: 40909,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T08:15:00.000Z',
-            key: 1599639300000,
-            doc_count: 43293,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T09:00:00.000Z',
-            key: 1599642000000,
-            doc_count: 47640,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T09:45:00.000Z',
-            key: 1599644700000,
-            doc_count: 48605,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T10:30:00.000Z',
-            key: 1599647400000,
-            doc_count: 42072,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T11:15:00.000Z',
-            key: 1599650100000,
-            doc_count: 46398,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T12:00:00.000Z',
-            key: 1599652800000,
-            doc_count: 49378,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T12:45:00.000Z',
-            key: 1599655500000,
-            doc_count: 51171,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T13:30:00.000Z',
-            key: 1599658200000,
-            doc_count: 57911,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T14:15:00.000Z',
-            key: 1599660900000,
-            doc_count: 58909,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T15:00:00.000Z',
-            key: 1599663600000,
-            doc_count: 62358,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-        ],
-      },
-    },
-  },
-  total: 21,
-  loaded: 21,
+
+export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse = {
+  ...mockDnsSearchStrategyResponse,
   inspect: {
     dsl: [
       '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "NetworkDns": {\n        "date_histogram": {\n          "field": "@timestamp",\n          "fixed_interval": "2700000ms"\n        },\n        "aggs": {\n          "dns": {\n            "terms": {\n              "field": "dns.question.registered_domain",\n              "order": {\n                "orderAgg": "desc"\n              },\n              "size": 10\n            },\n            "aggs": {\n              "orderAgg": {\n                "cardinality": {\n                  "field": "dns.question.name"\n                }\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T15:41:15.528Z",\n                "lte": "2020-09-09T15:41:15.529Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
@@ -1730,5 +1301,5 @@ export const formattedDnsSearchStrategyResponse = {
     { x: 1599623100000, y: 1, g: 'google.com' },
     { x: 1599623100000, y: 1, g: 'google.internal' },
   ],
-  totalCount: 1705016,
+  totalCount: 0,
 };

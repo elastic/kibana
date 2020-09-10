@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution';
-import * as buildQuery from './alerts/query.alerts_histogram.dsl';
+import {
+  MatrixHistogramRequestOptions,
+  MatrixHistogramType,
+} from '../../../../../common/search_strategy/security_solution';
 import { matrixHistogram } from '.';
 import {
   formattedAlertsSearchStrategyResponse,
@@ -15,15 +15,10 @@ import {
   formattedAuthenticationsSearchStrategyResponse,
   formattedEventsSearchStrategyResponse,
   formattedDnsSearchStrategyResponse,
-  mockAlertsOptions,
   mockAlertsSearchStrategyResponse,
-  mockAnomaliesOptions,
   mockAnomaliesSearchStrategyResponse,
-  mockAuthenticationsOptions,
   mockAuthenticationsSearchStrategyResponse,
-  mockEventsOptions,
   mockEventsSearchStrategyResponse,
-  mockDnsOptions,
   mockDnsSearchStrategyResponse,
 } from './__mocks__';
 import { alertsMatrixHistogramConfig } from './alerts';
@@ -31,6 +26,12 @@ import { anomaliesMatrixHistogramConfig } from './anomalies';
 import { authenticationsMatrixHistogramConfig } from './authentications';
 import { eventsMatrixHistogramConfig } from './events';
 import { dnsMatrixHistogramConfig } from './dns';
+
+import { mockOptions as mockAlertsOptions } from './alerts/__mocks__';
+import { mockOptions as mockAnomaliesOptions } from './anomalies/__mocks__';
+import { mockOptions as mockAuthenticationsOptions } from './authentications/__mocks__';
+import { mockOptions as mockEventsOptions } from './events/__mocks__';
+import { mockOptions as mockDnsOptions } from './dns/__mocks__';
 
 describe('Alerts matrixHistogram search strategy', () => {
   const buildMatrixHistogramQuery = jest.spyOn(alertsMatrixHistogramConfig, 'buildDsl');
@@ -46,13 +47,13 @@ describe('Alerts matrixHistogram search strategy', () => {
     });
 
     test('should throw error if histogramType is invalid', () => {
-      const overSizeOptions = {
+      const invalidOptions: MatrixHistogramRequestOptions = {
         ...mockAlertsOptions,
-        histogramType: 'xxx',
+        histogramType: 'xxx' as MatrixHistogramType,
       } as MatrixHistogramRequestOptions;
 
       expect(() => {
-        matrixHistogram.buildDsl(overSizeOptions);
+        matrixHistogram.buildDsl(invalidOptions);
       }).toThrowError(`This histogram type xxx is unknown to the server side`);
     });
   });
@@ -82,13 +83,13 @@ describe('Anomalies matrixHistogram search strategy', () => {
     });
 
     test('should throw error if histogramType is invalid', () => {
-      const overSizeOptions = {
+      const invalidOptions: MatrixHistogramRequestOptions = {
         ...mockAnomaliesOptions,
-        histogramType: 'xxx',
+        histogramType: 'xxx' as MatrixHistogramType,
       } as MatrixHistogramRequestOptions;
 
       expect(() => {
-        matrixHistogram.buildDsl(overSizeOptions);
+        matrixHistogram.buildDsl(invalidOptions);
       }).toThrowError(`This histogram type xxx is unknown to the server side`);
     });
   });
@@ -118,13 +119,13 @@ describe('Authentications matrixHistogram search strategy', () => {
     });
 
     test('should throw error if histogramType is invalid', () => {
-      const overSizeOptions = {
+      const invalidOptions = {
         ...mockAuthenticationsOptions,
-        histogramType: 'xxx',
+        histogramType: 'xxx' as MatrixHistogramType,
       } as MatrixHistogramRequestOptions;
 
       expect(() => {
-        matrixHistogram.buildDsl(overSizeOptions);
+        matrixHistogram.buildDsl(invalidOptions);
       }).toThrowError(`This histogram type xxx is unknown to the server side`);
     });
   });
@@ -154,13 +155,13 @@ describe('Events matrixHistogram search strategy', () => {
     });
 
     test('should throw error if histogramType is invalid', () => {
-      const overSizeOptions = {
+      const invalidOptions = {
         ...mockEventsOptions,
-        histogramType: 'xxx',
+        histogramType: 'xxx' as MatrixHistogramType,
       } as MatrixHistogramRequestOptions;
 
       expect(() => {
-        matrixHistogram.buildDsl(overSizeOptions);
+        matrixHistogram.buildDsl(invalidOptions);
       }).toThrowError(`This histogram type xxx is unknown to the server side`);
     });
   });
@@ -190,13 +191,13 @@ describe('Dns matrixHistogram search strategy', () => {
     });
 
     test('should throw error if histogramType is invalid', () => {
-      const overSizeOptions = {
+      const invalidOptions = {
         ...mockDnsOptions,
-        histogramType: 'xxx',
+        histogramType: 'xxx' as MatrixHistogramType,
       } as MatrixHistogramRequestOptions;
 
       expect(() => {
-        matrixHistogram.buildDsl(overSizeOptions);
+        matrixHistogram.buildDsl(invalidOptions);
       }).toThrowError(`This histogram type xxx is unknown to the server side`);
     });
   });

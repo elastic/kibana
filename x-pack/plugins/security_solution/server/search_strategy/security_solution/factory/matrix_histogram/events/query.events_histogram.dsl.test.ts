@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { buildEventsHistogramQuery } from './query.events_histogram.dsl.ts';
+import { buildEventsHistogramQuery } from './query.events_histogram.dsl';
 import { mockOptions, expectedDsl } from './__mocks__/';
 
 describe('buildEventsHistogramQuery', () => {

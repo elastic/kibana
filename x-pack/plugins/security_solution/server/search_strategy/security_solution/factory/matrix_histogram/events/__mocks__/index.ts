@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const mockOptions = {
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  timerange: { from: '2020-09-08T14:23:04.482Z', to: '2020-09-09T14:23:04.482Z' },
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramType,
+} from '../../../../../../../common/search_strategy';
+
+export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -16,6 +20,10 @@ export const mockOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+  factoryQueryType: MatrixHistogramQuery,
+  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+  histogramType: MatrixHistogramType.events,
+  timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
   stackByField: 'event.action',
 };
 
@@ -46,7 +54,7 @@ export const expectedDsl = {
               field: '@timestamp',
               fixed_interval: '2700000ms',
               min_doc_count: 0,
-              extended_bounds: { min: 1599574984482, max: 1599661384482 },
+              extended_bounds: { min: 1599581486215, max: 1599667886215 },
             },
           },
         },
@@ -59,8 +67,8 @@ export const expectedDsl = {
           {
             range: {
               '@timestamp': {
-                gte: '2020-09-08T14:23:04.482Z',
-                lte: '2020-09-09T14:23:04.482Z',
+                gte: '2020-09-08T16:11:26.215Z',
+                lte: '2020-09-09T16:11:26.215Z',
                 format: 'strict_date_optional_time',
               },
             },

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
+
 export const mockOptions = {
-  filterQuery:
-    '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[],"must_not":[]}}',
-  timerange: { from: '2020-09-08T13:51:04.932Z', to: '2020-09-09T13:51:04.933Z' },
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -17,6 +16,10 @@ export const mockOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+  filterQuery:
+    '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"must_not":[],"minimum_should_match":1}}',
+  histogramType: MatrixHistogramType.anomalies,
+  timerange: { interval: '12h', from: '2020-09-08T15:14:35.566Z', to: '2020-09-09T15:14:35.566Z' },
   stackByField: 'job_id',
 };
 
@@ -42,7 +45,7 @@ export const expectedDsl = {
               field: 'timestamp',
               fixed_interval: '2700000ms',
               min_doc_count: 0,
-              extended_bounds: { min: 1599573064932, max: 1599659464933 },
+              extended_bounds: { min: 1599578075566, max: 1599664475566 },
             },
           },
         },
@@ -51,12 +54,12 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[],"must_not":[]}}',
+          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"must_not":[],"minimum_should_match":1}}',
           {
             range: {
               timestamp: {
-                gte: '2020-09-08T13:51:04.932Z',
-                lte: '2020-09-09T13:51:04.933Z',
+                gte: '2020-09-08T15:14:35.566Z',
+                lte: '2020-09-09T15:14:35.566Z',
                 format: 'strict_date_optional_time',
               },
             },
