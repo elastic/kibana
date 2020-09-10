@@ -36,16 +36,17 @@ const BaseRangeEditor = ({
   onIntervalChange,
 }: {
   autoIntervalEnabled: boolean;
-  maxBars: 'auto' | number;
+  maxBars: 'auto' | '' | number;
   interval: '' | number;
   maxHistogramBars: number;
   onToggleEditor: () => void;
   toggleAutoInterval: (enabled: boolean) => void;
-  onMaxBarsChange: (newMaxBars: number) => void;
+  onMaxBarsChange: (newMaxBars: number | 'auto') => void;
   onIntervalChange: (newInterval: '' | number) => void;
 }) => {
   // store the value as string: storing it as Number has some issues with decimals
   const [intervalValue, setIntervalValue] = useState(String(interval));
+  const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
 
   // Update locally all the time, but bounce the parents prop function
   // to aviod too many requests
@@ -58,6 +59,16 @@ const BaseRangeEditor = ({
     },
     256,
     [intervalValue]
+  );
+
+  useDebounce(
+    () => {
+      if (maxBarsValue !== AUTO_BARS) {
+        onMaxBarsChange(maxBarsValue === '' ? AUTO_BARS : Number(maxBarsValue));
+      }
+    },
+    256,
+    [maxBarsValue]
   );
 
   return (
@@ -86,10 +97,8 @@ const BaseRangeEditor = ({
               min={1}
               max={maxHistogramBars}
               step={1}
-              value={maxBars === AUTO_BARS ? '' : maxBars}
-              onChange={({ target }) =>
-                onMaxBarsChange(Number(get(target, 'value', maxHistogramBars)))
-              }
+              value={maxBarsValue === AUTO_BARS ? '' : maxBarsValue}
+              onChange={({ currentTarget }) => setMaxBarsValue(currentTarget.value)}
               placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
                 defaultMessage: 'Auto',
               })}
@@ -198,7 +207,7 @@ export const RangeEditor = ({
       maxBars={params.maxBars}
       maxHistogramBars={maxHistogramBars}
       toggleAutoInterval={onAutoIntervalToggle}
-      onMaxBarsChange={(maxBars: number) => {
+      onMaxBarsChange={(maxBars: number | 'auto') => {
         setParam('maxBars', maxBars);
       }}
       onIntervalChange={(interval: number | '') => {
