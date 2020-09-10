@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await pageObjects.hosts.deleteDataStreams();
+      await pageObjects.hosts.deleteDataStreams();
     });
 
     it('check that Resolver and Data table is loaded', async () => {
