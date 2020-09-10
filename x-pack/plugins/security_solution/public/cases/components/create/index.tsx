@@ -34,7 +34,7 @@ import * as i18n from '../../translations';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useGetTags } from '../../containers/use_get_tags';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
-import { useTimelineClick } from '../../../common/containers/use_timeline_click';
+import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
 
 export const CommonUseField = getUseField({ component: Field });
 

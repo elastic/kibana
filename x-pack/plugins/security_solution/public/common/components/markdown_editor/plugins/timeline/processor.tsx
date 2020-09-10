@@ -7,7 +7,7 @@
 import React, { useCallback, memo } from 'react';
 import { EuiToolTip, EuiLink, EuiMarkdownAstNodePosition } from '@elastic/eui';
 
-import { useTimelineClick } from '../../../../containers/use_timeline_click';
+import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click';
 import { TimelineProps } from './types';
 import * as i18n from './translations';
 
