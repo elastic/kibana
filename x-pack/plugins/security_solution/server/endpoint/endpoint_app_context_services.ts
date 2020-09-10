@@ -12,12 +12,10 @@ import {
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
-import { ExceptionListClient } from '../../../lists/server';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<IngestManagerStartContract, 'agentService'>
 > & {
-  exceptionsListService: ExceptionListClient;
   logger: Logger;
   manifestManager?: ManifestManager;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
@@ -32,11 +30,9 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
-  private exceptionsListService: ExceptionListClient | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
-    this.exceptionsListService = dependencies.exceptionsListService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
 
@@ -52,13 +48,6 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
-  }
-
-  public getExceptionsList() {
-    if (!this.exceptionsListService) {
-      throw new Error('exceptionsListService not set');
-    }
-    return this.exceptionsListService;
   }
 
   public getManifestManager(): ManifestManager | undefined {

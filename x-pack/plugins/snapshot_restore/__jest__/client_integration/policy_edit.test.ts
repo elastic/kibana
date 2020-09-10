@@ -52,6 +52,44 @@ describe('<PolicyEdit />', () => {
       expect(find('pageTitle').text()).toEqual('Edit policy');
     });
 
+    describe('policy with pre-existing repository that was deleted', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
+        httpRequestsMockHelpers.setLoadIndicesResponse({
+          indices: ['my_index'],
+          dataStreams: ['my_data_stream'],
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: 'this-is-a-new-repository' }],
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          await nextTick();
+          testBed.component.update();
+        });
+      });
+
+      test('should show repository-not-found warning', () => {
+        const { exists, find } = testBed;
+        expect(exists('repositoryNotFoundWarning')).toBe(true);
+        // The select should be an empty string to allow users to select a new repository
+        expect(find('repositorySelect').props().value).toBe('');
+      });
+
+      describe('validation', () => {
+        test('should block navigating to next step', () => {
+          const { exists, find, actions } = testBed;
+          actions.clickNextButton();
+          // Assert that we are still on the repository configuration step
+          expect(exists('repositoryNotFoundWarning')).toBe(true);
+          // The select should be an empty string to allow users to select a new repository
+          expect(find('repositorySelect').props().value).toBe('');
+        });
+      });
+    });
+
     /**
      * As the "edit" policy component uses the same form underneath that
      * the "create" policy, we won't test it again but simply make sure that
