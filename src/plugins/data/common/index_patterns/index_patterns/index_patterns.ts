@@ -342,10 +342,12 @@ export class IndexPatternsService {
 
   async create(indexPattern: IndexPattern, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
-    if (dupe && override) {
-      await this.delete(dupe.id);
-    } else {
-      throw new Error('Duplicate index pattern: ${indexPattern.title}');
+    if (dupe) {
+      if (override) {
+        await this.delete(dupe.id);
+      } else {
+        throw new Error(`Duplicate index pattern: ${indexPattern.title}`);
+      }
     }
 
     const body = indexPattern.prepBody();
