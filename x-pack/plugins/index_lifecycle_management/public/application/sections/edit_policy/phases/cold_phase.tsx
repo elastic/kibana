@@ -152,7 +152,7 @@ export const ColdPhase: FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
                 {
                   defaultMessage:
-                    'Set the number of replicas. Remains the same as the warm tier by default.',
+                    'Set the number of replicas. Remains the same as the previous tier by default.',
                 }
               )}
               switchProps={{
@@ -182,12 +182,6 @@ export const ColdPhase: FunctionComponent<Props> = ({
                 }
                 isShowingErrors={isShowingErrors}
                 errors={errors?.selectedReplicaCount}
-                helpText={i18n.translate(
-                  'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
-                  {
-                    defaultMessage: 'By default, the number of replicas remains the same.',
-                  }
-                )}
               >
                 <EuiFieldNumber
                   id={`${coldProperty}-${phaseProperty('selectedReplicaCount')}`}

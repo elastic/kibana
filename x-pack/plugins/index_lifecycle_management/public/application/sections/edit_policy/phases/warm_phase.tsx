@@ -190,7 +190,7 @@ export const WarmPhase: FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasDescription',
                 {
                   defaultMessage:
-                    'Set the number of replicas. Remains the same as the hot tier by default.',
+                    'Set the number of replicas. Remains the same as the previous tier by default.',
                 }
               )}
               switchProps={{
