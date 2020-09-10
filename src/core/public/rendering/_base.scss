@@ -1,4 +1,4 @@
-@include euiHeaderAffordForFixed($headerOffset);
+@include euiHeaderAffordForFixed($kbnHeaderOffset);
 
 /**
  * stretch the root element of the Kibana application to set the base-size that
@@ -15,7 +15,7 @@
   display: flex;
   flex-flow: column nowrap;
   margin: 0 auto;
-  min-height: calc(100vh - #{$headerOffset});
+  min-height: calc(100vh - #{$kbnHeaderOffset});
 
   &.hidden-chrome {
     min-height: 100vh;
