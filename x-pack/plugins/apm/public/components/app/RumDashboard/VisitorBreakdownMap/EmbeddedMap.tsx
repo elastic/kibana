@@ -8,11 +8,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+
 import {
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../maps/public/embeddable';
+} from '../../../../../../maps/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -22,9 +23,10 @@ import {
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { getLayerList } from './LayerList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { RenderTooltipContentParams } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { MapToolTipComponent } from './MapToolTip';
+import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import { MapToolTip } from './MapToolTip';
+import { useMapFilters } from './useMapFilters';
+import { EmbeddableStart } from '../../../../../../../../src/plugins/embeddable/public';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -45,12 +47,14 @@ const EmbeddedPanel = styled.div`
 `;
 
 interface KibanaDeps {
-  embeddable: any;
+  embeddable: EmbeddableStart;
 }
-export const EmbeddedMap = React.memo(() => {
+export function EmbeddedMapComponent() {
   const { urlParams } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
+
+  const mapFilters = useMapFilters();
 
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
@@ -74,22 +78,7 @@ export const EmbeddedMap = React.memo(() => {
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
-    filters: [
-      {
-        meta: {
-          index: 'apm_static_index_pattern_id',
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'exists',
-          key: 'transaction.marks.navigationTiming.fetchStart',
-          value: 'exists',
-        },
-        exists: {
-          field: 'transaction.marks.navigationTiming.fetchStart',
-        },
-      },
-    ],
+    filters: mapFilters,
     refreshConfig: {
       value: 0,
       pause: false,
@@ -100,13 +89,15 @@ export const EmbeddedMap = React.memo(() => {
       query: 'transaction.type : "page-load"',
       language: 'kuery',
     },
-    timeRange: {
-      from: new Date(start!).toISOString(),
-      to: new Date(end!).toISOString(),
-    },
+    ...(start && {
+      timeRange: {
+        from: new Date(start!).toISOString(),
+        to: new Date(end!).toISOString(),
+      },
+    }),
   };
 
-  const renderTooltipContent = ({
+  function renderTooltipContent({
     addFilters,
     closeTooltip,
     features,
@@ -114,7 +105,7 @@ export const EmbeddedMap = React.memo(() => {
     getLayerName,
     loadFeatureProperties,
     loadFeatureGeometry,
-  }: RenderTooltipContentParams) => {
+  }: RenderTooltipContentParams) {
     const props = {
       addFilters,
       closeTooltip,
@@ -125,7 +116,26 @@ export const EmbeddedMap = React.memo(() => {
     };
 
     return <OutPortal {...props} node={portalNode} features={features} />;
-  };
+  }
+
+  useEffect(() => {
+    if (embeddable != null && serviceName) {
+      embeddable.updateInput({ filters: mapFilters });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapFilters]);
+
+  // DateRange updated useEffect
+  useEffect(() => {
+    if (embeddable != null && start != null && end != null) {
+      const timeRange = {
+        from: new Date(start).toISOString(),
+        to: new Date(end).toISOString(),
+      };
+      embeddable.updateInput({ timeRange });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end]);
 
   useEffect(() => {
     async function setupEmbeddable() {
@@ -166,10 +176,12 @@ export const EmbeddedMap = React.memo(() => {
         ref={embeddableRoot}
       />
       <InPortal node={portalNode}>
-        <MapToolTipComponent />
+        <MapToolTip />
       </InPortal>
     </EmbeddedPanel>
   );
-});
+}
 
-EmbeddedMap.displayName = 'EmbeddedMap';
+EmbeddedMapComponent.displayName = 'EmbeddedMap';
+
+export const EmbeddedMap = React.memo(EmbeddedMapComponent);

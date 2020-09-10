@@ -68,11 +68,6 @@ export function RumDashboard() {
             <EuiFlexItem grow={3}>
               <VisitorBreakdown />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiSpacer size="s" />
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
               <VisitorBreakdownMap />
             </EuiFlexItem>

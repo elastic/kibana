@@ -12,15 +12,14 @@ import {
   EuiOutsideClickDetector,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { RenderTooltipContentParams } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import styled from 'styled-components';
 import {
   COUNTRY_NAME,
   REGION_NAME,
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
 } from './LayerList';
-import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderTooltipContentParams } from '../../../../../../maps/public';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
@@ -36,11 +35,11 @@ const TitleItem = styled(EuiDescriptionListTitle)`
   }
 `;
 
-export const MapToolTipComponent = ({
+function MapToolTipComponent({
   closeTooltip,
   features = [],
   loadFeatureProperties,
-}: MapToolTipProps) => {
+}: MapToolTipProps) {
   const { id: featureId, layerId } = features[0] ?? {};
 
   const [regionName, setRegionName] = useState<string>(featureId as string);
@@ -104,6 +103,6 @@ export const MapToolTipComponent = ({
       </>
     </EuiOutsideClickDetector>
   );
-};
+}
 
 export const MapToolTip = React.memo(MapToolTipComponent);

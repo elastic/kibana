@@ -37,7 +37,7 @@ import {
 import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { EmbeddableStart } from '../../../../target/types/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;

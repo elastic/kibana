@@ -58,7 +58,7 @@ export function RumOverview() {
 
   return (
     <>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EnvironmentFilter />
