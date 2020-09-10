@@ -555,12 +555,18 @@ describe('#bulkUpdate', () => {
   });
 
   describe('namespace', () => {
-    const doTest = async (
-      optionsNamespace: string | undefined,
-      expectOptionsNamespaceInDescriptor: boolean,
-      objectNamespace: string | undefined,
-      expectObjectNamespaceInDescriptor: boolean
-    ) => {
+    interface TestParams {
+      optionsNamespace: string | undefined;
+      objectNamespace: string | undefined;
+      expectOptionsNamespaceInDescriptor: boolean;
+      expectObjectNamespaceInDescriptor: boolean;
+    }
+    const doTest = async ({
+      optionsNamespace,
+      objectNamespace,
+      expectOptionsNamespaceInDescriptor,
+      expectObjectNamespaceInDescriptor,
+    }: TestParams) => {
       const docs = [
         {
           id: 'some-id',
@@ -623,7 +629,6 @@ describe('#bulkUpdate', () => {
             },
             version: 'some-version',
             namespace: objectNamespace,
-
             references: undefined,
           },
         ],
@@ -632,24 +637,44 @@ describe('#bulkUpdate', () => {
     };
 
     it('does not use options `namespace` or object `namespace` to encrypt attributes if neither are specified', async () => {
-      await doTest(undefined, false, undefined, false);
+      await doTest({
+        optionsNamespace: undefined,
+        objectNamespace: undefined,
+        expectOptionsNamespaceInDescriptor: false,
+        expectObjectNamespaceInDescriptor: false,
+      });
     });
 
     describe('with a single-namespace type', () => {
       it('uses options `namespace` to encrypt attributes if it is specified and object `namespace` is not', async () => {
-        await doTest('some-namespace', true, undefined, false);
+        await doTest({
+          optionsNamespace: 'some-namespace',
+          objectNamespace: undefined,
+          expectOptionsNamespaceInDescriptor: true,
+          expectObjectNamespaceInDescriptor: false,
+        });
       });
 
       it('uses object `namespace` to encrypt attributes if it is specified', async () => {
         // object namespace supersedes options namespace
-        await doTest('some-namespace', false, 'another-namespace', true);
+        await doTest({
+          optionsNamespace: 'some-namespace',
+          objectNamespace: 'another-namespace',
+          expectOptionsNamespaceInDescriptor: false,
+          expectObjectNamespaceInDescriptor: true,
+        });
       });
     });
 
     describe('with a non-single-namespace type', () => {
       it('does not use object `namespace` or options `namespace` to encrypt attributes if it is specified', async () => {
         mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
-        await doTest('some-namespace', false, 'another-namespace', false);
+        await doTest({
+          optionsNamespace: 'some-namespace',
+          objectNamespace: 'another-namespace',
+          expectOptionsNamespaceInDescriptor: false,
+          expectObjectNamespaceInDescriptor: false,
+        });
       });
     });
   });

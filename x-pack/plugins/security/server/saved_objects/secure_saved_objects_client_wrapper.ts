@@ -200,6 +200,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsBaseOptions = {}
   ) {
     const objectNamespaces = objects
+      // The repository treats an `undefined` object namespace is treated as the absence of a namespace, falling back to options.namespace;
+      // in this case, filter it out here so we don't accidentally check for privileges in the Default space when we shouldn't be doing so.
       .filter(({ namespace }) => namespace !== undefined)
       .map(({ namespace }) => namespace!);
     const namespaces = [options?.namespace, ...objectNamespaces];
