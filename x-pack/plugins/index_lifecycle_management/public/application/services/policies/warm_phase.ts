@@ -17,6 +17,7 @@ import {
 } from './policy_validation';
 
 import { determineDataTierAllocationType } from '../../lib';
+import { serializePhaseWithAllocation } from './shared/serialize_phase_with_allocation';
 
 const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
@@ -108,22 +109,7 @@ export const warmPhaseToES = (
     delete esPhase.min_age;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
-
-  if (phase.dataTierAllocationType === 'custom' && phase.selectedNodeAttrs) {
-    const [name, value] = phase.selectedNodeAttrs.split(':');
-    esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
-    esPhase.actions.allocate.require = {
-      [name]: value,
-    };
-  } else if (phase.dataTierAllocationType === 'none') {
-    esPhase.actions.migrate = { enabled: false };
-  } else {
-    if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
-      delete esPhase.actions.migrate;
-    }
-  }
+  esPhase.actions = serializePhaseWithAllocation(phase, esPhase.actions);
 
   if (isNumber(phase.selectedReplicaCount)) {
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
