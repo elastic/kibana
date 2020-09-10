@@ -139,7 +139,8 @@ export const ConditionEntry = memo<ConditionEntryProps>(
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ConditionEntryCell showLabel={showLabels} label={''}>
+          {/* Unicode `nbsp` is used below so that Remove button is property displayed */}
+          <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
             <EuiButtonIcon
               color="danger"
               iconType="trash"

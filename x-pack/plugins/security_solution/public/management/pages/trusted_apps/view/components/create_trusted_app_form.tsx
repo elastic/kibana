@@ -17,8 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
-import { NewTrustedApp } from '../../../../../../common/endpoint/types';
+import { NewTrustedApp, TrustedApp } from '../../../../../../common/endpoint/types';
 import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
+import { OS_TITLES } from '../constants';
 
 const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   return {
@@ -70,11 +71,10 @@ export type CreateTrustedAppFormProps = Omit<EuiFormProps, 'component'> & {
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
   ({ fullWidth, onChange, ...formProps }) => {
     const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-      // FIXME:PT i18n these or get them from an already i18n place (see Bohdan's PR after merge)
       return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
         return {
           value: os,
-          inputDisplay: os,
+          inputDisplay: OS_TITLES[os as TrustedApp['os']],
         };
       });
     }, []);

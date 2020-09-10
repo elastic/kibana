@@ -28,7 +28,7 @@ import {
 import { useTrustedAppsSelector } from '../hooks';
 import { getApiCreateErrors, isCreatePending, wasCreateSuccessful } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
-import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useToasts } from '../../../../../common/lib/kibana';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
