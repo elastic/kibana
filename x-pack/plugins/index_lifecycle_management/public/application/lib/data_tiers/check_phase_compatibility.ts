@@ -13,7 +13,7 @@ import { NodeRole, ListNodesRouteResponse } from '../../../../common/types';
  * This can only be checked for phases that have an allocate action.
  */
 export const isPhaseDefaultDataAllocationCompatible = (
-  phase: 'warm' | 'cold' | 'frozen',
+  phase: PhaseWithAllocation,
   nodesByRoles: ListNodesRouteResponse['nodesByRoles']
 ): boolean => {
   // The 'data' role covers all node roles, so if we have at least one node with the data role

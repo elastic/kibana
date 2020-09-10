@@ -28,11 +28,9 @@ import {
   ErrableFormRow,
   SetPriorityInput,
   MinAgeInput,
-  DataTierAllocation,
   DescribedFormField,
-  NodesDataProvider,
-  DefaultAllocationWarning,
 } from '../components';
+import { DataTierAllocationField } from './shared';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
@@ -164,49 +162,21 @@ export const WarmPhase: FunctionComponent<Props> = ({
 
         {phaseData.phaseEnabled ? (
           <Fragment>
-            <NodesDataProvider>
-              {(nodesData) => (
-                <EuiDescribedFormGroup
-                  title={
-                    <h3>
-                      {i18n.translate(
-                        'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationTitle',
-                        { defaultMessage: 'Data tier allocation' }
-                      )}
-                    </h3>
-                  }
-                  description={
-                    <>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription"
-                        defaultMessage="Allocate warm data to nodes in the cluster."
-                      />
-                      {
-                        <DefaultAllocationWarning
-                          phase={warmProperty}
-                          title={i18nTexts.defaultAllocationNotAvailable.title}
-                          body={i18nTexts.defaultAllocationNotAvailable.body}
-                          nodesByRoles={nodesData.nodesByRoles}
-                          currentAllocationType={phaseData.dataTierAllocationType}
-                        />
-                      }
-                    </>
-                  }
-                  fullWidth
-                >
-                  <EuiFormRow>
-                    <DataTierAllocation
-                      phase={warmProperty}
-                      setPhaseData={setPhaseData}
-                      errors={errors}
-                      phaseData={phaseData}
-                      isShowingErrors={isShowingErrors}
-                      nodes={nodesData.nodesByAttributes}
-                    />
-                  </EuiFormRow>
-                </EuiDescribedFormGroup>
-              )}
-            </NodesDataProvider>
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription"
+                  defaultMessage="Allocate warm data to nodes in the cluster."
+                />
+              }
+              phase={warmProperty}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              phaseData={phaseData}
+              defaultAllocationWarningTitle={i18nTexts.defaultAllocationNotAvailable.title}
+              defaultAllocationWarningBody={i18nTexts.defaultAllocationNotAvailable.body}
+            />
 
             <DescribedFormField
               title={

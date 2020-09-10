@@ -7,15 +7,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSwitch, EuiText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 
-import { PhaseWithAllocationAction } from '../../../../../../common/types';
-import { AdvancedSectionLayout } from '../advanced_section_layout';
+import { DataTierAllocationType, PhaseWithAllocationAction } from '../../../../../../common/types';
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
 import './data_tier_allocation.scss';
 import { LearnMoreLink } from '../learn_more_link';
+
+type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
 const learnMoreLink = (
   <LearnMoreLink
@@ -38,6 +39,49 @@ const i18nTexts = {
     'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useCustomSwitchLabel',
     { defaultMessage: 'Custom attribute-based allocation' }
   ),
+  allocationFieldLabel: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.allocationFieldLabel',
+    { defaultMessage: 'Data tier allocation' }
+  ),
+  allocationOptions: {
+    auto: {
+      inputDisplay: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.input',
+        { defaultMessage: 'Auto (recommended)' }
+      ),
+      helpText: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.helpText',
+        { defaultMessage: 'Node role-based allocation.' }
+      ),
+    },
+    custom: {
+      inputDisplay: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.input',
+        { defaultMessage: 'Custom' }
+      ),
+      helpText: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.helpText',
+        { defaultMessage: 'Node attribute-based allocation.' }
+      ),
+      description: (
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
+          defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
+          values={{ learnMoreLink }}
+        />
+      ),
+    },
+    none: {
+      inputDisplay: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.input',
+        { defaultMessage: 'None' }
+      ),
+      helpText: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.helpText',
+        { defaultMessage: 'Do not allocate data in this phase.' }
+      ),
+    },
+  },
 };
 
 export const DataTierAllocation = (
@@ -45,58 +89,74 @@ export const DataTierAllocation = (
 ) => {
   const { phaseData, setPhaseData, phase } = props;
 
-  const isUsingDataTierAllocation =
-    phaseData.dataTierAllocationType === 'custom' || phaseData.dataTierAllocationType === 'default';
-
   return (
     <div data-test-subj={`${phase}-dataTierAllocationControls`}>
-      <EuiSwitch
-        label={i18nTexts.useDataTierAllocation}
-        checked={isUsingDataTierAllocation}
-        onChange={(e) => {
-          if (!e.target.checked) {
-            props.setPhaseData('dataTierAllocationType', 'none');
-          } else {
-            props.setPhaseData('dataTierAllocationType', 'default');
+      <EuiFormRow label={i18nTexts.allocationFieldLabel}>
+        <EuiSuperSelect
+          hasDividers
+          valueOfSelected={phaseData.dataTierAllocationType}
+          onChange={(value) => setPhaseData('dataTierAllocationType', value)}
+          options={
+            [
+              {
+                value: 'default',
+                inputDisplay: i18nTexts.allocationOptions.auto.inputDisplay,
+                dropdownDisplay: (
+                  <>
+                    <strong>{i18nTexts.allocationOptions.auto.inputDisplay}</strong>
+                    <EuiText size="s" color="subdued">
+                      <p className="euiTextColor--subdued">
+                        {i18nTexts.allocationOptions.auto.helpText}
+                      </p>
+                    </EuiText>
+                  </>
+                ),
+              },
+              {
+                value: 'custom',
+                inputDisplay: i18nTexts.allocationOptions.custom.inputDisplay,
+                dropdownDisplay: (
+                  <>
+                    <strong>{i18nTexts.allocationOptions.custom.inputDisplay}</strong>
+                    <EuiText size="s" color="subdued">
+                      <p className="euiTextColor--subdued">
+                        {i18nTexts.allocationOptions.custom.helpText}
+                      </p>
+                    </EuiText>
+                  </>
+                ),
+              },
+              {
+                value: 'none',
+                inputDisplay: i18nTexts.allocationOptions.none.inputDisplay,
+                dropdownDisplay: (
+                  <>
+                    <strong>{i18nTexts.allocationOptions.none.inputDisplay}</strong>
+                    <EuiText size="s" color="subdued">
+                      <p className="euiTextColor--subdued">
+                        {i18nTexts.allocationOptions.none.helpText}
+                      </p>
+                    </EuiText>
+                  </>
+                ),
+              },
+            ] as SelectOptions[]
           }
-        }}
-      />
-      {isUsingDataTierAllocation ? (
+        />
+      </EuiFormRow>
+      {phaseData.dataTierAllocationType === 'custom' && (
         <>
-          <EuiSpacer size="m" />
-          <AdvancedSectionLayout>
-            <div className="indexLifecycleManagement__phase__dataTierAllocation__advancedSection">
-              <EuiFormRow
-                helpText={
-                  <EuiText size="xs">
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.description"
-                      defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
-                      values={{ learnMoreLink }}
-                    />
-                  </EuiText>
-                }
-              >
-                <EuiSwitch
-                  data-test-subj="useCustomAllocationSwitch"
-                  label={i18nTexts.useCustomDataTierAllocation}
-                  checked={phaseData.dataTierAllocationType === 'custom'}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setPhaseData('dataTierAllocationType', 'custom');
-                    } else {
-                      setPhaseData('dataTierAllocationType', 'default');
-                    }
-                  }}
-                />
-              </EuiFormRow>
-              {props.phaseData.dataTierAllocationType === 'custom' ? (
-                <NodeAllocation {...props} />
-              ) : null}
-            </div>
-          </AdvancedSectionLayout>
+          <EuiSpacer size="s" />
+          <div className="indexLifecycleManagement__phase__dataTierAllocation__controlSection">
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>{i18nTexts.allocationOptions.custom.description}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <NodeAllocation {...props} />
+          </div>
         </>
-      ) : null}
+      )}
     </div>
   );
 };

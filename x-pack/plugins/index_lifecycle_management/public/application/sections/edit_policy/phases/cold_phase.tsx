@@ -8,13 +8,7 @@ import React, { FunctionComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFieldNumber,
-  EuiDescribedFormGroup,
-  EuiSwitch,
-  EuiTextColor,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiDescribedFormGroup, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
 import { ColdPhase as ColdPhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
@@ -27,11 +21,10 @@ import {
   ErrableFormRow,
   SetPriorityInput,
   MinAgeInput,
-  DataTierAllocation,
   DescribedFormField,
-  NodesDataProvider,
-  DefaultAllocationWarning,
 } from '../components';
+
+import { DataTierAllocationField } from './shared';
 
 const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
   defaultMessage: 'Freeze index',
@@ -131,49 +124,20 @@ export const ColdPhase: FunctionComponent<Props> = ({
         {phaseData.phaseEnabled ? (
           <Fragment>
             {/* Data tier allocation section */}
-            <NodesDataProvider>
-              {(nodesData) => (
-                <EuiDescribedFormGroup
-                  title={
-                    <h3>
-                      {i18n.translate(
-                        'xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationTitle',
-                        { defaultMessage: 'Data tier allocation' }
-                      )}
-                    </h3>
-                  }
-                  description={
-                    <>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationDescription"
-                        defaultMessage="Allocate cold data to nodes in the cluster."
-                      />
-                      {
-                        <DefaultAllocationWarning
-                          title={i18nTexts.defaultAllocationNotAvailable.title}
-                          body={i18nTexts.defaultAllocationNotAvailable.body}
-                          phase={coldProperty}
-                          nodesByRoles={nodesData.nodesByRoles}
-                          currentAllocationType={phaseData.dataTierAllocationType}
-                        />
-                      }
-                    </>
-                  }
-                  fullWidth
-                >
-                  <EuiFormRow>
-                    <DataTierAllocation
-                      phase={coldProperty}
-                      setPhaseData={setPhaseData}
-                      errors={errors}
-                      phaseData={phaseData}
-                      isShowingErrors={isShowingErrors}
-                      nodes={nodesData.nodesByAttributes}
-                    />
-                  </EuiFormRow>
-                </EuiDescribedFormGroup>
-              )}
-            </NodesDataProvider>
+            <DataTierAllocationField
+              description={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationDescription"
+                  defaultMessage="Allocate cold data to nodes in the cluster."
+                />
+              }
+              phase={coldProperty}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              phaseData={phaseData}
+              defaultAllocationWarningTitle={i18nTexts.defaultAllocationNotAvailable.title}
+              defaultAllocationWarningBody={i18nTexts.defaultAllocationNotAvailable.body}
+            />
 
             {/* Replicas section */}
             <DescribedFormField

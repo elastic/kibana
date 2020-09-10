@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-
-export type DataTierNodeRole = 'data' | 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
-
-export type PhaseWithAllocation = 'warm' | 'cold' | 'frozen';
-
-export * from './policies';
+export { DataTierAllocationField } from './data_tier_allocation_field';
