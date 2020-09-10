@@ -67,15 +67,27 @@ export function DimensionContainer({
     }, 255);
   };
 
+  const flyoutShouldBeOpen =
+    dimensionContainerState.isOpen &&
+    (dimensionContainerState.openId === accessor ||
+      (noMatch && dimensionContainerState.addingToGroupId === groupId));
+
   useEffect(() => {
-    if (
-      dimensionContainerState.isOpen &&
-      (dimensionContainerState.openId === accessor ||
-        (noMatch && dimensionContainerState.addingToGroupId === groupId))
-    ) {
+    if (flyoutShouldBeOpen) {
       openFlyout();
     }
   });
+
+  useEffect(() => {
+    if (!flyoutShouldBeOpen) {
+      if (flyoutIsVisible) {
+        setFlyoutIsVisible(false);
+      }
+      if (focusTrapIsEnabled) {
+        setFocusTrapIsEnabled(false);
+      }
+    }
+  }, [flyoutShouldBeOpen, flyoutIsVisible, focusTrapIsEnabled]);
 
   const flyout = flyoutIsVisible && (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
