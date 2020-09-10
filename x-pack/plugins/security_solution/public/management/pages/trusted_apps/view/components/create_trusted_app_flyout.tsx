@@ -35,8 +35,11 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const pendingCreate = useTrustedAppsSelector(isCreatePending);
     const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
     const handleCancelClick = useCallback(() => {
+      if (pendingCreate) {
+        return;
+      }
       onClose();
-    }, [onClose]);
+    }, [onClose, pendingCreate]);
     const handleSaveClick = useCallback(() => {
       if (formState) {
         dispatch({
@@ -56,7 +59,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     );
 
     return (
-      <EuiFlyout onClose={onClose} {...flyoutProps} hideCloseButton={pendingCreate}>
+      <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={pendingCreate}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
