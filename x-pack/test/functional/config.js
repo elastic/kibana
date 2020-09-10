@@ -287,6 +287,26 @@ export default async function ({ readConfigFile }) {
             ],
           },
         },
+        antimeridian_points_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_points*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_shapes_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
 
         geoconnections_data_reader: {
           elasticsearch: {
