@@ -55,7 +55,7 @@ describe('setOptedInNoticeSeen', () => {
 });
 
 describe('shouldShowOptedInNoticeBanner', () => {
-  it('should return true because no banner, not seen and user can change settings', () => {
+  it("should return true because a banner hasn't been shown, the notice hasn't been seen and the user has privileges to edit saved objects", () => {
     const telemetryService = mockTelemetryService();
     telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(true);
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
