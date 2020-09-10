@@ -137,7 +137,7 @@ export async function getClustersFromRequest(
           cluster.alerts = {
             list: {},
             alertsMeta: {
-              enabled: true,
+              enabled: false,
             },
           };
           continue;
@@ -162,7 +162,7 @@ export async function getClustersFromRequest(
               []
             ),
             alertsMeta: {
-              enabled: false,
+              enabled: true,
             },
           };
           continue;
@@ -171,7 +171,7 @@ export async function getClustersFromRequest(
         cluster.alerts = {
           list: {},
           alertsMeta: {
-            enabled: true,
+            enabled: false,
           },
           clusterMeta: {
             enabled: false,
