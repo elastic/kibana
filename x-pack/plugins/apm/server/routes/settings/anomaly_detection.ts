@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import Boom from 'boom';
-import { isValidPlatinumLicense } from '../../../common/service_map';
+import { isActivePlatinumLicense } from '../../../common/service_map';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createRoute } from '../create_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
@@ -25,7 +25,7 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    if (!isValidPlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
@@ -56,7 +56,7 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
     const { environments } = context.params.body;
     const setup = await setupRequest(context, request);
 
-    if (!isValidPlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 

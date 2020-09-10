@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { isValidPlatinumLicense } from '../../../common/service_map';
+import { isActivePlatinumLicense } from '../../../common/service_map';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
@@ -100,7 +100,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       request,
     }),
     ml:
-      context.plugins.ml && isValidPlatinumLicense(context.licensing.license)
+      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
         ? getMlSetup(
             context.plugins.ml,
             context.core.savedObjects.client,
