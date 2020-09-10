@@ -135,7 +135,14 @@ export const extractErrorProperties = (
       typeof error.body.attributes === 'object' &&
       error.body.attributes.body?.status !== undefined
     ) {
-      statusCode = error.body.attributes.body?.status;
+      statusCode = error.body.attributes.body.status;
+
+      if (typeof error.body.attributes.body.error?.reason === 'string') {
+        return {
+          message: error.body.attributes.body.error.reason,
+          statusCode,
+        };
+      }
     }
 
     if (typeof error.body.message === 'string') {

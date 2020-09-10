@@ -8,7 +8,6 @@ jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
-jest.mock('../lib/validate');
 
 import * as Rx from 'rxjs';
 import { featuresPluginMock } from '../../../features/server/mocks';
