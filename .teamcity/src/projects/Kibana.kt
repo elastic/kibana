@@ -139,5 +139,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
     }
 
     buildType(EssentialCi)
+    buildType(BaselineCi)
   }
 }
