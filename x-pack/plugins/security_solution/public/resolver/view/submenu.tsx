@@ -196,7 +196,7 @@ const NodeSubMenuComponents = React.memo(
         />
         {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={!menuIsOpen} aria-owns={nodeID} aria-describedby={nodeID}>
           { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
-            return (<li className="item" role="menuitem" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
+            return (<li className="item" role="menuitem" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button className="kbn-resetFocusState" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
           })}
         </ul>) : null}
       </>
@@ -237,6 +237,20 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     height: fit-content;
     width: fit-content;
     line-height: .8;
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  &.options .item button:focus {
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    text-decoration: underline;
+  }
+
+  &.options .item button:active {
+    transform: scale(.95);
   }
 
   & .euiButton {
