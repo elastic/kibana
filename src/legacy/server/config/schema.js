@@ -144,6 +144,7 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
+      cGroupOverrides: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
     plugins: Joi.object({
