@@ -19,14 +19,14 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
 
   steps {
     // TODO is there a way to re-use what was built in the DefaultBuild job?
-//    script {
-//      name = "Build Default Plugins"
-//      scriptContent =
-//        """
-//                #!/bin/bash
-//                ./.ci/teamcity/default/build_plugins.sh
-//        """.trimIndent()
-//    }
+    script {
+      name = "Build Default Plugins"
+      scriptContent =
+        """
+                #!/bin/bash
+                ./.ci/teamcity/default/build_plugins.sh
+        """.trimIndent()
+    }
 
     script {
       name = "Default CI Group $ciGroup"
