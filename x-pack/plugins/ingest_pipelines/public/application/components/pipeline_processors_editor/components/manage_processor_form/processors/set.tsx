@@ -32,13 +32,13 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Value',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText', {
-      defaultMessage: 'Value to be set for the field',
+      defaultMessage: 'Value for the field.',
     }),
     validations: [
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError', {
-            defaultMessage: 'A value is required',
+            defaultMessage: 'A value is required.',
           })
         ),
       },
@@ -53,9 +53,15 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldLabel', {
       defaultMessage: 'Override',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldHelpText', {
-      defaultMessage: 'If disabled, fields containing non-null values will not be updated.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldHelpText"
+        defaultMessage="If enabled, overwrite existing field values. If disabled, only update {nullValue} fields."
+        values={{
+          nullValue: <EuiCode>{'null'}</EuiCode>,
+        }}
+      />
+    ),
   },
   ignore_empty_value: {
     type: FIELD_TYPES.TOGGLE,
@@ -71,7 +77,8 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.ignoreEmptyValueFieldHelpText"
-        defaultMessage="If enabled and {valueField} is a template snippet that evaluates to {nullValue} or an empty string, quietly exit without modifying the document."
+        defaultMessage="If {valueField} is {nullValue} or an empty string, do not
+        update the field."
         values={{
           valueField: <EuiCode>{'value'}</EuiCode>,
           nullValue: <EuiCode>{'null'}</EuiCode>,
@@ -89,7 +96,7 @@ export const SetProcessor: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
-          defaultMessage: 'Field to insert or update',
+          defaultMessage: 'Field to insert or update.',
         })}
       />
 
