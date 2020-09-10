@@ -66,6 +66,18 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.settings.createIndexPattern('alias1', false);
       });
+
+      after(async () => {
+        await es.transport.request({
+          path: '/_aliases',
+          method: 'POST',
+          body: { actions: [{ remove: { index: 'blogs', alias: 'alias1' } }] },
+        });
+        await es.transport.request({
+          path: '/blogs',
+          method: 'DELETE',
+        });
+      });
     });
   });
 }

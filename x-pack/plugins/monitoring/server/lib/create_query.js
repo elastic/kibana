@@ -57,7 +57,7 @@ export function createQuery(options) {
 
   let typeFilter;
   if (type) {
-    typeFilter = { term: { type } };
+    typeFilter = { bool: { should: [{ term: { type } }, { term: { 'metricset.name': type } }] } };
   }
 
   let clusterUuidFilter;
