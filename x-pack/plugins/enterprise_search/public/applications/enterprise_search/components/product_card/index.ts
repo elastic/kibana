@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  SetEnterpriseSearchChrome,
-  SetAppSearchChrome,
-  SetWorkplaceSearchChrome,
-} from './set_chrome';
+export { ProductCard } from './product_card';
