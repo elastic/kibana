@@ -20,10 +20,11 @@ const CoreVitalsThresholds = {
 export function CoreVitals() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      const { serviceName } = uiFilters;
       if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/web-core-vitals',
@@ -34,7 +35,7 @@ export function CoreVitals() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [start, end, uiFilters]
   );
 
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};

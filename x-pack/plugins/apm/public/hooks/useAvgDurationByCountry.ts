@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { useParams } from 'react-router-dom';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 
 export function useAvgDurationByCountry() {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    urlParams: { serviceName, start, end, transactionName },
+    urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 

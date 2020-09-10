@@ -8,6 +8,12 @@ import { renderHook } from '@testing-library/react-hooks';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import * as useFetcherModule from './useFetcher';
 import { useAvgDurationByBrowser } from './useAvgDurationByBrowser';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return <MemoryRouter>{children}</MemoryRouter>;
+}
 
 describe('useAvgDurationByBrowser', () => {
   it('returns data', () => {
@@ -19,7 +25,9 @@ describe('useAvgDurationByBrowser', () => {
       refetch: () => {},
       status: 'success' as useFetcherModule.FETCH_STATUS,
     });
-    const { result } = renderHook(() => useAvgDurationByBrowser());
+    const { result } = renderHook(() => useAvgDurationByBrowser(), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.data).toEqual([
       {
