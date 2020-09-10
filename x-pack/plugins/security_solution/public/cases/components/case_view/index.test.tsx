@@ -121,14 +121,14 @@ describe('CaseView ', () => {
 
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-coke"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
           .first()
           .text()
       ).toEqual(data.tags[0]);
 
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-pepsi"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
           .first()
           .text()
       ).toEqual(data.tags[1]);
