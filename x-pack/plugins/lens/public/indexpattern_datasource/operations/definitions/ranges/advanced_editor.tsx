@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './ranges.scss';
+
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
@@ -95,6 +97,7 @@ const RangePopover = ({
 
   return (
     <EuiPopover
+      display="block"
       ownFocus
       isOpen={isOpenByCreation || isPopoverOpen}
       closePopover={() => {
@@ -305,7 +308,7 @@ export const AdvancedRangeEditor = ({
                                 <EuiLink
                                   color="text"
                                   onClick={onClick}
-                                  className="lnsLayerPanel__rangeLink"
+                                  className="lnsRangesOperation__popoverButton"
                                 >
                                   <EuiText
                                     size="s"
@@ -346,6 +349,7 @@ export const AdvancedRangeEditor = ({
           </EuiDroppable>
         </EuiDragDropContext>
         <EuiButtonEmpty
+          size="xs"
           iconType="plusInCircle"
           onClick={() => {
             addNewRange();
