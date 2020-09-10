@@ -9,7 +9,6 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
-
 import { EvaluatePanel } from './evaluate_panel';
 
 interface Props {
