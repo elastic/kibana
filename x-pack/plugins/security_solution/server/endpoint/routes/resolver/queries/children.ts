@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { ChildrenPaginationBuilder } from '../utils/children_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
@@ -12,7 +12,7 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
+export class ChildrenQuery extends ResolverQuery<SafeResolverEvent[]> {
   constructor(
     private readonly pagination: ChildrenPaginationBuilder,
     indexPattern: string | string[],
@@ -126,7 +126,7 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
     return this.getResults(response);
   }
 }

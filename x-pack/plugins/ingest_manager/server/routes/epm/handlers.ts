@@ -167,7 +167,7 @@ export const installPackageHandler: RequestHandler<
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
       if (installType === 'update') {
-        // @ts-ignore installType conditions already check for existence of installedPkg
+        // @ts-ignore getInstallType ensures we have installedPkg
         const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
         logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
         await installPackage({

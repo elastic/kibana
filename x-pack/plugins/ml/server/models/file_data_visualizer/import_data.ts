@@ -94,7 +94,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
         },
-        properties: mappings,
+        properties: mappings.properties,
       },
     };
 

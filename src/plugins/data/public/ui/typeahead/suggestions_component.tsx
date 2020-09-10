@@ -154,6 +154,7 @@ export class SuggestionsComponent extends Component<Props> {
 const StyledSuggestionsListDiv = styled.div`
   ${(props: { queryBarRect: DOMRect; verticalListPosition: string }) => `
       position: absolute;
+      z-index: 4001;
       left: ${props.queryBarRect.left}px;
       width: ${props.queryBarRect.width}px;
       ${props.verticalListPosition}`}
