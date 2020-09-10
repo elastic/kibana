@@ -45,7 +45,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
-  const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
+  const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
   const setOptions = useCallback(
     (_options: GlobalSearchResult[]) => {
@@ -106,7 +106,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   );
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
+    if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
       if (searchRef) {
         event.preventDefault();
         searchRef.focus();
@@ -176,7 +176,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                 what: <EuiFlexItem grow={false}>Shortcut</EuiFlexItem>,
                 how: (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge>{isWindows ? 'Control + /' : 'Command + /'}</EuiBadge>
+                    <EuiBadge>{isMac ? 'Command + /' : 'Control + /'}</EuiBadge>
                   </EuiFlexItem>
                 ),
               }}
