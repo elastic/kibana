@@ -211,7 +211,6 @@ const NodeSubMenuComponents = React.memo(
           <ul
             className={`${className} options`}
             aria-hidden={!menuIsOpen}
-            aria-owns={nodeID}
             aria-describedby={nodeID}
           >
             {optionsWithActions
