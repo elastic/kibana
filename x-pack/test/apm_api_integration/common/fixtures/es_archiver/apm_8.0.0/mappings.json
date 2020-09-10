@@ -62937,6 +62937,14 @@
                       "scaling_factor": 1000000,
                       "type": "scaled_float"
                     },
+                    "firstContentfulPaint": {
+                      "scaling_factor": 1000000,
+                      "type": "scaled_float"
+                    },
+                    "largestContentfulPaint": {
+                      "scaling_factor": 1000000,
+                      "type": "scaled_float"
+                    },
                     "timeToFirstByte": {
                       "scaling_factor": 1000000,
                       "type": "scaled_float"
