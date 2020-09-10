@@ -67,7 +67,12 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { FIND_DEFAULT_PAGE, FIND_DEFAULT_PER_PAGE, SavedObjectsUtils } from './utils';
+import {
+  ALL_NAMESPACES_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+  SavedObjectsUtils,
+} from './utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -562,7 +567,10 @@ export class SavedObjectsRepository {
     if (this._registry.isMultiNamespace(type)) {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
       const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult) ?? [];
-      if (!force && existingNamespaces.length > 1) {
+      if (
+        !force &&
+        (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
+      ) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
@@ -610,8 +618,8 @@ export class SavedObjectsRepository {
     namespace: string,
     options: SavedObjectsDeleteByNamespaceOptions = {}
   ): Promise<any> {
-    if (!namespace || typeof namespace !== 'string') {
-      throw new TypeError(`namespace is required, and must be a string`);
+    if (!namespace || typeof namespace !== 'string' || namespace === '*') {
+      throw new TypeError(`namespace is required, and must be a string that is not equal to '*'`);
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
@@ -1226,6 +1234,19 @@ export class SavedObjectsRepository {
       }
 
       const { attributes, references, version, namespace: objectNamespace } = object;
+
+      if (objectNamespace === ALL_NAMESPACES_STRING) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: errorContent(
+              SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"')
+            ),
+          },
+        };
+      }
       // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
       // The object namespace string, if defined, will supersede the operation's namespace ID.
 
@@ -1541,7 +1562,10 @@ export class SavedObjectsRepository {
     }
 
     const namespaces = raw._source.namespaces;
-    return namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ?? false;
+    const existsInNamespace =
+      namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
+      namespaces?.includes('*');
+    return existsInNamespace ?? false;
   }
 
   /**
@@ -1668,8 +1692,15 @@ function getSavedObjectNamespaces(
  * Ensure that a namespace is always in its namespace ID representation.
  * This allows `'default'` to be used interchangeably with `undefined`.
  */
-const normalizeNamespace = (namespace?: string) =>
-  namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);
+const normalizeNamespace = (namespace?: string) => {
+  if (namespace === ALL_NAMESPACES_STRING) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
+  } else if (namespace === undefined) {
+    return namespace;
+  } else {
+    return SavedObjectsUtils.namespaceStringToId(namespace);
+  }
+};
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.

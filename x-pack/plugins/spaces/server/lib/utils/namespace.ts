@@ -6,6 +6,8 @@
 
 import { SavedObjectsUtils } from '../../../../../../src/core/server';
 
+export const ALL_SPACES_STRING = '*';
+
 /**
  * Converts a Space ID string to its namespace ID representation. Note that a Space ID string is equivalent to a namespace string.
  *

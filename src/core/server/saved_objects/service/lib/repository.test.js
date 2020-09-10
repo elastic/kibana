@@ -20,6 +20,7 @@
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
+import { ALL_NAMESPACES_STRING } from './utils';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -725,6 +726,12 @@ describe('SavedObjectsRepository', () => {
         });
       };
 
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.bulkCreate([obj3], { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
       it(`returns error when type is invalid`, async () => {
         const obj = { ...obj3, type: 'unknownType' };
         await bulkCreateError(obj, undefined, expectErrorInvalidType(obj));
@@ -1041,6 +1048,13 @@ describe('SavedObjectsRepository', () => {
           saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
         });
       };
+
+      it(`throws when options.namespace is '*'`, async () => {
+        const obj = { type: 'dashboard', id: 'three' };
+        await expect(
+          savedObjectsRepository.bulkGet([obj], { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
 
       it(`returns error when type is invalid`, async () => {
         const obj = { type: 'unknownType', id: 'three' };
@@ -1467,6 +1481,12 @@ describe('SavedObjectsRepository', () => {
         });
       };
 
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.bulkUpdate([obj], { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
       it(`returns error when type is invalid`, async () => {
         const _obj = { ...obj, type: 'unknownType' };
         await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
@@ -1475,6 +1495,15 @@ describe('SavedObjectsRepository', () => {
       it(`returns error when type is hidden`, async () => {
         const _obj = { ...obj, type: HIDDEN_TYPE };
         await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
+      });
+
+      it(`returns error when object namespace is '*'`, async () => {
+        const _obj = { ...obj, namespace: '*' };
+        await bulkUpdateError(
+          _obj,
+          undefined,
+          expectErrorResult(obj, createBadRequestError('"namespace" cannot be "*"'))
+        );
       });
 
       it(`returns error when ES is unable to find the document (mget)`, async () => {
@@ -1630,7 +1659,7 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    describe('cluster calls', () => {
+    describe('client calls', () => {
       it(`doesn't make a cluster call if the objects array is empty`, async () => {
         await checkConflicts([]);
         expect(client.mget).not.toHaveBeenCalled();
@@ -1659,6 +1688,14 @@ describe('SavedObjectsRepository', () => {
         // obj3 is multi-namespace, and obj6 is namespace-agnostic
         await checkConflictsSuccess([obj3, obj6], { namespace });
         _expectClientCallArgs([obj3, obj6], { getId });
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.checkConflicts([obj1], { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
       });
     });
 
@@ -1909,6 +1946,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.create(type, attributes, { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
       it(`throws when type is invalid`, async () => {
         await expect(savedObjectsRepository.create('unknownType', attributes)).rejects.toThrowError(
           createUnsupportedTypeError('unknownType')
@@ -2120,6 +2163,12 @@ describe('SavedObjectsRepository', () => {
         );
       };
 
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.delete(type, id, { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
       it(`throws when type is invalid`, async () => {
         await expectNotFoundError('unknownType', id);
         expect(client.delete).not.toHaveBeenCalled();
@@ -2158,6 +2207,20 @@ describe('SavedObjectsRepository', () => {
       it(`throws when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
         response._source.namespaces = [namespace, 'bar-namespace'];
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        await expect(
+          savedObjectsRepository.delete(MULTI_NAMESPACE_TYPE, id, { namespace })
+        ).rejects.toThrowError(
+          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when the type is multi-namespace and the document has all namespaces and the force option is not enabled`, async () => {
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        response._source.namespaces = ['*'];
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2252,7 +2315,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      it(`throws when namespace is not a string`, async () => {
+      it(`throws when namespace is not a string or is '*'`, async () => {
         const test = async (namespace) => {
           await expect(savedObjectsRepository.deleteByNamespace(namespace)).rejects.toThrowError(
             `namespace is required, and must be a string`
@@ -2263,6 +2326,7 @@ describe('SavedObjectsRepository', () => {
         await test(['namespace']);
         await test(123);
         await test(true);
+        await test(ALL_NAMESPACES_STRING);
       });
     });
 
@@ -2861,6 +2925,12 @@ describe('SavedObjectsRepository', () => {
         );
       };
 
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.get(type, id, { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
       it(`throws when type is invalid`, async () => {
         await expectNotFoundError('unknownType', id);
         expect(client.get).not.toHaveBeenCalled();
@@ -3051,6 +3121,14 @@ describe('SavedObjectsRepository', () => {
           createUnsupportedTypeError(type)
         );
       };
+
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.incrementCounter(type, id, field, {
+            namespace: ALL_NAMESPACES_STRING,
+          })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
 
       it(`throws when type is not a string`, async () => {
         const test = async (type) => {
@@ -3707,6 +3785,12 @@ describe('SavedObjectsRepository', () => {
           createGenericNotFoundError(type, id)
         );
       };
+
+      it(`throws when options.namespace is '*'`, async () => {
+        await expect(
+          savedObjectsRepository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
+        ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
 
       it(`throws when type is invalid`, async () => {
         await expectNotFoundError('unknownType', id);

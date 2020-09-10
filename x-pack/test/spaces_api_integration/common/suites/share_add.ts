@@ -26,7 +26,6 @@ export interface ShareAddTestCase {
   id: string;
   namespaces: string[];
   failure?: 400 | 403 | 404;
-  fail400Param?: string;
   fail403Param?: string;
 }
 
@@ -42,19 +41,12 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
   const expectResponseBody = (testCase: ShareAddTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
-    const { id, failure, fail400Param, fail403Param } = testCase;
+    const { id, failure, fail403Param } = testCase;
     const object = response.body;
     if (failure === 403) {
       await expectResponses.forbiddenTypes(fail403Param!)(TYPE)(response);
-    } else if (failure) {
-      let error: any;
-      if (failure === 400) {
-        error = SavedObjectsErrorHelpers.createBadRequestError(
-          `${id} already exists in the following namespace(s): ${fail400Param}`
-        );
-      } else if (failure === 404) {
-        error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
-      }
+    } else if (failure === 404) {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
       expect(object.error).to.eql(error.output.payload.error);
       expect(object.statusCode).to.eql(error.output.payload.statusCode);
     } else {

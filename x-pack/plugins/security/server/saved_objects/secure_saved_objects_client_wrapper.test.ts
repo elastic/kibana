@@ -154,7 +154,7 @@ const expectObjectNamespaceFiltering = async (
   );
 
   const authorizedNamespace = args.options?.namespace || 'default';
-  const namespaces = ['some-other-namespace', authorizedNamespace];
+  const namespaces = ['some-other-namespace', '*', authorizedNamespace];
   const returnValue = { namespaces, foo: 'bar' };
   // we don't know which base client method will be called; mock them all
   clientOpts.baseClient.create.mockReturnValue(returnValue as any);
@@ -164,7 +164,8 @@ const expectObjectNamespaceFiltering = async (
   clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(returnValue as any);
 
   const result = await fn.bind(client)(...Object.values(args));
-  expect(result).toEqual(expect.objectContaining({ namespaces: [authorizedNamespace, '?'] }));
+  // we will never redact the "All Spaces" ID
+  expect(result).toEqual(expect.objectContaining({ namespaces: ['*', authorizedNamespace, '?'] }));
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(
     privilegeChecks + 1

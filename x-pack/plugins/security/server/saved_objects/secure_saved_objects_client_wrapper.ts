@@ -55,6 +55,8 @@ interface EnsureAuthorizedTypeResult {
   isGloballyAuthorized?: boolean;
 }
 
+const ALL_SPACES_ID = '*';
+
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -383,7 +385,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
-    return spaceIds.map((x) => (privilegeMap[x] ? x : '?')).sort(namespaceComparator);
+    return spaceIds
+      .map((x) => (x === ALL_SPACES_ID || privilegeMap[x] ? x : '?'))
+      .sort(namespaceComparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(

@@ -22,6 +22,9 @@ const createTestCases = () => {
     CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404() },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail400() },
+    // try to delete this object again, this time using the `force` option
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, force: true },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
     // try to delete this object again, this time using the `force` option
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, force: true },
