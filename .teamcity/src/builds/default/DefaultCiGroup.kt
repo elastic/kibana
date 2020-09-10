@@ -13,10 +13,6 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   name = "CI Group $ciGroup"
   paused = true
 
-  params {
-    param("env.KBN_NP_PLUGINS_BUILT", "true")
-  }
-
   steps {
     // TODO is there a way to re-use what was built in the DefaultBuild job?
     script {
@@ -45,7 +41,7 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   }
 
   dependencies {
-    defaultBuildWithPlugins()
+    defaultBuild()
   }
 
   addTestArtifacts()
