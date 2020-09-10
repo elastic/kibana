@@ -19,6 +19,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
 
 export const DEFAULT_INTERVAL = 1000;
+export const AUTO_BARS = 'auto';
 
 export const MODES = {
   Range: 'range',
@@ -33,7 +34,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
   params: {
     type: MODES_TYPES;
-    interval: 'auto' | number;
+    interval: 'auto' | '' | number;
     maxBars: 'auto' | number;
     ranges: RangeTypeLens[];
   };
@@ -74,8 +75,9 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
   }
   return {
     field: sourceField,
-    interval: params.interval,
-    maxBars: params.maxBars === 'auto' ? null : params.maxBars,
+    // fallback to 0 in case of empty string
+    interval: params.interval === '' ? 0 : params.interval,
+    maxBars: params.maxBars === AUTO_BARS ? null : params.maxBars,
     has_extended_bounds: false,
     min_doc_count: false,
     extended_bounds: { min: '', max: '' },
@@ -187,7 +189,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       <EuiForm>
         <RangeEditor
           onAutoIntervalToggle={(enabled: boolean) =>
-            setParam('interval', enabled ? autoInterval : 0)
+            setParam('interval', enabled ? autoInterval : '')
           }
           setParam={setParam}
           params={currentColumn.params}
