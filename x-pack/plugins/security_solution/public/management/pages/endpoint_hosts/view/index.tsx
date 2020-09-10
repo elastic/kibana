@@ -92,6 +92,7 @@ export const EndpointList = () => {
     endpointsExist,
     autoRefreshInterval,
     isAutoRefreshEnabled,
+    patternsError,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -431,7 +432,7 @@ export const EndpointList = () => {
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         <EuiFlexGroup>
-          {endpointsExist && (
+          {endpointsExist && !patternsError && (
             <EuiFlexItem>
               <AdminSearchBar />
             </EuiFlexItem>

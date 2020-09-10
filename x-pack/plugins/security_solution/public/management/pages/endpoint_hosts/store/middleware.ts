@@ -16,6 +16,8 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
+  patterns,
+  searchBarQuery,
 } from './selectors';
 import { EndpointState } from '../types';
 import {
@@ -66,34 +68,29 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         }
       }
 
-      const { page_index: pageIndex, page_size: pageSize, admin_query: adminQuery } = uiQueryParams(
-        getState()
-      );
+      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
-      try {
-        // get index pattern and fields for search bar
-        fetchIndexPatterns()
-          .then((patterns) => {
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
             dispatch({
               type: 'serverReturnedMetadataPatterns',
-              payload: patterns,
+              payload: indexPatterns,
             });
-          })
-          .catch((error) => {
-            // what to do with error??
-            dispatch({
-              type: 'serverFailedToReturnMetadataPatterns',
-              payload: error,
-            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
           });
-
-        let decodedQuery;
-        if (adminQuery !== undefined) {
-          decodedQuery = (decode(adminQuery) as unknown) as Query;
-        } else {
-          decodedQuery = { query: '', language: 'kuery' };
         }
+      }
+
+      try {
+        const decodedQuery: Query = searchBarQuery(getState());
 
         endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({

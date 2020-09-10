@@ -43,6 +43,8 @@ export const AdminSearchBar = memo(() => {
     [history, queryParams]
   );
 
+  const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
+
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
@@ -51,7 +53,7 @@ export const AdminSearchBar = memo(() => {
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
             indexPatterns={clonedIndexPatterns}
-            timeHistory={new TimeHistory(new Storage(localStorage))}
+            timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             isLoading={false}
             showFilterBar={false}

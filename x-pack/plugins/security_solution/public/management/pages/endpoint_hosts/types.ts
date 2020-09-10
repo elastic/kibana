@@ -57,6 +57,8 @@ export interface EndpointState {
   endpointsExist: boolean;
   /** index patterns for query bar */
   patterns: IIndexPattern[];
+  /** api error from retrieving index patters for query bar */
+  patternsError?: ServerApiError;
   /** Is auto-refresh enabled */
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */

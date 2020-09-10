@@ -62,7 +62,9 @@ export const endpointPackageVersion = createSelector(
 /**
  * Returns the index patterns for the SearchBar to use for autosuggest
  */
-export const patterns = (state: Immutable<EndpointState>) => state.patterns;
+export const patterns = (state: Immutable<EndpointState>): IIndexPattern[] => state.patterns;
+
+export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
@@ -228,8 +230,19 @@ export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (sta
 export const searchBarQuery: (state: Immutable<EndpointState>) => Query = createSelector(
   uiQueryParams,
   ({ admin_query: adminQuery }) => {
-    return adminQuery
-      ? ((decode(adminQuery) as unknown) as Query)
-      : { query: '', language: 'kuery' };
+    const decodedQuery: Query = { query: '', language: 'kuery' };
+    if (adminQuery) {
+      const urlDecodedQuery = decode(adminQuery);
+      if (typeof urlDecodedQuery.query === 'string') {
+        decodedQuery.query = urlDecodedQuery.query;
+      }
+      if (
+        typeof urlDecodedQuery.language === 'string' &&
+        (urlDecodedQuery.language === 'kuery' || urlDecodedQuery.language === 'lucene')
+      ) {
+        decodedQuery.language = urlDecodedQuery.language;
+      }
+    }
+    return decodedQuery;
   }
 );
