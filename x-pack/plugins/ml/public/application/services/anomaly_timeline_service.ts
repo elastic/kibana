@@ -180,7 +180,7 @@ export class AnomalyTimelineService {
     // Pass the interval in seconds as the swim lane relies on a fixed number of seconds between buckets
     // which wouldn't be the case if e.g. '1M' was used.
 
-    const interval = `${swimlaneBucketInterval.asSeconds()}s`;
+    const intervalMs = swimlaneBucketInterval.asMilliseconds();
 
     let response;
     if (viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL) {
@@ -190,7 +190,7 @@ export class AnomalyTimelineService {
         jobIds,
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
-        interval,
+        intervalMs,
         perPage,
         fromPage
       );
@@ -201,7 +201,7 @@ export class AnomalyTimelineService {
         fieldValues,
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
-        interval,
+        intervalMs,
         swimlaneLimit,
         perPage,
         fromPage,
@@ -269,7 +269,7 @@ export class AnomalyTimelineService {
         selectedJobIds,
         earliestMs,
         latestMs,
-        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds() + 's',
+        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asMilliseconds(),
         swimlaneLimit
       );
       return Object.keys(resp.results);
