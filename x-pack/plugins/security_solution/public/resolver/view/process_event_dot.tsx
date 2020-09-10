@@ -343,7 +343,7 @@ const UnstyledProcessEventDot = React.memo(
             pointerEvents: 'none',
           }}
         >
-          <g fill="none" style={{pointerEvents: 'visiblePainted'}}>
+          <g fill="none" style={{ pointerEvents: 'visiblePainted' }}>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover

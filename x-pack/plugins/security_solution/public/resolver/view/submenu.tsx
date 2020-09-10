@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 /* eslint-disable react/display-name */
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
-import {
-  EuiI18nNumber,
-  EuiButton,
-  EuiPopover,
-  ButtonColor,
-} from '@elastic/eui';
+import { EuiI18nNumber, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { Matrix3 } from '../types';
 import { useResolverTheme } from './assets';
@@ -54,27 +47,45 @@ export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
  * This will be the "host button" that displays the "total number of related events" and opens
  * the sumbmenu (with counts by category) when clicked.
  */
-const DetailHostButton = React.memo(({hasMenu, menuIsOpen, action, count, title, buttonBorderColor, nodeID}: {hasMenu: boolean, menuIsOpen?: boolean, action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>)=>void, count?: number, title: string, buttonBorderColor: ButtonColor, nodeID: string})=>{
-  const hasIcon = hasMenu ?? false;
-  const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
-  return (
-    <EuiButton
-      onClick={action}
-      iconType={hasIcon ? iconType : 'none'}
-      fill={false}
-      color={'primary'}
-      style={{height: 'fit-content', lineHeight: 1, padding: '.25em', fontSize: '.85rem'}}
-      size="s"
-      iconSide="right"
-      tabIndex={-1}
-      data-test-subj="resolver:submenu:button"
-      data-test-resolver-node-id={nodeID}
-      id={nodeID}
-    >
-      {count ? <EuiI18nNumber value={count} /> : ''} {title}
-    </EuiButton>
-  )
-})
+const DetailHostButton = React.memo(
+  ({
+    hasMenu,
+    menuIsOpen,
+    action,
+    count,
+    title,
+    buttonBorderColor,
+    nodeID,
+  }: {
+    hasMenu: boolean;
+    menuIsOpen?: boolean;
+    action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    count?: number;
+    title: string;
+    buttonBorderColor: ButtonColor;
+    nodeID: string;
+  }) => {
+    const hasIcon = hasMenu ?? false;
+    const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
+    return (
+      <EuiButton
+        onClick={action}
+        iconType={hasIcon ? iconType : 'none'}
+        fill={false}
+        color={'primary'}
+        style={{ height: 'fit-content', lineHeight: 1, padding: '.25em', fontSize: '.85rem' }}
+        size="s"
+        iconSide="right"
+        tabIndex={-1}
+        data-test-subj="resolver:submenu:button"
+        data-test-resolver-node-id={nodeID}
+        id={nodeID}
+      >
+        {count ? <EuiI18nNumber value={count} /> : ''} {title}
+      </EuiButton>
+    );
+  }
+);
 
 /**
  * A Submenu to be displayed in one of two forms:
@@ -152,13 +163,15 @@ const NodeSubMenuComponents = React.memo(
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
 
-    const { colorMap: {pillStroke: pillBorderStroke, resolverBackground: pillFill} } = useResolverTheme();
-    const listStylesFromTheme = useMemo(()=>{
+    const {
+      colorMap: { pillStroke: pillBorderStroke, resolverBackground: pillFill },
+    } = useResolverTheme();
+    const listStylesFromTheme = useMemo(() => {
       return {
         border: `1.5px solid ${pillBorderStroke}`,
         backgroundColor: pillFill,
-      }
-    },[pillBorderStroke, pillFill]);
+      };
+    }, [pillBorderStroke, pillFill]);
 
     if (!optionsWithActions) {
       /**
@@ -178,27 +191,48 @@ const NodeSubMenuComponents = React.memo(
         </div>
       );
     }
-    
-    if(typeof optionsWithActions === 'string') {
-      return (<></>)
+
+    if (typeof optionsWithActions === 'string') {
+      return <></>;
     }
 
     return (
       <>
         <DetailHostButton
-          hasMenu={true} 
+          hasMenu={true}
           menuIsOpen={menuIsOpen}
           action={handleMenuOpenClick}
           count={count}
           title={menuTitle}
-          buttonBorderColor={buttonBorderColor} 
+          buttonBorderColor={buttonBorderColor}
           nodeID={nodeID}
         />
-        {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={!menuIsOpen} aria-owns={nodeID} aria-describedby={nodeID}>
-          { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
-            return (<li className="item" role="menuitem" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button className="kbn-resetFocusState" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
-          })}
-        </ul>) : null}
+        {menuIsOpen ? (
+          <ul
+            className={`${className} options`}
+            aria-hidden={!menuIsOpen}
+            aria-owns={nodeID}
+            aria-describedby={nodeID}
+          >
+            {optionsWithActions
+              .sort((opta, optb) => {
+                return opta.optionTitle < optb.optionTitle ? -1 : 1;
+              })
+              .map((opt) => {
+                return (
+                  <li
+                    className="item"
+                    data-test-subj="resolver:map:node-submenu-item"
+                    style={listStylesFromTheme}
+                  >
+                    <button type="button" className="kbn-resetFocusState" onClick={opt.action}>
+                      {opt.prefix} {opt.optionTitle}
+                    </button>
+                  </li>
+                );
+              })}
+          </ul>
+        ) : null}
       </>
     );
   }
@@ -212,7 +246,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   flex-flow: column;
 
   &.options {
-    font-size: .8rem;
+    font-size: 0.8rem;
     display: flex;
     flex-flow: row wrap;
     background: transparent;
@@ -224,19 +258,19 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   }
 
   &.options .item {
-    margin: .25ch .35ch .35ch 0;
-    padding: .35em .5em;
+    margin: 0.25ch 0.35ch 0.35ch 0;
+    padding: 0.35em 0.5em;
     height: fit-content;
     width: fit-content;
     border-radius: 2px;
-    line-height: .8;
+    line-height: 0.8;
   }
 
   &.options .item button {
     appearance: none;
     height: fit-content;
     width: fit-content;
-    line-height: .8;
+    line-height: 0.8;
     outline-style: none;
     border-color: transparent;
     box-shadow: none;
@@ -250,7 +284,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   }
 
   &.options .item button:active {
-    transform: scale(.95);
+    transform: scale(0.95);
   }
 
   & .euiButton {

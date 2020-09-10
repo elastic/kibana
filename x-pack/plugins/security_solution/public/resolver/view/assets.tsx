@@ -441,7 +441,7 @@ export const useResolverTheme = (): {
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
     pillStroke: theme.euiColorLightShade,
   };
-  
+
   const nodeAssets: NodeStyleMap = {
     runningProcessCube: {
       backingFill: colorMap.processBackingFill,
