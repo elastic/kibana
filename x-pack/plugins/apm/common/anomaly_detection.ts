@@ -54,11 +54,9 @@ export function getSeverityColor(theme: EuiTheme, severity?: Severity) {
 }
 
 export function getSeverityLabel(severity?: Severity) {
-  let label: string = '';
-
   switch (severity) {
     case Severity.critical:
-      label = i18n.translate(
+      return i18n.translate(
         'xpack.apm.servicesTable.serviceHealthStatus.critical',
         {
           defaultMessage: 'Critical',
@@ -68,7 +66,7 @@ export function getSeverityLabel(severity?: Severity) {
 
     case Severity.major:
     case Severity.minor:
-      label = i18n.translate(
+      return i18n.translate(
         'xpack.apm.servicesTable.serviceHealthStatus.warning',
         {
           defaultMessage: 'Warning',
@@ -77,7 +75,7 @@ export function getSeverityLabel(severity?: Severity) {
       break;
 
     case Severity.warning:
-      label = i18n.translate(
+      return i18n.translate(
         'xpack.apm.servicesTable.serviceHealthStatus.healthy',
         {
           defaultMessage: 'Healthy',
@@ -86,7 +84,7 @@ export function getSeverityLabel(severity?: Severity) {
       break;
 
     default:
-      label = i18n.translate(
+      return i18n.translate(
         'xpack.apm.servicesTable.serviceHealthStatus.unknown',
         {
           defaultMessage: 'Unknown',
@@ -94,7 +92,6 @@ export function getSeverityLabel(severity?: Severity) {
       );
       break;
   }
-  return label;
 }
 
 export const ML_ERRORS = {
