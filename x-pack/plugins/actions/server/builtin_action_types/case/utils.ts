@@ -4,31 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, flow, get } from 'lodash';
-import { schema } from '@kbn/config-schema';
-
-import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
-
-import { ExecutorParamsSchema } from './schema';
-import {
-  ExternalIncidentServiceConfiguration,
-  ExternalIncidentServiceSecretConfiguration,
-  EntityInformation,
-} from './types';
+import { flow, get } from 'lodash';
 
 import {
-  CreateExternalServiceArgs,
-  CreateActionTypeArgs,
-  ExecutorParams,
   MapRecord,
-  AnyParams,
-  CreateExternalServiceBasicArgs,
-  PrepareFieldsForTransformArgs,
-  PipedField,
   TransformFieldsArgs,
   Comment,
-  ExecutorSubActionPushParams,
-  PushToServiceResponse,
+  EntityInformation,
+  PipedField,
+  AnyParams,
+  PrepareFieldsForTransformArgs,
 } from './types';
 
 import { transformers } from './transformers';
@@ -62,92 +47,6 @@ export const mapParams = <T extends {}>(params: T, mapping: Map<string, MapRecor
   }, {});
 };
 
-export const createConnectorExecutor = ({
-  api,
-  createExternalService,
-  logger,
-}: CreateExternalServiceBasicArgs) => async (
-  execOptions: ActionTypeExecutorOptions<
-    ExternalIncidentServiceConfiguration,
-    ExternalIncidentServiceSecretConfiguration,
-    ExecutorParams
-  >
-): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> => {
-  const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params;
-  let data = {};
-
-  const res: ActionTypeExecutorResult<void> = {
-    status: 'ok',
-    actionId,
-  };
-
-  const externalService = createExternalService(
-    {
-      config,
-      secrets,
-    },
-    logger,
-    execOptions.proxySettings
-  );
-
-  if (!api[subAction]) {
-    throw new Error('[Action][ExternalService] Unsupported subAction type.');
-  }
-
-  if (subAction !== 'pushToService') {
-    throw new Error('[Action][ExternalService] subAction not implemented.');
-  }
-
-  if (subAction === 'pushToService') {
-    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-
-    const mapping = buildMap(config.casesConfiguration.mapping);
-    const externalCase = mapParams<ExecutorSubActionPushParams>(
-      restParams as ExecutorSubActionPushParams,
-      mapping
-    );
-
-    data = await api.pushToService({
-      externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalCase },
-    });
-  }
-
-  return {
-    ...res,
-    data,
-  };
-};
-
-export const createConnector = ({
-  api,
-  config,
-  validate,
-  createExternalService,
-  validationSchema,
-  logger,
-}: CreateExternalServiceArgs) => {
-  return ({
-    configurationUtilities,
-    executor = createConnectorExecutor({ api, createExternalService, logger }),
-  }: CreateActionTypeArgs): ActionType => ({
-    ...config,
-    validate: {
-      config: schema.object(validationSchema.config, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(validationSchema.secrets, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
-      params: ExecutorParamsSchema,
-    },
-    executor,
-  });
-};
-
 export const prepareFieldsForTransformation = ({
   externalCase,
   mapping,
@@ -166,11 +65,15 @@ export const prepareFieldsForTransformation = ({
     });
 };
 
-export const transformFields = ({
+export const transformFields = <
+  P extends EntityInformation,
+  S extends Record<string, unknown>,
+  R extends {}
+>({
   params,
   fields,
   currentIncident,
-}: TransformFieldsArgs): Record<string, string> => {
+}: TransformFieldsArgs<P, S>): R => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
@@ -182,7 +85,7 @@ export const transformFields = ({
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
-  }, {});
+  }, {} as R);
 };
 
 export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
@@ -196,13 +99,7 @@ export const transformComments = (comments: Comment[], pipes: string[]): Comment
   }));
 };
 
-export const getErrorMessage = (connector: string, msg: string) => {
-  return `[Action][${connector}]: ${msg}`;
-};
-
-type Nullable<T> = { [P in keyof T]: T[P] | null };
-
-export const getEntity = (entity: Nullable<EntityInformation>): string =>
+export const getEntity = (entity: EntityInformation): string =>
   (entity.updatedBy != null
     ? entity.updatedBy.fullName
       ? entity.updatedBy.fullName
