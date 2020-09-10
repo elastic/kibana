@@ -91,7 +91,7 @@ describe('api', () => {
         expect(externalService.updateIncident).not.toHaveBeenCalled();
       });
 
-      test('it calls updateIncident correctly', async () => {
+      test('it calls updateIncident correctly when creating an incident and having comments', async () => {
         const params = { ...apiParams, externalId: null };
         await api.pushToService({
           externalService,
@@ -103,7 +103,7 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incident: {
-            comments: 'A comment',
+            comments: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
@@ -114,7 +114,7 @@ describe('api', () => {
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incident: {
-            comments: 'Another comment',
+            comments: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
@@ -215,7 +215,7 @@ describe('api', () => {
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incident: {
-            comments: 'A comment',
+            comments: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             description:
               'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
             short_description:
