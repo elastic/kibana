@@ -51,7 +51,10 @@ export const useInitSourcerer = () => {
   const dispatch = useDispatch();
   const [{ pageName }] = useRouteSpy();
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const getkibanaIndexPatternsSelector = useMemo(() => sourcererSelectors.kibanaIndexPatternsSelector(), []);
+  const getkibanaIndexPatternsSelector = useMemo(
+    () => sourcererSelectors.kibanaIndexPatternsSelector(),
+    []
+  );
   const kibanaIndexPatterns = useSelector(getkibanaIndexPatternsSelector, isEqual);
   useIndexFields(getSourcererScopeName(pageName));
 

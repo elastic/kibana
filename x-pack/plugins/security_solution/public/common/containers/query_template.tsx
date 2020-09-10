@@ -14,7 +14,7 @@ import { DocValueFields } from './source';
 export { DocValueFields };
 
 export interface QueryTemplateProps {
-  indexesName?: string[];
+  indexesName: string[];
   docValueFields?: DocValueFields[];
   id?: string;
   endDate?: string;

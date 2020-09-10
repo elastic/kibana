@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
@@ -38,6 +37,7 @@ interface UseNetworkDetails {
   id?: string;
   docValueFields: DocValueFields[];
   ip: string;
+  indexesName: string[];
   filterQuery?: ESTermQuery | string;
   skip: boolean;
 }
@@ -45,6 +45,7 @@ interface UseNetworkDetails {
 export const useNetworkDetails = ({
   docValueFields,
   filterQuery,
+  indexesName,
   id = ID,
   skip,
   ip,
@@ -52,11 +53,10 @@ export const useNetworkDetails = ({
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexesName,
     docValueFields: docValueFields ?? [],
     factoryQueryType: NetworkQueries.details,
     filterQuery: createFilter(filterQuery),
@@ -133,7 +133,7 @@ export const useNetworkDetails = ({
     setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexesName,
         ip,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
@@ -143,7 +143,7 @@ export const useNetworkDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, filterQuery, skip, ip, docValueFields]);
+  }, [indexesName, filterQuery, skip, ip, docValueFields]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

@@ -9,10 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
-import { useUiSetting } from '../../../common/lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
 import { QueryTemplateProps } from '../../../common/containers/query_template';
 
@@ -33,7 +31,17 @@ export interface KpiNetworkProps extends QueryTemplateProps {
 }
 
 const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
+  ({
+    id = ID,
+    children,
+    filterQuery,
+    isInspected,
+    indexesName,
+    skip,
+    sourceId,
+    startDate,
+    endDate,
+  }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
       fetchPolicy={getDefaultFetchPolicy()}
@@ -47,7 +55,7 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+        defaultIndex: indexesName,
         inspect: isInspected,
       }}
     >

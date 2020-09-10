@@ -10,7 +10,6 @@ import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
@@ -45,6 +44,7 @@ export interface NetworkTopCountriesArgs {
 interface UseNetworkTopCountries {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
+  indexesName: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,6 +56,7 @@ export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexesName,
   skip,
   startDate,
   type,
@@ -65,14 +66,13 @@ export const useNetworkTopCountries = ({
     (state: State) => getTopCountriesSelector(state, type, flowTarget),
     shallowEqual
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
   const [networkTopCountriesRequest, setHostRequest] = useState<NetworkTopCountriesRequestOptions>({
-    defaultIndex,
+    defaultIndex: indexesName,
     factoryQueryType: NetworkQueries.topCountries,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -176,7 +176,7 @@ export const useNetworkTopCountries = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexesName,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -191,7 +191,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

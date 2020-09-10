@@ -25,7 +25,6 @@ import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiNetworkQuery } from '../../network/containers/kpi_network';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -45,6 +44,7 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { TimelineModel } from '../../timelines/store/timeline/model';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -86,7 +86,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       [setAbsoluteRangeDatePicker]
     );
 
-    const { indicesExist, indexPattern } = useWithSource(sourceId);
+    const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -130,6 +130,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                 <KpiNetworkQuery
                   endDate={to}
                   filterQuery={filterQuery}
+                  indexesName={selectedPatterns}
                   skip={isInitializing}
                   sourceId={sourceId}
                   startDate={from}
@@ -165,6 +166,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
+                    indexesName={selectedPatterns}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}

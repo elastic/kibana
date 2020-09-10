@@ -22,6 +22,7 @@ export interface OwnProps {
   endDate: string;
   filterQuery: string | ESTermQuery;
   ip: string;
+  indexesName: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
