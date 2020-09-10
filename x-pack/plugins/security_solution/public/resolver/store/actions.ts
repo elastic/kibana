@@ -115,7 +115,7 @@ interface AppReceivedNewExternalProperties {
     /**
      * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     /**
      * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
      */
@@ -125,6 +125,11 @@ interface AppReceivedNewExternalProperties {
      * The `search` part of the URL of this page.
      */
     locationSearch: string;
+
+    /**
+     * Indices that the backend will use to find the document.
+     */
+    indices: string[];
   };
 }
 

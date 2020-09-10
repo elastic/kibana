@@ -32,15 +32,12 @@ jest.useFakeTimers();
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
-    searchInterceptor = new SearchInterceptor(
-      {
-        toasts: mockCoreSetup.notifications.toasts,
-        startServices: mockCoreSetup.getStartServices(),
-        uiSettings: mockCoreSetup.uiSettings,
-        http: mockCoreSetup.http,
-      },
-      1000
-    );
+    searchInterceptor = new SearchInterceptor({
+      toasts: mockCoreSetup.notifications.toasts,
+      startServices: mockCoreSetup.getStartServices(),
+      uiSettings: mockCoreSetup.uiSettings,
+      http: mockCoreSetup.http,
+    });
   });
 
   describe('search', () => {
@@ -112,7 +109,9 @@ describe('SearchInterceptor', () => {
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
-      const response = searchInterceptor.search(mockRequest, { signal: abortController.signal });
+      const response = searchInterceptor.search(mockRequest, {
+        abortSignal: abortController.signal,
+      });
 
       const next = jest.fn();
       const error = (e: any) => {
@@ -131,7 +130,7 @@ describe('SearchInterceptor', () => {
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
-      const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
+      const response = searchInterceptor.search(mockRequest, { abortSignal: abort.signal });
       abort.abort();
 
       const error = (e: any) => {

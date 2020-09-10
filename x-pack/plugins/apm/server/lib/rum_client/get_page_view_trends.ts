@@ -10,7 +10,6 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -23,22 +22,9 @@ export async function getPageViewTrends({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
-
-  const breakdownAggs: Record<
-    string,
-    Pick<AggregationOptionsByType, 'terms'>
-  > = {};
+  let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
-    const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
-    breakdownList.forEach(({ name, fieldName }) => {
-      breakdownAggs[name] = {
-        terms: {
-          field: fieldName,
-          size: 9,
-          missing: 'Other',
-        },
-      };
-    });
+    breakdownItem = JSON.parse(breakdowns);
   }
 
   const params = mergeProjection(projection, {
@@ -53,7 +39,17 @@ export async function getPageViewTrends({
             field: '@timestamp',
             buckets: 50,
           },
-          aggs: breakdownAggs,
+          aggs: breakdownItem
+            ? {
+                breakdown: {
+                  terms: {
+                    field: breakdownItem.fieldName,
+                    size: 9,
+                    missing: 'Other',
+                  },
+                },
+              }
+            : undefined,
         },
       },
     },
@@ -71,19 +67,16 @@ export async function getPageViewTrends({
       x: xVal,
       y: bCount,
     };
-
-    Object.keys(breakdownAggs)
-      .filter((bKey) => bKey === 'count')
-      .forEach((bKey) => {
-        const categoryBuckets = bucket[bKey].buckets;
-        categoryBuckets.forEach(({ key, doc_count: docCount }) => {
-          if (key === 'Other') {
-            res[key + `(${bKey})`] = docCount;
-          } else {
-            res[key] = docCount;
-          }
-        });
+    if (breakdownItem) {
+      const categoryBuckets = bucket.breakdown.buckets;
+      categoryBuckets.forEach(({ key, doc_count: docCount }) => {
+        if (key === 'Other') {
+          res[key + `(${breakdownItem?.name})`] = docCount;
+        } else {
+          res[key] = docCount;
+        }
       });
+    }
 
     return res;
   });

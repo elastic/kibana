@@ -6,7 +6,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -18,9 +18,10 @@ const CentralizedContainer = styled.div`
   display: flex;
 `;
 
-export function TraceLink() {
+export function TraceLink({ match }: RouteComponentProps<{ traceId: string }>) {
+  const { traceId } = match.params;
   const { urlParams } = useUrlParams();
-  const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
+  const { rangeFrom, rangeTo } = urlParams;
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {

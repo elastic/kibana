@@ -16,6 +16,7 @@ export interface OpsMetrics
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [collected\_at](./kibana-plugin-core-server.opsmetrics.collected_at.md) | <code>Date</code> | Time metrics were recorded at. |
 |  [concurrent\_connections](./kibana-plugin-core-server.opsmetrics.concurrent_connections.md) | <code>OpsServerMetrics['concurrent_connections']</code> | number of current concurrent connections to the server |
 |  [os](./kibana-plugin-core-server.opsmetrics.os.md) | <code>OpsOsMetrics</code> | OS related metrics |
 |  [process](./kibana-plugin-core-server.opsmetrics.process.md) | <code>OpsProcessMetrics</code> | Process related metrics |

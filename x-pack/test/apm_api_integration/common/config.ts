@@ -33,7 +33,7 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
   return supertestAsPromised(url);
 };
 
-export function createTestConfig(settings: Settings) {
+export function createTestConfig<T extends Settings>(settings: T) {
   const { testFiles, license, name } = settings;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

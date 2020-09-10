@@ -14,7 +14,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
-import { parseScheduleDates } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import {
@@ -120,7 +120,6 @@ export const signalRulesAlertType = ({
         enabled,
         schedule: { interval },
         throttle,
-        params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
       const refresh = actions.length ? 'wait_for' : false;
@@ -343,7 +342,7 @@ export const signalRulesAlertType = ({
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
-              ...ruleParams,
+              ...params,
               name,
               id: savedObject.id,
             };

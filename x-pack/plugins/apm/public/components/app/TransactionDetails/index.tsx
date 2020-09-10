@@ -15,6 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -37,7 +38,10 @@ interface Sample {
   transactionId: string;
 }
 
-export function TransactionDetails() {
+type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
+
+export function TransactionDetails({ match }: TransactionDetailsProps) {
+  const { serviceName } = match.params;
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const history = useHistory();
@@ -50,7 +54,7 @@ export function TransactionDetails() {
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
-  const { transactionName, transactionType, serviceName } = urlParams;
+  const { transactionName, transactionType } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
