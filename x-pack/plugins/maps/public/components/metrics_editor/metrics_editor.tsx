@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
-// @ts-expect-error
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { AggDescriptor } from '../../../common/descriptor_types';
