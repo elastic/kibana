@@ -63,16 +63,18 @@ export function getAxesConfiguration(
   series.auto.forEach((currentSeries) => {
     if (
       series.left.length === 0 ||
-      series.left.every((leftSeries) =>
-        isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-      )
+      (tables &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
     ) {
       series.left.push(currentSeries);
     } else if (
       series.right.length === 0 ||
-      series.right.every((rightSeries) =>
-        isFormatterCompatible(rightSeries.fieldFormat, currentSeries.fieldFormat)
-      )
+      (tables &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
     ) {
       series.right.push(currentSeries);
     } else if (series.right.length >= series.left.length) {

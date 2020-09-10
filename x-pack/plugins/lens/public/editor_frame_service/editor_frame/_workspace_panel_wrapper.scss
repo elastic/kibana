@@ -38,5 +38,7 @@
 }
 
 .lnsWorkspacePanelWrapper__toolbar {
+  @include euiScrollBar;
+  overflow-x: auto;
   margin-bottom: $euiSizeS;
 }

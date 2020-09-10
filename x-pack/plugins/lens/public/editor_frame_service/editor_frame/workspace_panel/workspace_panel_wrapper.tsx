@@ -67,8 +67,13 @@ export function WorkspacePanelWrapper({
   );
   return (
     <>
-      <div className="lnsWorkspacePanelWrapper__toolbar">
-        <EuiFlexGroup gutterSize="m" direction="row" responsive={false}>
+      <div>
+        <EuiFlexGroup
+          gutterSize="m"
+          direction="row"
+          responsive={false}
+          className="lnsWorkspacePanelWrapper__toolbar"
+        >
           <EuiFlexItem grow={false}>
             <ChartSwitch
               data-test-subj="lnsChartSwitcher"

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,13 +20,14 @@ import { FramePublicAPI } from '../types';
 import { ToolbarPopover } from '../shared_components';
 import { ToolbarButtonProps } from '../toolbar_button';
 import { isHorizontalChart } from './state_helpers';
-import { getAxesConfiguration } from './axes_configuration';
 // @ts-ignore
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 // @ts-ignore
 import { EuiIconAxisLeft } from '../assets/axis_left';
 // @ts-ignore
 import { EuiIconAxisRight } from '../assets/axis_right';
+// @ts-ignore
+import { EuiIconAxisTop } from '../assets/axis_top';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 export interface AxisSettingsPopoverProps {
@@ -98,8 +99,7 @@ const popoverConfig = (
       };
     case 'yRight':
       return {
-        // should be top, missing icon
-        icon: isHorizontal ? EuiIconAxisBottom : EuiIconAxisRight,
+        icon: isHorizontal ? EuiIconAxisTop : EuiIconAxisRight,
         groupPosition: 'right',
         popoverTitle: isHorizontal
           ? i18n.translate('xpack.lens.xyChart.topAxisLabel', {
@@ -125,23 +125,6 @@ const popoverConfig = (
   }
 };
 
-const yAxisTitle = (
-  groupId: 'left' | 'right',
-  layers: LayerConfig[] | undefined,
-  isHorizontal: boolean,
-  frame: FramePublicAPI
-) => {
-  const axisGroups = layers ? getAxesConfiguration(layers, isHorizontal) : [];
-  const activeGroup = axisGroups.find((group) => group.groupId === groupId);
-  const initialSeries = activeGroup?.series[0];
-  if (!initialSeries) {
-    return;
-  }
-  const dataSourceRightLayer = frame.datasourceLayers[initialSeries.layer];
-  const y = dataSourceRightLayer.getOperationForColumnId(initialSeries.accessor) || null;
-  return y?.label;
-};
-
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   axis,
@@ -156,47 +139,10 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   isAxisTitleVisible,
   toggleAxisTitleVisibility,
 }) => {
-  const [popoversOpenState, setPopoversOpenState] = useState(false);
   const [title, setTitle] = useState<string | undefined>(axisTitle);
 
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
-
-  const getAxisTitle = useCallback(() => {
-    const defaultTitle = axisTitle;
-    switch (axis) {
-      case 'x':
-      default:
-        const initialLayer = layers?.[0];
-        if (!initialLayer || !initialLayer.accessors.length) {
-          return defaultTitle;
-        }
-        const datasource = frame.datasourceLayers[initialLayer.layerId];
-        if (!datasource) {
-          return defaultTitle;
-        }
-        const x = initialLayer.xAccessor
-          ? datasource.getOperationForColumnId(initialLayer.xAccessor)
-          : null;
-        return defaultTitle || x?.label;
-      case 'yRight':
-        const yRight = yAxisTitle('right', layers, isHorizontal, frame);
-        return defaultTitle || yRight;
-
-      case 'yLeft':
-        const yLeft = yAxisTitle('left', layers, isHorizontal, frame);
-        return defaultTitle || yLeft;
-    }
-    /* We want this callback to run only if open changes its state. What we want to accomplish here is to give the user a better UX.
-       By default these input fields have the axis legends. If the user changes the input text, the axis legends should also change.
-       BUT if the user cleans up the input text, it should remain empty until the user closes and reopens the panel.
-       In that case, the default axis legend should appear. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [popoversOpenState]);
-
-  useEffect(() => {
-    setTitle(getAxisTitle());
-  }, [getAxisTitle]);
 
   const onTitleChange = (value: string): void => {
     setTitle(value);
@@ -205,7 +151,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   return (
     <ToolbarPopover
       title={config.popoverTitle}
-      handlePopoverState={setPopoversOpenState}
       type={config.icon}
       groupPosition={config.groupPosition}
       isDisabled={isDisabled}

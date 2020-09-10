@@ -273,22 +273,30 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <AxisSettingsPopover
-            axis="yLeft"
-            layers={state?.layers}
-            frame={frame}
-            axisTitle={state?.yTitle}
-            updateTitleState={(value) => setState({ ...state, yTitle: value })}
-            areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
-            toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
-            areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
-            toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
-            isDisabled={
-              Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
-            }
-            isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
-            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
-          />
+          <EuiToolTip
+            anchorClassName="eui-displayBlock"
+            content={i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
+              defaultMessage: 'This setting only applies when left axis is enabled.',
+            })}
+            delay="long"
+          >
+            <AxisSettingsPopover
+              axis="yLeft"
+              layers={state?.layers}
+              frame={frame}
+              axisTitle={state?.yTitle}
+              updateTitleState={(value) => setState({ ...state, yTitle: value })}
+              areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
+              toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+              areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
+              toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+              isDisabled={
+                Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
+              }
+              isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
+              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            />
+          </EuiToolTip>
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}

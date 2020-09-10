@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
 import { EuiIconLegend } from '../assets/legend';
@@ -28,9 +28,8 @@ export interface ToolbarPopoverProps {
    */
   isDisabled?: boolean;
   /**
-   * Is used to pass the popover state to the parent component
+   * Button group position
    */
-  handlePopoverState?: (open: boolean) => void;
   groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
@@ -39,16 +38,9 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   title,
   type,
   isDisabled = false,
-  handlePopoverState,
   groupPosition,
 }) => {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (handlePopoverState) {
-      handlePopoverState(open);
-    }
-  }, [open, handlePopoverState]);
 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
