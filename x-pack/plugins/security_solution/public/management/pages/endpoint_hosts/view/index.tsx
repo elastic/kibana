@@ -33,7 +33,7 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -99,7 +99,7 @@ export const EndpointList = () => {
       pageIndex,
       pageSize,
       totalItemCount,
-      pageSizeOptions: [10, 20, 50],
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       hidePerPageOptions: false,
     };
   }, [pageIndex, pageSize, totalItemCount]);

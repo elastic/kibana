@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -13,13 +12,13 @@ import {
   DETECTION_ENGINE_TAGS_URL,
 } from '../../../../../common/constants';
 import {
-  AddRulesProps,
+  UpdateRulesProps,
+  CreateRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
   EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
-  NewRule,
   Rule,
   FetchRuleProps,
   BasicFetchProps,
@@ -33,32 +32,51 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 
 /**
- * Add provided Rule
+ * Create provided Rule
  *
- * @param rule to add
+ * @param rule CreateRulesSchema to add
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
-    method: rule.id != null ? 'PUT' : 'POST',
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'POST',
     body: JSON.stringify(rule),
     signal,
   });
 
 /**
- * Patch provided Rule
+ * Update provided Rule using PUT
+ *
+ * @param rule UpdateRulesSchema to be updated
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'PUT',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
+ * Patch provided rule
+ * NOTE: The rule edit flow does NOT use patch as it relies on the
+ * functionality of PUT to delete field values when not provided, if
+ * just expecting changes, use this `patchRule`
  *
  * @param ruleProperties to patch
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,

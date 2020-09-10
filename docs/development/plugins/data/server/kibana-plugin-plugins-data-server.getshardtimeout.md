@@ -9,6 +9,8 @@
 ```typescript
 export declare function getShardTimeout(config: SharedGlobalConfig): {
     timeout: string;
+} | {
+    timeout?: undefined;
 };
 ```
 
@@ -22,5 +24,7 @@ export declare function getShardTimeout(config: SharedGlobalConfig): {
 
 `{
     timeout: string;
+} | {
+    timeout?: undefined;
 }`
 
