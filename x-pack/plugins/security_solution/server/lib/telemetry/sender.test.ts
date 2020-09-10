@@ -76,12 +76,14 @@ describe('TelemetryEventsSender', () => {
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
       const sender = new TelemetryEventsSender();
+      sender.logger = loggingSystemMock.create().get();
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender.queue.length).toBe(2);
     });
 
     it('queues more than maxQueueSize events', () => {
       const sender = new TelemetryEventsSender();
+      sender.logger = loggingSystemMock.create().get();
       sender.maxQueueSize = 5;
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
@@ -94,6 +96,10 @@ describe('TelemetryEventsSender', () => {
       const sender = new TelemetryEventsSender();
       sender.logger = loggingSystemMock.create().get();
       sender.sendEvents = jest.fn();
+      const telemetryStart = {
+        getIsOptedIn: jest.fn(() => true),
+      };
+      sender.telemetryStart = telemetryStart;
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender.queue.length).toBe(2);
@@ -106,6 +112,23 @@ describe('TelemetryEventsSender', () => {
       await sender.sendIfDue();
       expect(sender.queue.length).toBe(0);
       expect(sender.sendEvents).toBeCalledTimes(2);
+    });
+
+    it("shouldn't send when telemetry is disabled", async () => {
+      const sender = new TelemetryEventsSender();
+      sender.logger = loggingSystemMock.create().get();
+      sender.sendEvents = jest.fn();
+      const telemetryStart = {
+        getIsOptedIn: jest.fn(() => false),
+      };
+      sender.telemetryStart = telemetryStart;
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender.queue.length).toBe(2);
+      await sender.sendIfDue();
+
+      expect(sender.queue.length).toBe(0);
+      expect(sender.sendEvents).toBeCalledTimes(0);
     });
   });
 });
