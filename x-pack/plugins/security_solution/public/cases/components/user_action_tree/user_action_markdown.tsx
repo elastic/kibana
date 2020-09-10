@@ -21,7 +21,7 @@ import {
   MarkdownEditorForm,
   parsingPlugins,
   processingPlugins,
-} from '../../../common/components/markdown_editor/new_form';
+} from '../../../common/components/markdown_editor/eui_form';
 
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
