@@ -30,6 +30,7 @@ import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -48,12 +49,15 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   }, []);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern } = useWithSource();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+
+  // TODO convert useWithSource to use the new index fields
   const { indicesExist: metadataIndexExists } = useWithSource(
     'default',
     endpointMetadataIndex,
     true
   );
+
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),
@@ -107,6 +111,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexesName={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -119,6 +124,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexesName={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}

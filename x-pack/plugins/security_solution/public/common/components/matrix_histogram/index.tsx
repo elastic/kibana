@@ -37,7 +37,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
-    indexToAdd?: string[] | null;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
     showSpacer?: boolean;

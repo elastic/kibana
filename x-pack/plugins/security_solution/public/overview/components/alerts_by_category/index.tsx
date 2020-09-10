@@ -43,6 +43,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filters?: Filter[];
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
+  indexesName: string[];
   query?: Query;
 }
 
@@ -52,6 +53,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   from,
   hideHeaderChildren = false,
   indexPattern,
+  indexesName,
   query = DEFAULT_QUERY,
   setQuery,
   to,
@@ -117,6 +119,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       })}
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
       id={ID}
+      indexesName={indexesName}
       setQuery={setQuery}
       startDate={from}
       {...alertsByCategoryHistogramConfigs}

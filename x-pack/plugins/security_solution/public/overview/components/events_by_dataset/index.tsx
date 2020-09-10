@@ -47,7 +47,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
-  indexToAdd?: string[] | null;
+  indexesName: string[];
   onlyField?: string;
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
@@ -67,7 +67,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   headerChildren,
   indexPattern,
-  indexToAdd,
+  indexesName,
   onlyField,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePickerTarget,
@@ -164,7 +164,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       filterQuery={filterQuery}
       headerChildren={headerContent}
       id={uniqueQueryId}
-      indexToAdd={indexToAdd}
+      indexesName={indexesName}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
