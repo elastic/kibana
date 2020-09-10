@@ -47,6 +47,7 @@ import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { PolicyAdvanced } from './policy_advanced';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -244,6 +245,10 @@ export const PolicyDetails = React.memo(() => {
         <MacEvents />
         <EuiSpacer size="l" />
         <LinuxEvents />
+
+        <EuiSpacer size="l" />
+        <PolicyAdvanced configPath={['advanced', 'elasticsearch', 'tls', 'verify_peer']} />
+        {/* <PolicyAdvanced configPath={["advanced", "elasticsearch", "tls", "verify_hostname"]} /> */}
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

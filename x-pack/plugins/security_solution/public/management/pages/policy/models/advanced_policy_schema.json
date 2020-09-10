@@ -1,0 +1,11 @@
+[
+    {
+        "key": "windows.advanced.elasticsearch.tls.verify_peer",
+        "first_supported_version": "7.10",
+        "last_supported_version": "7.13"
+    },
+    {
+        "key": "windows.advanced.elasticsearch.tls.verify_hostname",
+        "first_supported_version": "7.10"
+    }
+]
