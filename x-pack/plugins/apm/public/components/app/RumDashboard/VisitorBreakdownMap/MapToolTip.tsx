@@ -20,6 +20,7 @@ import {
   TRANSACTION_DURATION_REGION,
 } from './LayerList';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import { I18LABELS } from '../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
@@ -96,7 +97,7 @@ function MapToolTipComponent({
           style={{ width: 300 }}
         >
           <TitleItem className="eui-textNoWrap">
-            Average page load duration
+            {I18LABELS.avgPageLoadDuration}
           </TitleItem>
           <DescriptionItem>{pageLoadDuration}</DescriptionItem>
         </EuiDescriptionList>

@@ -18,6 +18,7 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/apm_index_pattern';
 
 const ES_TERM_SOURCE: ESTermSourceDescriptor = {
   type: 'ES_TERM_SOURCE',
@@ -31,7 +32,7 @@ const ES_TERM_SOURCE: ESTermSourceDescriptor = {
       label: 'Page load duration',
     },
   ],
-  indexPatternId: 'apm_static_index_pattern_id',
+  indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
 };
 
@@ -136,7 +137,7 @@ export function getLayerList() {
           indexPatternTitle: 'apm-*',
           term: 'client.geo.region_iso_code',
           metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
-          indexPatternId: 'apm_static_index_pattern_id',
+          indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
         },
       },
     ],

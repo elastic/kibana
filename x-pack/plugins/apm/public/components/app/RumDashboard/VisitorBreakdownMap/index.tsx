@@ -7,12 +7,13 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EmbeddedMap } from './EmbeddedMap';
+import { I18LABELS } from '../translations';
 
 export function VisitorBreakdownMap() {
   return (
     <>
       <EuiTitle size="xs">
-        <h3>Page load duration by region</h3>
+        <h3>{I18LABELS.pageLoadDurationByRegion}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <div style={{ height: 400 }}>

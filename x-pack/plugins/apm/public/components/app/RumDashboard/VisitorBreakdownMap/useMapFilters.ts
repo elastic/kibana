@@ -14,11 +14,12 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/apm_index_pattern';
 
 const getMatchFilter = (field: string, value: string): Filter => {
   return {
     meta: {
-      index: 'apm_static_index_pattern_id',
+      index: APM_STATIC_INDEX_PATTERN_ID,
       alias: null,
       negate: false,
       disabled: false,
@@ -33,7 +34,7 @@ const getMatchFilter = (field: string, value: string): Filter => {
 const getMultiMatchFilter = (field: string, values: string[]): Filter => {
   return {
     meta: {
-      index: 'apm_static_index_pattern_id',
+      index: APM_STATIC_INDEX_PATTERN_ID,
       type: 'phrases',
       key: field,
       value: values.join(', '),
@@ -61,7 +62,7 @@ export const useMapFilters = (): Filter[] => {
 
   const existFilter: Filter = {
     meta: {
-      index: 'apm_static_index_pattern_id',
+      index: APM_STATIC_INDEX_PATTERN_ID,
       alias: null,
       negate: false,
       disabled: false,
