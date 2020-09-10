@@ -84,7 +84,12 @@ export interface Settings {
 }
 
 export interface Mappings {
-  [key: string]: any;
+  _meta?: {
+    created_by: string;
+  };
+  properties: {
+    [key: string]: any;
+  };
 }
 
 export interface IngestPipelineWrapper {
