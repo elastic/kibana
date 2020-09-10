@@ -56,13 +56,13 @@ export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
  */
 const DetailHostButton = React.memo(({hasMenu, menuIsOpen, action, count, title, buttonBorderColor, nodeID}: {hasMenu: boolean, menuIsOpen?: boolean, action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>)=>void, count?: number, title: string, buttonBorderColor: ButtonColor, nodeID: string})=>{
   const hasIcon = hasMenu ?? false;
-  const iconType = menuIsOpen === true ? 'minusInCircleFilled' : 'plusInCircleFilled';
+  const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
   return (
     <EuiButton
       onClick={action}
       iconType={hasIcon ? iconType : 'none'}
-      fill={true}
-      color={'secondary'}
+      fill={false}
+      color={'primary'}
       style={{height: 'fit-content', lineHeight: 1, padding: '.25em', fontSize: '.85rem'}}
       size="s"
       iconSide="right"
@@ -151,10 +151,10 @@ const NodeSubMenuComponents = React.memo(
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
 
-    const { colorMap: {full: pillBorderStroke, resolverBackground: pillFill} } = useResolverTheme();
+    const { colorMap: {pillStroke: pillBorderStroke, resolverBackground: pillFill} } = useResolverTheme();
     const listStylesFromTheme = useMemo(()=>{
       return {
-        border: `1px solid ${pillBorderStroke}`,
+        border: `1.5px solid ${pillBorderStroke}`,
         backgroundColor: pillFill,
       }
     },[pillBorderStroke, pillFill]);
@@ -195,7 +195,7 @@ const NodeSubMenuComponents = React.memo(
         />
         {menuIsOpen ? (<ul role="menu" className={className + ' options'} aria-hidden={menuIsOpen} aria-owns={nodeID}>
           { optionsWithActions.sort((opta, optb)=>{ return opta.optionTitle < optb.optionTitle ? -1 : 1 }).map((opt)=>{
-            return (<li className="item" style={listStylesFromTheme}><button role="menuitem" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
+            return (<li className="item" data-test-subj="resolver:map:node-submenu-item" style={listStylesFromTheme}><button role="menuitem" onClick={opt.action}>{opt.prefix} {opt.optionTitle}</button></li>)
           })}
         </ul>) : null}
       </>
@@ -224,9 +224,10 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
 
   &.options .item {
     margin: .25ch .35ch .35ch 0;
-    padding: .25em;
+    padding: .35em .5em;
     height: fit-content;
     width: fit-content;
+    border-radius: 2px;
     line-height: .8;
   }
 
