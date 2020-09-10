@@ -66,6 +66,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const [loadingFieldOptions, setLoadingFieldOptions] = useState<boolean>(false);
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
   const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
+  const [loadedDepVarOptions, setLoadedDepVarOptions] = useState<boolean>(false);
   const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
   const [dependentVariableOptions, setDependentVariableOptions] = useState<
     EuiComboBoxOptionOption[]
@@ -124,7 +125,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     requiredFieldsError !== undefined ||
     unsupportedFieldsError !== undefined;
 
-  const loadDepVarOptions = async (formState: State['form']) => {
+  const loadDepVarOptions = (formState: State['form']) => {
     setLoadingDepVarOptions(true);
     setMaxDistinctValuesError(undefined);
 
@@ -152,11 +153,13 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           depVarUpdate = '';
         }
         setDependentVariableOptions(depVarOptions);
+        setLoadedDepVarOptions(true);
         setLoadingDepVarOptions(false);
         setDependentVariableFetchFail(false);
         setFormState({ dependentVariable: depVarUpdate });
       }
     } catch (e) {
+      setLoadedDepVarOptions(true);
       setLoadingDepVarOptions(false);
       setDependentVariableFetchFail(true);
     }
@@ -331,7 +334,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <DataGrid {...indexPreviewProps} />
       </EuiFormRow>
-      {isJobTypeWithDepVar && (
+      {isJobTypeWithDepVar && loadedDepVarOptions && (
         <Fragment>
           <EuiFormRow
             fullWidth
