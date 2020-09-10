@@ -48,7 +48,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
-import { AdminSearchBar } from '../../../components/search_bar';
+import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 
 const EndpointListNavLink = memo<{

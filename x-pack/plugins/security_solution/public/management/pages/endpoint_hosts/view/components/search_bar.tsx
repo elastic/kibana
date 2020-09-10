@@ -8,12 +8,12 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
-import { Query, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public/';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { urlFromQueryParams } from '../pages/endpoint_hosts/view/url_from_query_params';
-import { useEndpointSelector } from '../pages/endpoint_hosts/view/hooks';
-import * as selectors from '../pages/endpoint_hosts/store/selectors';
-import { clone } from '../pages/endpoint_hosts/models/index_pattern';
+import { Query, SearchBar, TimeHistory } from '../../../../../../../../../src/plugins/data/public';
+import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/public';
+import { urlFromQueryParams } from '../url_from_query_params';
+import { useEndpointSelector } from '../hooks';
+import * as selectors from '../../store/selectors';
+import { clone } from '../../models/index_pattern';
 
 const AdminQueryBar = styled.div`
   .globalQueryBar {
