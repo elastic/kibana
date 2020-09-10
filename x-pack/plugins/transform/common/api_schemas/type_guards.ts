@@ -60,8 +60,7 @@ export const isEsIndices = (arg: any): arg is EsIndex[] => {
   return Array.isArray(arg);
 };
 
-type EsSearchResponse = SearchResponse7;
-export const isEsSearchResponse = (arg: any): arg is EsSearchResponse => {
+export const isEsSearchResponse = (arg: any): arg is SearchResponse7 => {
   return isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
 };
 

@@ -36,9 +36,8 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
+import type { SearchResponse7 } from '../../../../common/shared_imports';
 import { EsIndex } from '../../../../common/types/es_index';
-
-import type { SearchResponse7 } from '../../../shared_imports';
 
 import type { SavedSearchQuery } from '../use_search_items';
 
@@ -135,8 +134,21 @@ const apiFactory = () => ({
     return Promise.resolve([]);
   },
   async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
-    return Promise.resolve([]);
+    return Promise.resolve({
+      hits: {
+        hits: [],
+        total: {
+          value: 0,
+          relation: 'the-relation',
+        },
+        max_score: 0,
+      },
+      timed_out: false,
+      took: 10,
+      _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+    });
   },
+
   async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
     return Promise.resolve([]);
   },

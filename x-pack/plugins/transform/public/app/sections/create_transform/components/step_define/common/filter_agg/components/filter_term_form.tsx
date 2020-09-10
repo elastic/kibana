@@ -66,6 +66,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
             defaultMessage: 'Unable to fetch suggestions',
           })
         );
+        return;
       }
 
       setOptions(
