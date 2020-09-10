@@ -8,12 +8,7 @@
 import { Query } from 'src/plugins/data/public';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import {
-  AbstractSourceDescriptor,
-  EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
-  ESTermSourceDescriptor,
-} from './source_descriptor_types';
+import { AbstractSourceDescriptor, ESTermSourceDescriptor } from './source_descriptor_types';
 
 export type JoinDescriptor = {
   leftField?: string;
@@ -33,11 +28,7 @@ export type LayerDescriptor = {
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor:
-    | AbstractSourceDescriptor
-    | EMSFileSourceDescriptor
-    | EMSTMSSourceDescriptor
-    | null;
+  sourceDescriptor: AbstractSourceDescriptor | null;
   type?: string;
   visible?: boolean;
   style?: StyleDescriptor | null;

@@ -5,9 +5,11 @@
  */
 
 import {
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
   ESTermSourceDescriptor,
-  LayerDescriptor,
-  VectorLayerDescriptor,
+  LayerDescriptor as BaseLayerDescriptor,
+  VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '../../../../../../maps/common/descriptor_types';
 import {
@@ -44,6 +46,14 @@ export const TRANSACTION_DURATION_REGION =
 
 export const TRANSACTION_DURATION_COUNTRY =
   '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
+
+interface LayerDescriptor extends BaseLayerDescriptor {
+  sourceDescriptor: EMSTMSSourceDescriptor;
+}
+
+interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
+  sourceDescriptor: EMSFileSourceDescriptor;
+}
 
 export function getLayerList() {
   const baseLayer: LayerDescriptor = {

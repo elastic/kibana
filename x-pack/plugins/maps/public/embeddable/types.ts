@@ -11,12 +11,7 @@ import {
   EmbeddableOutput,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../src/plugins/embeddable/public/lib/embeddables';
-import {
-  FieldFilter,
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../src/plugins/data/common';
+import { Filter, Query, RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
 import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 
 export interface MapEmbeddableConfig {
@@ -32,7 +27,7 @@ export interface MapEmbeddableConfig {
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
-  filters: FieldFilter[];
+  filters: Filter[];
   query?: Query;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;
