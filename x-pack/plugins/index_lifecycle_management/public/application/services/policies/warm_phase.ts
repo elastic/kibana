@@ -17,7 +17,7 @@ import {
 } from './policy_validation';
 
 import { determineDataTierAllocationType } from '../../lib';
-import { serializePhaseWithAllocation } from './shared/serialize_phase_with_allocation';
+import { serializePhaseWithAllocation } from './shared';
 
 const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
