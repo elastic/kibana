@@ -59,7 +59,6 @@ import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { APP_ID } from '../../../../../common/constants';
 
 const EndpointListNavLink = memo<{
