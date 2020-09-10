@@ -9,3 +9,10 @@
   display: block;
   word-break: break-word;
 }
+
+// todo: remove after closing https://github.com/elastic/eui/issues/3548
+.lnsDimensionPopover__fixTranslateDnd {
+  // sass-lint:disable-block no-important
+  transform: none !important;
+}
+
