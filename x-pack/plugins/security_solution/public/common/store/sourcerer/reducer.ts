@@ -7,38 +7,49 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  setActiveSourcererScopeId,
-  setKibanaIndexPatterns,
+  setIndexPatternsList,
   setIsIndexPatternsLoading,
+  setSelectedIndexPatterns,
   setSource,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { getSourceDefaults } from '../../containers/sourcerer';
 
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  .case(setActiveSourcererScopeId, (state, { payload }) => ({
+  .case(setIndexPatternsList, (state, { kibanaIndexPatterns, allIndexPatterns }) => ({
     ...state,
-    activeSourcererScopeId: payload,
-  }))
-  .case(setKibanaIndexPatterns, (state, { payload }) => ({
-    ...state,
-    kibanaIndexPatterns: payload,
+    kibanaIndexPatterns,
+    allIndexPatterns,
   }))
   .case(setIsIndexPatternsLoading, (state, { payload }) => ({
     ...state,
     isIndexPatternsLoading: payload,
   }))
-  .case(setSource, (state, { id, payload }) => ({
-    ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      [id]: {
-        ...getSourceDefaults(id, payload.selectedPatterns),
-        ...state.sourcererScopes[id],
-        ...payload,
+  .case(setSelectedIndexPatterns, (state, { id, selectedPatterns }) => {
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          ...selectedPatterns,
+        },
       },
-    },
-  }))
+    };
+  })
+  .case(setSource, (state, { id, payload }) => {
+    const { allExistingIndexPatterns, ...sourcererScopes } = payload;
+    return {
+      ...state,
+      allIndexPatterns: allExistingIndexPatterns,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          ...sourcererScopes,
+        },
+      },
+    };
+  })
   .build();

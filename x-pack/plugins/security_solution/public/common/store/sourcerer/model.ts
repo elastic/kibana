@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BrowserFields, DocValueFields } from '../../containers/sourcerer/format';
+import {
+  BrowserFields,
+  DocValueFields,
+  EMPTY_BROWSER_FIELDS,
+  EMPTY_DOCVALUE_FIELD,
+  EMPTY_INDEX_PATTERN,
+} from '../../containers/sourcerer/format';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { SourcererState } from './reducer';
-import { DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 export type ErrorModel = Error[];
 
 export enum SourcererScopeName {
   default = 'default',
-  host = 'host',
-  detections = 'detections',
   timeline = 'timeline',
-  network = 'network',
 }
-
-// export type SourcererScopesType = keyof typeof SourcererScopeName;
 
 export interface ManageScope {
   browserFields: BrowserFields;
@@ -29,32 +29,50 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
-  scopePatterns: string[];
   selectedPatterns: string[];
 }
 
 export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
-  selectedPatterns: string[];
+  allExistingIndexPatterns: string[];
 }
 
 export type SourcererScopeById = {
-  [id in SourcererScopeName]?: ManageScope;
+  [id in SourcererScopeName]: ManageScope;
 };
+
+export type KibanaIndexPatterns = Array<{ id: string; title: string }>;
 
 // ManageSourcerer
 export interface SourcererModel {
-  activeSourcererScopeId: SourcererScopeName;
-  kibanaIndexPatterns: string[];
-  isIndexPatternsLoading: boolean;
+  kibanaIndexPatterns: KibanaIndexPatterns;
+  allIndexPatterns: string[];
   sourcererScopes: SourcererScopeById;
 }
 
-export const initialSourcererState: SourcererState = {
-  activeSourcererScopeId: SourcererScopeName.default,
+const initSourcererScope = {
+  browserFields: EMPTY_BROWSER_FIELDS,
+  docValueFields: EMPTY_DOCVALUE_FIELD,
+  errorMessage: null,
+  indexPattern: EMPTY_INDEX_PATTERN,
+  indicesExist: true,
+  loading: true,
+  selectedPatterns: [],
+};
+
+export const initialSourcererState: SourcererModel = {
   kibanaIndexPatterns: [],
-  isIndexPatternsLoading: true,
-  sourcererScopes: {},
+  allIndexPatterns: [],
+  sourcererScopes: {
+    [SourcererScopeName.default]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.default,
+    },
+    [SourcererScopeName.timeline]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.timeline,
+    },
+  },
 };
 
 export type FSourcererScopePatterns = {
@@ -64,8 +82,7 @@ export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;
 
 export const sourcererScopePatterns: FSourcererScopePatterns = {
   [SourcererScopeName.default]: DEFAULT_INDEX_PATTERN,
-  [SourcererScopeName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  [SourcererScopeName.detections]: [DEFAULT_SIGNALS_INDEX],
   [SourcererScopeName.timeline]: DEFAULT_INDEX_PATTERN,
-  [SourcererScopeName.network]: ['auditbeat-*', 'filebeat-*', 'packetbeat-*'],
 };
+
+export type SourcererIndexPatterns = Record<string, IIndexPattern>;

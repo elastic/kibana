@@ -61,6 +61,7 @@ import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -274,6 +275,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
+      );
+
+      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionIndexFields',
+        securitySolutionIndexFields
       );
     });
 

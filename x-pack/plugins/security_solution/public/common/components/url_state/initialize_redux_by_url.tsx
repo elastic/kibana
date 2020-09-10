@@ -42,7 +42,6 @@ export const dispatchSetInitialStateFromUrl = (
       updateTimerange(newUrlStateString, dispatch);
     }
     if (urlKey === CONSTANTS.sourcerer) {
-      console.log('replace sourcerer in redux');
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
       if (sourcererState != null) {
         const activeScopes: SourcererScopeName[] = Object.keys(
@@ -50,12 +49,9 @@ export const dispatchSetInitialStateFromUrl = (
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) =>
           dispatch(
-            sourcererActions.setSource({
+            sourcererActions.setSelectedIndexPatterns({
               id: scope,
-              payload: {
-                id: scope,
-                selectedPatterns: sourcererState[scope] ?? [],
-              },
+              selectedPatterns: sourcererState[scope] ?? [],
             })
           )
         );

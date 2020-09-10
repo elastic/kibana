@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -18,9 +18,6 @@ import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/
 import { QueryTemplateProps } from '../../../common/containers/query_template';
 
 import { overviewHostQuery } from './index.gql_query';
-import { useSourcererContext } from '../../../common/containers/sourcerer';
-import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
-
 export const ID = 'overviewHostQuery';
 
 export interface OverviewHostArgs {
@@ -40,13 +37,14 @@ export interface OverviewHostProps extends QueryTemplateProps {
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
-    const { activeSourcererScopeId, getSourcererScopeById } = useSourcererContext();
-    const { selectedPatterns } = useMemo(() => getSourcererScopeById(activeSourcererScopeId), [
-      getSourcererScopeById,
-      activeSourcererScopeId,
-    ]);
+    // const { activeSourcererScopeId, getSourcererScopeById } = useSourcererContext();
+    // const { selectedPatterns } = useMemo(() => getSourcererScopeById(activeSourcererScopeId), [
+    //   getSourcererScopeById,
+    //   activeSourcererScopeId,
+    // ]);
     const uiDefaultIndexPatterns = useUiSetting<string[]>(DEFAULT_INDEX_KEY);
-    const defaultIndex = SOURCERER_FEATURE_FLAG_ON ? selectedPatterns : uiDefaultIndexPatterns;
+    // const defaultIndex = SOURCERER_FEATURE_FLAG_ON ? selectedPatterns : uiDefaultIndexPatterns;
+    const defaultIndex = uiDefaultIndexPatterns;
     return (
       <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
         query={overviewHostQuery}

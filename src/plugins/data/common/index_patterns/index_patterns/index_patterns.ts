@@ -123,6 +123,21 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  getIdsWithTitle = async (
+    refresh: boolean = false
+  ): Promise<Array<{ id: string; title: string }>> => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+    return this.savedObjectsCache.map((obj) => ({
+      id: obj?.id,
+      title: obj?.attributes?.title,
+    }));
+  };
+
   getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();

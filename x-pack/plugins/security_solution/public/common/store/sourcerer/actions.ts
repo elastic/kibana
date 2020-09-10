@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { ManageScopeInit, SourcererScopeName } from './model';
+import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -15,14 +15,16 @@ export const setSource = actionCreator<{
   payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-export const setActiveSourcererScopeId = actionCreator<{ payload: SourcererScopeName }>(
-  'SET_ACTIVE_SOURCE_GROUP_ID'
-);
-
-export const setKibanaIndexPatterns = actionCreator<{ payload: string[] }>(
-  'SET_KIBANA_INDEX_PATTERNS'
-);
+export const setIndexPatternsList = actionCreator<{
+  kibanaIndexPatterns: KibanaIndexPatterns;
+  allIndexPatterns: string[];
+}>('SET_INDEX_PATTERNS_LIST');
 
 export const setIsIndexPatternsLoading = actionCreator<{ payload: boolean }>(
   'SET_IS_INDEX_PATTERNS_LOADING'
 );
+
+export const setSelectedIndexPatterns = actionCreator<{
+  id: SourcererScopeName;
+  selectedPatterns: string[];
+}>('SET_SELECTED_INDEX_PATTERNS');

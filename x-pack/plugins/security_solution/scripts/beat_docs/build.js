@@ -100,7 +100,8 @@ const convertFieldsToHash = (schemaFields, beatFields, path) =>
     ? schemaFields.fields.reduce((accumulator, item) => {
         if (item.name) {
           const attr = isEmpty(path) ? item.name : `${path}.${item.name}`;
-          const category = attr.split('.')[0];
+          const splitAttr = attr.split('.');
+          const category = splitAttr.length === 1 ? 'base' : splitAttr[0];
           const myItem = {
             ...item,
             category,
@@ -184,7 +185,24 @@ const manageTarFields = async (beat, filePath, beatFields) =>
   });
 
 async function main() {
-  let beatFields = {};
+  let beatFields = {
+    _id: {
+      category: 'base',
+      description: 'Each document has an _id that uniquely identifies it',
+      example: 'Y-6TfmcB0WOhS6qyMv3s',
+      name: '_id',
+      type: 'keyword',
+    },
+    _index: {
+      category: 'base',
+      description:
+        'An index is like a ‘database’ in a relational database. It has a mapping which defines multiple types. An index is a logical namespace which maps to one or more primary shards and can have zero or more replica shards.',
+      example: 'auditbeat-8.0.0-2019.02.19-000001',
+      name: '_index',
+      type: 'keyword',
+    },
+  };
+
   for (const myBeat of beats) {
     console.log('downloading', myBeat.index);
     const filepath = await download(myBeat.url, myBeat.filePath);
@@ -201,8 +219,10 @@ async function main() {
       * you may not use this file except in compliance with the Elastic License.
       */
 
+      import { BeatFields } from '../../../common/search_strategy/security_solution/beat_fields';
+
       /* eslint-disable @typescript-eslint/naming-convention */
-      export const fieldsBeat =
+      export const fieldsBeat: BeatFields =
         ${JSON.stringify(beatFields, null, 2)};
   `;
   fs.writeFileSync(`${OUTPUT_SERVER_DIRECTORY}/fields.ts`, body, 'utf-8');

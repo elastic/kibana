@@ -4,20 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isUndefined } from 'lodash';
+import { isEqual, isUndefined } from 'lodash';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, keyBy, pick, isEmpty } from 'lodash/fp';
-import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../../common/constants';
-import { useUiSetting$ } from '../../lib/kibana';
+import { useKibana, useUiSetting$ } from '../../lib/kibana';
 
-import { IndexField, SourceQuery } from '../../../graphql/types';
+import { SourceQuery } from '../../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
 import { useApolloClient } from '../../utils/apollo_context';
+import {
+  IndexField,
+  IndexFieldsStrategyResponse,
+  IndexFieldsStrategyRequest,
+} from '../../../../common/search_strategy/index_fields';
+import { AbortError } from '../../../../../../../src/plugins/data/common';
+import * as i18n from './translations';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
+
+import { State } from '../../store';
 
 export { sourceQuery };
 
@@ -86,6 +99,28 @@ export const getDocValueFields = memoizeOne(
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
           if (field.type === 'date' && accumulator.length < 100) {
+            const format: string =
+              field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
+            return [
+              ...accumulator,
+              {
+                field: field.name,
+                format,
+              },
+            ];
+          }
+          return accumulator;
+        }, [])
+      : [],
+  // Update the value only if _title has changed
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
+export const getDocValueFields2 = memoizeOne(
+  (_title: string, fields: IndexField[]): DocValueFields[] =>
+    fields && fields.length > 0
+      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
+          if (field.readFromDocValues && accumulator.length < 100) {
             const format: string =
               field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
             return [
@@ -218,4 +253,87 @@ export const useWithSource = (
   }, [apolloClient, sourceId, defaultIndex, queryDeduplication]);
 
   return state;
+};
+
+export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
+  const { data, notifications } = useKibana().services;
+  const abortCtrl = useRef(new AbortController());
+  const dispatch = useDispatch();
+  const previousIndexesName = useRef<string[]>([]);
+
+  const indexesNameSelectedSelector = useMemo(
+    () => sourcererSelectors.getIndexesNameSelectedSelector(),
+    []
+  );
+  const indexesName = useSelector<State, string[]>(
+    (state) => indexesNameSelectedSelector(state, sourcererScopeName),
+    shallowEqual
+  );
+
+  const indexFieldsSearch = useCallback(
+    (indicesName) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+
+        const searchSubscription$ = data.search
+          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+            { indices: indicesName },
+            {
+              strategy: 'securitySolutionIndexFields',
+              signal: abortCtrl.current.signal,
+            }
+          )
+          .subscribe({
+            next: (response) => {
+              if (!response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  const stringifyIndices = indicesName.sort().join();
+                  previousIndexesName.current = response.indicesExists;
+                  dispatch(
+                    sourcererActions.setSource({
+                      id: sourcererScopeName,
+                      payload: {
+                        browserFields: getBrowserFields(stringifyIndices, response.indexFields),
+                        docValueFields: getDocValueFields2(stringifyIndices, response.indexFields),
+                        errorMessage: null,
+                        id: sourcererScopeName,
+                        indexPattern: getIndexFields(stringifyIndices, response.indexFields),
+                        indicesExist: response.indicesExists.length > 0,
+                        loading: false,
+                        selectedPatterns: [],
+                        allExistingIndexPatterns: response.indicesExists.sort(),
+                      },
+                    })
+                  );
+                }
+                searchSubscription$.unsubscribe();
+              } else if (response.isPartial && !response.isRunning) {
+                // TODO: Make response error status clearer
+                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({ title: i18n.FAIL_BEAT_FIELDS, text: msg.message });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, dispatch, notifications.toasts, sourcererScopeName]
+  );
+
+  useEffect(() => {
+    if (indexesName.length > 0 && !isEqual(previousIndexesName.current, indexesName)) {
+      indexFieldsSearch(indexesName);
+    }
+  }, [indexesName, indexFieldsSearch, previousIndexesName]);
 };

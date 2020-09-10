@@ -34,7 +34,6 @@ export const HostsTabs = memo<HostsTabsProps>(
     setQuery,
     isInitializing,
     type,
-    indexPattern,
     hostsPagePath,
   }) => {
     const tabProps = {
@@ -45,7 +44,6 @@ export const HostsTabs = memo<HostsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      indexPattern,
       narrowDateRange: useCallback(
         (score: Anomaly, interval: string) => {
           const fromTo = scoreIntervalToDateTime(score, interval);

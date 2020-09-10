@@ -78,88 +78,89 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { docValueFields, indicesExist, indexPattern } = useWithSource();
-    const filterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters,
-    });
-    const tabsFilterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters: tabsFilters,
-    });
+    // const { docValueFields, indicesExist, indexPattern } = useWithSource();
+    const filterQuery = '';
+    const tabsFilterQuery = '';
+    // convertToBuildEsQuery({
+    //   config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    //   indexPattern,
+    //   queries: [query],
+    //   filters,
+    // });
+    // const tabsFilterQuery = convertToBuildEsQuery({
+    //   config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    //   indexPattern,
+    //   queries: [query],
+    //   filters: tabsFilters,
+    // });
 
     return (
       <>
-        {indicesExist ? (
-          <>
-            <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
-            </FiltersGlobal>
+        {/* {indicesExist ? ( */}
+        <>
+          <EuiWindowEvent event="resize" handler={noop} />
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            {/* <SiemSearchBar indexPattern={indexPattern} id="global" /> */}
+          </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                  title={i18n.PAGE_TITLE}
-                />
-
-                <KpiHostsQuery
-                  endDate={to}
-                  filterQuery={filterQuery}
-                  skip={isInitializing}
-                  sourceId="default"
-                  startDate={from}
-                >
-                  {({ kpiHosts, loading, id, inspect, refetch }) => (
-                    <KpiHostsComponentManage
-                      data={kpiHosts}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostsQuery>
-
-                <EuiSpacer />
-
-                <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
-
-                <EuiSpacer />
-              </Display>
-
-              <HostsTabs
-                deleteQuery={deleteQuery}
-                docValueFields={docValueFields}
-                to={to}
-                filterQuery={tabsFilterQuery}
-                isInitializing={isInitializing}
-                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                setQuery={setQuery}
-                from={from}
-                type={hostsModel.HostsType.page}
-                indexPattern={indexPattern}
-                hostsPagePath={hostsPagePath}
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <HeaderPage
+                border
+                subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                title={i18n.PAGE_TITLE}
               />
-            </WrapperPage>
-          </>
-        ) : (
+
+              <KpiHostsQuery
+                endDate={to}
+                filterQuery={filterQuery}
+                skip={isInitializing}
+                sourceId="default"
+                startDate={from}
+              >
+                {({ kpiHosts, loading, id, inspect, refetch }) => (
+                  <KpiHostsComponentManage
+                    data={kpiHosts}
+                    from={from}
+                    id={id}
+                    inspect={inspect}
+                    loading={loading}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    to={to}
+                    narrowDateRange={narrowDateRange}
+                  />
+                )}
+              </KpiHostsQuery>
+
+              <EuiSpacer />
+
+              <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+
+              <EuiSpacer />
+            </Display>
+
+            <HostsTabs
+              deleteQuery={deleteQuery}
+              docValueFields={[]}
+              to={to}
+              filterQuery={tabsFilterQuery}
+              isInitializing={isInitializing}
+              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+              setQuery={setQuery}
+              from={from}
+              type={hostsModel.HostsType.page}
+              hostsPagePath={hostsPagePath}
+            />
+          </WrapperPage>
+        </>
+        {/* ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
 
             <OverviewEmpty />
           </WrapperPage>
-        )}
+        )} */}
 
         <SpyRoute pageName={SecurityPageName.hosts} />
       </>

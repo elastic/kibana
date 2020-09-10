@@ -94,3 +94,7 @@ export const indicesExistOrDataTemporarilyUnavailable = (
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
+export const EMPTY_INDEX_PATTERN: IIndexPattern = {
+  fields: [],
+  title: '',
+};

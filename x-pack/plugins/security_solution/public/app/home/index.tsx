@@ -17,6 +17,7 @@ import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useInitSourcerer } from '../../common/containers/sourcerer';
 
 const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -41,7 +42,7 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { signalIndexExists, signalIndexName } = useSignalIndex();
-
+  useInitSourcerer();
   const indexToAdd = useMemo<string[] | null>(() => {
     if (signalIndexExists && signalIndexName != null) {
       return [signalIndexName];

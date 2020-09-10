@@ -6,14 +6,41 @@
 
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, SourcererScopeName } from './model';
+import { SourcererScopeById, KibanaIndexPatterns, SourcererScopeName } from './model';
 
-export const activeSourcererScopeIdSelector = ({ sourcerer }: State): SourcererScopeName =>
-  sourcerer.activeSourcererScopeId;
-export const kibanaIndexPatternsSelector = ({ sourcerer }: State): string[] =>
+export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
-export const isIndexPatternsLoadingSelector = ({ sourcerer }: State): boolean =>
-  sourcerer.isIndexPatternsLoading;
+
+export const sourcererallIndexPatternsSelector = ({ sourcerer }: State): string[] =>
+  sourcerer.allIndexPatterns;
+
 export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
   sourcerer.sourcererScopes;
+
 export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
+
+export const kibanaIndexPatternsSelector = () =>
+  createSelector(
+    sourcererKibanaIndexPatternsSelector,
+    (kibanaIndexPatterns) => kibanaIndexPatterns
+  );
+
+export const allIndexPatternsSelector = () =>
+  createSelector(
+    sourcererallIndexPatternsSelector,
+    (allExistingIndexPatterns) => allExistingIndexPatterns
+  );
+
+export const getIndexesNameSelectedSelector = () => {
+  const getScopesSelector = scopesSelector();
+  const getAllIndexPatternsSelector = allIndexPatternsSelector();
+
+  const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
+    const scope = getScopesSelector(state)[scopeId];
+    const allExistingIndexPatterns = getAllIndexPatternsSelector(state);
+
+    return scope.selectedPatterns.length === 0 ? allExistingIndexPatterns : scope.selectedPatterns;
+  };
+
+  return mapStateToProps;
+};
