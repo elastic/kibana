@@ -13,6 +13,7 @@ import {
 } from '../../../../../src/plugins/embeddable/public/lib/embeddables';
 import { Filter, Query, RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
 import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
+import { ExistsFilter } from '../../../../../target/types/plugins/data/common/es_query/filters';
 
 export interface MapEmbeddableConfig {
   editUrl?: string;
@@ -27,7 +28,7 @@ export interface MapEmbeddableConfig {
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
-  filters: Filter[];
+  filters: Filter[] | ExistsFilter[];
   query?: Query;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;

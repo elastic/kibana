@@ -5,12 +5,19 @@
  */
 
 import React from 'react';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EmbeddedMap } from './EmbeddedMap';
 
 export function VisitorBreakdownMap() {
   return (
-    <div style={{ height: 400 }}>
-      <EmbeddedMap />
-    </div>
+    <>
+      <EuiTitle size="xs">
+        <h3>Page load duration by region</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <div style={{ height: 400 }}>
+        <EmbeddedMap />
+      </div>
+    </>
   );
 }

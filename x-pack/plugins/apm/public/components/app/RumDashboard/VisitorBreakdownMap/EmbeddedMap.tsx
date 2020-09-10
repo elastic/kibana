@@ -22,6 +22,9 @@ import {
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { getLayerList } from './LayerList';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { RenderTooltipContentParams } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { MapToolTipComponent } from './MapToolTip';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -60,6 +63,8 @@ export const EmbeddedMap = React.memo(() => {
     services: { embeddable: embeddablePlugin },
   } = useKibana<KibanaDeps>();
 
+  const portalNode = React.useMemo(() => createPortalNode(), []);
+
   if (!embeddablePlugin) {
     throw new Error('Embeddable start plugin not found');
   }
@@ -69,7 +74,22 @@ export const EmbeddedMap = React.memo(() => {
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
-    filters: [],
+    filters: [
+      {
+        meta: {
+          index: 'apm_static_index_pattern_id',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'exists',
+          key: 'transaction.marks.navigationTiming.fetchStart',
+          value: 'exists',
+        },
+        exists: {
+          field: 'transaction.marks.navigationTiming.fetchStart',
+        },
+      },
+    ],
     refreshConfig: {
       value: 0,
       pause: false,
@@ -86,6 +106,27 @@ export const EmbeddedMap = React.memo(() => {
     },
   };
 
+  const renderTooltipContent = ({
+    addFilters,
+    closeTooltip,
+    features,
+    isLocked,
+    getLayerName,
+    loadFeatureProperties,
+    loadFeatureGeometry,
+  }: RenderTooltipContentParams) => {
+    const props = {
+      addFilters,
+      closeTooltip,
+      isLocked,
+      getLayerName,
+      loadFeatureProperties,
+      loadFeatureGeometry,
+    };
+
+    return <OutPortal {...props} node={portalNode} features={features} />;
+  };
+
   useEffect(() => {
     async function setupEmbeddable() {
       if (!factory) {
@@ -97,6 +138,7 @@ export const EmbeddedMap = React.memo(() => {
       });
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
+        embeddableObject.setRenderTooltipContent(renderTooltipContent);
         await embeddableObject.setLayerList(getLayerList());
       }
 
@@ -123,6 +165,9 @@ export const EmbeddedMap = React.memo(() => {
         className="embPanel__content"
         ref={embeddableRoot}
       />
+      <InPortal node={portalNode}>
+        <MapToolTipComponent />
+      </InPortal>
     </EmbeddedPanel>
   );
 });

@@ -70,6 +70,7 @@ export function RumDashboard() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+        <EuiSpacer size="s" />
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
