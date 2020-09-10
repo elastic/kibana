@@ -249,6 +249,7 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
             "panel": undefined,
           },
           Object {
+            "data-test-subj": "embeddablePanelMore-mainMenu",
             "icon": "boxesHorizontal",
             "name": "More",
             "panel": "mainMenu__more",
