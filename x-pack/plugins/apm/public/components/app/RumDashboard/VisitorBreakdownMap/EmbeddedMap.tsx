@@ -93,6 +93,7 @@ export function EmbeddedMapComponent() {
         to: new Date(end!).toISOString(),
       },
     }),
+    hideFilterActions: true,
   };
 
   function renderTooltipContent({
