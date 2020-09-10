@@ -153,7 +153,7 @@ describe('UiActionsService', () => {
         telemetry,
       });
       service.telemetry(actionState);
-      expect(telemetry).toBeCalledWith(actionState.events[0]);
+      expect(telemetry).toBeCalledWith(actionState.events[0], {});
     });
 
     describe('registerFeature for licensing', () => {
