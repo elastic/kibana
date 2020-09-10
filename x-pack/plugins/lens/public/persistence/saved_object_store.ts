@@ -8,9 +8,10 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectReference,
+  ChromeStart,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
-import { PersistableFilter } from '../../common';
+import { getFullPath, PersistableFilter } from '../../common';
 
 export interface Document {
   id?: string;
@@ -40,11 +41,7 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: SavedObjectsClientContract;
-
-  constructor(client: SavedObjectsClientContract) {
-    this.client = client;
-  }
+  constructor(private client: SavedObjectsClientContract, private chrome: ChromeStart) {}
 
   async save(vis: Document) {
     const { id, type, references, ...rest } = vis;
@@ -57,6 +54,8 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       : this.client.create(DOC_TYPE, attributes, {
           references,
         }));
+
+    this.chrome.recentlyAccessed.add(getFullPath(result.id), vis.title, result.id);
 
     return { ...vis, id: result.id };
   }
@@ -90,12 +89,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     if (error) {
       throw error;
     }
-
-    return {
+    const document = {
       ...(attributes as SavedObjectAttributes),
       references,
       id,
       type,
     } as Document;
+    this.chrome.recentlyAccessed.add(getFullPath(id), document.title, id);
+
+    return document;
   }
 }

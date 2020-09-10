@@ -82,7 +82,7 @@ export async function mountApp(
         editorFrame={instance}
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
-        docStorage={new SavedObjectIndexStore(savedObjectsClient)}
+        docStorage={new SavedObjectIndexStore(savedObjectsClient, coreStart.chrome)}
         redirectTo={(id, returnToOrigin, newlyCreated) =>
           redirectTo(routeProps, id, returnToOrigin, newlyCreated)
         }
