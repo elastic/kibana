@@ -45,6 +45,12 @@ export const INVESTIGATION_NOTES_TEXTAREA =
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
 
+export const LOOK_BACK_INTERVAL =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
+
+export const LOOK_BACK_TIME_TYPE =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
+
 export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
 
 export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
@@ -78,6 +84,12 @@ export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRule
 
 export const RULE_TIMESTAMP_OVERRIDE =
   '[data-test-subj="detectionEngineStepAboutRuleTimestampOverride"]';
+
+export const RUNS_EVERY_INTERVAL =
+  '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="interval"]';
+
+export const RUNS_EVERY_TIME_TYPE =
+  '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
 
 export const SCHEDULE_CONTINUE_BUTTON = '[data-test-subj="schedule-continue"]';
 

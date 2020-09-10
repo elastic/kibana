@@ -13,6 +13,7 @@ import {
 } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
+  ABOUT_EDIT_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
@@ -21,10 +22,13 @@ import {
   CREATE_AND_ACTIVATE_BTN,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
+  DEFINE_EDIT_BUTTON,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
   INVESTIGATION_NOTES_TEXTAREA,
+  LOOK_BACK_INTERVAL,
+  LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
@@ -40,6 +44,8 @@ import {
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
   RULE_TIMESTAMP_OVERRIDE,
+  RUNS_EVERY_INTERVAL,
+  RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
@@ -48,8 +54,6 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  DEFINE_EDIT_BUTTON,
-  ABOUT_EDIT_BUTTON,
   EQL_TYPE,
   EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
@@ -179,6 +183,13 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
+export const fillScheduleRuleAndContinue = (rule: CustomRule) => {
+  cy.get(RUNS_EVERY_INTERVAL).clear().type(rule.runsEvery.interval);
+  cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
+  cy.get(LOOK_BACK_INTERVAL).clear().type(rule.lookBack.interval);
+  cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+};
+
 export const expectDefineFormToRepopulateAndContinue = (rule: CustomRule) => {
   cy.get(DEFINE_EDIT_BUTTON).click();
   cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
@@ -236,6 +247,10 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const waitForTheRuleToBeExecuted = (rule: CustomRule) => {
+  cy.wait(parseInt(rule.runsEvery.interval, 10) * 1000);
 };
 
 export const selectEqlRuleType = () => {

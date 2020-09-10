@@ -23,6 +23,12 @@ interface SeverityOverride {
   sourceValue: string;
 }
 
+interface Interval {
+  interval: string;
+  timeType: string;
+  type: string;
+}
+
 export interface CustomRule {
   customQuery: string;
   name: string;
@@ -36,6 +42,8 @@ export interface CustomRule {
   mitre: Mitre[];
   note: string;
   timelineId: string;
+  runsEvery: Interval;
+  lookBack: Interval;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -95,6 +103,18 @@ const severityOverride4: SeverityOverride = {
   sourceValue: '10/02/2020',
 };
 
+const runsEvery: Interval = {
+  interval: '1',
+  timeType: 'Seconds',
+  type: 's',
+};
+
+const lookBack: Interval = {
+  interval: '17520',
+  timeType: 'Hours',
+  type: 'h',
+};
+
 export const newRule: CustomRule = {
   customQuery: 'host.name:*',
   name: 'New Rule Test',
@@ -107,6 +127,8 @@ export const newRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
 };
 
 export const newOverrideRule: OverrideRule = {
@@ -125,6 +147,8 @@ export const newOverrideRule: OverrideRule = {
   riskOverride: 'destination.port',
   nameOverride: 'agent.type',
   timestampOverride: '@timestamp',
+  runsEvery,
+  lookBack,
 };
 
 export const newThresholdRule: ThresholdRule = {
@@ -141,6 +165,8 @@ export const newThresholdRule: ThresholdRule = {
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   thresholdField: 'host.name',
   threshold: '10',
+  runsEvery,
+  lookBack,
 };
 
 export const machineLearningRule: MachineLearningRule = {

@@ -72,4 +72,4 @@ export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__
 
 export const SCHEDULE_RUNS = 0;
 
-export const SCHEDULE_LOOPBACK = 1;
+export const SCHEDULE_LOOKBACK = 1;
