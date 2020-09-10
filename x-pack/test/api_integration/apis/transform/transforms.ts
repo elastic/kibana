@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('/transforms/{transformId}', function () {
-      it('should return a specific transform configuration', async () => {
+      it('should return a specific transform configuration for super-user', async () => {
         const { body } = await supertest
           .get('/api/transform/transforms/the-transform-1')
           .auth(
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         assertSingleTransformResponseBody(body);
       });
 
-      it('should return 200 for transform view-only user', async () => {
+      it('should return a specific transform configuration transform view-only user', async () => {
         const { body } = await supertest
           .get(`/api/transform/transforms/the-transform-1`)
           .auth(
@@ -147,6 +147,18 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         assertSingleTransformResponseBody(body);
+      });
+
+      it('should report 404 for a non-existing transform', async () => {
+        await supertest
+          .get('/api/transform/transforms/the-non-existing-transform')
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send()
+          .expect(404);
       });
     });
   });
