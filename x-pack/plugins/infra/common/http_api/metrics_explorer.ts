@@ -89,7 +89,10 @@ export const metricsExplorerRowRT = rt.intersection([
   rt.type({
     timestamp: rt.number,
   }),
-  rt.record(rt.string, rt.union([rt.string, rt.number, rt.null, rt.undefined])),
+  rt.record(
+    rt.string,
+    rt.union([rt.string, rt.number, rt.null, rt.undefined, rt.array(rt.object)])
+  ),
 ]);
 
 export const metricsExplorerSeriesRT = rt.intersection([

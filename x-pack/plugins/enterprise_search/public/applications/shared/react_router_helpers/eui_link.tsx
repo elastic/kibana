@@ -21,14 +21,22 @@ import { letBrowserHandleEvent } from './link_events';
 interface IEuiReactRouterProps {
   to: string;
   onClick?(): void;
+  // Used to navigate outside of the React Router plugin basename but still within Kibana,
+  // e.g. if we need to go from Enterprise Search to App Search
+  shouldNotCreateHref?: boolean;
 }
 
-export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, onClick, children }) => {
+export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  children,
+}) => {
   const history = useHistory();
   const { navigateToUrl } = useContext(KibanaContext) as IKibanaContext;
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = history.createHref({ pathname: to });
+  const href = shouldNotCreateHref ? to : history.createHref({ pathname: to });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -51,9 +59,10 @@ type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
 export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({
   to,
   onClick,
+  shouldNotCreateHref,
   ...rest
 }) => (
-  <EuiReactRouterHelper to={to} onClick={onClick}>
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiLink {...rest} />
   </EuiReactRouterHelper>
 );
@@ -61,9 +70,10 @@ export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({
 export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({
   to,
   onClick,
+  shouldNotCreateHref,
   ...rest
 }) => (
-  <EuiReactRouterHelper to={to} onClick={onClick}>
+  <EuiReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiButton {...rest} />
   </EuiReactRouterHelper>
 );
