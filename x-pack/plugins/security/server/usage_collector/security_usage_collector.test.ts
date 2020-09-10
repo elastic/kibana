@@ -80,7 +80,7 @@ describe('Security UsageCollector', () => {
     });
   });
 
-  it('does not report when security is disabled in Elasticsearch', async () => {
+  it('reports correctly when security is disabled in Elasticsearch', async () => {
     const config = createSecurityConfig(ConfigSchema.validate({}));
     const usageCollection = usageCollectionPluginMock.createSetupContract();
     const license = createSecurityLicense({ allowRbac: false, isLicenseAvailable: true });
