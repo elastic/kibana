@@ -298,10 +298,15 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
 
         expect(response.status).to.be(200);
-        const anomalies = response.body.elements.filter(
+        const dataWithAnomalies = response.body.elements.filter(
           (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
         );
-        expect(anomalies).to.not.empty();
+        expect(dataWithAnomalies).to.not.empty();
+        dataWithAnomalies.forEach(({ data }: any) => {
+          expect(
+            Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
+          ).to.not.empty();
+        });
       });
     });
   });
