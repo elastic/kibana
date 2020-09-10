@@ -16,7 +16,7 @@ export function VisitorBreakdown() {
 
   const { start, end } = urlParams;
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -47,14 +47,20 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart options={data?.browsers} />
+          <VisitorBreakdownChart
+            options={data?.browsers}
+            loading={status !== 'success'}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart options={data?.os} />
+          <VisitorBreakdownChart
+            options={data?.os}
+            loading={status !== 'success'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

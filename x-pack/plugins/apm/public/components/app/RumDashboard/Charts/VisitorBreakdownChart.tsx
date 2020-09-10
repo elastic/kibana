@@ -31,9 +31,10 @@ interface Props {
     count: number;
     name: string;
   }>;
+  loading: boolean;
 }
 
-export function VisitorBreakdownChart({ options }: Props) {
+export function VisitorBreakdownChart({ loading, options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const euiChartTheme = darkMode
@@ -41,7 +42,7 @@ export function VisitorBreakdownChart({ options }: Props) {
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper loading={false} height="230px" maxWidth="430px">
+    <ChartWrapper loading={loading} height="230px" maxWidth="430px">
       <StyleChart>
         <Chart>
           <Settings
