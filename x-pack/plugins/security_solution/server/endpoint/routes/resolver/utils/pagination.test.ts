@@ -5,14 +5,18 @@
  */
 import { PaginationBuilder } from './pagination';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { EndpointEvent } from '../../../../../common/endpoint/types';
+import { SafeEndpointEvent } from '../../../../../common/endpoint/types';
+import {
+  eventIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../../common/endpoint/models/event';
 
 describe('Pagination', () => {
   const generator = new EndpointDocGenerator();
 
-  const getSearchAfterInfo = (events: EndpointEvent[]) => {
+  const getSearchAfterInfo = (events: SafeEndpointEvent[]) => {
     const lastEvent = events[events.length - 1];
-    return [lastEvent['@timestamp'], lastEvent.event.id];
+    return [timestampSafeVersion(lastEvent), eventIDSafeVersion(lastEvent)];
   };
   describe('cursor', () => {
     const root = generator.generateEvent();
