@@ -200,7 +200,7 @@ export function OverviewPage({ routeParams }: Props) {
 
             {!!newsFeed?.items?.length && (
               <EuiFlexItem grow={false}>
-                <NewsFeed items={newsFeed.items.slice(0, 3)} />
+                <NewsFeed items={newsFeed.items.slice(0, 5)} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
