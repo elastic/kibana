@@ -1,7 +1,9 @@
 package builds
 
+import builds.default.DefaultBuild
 import builds.default.DefaultCiGroups
 import builds.default.DefaultVisualRegression
+import builds.oss.OssBuild
 import builds.oss.OssCiGroups
 import builds.oss.OssVisualRegression
 import builds.test.AllTests
@@ -15,6 +17,8 @@ object EssentialCi : BuildType({
 
   dependsOn(
     AllTests,
+    OssBuild,
+    DefaultBuild,
     OssVisualRegression,
     DefaultVisualRegression,
     Lint,
