@@ -43,6 +43,15 @@ interface ResolverSubmenuOption {
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
+const StyledActionButton = styled(EuiButton)`
+  &.euiButton--small {
+    height: fit-content;
+    line-height: 1;
+    padding: 0.25em;
+    font-size: 0.85rem;
+  }
+`;
+
 /**
  * This will be the "host button" that displays the "total number of related events" and opens
  * the sumbmenu (with counts by category) when clicked.
@@ -66,12 +75,11 @@ const SubButton = React.memo(
     const hasIcon = hasMenu ?? false;
     const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
     return (
-      <EuiButton
+      <StyledActionButton
         onClick={action}
         iconType={hasIcon ? iconType : 'none'}
         fill={false}
         color={'primary'}
-        style={{ height: 'fit-content', lineHeight: 1, padding: '.25em', fontSize: '.85rem' }}
         size="s"
         iconSide="right"
         tabIndex={-1}
@@ -80,7 +88,7 @@ const SubButton = React.memo(
         id={nodeID}
       >
         {count ? <EuiI18nNumber value={count} /> : ''} {title}
-      </EuiButton>
+      </StyledActionButton>
     );
   }
 );

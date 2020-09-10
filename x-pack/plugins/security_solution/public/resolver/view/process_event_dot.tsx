@@ -62,6 +62,11 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   width: fit-content;
 `;
 
+const StyledOuterGroup = styled.g`
+  fill: none;
+  pointer-events: visiblePainted;
+`;
+
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
@@ -343,7 +348,7 @@ const UnstyledProcessEventDot = React.memo(
             pointerEvents: 'none',
           }}
         >
-          <g fill="none" style={{ pointerEvents: 'visiblePainted' }}>
+          <StyledOuterGroup>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -375,7 +380,7 @@ const UnstyledProcessEventDot = React.memo(
                 ref={animationTarget}
               />
             </use>
-          </g>
+          </StyledOuterGroup>
         </svg>
         <StyledActionsContainer
           color={colorMap.full}
