@@ -50,9 +50,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   );
 
   const results = await Promise.all(
-    criteria.map((c) =>
-      evaluateCondition(c, nodeType, source.configuration, services.callCluster, filterQuery)
-    )
+    criteria.map((c) => evaluateCondition(c, nodeType, source, services.callCluster, filterQuery))
   );
 
   const inventoryItems = Object.keys(first(results)!);
