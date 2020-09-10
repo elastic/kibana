@@ -111,6 +111,7 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",

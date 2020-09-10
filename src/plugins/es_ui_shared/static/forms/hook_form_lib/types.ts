@@ -108,15 +108,18 @@ export interface FieldHook<T = unknown> {
     errorCode?: string;
   }) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  setValue: (value: T) => T;
+  setValue: (value: T | ((prevValue: T) => T)) => void;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   validate: (validateData?: {
     formData?: any;
-    value?: unknown;
+    value?: T;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
+  // Flag to indicate if the field value will be included in the form data outputted
+  // when calling form.getFormData();
+  __isIncludedInOutput: boolean;
   __serializeValue: (rawValue?: unknown) => unknown;
 }
 
@@ -127,7 +130,7 @@ export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
   readonly helpText?: string | ReactNode;
   readonly type?: HTMLInputElement['type'];
   readonly defaultValue?: ValueType;
-  readonly validations?: Array<ValidationConfig<T>>;
+  readonly validations?: Array<ValidationConfig<T, string, ValueType>>;
   readonly formatters?: FormatterFunc[];
   readonly deserializer?: SerializerFunc;
   readonly serializer?: SerializerFunc;
@@ -163,8 +166,8 @@ export interface ValidationFuncArg<T extends FormData, V = unknown> {
   errors: readonly ValidationError[];
 }
 
-export type ValidationFunc<T extends FormData = any, E = string> = (
-  data: ValidationFuncArg<T>
+export type ValidationFunc<T extends FormData = any, E = string, V = unknown> = (
+  data: ValidationFuncArg<T, V>
 ) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
 export interface FieldValidateResponse {
@@ -184,8 +187,8 @@ type FormatterFunc = (value: any, formData: FormData) => unknown;
 // string | number | boolean | string[] ...
 type FieldValue = unknown;
 
-export interface ValidationConfig<T extends FormData = any> {
-  validator: ValidationFunc<T>;
+export interface ValidationConfig<T extends FormData = any, E = string, V = unknown> {
+  validator: ValidationFunc<T, E, V>;
   type?: string;
   /**
    * By default all validation are blockers, which means that if they fail, the field is invalid.
