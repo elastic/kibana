@@ -4,7 +4,7 @@
 
 ## SavedObjectsBulkUpdateObject.namespace property
 
-Optional namespace string to use for this document. If this is defined, it will supersede the namespace ID that is in [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md)<!-- -->.
+Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md)<!-- -->.
 
 Note: the default namespace's string representation is `'default'`<!-- -->, and its ID representation is `undefined`<!-- -->.
 
