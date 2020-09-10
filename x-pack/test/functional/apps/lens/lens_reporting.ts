@@ -14,13 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const security = getService('security');
 
+  // https://github.com/elastic/kibana/issues/77246 ( with the dashboard_read permissions- hitting a telemetry 403)
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
       await security.testUser.setRoles([
-        'global_visualize_read',
         'test_logstash_reader',
-        'global_dashboard_all',
+        'global_dashboard_read',
         'reporting_user',
       ]);
     });
