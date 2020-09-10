@@ -30,15 +30,13 @@ export const useStopTransforms = () => {
     const results = await api.stopTransforms(transformsInfo);
 
     if (!isStopTransformsResponseSchema(results)) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.transform.transformList.startTransformCommonErrorMessage', {
-          defaultMessage: 'An error occurred starting the transforms.',
-        })
-      );
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-          defaultMessage: 'An error occurred starting the transform(s).',
-        }),
+        title: i18n.translate(
+          'xpack.transform.transformList.stopTransformResponseSchemaErrorMessage',
+          {
+            defaultMessage: 'An error occurred called the stop transforms request.',
+          }
+        ),
         text: toMountPoint(
           <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
         ),

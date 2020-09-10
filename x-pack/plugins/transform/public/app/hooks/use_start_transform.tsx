@@ -30,15 +30,13 @@ export const useStartTransforms = () => {
     const results = await api.startTransforms(transformsInfo);
 
     if (!isStartTransformsResponseSchema(results)) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.transform.transformList.startTransformCommonErrorMessage', {
-          defaultMessage: 'An error occurred starting the transforms.',
-        })
-      );
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-          defaultMessage: 'An error occurred starting the transform(s).',
-        }),
+        title: i18n.translate(
+          'xpack.transform.stepCreateForm.startTransformResponseSchemaErrorMessage',
+          {
+            defaultMessage: 'An error occurred calling the start transforms request.',
+          }
+        ),
         text: toMountPoint(
           <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
         ),
