@@ -60,7 +60,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
-To follow along, add the <<get-data-in, sample web logs data set>>.
+To follow along, add the <<gs-get-data-into-kibana, sample web logs data set>>.
 
 In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
 to roll up once a day into the index `rollup_logstash`. You’ll bucket the
@@ -145,7 +145,7 @@ is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_log
 matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
 pattern for raw data.
 
-. Go to *Visualize* and create a vertical bar chart.
+. Go to *Dashboard* and create a vertical bar chart.
  
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.

@@ -32,7 +32,13 @@ export default function ({ getService }: FtrProviderContext) {
     resolve(__dirname, '../../pki_api_integration/fixtures/first_client.p12')
   );
 
-  async function checkSessionCookie(sessionCookie: Cookie, username: string, providerName: string) {
+  async function checkSessionCookie(
+    sessionCookie: Cookie,
+    username: string,
+    providerName: string,
+    authenticationRealm: { name: string; type: string } | null,
+    authenticationType: string
+  ) {
     expect(sessionCookie.key).to.be('sid');
     expect(sessionCookie.value).to.not.be.empty();
     expect(sessionCookie.path).to.be('/');
@@ -56,14 +62,18 @@ export default function ({ getService }: FtrProviderContext) {
       'authentication_realm',
       'lookup_realm',
       'authentication_provider',
+      'authentication_type',
     ]);
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.be(providerName);
+    if (authenticationRealm) {
+      expect(apiResponse.body.authentication_realm).to.eql(authenticationRealm);
+    }
+    expect(apiResponse.body.authentication_type).to.be(authenticationType);
   }
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('Login Selector', () => {
+  describe('Login Selector', () => {
     it('should redirect user to a login selector', async () => {
       const response = await supertest
         .get('/abc/xyz/handshake?one=two three')
@@ -121,7 +131,16 @@ export default function ({ getService }: FtrProviderContext) {
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
 
-          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+          await checkSessionCookie(
+            request.cookie(cookies[0])!,
+            'a@b.c',
+            providerName,
+            {
+              name: providerName,
+              type: 'saml',
+            },
+            'token'
+          );
         }
       });
 
@@ -148,7 +167,16 @@ export default function ({ getService }: FtrProviderContext) {
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
 
-          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+          await checkSessionCookie(
+            request.cookie(cookies[0])!,
+            'a@b.c',
+            providerName,
+            {
+              name: providerName,
+              type: 'saml',
+            },
+            'token'
+          );
         }
       });
 
@@ -172,7 +200,16 @@ export default function ({ getService }: FtrProviderContext) {
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
 
-          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+          await checkSessionCookie(
+            request.cookie(cookies[0])!,
+            'a@b.c',
+            providerName,
+            {
+              name: providerName,
+              type: 'saml',
+            },
+            'token'
+          );
         }
       });
 
@@ -193,7 +230,9 @@ export default function ({ getService }: FtrProviderContext) {
           const basicSessionCookie = request.cookie(
             basicAuthenticationResponse.headers['set-cookie'][0]
           )!;
-          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1');
+          // Skip auth provider check since this comes from the reserved realm,
+          // which is not available when running on ESS
+          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1', null, 'realm');
 
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -213,7 +252,16 @@ export default function ({ getService }: FtrProviderContext) {
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
 
-          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+          await checkSessionCookie(
+            request.cookie(cookies[0])!,
+            'a@b.c',
+            providerName,
+            {
+              name: providerName,
+              type: 'saml',
+            },
+            'token'
+          );
         }
       });
 
@@ -230,7 +278,16 @@ export default function ({ getService }: FtrProviderContext) {
         const saml1SessionCookie = request.cookie(
           saml1AuthenticationResponse.headers['set-cookie'][0]
         )!;
-        await checkSessionCookie(saml1SessionCookie, 'a@b.c', 'saml1');
+        await checkSessionCookie(
+          saml1SessionCookie,
+          'a@b.c',
+          'saml1',
+          {
+            name: 'saml1',
+            type: 'saml',
+          },
+          'token'
+        );
 
         // And now try to login with `saml2`.
         const saml2AuthenticationResponse = await supertest
@@ -249,7 +306,16 @@ export default function ({ getService }: FtrProviderContext) {
         const saml2SessionCookie = request.cookie(
           saml2AuthenticationResponse.headers['set-cookie'][0]
         )!;
-        await checkSessionCookie(saml2SessionCookie, 'a@b.c', 'saml2');
+        await checkSessionCookie(
+          saml2SessionCookie,
+          'a@b.c',
+          'saml2',
+          {
+            name: 'saml2',
+            type: 'saml',
+          },
+          'token'
+        );
       });
 
       it('should redirect to URL from relay state in case of IdP initiated login even if session with other SAML provider exists', async () => {
@@ -265,7 +331,16 @@ export default function ({ getService }: FtrProviderContext) {
         const saml1SessionCookie = request.cookie(
           saml1AuthenticationResponse.headers['set-cookie'][0]
         )!;
-        await checkSessionCookie(saml1SessionCookie, 'a@b.c', 'saml1');
+        await checkSessionCookie(
+          saml1SessionCookie,
+          'a@b.c',
+          'saml1',
+          {
+            name: 'saml1',
+            type: 'saml',
+          },
+          'token'
+        );
 
         // And now try to login with `saml2`.
         const saml2AuthenticationResponse = await supertest
@@ -286,7 +361,16 @@ export default function ({ getService }: FtrProviderContext) {
         const saml2SessionCookie = request.cookie(
           saml2AuthenticationResponse.headers['set-cookie'][0]
         )!;
-        await checkSessionCookie(saml2SessionCookie, 'a@b.c', 'saml2');
+        await checkSessionCookie(
+          saml2SessionCookie,
+          'a@b.c',
+          'saml2',
+          {
+            name: 'saml2',
+            type: 'saml',
+          },
+          'token'
+        );
       });
 
       // Ideally we should be able to abandon intermediate session and let user log in, but for the
@@ -367,7 +451,16 @@ export default function ({ getService }: FtrProviderContext) {
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
 
-          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+          await checkSessionCookie(
+            request.cookie(cookies[0])!,
+            'a@b.c',
+            providerName,
+            {
+              name: providerName,
+              type: 'saml',
+            },
+            'token'
+          );
         }
       });
 
@@ -429,7 +522,16 @@ export default function ({ getService }: FtrProviderContext) {
         const saml2SessionCookie = request.cookie(
           saml2AuthenticationResponse.headers['set-cookie'][0]
         )!;
-        await checkSessionCookie(saml2SessionCookie, 'a@b.c', 'saml2');
+        await checkSessionCookie(
+          saml2SessionCookie,
+          'a@b.c',
+          'saml2',
+          {
+            name: 'saml2',
+            type: 'saml',
+          },
+          'token'
+        );
       });
     });
 
@@ -472,7 +574,12 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1'
+          'kerberos1',
+          {
+            name: 'kerb1',
+            type: 'kerberos',
+          },
+          'token'
         );
       });
 
@@ -516,7 +623,12 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1'
+          'kerberos1',
+          {
+            name: 'kerb1',
+            type: 'kerberos',
+          },
+          'token'
         );
       });
     });
@@ -550,7 +662,16 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = authenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!, 'user2', 'oidc1');
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'user2',
+          'oidc1',
+          {
+            name: 'oidc1',
+            type: 'oidc',
+          },
+          'token'
+        );
       });
 
       it('should be able to log in via SP initiated login', async () => {
@@ -601,7 +722,16 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = authenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!, 'user1', 'oidc1');
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'user1',
+          'oidc1',
+          {
+            name: 'oidc1',
+            type: 'oidc',
+          },
+          'token'
+        );
       });
     });
 
@@ -634,7 +764,16 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = authenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!, 'first_client', 'pki1');
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'first_client',
+          'pki1',
+          {
+            name: 'pki1',
+            type: 'pki',
+          },
+          'token'
+        );
       });
     });
   });

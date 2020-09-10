@@ -20,6 +20,7 @@
     "DataVisualizer",
     "GetOverallStats",
     "GetStatsForFields",
+    "GetHistogramsForFields",
 
     "AnomalyDetectors",
     "CreateAnomalyDetectors",

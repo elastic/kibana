@@ -11,7 +11,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  ActionExecutionContext,
+  TriggerContextMapping,
+} from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
   TimeRange,
@@ -97,6 +102,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+  }
+
+  supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [APPLY_FILTER_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -226,6 +235,8 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
         <I18nContext>
           <MapContainer
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            getFilterActions={this.getFilterActions}
+            getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
           />
         </I18nContext>
@@ -243,11 +254,34 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
-  addFilters = (filters: Filter[]) => {
-    getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
-      embeddable: this,
+  addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+    const executeContext = {
+      ...this.getActionContext(),
       filters,
+    };
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply filter, could not locate action');
+    }
+    action.execute(executeContext);
+  };
+
+  getFilterActions = async () => {
+    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      filters: [],
     });
+  };
+
+  getActionContext = () => {
+    const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
+    return {
+      embeddable: this,
+      trigger,
+    } as ActionExecutionContext;
   };
 
   destroy() {

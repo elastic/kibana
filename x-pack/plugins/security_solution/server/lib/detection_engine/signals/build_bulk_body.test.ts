@@ -39,6 +39,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -47,19 +48,25 @@ describe('buildBulkBody', () => {
       },
       signal: {
         parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
-          depth: 1,
+          depth: 0,
         },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -101,6 +108,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -132,6 +140,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -149,19 +158,25 @@ describe('buildBulkBody', () => {
           module: 'system',
         },
         parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
-          depth: 1,
+          depth: 0,
         },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -203,6 +218,7 @@ describe('buildBulkBody', () => {
           threat: [],
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -233,6 +249,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -249,19 +266,25 @@ describe('buildBulkBody', () => {
           module: 'system',
         },
         parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
-          depth: 1,
+          depth: 0,
         },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -303,6 +326,7 @@ describe('buildBulkBody', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
@@ -331,6 +355,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -342,19 +367,25 @@ describe('buildBulkBody', () => {
           kind: 'event',
         },
         parent: {
-          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           id: sampleIdGuid,
           type: 'event',
           index: 'myFakeSignalIndex',
-          depth: 1,
+          depth: 0,
         },
-        ancestors: [
+        parents: [
           {
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
-            depth: 1,
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
           },
         ],
         original_time: '2020-04-20T21:27:45+0000',
@@ -396,6 +427,7 @@ describe('buildBulkBody', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
+        depth: 1,
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);

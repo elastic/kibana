@@ -19,10 +19,10 @@ import {
   DynamicActionManager,
   SerializedEvent,
 } from '../../../dynamic_actions';
-import { ExtraActionFactoryContext } from '../types';
 import { useWelcomeMessage } from '../../hooks/use_welcome_message';
 import { useCompatibleActionFactoriesForCurrentContext } from '../../hooks/use_compatible_action_factories_for_current_context';
 import { useDrilldownsStateManager } from '../../hooks/use_drilldown_state_manager';
+import { ActionFactoryPlaceContext } from '../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -39,7 +39,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
    */
-  extraContext?: ExtraActionFactoryContext<ActionFactoryContext>;
+  placeContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 }
 
 /**
@@ -73,8 +73,8 @@ export function createFlyoutManageDrilldowns({
     const isCreateOnly = props.viewMode === 'create';
 
     const factoryContext: BaseActionFactoryContext = useMemo(
-      () => ({ ...props.extraContext, triggers: props.triggers }),
-      [props.extraContext, props.triggers]
+      () => ({ ...props.placeContext, triggers: props.triggers }),
+      [props.placeContext, props.triggers]
     );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -129,7 +129,7 @@ export function createFlyoutManageDrilldowns({
     function mapToDrilldownToDrilldownListItem(drilldown: SerializedEvent): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       const drilldownFactoryContext: BaseActionFactoryContext = {
-        ...props.extraContext,
+        ...props.placeContext,
         triggers: drilldown.triggers as TriggerId[],
       };
       return {
@@ -140,7 +140,7 @@ export function createFlyoutManageDrilldowns({
         icon: actionFactory?.getIconType(drilldownFactoryContext),
         error: !actionFactory
           ? invalidDrilldownType(drilldown.action.factoryId) // this shouldn't happen for the end user, but useful during development
-          : !actionFactory.isCompatibleLicence()
+          : !actionFactory.isCompatibleLicense()
           ? insufficientLicenseLevel
           : undefined,
         triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as TriggerId)),
@@ -196,7 +196,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            extraActionFactoryContext={props.extraContext}
+            actionFactoryPlaceContext={props.placeContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
             supportedTriggers={props.triggers}
             getTrigger={getTrigger}

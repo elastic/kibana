@@ -13,11 +13,11 @@ import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/ma
 
 import {
   ArtifactConstants,
-  Manifest,
   buildArtifact,
-  getFullEndpointExceptionList,
-  ManifestDiff,
   getArtifactId,
+  getFullEndpointExceptionList,
+  Manifest,
+  ManifestDiff,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -25,6 +25,8 @@ import {
 } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -87,9 +89,43 @@ export class ManifestManager {
       const exceptionList = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
-        artifactSchemaVersion ?? 'v1'
+        artifactSchemaVersion ?? 'v1',
+        ENDPOINT_LIST_ID
       );
-      const artifact = await buildArtifact(exceptionList, os, artifactSchemaVersion ?? 'v1');
+      const artifact = await buildArtifact(
+        exceptionList,
+        os,
+        artifactSchemaVersion ?? 'v1',
+        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+      );
+      artifacts.push(artifact);
+    }
+    return artifacts;
+  }
+
+  /**
+   * Builds an array of artifacts (one per supported OS) based on the current state of the
+   * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
+   * @param artifactSchemaVersion
+   */
+  protected async buildTrustedAppsArtifacts(
+    artifactSchemaVersion?: string
+  ): Promise<InternalArtifactCompleteSchema[]> {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
+      const trustedApps = await getFullEndpointExceptionList(
+        this.exceptionListClient,
+        os,
+        artifactSchemaVersion ?? 'v1',
+        ENDPOINT_TRUSTED_APPS_LIST_ID
+      );
+      const artifact = await buildArtifact(
+        trustedApps,
+        os,
+        'v1',
+        ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
+      );
       artifacts.push(artifact);
     }
     return artifacts;
@@ -205,7 +241,9 @@ export class ManifestManager {
    */
   public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
     // Build new exception list artifacts
-    const artifacts = await this.buildExceptionListArtifacts();
+    const artifacts = (
+      await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
+    ).flat();
 
     // Build new manifest
     const manifest = Manifest.fromArtifacts(

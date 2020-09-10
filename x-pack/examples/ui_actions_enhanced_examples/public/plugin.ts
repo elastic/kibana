@@ -11,7 +11,6 @@ import {
   AdvancedUiActionsStart,
 } from '../../../../x-pack/plugins/ui_actions_enhanced/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
-import { DashboardToUrlDrilldown } from './drilldowns/dashboard_to_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { SampleMlToUrlDrilldown } from './drilldowns/ml_to_url_drilldown';
 import { SampleMlToDashboardDrilldown } from './drilldowns/ml_to_dashboard_drilldown';
@@ -48,7 +47,6 @@ export class UiActionsEnhancedExamplesPlugin
 
     uiActions.registerDrilldown(new DashboardHelloWorldDrilldown());
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
-    uiActions.registerDrilldown(new DashboardToUrlDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
     uiActions.registerDrilldown(new SampleMlToUrlDrilldown());
     uiActions.registerDrilldown(new SampleMlToDashboardDrilldown({ start }));

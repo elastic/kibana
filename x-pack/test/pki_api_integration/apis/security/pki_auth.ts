@@ -41,8 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('PKI authentication', () => {
+  describe('PKI authentication', () => {
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/first_client_pki')
@@ -94,8 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -125,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
         authentication_provider: 'pki',
+        authentication_type: 'token',
       });
 
       // Cookie should be accepted.
@@ -169,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: 'pki',
+          authentication_type: 'token',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);

@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('OpenID Connect authentication', () => {
+  describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
       await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
@@ -44,8 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.be('realm');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     describe('initiating handshake', () => {
@@ -230,9 +230,13 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
 
@@ -280,9 +284,13 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
 

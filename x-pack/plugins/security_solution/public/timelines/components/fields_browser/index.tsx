@@ -36,7 +36,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   columnHeaders,
   browserFields,
   height,
-  isEventViewer = false,
   onFieldSelected,
   onUpdateColumns,
   timelineId,
@@ -164,7 +163,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
           }
           height={height}
-          isEventViewer={isEventViewer}
           isSearching={isSearching}
           onCategorySelected={updateSelectedCategoryId}
           onFieldSelected={onFieldSelected}
