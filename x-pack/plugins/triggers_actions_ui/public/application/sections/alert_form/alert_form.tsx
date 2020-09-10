@@ -299,24 +299,32 @@ export const AlertForm = ({
   );
 
   // Incorrect
-  const alertTypeOptions = alertTypeRegistryList.map((item) => ({ label: item.name, id: item.id }));
+  const alertTypeOptions = alertTypeRegistryList.map((item) => ({
+    label: typeof item.name === 'string' ? item.name : item.id,
+    id: item.id,
+  }));
 
   // Incorrect
   const alertTypeOnChange = (alertTypeSelectedOption) => {
-    setAlertProperty('alertTypeId', alertTypeSelectedOption.id);
-    setAlertTypeModel(alertTypeSelectedOption);
+    setAlertProperty('alertTypeId', alertTypeSelectedOption[0].id);
+    setAlertTypeModel(
+      alertTypeRegistry
+        .list()
+        .filter(
+          (alertTypeRegistryItem: AlertTypeModel) =>
+            alertTypeRegistryItem.id === alertTypeSelectedOption[0].id
+        )[0]
+    );
     setAlertProperty('params', {});
-    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption.id)) {
+    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption[0].id)) {
       setDefaultActionGroupId(
-        alertTypesIndex.get(alertTypeSelectedOption.id)!.defaultActionGroupId
+        alertTypesIndex.get(alertTypeSelectedOption[0].id)!.defaultActionGroupId
       );
     }
   };
 
   // Incorrect
   const alertTypeRenderOption = (option) => {
-    const { name } = option;
-    option.label = name;
     return (
       <EuiText color="default" size="m">
         {option.label}
@@ -492,7 +500,7 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
-      ) : alertTypeNodes.length ? (
+      ) : alertTypeOptions.length ? (
         <Fragment>
           <EuiHorizontalRule />
 
@@ -512,7 +520,6 @@ export const AlertForm = ({
             I think I need to have the selection saved to state as well?
             */}
           <EuiComboBox
-            noSuggestions
             fullWidth
             data-test-subj="alertTypesComboBox"
             singleSelection={{ asPlainText: true }}
