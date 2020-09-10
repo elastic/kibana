@@ -7,37 +7,18 @@
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { ListNodesRouteResponse, DataTierAllocationType } from '../../../../../../common/types';
-
-import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
-
 interface Props {
   title: string;
   body: string;
-  phase: Parameters<typeof isPhaseDefaultDataAllocationCompatible>[0];
-  nodesByRoles: ListNodesRouteResponse['nodesByRoles'];
-  currentAllocationType: DataTierAllocationType;
 }
 
-export const DefaultAllocationWarning: FunctionComponent<Props> = ({
-  title,
-  phase,
-  body,
-  nodesByRoles,
-  currentAllocationType,
-}) => {
-  const isCompatible = isPhaseDefaultDataAllocationCompatible(phase, nodesByRoles);
-  return currentAllocationType === 'default' && isCompatible ? (
+export const DefaultAllocationWarning: FunctionComponent<Props> = ({ title, body }) => {
+  return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
-        data-test-subj="defaultAllocationWarning"
-        title={title}
-        iconType="alert"
-        color="warning"
-      >
+      <EuiCallOut data-test-subj="defaultAllocationWarning" title={title} color="warning">
         {body}
       </EuiCallOut>
     </>
-  ) : null;
+  );
 };

@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 
 import { DataTierAllocationType, PhaseWithAllocationAction } from '../../../../../../common/types';
@@ -14,31 +13,10 @@ import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
 import './data_tier_allocation.scss';
-import { LearnMoreLink } from '../learn_more_link';
 
 type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
-const learnMoreLink = (
-  <LearnMoreLink
-    text={
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
-        defaultMessage="Learn about shard allocation"
-      />
-    }
-    docPath="modules-cluster.html#cluster-shard-allocation-settings"
-  />
-);
-
-const i18nTexts = {
-  useDataTierAllocation: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useDataTierSwitchLabel',
-    { defaultMessage: 'Enable data tier allocation' }
-  ),
-  useCustomDataTierAllocation: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.useCustomSwitchLabel',
-    { defaultMessage: 'Custom attribute-based allocation' }
-  ),
+export const i18nTexts = {
   allocationFieldLabel: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.allocationFieldLabel',
     { defaultMessage: 'Data tier allocation' }
@@ -47,7 +25,7 @@ const i18nTexts = {
     auto: {
       inputDisplay: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.input',
-        { defaultMessage: 'Auto (recommended)' }
+        { defaultMessage: 'Node role (recommended)' }
       ),
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.helpText',
@@ -62,13 +40,6 @@ const i18nTexts = {
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.helpText',
         { defaultMessage: 'Node attribute-based allocation.' }
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
-          defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
-          values={{ learnMoreLink }}
-        />
       ),
     },
     none: {
@@ -87,7 +58,7 @@ const i18nTexts = {
 export const DataTierAllocation = (
   props: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>
 ) => {
-  const { phaseData, setPhaseData, phase } = props;
+  const { phaseData, setPhaseData, phase, hasNodeAttributes } = props;
 
   return (
     <div data-test-subj={`${phase}-dataTierAllocationControls`}>
@@ -144,15 +115,10 @@ export const DataTierAllocation = (
           }
         />
       </EuiFormRow>
-      {phaseData.dataTierAllocationType === 'custom' && (
+      {phaseData.dataTierAllocationType === 'custom' && hasNodeAttributes && (
         <>
           <EuiSpacer size="s" />
           <div className="indexLifecycleManagement__phase__dataTierAllocation__controlSection">
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>{i18nTexts.allocationOptions.custom.description}</p>
-            </EuiText>
-            <EuiSpacer size="s" />
             <NodeAllocation {...props} />
           </div>
         </>

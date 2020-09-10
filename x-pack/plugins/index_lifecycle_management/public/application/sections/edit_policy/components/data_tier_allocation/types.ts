@@ -18,4 +18,5 @@ export interface SharedProps<T extends PhaseWithAllocationAction> {
   setPhaseData: (dataKey: keyof T, value: string) => void;
   isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
+  hasNodeAttributes: boolean;
 }

@@ -13,9 +13,11 @@ import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../.
 import {
   DataTierAllocation,
   DefaultAllocationWarning,
+  NoNodeAttributesWarning,
   NodesDataProvider,
 } from '../../components/data_tier_allocation';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
 interface Props {
   description: React.ReactNode;
@@ -28,6 +30,9 @@ interface Props {
   defaultAllocationWarningBody: string;
 }
 
+/**
+ * Top-level layout control for the data tier allocation field.
+ */
 export const DataTierAllocationField: FunctionComponent<Props> = ({
   description,
   phaseData,
@@ -40,40 +45,49 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
 }) => {
   return (
     <NodesDataProvider>
-      {(nodesData) => (
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              {i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationTitle',
-                { defaultMessage: 'Data tier allocation' }
-              )}
-            </h3>
-          }
-          description={description}
-          fullWidth
-        >
-          <EuiFormRow>
-            <>
-              <DataTierAllocation
-                phase={phase}
-                errors={errors}
-                setPhaseData={setPhaseData}
-                phaseData={phaseData}
-                isShowingErrors={isShowingErrors}
-                nodes={nodesData.nodesByAttributes}
-              />
-              <DefaultAllocationWarning
-                phase={phase}
-                title={defaultAllocationWarningTitle}
-                body={defaultAllocationWarningBody}
-                nodesByRoles={nodesData.nodesByRoles}
-                currentAllocationType={phaseData.dataTierAllocationType}
-              />
-            </>
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
+      {(nodesData) => {
+        const isCompatible = isPhaseDefaultDataAllocationCompatible(phase, nodesData.nodesByRoles);
+        const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
+
+        return (
+          <EuiDescribedFormGroup
+            title={
+              <h3>
+                {i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationTitle',
+                  { defaultMessage: 'Data tier allocation' }
+                )}
+              </h3>
+            }
+            description={description}
+            fullWidth
+          >
+            <EuiFormRow>
+              <>
+                <DataTierAllocation
+                  hasNodeAttributes={hasNodeAttrs}
+                  phase={phase}
+                  errors={errors}
+                  setPhaseData={setPhaseData}
+                  phaseData={phaseData}
+                  isShowingErrors={isShowingErrors}
+                  nodes={nodesData.nodesByAttributes}
+                />
+                {phaseData.dataTierAllocationType === 'default' && !isCompatible && (
+                  <DefaultAllocationWarning
+                    title={defaultAllocationWarningTitle}
+                    body={defaultAllocationWarningBody}
+                  />
+                )}
+
+                {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
+                  <NoNodeAttributesWarning />
+                )}
+              </>
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        );
+      }}
     </NodesDataProvider>
   );
 };

@@ -9,3 +9,4 @@ export { NodeAllocation } from './node_allocation';
 export { NodeAttrsDetails } from './node_attrs_details';
 export { DataTierAllocation } from './data_tier_allocation';
 export { DefaultAllocationWarning } from './default_allocation_warning';
+export { NoNodeAttributesWarning } from './no_node_attributes_warning';

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { PhaseWithAllocationAction } from '../../../../../../common/types';
 import { propertyof } from '../../../../services/policies/policy_validation';
@@ -16,6 +16,19 @@ import { ErrableFormRow } from '../form_errors';
 
 import { NodeAttrsDetails } from './node_attrs_details';
 import { SharedProps } from './types';
+import { LearnMoreLink } from '../learn_more_link';
+
+const learnMoreLink = (
+  <LearnMoreLink
+    text={
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
+        defaultMessage="Learn about shard allocation"
+      />
+    }
+    docPath="modules-cluster.html#cluster-shard-allocation-settings"
+  />
+);
 
 export const NodeAllocation = ({
   phase,
@@ -44,36 +57,22 @@ export const NodeAllocation = ({
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
 
-  if (!nodeOptions.length) {
-    return (
-      // Wrap in form row so that margins are consistent with when we can render
-      // form controls.
-      <EuiFormRow>
-        <EuiCallOut
-          data-test-subj="noNodeAttributesWarning"
-          style={{ maxWidth: 400 }}
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel"
-              defaultMessage="No node attributes configured in elasticsearch.yml"
-            />
-          }
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
-            defaultMessage="You must define custom node attributes to control shard allocation."
-          />
-        </EuiCallOut>
-      </EuiFormRow>
-    );
-  }
-
   // check that this string is a valid property
   const nodeAttrsProperty = propertyof<PhaseWithAllocationAction>('selectedNodeAttrs');
 
   return (
-    <Fragment>
+    <>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
+            defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
+            values={{ learnMoreLink }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
       <ErrableFormRow
         id={`${phase}-${nodeAttrsProperty}`}
         label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
@@ -114,6 +113,6 @@ export const NodeAllocation = ({
           close={() => setSelectedNodeAttrsForDetails(null)}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 };
