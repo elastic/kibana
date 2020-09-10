@@ -426,21 +426,18 @@ export const EndpointList = () => {
                       data-test-subj="agentPolicyLink"
                       navigateAppId="ingestManager"
                       navigateOptions={{
-                        path: `#/policies/${
-                          agentPolicies[item.metadata.Endpoint.policy.applied.id]
-                        }`,
+                        path: `#${pagePathGetters.policy_details({
+                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                        })}`,
                       }}
-                      href={`${services?.application?.getUrlForApp('ingestManager')}#/policies/${
-                        agentPolicies[item.metadata.Endpoint.policy.applied.id]
-                      }`}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.policy_details({
+                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                      })}`}
                       disabled={
                         agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
                       }
-                      // href={`${services?.application?.getUrlForApp(
-                      //  'ingestManager'
-                      // )}#${pagePathGetters.policy_details({
-                      // policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                      // })}`}
                     >
                       <FormattedMessage
                         id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
