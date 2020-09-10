@@ -72,4 +72,6 @@ export {
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
 export const useKibana = () => _useKibana<AppServices>();
