@@ -15,6 +15,7 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { ActionParamsProps } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import { ResilientActionParams } from './types';
@@ -32,6 +33,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   messageVariables,
   actionConnector,
 }) => {
+  const [firstLoad, setFirstLoad] = useState(false);
   const { http, toastNotifications } = useAppDependencies();
   const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
     actionParams.subActionParams || {};
@@ -45,6 +47,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   >([]);
 
   const [severitySelectOptions, setSeveritySelectOptions] = useState<EuiSelectOption[]>([]);
+
+  useEffect(() => {
+    setFirstLoad(true);
+  }, []);
 
   const {
     isLoading: isLoadingIncidentTypes,
@@ -77,10 +83,14 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
 
   // Reset parameters when changing connector
   useEffect(() => {
+    if (!firstLoad) {
+      return;
+    }
+
     setIncidentTypesComboBoxOptions([]);
     setSelectedIncidentTypesComboBoxOptions([]);
     setSeveritySelectOptions([]);
-    editAction('subActionParams', { savedObjectId }, index);
+    editAction('subActionParams', { title, comments, description: '', savedObjectId }, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
 
@@ -103,6 +113,23 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           }))
         : []
     );
+
+    const allIncidentTypesAsObject = allIncidentTypes.reduce(
+      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
+      {} as Record<string, string>
+    );
+
+    setSelectedIncidentTypesComboBoxOptions(
+      incidentTypes
+        ? incidentTypes
+            .map((type) => ({
+              label: allIncidentTypesAsObject[type.toString()],
+              value: type.toString(),
+            }))
+            .filter((type) => type.label != null)
+        : []
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, allIncidentTypes]);
 
   return (
