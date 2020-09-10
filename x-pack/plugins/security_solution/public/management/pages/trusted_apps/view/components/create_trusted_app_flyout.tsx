@@ -18,20 +18,36 @@ import {
 import React, { memo, useCallback, useState } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
 import {
   CreateTrustedAppForm,
   CreateTrustedAppFormProps,
   TrustedAppFormState,
 } from './create_trusted_app_form';
+import { useTrustedAppsSelector } from '../hooks';
+import { isCreatePending } from '../../store/selectors';
+import { AppAction } from '../../../../../common/store/actions';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
+    const dispatch = useDispatch<(action: AppAction) => void>();
+    const pendingCreate = useTrustedAppsSelector(isCreatePending);
     const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
     const handleCancelClick = useCallback(() => {
       onClose();
     }, [onClose]);
-    const handleSaveClick = useCallback(() => {}, []);
+    const handleSaveClick = useCallback(() => {
+      if (formState) {
+        dispatch({
+          type: 'userClickedSaveNewTrustedAppButton',
+          payload: {
+            type: 'pending',
+            data: formState.item,
+          },
+        });
+      }
+    }, [dispatch, formState]);
     const handleFormOnChange = useCallback<CreateTrustedAppFormProps['onChange']>(
       (newFormState) => {
         setFormState(newFormState);
@@ -40,7 +56,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     );
 
     return (
-      <EuiFlyout onClose={onClose} {...flyoutProps}>
+      <EuiFlyout onClose={onClose} {...flyoutProps} hideCloseButton={pendingCreate}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -59,7 +75,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={handleCancelClick} flush="left">
+              <EuiButtonEmpty onClick={handleCancelClick} flush="left" isDisabled={pendingCreate}>
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.cancelButton"
                   defaultMessage="Cancel"
@@ -67,7 +83,12 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={handleSaveClick} fill isDisabled={!formState?.isValid}>
+              <EuiButton
+                onClick={handleSaveClick}
+                fill
+                isDisabled={!formState?.isValid || pendingCreate}
+                isLoading={pendingCreate}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
                   defaultMessage="Add trusted application"

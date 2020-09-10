@@ -97,3 +97,7 @@ export const getListErrorMessage = (
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
   return isLoadingResourceState(state.listView.currentListResourceState);
 };
+
+export const isCreatePending: (state: Immutable<TrustedAppsListPageState>) => boolean = (state) => {
+  return state.createView?.type === 'pending';
+};

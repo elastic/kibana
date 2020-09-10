@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResourceState, TrustedAppsListData } from '../state';
+import { AsyncResourceState, TrustedAppCreatePending, TrustedAppsListData } from '../state';
 
 export interface TrustedAppsListResourceStateChanged {
   type: 'trustedAppsListResourceStateChanged';
@@ -13,4 +13,11 @@ export interface TrustedAppsListResourceStateChanged {
   };
 }
 
-export type TrustedAppsPageAction = TrustedAppsListResourceStateChanged;
+export interface UserClickedSaveNewTrustedAppButton {
+  type: 'userClickedSaveNewTrustedAppButton';
+  payload: TrustedAppCreatePending;
+}
+
+export type TrustedAppsPageAction =
+  | TrustedAppsListResourceStateChanged
+  | UserClickedSaveNewTrustedAppButton;

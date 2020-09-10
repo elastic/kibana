@@ -18,7 +18,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
 
-import { TrustedAppsListResourceStateChanged } from './action';
+import { TrustedAppsListResourceStateChanged, UserClickedSaveNewTrustedAppButton } from './action';
 import { TrustedAppsListPageState } from '../state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
@@ -71,6 +71,16 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
 };
 
+const trustedAppsCreateResourceChanged: CaseReducer<UserClickedSaveNewTrustedAppButton> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    createView: action.payload,
+  };
+};
+
 export const initialTrustedAppsPageState: TrustedAppsListPageState = {
   listView: {
     currentListResourceState: { type: 'UninitialisedResourceState' },
@@ -80,6 +90,7 @@ export const initialTrustedAppsPageState: TrustedAppsListPageState = {
     },
     show: undefined,
   },
+  createView: undefined,
   active: false,
 };
 
@@ -93,6 +104,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+
+    case 'userClickedSaveNewTrustedAppButton':
+      return trustedAppsCreateResourceChanged(state, action);
   }
 
   return state;
