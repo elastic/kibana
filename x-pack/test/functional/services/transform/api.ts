@@ -149,7 +149,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
             return true;
           } else {
             throw new Error(
-              `not expected transform state to be ${notExpectedState} but got ${state}`
+              `expected transform state to not be ${notExpectedState} but got ${state}`
             );
           }
         }
