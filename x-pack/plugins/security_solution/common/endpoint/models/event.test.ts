@@ -13,8 +13,6 @@ describe('Generated documents', () => {
     generator = new EndpointDocGenerator('seed');
   });
 
-  // TODO what should I do about the cast? We can create a new safe descriptive name but
-  // the front end won't use that until the rest of it is converted
   describe('Event descriptive names', () => {
     it('returns the right name for a registry event', () => {
       const extensions = { registry: { key: `HKLM/Windows/Software/abc` } };
