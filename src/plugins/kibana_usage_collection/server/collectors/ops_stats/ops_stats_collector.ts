@@ -18,13 +18,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 
-interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times'> {
+interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;
   response_times: {
     average: number;
@@ -52,9 +52,9 @@ export function getOpsStatsCollector(
     // @ts-expect-error
     delete metrics.requests.statusCodes;
     lastMetrics = {
-      ...metrics,
+      ...omit(metrics, ['collected_at']),
       response_times: responseTimes,
-      timestamp: moment.utc().toISOString(),
+      timestamp: moment.utc(metrics.collected_at).toISOString(),
     };
   });
 

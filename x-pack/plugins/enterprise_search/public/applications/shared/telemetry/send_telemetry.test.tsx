@@ -10,7 +10,12 @@ import { httpServiceMock } from 'src/core/public/mocks';
 import { JSON_HEADER as headers } from '../../../../common/constants';
 import { mountWithKibanaContext } from '../../__mocks__';
 
-import { sendTelemetry, SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from './';
+import {
+  sendTelemetry,
+  SendEnterpriseSearchTelemetry,
+  SendAppSearchTelemetry,
+  SendWorkplaceSearchTelemetry,
+} from './';
 
 describe('Shared Telemetry Helpers', () => {
   const httpMock = httpServiceMock.createSetupContract();
@@ -44,6 +49,17 @@ describe('Shared Telemetry Helpers', () => {
   });
 
   describe('React component helpers', () => {
+    it('SendEnterpriseSearchTelemetry component', () => {
+      mountWithKibanaContext(<SendEnterpriseSearchTelemetry action="viewed" metric="page" />, {
+        http: httpMock,
+      });
+
+      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
+        headers,
+        body: '{"product":"enterprise_search","action":"viewed","metric":"page"}',
+      });
+    });
+
     it('SendAppSearchTelemetry component', () => {
       mountWithKibanaContext(<SendAppSearchTelemetry action="clicked" metric="button" />, {
         http: httpMock,
@@ -56,13 +72,13 @@ describe('Shared Telemetry Helpers', () => {
     });
 
     it('SendWorkplaceSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendWorkplaceSearchTelemetry action="viewed" metric="page" />, {
+      mountWithKibanaContext(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />, {
         http: httpMock,
       });
 
       expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
         headers,
-        body: '{"product":"workplace_search","action":"viewed","metric":"page"}',
+        body: '{"product":"workplace_search","action":"error","metric":"not_found"}',
       });
     });
   });
