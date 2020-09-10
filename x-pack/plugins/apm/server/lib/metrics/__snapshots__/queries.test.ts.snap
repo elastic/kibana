@@ -209,6 +209,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -216,16 +217,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -251,6 +254,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -258,16 +262,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -295,6 +301,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -302,16 +309,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -337,6 +346,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -344,16 +354,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -819,6 +831,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -826,16 +839,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -861,6 +876,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -868,16 +884,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -905,6 +923,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -912,16 +931,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -947,6 +968,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -954,16 +976,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -1425,6 +1449,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -1432,16 +1457,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -1467,6 +1494,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -1474,16 +1502,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -1511,6 +1541,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -1518,16 +1549,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
@@ -1553,6 +1586,7 @@ Object {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
     return null;
   }
@@ -1560,16 +1594,18 @@ Object {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value
+    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value
+    total = doc['system.memory.total'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
   } else if(total == 9223372036854771712L){
     total = doc['system.memory.total'].value;
   }
