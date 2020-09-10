@@ -1,8 +1,4 @@
-@import '@elastic/eui/src/global_styling/variables/header';
-@import '@elastic/eui/src/components/nav_drawer/variables';
-@include euiHeaderAffordForFixed($euiHeaderHeightCompensation * 2);
-
-$headerOffset: $euiHeaderHeightCompensation * 2;
+@include euiHeaderAffordForFixed($headerOffset);
 
 /**
  * stretch the root element of the Kibana application to set the base-size that
@@ -20,12 +16,6 @@ $headerOffset: $euiHeaderHeightCompensation * 2;
   flex-flow: column nowrap;
   margin: 0 auto;
   min-height: calc(100vh - #{$headerOffset});
-
-  @include internetExplorerOnly {
-    // IE specific bug with min-height in flex container, described in the next link
-    // https://github.com/philipwalton/flexbugs#3-min-height-on-a-flex-container-wont-apply-to-its-flex-items
-    height: calc(100vh - #{$headerOffset});
-  }
 
   &.hidden-chrome {
     min-height: 100vh;

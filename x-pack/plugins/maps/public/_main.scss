@@ -1,5 +1,4 @@
-@import '@elastic/eui/src/global_styling/variables/header';
-$headerOffset: $euiHeaderHeightCompensation * 2;
+@import '../../../../src/core/public/variables';
 
 // sass-lint:disable no-ids
 #maps-plugin {
