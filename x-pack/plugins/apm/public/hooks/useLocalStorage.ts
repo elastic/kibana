@@ -18,7 +18,9 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       try {
         toStore = JSON.parse(storedItem) as T;
       } catch (err) {
-        // do nothing
+        window.localStorage.removeItem(key);
+        // eslint-disable-next-line no-console
+        console.log(`Unable to decode: ${key}`);
       }
     }
 
