@@ -17,14 +17,7 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
-
-export const DEFAULT_INTERVAL = 1000;
-export const AUTO_BARS = 'auto';
-
-export const MODES = {
-  Range: 'range',
-  Histogram: 'histogram',
-} as const;
+import { MODES, AUTO_BARS, DEFAULT_INTERVAL } from './constants';
 
 export type RangeTypeLens = RangeType & { label: string };
 

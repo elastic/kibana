@@ -33,14 +33,11 @@ import {
 } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
+import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 
 const generateId = htmlIdGenerator();
 
 type LocalRangeType = RangeTypeLens & { id: string };
-
-// Taken from the Visualize editor
-const FROM_PLACEHOLDER = '\u2212\u221E';
-const TO_PLACEHOLDER = '+\u221E';
 
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
@@ -215,7 +212,7 @@ export const AdvancedRangeEditor = ({
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
-    256,
+    TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
 

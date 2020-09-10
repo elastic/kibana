@@ -13,12 +13,16 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { rangeOperation } from '../index';
-import { MODES, DEFAULT_INTERVAL, RangeIndexPatternColumn } from './ranges';
+import { RangeIndexPatternColumn } from './ranges';
 import { autoInterval } from 'src/plugins/data/common';
+import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  // need this for MAX_HISTOGRAM value
+  uiSettings: ({
+    get: () => 100,
+  } as unknown) as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -47,6 +51,10 @@ describe('ranges', () => {
     column.params.type = MODES.Range;
   }
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   beforeEach(() => {
     state = {
       indexPatternRefs: [],
@@ -71,7 +79,7 @@ describe('ranges', () => {
                 type: MODES.Histogram,
                 interval: autoInterval,
                 ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-                maxBars: 1,
+                maxBars: 'auto',
               },
             },
             col2: {
@@ -101,9 +109,8 @@ describe('ranges', () => {
           type: MODES.Histogram,
           params: expect.objectContaining({
             field: sourceField,
-            ranges: [{ from: 0, to: DEFAULT_INTERVAL }],
             interval: autoInterval,
-            maxBars: 1,
+            maxBars: null,
           }),
         })
       );
@@ -171,10 +178,17 @@ describe('ranges', () => {
           />
         );
         expect(instance.find(EuiSwitch).prop('checked')).toBe(true);
+        expect(
+          instance
+            .find('input')
+            .find('[data-test-subj="lns-indexPattern-range-maxBars-field"]')
+            .prop('value')
+        ).toBe('');
       });
 
       it('should update state when changing Max bars number', () => {
         const setStateSpy = jest.fn();
+
         const instance = mount(
           <InlineOptions
             {...defaultOptions}
@@ -188,12 +202,13 @@ describe('ranges', () => {
         act(() => {
           instance.find(EuiRange).prop('onChange')!(
             {
-              target: {
+              currentTarget: {
                 value: '50',
               },
             } as React.ChangeEvent<HTMLInputElement>,
             true
           );
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(setStateSpy).toHaveBeenCalledWith({
             ...state,

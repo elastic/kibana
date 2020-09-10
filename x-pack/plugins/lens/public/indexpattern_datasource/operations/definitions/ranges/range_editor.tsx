@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
-import { get } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiFormRow,
@@ -22,8 +21,9 @@ import {
   IFieldFormat,
   UI_SETTINGS,
 } from '../../../../../../../../src/plugins/data/common';
-import { MODES, RangeColumnParams, UpdateParamsFnType, MODES_TYPES, AUTO_BARS } from './ranges';
+import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
+import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES } from './constants';
 
 const BaseRangeEditor = ({
   autoIntervalEnabled,
@@ -57,7 +57,7 @@ const BaseRangeEditor = ({
         onIntervalChange(intervalValue === '' ? intervalValue : Number(intervalValue));
       }
     },
-    256,
+    TYPING_DEBOUNCE_TIME,
     [intervalValue]
   );
 
@@ -67,7 +67,7 @@ const BaseRangeEditor = ({
         onMaxBarsChange(maxBarsValue === '' ? AUTO_BARS : Number(maxBarsValue));
       }
     },
-    256,
+    TYPING_DEBOUNCE_TIME,
     [maxBarsValue]
   );
 
@@ -94,6 +94,9 @@ const BaseRangeEditor = ({
           {autoIntervalEnabled ? (
             <EuiRange
               compressed
+              showLabels
+              showInput="inputWithPopover"
+              data-test-subj="lns-indexPattern-range-maxBars-field"
               min={1}
               max={maxHistogramBars}
               step={1}
@@ -102,8 +105,6 @@ const BaseRangeEditor = ({
               placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
                 defaultMessage: 'Auto',
               })}
-              showLabels
-              showInput="inputWithPopover"
               prepend={
                 <>
                   <EuiText size="s">
