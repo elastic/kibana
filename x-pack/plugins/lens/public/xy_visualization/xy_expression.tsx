@@ -254,9 +254,9 @@ export function XYChart({
 
   const yAxesConfiguration = getAxesConfiguration(
     filteredLayers,
+    shouldRotate,
     data.tables,
-    formatFactory,
-    shouldRotate
+    formatFactory
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
@@ -468,7 +468,7 @@ export function XYChart({
               index > 0 ? gridlinesVisibilitySettings?.yRight : gridlinesVisibilitySettings?.yLeft,
           }}
           hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter.convert(d)}
+          tickFormat={(d) => axis.formatter?.convert(d) || ''}
           style={getYAxesStyle(index)}
         />
       ))}

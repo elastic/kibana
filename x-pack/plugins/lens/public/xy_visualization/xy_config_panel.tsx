@@ -34,6 +34,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
+import { getAxesConfiguration } from './axes_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -123,21 +124,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const rightAxisLayers = state?.layers.filter(
-    (layer) =>
-      layer.yConfig &&
-      layer.yConfig.length &&
-      layer.yConfig.some(({ axisMode }) => axisMode === 'right')
-  );
-
-  const leftAxisLayers = state?.layers.filter(
-    (layer) =>
-      !layer.yConfig ||
-      (layer.yConfig && layer.accessors.length !== layer.yConfig.length) ||
-      (layer.yConfig &&
-        layer.accessors.length === layer.yConfig.length &&
-        layer.yConfig.some(({ axisMode }) => axisMode === 'left'))
-  );
+  const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -298,7 +286,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
-            isDisabled={leftAxisLayers?.length === 0 ?? true}
+            isDisabled={
+              Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
+            }
             isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
           />
@@ -338,7 +328,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yRight}
               toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
-              isDisabled={rightAxisLayers?.length === 0 ?? true}
+              isDisabled={
+                Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
+                0
+              }
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             />
