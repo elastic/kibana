@@ -90,15 +90,18 @@ export const frozenPhaseToES = (
 
   esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
 
-  if (phase.selectedNodeAttrs) {
+  if (phase.dataTierAllocationType === 'custom' && phase.selectedNodeAttrs) {
     const [name, value] = phase.selectedNodeAttrs.split(':');
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
     esPhase.actions.allocate.require = {
       [name]: value,
     };
+  } else if (phase.dataTierAllocationType === 'none') {
+    esPhase.actions.migrate = { enabled: false };
   } else {
     if (esPhase.actions.allocate) {
       delete esPhase.actions.allocate.require;
+      delete esPhase.actions.migrate;
     }
   }
 

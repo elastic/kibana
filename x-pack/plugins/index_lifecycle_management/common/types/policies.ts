@@ -70,6 +70,7 @@ export interface SerializedColdPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
+    migrate?: { enabled: boolean };
   };
 }
 
@@ -80,6 +81,7 @@ export interface SerializedFrozenPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
+    migrate?: { enabled: boolean };
   };
 }
 
