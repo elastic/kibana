@@ -8,8 +8,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-
 import {
   MapEmbeddable,
   MapEmbeddableInput,
@@ -60,6 +58,7 @@ export function EmbeddedMapComponent() {
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
+
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<
     HTMLDivElement
   >(null);
@@ -67,8 +66,6 @@ export function EmbeddedMapComponent() {
   const {
     services: { embeddable: embeddablePlugin },
   } = useKibana<KibanaDeps>();
-
-  const portalNode = React.useMemo(() => createPortalNode(), []);
 
   if (!embeddablePlugin) {
     throw new Error('Embeddable start plugin not found');
@@ -116,7 +113,7 @@ export function EmbeddedMapComponent() {
       loadFeatureGeometry,
     };
 
-    return <OutPortal {...props} node={portalNode} features={features} />;
+    return <MapToolTip {...props} features={features} />;
   }
 
   useEffect(() => {
@@ -172,13 +169,10 @@ export function EmbeddedMapComponent() {
   return (
     <EmbeddedPanel>
       <div
-        data-test-subj="xpack.uptime.locationMap.embeddedPanel"
+        data-test-subj="xpack.apm.regionMap.embeddedPanel"
         className="embPanel__content"
         ref={embeddableRoot}
       />
-      <InPortal node={portalNode}>
-        <MapToolTip />
-      </InPortal>
     </EmbeddedPanel>
   );
 }

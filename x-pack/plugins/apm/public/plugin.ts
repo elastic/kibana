@@ -139,7 +139,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginSetupDeps,
           params,
           config,
-          corePlugins
+          corePlugins as ApmPluginStartDeps
         );
       },
     });
