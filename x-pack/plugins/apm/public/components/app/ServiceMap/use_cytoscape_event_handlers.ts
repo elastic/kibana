@@ -46,14 +46,18 @@ function getLayoutOptions({
   nodeHeight: number;
   theme: EuiTheme;
 }): cytoscape.LayoutOptions {
+  const animationOptions = getAnimationOptions(theme);
+
+  // @ts-expect-error Some of the dagre-specific layout options don't work with
+  // the types.
   return {
-    ...getAnimationOptions(theme),
+    animationDuration: animationOptions.duration,
+    animationEasing: animationOptions.easing,
     fit,
     name: 'dagre',
     animate: !fit,
     padding: nodeHeight,
     spacingFactor: 1.2,
-    // @ts-ignore
     nodeSep: nodeHeight,
     edgeSep: 32,
     rankSep: 128,
@@ -165,7 +169,7 @@ export function useCytoscapeEventHandlers({
     return () => {
       if (cy) {
         cy.removeListener(
-          'data layoutstop select unselect',
+          'custom:data layoutstop select unselect',
           undefined,
           debugHandler
         );
