@@ -112,7 +112,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   getMetricFields() {
-    return super.getMetricFields(this._descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE);
+    return super.getMetricFields();
   }
 
   getFieldNames() {
