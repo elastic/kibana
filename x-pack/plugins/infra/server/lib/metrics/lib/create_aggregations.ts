@@ -33,7 +33,7 @@ export const createAggregations = (options: MetricsAPIRequest) => {
         composite: {
           size: limit,
           sources: options.groupBy.map((field, index) => ({
-            [`groupBy${index}`]: { terms: { field, order: 'asc' } },
+            [`groupBy${index}`]: { terms: { field } },
           })),
         },
         aggs: histogramAggregation,
