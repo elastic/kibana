@@ -50,7 +50,7 @@ type ProcessRunningFields = Partial<
 >;
 
 export function isProcessRunning(event: ProcessRunningFields): boolean {
-  if (isLegacyEventSafeVersion<LegacyProcessRunningFields>(event)) {
+  if (isLegacyEventSafeVersion(event)) {
     return (
       hasValue(event.event?.type, 'process_start') ||
       hasValue(event.event?.action, 'fork_event') ||

@@ -433,8 +433,14 @@ describe('data generator', () => {
         tree[value.parent_entity_id].children.push(value);
       }
     }
+
+    const entityID = entityIDSafeVersion(events[0]);
+    if (!entityID) {
+      throw new Error('entity id was invalid');
+    }
+
     // The root node must be first in the array or this fails
-    return tree[entityIDSafeVersion(events[0]) ?? ''];
+    return tree[entityID];
   }
 
   function countResolverEvents(rootNode: Node, generations: number): number {

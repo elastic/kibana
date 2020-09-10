@@ -509,6 +509,13 @@ export type HostInfo = Immutable<{
   host_status: HostStatus;
 }>;
 
+export type HostMetadataDetails = Immutable<{
+  agent: {
+    id: string;
+  };
+  HostDetails: HostMetadata;
+}>;
+
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {

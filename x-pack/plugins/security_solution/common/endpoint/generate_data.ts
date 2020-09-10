@@ -1153,7 +1153,8 @@ export class EndpointDocGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
-          src: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
           type: 'image/svg+xml',
         },
