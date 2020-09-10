@@ -94,7 +94,7 @@ const field = {
   format: new Format(),
 };
 
-const services = { redirectAway: () => {}, saveIndexPattern: async () => {} };
+const services = { redirectAway: () => {}, saveIndexPattern: async () => ({} as IndexPattern) };
 
 describe('FieldEditor', () => {
   let indexPattern: IndexPattern;

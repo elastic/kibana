@@ -52,6 +52,7 @@ const helpers = {
 };
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const saveIndexPattern = async () => ({} as IndexPattern);
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: IndexPattern;
@@ -71,7 +72,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -89,7 +90,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -118,7 +119,7 @@ describe('ScriptedFieldsTable', () => {
         }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -143,7 +144,7 @@ describe('ScriptedFieldsTable', () => {
         }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -161,7 +162,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 
@@ -185,7 +186,7 @@ describe('ScriptedFieldsTable', () => {
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={saveIndexPattern}
       />
     );
 

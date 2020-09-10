@@ -196,6 +196,8 @@ export class IndexPatternsService {
   }
 
   async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<IndexPattern | Error> {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     if (!indexPattern.id) {
       throw new Error('no id');
     }
@@ -209,22 +211,23 @@ export class IndexPatternsService {
     });
 
     try {
-      const resp = await this.savedObjectsClient.update(savedObjectType, this.id, body, {
+      const resp = await this.savedObjectsClient.update(savedObjectType, indexPattern.id, body, {
         version: indexPattern.version,
       });
       indexPattern.id = resp.id;
       indexPattern.version = resp.version;
     } catch (err) {
-      if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+      if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
         const samePattern = new IndexPattern(indexPattern.id, {
           savedObjectsClient: this.savedObjectsClient,
           apiClient: this.apiClient,
-          patternCache: this.patternCache,
+          patternCache: indexPatternCache,
           fieldFormats: this.fieldFormats,
+          indexPatternsService: this,
           onNotification: this.onNotification,
           onError: this.onError,
-          shortDotsEnable: this.shortDotsEnable,
-          metaFields: this.metaFields,
+          shortDotsEnable,
+          metaFields,
         });
 
         await samePattern.init();
@@ -238,7 +241,7 @@ export class IndexPatternsService {
 
         const serverChangedKeys: string[] = [];
         Object.entries(updatedBody).forEach(([key, value]) => {
-          if (value !== (body as any)[key] && value !== this.originalBody[key]) {
+          if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
             serverChangedKeys.push(key);
           }
         });
@@ -270,7 +273,7 @@ export class IndexPatternsService {
         indexPattern.version = samePattern.version;
 
         // Clear cache
-        this.patternCache.clear(this.id!);
+        indexPatternCache.clear(indexPattern.id!);
 
         // Try the save again
         await this.save(indexPattern, saveAttempts);

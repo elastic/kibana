@@ -61,7 +61,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={getIndexPatternMock()}
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={async () => ({} as IndexPattern)}
       />
     );
 
@@ -74,7 +74,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={getIndexPatternMock()}
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={async () => ({} as IndexPattern)}
       />
     );
 
@@ -90,7 +90,7 @@ describe('SourceFiltersTable', () => {
         })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={async () => ({} as IndexPattern)}
       />
     );
 
@@ -108,7 +108,7 @@ describe('SourceFiltersTable', () => {
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
+        saveIndexPattern={async () => ({} as IndexPattern)}
       />
     );
 
@@ -128,7 +128,7 @@ describe('SourceFiltersTable', () => {
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
-        saveIndexPattern={saveIndexPattern}
+        saveIndexPattern={async () => ({} as IndexPattern)}
       />
     );
 
@@ -142,7 +142,7 @@ describe('SourceFiltersTable', () => {
   });
 
   test('should add a filter', async () => {
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = jest.fn(async () => ({} as IndexPattern));
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock({
@@ -162,7 +162,7 @@ describe('SourceFiltersTable', () => {
   });
 
   test('should update a filter', async () => {
-    const saveIndexPattern = jest.fn(async () => {});
+    const saveIndexPattern = jest.fn(async () => ({} as IndexPattern));
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
         indexPattern={
