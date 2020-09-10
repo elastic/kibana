@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        if (!isProd) {
+        if (!isProdOrCi) {
           expectGraphIQLResponse(graphQLIResult);
         } else {
           expectGraphIQL404(graphQLIResult);
