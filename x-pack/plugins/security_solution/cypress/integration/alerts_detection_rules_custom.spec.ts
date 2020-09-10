@@ -59,12 +59,7 @@ import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
-  expectDefineFormToRepopulateAndContinue,
-  expectAboutFormToRepopulateAndContinue,
-  expectDefineStepForm,
   goToAboutStepTab,
-  expectAboutStepForm,
-  expectScheduleStepForm,
   goToScheduleStepTab,
   goToActionsStepTab,
   fillAboutRule,
@@ -73,8 +68,23 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
-import { ACTIONS_THROTTLE_INPUT } from '../screens/create_new_rule';
-import { saveEditedRule, expectRuleDetails } from '../tasks/edit_rule';
+import {
+  ACTIONS_THROTTLE_INPUT,
+  CUSTOM_QUERY_INPUT,
+  DEFINE_INDEX_INPUT,
+  RULE_NAME_INPUT,
+  RULE_DESCRIPTION_INPUT,
+  TAGS_FIELD,
+  SEVERITY_DROPDOWN,
+  RISK_INPUT,
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  DEFINE_EDIT_BUTTON,
+  DEFINE_CONTINUE_BUTTON,
+  ABOUT_EDIT_BUTTON,
+  ABOUT_CONTINUE_BTN,
+} from '../screens/create_new_rule';
+import { saveEditedRule } from '../tasks/edit_rule';
 
 describe('Detection rules, custom', () => {
   before(() => {
@@ -94,8 +104,19 @@ describe('Detection rules, custom', () => {
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
-    expectDefineFormToRepopulateAndContinue(newRule);
-    expectAboutFormToRepopulateAndContinue(newRule);
+
+    // expect define step to repopulate
+    cy.get(DEFINE_EDIT_BUTTON).click();
+    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', newRule.customQuery);
+    cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+    cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
+
+    // expect about step to populate
+    cy.get(ABOUT_EDIT_BUTTON).click();
+    cy.get(RULE_NAME_INPUT).invoke('val').should('eq', newRule.name);
+    cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+    cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
+
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
@@ -246,12 +267,37 @@ describe('Deletes custom rules', () => {
 
   it('Allows a rule to be edited', () => {
     editFirstRule();
-    expectDefineStepForm(existingRule);
+
+    // expect define step to populate
+    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', existingRule.customQuery);
+    if (existingRule.index && existingRule.index.length > 0) {
+      cy.get(DEFINE_INDEX_INPUT).invoke('text').should('eq', existingRule.index.join(''));
+    }
+
     goToAboutStepTab();
-    expectAboutStepForm(existingRule);
+
+    // expect about step to populate
+    cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+    cy.get(RULE_DESCRIPTION_INPUT).invoke('text').should('eql', existingRule.description);
+    cy.get(TAGS_FIELD).invoke('text').should('eql', existingRule.tags.join(''));
+
+    cy.get(SEVERITY_DROPDOWN).invoke('text').should('eql', existingRule.severity);
+    cy.get(RISK_INPUT).invoke('val').should('eql', existingRule.riskScore);
+
     goToScheduleStepTab();
-    expectScheduleStepForm(existingRule);
+
+    // expect schedule step to populate
+    const intervalParts = existingRule.interval && existingRule.interval.match(/[0-9]+|[a-zA-Z]+/g);
+    if (intervalParts) {
+      const [amount, unit] = intervalParts;
+      cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
+      cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
+    } else {
+      throw new Error('Cannot assert scheduling info on a rule without an interval');
+    }
+
     goToActionsStepTab();
+
     cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
 
     goToAboutStepTab();
@@ -264,6 +310,45 @@ describe('Deletes custom rules', () => {
 
     fillAboutRule(editedRule);
     saveEditedRule();
-    expectRuleDetails(editedRule);
+
+    const expectedTags = editedRule.tags.join('');
+    const expectedIndexPatterns =
+      editedRule.index && editedRule.index.length
+        ? editedRule.index
+        : [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ];
+
+    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${editedRule.name} Beta`);
+
+    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', editedRule.description);
+    cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', editedRule.severity);
+    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', editedRule.riskScore);
+    cy.get(ABOUT_STEP).eq(2).invoke('text').should('eql', expectedTags);
+
+    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', editedRule.note);
+
+    cy.get(DEFINITION_INDEX_PATTERNS).then((patterns) => {
+      cy.wrap(patterns).each((pattern, index) => {
+        cy.wrap(pattern).invoke('text').should('eql', expectedIndexPatterns[index]);
+      });
+    });
+    cy.get(DEFINITION_STEP)
+      .eq(DEFINITION_CUSTOM_QUERY)
+      .invoke('text')
+      .should('eql', `${editedRule.customQuery} `);
+    cy.get(DEFINITION_STEP).eq(2).invoke('text').should('eql', 'Query');
+    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
+
+    if (editedRule.interval) {
+      cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', editedRule.interval);
+    }
   });
 });
