@@ -20,6 +20,7 @@
 import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action } from '../actions';
@@ -46,11 +47,11 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
 export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
-  closeMenu,
+  closeMenu = () => {},
 }: {
   actions: ActionWithContext[];
   title?: string;
-  closeMenu: () => void;
+  closeMenu?: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
   const menuItems = await buildEuiContextMenuPanelItems({
     actions,
@@ -74,6 +75,13 @@ async function buildEuiContextMenuPanelItems({
   actions: ActionWithContext[];
   closeMenu: () => void;
 }) {
+  actions = sortBy(
+    actions,
+    (a) => -1 * (a.action.order ?? 0),
+    (a) => a.action.type,
+    (a) => a.action.getDisplayName({ ...a.context, trigger: a.trigger })
+  );
+
   const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
   const promises = actions.map(async ({ action, context, trigger }, index) => {
     const isCompatible = await action.isCompatible({
