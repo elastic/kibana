@@ -28,7 +28,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-    const layout = new PreserveLayout(layoutParams.dimensions);
+    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
     if (apmLayout) apmLayout.end();
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
