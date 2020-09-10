@@ -36,7 +36,7 @@ export const Credentials: React.FC = () => {
     CredentialsLogic
   ) as ICredentialsLogicActions;
 
-  const { meta, apiUrl, dataLoading, showCredentialsForm } = useValues(
+  const { apiUrl, dataLoading, showCredentialsForm } = useValues(
     CredentialsLogic
   ) as ICredentialsLogicValues;
 

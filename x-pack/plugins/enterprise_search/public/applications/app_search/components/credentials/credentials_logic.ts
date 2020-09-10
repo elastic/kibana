@@ -64,6 +64,8 @@ export interface ICredentialsLogicValues {
   engines: IEngine[];
   // TODO flashMessages from ent-search
   formErrors: string[];
+  isCredentialsDataComplete: boolean;
+  isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
   keyHelpText: string;
   meta: IMeta;
@@ -121,14 +123,14 @@ export const CredentialsLogic = kea({
     isCredentialsDetailsComplete: [
       false,
       {
-        setCredentialsData: () => true,
+        setCredentialsDetails: () => true,
         resetCredentials: () => false,
       },
     ],
     isCredentialsDataComplete: [
       false,
       {
-        setCredentialsDetails: () => true,
+        setCredentialsData: () => true,
         resetCredentials: () => false,
       },
     ],
@@ -175,10 +177,7 @@ export const CredentialsLogic = kea({
         }),
         setTokenType: (activeApiToken, tokenType) => ({
           ...activeApiToken,
-          access_all_engines:
-            tokenType === ADMIN
-              ? false
-              : activeApiToken.type === ADMIN || activeApiToken.access_all_engines,
+          access_all_engines: tokenType === ADMIN ? false : activeApiToken.access_all_engines,
           engines: tokenType === ADMIN ? [] : activeApiToken.engines,
           write: tokenType === PRIVATE,
           read: tokenType === PRIVATE,
