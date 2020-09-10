@@ -54,7 +54,7 @@ describe('filters', () => {
           columnOrder: ['col1', 'col2'],
           columns: {
             col1: {
-              label: 'Search query',
+              label: 'Custom query',
               dataType: 'document',
               operationType: 'filters',
               scale: 'ordinal',
@@ -209,7 +209,7 @@ describe('filters', () => {
       });
     });
 
-    describe('Modify search query', () => {
+    describe('Modify custom query', () => {
       it('should correctly show existing filters ', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
@@ -236,7 +236,7 @@ describe('filters', () => {
         ).toEqual('src : 2');
       });
 
-      it('should remove search query', () => {
+      it('should remove custom query', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
           <InlineOptions

@@ -43,8 +43,8 @@ export interface FilterValue {
   id: string;
 }
 
-const searchQueryLabel = i18n.translate('xpack.lens.indexPattern.searchQuery', {
-  defaultMessage: 'Search query',
+const customQueryLabel = i18n.translate('xpack.lens.indexPattern.customQuery', {
+  defaultMessage: 'Custom query',
 });
 
 export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
@@ -87,7 +87,7 @@ export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn 
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
   type: 'filters',
-  displayName: searchQueryLabel,
+  displayName: customQueryLabel,
   priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ type }) => {
     if (type === 'document') {
@@ -116,12 +116,10 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
           },
         ],
       };
-    } else if (previousColumn?.operationType === 'filters' && previousColumn.params?.filters) {
-      params = previousColumn.params;
     }
 
     return {
-      label: searchQueryLabel,
+      label: customQueryLabel,
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
@@ -163,12 +161,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       );
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.filters.queries', {
-          defaultMessage: 'Queries',
-        })}
-        labelType="legend"
-      >
+      <EuiFormRow>
         <FilterList
           filters={filters}
           setFilters={setFilters}
@@ -241,7 +234,7 @@ export const FilterList = ({
 
   return (
     <>
-      <EuiDragDropContext onDragEnd={onDragEnd}>
+      <EuiDragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsOpenByCreation(false)}>
         <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
           {localFilters?.map((filter: FilterValue, idx: number) => {
             const { input, label, id } = filter;
@@ -312,9 +305,9 @@ export const FilterList = ({
                             onRemoveFilter(filter.id);
                           }}
                           aria-label={i18n.translate(
-                            'xpack.lens.indexPattern.filters.removeSearchQuery',
+                            'xpack.lens.indexPattern.filters.removeCustomQuery',
                             {
-                              defaultMessage: 'Remove search query',
+                              defaultMessage: 'Remove custom query',
                             }
                           )}
                           title={i18n.translate('xpack.lens.indexPattern.filters.remove', {
@@ -339,8 +332,8 @@ export const FilterList = ({
           setIsOpenByCreation(true);
         }}
       >
-        {i18n.translate('xpack.lens.indexPattern.filters.addSearchQuery', {
-          defaultMessage: 'Add a search query',
+        {i18n.translate('xpack.lens.indexPattern.filters.addCustomQuery', {
+          defaultMessage: 'Add a custom query',
         })}
       </EuiButtonEmpty>
     </>

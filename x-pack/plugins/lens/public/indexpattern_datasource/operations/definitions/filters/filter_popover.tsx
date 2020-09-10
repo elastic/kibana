@@ -130,15 +130,15 @@ const QueryInput = ({
       placeholder={
         inputValue.language === 'kuery'
           ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
-              defaultMessage: 'Example: {example}',
+              defaultMessage: '{example}',
               values: { example: 'method : "GET" or status : "404"' },
             })
           : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
-              defaultMessage: 'Example: {example}',
+              defaultMessage: '{example}',
               values: { example: 'method:GET OR status:404' },
             })
       }
-      dataTestSubj="transformQueryInput"
+      dataTestSubj="lns-indexPattern-searchQueryInput"
       languageSwitcherPopoverAnchorPosition="rightDown"
     />
   );
