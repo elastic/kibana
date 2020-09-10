@@ -5,7 +5,7 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AbstractField, IField } from './field';
+import { getMbPropertyName, IField } from './field';
 import { AggDescriptor } from '../../../common/descriptor_types';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IVectorSource } from '../sources/vector_source';
@@ -144,7 +144,7 @@ export class ESAggField implements IESAggField {
   }
 
   getMbPropertyName(styleName: VECTOR_STYLES): string {
-    return AbstractField.getMbPropertyName(this, styleName);
+    return getMbPropertyName(this, styleName);
   }
 }
 

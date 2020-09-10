@@ -44,18 +44,6 @@ export interface IField {
 }
 
 export class AbstractField implements IField {
-  static getMbPropertyName(field: IField, styleName: VECTOR_STYLES) {
-    let targetName;
-    if (field.canReadFromGeoJson()) {
-      targetName = field.supportsAutoDomain()
-        ? getComputedFieldName(styleName, field.getName())
-        : field.getName();
-    } else {
-      targetName = field.getName();
-    }
-    return targetName;
-  }
-
   private readonly _fieldName: string;
   private readonly _origin: FIELD_ORIGIN;
 
@@ -122,6 +110,18 @@ export class AbstractField implements IField {
   }
 
   getMbPropertyName(styleName: VECTOR_STYLES): string {
-    return AbstractField.getMbPropertyName(this, styleName);
+    return getMbPropertyName(this, styleName);
   }
+}
+
+export function getMbPropertyName(field: IField, styleName: VECTOR_STYLES) {
+  let targetName;
+  if (field.canReadFromGeoJson()) {
+    targetName = field.supportsAutoDomain()
+      ? getComputedFieldName(styleName, field.getName())
+      : field.getName();
+  } else {
+    targetName = field.getName();
+  }
+  return targetName;
 }

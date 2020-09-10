@@ -53,7 +53,7 @@ export interface ISource {
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
   isESSource(): boolean;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
@@ -129,7 +129,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
 

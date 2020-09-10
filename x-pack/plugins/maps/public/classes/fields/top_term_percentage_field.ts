@@ -9,7 +9,7 @@ import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX, VECTOR_STYLES } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { AbstractField } from './field';
+import { getMbPropertyName } from './field';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
@@ -87,6 +87,6 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   getMbPropertyName(styleName: VECTOR_STYLES): string {
-    return AbstractField.getMbPropertyName(this, styleName);
+    return getMbPropertyName(this, styleName);
   }
 }
