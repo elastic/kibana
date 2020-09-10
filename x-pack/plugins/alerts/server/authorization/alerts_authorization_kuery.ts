@@ -10,7 +10,11 @@ import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerts_authorization';
 
 export const is = (fieldName: string, value: string | KueryNode) =>
-  nodeTypes.function.buildNode('is', fieldName, value);
+  nodeTypes.function.buildNodeWithArgumentNodes('is', [
+    nodeTypes.literal.buildNode(fieldName),
+    typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
+    nodeTypes.literal.buildNode(false),
+  ]);
 
 export const or = ([first, ...args]: KueryNode[]): KueryNode =>
   args.length ? nodeTypes.function.buildNode('or', [first, or(args)]) : first;
