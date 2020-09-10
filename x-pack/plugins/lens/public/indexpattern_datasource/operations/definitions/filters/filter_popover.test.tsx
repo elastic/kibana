@@ -7,7 +7,7 @@
 import React, { MouseEventHandler } from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover, QueryInput, LabelInput } from './filter_popover';
 
@@ -24,10 +24,8 @@ const defaultProps = {
   },
   setFilter: jest.fn(),
   indexPattern: createMockedIndexPattern(),
-  Button: (onClick: MouseEventHandler) => (
-    <div onClick={onClick} onKeyPress={onClick}>
-      trigger
-    </div>
+  Button: ({ onClick }: { onClick: MouseEventHandler }) => (
+    <EuiLink onClick={onClick}>trigger</EuiLink>
   ),
   isOpenByCreation: true,
   setIsOpenByCreation: jest.fn(),

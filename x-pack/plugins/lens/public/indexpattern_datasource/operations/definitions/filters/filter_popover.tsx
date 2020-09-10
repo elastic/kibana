@@ -6,9 +6,9 @@
 import './filter_popover.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
+import { useDebounce } from 'react-use';
 import { EuiPopover, EuiFieldText, EuiSpacer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
 import { QueryStringInput, Query } from '../../../../../../../../src/plugins/data/public';
@@ -107,11 +107,10 @@ export const QueryInput = ({
     setInputValue(value);
   }, [value, setInputValue]);
 
-  const onChangeDebounced = React.useMemo(() => debounce(onChange, 256), [onChange]);
+  useDebounce(() => onChange(inputValue), 256, [inputValue]);
 
   const handleInputChange = (input: Query) => {
     setInputValue(input);
-    onChangeDebounced(input);
   };
 
   return (
@@ -162,12 +161,11 @@ export const LabelInput = ({
     setInputValue(value);
   }, [value, setInputValue]);
 
-  const onChangeDebounced = React.useMemo(() => debounce(onChange, 256), [onChange]);
+  useDebounce(() => onChange(inputValue), 256, [inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);
     setInputValue(val);
-    onChangeDebounced(val);
   };
 
   return (
