@@ -86,6 +86,7 @@ export class CustomizeSpace extends Component<Props, State> {
               >
                 <EuiFieldText
                   name="name"
+                  data-test-subj="addSpaceName"
                   placeholder={i18n.translate(
                     'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
                     {
@@ -149,6 +150,7 @@ export class CustomizeSpace extends Component<Props, State> {
           )}
 
           <EuiFormRow
+            data-test-subj="optionalDescription"
             label={i18n.translate(
               'xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel',
               {
@@ -165,6 +167,7 @@ export class CustomizeSpace extends Component<Props, State> {
             fullWidth
           >
             <EuiTextArea
+              data-test-subj="descriptionSpaceText"
               name="description"
               value={description}
               onChange={this.onDescriptionChange}
