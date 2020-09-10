@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.openControlsByName(fieldName);
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('');
+      expect(popularity).to.be('0');
     });
 
     it('can be saved', async function () {

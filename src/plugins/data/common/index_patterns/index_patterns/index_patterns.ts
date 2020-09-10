@@ -153,6 +153,8 @@ export class IndexPatternsService {
       indexPatternCache.clearAll();
     }
   };
+
+  // rename
   getCache = async () => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
@@ -331,6 +333,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
+  // make private
   async saveNew(indexPattern: IndexPattern, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe && override) {
@@ -347,8 +350,12 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async save(indexPattern: IndexPattern) {
+  async save(indexPattern: IndexPattern, overwrite = false) {
+    // if(overwrite || !indexPattern.id){
+    // saveNew
+    // } else {
     return this.update(indexPattern);
+    // }
   }
 
   async update(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
@@ -438,6 +445,7 @@ export class IndexPatternsService {
       });
   }
 
+  // kill this
   async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);

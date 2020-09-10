@@ -152,6 +152,7 @@ describe('CreateIndexPatternWizard', () => {
       timeFieldName: 'timestamp',
       fields: [],
       create,
+      _fetchFields: jest.fn(),
     } as unknown) as IndexPattern;
     mockContext.data.indexPatterns.make = async () => {
       return indexPattern;

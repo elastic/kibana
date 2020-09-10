@@ -72,6 +72,7 @@ export class IndexPattern implements IIndexPattern {
   public flattenHit: any;
   public metaFields: string[];
 
+  // todo rename
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
@@ -151,7 +152,6 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    // this.indexFields(spec.fields);
     this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
 
@@ -194,47 +194,6 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
-  /*
-  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return specs.every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
-  /*
-  private async indexFields(specs?: FieldSpec[]) {
-    if (!this.id) {
-      return;
-    }
-
-    if (this.isFieldRefreshRequired(specs)) {
-      await this.refreshFields();
-    } else {
-      if (specs) {
-        try {
-          this.fields.replaceAll(specs);
-        } catch (err) {
-          if (err instanceof FieldTypeUnknownError) {
-            this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
-          } else {
-            throw err;
-          }
-        }
-      }
-    }
-  }
-  */
-
   private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = []) =>
     fldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
       if (fieldSpec.format) {
@@ -242,23 +201,6 @@ export class IndexPattern implements IIndexPattern {
       }
       return col;
     }, {});
-
-  /*
-    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
-    fieldList.forEach((field: FieldSpec) => {
-      if (field.format) {
-        fieldFormatMap[field.name as string] = { ...field.format };
-      }
-    });
-
-    fieldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
-      if (fieldSpec.format) {
-        col[fieldSpec.name] = { ...fieldSpec.format };
-      }
-      return col;
-    }, {});
-  }
-  */
 
   // this is swallowed by constructor
   public initFromSpec(spec: IndexPatternSpec) {
@@ -372,6 +314,7 @@ export class IndexPattern implements IIndexPattern {
   // loads saved object
   // caches object state
   // deserializes and sets values
+  // todo kill this and updateFromES
   async init() {
     if (!this.id) {
       return this; // no id === no elasticsearch document
@@ -549,6 +492,7 @@ export class IndexPattern implements IIndexPattern {
     );
   }
 
+  // todo remove
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {

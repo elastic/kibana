@@ -105,7 +105,7 @@ export const fieldList = (
       this.groups.clear();
     };
 
-    public readonly replaceAll = (spcs: FieldSpec[]) => {
+    public readonly replaceAll = (spcs: FieldSpec[] = []) => {
       this.removeAll();
       spcs.forEach(this.add);
     };
