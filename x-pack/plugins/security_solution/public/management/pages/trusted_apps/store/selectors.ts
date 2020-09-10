@@ -5,7 +5,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { ApiError } from '@elastic/elasticsearch';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
@@ -16,6 +15,7 @@ import {
   isOutdatedResourceState,
   LoadedResourceState,
   PaginationInfo,
+  TrustedAppCreateFailure,
   TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state';
@@ -118,7 +118,7 @@ export const getTrustedAppCreateData: (
 
 export const getApiCreateErrors: (
   state: Immutable<TrustedAppsListPageState>
-) => undefined | ApiError = ({ createView }) => {
+) => undefined | TrustedAppCreateFailure['data'] = ({ createView }) => {
   return (isTrustedAppCreateFailureState(createView) && createView.data) || undefined;
 };
 

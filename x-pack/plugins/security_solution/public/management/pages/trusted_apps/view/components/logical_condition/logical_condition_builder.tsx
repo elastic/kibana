@@ -5,14 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  CommonProps,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, CommonProps, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
 

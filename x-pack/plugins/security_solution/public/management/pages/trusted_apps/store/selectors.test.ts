@@ -26,7 +26,6 @@ import {
   createSampleTrustedApps,
   createUninitialisedResourceState,
 } from '../test_utils';
-import { initialTrustedAppsPageState } from './reducer';
 
 describe('selectors', () => {
   describe('needsRefreshOfListData()', () => {
@@ -53,19 +52,19 @@ describe('selectors', () => {
     it('returns true when current loaded page index is outdated', () => {
       const listView = createLoadedListViewWithPagination({ index: 1, size: 20 });
 
-      expect(needsRefreshOfListData({ listView, active: true })).toBe(true);
+      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(true);
     });
 
     it('returns true when current loaded page size is outdated', () => {
       const listView = createLoadedListViewWithPagination({ index: 0, size: 50 });
 
-      expect(needsRefreshOfListData({ listView, active: true })).toBe(true);
+      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(true);
     });
 
     it('returns false when current loaded data is up to date', () => {
       const listView = createLoadedListViewWithPagination();
 
-      expect(needsRefreshOfListData({ listView, active: true })).toBe(false);
+      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(false);
     });
   });
 
@@ -73,9 +72,9 @@ describe('selectors', () => {
     it('returns current list resource state', () => {
       const listView = createDefaultListView();
 
-      expect(getCurrentListResourceState({ listView, active: false })).toStrictEqual(
-        createUninitialisedResourceState()
-      );
+      expect(
+        getCurrentListResourceState({ listView, active: false, createView: undefined })
+      ).toStrictEqual(createUninitialisedResourceState());
     });
   });
 
@@ -87,11 +86,12 @@ describe('selectors', () => {
           200
         ),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
-      expect(getLastLoadedListResourceState({ listView, active: false })).toStrictEqual(
-        createListLoadedResourceState(createDefaultPaginationInfo(), 200)
-      );
+      expect(
+        getLastLoadedListResourceState({ listView, active: false, createView: undefined })
+      ).toStrictEqual(createListLoadedResourceState(createDefaultPaginationInfo(), 200));
     });
   });
 
@@ -112,7 +112,7 @@ describe('selectors', () => {
         show: undefined,
       };
 
-      expect(getListItems({ listView, active: false })).toStrictEqual(
+      expect(getListItems({ listView, active: false, createView: undefined })).toStrictEqual(
         createSampleTrustedApps(createDefaultPaginationInfo())
       );
     });
@@ -136,9 +136,10 @@ describe('selectors', () => {
           200
         ),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
-      expect(getListTotalItemsCount({ listView, active: false })).toBe(200);
+      expect(getListTotalItemsCount({ listView, active: false, createView: undefined })).toBe(200);
     });
   });
 
@@ -174,18 +175,24 @@ describe('selectors', () => {
           200
         ),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
-      expect(getListErrorMessage({ listView, active: false })).toBeUndefined();
+      expect(
+        getListErrorMessage({ listView, active: false, createView: undefined })
+      ).toBeUndefined();
     });
 
     it('returns message when not in failed state', () => {
       const listView = {
         currentListResourceState: createListFailedResourceState('Internal Server Error'),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
-      expect(getListErrorMessage({ listView, active: false })).toBe('Internal Server Error');
+      expect(getListErrorMessage({ listView, active: false, createView: undefined })).toBe(
+        'Internal Server Error'
+      );
     });
   });
 
@@ -203,9 +210,10 @@ describe('selectors', () => {
           200
         ),
         currentPaginationInfo: createDefaultPaginationInfo(),
+        show: undefined,
       };
 
-      expect(isListLoading({ listView, active: false })).toBe(true);
+      expect(isListLoading({ listView, active: false, createView: undefined })).toBe(true);
     });
   });
 });

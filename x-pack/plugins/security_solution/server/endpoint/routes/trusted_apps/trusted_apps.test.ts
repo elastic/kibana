@@ -144,7 +144,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'path',
+          field: 'process.path',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
