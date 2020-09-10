@@ -191,9 +191,8 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
-      panels.mainMenu.items.push({
-        name: <EuiHorizontalRule margin="none" />,
-      });
+      // TODO: Add separator line here once it is available in EUI.
+      // See https://github.com/elastic/eui/pull/4018
       panels.mainMenu.items.push(...panel.items);
     }
   }
