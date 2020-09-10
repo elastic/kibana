@@ -232,7 +232,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   return (
     <div id={columnId}>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>Choose a function</EuiFormLabel>
+        <EuiFormLabel>
+          {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+            defaultMessage: 'Choose a function',
+          })}
+        </EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
