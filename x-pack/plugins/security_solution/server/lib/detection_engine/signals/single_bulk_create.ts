@@ -51,7 +51,10 @@ export const filterDuplicateRules = (
     if (doc._source.signal == null) {
       return true;
     } else {
-      return !doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId);
+      return !(
+        doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
+        doc._source.signal.rule.id === ruleId
+      );
     }
   });
 };

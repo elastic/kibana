@@ -100,9 +100,17 @@ describe('es', () => {
       expect(agg.time_buckets.date_histogram.time_zone).to.equal('Etc/UTC');
     });
 
-    it('sets the field and interval', () => {
+    it('sets the field', () => {
       expect(agg.time_buckets.date_histogram.field).to.equal('@timestamp');
-      expect(agg.time_buckets.date_histogram.interval).to.equal('1y');
+    });
+
+    it('sets the interval for calendar_interval correctly', () => {
+      expect(agg.time_buckets.date_histogram).to.have.property('calendar_interval', '1y');
+    });
+
+    it('sets the interval for fixed_interval correctly', () => {
+      const a = createDateAgg({ timefield: '@timestamp', interval: '24h' }, tlConfig);
+      expect(a.time_buckets.date_histogram).to.have.property('fixed_interval', '24h');
     });
 
     it('sets min_doc_count to 0', () => {
