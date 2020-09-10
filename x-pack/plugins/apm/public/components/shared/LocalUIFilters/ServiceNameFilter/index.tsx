@@ -47,7 +47,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   );
 
   useEffect(() => {
-    if (!serviceName && serviceNames.length > 0) {
+    if (serviceNames?.length > 0 && serviceName !== serviceNames[0]) {
       updateServiceName(serviceNames[0]);
     }
   }, [serviceNames, serviceName, updateServiceName]);
