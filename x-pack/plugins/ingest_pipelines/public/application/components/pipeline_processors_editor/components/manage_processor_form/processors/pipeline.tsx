@@ -27,7 +27,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.pipelineForm.pipelineNameFieldHelpText',
       {
-        defaultMessage: 'Name of the pipeline to execute.',
+        defaultMessage: 'Name of the ingest pipeline to run.',
       }
     ),
     validations: [
