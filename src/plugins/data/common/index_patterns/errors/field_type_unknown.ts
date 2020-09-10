@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldSpec } from './types';
+import { FieldSpec } from '../types';
 
 export class FieldTypeUnknownError extends Error {
   public readonly fieldSpec: FieldSpec;

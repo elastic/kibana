@@ -12,6 +12,7 @@ import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   useRefreshAnalyticsList,
@@ -130,19 +131,24 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await mlContext.indexPatterns.make();
+      const newIndexPattern = await mlContext.indexPatterns.create({ title: indexPatternName });
+      await mlContext.indexPatterns.saveNew(newIndexPattern);
 
-      Object.assign(newIndexPattern, {
-        id: '',
-        title: indexPatternName,
+      // check if there's a default index pattern, if not,
+      // set the newly created one as the default index pattern.
+      await mlContext.indexPatterns.setDefault(newIndexPattern.id as string);
+
+      addRequestMessage({
+        message: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
+          {
+            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
+            values: { indexPatternName },
+          }
+        ),
       });
-
-      const id = await newIndexPattern.create();
-
-      await mlContext.indexPatterns.clearCache();
-
-      // id returns false if there's a duplicate index pattern.
-      if (id === false) {
+    } catch (e) {
+      if (e instanceof DuplicateIndexPatternError) {
         addRequestMessage({
           error: i18n.translate(
             'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
@@ -158,34 +164,17 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
             }
           ),
         });
-        return;
+      } else {
+        addRequestMessage({
+          error: getErrorMessage(e),
+          message: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
+            {
+              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+            }
+          ),
+        });
       }
-
-      // check if there's a default index pattern, if not,
-      // set the newly created one as the default index pattern.
-      if (!mlContext.kibanaConfig.get('defaultIndex')) {
-        await mlContext.kibanaConfig.set('defaultIndex', id);
-      }
-
-      addRequestMessage({
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
-          {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
-            values: { indexPatternName },
-          }
-        ),
-      });
-    } catch (e) {
-      addRequestMessage({
-        error: getErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
-          {
-            defaultMessage: 'An error occurred creating the Kibana index pattern:',
-          }
-        ),
-      });
     }
   };
 

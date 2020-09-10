@@ -563,6 +563,10 @@ export class IndexPattern implements IIndexPattern {
       return response.id;
     };
 
+    // search by title
+    // if dupe and override, delete index pattern
+    // if no dupe, create
+
     const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {

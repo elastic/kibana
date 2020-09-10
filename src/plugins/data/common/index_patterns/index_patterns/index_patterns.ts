@@ -40,6 +40,7 @@ import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
+import { findByTitle } from '../utils';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -166,6 +167,12 @@ export class IndexPatternsService {
     }
 
     return null;
+  };
+
+  setDefault = async (id: string, force = false) => {
+    if (force || !this.config.get('defaultIndex')) {
+      await this.config.set('defaultIndex', id);
+    }
   };
 
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
@@ -318,12 +325,33 @@ export class IndexPatternsService {
     });
 
     await indexPattern._fetchFields();
-    await indexPattern.create();
+    // todo should save as separate step
+    // await indexPattern.create();
 
     return indexPattern;
   }
 
-  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+  async saveNew(indexPattern: IndexPattern, override = false) {
+    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
+    if (dupe && override) {
+      await this.delete(dupe.id);
+    } else {
+      throw new Error('Duplicate index pattern: ${indexPattern.title}');
+    }
+
+    const body = indexPattern.prepBody();
+    const response = await this.savedObjectsClient.create(savedObjectType, body, {
+      id: indexPattern.id,
+    });
+    indexPattern.id = response.id;
+    return indexPattern;
+  }
+
+  async save(indexPattern: IndexPattern) {
+    return this.update(indexPattern);
+  }
+
+  async update(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
     if (!indexPattern.id) return;
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -343,7 +371,7 @@ export class IndexPatternsService {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
       })
-      .catch((err) => {
+      .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = new IndexPattern({
             savedObjectsClient: this.savedObjectsClient,
@@ -357,7 +385,7 @@ export class IndexPatternsService {
             metaFields,
           });
 
-          return samePattern.init().then(() => {
+          samePattern.init().then(() => {
             // What keys changed from now and what the server returned
             const updatedBody = samePattern.prepBody();
 
@@ -403,7 +431,7 @@ export class IndexPatternsService {
             indexPatternCache.clear(indexPattern.id!);
 
             // Try the save again
-            return this.save(indexPattern, saveAttempts);
+            return this.update(indexPattern, saveAttempts);
           });
         }
         throw err;

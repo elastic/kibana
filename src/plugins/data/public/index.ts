@@ -266,6 +266,8 @@ export {
   fieldList,
 } from '../common';
 
+export * from '../common/index_patterns/errors';
+
 /*
  * Autocomplete query suggestions:
  */
