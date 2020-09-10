@@ -28,17 +28,20 @@ import {
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { TimeBucketsInterval } from '../../../../../data';
 
 export interface TimechartHeaderProps {
   /**
    * Format of date to be displayed
    */
-  dateFormat: string;
+  dateFormat?: string;
   /**
    * Interval for the buckets of the recent request
    */
-  bucketInterval?: TimeBucketsInterval;
+  bucketInterval?: {
+    scaled?: boolean;
+    description?: string;
+    scale?: number;
+  };
   /**
    * Range of dates to be displayed
    */
@@ -73,6 +76,9 @@ export function TimechartHeader({
     (datetime: string) => {
       if (!datetime) {
         return '';
+      }
+      if (!dateFormat) {
+        return datetime;
       }
       return moment(datetime).format(dateFormat);
     },
@@ -141,7 +147,7 @@ export function TimechartHeader({
                       'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
                     values: {
                       bucketsDescription:
-                        bucketInterval.scale > 1
+                        bucketInterval!.scale && bucketInterval!.scale > 1
                           ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
                               defaultMessage: 'buckets that are too large',
                             })

@@ -30,7 +30,7 @@ import {
 } from './calc_es_interval';
 import { autoInterval } from '../../_interval_options';
 
-export interface TimeBucketsInterval extends moment.Duration {
+interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
   description: string;
   esValue: EsInterval['value'];
