@@ -1,5 +1,5 @@
 [[url-drilldown]]
-=== URL Drilldown
+=== URL drilldown
 
 The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
 The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
@@ -219,4 +219,3 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 | Aggregation field behind the selected range, if available.
 
 |===
-
