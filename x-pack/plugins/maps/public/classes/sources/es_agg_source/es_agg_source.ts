@@ -5,19 +5,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Adapters } from 'src/plugins/inspector/public';
+import { GeoJsonProperties } from 'geojson';
+import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory } from '../../fields/es_agg_field';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
+import { IESAggField } from '../../fields/es_agg_field';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
+import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IField } from '../../fields/field';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
+export interface IESAggSource extends IESSource {
+  getAggKey(aggType: AGG_TYPE, fieldName: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
+  getMetricFields(): IESAggField[];
+  hasMatchingMetricField(fieldName: string): boolean;
+  getMetricFieldForName(fieldName: string): IESAggField | null;
+  getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
+}
+
 export class AbstractESAggSource extends AbstractESSource {
-  constructor(descriptor, inspectorAdapters) {
+  private readonly _metricFields: IESAggField[];
+
+  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters: Adapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = [];
-    if (this._descriptor.metrics) {
-      this._descriptor.metrics.forEach((aggDescriptor) => {
+    if (descriptor.metrics) {
+      descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
         this._metricFields.push(
           ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
         );
@@ -25,30 +44,31 @@ export class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  getFieldByName(name) {
-    return this.getMetricFieldForName(name);
+  getFieldByName(fieldName: string) {
+    return this.getMetricFieldForName(fieldName);
   }
 
-  createField() {
+  createField({ fieldName }: { fieldName: string }): IField {
     throw new Error('Cannot create a new field from just a fieldname for an es_agg_source.');
   }
 
-  hasMatchingMetricField(fieldName) {
+  hasMatchingMetricField(fieldName: string): boolean {
     const matchingField = this.getMetricFieldForName(fieldName);
     return !!matchingField;
   }
 
-  getMetricFieldForName(fieldName) {
-    return this.getMetricFields().find((metricField) => {
+  getMetricFieldForName(fieldName: string): IESAggField | null {
+    const targetMetricField = this.getMetricFields().find((metricField: IESAggField) => {
       return metricField.getName() === fieldName;
     });
+    return targetMetricField ? targetMetricField : null;
   }
 
   getOriginForField() {
     return FIELD_ORIGIN.SOURCE;
   }
 
-  getMetricFields() {
+  getMetricFields(): IESAggField[] {
     const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
     // Handle case where metrics is empty because older saved object state is empty array or there are no valid aggs.
     return metrics.length === 0
@@ -56,14 +76,14 @@ export class AbstractESAggSource extends AbstractESSource {
       : metrics;
   }
 
-  getAggKey(aggType, fieldName) {
+  getAggKey(aggType: AGG_TYPE, fieldName: string): string {
     return getSourceAggKey({
       aggType,
       aggFieldName: fieldName,
     });
   }
 
-  getAggLabel(aggType, fieldName) {
+  getAggLabel(aggType: AGG_TYPE, fieldName: string): string {
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;
@@ -81,8 +101,8 @@ export class AbstractESAggSource extends AbstractESSource {
     return this.getMetricFields();
   }
 
-  getValueAggsDsl(indexPattern) {
-    const valueAggsDsl = {};
+  getValueAggsDsl(indexPattern: IndexPattern) {
+    const valueAggsDsl: { [key: string]: unknown } = {};
     this.getMetricFields().forEach((esAggMetric) => {
       const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
       if (aggDsl) {
@@ -92,9 +112,9 @@ export class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-    const metricFields = this.getMetricFields();
-    const tooltipPropertiesPromises = [];
+  async getTooltipProperties(properties: GeoJsonProperties) {
+    const metricFields = await this.getFields();
+    const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
@@ -105,9 +125,9 @@ export class AbstractESAggSource extends AbstractESSource {
       }
 
       const tooltipPromise = metricField.createTooltipProperty(value);
-      tooltipPropertiesPromises.push(tooltipPromise);
+      promises.push(tooltipPromise);
     });
 
-    return await Promise.all(tooltipPropertiesPromises);
+    return await Promise.all(promises);
   }
 }
