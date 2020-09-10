@@ -109,6 +109,7 @@ export function Waterfall({
         onClickWaterfallItem={(item: IWaterfallItem) =>
           toggleFlyout({ history, item, location })
         }
+        onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
       />
     );
   }
