@@ -23,12 +23,15 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
-export const indexBasedRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const indexBasedRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
         defaultMessage: 'Index',

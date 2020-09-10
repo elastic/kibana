@@ -122,6 +122,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
       )}
       {isInitialized === true && analytics.length > 0 && (
         <>
+          <EuiSpacer />
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiText size="m">

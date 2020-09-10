@@ -12,7 +12,7 @@ import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/publi
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 
-import { useNavigateToPath } from '../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -76,10 +76,16 @@ const MlRoutes: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => {
   const navigateToPath = useNavigateToPath();
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
+
   return (
     <>
       {Object.entries(routes).map(([name, routeFactory]) => {
-        const route = routeFactory(navigateToPath);
+        const route = routeFactory(navigateToPath, basePath.get());
 
         return (
           <Route

@@ -29,12 +29,15 @@ import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../brea
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
-export const calendarListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const calendarListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/calendars_list',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
         defaultMessage: 'Calendar management',

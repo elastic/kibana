@@ -88,7 +88,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           <span>
             {i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
               defaultMessage: 'Max anomaly score',
-            })}{' '}
+            })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
@@ -203,6 +203,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
 
   return (
     <Fragment>
+      <EuiSpacer />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="m">

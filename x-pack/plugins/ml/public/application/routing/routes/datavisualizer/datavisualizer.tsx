@@ -23,12 +23,15 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
-export const selectorRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const selectorRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
   ],
 });
 

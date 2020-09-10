@@ -38,13 +38,16 @@ interface NewCalendarPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const newCalendarRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/calendars_list/new_calendar',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
@@ -54,13 +57,16 @@ export const newCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute
   ],
 });
 
-export const editCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const editCalendarRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/calendars_list/edit_calendar/:calendarId',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',

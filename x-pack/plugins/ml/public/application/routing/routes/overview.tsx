@@ -24,11 +24,14 @@ import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcr
 import { useCreateAndNavigateToMlLink } from '../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 
-export const overviewRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const overviewRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/overview',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.overview.overviewLabel', {
         defaultMessage: 'Overview',
@@ -56,7 +59,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   );
 };
 
-export const appRootRouteFactory = (): MlRoute => ({
+export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: '/',
   render: () => <Page />,
   breadcrumbs: [],

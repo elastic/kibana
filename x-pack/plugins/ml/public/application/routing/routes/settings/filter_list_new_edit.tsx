@@ -39,13 +39,16 @@ interface NewFilterPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const newFilterListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/filter_lists/new_filter_list',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
 
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
@@ -56,13 +59,16 @@ export const newFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRou
   ],
 });
 
-export const editFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const editFilterListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/filter_lists/edit_filter_list/:filterId',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',
