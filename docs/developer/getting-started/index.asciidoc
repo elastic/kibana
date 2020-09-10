@@ -49,7 +49,7 @@ ____
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
-{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}packages/kbn-pm].)
+{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm].)
 
 When switching branches which use different versions of npm packages you
 may need to run:
