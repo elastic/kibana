@@ -17,7 +17,7 @@ import {
 } from './index';
 
 const LegacyESErrors = errors as Record<string, any>;
-type ITestEsErrorsFnParams = [errorCode: string, error: any, expectedMessage: string];
+type ITestEsErrorsFnParams = [string, any, string];
 
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
