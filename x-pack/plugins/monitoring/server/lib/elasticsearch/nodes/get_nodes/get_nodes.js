@@ -96,6 +96,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
     },
     filterPath: [
       'hits.hits._source.source_node',
+      'hits.hits._source.elasticsearch.node',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,
     ],

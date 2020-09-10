@@ -41,6 +41,12 @@ export interface ValidatePolicyHelperData {
    * are not configuring this value - like when they are on a previous step.
    */
   validateIndicesCount?: boolean;
+
+  /**
+   * A policy might be configured with a repository that no longer exists. We want the form to
+   * block in this case because just having a repository configured is not enough for validity.
+   */
+  repositoryDoesNotExist?: boolean;
 }
 
 export const validatePolicy = (
@@ -50,7 +56,13 @@ export const validatePolicy = (
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository, isEditing, policyName, validateIndicesCount } = validationHelperData;
+  const {
+    managedRepository,
+    isEditing,
+    policyName,
+    validateIndicesCount,
+    repositoryDoesNotExist,
+  } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -99,7 +111,7 @@ export const validatePolicy = (
     );
   }
 
-  if (isStringEmpty(repository)) {
+  if (isStringEmpty(repository) || repositoryDoesNotExist) {
     validation.errors.repository.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage', {
         defaultMessage: 'Repository is required.',

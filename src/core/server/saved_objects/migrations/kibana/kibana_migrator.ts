@@ -28,7 +28,6 @@ import { BehaviorSubject } from 'rxjs';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
-import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { MigrationEsClient } from '../core/';
@@ -44,7 +43,6 @@ export interface KibanaMigratorOptions {
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  savedObjectValidations: PropertyValidators;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -80,7 +78,6 @@ export class KibanaMigrator {
     typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
-    savedObjectValidations,
     kibanaVersion,
     logger,
   }: KibanaMigratorOptions) {
@@ -94,7 +91,6 @@ export class KibanaMigrator {
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
       typeRegistry,
-      validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
     // Building the active mappings (and associated md5sums) is an expensive
@@ -124,9 +120,17 @@ export class KibanaMigrator {
     Array<{ status: string }>
   > {
     if (this.migrationResult === undefined || rerun) {
-      this.status$.next({ status: 'running' });
+      // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
+      // unnecessarily, so we skip it in this case.
+      if (!rerun) {
+        this.status$.next({ status: 'running' });
+      }
+
       this.migrationResult = this.runMigrationsInternal().then((result) => {
-        this.status$.next({ status: 'completed', result });
+        // Similar to above, don't publish status updates when rerunning in CI.
+        if (!rerun) {
+          this.status$.next({ status: 'completed', result });
+        }
         return result;
       });
     }
