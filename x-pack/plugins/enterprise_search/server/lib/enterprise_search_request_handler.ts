@@ -79,7 +79,16 @@ export class EnterpriseSearchRequestHandler {
         }
 
         const { status } = apiResponse;
-        const json = await apiResponse.json();
+        const text = await apiResponse.text();
+        let json;
+
+        try {
+          json = JSON.parse(text);
+        } catch (e) {
+          throw new Error(
+            `Server responded with invalid json. Status code was: ${status}. Body was '${text}'`
+          );
+        }
 
         if (hasValidData(json)) {
           return response.custom({ statusCode: status, body: json });

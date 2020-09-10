@@ -151,6 +151,22 @@ describe('EnterpriseSearchRequestHandler', () => {
       );
     });
 
+    it('returns a helpful error if server responds with something other than json', async () => {
+      EnterpriseSearchAPI.mockTextReturn('I am just a text body');
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({
+        path: '/api/invalid',
+      });
+
+      await makeAPICall(requestHandler);
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/invalid');
+
+      expect(responseMock.customError).toHaveBeenCalledWith({
+        body:
+          "Error connecting to Enterprise Search: Server responded with invalid json. Status code was: 200. Body was 'I am just a text body'",
+        statusCode: 502,
+      });
+    });
+
     describe('user authentication errors', () => {
       afterEach(async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
@@ -203,6 +219,11 @@ const EnterpriseSearchAPI = {
   mockReturn(response: object, options?: object) {
     fetchMock.mockImplementation(() => {
       return Promise.resolve(new Response(JSON.stringify(response), options));
+    });
+  },
+  mockTextReturn(response: string, options?: object) {
+    fetchMock.mockImplementation(() => {
+      return Promise.resolve(new Response(response, options));
     });
   },
   mockReturnError() {
