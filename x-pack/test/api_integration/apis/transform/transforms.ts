@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   function assertTransformsResponseBody(body: GetTransformsResponseSchema) {
-    expect(isGetTransformsResponseSchema(body)).to.be(true);
+    expect(isGetTransformsResponseSchema(body)).to.eql(true);
 
     expect(body.count).to.eql(expected.apiTransformTransforms.count);
     expect(body.transforms).to.have.length(expected.apiTransformTransforms.count);
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   function assertSingleTransformResponseBody(body: GetTransformsResponseSchema) {
-    expect(isGetTransformsResponseSchema(body)).to.be(true);
+    expect(isGetTransformsResponseSchema(body)).to.eql(true);
 
     expect(body.count).to.eql(expected.apiTransformTransformsTransformId.count);
     expect(body.transforms).to.have.length(expected.apiTransformTransformsTransformId.count);

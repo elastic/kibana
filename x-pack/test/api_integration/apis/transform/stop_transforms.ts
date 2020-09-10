@@ -7,6 +7,8 @@ import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
+import { isStopTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
+
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
@@ -72,14 +74,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody)
           .expect(200);
 
+        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(true);
         expect(typeof body[transformId].error).to.eql('undefined');
+        await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
 
       it('should return 200 with success:false for unauthorized user', async () => {
-        await transform.api.waitForTransformStateNotToBe(transformId, TRANSFORM_STATE.STOPPED);
-
         const reqBody: StopTransformsRequestSchema = [
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
@@ -93,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody)
           .expect(200);
 
+        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('string');
 
@@ -116,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody)
           .expect(200);
 
+        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body.invalid_transform_id.success).to.eql(false);
         expect(body.invalid_transform_id).to.have.property('error');
       });
@@ -152,8 +156,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody)
           .expect(200);
 
+        expect(isStopTransformsResponseSchema(body)).to.eql(true);
+
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
+          await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
           await transform.api.waitForIndicesToExist(destinationIndices[idx]);
         });
       });
@@ -174,8 +181,11 @@ export default ({ getService }: FtrProviderContext) => {
           ])
           .expect(200);
 
+        expect(isStopTransformsResponseSchema(body)).to.eql(true);
+
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
+          await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
           await transform.api.waitForIndicesToExist(destinationIndices[idx]);
         });
 
