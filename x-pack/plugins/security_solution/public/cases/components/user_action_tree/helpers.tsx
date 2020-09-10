@@ -9,6 +9,7 @@ import React from 'react';
 
 import { CaseFullExternalService, Connector } from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
 import * as i18n from '../case_view/translations';
 import { Tags } from '../tag_list/tags';
 
@@ -78,3 +79,20 @@ const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean)
     </EuiFlexGroup>
   );
 };
+
+export const getPushInfo = (
+  caseServices: CaseServices,
+  parsedValue: { connector_id: string; connector_name: string },
+  index: number
+) =>
+  parsedValue != null
+    ? {
+        firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
+        parsedConnectorId: parsedValue.connector_id,
+        parsedConnectorName: parsedValue.connector_name,
+      }
+    : {
+        firstPush: false,
+        parsedConnectorId: 'none',
+        parsedConnectorName: 'none',
+      };

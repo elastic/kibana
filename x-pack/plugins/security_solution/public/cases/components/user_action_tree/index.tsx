@@ -22,7 +22,11 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { getLabelTitle } from './helpers';
+import { Connector } from '../../../../../case/common/api/cases';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { parseString } from '../../containers/utils';
+import { OnUpdateFields } from '../case_view';
+import { getLabelTitle, getPushInfo } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
@@ -31,10 +35,6 @@ import { UserActionPropertyActions } from './user_action_property_actions';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { UserActionUsername } from './user_action_username';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
-import { Connector } from '../../../../../case/common/api/cases';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseString } from '../../containers/utils';
-import { OnUpdateFields } from '../case_view';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -252,7 +252,6 @@ export const UserActionTree = React.memo(
     };
 
     const userActions: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
-      // eslint-disable-next-line complexity
       (comments, action, index) => {
         if (action.commentId != null && action.action === 'create') {
           const comment = caseData.comments.find((c) => c.id === action.commentId);
@@ -321,18 +320,12 @@ export const UserActionTree = React.memo(
         if (action.actionField.length === 1) {
           const myField = action.actionField[0];
           const parsedValue = parseString(`${action.newValue}`);
-          const { firstPush, parsedConnectorId, parsedConnectorName } =
-            parsedValue != null
-              ? {
-                  firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
-                  parsedConnectorId: parsedValue.connector_id,
-                  parsedConnectorName: parsedValue.connector_name,
-                }
-              : {
-                  firstPush: false,
-                  parsedConnectorId: 'none',
-                  parsedConnectorName: 'none',
-                };
+          const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
+            caseServices,
+            parsedValue,
+            index
+          );
+
           const labelTitle: string | JSX.Element = getLabelTitle({
             action,
             field: myField,
