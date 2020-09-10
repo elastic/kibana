@@ -416,7 +416,7 @@ export function jobsProvider(client: IScopedClusterClient) {
         results[jobId] = body.count > 0;
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
-        if (e.body.status !== 404) {
+        if (e.body?.status !== 404) {
           throw e;
         }
         results[jobId] = false;
