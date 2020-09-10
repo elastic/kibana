@@ -490,7 +490,7 @@ export interface DocLinksStart {
     readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
-            readonly urlDrilldownTriggerPicker: string;
+            readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
