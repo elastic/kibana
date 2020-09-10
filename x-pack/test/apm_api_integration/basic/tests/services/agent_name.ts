@@ -12,7 +12,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const range = archives['apm_8.0.0'];
+  const archiveName = 'apm_8.0.0';
+  const range = archives[archiveName];
   const start = encodeURIComponent(range.start);
   const end = encodeURIComponent(range.end);
 
@@ -29,8 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('apm_8.0.0'));
-      after(() => esArchiver.unload('apm_8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns the agent name', async () => {
         const response = await supertest.get(

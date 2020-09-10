@@ -15,7 +15,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const range = archives_metadata['apm_8.0.0'];
+  const archiveName = 'apm_8.0.0';
+
+  const range = archives_metadata[archiveName];
 
   // url parameters
   const start = encodeURIComponent(range.start);
@@ -25,8 +27,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('APM Services Overview', () => {
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('apm_8.0.0'));
-      after(() => esArchiver.unload('apm_8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns a list of services with anomaly scores', async () => {
         const response = await supertest.get(
