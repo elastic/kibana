@@ -10,11 +10,13 @@ import {
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
   ExternalServiceApi,
+  PushToServiceApiParams,
+  PushToServiceResponse,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import { PushToServiceResponse, TransformFieldsArgs } from './case_types';
+import { TransformFieldsArgs, Comment, EntityInformation } from '../case/common_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
@@ -92,9 +94,10 @@ const pushToServiceHandler = async ({
     mapping.get('comments')?.actionType !== 'nothing'
   ) {
     res.comments = [];
+    const commentsTransformed = transformComments(comments, ['informationAdded']);
 
     const fieldsKey = mapping.get('comments')?.target ?? 'comments';
-    for (const currentComment of comments) {
+    for (const currentComment of commentsTransformed) {
       await externalService.updateIncident({
         incidentId: res.id,
         incident: {
@@ -118,7 +121,7 @@ export const transformFields = ({
   params,
   fields,
   currentIncident,
-}: TransformFieldsArgs): Record<string, string> => {
+}: TransformFieldsArgs<PushToServiceApiParams, ExternalServiceParams>): Record<string, string> => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
@@ -126,19 +129,34 @@ export const transformFields = ({
       [cur.key]: transform({
         value: cur.value,
         date: params.updatedAt ?? params.createdAt,
-        user:
-          (params.updatedBy != null
-            ? params.updatedBy.fullName
-              ? params.updatedBy.fullName
-              : params.updatedBy.username
-            : params.createdBy.fullName
-            ? params.createdBy.fullName
-            : params.createdBy.username) ?? '',
+        user: getEntity(params),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
   }, {});
 };
+
+export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
+  return comments.map((c) => ({
+    ...c,
+    comment: flow(...pipes.map((p) => transformers[p]))({
+      value: c.comment,
+      date: c.updatedAt ?? c.createdAt,
+      user: getEntity(c),
+    }).value,
+  }));
+};
+
+export const getEntity = (entity: EntityInformation): string =>
+  (entity.updatedBy != null
+    ? entity.updatedBy.fullName
+      ? entity.updatedBy.fullName
+      : entity.updatedBy.username
+    : entity.createdBy != null
+    ? entity.createdBy.fullName
+      ? entity.createdBy.fullName
+      : entity.createdBy.username
+    : '') ?? '';
 
 export const api: ExternalServiceApi = {
   handshake: handshakeHandler,
