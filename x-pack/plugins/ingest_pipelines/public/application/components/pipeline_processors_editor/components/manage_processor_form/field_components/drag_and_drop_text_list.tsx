@@ -108,10 +108,11 @@ function DragAndDropTextListComponent({
                             const { isInvalid } = getFieldValidityAndErrorMessage(field);
                             return (
                               <EuiFieldText
-                                compressed
                                 isInvalid={isInvalid}
                                 value={field.value}
                                 onChange={field.onChange}
+                                compressed
+                                fullWidth
                               />
                             );
                           }}

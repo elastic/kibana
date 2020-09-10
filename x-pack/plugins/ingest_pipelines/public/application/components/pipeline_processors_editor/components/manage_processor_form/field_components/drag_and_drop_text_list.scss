@@ -12,6 +12,7 @@
   }
 
   &__item {
+    background-color: $euiColorEmptyShade;
     padding-top: $euiSizeM;
     padding-bottom: $euiSizeM;
     border-bottom: $euiBorderThin;
