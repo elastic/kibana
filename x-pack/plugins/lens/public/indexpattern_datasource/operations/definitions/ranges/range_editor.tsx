@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useDebounce } from 'react-use';
 import { get } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -45,7 +46,21 @@ const BaseRangeEditor = ({
   onMaxBarsChange: (newMaxBars: number) => void;
   onIntervalChange: (newInterval: number) => void;
 }) => {
-  // TODO: manage the temporary empty string for interval
+  // store the value as string: storing it as Number has some issues with decimals
+  const [intervalValue, setIntervalValue] = useState('' + interval);
+
+  // Update locally all the time, but bounce the parents prop function
+  // to aviod too many requests
+  useDebounce(
+    () => {
+      if (!isNaN(Number(intervalValue))) {
+        onIntervalChange(Number(intervalValue));
+      }
+    },
+    256,
+    [intervalValue]
+  );
+
   const sectionLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
     defaultMessage: 'Granularity',
   });
@@ -72,6 +87,7 @@ const BaseRangeEditor = ({
             <EuiFlexItem>
               {autoIntervalEnabled ? (
                 <EuiRange
+                  compressed
                   min={1}
                   max={maxHistogramBars}
                   step={1}
@@ -105,14 +121,16 @@ const BaseRangeEditor = ({
                 />
               ) : (
                 <EuiFieldNumber
+                  compressed
                   data-test-subj="lns-indexPattern-range-interval-field"
-                  value={interval}
-                  onChange={({ target }) => onIntervalChange(Number(target.value))}
+                  value={intervalValue}
+                  step="any"
+                  onChange={({ target }) => setIntervalValue(target.value)}
                   prepend={
                     <>
                       <EuiText size="s">
                         {i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                          defaultMessage: 'Min Interval',
+                          defaultMessage: 'Min interval',
                         })}
                       </EuiText>{' '}
                       <EuiIconTip
@@ -126,13 +144,12 @@ const BaseRangeEditor = ({
                       />
                     </>
                   }
-                  min={0}
                 />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiButtonEmpty iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
+          <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
             {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
               defaultMessage: 'Create custom intervals',
             })}
