@@ -26,7 +26,7 @@ interface Props {
   overlay: Maybe<HTMLElement>;
 }
 
-export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
+export function AnnotationsPlot({ plotValues, annotations }: Props) {
   const theme = useTheme();
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
@@ -70,4 +70,4 @@ export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
       ))}
     </>
   );
-};
+}

@@ -21,7 +21,6 @@ export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.ext
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  elasticsearch: monitoringElasticsearchConfigSchema,
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     ccs: schema.object({
@@ -29,6 +28,9 @@ export const configSchema = schema.object({
     }),
     logs: schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
+    }),
+    metricbeat: schema.object({
+      index: schema.string({ defaultValue: 'metricbeat-*' }),
     }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
@@ -86,7 +88,6 @@ export type MonitoringConfig = ReturnType<typeof createConfig>;
 export function createConfig(config: TypeOf<typeof configSchema>) {
   return {
     ...config,
-    elasticsearch: new ElasticsearchConfig(config.elasticsearch as ElasticsearchConfigType),
     ui: {
       ...config.ui,
       elasticsearch: new MonitoringElasticsearchConfig(config.ui.elasticsearch),

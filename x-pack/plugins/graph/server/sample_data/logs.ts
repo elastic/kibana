@@ -45,7 +45,7 @@ const wsState: any = {
       iconClass: 'fa-key',
     },
   ],
-  blacklist: [
+  blocklist: [
     {
       x: 349.9814471314239,
       y: 274.1259761174194,

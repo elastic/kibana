@@ -5,170 +5,55 @@
 ```ts
 
 import { Action } from 'history';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
-import { Breadcrumb } from '@elastic/eui';
-import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CatAliasesParams } from 'elasticsearch';
-import { CatAllocationParams } from 'elasticsearch';
-import { CatCommonParams } from 'elasticsearch';
-import { CatFielddataParams } from 'elasticsearch';
-import { CatHealthParams } from 'elasticsearch';
-import { CatHelpParams } from 'elasticsearch';
-import { CatIndicesParams } from 'elasticsearch';
-import { CatRecoveryParams } from 'elasticsearch';
-import { CatSegmentsParams } from 'elasticsearch';
-import { CatShardsParams } from 'elasticsearch';
-import { CatSnapshotsParams } from 'elasticsearch';
-import { CatTasksParams } from 'elasticsearch';
-import { CatThreadPoolParams } from 'elasticsearch';
-import { ClearScrollParams } from 'elasticsearch';
-import { Client } from 'elasticsearch';
-import { ClusterAllocationExplainParams } from 'elasticsearch';
-import { ClusterGetSettingsParams } from 'elasticsearch';
-import { ClusterHealthParams } from 'elasticsearch';
-import { ClusterPendingTasksParams } from 'elasticsearch';
-import { ClusterPutSettingsParams } from 'elasticsearch';
-import { ClusterRerouteParams } from 'elasticsearch';
-import { ClusterStateParams } from 'elasticsearch';
-import { ClusterStatsParams } from 'elasticsearch';
-import { CountParams } from 'elasticsearch';
-import { CreateDocumentParams } from 'elasticsearch';
-import { DeleteDocumentByQueryParams } from 'elasticsearch';
-import { DeleteDocumentParams } from 'elasticsearch';
-import { DeleteScriptParams } from 'elasticsearch';
-import { DeleteTemplateParams } from 'elasticsearch';
+import { ErrorToastOptions as ErrorToastOptions_2 } from 'src/core/public/notifications';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
-import { ExistsParams } from 'elasticsearch';
-import { ExplainParams } from 'elasticsearch';
-import { FieldStatsParams } from 'elasticsearch';
-import { GenericParams } from 'elasticsearch';
-import { GetParams } from 'elasticsearch';
-import { GetResponse } from 'elasticsearch';
-import { GetScriptParams } from 'elasticsearch';
-import { GetSourceParams } from 'elasticsearch';
-import { GetTemplateParams } from 'elasticsearch';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { IndexDocumentParams } from 'elasticsearch';
-import { IndicesAnalyzeParams } from 'elasticsearch';
-import { IndicesClearCacheParams } from 'elasticsearch';
-import { IndicesCloseParams } from 'elasticsearch';
-import { IndicesCreateParams } from 'elasticsearch';
-import { IndicesDeleteAliasParams } from 'elasticsearch';
-import { IndicesDeleteParams } from 'elasticsearch';
-import { IndicesDeleteTemplateParams } from 'elasticsearch';
-import { IndicesExistsAliasParams } from 'elasticsearch';
-import { IndicesExistsParams } from 'elasticsearch';
-import { IndicesExistsTemplateParams } from 'elasticsearch';
-import { IndicesExistsTypeParams } from 'elasticsearch';
-import { IndicesFlushParams } from 'elasticsearch';
-import { IndicesFlushSyncedParams } from 'elasticsearch';
-import { IndicesForcemergeParams } from 'elasticsearch';
-import { IndicesGetAliasParams } from 'elasticsearch';
-import { IndicesGetFieldMappingParams } from 'elasticsearch';
-import { IndicesGetMappingParams } from 'elasticsearch';
-import { IndicesGetParams } from 'elasticsearch';
-import { IndicesGetSettingsParams } from 'elasticsearch';
-import { IndicesGetTemplateParams } from 'elasticsearch';
-import { IndicesGetUpgradeParams } from 'elasticsearch';
-import { IndicesOpenParams } from 'elasticsearch';
-import { IndicesPutAliasParams } from 'elasticsearch';
-import { IndicesPutMappingParams } from 'elasticsearch';
-import { IndicesPutSettingsParams } from 'elasticsearch';
-import { IndicesPutTemplateParams } from 'elasticsearch';
-import { IndicesRecoveryParams } from 'elasticsearch';
-import { IndicesRefreshParams } from 'elasticsearch';
-import { IndicesRolloverParams } from 'elasticsearch';
-import { IndicesSegmentsParams } from 'elasticsearch';
-import { IndicesShardStoresParams } from 'elasticsearch';
-import { IndicesShrinkParams } from 'elasticsearch';
-import { IndicesStatsParams } from 'elasticsearch';
-import { IndicesUpdateAliasesParams } from 'elasticsearch';
-import { IndicesUpgradeParams } from 'elasticsearch';
-import { IndicesValidateQueryParams } from 'elasticsearch';
-import { InfoParams } from 'elasticsearch';
-import { IngestDeletePipelineParams } from 'elasticsearch';
-import { IngestGetPipelineParams } from 'elasticsearch';
-import { IngestPutPipelineParams } from 'elasticsearch';
-import { IngestSimulateParams } from 'elasticsearch';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
-import { MGetParams } from 'elasticsearch';
-import { MGetResponse } from 'elasticsearch';
-import { MSearchParams } from 'elasticsearch';
-import { MSearchResponse } from 'elasticsearch';
-import { MSearchTemplateParams } from 'elasticsearch';
-import { MTermVectorsParams } from 'elasticsearch';
-import { NodesHotThreadsParams } from 'elasticsearch';
-import { NodesInfoParams } from 'elasticsearch';
-import { NodesStatsParams } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ParsedQuery } from 'query-string';
 import { Path } from 'history';
-import { PingParams } from 'elasticsearch';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
-import { PutScriptParams } from 'elasticsearch';
-import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
-import { ReindexParams } from 'elasticsearch';
-import { ReindexRethrottleParams } from 'elasticsearch';
-import { RenderSearchTemplateParams } from 'elasticsearch';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { ScrollParams } from 'elasticsearch';
-import { SearchParams } from 'elasticsearch';
-import { SearchResponse } from 'elasticsearch';
-import { SearchShardsParams } from 'elasticsearch';
-import { SearchTemplateParams } from 'elasticsearch';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { ShallowPromise } from '@kbn/utility-types';
-import { SnapshotCreateParams } from 'elasticsearch';
-import { SnapshotCreateRepositoryParams } from 'elasticsearch';
-import { SnapshotDeleteParams } from 'elasticsearch';
-import { SnapshotDeleteRepositoryParams } from 'elasticsearch';
-import { SnapshotGetParams } from 'elasticsearch';
-import { SnapshotGetRepositoryParams } from 'elasticsearch';
-import { SnapshotRestoreParams } from 'elasticsearch';
-import { SnapshotStatusParams } from 'elasticsearch';
-import { SnapshotVerifyRepositoryParams } from 'elasticsearch';
-import { SuggestParams } from 'elasticsearch';
-import { TasksCancelParams } from 'elasticsearch';
-import { TasksGetParams } from 'elasticsearch';
-import { TasksListParams } from 'elasticsearch';
-import { TermvectorsParams } from 'elasticsearch';
+import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
-import { UpdateDocumentByQueryParams } from 'elasticsearch';
-import { UpdateDocumentParams } from 'elasticsearch';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): void;
 
-// @public
-export interface App<HistoryLocationState = unknown> extends AppBase {
-    appRoute?: string;
-    chromeless?: boolean;
-    exactRoute?: boolean;
-    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
-}
-
 // @public (undocumented)
-export interface AppBase {
+export interface App<HistoryLocationState = unknown> {
+    appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
     defaultPath?: string;
     euiIconType?: string;
+    exactRoute?: boolean;
     icon?: string;
     id: string;
-    // @internal
-    legacy?: boolean;
+    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
@@ -232,7 +117,7 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
-    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
@@ -276,6 +161,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
     onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 // @public
@@ -296,10 +182,10 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
-export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
 // @public
 export function assertNever(x: never): never;
@@ -333,14 +219,10 @@ export interface ChromeBrand {
 }
 
 // @public (undocumented)
-export type ChromeBreadcrumb = Breadcrumb;
+export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
-    // @internal (undocumented)
-    __legacy: {
-        setBaseTitle(baseTitle: string): void;
-    };
     change(newTitle: string | string[]): void;
     reset(): void;
 }
@@ -400,28 +282,18 @@ export interface ChromeNavControls {
 
 // @public (undocumented)
 export interface ChromeNavLink {
-    // @deprecated
-    readonly active?: boolean;
     readonly baseUrl: string;
     readonly category?: AppCategory;
-    // @deprecated
     readonly disabled?: boolean;
-    // @deprecated
-    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
-    readonly href?: string;
+    readonly href: string;
     readonly icon?: string;
     readonly id: string;
-    // @internal
-    readonly legacy: boolean;
-    // @deprecated
-    readonly linkToLastSubUrl?: boolean;
     readonly order?: number;
-    // @deprecated
-    readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
     readonly url?: string;
 }
 
@@ -434,12 +306,14 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
+    //
     // @deprecated
     update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -581,6 +455,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         euiIconType: string;
         order: number;
     };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
+    };
     observability: {
         id: string;
         label: string;
@@ -681,6 +561,7 @@ export interface DocLinksStart {
             readonly loadingData: string;
             readonly introduction: string;
         };
+        readonly addData: string;
         readonly kibana: string;
         readonly siem: {
             readonly guide: string;
@@ -695,6 +576,7 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly visualize: Record<string, string>;
     };
 }
 
@@ -983,52 +865,6 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
-// @public (undocumented)
-export interface LegacyApp extends AppBase {
-    // (undocumented)
-    appUrl: string;
-    // (undocumented)
-    disableSubUrlTracking?: boolean;
-    // (undocumented)
-    linkToLastSubUrl?: boolean;
-    // (undocumented)
-    subUrlBase?: string;
-}
-
-// @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup<any, any> {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataSetup;
-}
-
-// @public @deprecated
-export interface LegacyCoreStart extends CoreStart {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataStart;
-}
-
-// @public (undocumented)
-export interface LegacyNavLink {
-    // (undocumented)
-    category?: AppCategory;
-    // (undocumented)
-    euiIconType?: string;
-    // (undocumented)
-    icon?: string;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    order: number;
-    // (undocumented)
-    title: string;
-    // (undocumented)
-    url: string;
-}
-
 // @public
 export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
@@ -1142,23 +978,13 @@ export type PluginOpaqueId = symbol;
 
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
-    legacy: false;
-};
-
-// @public
-export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
-    legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
 };
 
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1166,13 +992,11 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
-    error?: {
-        message: string;
-        statusCode: number;
-    };
+    error?: SavedObjectError;
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
+    originId?: string;
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1190,6 +1014,20 @@ export interface SavedObjectAttributes {
 
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
+
+// Warning: (ae-missing-release-tag) "SavedObjectError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface SavedObjectError {
+    // (undocumented)
+    error: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    metadata?: Record<string, unknown>;
+    // (undocumented)
+    statusCode: number;
+}
 
 // @public
 export interface SavedObjectReference {
@@ -1277,22 +1115,27 @@ export interface SavedObjectsCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    filter?: string;
+    filter?: string | KueryNode;
     // (undocumented)
     hasReference?: {
         type: string;
         id: string;
     };
     // (undocumented)
+    namespaces?: string[];
+    // (undocumented)
     page?: number;
     // (undocumented)
     perPage?: number;
     preference?: string;
+    rootSearchFields?: string[];
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -1314,7 +1157,21 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
 }
 
 // @public
+export interface SavedObjectsImportAmbiguousConflictError {
+    // (undocumented)
+    destinations: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: string;
+    }>;
+    // (undocumented)
+    type: 'ambiguous_conflict';
+}
+
+// @public
 export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    destinationId?: string;
     // (undocumented)
     type: 'conflict';
 }
@@ -1322,10 +1179,16 @@ export interface SavedObjectsImportConflictError {
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
-    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
     id: string;
     // (undocumented)
+    meta: {
+        title?: string;
+        icon?: string;
+    };
+    overwrite?: boolean;
+    // @deprecated (undocumented)
     title?: string;
     // (undocumented)
     type: string;
@@ -1333,11 +1196,6 @@ export interface SavedObjectsImportError {
 
 // @public
 export interface SavedObjectsImportMissingReferencesError {
-    // (undocumented)
-    blocking: Array<{
-        type: string;
-        id: string;
-    }>;
     // (undocumented)
     references: Array<{
         type: string;
@@ -1355,12 +1213,17 @@ export interface SavedObjectsImportResponse {
     success: boolean;
     // (undocumented)
     successCount: number;
+    // (undocumented)
+    successResults?: SavedObjectsImportSuccess[];
 }
 
 // @public
 export interface SavedObjectsImportRetry {
+    createNewCopy?: boolean;
+    destinationId?: string;
     // (undocumented)
     id: string;
+    ignoreMissingReferences?: boolean;
     // (undocumented)
     overwrite: boolean;
     // (undocumented)
@@ -1369,6 +1232,23 @@ export interface SavedObjectsImportRetry {
         from: string;
         to: string;
     }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportSuccess {
+    // @deprecated (undocumented)
+    createNewCopy?: boolean;
+    destinationId?: string;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    meta: {
+        title?: string;
+        icon?: string;
+    };
+    overwrite?: boolean;
     // (undocumented)
     type: string;
 }
@@ -1394,6 +1274,9 @@ export interface SavedObjectsMigrationVersion {
     // (undocumented)
     [pluginName: string]: string;
 }
+
+// @public
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
 
 // @public (undocumented)
 export interface SavedObjectsStart {
@@ -1592,6 +1475,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

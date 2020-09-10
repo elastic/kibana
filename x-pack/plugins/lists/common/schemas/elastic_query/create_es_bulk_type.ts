@@ -14,4 +14,4 @@ export const createEsBulkTypeSchema = t.exact(
   })
 );
 
-export type CreateEsBulkTypeSchema = t.TypeOf<typeof createEsBulkTypeSchema>;
+export type CreateEsBulkTypeSchema = t.OutputOf<typeof createEsBulkTypeSchema>;

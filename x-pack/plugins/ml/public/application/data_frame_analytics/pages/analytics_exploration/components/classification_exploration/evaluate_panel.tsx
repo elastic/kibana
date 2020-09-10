@@ -30,7 +30,7 @@ import {
   DataFrameAnalyticsConfig,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,

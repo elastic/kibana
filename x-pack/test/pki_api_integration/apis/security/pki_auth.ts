@@ -70,8 +70,13 @@ export default function ({ getService }: FtrProviderContext) {
         .ca(CA_CERT)
         .pfx(UNTRUSTED_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
-        .send({ username, password })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
 
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -88,8 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -119,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
         authentication_provider: 'pki',
+        authentication_type: 'token',
       });
 
       // Cookie should be accepted.
@@ -147,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/internal/security/me')
         .ca(CA_CERT)
         .pfx(SECOND_CLIENT_CERT)
+        .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200, {
           username: 'second_client',
@@ -162,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: 'pki',
+          authentication_type: 'token',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);

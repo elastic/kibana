@@ -5,13 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isString, isNumber, capitalize } from 'lodash';
+import { isString, isNumber, upperFirst } from 'lodash';
 
 export function getRequiredFieldError(field: string): string {
   return i18n.translate('xpack.monitoring.alerts.migrate.manageAction.requiredFieldError', {
     defaultMessage: '{field} is a required field.',
     values: {
-      field: capitalize(field),
+      field: upperFirst(field),
     },
   });
 }

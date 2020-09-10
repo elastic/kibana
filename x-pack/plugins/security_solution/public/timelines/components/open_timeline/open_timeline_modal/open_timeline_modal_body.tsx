@@ -5,7 +5,7 @@
  */
 
 import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { OpenTimelineProps, ActionTimelineToShow } from '../types';
@@ -23,6 +23,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
@@ -42,17 +43,31 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
-    tabs,
+    timelineFilter,
+    timelineType,
+    templateTimelineFilter,
     title,
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
-      const actions: ActionTimelineToShow[] =
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate']
-          : ['duplicate'];
+      const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        actions.push('delete');
+      }
+
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
+
+    const SearchRowContent = useMemo(
+      () => (
+        <Fragment key="search-row-content">
+          {!!timelineFilter && timelineFilter}
+          {!!templateTimelineFilter && templateTimelineFilter}
+        </Fragment>
+      ),
+      [timelineFilter, templateTimelineFilter]
+    );
 
     return (
       <>
@@ -64,40 +79,43 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               selectedTimelinesCount={selectedItems.length}
               title={title}
             />
-            <>
-              <SearchRow
-                data-test-subj="search-row"
-                onlyFavorites={onlyFavorites}
-                onQueryChange={onQueryChange}
-                onToggleOnlyFavorites={onToggleOnlyFavorites}
-                query={query}
-                tabs={tabs}
-                totalSearchResultsCount={totalSearchResultsCount}
-              />
-            </>
           </HeaderContainer>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <TimelinesTable
-            actionTimelineToShow={actionsToShow}
-            data-test-subj="timelines-table"
-            deleteTimelines={deleteTimelines}
-            defaultPageSize={defaultPageSize}
-            loading={isLoading}
-            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-            onOpenTimeline={onOpenTimeline}
-            onSelectionChange={onSelectionChange}
-            onTableChange={onTableChange}
-            onToggleShowNotes={onToggleShowNotes}
-            pageIndex={pageIndex}
-            pageSize={pageSize}
-            searchResults={searchResults}
-            showExtendedColumns={false}
-            sortDirection={sortDirection}
-            sortField={sortField}
-            totalSearchResultsCount={totalSearchResultsCount}
-          />
+          <>
+            <SearchRow
+              data-test-subj="search-row"
+              favoriteCount={favoriteCount}
+              onlyFavorites={onlyFavorites}
+              onQueryChange={onQueryChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              query=""
+              timelineType={timelineType}
+            >
+              {SearchRowContent}
+            </SearchRow>
+            <TimelinesTable
+              actionTimelineToShow={actionsToShow}
+              data-test-subj="timelines-table"
+              deleteTimelines={deleteTimelines}
+              defaultPageSize={defaultPageSize}
+              loading={isLoading}
+              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              onOpenTimeline={onOpenTimeline}
+              onSelectionChange={onSelectionChange}
+              onTableChange={onTableChange}
+              onToggleShowNotes={onToggleShowNotes}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              searchResults={searchResults}
+              showExtendedColumns={false}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              timelineType={timelineType}
+              totalSearchResultsCount={totalSearchResultsCount}
+            />
+          </>
         </EuiModalBody>
       </>
     );

@@ -7,6 +7,8 @@
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
+import { showSecurityToast } from '../alerts/lib/security_toasts';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -19,6 +21,9 @@ function formatCluster(cluster) {
   return cluster;
 }
 
+let once = false;
+let inTransit = false;
+
 export function monitoringClustersProvider($injector) {
   return (clusterUuid, ccs, codePaths) => {
     const { min, max } = Legacy.shims.timefilter.getBounds();
@@ -30,23 +35,73 @@ export function monitoringClustersProvider($injector) {
     }
 
     const $http = $injector.get('$http');
-    return $http
-      .post(url, {
-        ccs,
-        timeRange: {
-          min: min.toISOString(),
-          max: max.toISOString(),
-        },
-        codePaths,
-      })
-      .then((response) => response.data)
-      .then((data) => {
-        return formatClusters(data); // return set of clusters
-      })
-      .catch((err) => {
+
+    function getClusters() {
+      return $http
+        .post(url, {
+          ccs,
+          timeRange: {
+            min: min.toISOString(),
+            max: max.toISOString(),
+          },
+          codePaths,
+        })
+        .then((response) => response.data)
+        .then((data) => {
+          return formatClusters(data); // return set of clusters
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return ajaxErrorHandlers(err);
+        });
+    }
+
+    function ensureAlertsEnabled() {
+      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
         return ajaxErrorHandlers(err);
       });
+    }
+
+    function ensureMetricbeatEnabled() {
+      if (Legacy.shims.isCloud) {
+        return Promise.resolve();
+      }
+
+      return $http
+        .get('../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring')
+        .then(({ data }) => {
+          showInternalMonitoringToast({
+            legacyIndices: data.legacy_indices,
+            metricbeatIndices: data.mb_indices,
+          });
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return ajaxErrorHandlers(err);
+        });
+    }
+
+    if (!once && !inTransit) {
+      inTransit = true;
+      return getClusters().then((clusters) => {
+        if (clusters.length) {
+          Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()])
+            .then(([{ data }]) => {
+              showSecurityToast(data);
+              once = true;
+            })
+            .catch(() => {
+              // Intentionally swallow the error as this will retry the next page load
+            })
+            .finally(() => (inTransit = false));
+        }
+        return clusters;
+      });
+    }
+    return getClusters();
   };
 }

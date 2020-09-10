@@ -11,11 +11,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('server-log action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
-
     let serverLogActionId: string;
 
     it('should return 200 when creating a builtin server-log action', async () => {

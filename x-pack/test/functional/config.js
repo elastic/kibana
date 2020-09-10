@@ -57,6 +57,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
+      resolve(__dirname, './apps/management'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -126,6 +127,10 @@ export default async function ({ readConfigFile }) {
       searchProfiler: {
         pathname: '/app/dev_tools',
         hash: '/searchprofiler',
+      },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
       },
       spaceSelector: {
         pathname: '/',
@@ -220,6 +225,17 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_discover_read: {
           kibana: [
             {
@@ -229,6 +245,58 @@ export default async function ({ readConfigFile }) {
               spaces: ['*'],
             },
           ],
+        },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
 
         global_devtools_read: {
@@ -270,6 +338,7 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+<<<<<<< HEAD
         global_remote_cluster_role: {
           kibana: [
             {
@@ -281,6 +350,8 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+=======
+>>>>>>> 0207f82e801e70641f9b1b820e0425187aae0b22
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {

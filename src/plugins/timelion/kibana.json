@@ -1,8 +1,19 @@
 {
   "id": "timelion",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": "timelion",
-  "ui": false,
-  "server": true
+  "version": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredBundles": [
+    "kibanaLegacy",
+    "kibanaUtils",
+    "savedObjects",
+    "visTypeTimelion"
+  ],
+  "requiredPlugins": [
+    "visualizations",
+    "data",
+    "navigation",
+    "visTypeTimelion",
+    "kibanaLegacy"
+  ]
 }

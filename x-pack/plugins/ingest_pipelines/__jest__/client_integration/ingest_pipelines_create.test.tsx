@@ -9,6 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
+import { nestedProcessorsErrorFixture } from './fixtures';
+
 const { setup } = pageHelpers.pipelinesCreate;
 
 jest.mock('@elastic/eui', () => {
@@ -163,6 +165,25 @@ describe('<PipelinesCreate />', () => {
         expect(exists('savePipelineError')).toBe(true);
         expect(find('savePipelineError').text()).toContain(error.message);
       });
+
+      test('displays nested pipeline errors as a flat list', async () => {
+        const { actions, find, exists, waitFor } = testBed;
+        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
+          body: nestedProcessorsErrorFixture,
+        });
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await waitFor('savePipelineError');
+        });
+
+        expect(exists('savePipelineError')).toBe(true);
+        expect(exists('savePipelineError.showErrorsButton')).toBe(true);
+        find('savePipelineError.showErrorsButton').simulate('click');
+        expect(exists('savePipelineError.hideErrorsButton')).toBe(true);
+        expect(exists('savePipelineError.showErrorsButton')).toBe(false);
+        expect(find('savePipelineError').find('li').length).toBe(8);
+      });
     });
 
     describe('test pipeline', () => {
@@ -180,7 +201,7 @@ describe('<PipelinesCreate />', () => {
         const { actions, exists, find, waitFor } = testBed;
 
         await act(async () => {
-          actions.clickTestPipelineButton();
+          actions.clickAddDocumentsButton();
           await waitFor('testPipelineFlyout');
         });
 

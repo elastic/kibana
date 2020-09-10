@@ -2,12 +2,16 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) &gt; [getPendingCount$](./kibana-plugin-plugins-data-public.searchinterceptor.getpendingcount_.md)
 
-## SearchInterceptor.getPendingCount$ property
+## SearchInterceptor.getPendingCount$() method
 
 Returns an `Observable` over the current number of pending searches. This could mean that one of the search requests is still in flight, or that it has only received partial responses.
 
 <b>Signature:</b>
 
 ```typescript
-getPendingCount$: () => import("rxjs").Observable<number>;
+getPendingCount$(): Observable<number>;
 ```
+<b>Returns:</b>
+
+`Observable<number>`
+

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor } from '../../legacy/utils/binder_for';
+import { BinderFor } from './binder_for';
 import { fromRoot } from '../../core/server/utils';
 
 const cliPath = fromRoot('src/cli');
@@ -177,7 +177,7 @@ export class Worker extends EventEmitter {
   }
 
   flushChangeBuffer() {
-    const files = _.unique(this.changes.splice(0));
+    const files = _.uniq(this.changes.splice(0));
     const prefix = files.length > 1 ? '\n - ' : '';
     return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;

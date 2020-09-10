@@ -31,7 +31,7 @@ const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' }
 export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('update');
+  const expectForbidden = expectResponses.forbiddenTypes('update');
   const expectResponseBody = (testCase: UpdateTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {

@@ -9,6 +9,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../mock/match_media';
 import { TestProviders } from '../../mock';
 
 import { DraggableLegendItem, LegendItem } from './draggable_legend_item';

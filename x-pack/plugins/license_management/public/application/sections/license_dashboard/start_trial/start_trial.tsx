@@ -94,14 +94,14 @@ export class StartTrial extends Component<Props, State> {
                   <p>
                     <FormattedMessage
                       id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription"
-                      defaultMessage="This trial is for the full set of {platinumLicenseFeaturesLinkText} of the Elastic Stack.
+                      defaultMessage="This trial is for the full set of {subscriptionFeaturesLinkText} of the Elastic Stack.
                       You'll get immediate access to:"
                       values={{
-                        platinumLicenseFeaturesLinkText: (
+                        subscriptionFeaturesLinkText: (
                           <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                             <FormattedMessage
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.platinumLicenseFeaturesLinkText"
-                              defaultMessage="Platinum features"
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.subscriptionFeaturesLinkText"
+                              defaultMessage="subscription features"
                             />
                           </EuiLink>
                         ),
@@ -236,15 +236,15 @@ export class StartTrial extends Component<Props, State> {
     const description = (
       <span>
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumFeaturesExperienceDescription"
+          id="xpack.licenseMgmt.licenseDashboard.startTrial.subscriptionFeaturesExperienceDescription"
           defaultMessage="Experience what machine learning, advanced security,
-          and all our other {platinumLicenseFeaturesLinkText} have to offer."
+          and all our other {subscriptionFeaturesLinkText} have to offer."
           values={{
-            platinumLicenseFeaturesLinkText: (
+            subscriptionFeaturesLinkText: (
               <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                 <FormattedMessage
-                  id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumLicenseFeaturesLinkText"
-                  defaultMessage="Platinum features"
+                  id="xpack.licenseMgmt.licenseDashboard.startTrial.subscriptionFeaturesLinkText"
+                  defaultMessage="subscription features"
                 />
               </EuiLink>
             ),

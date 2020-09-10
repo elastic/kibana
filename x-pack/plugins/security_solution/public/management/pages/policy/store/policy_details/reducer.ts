@@ -21,6 +21,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     offline: 0,
     online: 0,
     total: 0,
+    other: 0,
   },
 });
 
@@ -108,14 +109,14 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     /**
      * This is directly changing redux state because `policyItem.inputs` was copied over and not cloned.
      */
-    // @ts-ignore
+    // @ts-expect-error
     newState.policyItem.inputs[0].config.policy.value = newPolicy;
 
     Object.entries(action.payload.policyConfig).forEach(([section, newSettings]) => {
       /**
        * this is not safe because `action.payload.policyConfig` may have excess keys
        */
-      // @ts-ignore
+      // @ts-expect-error
       newPolicy[section as keyof UIPolicyConfig] = {
         ...newPolicy[section as keyof UIPolicyConfig],
         ...newSettings,

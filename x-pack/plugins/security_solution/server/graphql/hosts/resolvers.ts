@@ -71,6 +71,7 @@ export const createHostsResolvers = (
         sourceConfiguration: source.configuration,
         hostName: args.hostName,
         defaultIndex: args.defaultIndex,
+        docValueFields: args.docValueFields,
       };
       return libs.hosts.getHostFirstLastSeen(req, options);
     },

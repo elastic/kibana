@@ -3,7 +3,7 @@
 exports[`PingList component renders sorted list without errors 1`] = `
 <EuiPanel>
   <EuiTitle
-    size="xs"
+    size="s"
   >
     <h4>
       <FormattedMessage

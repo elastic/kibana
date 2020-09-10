@@ -61,8 +61,8 @@
  */
 
 import Boom from 'boom';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -73,12 +73,9 @@ import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
-type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
-
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
-  validateDoc: ValidateDoc;
   log: Logger;
 }
 
@@ -113,19 +110,16 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
-   * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
-   *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion,
       migrations: this.migrations,
-      validateDoc,
     });
   }
 
@@ -151,7 +145,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
-    const clonedDoc = cloneDeep(doc);
+    const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
 }
@@ -220,7 +214,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: _.last(transforms).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };
@@ -231,20 +225,15 @@ function buildActiveMigrations(
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
-  kibanaVersion,
   migrations,
-  validateDoc,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
-  validateDoc: ValidateDoc;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
-
-    validateDoc(result);
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have
@@ -292,7 +281,7 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
-      return version ? _.set(acc, prop, version) : acc;
+      return version ? set(acc, prop, version) : acc;
     }, {}),
   };
 }

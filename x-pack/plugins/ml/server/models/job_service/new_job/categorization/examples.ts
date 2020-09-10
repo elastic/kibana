@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
@@ -12,15 +13,14 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
-import { callWithRequestType } from '../../../../../common/types/kibana';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
 
-export function categorizationExamplesProvider(
-  callWithRequest: callWithRequestType,
-  callWithInternalUser: callWithRequestType
-) {
+export function categorizationExamplesProvider({
+  asCurrentUser,
+  asInternalUser,
+}: IScopedClusterClient) {
   const validationResults = new ValidationResults();
 
   async function categorizationExamples(
@@ -57,7 +57,7 @@ export function categorizationExamplesProvider(
       }
     }
 
-    const results: SearchResponse<{ [id: string]: string }> = await callWithRequest('search', {
+    const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
@@ -67,7 +67,7 @@ export function categorizationExamplesProvider(
       },
     });
 
-    const tempExamples = results.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
+    const tempExamples = body.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -112,7 +112,9 @@ export function categorizationExamplesProvider(
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await callWithInternalUser('indices.analyze', {
+    const {
+      body: { tokens },
+    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,

@@ -103,6 +103,10 @@ describe('getOptimizerCacheKey()', () => {
                 "dist": false,
                 "optimizerCacheKey": "♻",
                 "repoRoot": <absolute path>,
+                "themeTags": Array [
+                  "v7dark",
+                  "v7light",
+                ],
               },
             }
           `);

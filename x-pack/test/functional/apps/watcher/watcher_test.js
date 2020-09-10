@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 const watchID = 'watchID';
 const watchName = 'watch Name';
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
     it('should delete the watch', async () => {
       // Navigate to the main list page
       await PageObjects.common.navigateToApp('watcher');
-      const watchList = indexBy(await PageObjects.watcher.getWatches(), 'id');
+      const watchList = keyBy(await PageObjects.watcher.getWatches(), 'id');
       log.debug(watchList);
       expect(watchList.watchID.name).to.eql([watchName]);
       await PageObjects.watcher.deleteWatch(watchID);

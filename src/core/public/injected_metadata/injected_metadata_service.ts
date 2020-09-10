@@ -28,17 +28,6 @@ import {
 import { deepFreeze } from '../../utils/';
 import { AppCategory } from '../';
 
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  category?: AppCategory;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
-}
-
 export interface InjectedPluginMetadata {
   id: PluginName;
   plugin: DiscoveredPlugin;
@@ -67,14 +56,13 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
       app: {
         id: string;
         title: string;
       };
       bundleId: string;
-      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;
@@ -120,6 +108,10 @@ export class InjectedMetadataService {
         return this.state.serverBasePath;
       },
 
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -130,10 +122,6 @@ export class InjectedMetadataService {
 
       getPlugins: () => {
         return this.state.uiPlugins;
-      },
-
-      getLegacyMode: () => {
-        return this.state.legacyMode;
       },
 
       getLegacyMetadata: () => {
@@ -177,15 +165,13 @@ export interface InjectedMetadataSetup {
    * An array of frontend plugins in topological order.
    */
   getPlugins: () => InjectedPluginMetadata[];
-  /** Indicates whether or not we are rendering a known legacy app. */
-  getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
     app: {
       id: string;
       title: string;
     };
     bundleId: string;
-    nav: LegacyNavLink[];
     version: string;
     branch: string;
     buildNum: number;

@@ -20,6 +20,7 @@
 /**
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { vislibTypesConfig as visTypes } from './types';
 import { Data } from './data';
@@ -40,7 +41,7 @@ export class VisConfig {
 
     const visType = visTypes[visConfigArgs.type];
     const typeDefaults = visType(visConfigArgs, this.data);
-    this._values = _.defaultsDeep({}, typeDefaults, DEFAULT_VIS_CONFIG);
+    this._values = _.defaultsDeep({ ...typeDefaults }, DEFAULT_VIS_CONFIG);
     this._values.el = el;
   }
 
@@ -54,6 +55,6 @@ export class VisConfig {
   }
 
   set(property, value) {
-    return _.set(this._values, property, value);
+    return set(this._values, property, value);
   }
 }

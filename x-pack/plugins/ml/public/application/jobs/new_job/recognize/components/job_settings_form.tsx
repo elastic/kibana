@@ -258,7 +258,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           fill
           type="submit"
           isLoading={saveState === SAVE_STATE.SAVING}
-          disabled={!validationResult.formValid}
+          disabled={!validationResult.formValid || saveState === SAVE_STATE.SAVING}
           onClick={() => {
             onSubmit(formState);
           }}
@@ -266,19 +266,11 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             defaultMessage: 'Create job',
           })}
         >
-          {saveState === SAVE_STATE.NOT_SAVED && (
-            <FormattedMessage
-              id="xpack.ml.newJob.recognize.createJobButtonLabel"
-              defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
-              values={{ numberOfJobs: jobs.length }}
-            />
-          )}
-          {saveState === SAVE_STATE.SAVING && (
-            <FormattedMessage
-              id="xpack.ml.newJob.recognize.analysisRunningLabel"
-              defaultMessage="Analysis running"
-            />
-          )}
+          <FormattedMessage
+            id="xpack.ml.newJob.recognize.createJobButtonLabel"
+            defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
+            values={{ numberOfJobs: jobs.length }}
+          />
         </EuiButton>
       </EuiTextAlign>
     </>

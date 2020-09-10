@@ -55,6 +55,10 @@ exports[`buildOSSFeatures returns the dashboard feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "dashboards",
@@ -67,8 +71,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
-          "url",
           "query",
+          "url",
         ],
         "read": Array [
           "index-pattern",
@@ -107,6 +111,7 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",
@@ -179,6 +184,10 @@ exports[`buildOSSFeatures returns the discover feature augmented with appropriat
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "discover",
@@ -240,11 +249,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -265,11 +274,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -315,6 +324,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",
@@ -403,6 +413,10 @@ exports[`buildOSSFeatures returns the visualize feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "visualize",

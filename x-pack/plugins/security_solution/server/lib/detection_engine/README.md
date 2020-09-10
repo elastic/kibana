@@ -59,7 +59,7 @@ which will:
 - Delete any existing alerts you have
 - Delete any existing alert tasks you have
 - Delete any existing signal mapping, policies, and template, you might have previously had.
-- Add the latest signal index and its mappings using your settings from `kibana.dev.yml` environment variable of `xpack.security_solution.signalsIndex`.
+- Add the latest signal index and its mappings using your settings from `kibana.dev.yml` environment variable of `xpack.securitySolution.signalsIndex`.
 - Posts the sample rule from `./rules/queries/query_with_rule_id.json`
 - The sample rule checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
 
@@ -171,6 +171,6 @@ go about doing so.
 To test out the functionality of large lists with rules, the user will need to import a list and post a rule with a reference to that exception list. The following outlines an example using the sample json rule provided in the repo.
 
 * First, set the appropriate env var in order to enable exceptions features`export ELASTIC_XPACK_SECURITY_SOLUTION_LISTS_FEATURE=true` and `export ELASTIC_XPACK_SECURITY_SOLUTION_EXCEPTIONS_LISTS=true` and start kibana
-* Second, import a list of ips from a file called `ci-badguys.txt`. The command should look like this: 
+* Second, import a list of ips from a file called `ci-badguys.txt`. The command should look like this:
 `cd $HOME/kibana/x-pack/plugins/lists/server/scripts && ./import_list_items_by_filename.sh ip ~/ci-badguys.txt`
 * Then, from the detection engine scripts folder (`cd kibana/x-pack/plugins/security_solution/server/lib/detection_engine/scripts`) run `./post_rule.sh rules/queries/lists/query_with_list_plugin.json`

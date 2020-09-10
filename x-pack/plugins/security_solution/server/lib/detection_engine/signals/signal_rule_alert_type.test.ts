@@ -10,7 +10,14 @@ import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import { getGapBetweenRuns, getListsClient, getExceptions, sortExceptionItems } from './utils';
+import {
+  getGapBetweenRuns,
+  getGapMaxCatchupRatio,
+  getListsClient,
+  getExceptions,
+  sortExceptionItems,
+} from './utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -30,6 +37,8 @@ jest.mock('./utils');
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
+jest.mock('./../../../../common/detection_engine/utils');
+jest.mock('../../../../common/detection_engine/parse_schedule_dates');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
   alertId: ruleAlert.id,
@@ -97,6 +106,7 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithValueLists: [],
     });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
+    (getGapMaxCatchupRatio as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],
@@ -126,20 +136,37 @@ describe('rules_notification_alert_type', () => {
   });
 
   describe('executor', () => {
-    it('should warn about the gap between runs', async () => {
-      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1000));
+    it('should warn about the gap between runs if gap is very large', async () => {
+      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(100, 'm'));
+      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
+        maxCatchup: 4,
+        ratio: 20,
+        gapDiffInUnits: 95,
+      });
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
       expect(logger.warn.mock.calls[0][0]).toContain(
-        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
       );
       expect(ruleStatusService.error).toHaveBeenCalled();
       expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
       );
       expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
-        gap: 'a few seconds',
+        gap: '2 hours',
       });
+    });
+
+    it('should NOT warn about the gap between runs if gap small', async () => {
+      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1, 'm'));
+      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
+        maxCatchup: 1,
+        ratio: 1,
+        gapDiffInUnits: 1,
+      });
+      await alert.executor(payload);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
     });
 
     it("should set refresh to 'wait_for' when actions are present", async () => {
@@ -199,6 +226,105 @@ describe('rules_notification_alert_type', () => {
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
           signalsCount: 10,
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = {};
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = {};
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is undefined use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      delete ruleAlert.params.meta;
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      delete payload.params.meta;
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link with a custom link', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
         })
       );
     });

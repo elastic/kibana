@@ -55,6 +55,7 @@ function createPlugin(
       kibanaVersion: '7.0.0',
       requiredPlugins: required,
       optionalPlugins: optional,
+      requiredBundles: [],
       server,
       ui,
     },
@@ -99,15 +100,27 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
   pluginsSystem.addPlugin(createPlugin('no-dep'));
 
   expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
-    Map {
-      Symbol(plugin-a) => Array [
-        Symbol(no-dep),
-      ],
-      Symbol(plugin-b) => Array [
-        Symbol(plugin-a),
-        Symbol(no-dep),
-      ],
-      Symbol(no-dep) => Array [],
+    Object {
+      "asNames": Map {
+        "plugin-a" => Array [
+          "no-dep",
+        ],
+        "plugin-b" => Array [
+          "plugin-a",
+          "no-dep",
+        ],
+        "no-dep" => Array [],
+      },
+      "asOpaqueIds": Map {
+        Symbol(plugin-a) => Array [
+          Symbol(no-dep),
+        ],
+        Symbol(plugin-b) => Array [
+          Symbol(plugin-a),
+          Symbol(no-dep),
+        ],
+        Symbol(no-dep) => Array [],
+      },
     }
   `);
 });

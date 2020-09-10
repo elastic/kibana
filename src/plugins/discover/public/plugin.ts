@@ -53,6 +53,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
@@ -66,6 +67,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
 } from './url_generator';
+import { SearchEmbeddableFactory } from './application/embeddable';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -313,6 +315,8 @@ export class DiscoverPlugin
       this.innerAngularInitialized = true;
     };
 
+    setUiActions(plugins.uiActions);
+
     this.initializeServices = async () => {
       if (this.servicesInitialized) {
         return { core, plugins };
@@ -345,12 +349,7 @@ export class DiscoverPlugin
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
-  private async registerEmbeddable(
-    core: CoreSetup<DiscoverStartPlugins>,
-    plugins: DiscoverSetupPlugins
-  ) {
-    const { SearchEmbeddableFactory } = await import('./application/embeddable');
-
+  private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     if (!this.getEmbeddableInjector) {
       throw Error('Discover plugin method getEmbeddableInjector is undefined');
     }

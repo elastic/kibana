@@ -12,7 +12,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
-// @ts-expect-error: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
 import { initializeElements } from './elements';
 // @ts-expect-error untyped local
@@ -24,7 +23,6 @@ import { modelSpecs } from './uis/models';
 import { initializeViews } from './uis/views';
 import { initializeArgs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
-import { templateSpecs } from './templates';
 
 interface SetupDeps {
   canvas: CanvasSetup;
@@ -59,7 +57,6 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addViewUIs(initializeViews(core, plugins));
     plugins.canvas.addArgumentUIs(initializeArgs(core, plugins));
     plugins.canvas.addTagUIs(tagSpecs);
-    plugins.canvas.addTemplates(templateSpecs);
     plugins.canvas.addTransformUIs(transformSpecs);
   }
 

@@ -22,7 +22,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
 
   return (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.methodLabel', {
             defaultMessage: 'Method',
@@ -48,7 +48,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.nNeighborsLabel', {
             defaultMessage: 'N neighbors',
@@ -78,7 +78,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.outlierFractionLabel', {
             defaultMessage: 'Outlier fraction',
@@ -109,7 +109,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.standardizationEnabledLabel', {
             defaultMessage: 'Standardization enabled',

@@ -64,9 +64,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions } = usePagination();
 
   // Fetch data streams
-  const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
+  const { isLoading, data: dataStreamsData, resendRequest } = useGetDataStreams();
 
-  // Some configs retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<
       EuiTableFieldDataColumnType<DataStream> | EuiTableActionsColumnType<DataStream>
@@ -75,7 +75,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         field: 'dataset',
         sortable: true,
         width: '25%',
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
           defaultMessage: 'Dataset',
         }),
@@ -83,7 +82,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'type',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
@@ -91,7 +89,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'namespace',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
           defaultMessage: 'Namespace',
         }),
@@ -102,7 +99,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'package',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
@@ -245,7 +241,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               key="reloadButton"
               color="primary"
               iconType="refresh"
-              onClick={() => sendRequest()}
+              onClick={() => resendRequest()}
             >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"

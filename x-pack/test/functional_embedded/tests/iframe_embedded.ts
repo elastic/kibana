@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
@@ -35,8 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const iframe = await testSubjects.find('iframe_embedded');
       await browser.switchToFrame(iframe);
 
-      const isChromeHidden = await PageObjects.common.isChromeHidden();
-      expect(isChromeHidden).to.be(false);
+      await retry.waitFor('page rendered for a logged-in user', async () => {
+        return await PageObjects.common.isChromeVisible();
+      });
     });
   });
 }

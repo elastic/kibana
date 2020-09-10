@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiIcon, keyCodes } from '@elastic/eui';
+import { EuiIcon, keys } from '@elastic/eui';
 
 import { JobGroup } from '../../../job_group';
 
@@ -63,17 +63,17 @@ export class GroupList extends Component {
   };
 
   handleKeyDown = (event, group, index) => {
-    switch (event.keyCode) {
-      case keyCodes.ENTER:
+    switch (event.key) {
+      case keys.ENTER:
         this.selectGroup(group);
         break;
-      case keyCodes.SPACE:
+      case keys.SPACE:
         this.selectGroup(group);
         break;
-      case keyCodes.DOWN:
+      case keys.ARROW_DOWN:
         this.moveDown(event, index);
         break;
-      case keyCodes.UP:
+      case keys.ARROW_UP:
         this.moveUp(event, index);
         break;
     }

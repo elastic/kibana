@@ -51,7 +51,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder",
+          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
         ]
       `);
     });

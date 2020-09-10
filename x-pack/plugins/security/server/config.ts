@@ -96,7 +96,7 @@ const providersConfigSchema = schema.object(
         schema.object({
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
-          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+          maxRedirectURLSize: schema.maybe(schema.byteSize()),
           useRelayStateDeepLink: schema.boolean({ defaultValue: false }),
         })
       )
@@ -149,6 +149,14 @@ export const ConfigSchema = schema.object({
   session: schema.object({
     idleTimeout: schema.nullable(schema.duration()),
     lifespan: schema.nullable(schema.duration()),
+    cleanupInterval: schema.duration({
+      defaultValue: '1h',
+      validate(value) {
+        if (value.asSeconds() < 10) {
+          return 'the value must be greater or equal to 10 seconds.';
+        }
+      },
+    }),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -181,7 +189,7 @@ export const ConfigSchema = schema.object({
       'saml',
       schema.object({
         realm: schema.string(),
-        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        maxRedirectURLSize: schema.maybe(schema.byteSize()),
       })
     ),
     http: schema.object({
@@ -247,13 +255,19 @@ export function createConfig(
     type: keyof ProvidersConfigType;
     name: string;
     order: number;
+    hasAccessAgreement: boolean;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
-    for (const [name, { enabled, order }] of Object.entries(providerGroup ?? {})) {
+    for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        sortedProviders.push({ type: type as any, name, order });
+        sortedProviders.push({
+          type: type as any,
+          name,
+          order,
+          hasAccessAgreement: !!accessAgreement?.message,
+        });
       }
     }
   }

@@ -39,7 +39,7 @@ interface AggRowProps {
 export function AggRow(props: AggRowProps) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
-  const lastSibling = last(props.siblings);
+  const lastSibling = last(props.siblings) as MetricsItemsSchema;
 
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';

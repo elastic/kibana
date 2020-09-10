@@ -7,10 +7,8 @@
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import {
-  AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-} from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 jest.mock('./anomaly_swimlane_embeddable', () => ({
   AnomalySwimlaneEmbeddable: jest.fn(),
@@ -46,6 +44,9 @@ describe('AnomalySwimlaneEmbeddableFactory', () => {
     });
     expect(Object.keys(createServices[0])).toEqual(Object.keys(coreStart));
     expect(createServices[1]).toMatchObject(pluginsStart);
-    expect(Object.keys(createServices[2])).toEqual(['anomalyDetectorService', 'explorerService']);
+    expect(Object.keys(createServices[2])).toEqual([
+      'anomalyDetectorService',
+      'anomalyTimelineService',
+    ]);
   });
 });

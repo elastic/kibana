@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(request: IRequestTypesMap[T], options?: ISearchOptions, strategy?: T) => Observable<IResponseTypesMap[T]>;
+export declare type ISearchGeneric = <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
 ```

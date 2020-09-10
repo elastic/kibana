@@ -13,6 +13,7 @@ import {
   SortField,
   Source,
   TimerangeInput,
+  DocValueFieldsInput,
 } from '../../graphql/types';
 import { RequestOptions, RequestOptionsPaginated } from '../../lib/framework';
 import { parseFilterQuery } from '../serialized_query';
@@ -32,6 +33,7 @@ export interface Args {
   filterQuery?: string | null;
   sortField?: SortField | null;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 export interface ArgsPaginated {
   timerange?: TimerangeInput | null;
@@ -39,6 +41,7 @@ export interface ArgsPaginated {
   filterQuery?: string | null;
   sortField?: SortField | null;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 
 export const createOptions = (
@@ -50,6 +53,7 @@ export const createOptions = (
   const fields = getFields(getOr([], 'fieldNodes[0]', info));
   return {
     defaultIndex: args.defaultIndex,
+    docValueFields: args.docValueFields ?? [],
     sourceConfiguration: source.configuration,
     timerange: args.timerange!,
     pagination: args.pagination!,
@@ -70,6 +74,7 @@ export const createOptionsPaginated = (
   const fields = getFields(getOr([], 'fieldNodes[0]', info));
   return {
     defaultIndex: args.defaultIndex,
+    docValueFields: args.docValueFields ?? [],
     sourceConfiguration: source.configuration,
     timerange: args.timerange!,
     pagination: args.pagination!,

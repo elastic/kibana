@@ -5,7 +5,7 @@
  */
 
 import { getEnabledFeatures } from './feature_utils';
-import { Feature } from '../../../../features/public';
+import { FeatureConfig } from '../../../../features/public';
 
 const buildFeatures = () =>
   [
@@ -25,7 +25,7 @@ const buildFeatures = () =>
       id: 'feature4',
       name: 'feature 4',
     },
-  ] as Feature[];
+  ] as FeatureConfig[];
 
 const buildSpace = (disabledFeatures = [] as string[]) => ({
   id: 'space',

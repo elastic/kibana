@@ -6,10 +6,11 @@
 
 import { createStore, Store, Reducer } from 'redux';
 import { cameraReducer, cameraInitialState } from './reducer';
-import { CameraState, Vector2, ResolverAction } from '../../types';
+import { CameraState, Vector2 } from '../../types';
 import * as selectors from './selectors';
 import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
+import { ResolverAction } from '../actions';
 
 type TestAction =
   | ResolverAction

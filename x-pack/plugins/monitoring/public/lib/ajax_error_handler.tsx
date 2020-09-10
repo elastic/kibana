@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { contains } from 'lodash';
+import { includes } from 'lodash';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../legacy_shims';
@@ -38,7 +38,7 @@ export function ajaxErrorHandlersProvider() {
     if (err.status === 403) {
       // redirect to error message view
       history.replaceState(null, '', '#/access-denied');
-    } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) {
+    } else if (err.status === 404 && !includes(window.location.hash, 'no-data')) {
       // pass through if this is a 404 and we're already on the no-data page
       Legacy.shims.toastNotifications.addDanger({
         title: toMountPoint(

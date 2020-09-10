@@ -19,6 +19,10 @@ export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
   const SUBJ_SUMMARY_STATUS = `${SUBJ_SUMMARY} > statusIcon`;
 
   return new (class ElasticsearchNodeDetail {
+    async clickAdvanced() {
+      return testSubjects.click('esNodeDetailAdvancedLink');
+    }
+
     async getSummary() {
       return {
         transportAddress: await testSubjects.getVisibleText(SUBJ_SUMMARY_TRANSPORT_ADDRESS),

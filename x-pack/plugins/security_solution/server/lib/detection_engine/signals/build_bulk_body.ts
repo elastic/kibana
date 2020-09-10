@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalHit } from './types';
+import { SignalSourceHit, SignalHit, Signal } from './types';
 import { buildRule } from './build_rule';
-import { buildSignal } from './build_signal';
+import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
@@ -51,13 +51,17 @@ export const buildBulkBody = ({
     enabled,
     createdAt,
     createdBy,
+    doc,
     updatedAt,
     updatedBy,
     interval,
     tags,
     throttle,
   });
-  const signal = buildSignal(doc, rule);
+  const signal: Signal = {
+    ...buildSignal([doc], rule),
+    ...additionalSignalFields(doc),
+  };
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,

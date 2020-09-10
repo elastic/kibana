@@ -15,7 +15,6 @@ export const MetricsSettingsPage = () => {
     <EuiErrorBoundary>
       <SourceConfigurationSettings
         shouldAllowEdit={uiCapabilities?.infrastructure?.configureSource as boolean}
-        displaySettings="metrics"
       />
     </EuiErrorBoundary>
   );

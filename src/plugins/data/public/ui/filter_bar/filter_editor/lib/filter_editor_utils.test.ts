@@ -177,9 +177,25 @@ describe('Filter editor utils', () => {
     it('should return true for range filter with from/to', () => {
       const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
         from: 'foo',
-        too: 'goo',
+        to: 'goo',
       });
       expect(isValid).toBe(true);
+    });
+
+    it('should return false for date range filter with bad from', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: 'foo',
+        to: 'now',
+      });
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for date range filter with bad to', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: '2020-01-01',
+        to: 'mau',
+      });
+      expect(isValid).toBe(false);
     });
 
     it('should return true for exists filter without params', () => {

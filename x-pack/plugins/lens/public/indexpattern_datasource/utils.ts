@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { DataType } from '../types';
 import { DraggedField } from './indexpattern';
 import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { DataType } from '../types';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations

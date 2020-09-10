@@ -33,12 +33,15 @@ describe('Security Plugin', () => {
           coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
             PluginStartDependencies
           >,
-          { licensing: licensingMock.createSetup() }
+          {
+            licensing: licensingMock.createSetup(),
+          }
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
+          isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
@@ -65,6 +68,7 @@ describe('Security Plugin', () => {
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
+          isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
@@ -117,7 +121,6 @@ describe('Security Plugin', () => {
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
-      expect(startManagementServiceMock).toHaveBeenCalledWith({ management: managementStartMock });
     });
   });
 

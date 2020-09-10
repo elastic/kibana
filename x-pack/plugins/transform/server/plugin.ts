@@ -6,9 +6,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -23,7 +23,7 @@ import { License } from './services';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     transform?: {
-      dataClient: IScopedClusterClient;
+      dataClient: ILegacyScopedClusterClient;
     };
   }
 }
@@ -50,7 +50,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
-  private transformESClient?: ICustomClusterClient;
+  private transformESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();

@@ -5,16 +5,16 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { Datasource } from '../../../../common/types/models';
+import { PackagePolicy } from './';
 
 /**
- * Supported routing state for the create datasource page routes
+ * Supported routing state for the create package policy page routes
  */
-export interface CreateDatasourceRouteState {
-  /** On a successful save of the datasource, use navigate to the given app */
+export interface CreatePackagePolicyRouteState {
+  /** On a successful save of the package policy, use navigate to the given app */
   onSaveNavigateTo?:
     | Parameters<ApplicationStart['navigateToApp']>
-    | ((newDatasource: Datasource) => Parameters<ApplicationStart['navigateToApp']>);
+    | ((newPackagePolicy: PackagePolicy) => Parameters<ApplicationStart['navigateToApp']>);
   /** On cancel, navigate to the given app */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
@@ -22,6 +22,25 @@ export interface CreateDatasourceRouteState {
 }
 
 /**
+ * Supported routing state for the agent policy details page routes with deploy agents action
+ */
+export interface AgentPolicyDetailsDeployAgentAction {
+  /** On done, navigate to the given app */
+  onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
+
+/**
+ * Supported routing state for the agent policy details page routes with deploy agents action
+ */
+export interface AgentDetailsReassignPolicyAction {
+  /** On done, navigate to the given app */
+  onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
+
+/**
  * All possible Route states.
  */
-export type AnyIntraAppRouteState = CreateDatasourceRouteState;
+export type AnyIntraAppRouteState =
+  | CreatePackagePolicyRouteState
+  | AgentPolicyDetailsDeployAgentAction
+  | AgentDetailsReassignPolicyAction;

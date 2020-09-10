@@ -23,6 +23,13 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToStackManagement() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('management');
+        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
+      });
+    },
+
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
       await retry.tryForTime(10000, async () => {
         const allTabs = await testSubjects.findAll(`~${tabTypeSubject}`, 3);
@@ -75,6 +82,82 @@ export function MachineLearningNavigationProvider({
 
     async navigateToSettings() {
       await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
+    },
+
+    async navigateToStackManagementJobsListPage({
+      expectAccessDenied = false,
+    }: {
+      expectAccessDenied?: boolean;
+    } = {}) {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        if (expectAccessDenied === true) {
+          await testSubjects.existOrFail('mlPageAccessDenied');
+        } else {
+          // verify that the overall page is present
+          await testSubjects.existOrFail('mlPageStackManagementJobsList');
+          // verify that the default tab with the anomaly detection jobs list got loaded
+          await testSubjects.existOrFail('ml-jobs-list');
+        }
+      });
+    },
+
+    async navigateToStackManagementJobsListPageAnalyticsTab() {
+      // clicks the `Analytics` tab and loads the analytics list page
+      await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the empty prompt for analytics jobs list got loaded
+        await testSubjects.existOrFail('mlAnalyticsJobList');
+      });
+    },
+
+    async navigateToAnomalyExplorerViaSingleMetricViewer() {
+      // clicks the `Anomaly Explorer` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the anomaly explorer page is visible
+        await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      });
+    },
+
+    async navigateToSingleMetricViewerViaAnomalyExplorer() {
+      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the single metric viewer page is visible
+        await testSubjects.existOrFail('mlPageSingleMetricViewer');
+      });
+    },
+
+    async openKibanaNav() {
+      if (!(await testSubjects.exists('collapsibleNav'))) {
+        await testSubjects.click('toggleNavButton');
+      }
+      await testSubjects.existOrFail('collapsibleNav');
+    },
+
+    async assertKibanaNavMLEntryExists() {
+      const navArea = await testSubjects.find('collapsibleNav');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      if (mlNavLink.length === 0) {
+        throw new Error(`expected ML link in nav menu to exist`);
+      }
+    },
+
+    async assertKibanaNavMLEntryNotExists() {
+      const navArea = await testSubjects.find('collapsibleNav');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      if (mlNavLink.length !== 0) {
+        throw new Error(`expected ML link in nav menu to not exist`);
+      }
+    },
+
+    async navigateToKibanaHome() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('home');
+        await testSubjects.existOrFail('homeApp', { timeout: 2000 });
+      });
     },
   };
 }

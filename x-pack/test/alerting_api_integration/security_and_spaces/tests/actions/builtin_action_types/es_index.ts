@@ -14,10 +14,8 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('index action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
     beforeEach(() => clearTestIndex(es));
 
     let createdActionID: string;

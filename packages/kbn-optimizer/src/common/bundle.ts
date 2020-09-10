@@ -18,12 +18,18 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
+
+const DEFAULT_IMPLICIT_BUNDLE_DEPS = ['core'];
+
+const isStringArray = (input: any): input is string[] =>
+  Array.isArray(input) && input.every((x) => typeof x === 'string');
 
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
@@ -37,6 +43,10 @@ export interface BundleSpec {
   readonly sourceRoot: string;
   /** Absolute path to the directory where output should be written */
   readonly outputDir: string;
+  /** Banner that should be written to all bundle JS files */
+  readonly banner?: string;
+  /** Absolute path to a kibana.json manifest file, if omitted we assume there are not dependenices */
+  readonly manifestPath?: string;
 }
 
 export class Bundle {
@@ -56,6 +66,14 @@ export class Bundle {
   public readonly sourceRoot: BundleSpec['sourceRoot'];
   /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
+  /** Banner that should be written to all bundle JS files */
+  public readonly banner: BundleSpec['banner'];
+  /**
+   * Absolute path to a manifest file with "requiredBundles" which will be
+   * used to allow bundleRefs from this bundle to the exports of another bundle.
+   * Every bundle mentioned in the `requiredBundles` must be built together.
+   */
+  public readonly manifestPath: BundleSpec['manifestPath'];
 
   public readonly cache: BundleCache;
 
@@ -66,6 +84,8 @@ export class Bundle {
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
+    this.manifestPath = spec.manifestPath;
+    this.banner = spec.banner;
 
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
@@ -96,7 +116,54 @@ export class Bundle {
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
+      manifestPath: this.manifestPath,
+      banner: this.banner,
     };
+  }
+
+  readBundleDeps(): { implicit: string[]; explicit: string[] } {
+    if (!this.manifestPath) {
+      return {
+        implicit: [...DEFAULT_IMPLICIT_BUNDLE_DEPS],
+        explicit: [],
+      };
+    }
+
+    let json: string;
+    try {
+      json = Fs.readFileSync(this.manifestPath, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+
+      json = '{}';
+    }
+
+    let parsedManifest: { requiredPlugins?: string[]; requiredBundles?: string[] };
+    try {
+      parsedManifest = JSON.parse(json);
+    } catch (error) {
+      throw new Error(
+        `unable to parse manifest at [${this.manifestPath}], error: [${error.message}]`
+      );
+    }
+
+    if (typeof parsedManifest === 'object' && parsedManifest) {
+      const explicit = parsedManifest.requiredBundles || [];
+      const implicit = [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(parsedManifest.requiredPlugins || [])];
+
+      if (isStringArray(explicit) && isStringArray(implicit)) {
+        return {
+          explicit,
+          implicit,
+        };
+      }
+    }
+
+    throw new Error(
+      `Expected "requiredBundles" and "requiredPlugins" in manifest file [${this.manifestPath}] to be arrays of strings`
+    );
   }
 }
 
@@ -152,6 +219,20 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have an absolute path `outputDir` property');
         }
 
+        const { manifestPath } = spec;
+        if (manifestPath !== undefined) {
+          if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
+            throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
+          }
+        }
+
+        const { banner } = spec;
+        if (banner !== undefined) {
+          if (!(typeof banner === 'string')) {
+            throw new Error('`bundles[]` must have a string `banner` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
@@ -159,6 +240,8 @@ export function parseBundles(json: string) {
           contextDir,
           sourceRoot,
           outputDir,
+          banner,
+          manifestPath,
         });
       }
     );

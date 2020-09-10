@@ -66,14 +66,7 @@ interface Props {
 
 type Option = EuiSelectable['props']['options'][0];
 
-const Filter = ({
-  name,
-  title,
-  options,
-  onChange,
-  value,
-  showCount,
-}: Props) => {
+function Filter({ name, title, options, onChange, value, showCount }: Props) {
   const [showPopover, setShowPopover] = useState(false);
 
   const toggleShowPopover = () => setShowPopover((show) => !show);
@@ -140,6 +133,7 @@ const Filter = ({
                 </FlexItem>
                 <FlexItem grow={false}>
                   <ApplyButton
+                    data-cy="applyFilter"
                     color="primary"
                     fill={true}
                     onClick={() => {
@@ -170,11 +164,11 @@ const Filter = ({
             }}
             value={value}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </>
       ) : null}
     </>
   );
-};
+}
 
 export { Filter };

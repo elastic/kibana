@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 import {
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -18,7 +18,7 @@ import { CURRENT_VERSION } from '../../common/version';
 /**
  * Returns an array of all the unique Elasticsearch Node Versions in the Elasticsearch cluster.
  */
-export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
+export const getAllNodeVersions = async (adminClient: ILegacyScopedClusterClient) => {
   // Get the version information for all nodes in the cluster.
   const { nodes } = (await adminClient.callAsInternalUser('nodes.info', {
     filterPath: 'nodes.*.version',

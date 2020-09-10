@@ -32,11 +32,13 @@ import * as note from '../note/saved_object';
 import * as pinnedEvent from '../pinned_event/saved_object';
 import * as timeline from '../timeline/saved_object';
 import { ElasticsearchMatrixHistogramAdapter, MatrixHistogram } from '../matrix_histogram';
+import { EndpointAppContext } from '../../endpoint/types';
 
 export function compose(
   core: CoreSetup,
   plugins: SetupPlugins,
-  isProductionMode: boolean
+  isProductionMode: boolean,
+  endpointContext: EndpointAppContext
 ): AppBackendLibs {
   const framework = new KibanaBackendFrameworkAdapter(core, plugins, isProductionMode);
   const sources = new Sources(new ConfigurationSourcesAdapter());
@@ -46,7 +48,7 @@ export function compose(
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
-    hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
+    hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
     ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
     tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),

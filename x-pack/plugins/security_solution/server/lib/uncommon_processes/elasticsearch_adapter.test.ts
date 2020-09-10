@@ -131,7 +131,7 @@ describe('elasticsearch_adapter', () => {
                     _id: 'id-9',
                     _score: 0,
                     _source: {
-                      // @ts-ignore ts doesn't like seeing the object written this way, but sometimes this is the data we get!
+                      // @ts-expect-error ts doesn't like seeing the object written this way, but sometimes this is the data we get!
                       'host.id': ['host-id-9'],
                       'host.name': ['host-9'],
                     },

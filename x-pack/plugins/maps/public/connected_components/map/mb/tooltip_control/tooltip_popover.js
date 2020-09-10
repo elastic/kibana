@@ -58,7 +58,7 @@ export class TooltipPopover extends Component {
   // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
   _loadFeatureGeometry = ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 
@@ -70,22 +70,24 @@ export class TooltipPopover extends Component {
     return targetFeature.geometry;
   };
 
-  _loadFeatureProperties = async ({ layerId, featureId }) => {
+  _loadFeatureProperties = async ({ layerId, featureId, mbProperties }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return [];
+    let targetFeature;
+    if (typeof featureId !== 'undefined') {
+      targetFeature = tooltipLayer.getFeatureById(featureId);
     }
-    return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+
+    const properties = targetFeature ? targetFeature.properties : mbProperties;
+    return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
   _loadPreIndexedShape = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 
@@ -115,6 +117,8 @@ export class TooltipPopover extends Component {
   _renderTooltipContent = () => {
     const publicProps = {
       addFilters: this.props.addFilters,
+      getFilterActions: this.props.getFilterActions,
+      getActionContext: this.props.getActionContext,
       closeTooltip: this.props.closeTooltip,
       features: this.props.features,
       isLocked: this.props.isLocked,

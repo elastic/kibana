@@ -5,14 +5,15 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { GeoJsonProperties } from 'geojson';
 import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
   minLon: number;
+  minLat: number;
+  maxLon: number;
+  maxLat: number;
 };
 
 export type MapQuery = Query & {
@@ -39,8 +40,9 @@ export type Goto = {
 };
 
 export type TooltipFeature = {
-  id: number;
+  id?: number | string;
   layerId: string;
+  mbProperties: GeoJsonProperties;
 };
 
 export type TooltipState = {
@@ -51,6 +53,7 @@ export type TooltipState = {
 };
 
 export type DrawState = {
+  actionId: string;
   drawType: DRAW_TYPE;
   filterLabel?: string; // point radius filter alias
   geoFieldName?: string;

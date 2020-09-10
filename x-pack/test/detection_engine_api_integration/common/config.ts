@@ -8,7 +8,6 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { listsEnvFeatureFlagName } from '../../../plugins/security_solution/server/lib/detection_engine/feature_flags';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -32,11 +31,6 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-// Temporary feature flag for the lists feature
-// TODO: Remove this once lists land in a Kibana version
-process.env[listsEnvFeatureFlagName] = 'true';
-
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
 
@@ -73,13 +67,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.lists.enabled=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,

@@ -9,10 +9,13 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { RowRendererId } from '../../../../../../../common/types/timeline';
+
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { SuricataDetails } from './suricata_details';
 
 export const suricataRowRenderer: RowRenderer = {
+  id: RowRendererId.suricata,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';

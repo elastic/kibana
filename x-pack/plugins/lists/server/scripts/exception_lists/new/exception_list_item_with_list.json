@@ -12,13 +12,13 @@
       "field": "event.module",
       "operator": "excluded",
       "type": "match_any",
-      "value": ["zeek"]
+      "value": ["suricata"]
     },
     {
       "field": "source.ip",
       "operator": "excluded",
       "type": "list",
-      "list": { "id": "list-ip", "type": "ip" }
+      "list": { "id": "ip_list", "type": "ip" }
     }
   ]
 }

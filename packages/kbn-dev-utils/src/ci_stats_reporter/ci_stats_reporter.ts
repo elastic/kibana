@@ -29,6 +29,8 @@ interface Config {
   buildId: string;
 }
 
+export type CiStatsMetrics = Array<{ group: string; id: string; value: number }>;
+
 function parseConfig(log: ToolingLog) {
   const configJson = process.env.KIBANA_CI_STATS_CONFIG;
   if (!configJson) {
@@ -84,7 +86,7 @@ export class CiStatsReporter {
     return !!this.config;
   }
 
-  async metrics(metrics: Array<{ group: string; id: string; value: number }>) {
+  async metrics(metrics: CiStatsMetrics) {
     if (!this.config) {
       return;
     }

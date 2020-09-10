@@ -27,10 +27,9 @@ import {
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
-
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouterLinkProps, listBreadcrumb } from '../../services';
 import { JobTable } from './job_table';
-
 import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;

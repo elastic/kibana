@@ -9,13 +9,11 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { ListArray, list } from './lists';
 
-export type DefaultListArrayC = t.Type<ListArray, ListArray, unknown>;
-
 /**
  * Types the DefaultListArray as:
  *   - If null or undefined, then a default array of type list will be set
  */
-export const DefaultListArray: DefaultListArrayC = new t.Type<ListArray, ListArray, unknown>(
+export const DefaultListArray = new t.Type<ListArray, ListArray | undefined, unknown>(
   'DefaultListArray',
   t.array(list).is,
   (input, context): Either<t.Errors, ListArray> =>

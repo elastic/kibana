@@ -3,19 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
-import { getDateHistogramOffset } from '../../../snapshot/query_helpers';
+import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { createPercentileAggregation } from './create_percentile_aggregation';
+import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
 const MINIMUM_BUCKETS = 5;
 
-const getParsedFilterQuery: (
-  filterQuery: string | undefined
-) => Record<string, any> | Array<Record<string, any>> = (filterQuery) => {
-  if (!filterQuery) return {};
-  return JSON.parse(filterQuery).bool;
+const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
+  filterQuery
+) => {
+  if (!filterQuery) return null;
+  return JSON.parse(filterQuery);
 };
 
 export const getElasticsearchMetricQuery = (
@@ -34,14 +36,17 @@ export const getElasticsearchMetricQuery = (
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
 
-  const to = timeframe ? timeframe.end : Date.now();
+  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
   const minimumFrom = to - intervalAsSeconds * 1000 * MINIMUM_BUCKETS;
 
-  const from = timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom;
+  const from = roundTimestamp(
+    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
+    timeUnit
+  );
 
-  const offset = getDateHistogramOffset(from, interval);
+  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -129,9 +134,8 @@ export const getElasticsearchMetricQuery = (
         filter: [
           ...rangeFilters,
           ...metricFieldFilters,
-          ...(Array.isArray(parsedFilterQuery) ? parsedFilterQuery : []),
+          ...(parsedFilterQuery ? [parsedFilterQuery] : []),
         ],
-        ...(!Array.isArray(parsedFilterQuery) ? parsedFilterQuery : {}),
       },
     },
     size: 0,

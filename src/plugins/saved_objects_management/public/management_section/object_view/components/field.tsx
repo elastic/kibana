@@ -18,14 +18,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import {
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSwitch,
-  // @ts-ignore
-  EuiCodeEditor,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch, EuiCodeEditor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldState, FieldType } from '../../types';
 

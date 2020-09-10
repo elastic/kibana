@@ -214,10 +214,10 @@ export class AlertUtils {
       .set('kbn-xsrf', 'foo')
       .auth(user.username, user.password);
 
-    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
-    delete alertBody.alertTypeId;
-    delete alertBody.enabled;
-    delete alertBody.consumer;
+    const { alertTypeId, enabled, consumer, ...alertBody } = getDefaultAlwaysFiringAlertData(
+      reference,
+      actionId
+    );
 
     const response = await request.send({ ...alertBody, ...overwrites });
     return response;
@@ -252,7 +252,7 @@ export class AlertUtils {
       throttle: '30s',
       tags: [],
       alertTypeId: 'test.failing',
-      consumer: 'bar',
+      consumer: 'alertsFixture',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,
@@ -265,6 +265,22 @@ export class AlertUtils {
     }
     return response;
   }
+}
+
+export function getConsumerUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  consumer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
+}
+
+export function getProducerUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  producer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert by "${producer}"`;
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
@@ -284,7 +300,7 @@ instanceStateValue: {{state.instanceStateValue}}
     throttle: '1m',
     tags: ['tag-A', 'tag-B'],
     alertTypeId: 'test.always-firing',
-    consumer: 'bar',
+    consumer: 'alertsFixture',
     params: {
       index: ES_TEST_INDEX_NAME,
       reference,

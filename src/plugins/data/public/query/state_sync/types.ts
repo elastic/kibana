@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, RefreshInterval, TimeRange } from '../../../common';
+import { Filter, RefreshInterval, TimeRange, Query } from '../../../common';
 
 /**
  * All query state service state
@@ -26,6 +26,7 @@ export interface QueryState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
+  query?: Query;
 }
 
 type QueryStateChangePartial = {

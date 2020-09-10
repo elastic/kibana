@@ -6,25 +6,15 @@
 
 import React from 'react';
 
-import { getUiSettings } from '../../../../../kibana_services';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';
-import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
 export function VectorStyleIconEditor(props) {
   const iconForm = props.styleProperty.isDynamic() ? (
-    <DynamicIconForm
-      {...props}
-      isDarkMode={getUiSettings().get('theme:darkMode', false)}
-      symbolOptions={SYMBOL_OPTIONS}
-    />
+    <DynamicIconForm {...props} />
   ) : (
-    <StaticIconForm
-      {...props}
-      isDarkMode={getUiSettings().get('theme:darkMode', false)}
-      symbolOptions={SYMBOL_OPTIONS}
-    />
+    <StaticIconForm {...props} />
   );
 
   return <StylePropEditor {...props}>{iconForm}</StylePropEditor>;

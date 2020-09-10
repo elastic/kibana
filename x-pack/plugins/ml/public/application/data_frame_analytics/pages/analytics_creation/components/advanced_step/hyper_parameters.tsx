@@ -24,7 +24,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
 
   return (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaLabel', {
             defaultMessage: 'Lambda',
@@ -51,7 +51,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.maxTreesLabel', {
             defaultMessage: 'Max trees',
@@ -81,7 +81,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaLabel', {
             defaultMessage: 'Gamma',
@@ -108,7 +108,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.etaLabel', {
             defaultMessage: 'Eta',
@@ -134,7 +134,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.featureBagFractionLabel', {
             defaultMessage: 'Feature bag fraction',
@@ -172,7 +172,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedLabel', {
             defaultMessage: 'Randomize seed',

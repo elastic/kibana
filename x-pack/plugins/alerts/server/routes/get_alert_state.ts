@@ -27,9 +27,6 @@ export const getAlertStateRoute = (router: IRouter, licenseState: LicenseState) 
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:alerting-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

@@ -89,7 +89,7 @@ export function registerTransactionDurationAlertType({
       });
 
       const environmentTerm =
-        alertParams.environment === ENVIRONMENT_ALL
+        alertParams.environment === ENVIRONMENT_ALL.value
           ? []
           : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
 
@@ -157,7 +157,7 @@ export function registerTransactionDurationAlertType({
 
       const { agg } = response.aggregations;
 
-      const value = 'values' in agg ? agg.values[0] : agg?.value;
+      const value = 'values' in agg ? Object.values(agg.values)[0] : agg?.value;
 
       if (value && value > alertParams.threshold * 1000) {
         const alertInstance = services.alertInstanceFactory(

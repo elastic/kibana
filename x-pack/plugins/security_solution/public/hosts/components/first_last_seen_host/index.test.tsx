@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { render, act } from '@testing-library/react';
 
-import { mockFirstLastSeenHostQuery } from '../../containers/hosts/first_last_seen/mock';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { render, act, wait as waitFor } from '@testing-library/react';
+
+import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { TestProviders } from '../../../common/mock';
-
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
+
+const MOCKED_RESPONSE = {
+  firstSeen: '2019-04-08T16:09:40.692Z',
+  lastSeen: '2019-04-08T18:35:45.064Z',
+};
+
+jest.mock('../../containers/hosts/first_last_seen');
+const useFirstLastSeenHostMock = useFirstLastSeenHost as jest.Mock;
+useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
@@ -30,11 +37,10 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('Loading', async () => {
+    useFirstLastSeenHostMock.mockReturnValue([true, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
       </TestProviders>
     );
     expect(container.innerHTML).toBe(
@@ -43,96 +49,121 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('First Seen', async () => {
+    useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        );
+      })
     );
   });
 
   test('Last Seen', async () => {
+    useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        );
+      })
     );
   });
 
   test('First Seen is empty but not Last Seen', async () => {
-    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = null;
+    useFirstLastSeenHostMock.mockReturnValue([
+      false,
+      {
+        ...MOCKED_RESPONSE,
+        firstSeen: null,
+      },
+    ]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        );
+      })
     );
   });
 
   test('Last Seen is empty but not First Seen', async () => {
-    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = null;
+    useFirstLastSeenHostMock.mockReturnValue([
+      false,
+      {
+        ...MOCKED_RESPONSE,
+        lastSeen: null,
+      },
+    ]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        );
+      })
     );
   });
 
   test('First Seen With a bad date time string', async () => {
-    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = 'something-invalid';
+    useFirstLastSeenHostMock.mockReturnValue([
+      false,
+      {
+        ...MOCKED_RESPONSE,
+        firstSeen: 'something-invalid',
+      },
+    ]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.textContent).toBe('something-invalid');
+    await act(() =>
+      waitFor(() => {
+        expect(container.textContent).toBe('something-invalid');
+      })
+    );
   });
 
   test('Last Seen With a bad date time string', async () => {
-    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = 'something-invalid';
+    useFirstLastSeenHostMock.mockReturnValue([
+      false,
+      {
+        ...MOCKED_RESPONSE,
+        lastSeen: 'something-invalid',
+      },
+    ]);
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
-        </MockedProvider>
+        <FirstLastSeenHost hostName="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.textContent).toBe('something-invalid');
+    await act(() =>
+      waitFor(() => {
+        expect(container.textContent).toBe('something-invalid');
+      })
+    );
   });
 });

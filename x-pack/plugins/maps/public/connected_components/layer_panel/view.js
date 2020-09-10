@@ -43,16 +43,16 @@ export class LayerPanel extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-    this.loadLeftJoinFields();
+    this._loadDisplayName();
+    this._loadImmutableSourceProperties();
+    this._loadLeftJoinFields();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  loadDisplayName = async () => {
+  _loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -63,7 +63,7 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  loadImmutableSourceProperties = async () => {
+  _loadImmutableSourceProperties = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -74,8 +74,8 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  async loadLeftJoinFields() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
+  async _loadLeftJoinFields() {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
       return;
     }
 
@@ -97,8 +97,11 @@ export class LayerPanel extends React.Component {
     }
   }
 
-  _onSourceChange = ({ propName, value, newLayerType }) => {
-    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+  _onSourceChange = (...args) => {
+    for (let i = 0; i < args.length; i++) {
+      const { propName, value, newLayerType } = args[i];
+      this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+    }
   };
 
   _renderFilterSection() {
@@ -117,7 +120,7 @@ export class LayerPanel extends React.Component {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer.isJoinable()) {
+    if (!this.props.selectedLayer.showJoinEditor()) {
       return null;
     }
 
@@ -125,6 +128,7 @@ export class LayerPanel extends React.Component {
       <Fragment>
         <EuiPanel>
           <JoinEditor
+            layer={this.props.selectedLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
@@ -202,7 +206,7 @@ export class LayerPanel extends React.Component {
             <div className="mapLayerPanel__bodyOverflow">
               <LayerErrors />
 
-              <LayerSettings />
+              <LayerSettings layer={selectedLayer} />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
                 onChange: this._onSourceChange,

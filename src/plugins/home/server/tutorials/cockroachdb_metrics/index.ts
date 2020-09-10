@@ -36,6 +36,7 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
     name: i18n.translate('home.tutorials.cockroachdbMetrics.nameTitle', {
       defaultMessage: 'CockroachDB metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cockroachdbMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CockroachDB server.',

@@ -15,6 +15,8 @@ export * from './default_language_string';
 export * from './default_max_signals_number';
 export * from './default_page';
 export * from './default_per_page';
+export * from './default_risk_score_mapping_array';
+export * from './default_severity_mapping_array';
 export * from './default_string_array';
 export * from './default_string_boolean_false';
 export * from './default_threat_array';

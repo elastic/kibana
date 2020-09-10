@@ -22,14 +22,12 @@ import { getFlags } from './flags';
 it('gets flags correctly', () => {
   expect(
     getFlags(['-a', '--abc=bcd', '--foo=bar', '--no-bar', '--foo=baz', '--box', 'yes', '-zxy'], {
-      flags: {
-        boolean: ['x'],
-        string: ['abc'],
-        alias: {
-          x: 'extra',
-        },
-        allowUnexpected: true,
+      boolean: ['x'],
+      string: ['abc'],
+      alias: {
+        x: 'extra',
       },
+      allowUnexpected: true,
     })
   ).toMatchInlineSnapshot(`
     Object {
@@ -60,10 +58,8 @@ it('gets flags correctly', () => {
 it('guesses types for unexpected flags', () => {
   expect(
     getFlags(['-abc', '--abc=bcd', '--no-foo', '--bar'], {
-      flags: {
-        allowUnexpected: true,
-        guessTypesForUnexpectedFlags: true,
-      },
+      allowUnexpected: true,
+      guessTypesForUnexpectedFlags: true,
     })
   ).toMatchInlineSnapshot(`
     Object {

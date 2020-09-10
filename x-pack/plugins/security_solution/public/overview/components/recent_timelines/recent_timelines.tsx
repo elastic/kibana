@@ -20,6 +20,7 @@ import {
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
+import { TimelineType } from '../../../../common/types/timeline';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
@@ -58,9 +59,19 @@ export const RecentTimelines = React.memo<{
 
                 {showHoverContent && (
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
+                    <EuiToolTip
+                      content={
+                        t.timelineType === TimelineType.default
+                          ? i18n.OPEN_AS_DUPLICATE
+                          : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+                      }
+                    >
                       <EuiButtonIcon
-                        aria-label={i18n.OPEN_AS_DUPLICATE}
+                        aria-label={
+                          t.timelineType === TimelineType.default
+                            ? i18n.OPEN_AS_DUPLICATE
+                            : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+                        }
                         data-test-subj="open-duplicate"
                         isDisabled={t.savedObjectId == null}
                         iconSize="s"

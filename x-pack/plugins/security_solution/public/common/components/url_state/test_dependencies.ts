@@ -92,20 +92,20 @@ export const defaultProps: UrlStateContainerPropTypes = {
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {
-          from: 1558048243696,
+          from: '2019-05-16T23:10:43.696Z',
           fromStr: 'now-24h',
           kind: 'relative',
-          to: 1558134643697,
+          to: '2019-05-17T23:10:43.697Z',
           toStr: 'now',
         },
         linkTo: ['timeline'],
       },
       timeline: {
         [CONSTANTS.timerange]: {
-          from: 1558048243696,
+          from: '2019-05-16T23:10:43.696Z',
           fromStr: 'now-24h',
           kind: 'relative',
-          to: 1558134643697,
+          to: '2019-05-17T23:10:43.697Z',
           toStr: 'now',
         },
         linkTo: ['global'],

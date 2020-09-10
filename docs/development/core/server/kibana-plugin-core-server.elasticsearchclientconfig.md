@@ -4,14 +4,15 @@
 
 ## ElasticsearchClientConfig type
 
+Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md)
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
-    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
-    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
-    sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
+export declare type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
+    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
+    keepAlive?: boolean;
 };
 ```

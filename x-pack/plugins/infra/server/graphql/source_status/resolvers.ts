@@ -73,7 +73,7 @@ export const createSourceStatusResolvers = (libs: {
       return await libs.sourceStatus.hasLogAlias(req, source.id);
     },
     async logIndicesExist(source, args, { req }) {
-      return await libs.sourceStatus.hasLogIndices(req, source.id);
+      return (await libs.sourceStatus.getLogIndexStatus(req, source.id)) !== 'missing';
     },
     async logIndices(source, args, { req }) {
       return await libs.sourceStatus.getLogIndexNames(req, source.id);

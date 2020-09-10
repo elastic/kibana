@@ -57,4 +57,4 @@ canvas_plugin/*
 webpack_stats.json
 
 # Don't commit storybook builds
-storybook
+storybook/build

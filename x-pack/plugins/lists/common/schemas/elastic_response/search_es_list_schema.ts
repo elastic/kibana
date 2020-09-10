@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
   created_at,
   created_by,
   description,
+  deserializerOrUndefined,
+  immutable,
   metaOrUndefined,
   name,
+  serializerOrUndefined,
   tie_breaker_id,
   type,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
 export const searchEsListSchema = t.exact(
@@ -25,12 +27,16 @@ export const searchEsListSchema = t.exact(
     created_at,
     created_by,
     description,
+    deserializer: deserializerOrUndefined,
+    immutable,
     meta: metaOrUndefined,
     name,
+    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,
     updated_by,
+    version,
   })
 );
 

@@ -7,6 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
+import { CanvasWorkpad } from '../../../types';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -14,7 +15,6 @@ import {
   API_ROUTE_WORKPAD_STRUCTURES,
   API_ROUTE_WORKPAD_ASSETS,
 } from '../../../common/lib/constants';
-import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -33,8 +33,8 @@ const workpadUpdateHandler = async (
 ) => {
   const now = new Date().toISOString();
 
-  const workpadObject = await savedObjectsClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
-  await savedObjectsClient.create<WorkpadAttributes>(
+  const workpadObject = await savedObjectsClient.get<CanvasWorkpad>(CANVAS_TYPE, id);
+  await savedObjectsClient.create(
     CANVAS_TYPE,
     {
       ...workpadObject.attributes,

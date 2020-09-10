@@ -14,7 +14,7 @@ interface Props extends APMLinkExtendProps {
   query?: APMQueryParams;
 }
 
-const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
+function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -35,6 +35,6 @@ const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
       {...rest}
     />
   );
-};
+}
 
 export { ErrorOverviewLink };

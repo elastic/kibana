@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../common/utility_types';
 import { Direction, UsersFields, UsersSortField } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { UsersRequestOptions } from './index';
 
@@ -23,7 +24,11 @@ export const buildUsersQuery = ({
 }: UsersRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
     { term: { [`${flowTarget}.ip`]: ip } },
   ];
 

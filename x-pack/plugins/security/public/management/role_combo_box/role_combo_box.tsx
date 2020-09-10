@@ -12,7 +12,7 @@ import { RoleComboBoxOption } from './role_combo_box_option';
 
 interface Props {
   availableRoles: Role[];
-  selectedRoleNames: string[];
+  selectedRoleNames: readonly string[];
   onChange: (selectedRoleNames: string[]) => void;
   placeholder?: string;
   isLoading?: boolean;

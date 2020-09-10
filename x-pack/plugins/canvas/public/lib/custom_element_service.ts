@@ -11,7 +11,7 @@ import { CustomElement } from '../../types';
 import { platformService } from '../services';
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;
 };
 

@@ -10,6 +10,7 @@ import { routerProvider } from '../../lib/router_provider';
 import { getAppState } from '../../lib/app_state';
 import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
+import { RouterContext } from './';
 
 export class Router extends React.PureComponent {
   static propTypes = {
@@ -97,6 +98,10 @@ export class Router extends React.PureComponent {
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
     }
 
-    return <this.state.activeComponent />;
+    return (
+      <RouterContext.Provider value={this.state.router}>
+        <this.state.activeComponent />
+      </RouterContext.Provider>
+    );
   }
 }

@@ -10,10 +10,11 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
-import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
+import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import { severity, getSeverity } from './Popover/getSeverity';
 
-export const popoverMinWidth = 280;
+export const popoverWidth = 280;
 
 export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
   switch (nodeSeverity) {
@@ -29,12 +30,19 @@ export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
   }
 }
 
+function getNodeSeverity(el: cytoscape.NodeSingular) {
+  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
+    'serviceAnomalyStats'
+  );
+  return getSeverity(serviceAnomalyStats?.anomalyScore);
+}
+
 function getBorderColorFn(
   theme: EuiTheme
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
-    const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
-    const nodeSeverity = el.data('anomaly_severity');
+    const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
+    const nodeSeverity = getNodeSeverity(el);
     if (hasAnomalyDetectionJob) {
       return (
         getSeverityColor(theme, nodeSeverity) || theme.eui.euiColorMediumShade
@@ -51,7 +59,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('anomaly_severity');
+  const nodeSeverity = getNodeSeverity(el);
   if (nodeSeverity === severity.critical) {
     return 'double';
   } else {
@@ -60,7 +68,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 };
 
 function getBorderWidth(el: cytoscape.NodeSingular) {
-  const nodeSeverity = el.data('anomaly_severity');
+  const nodeSeverity = getNodeSeverity(el);
 
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
     return 4;
@@ -79,14 +87,14 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export const getAnimationOptions = (
   theme: EuiTheme
 ): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
-  // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
+  // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.eui.euiAnimSlightBounce,
 });
 
@@ -111,8 +119,6 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'background-color': theme.eui.euiColorGhost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        //
-        // @ts-ignore
         'background-image': isIE11
           ? undefined
           : (el: cytoscape.NodeSingular) => iconForNode(el) ?? defaultIcon,
@@ -160,9 +166,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
     {
       selector: 'edge',
       style: {
-        'curve-style': 'taxi',
-        // @ts-ignore
-        'taxi-direction': 'auto',
+        'curve-style': 'unbundled-bezier',
         'line-color': lineColor,
         'overlay-opacity': 0,
         'target-arrow-color': lineColor,
@@ -170,7 +174,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         // The DefinitelyTyped definitions don't specify this property since it's
         // fairly new.
         //
-        // @ts-ignore
+        // @ts-expect-error
         'target-distance-from-node': isIE11
           ? undefined
           : theme.eui.paddingSizes.xs,
@@ -185,7 +189,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'source-arrow-shape': isIE11 ? 'none' : 'triangle',
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
-        // @ts-ignore
+        // @ts-expect-error
         'source-distance-from-node': isIE11
           ? undefined
           : parseInt(theme.eui.paddingSizes.xs, 10),
@@ -196,7 +200,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
     },
     {
       selector: 'edge[isInverseEdge]',
-      // @ts-ignore DefinitelyTyped says visibility is "none" but it's
+      // @ts-expect-error DefinitelyTyped says visibility is "none" but it's
       // actually "hidden"
       style: { visibility: 'hidden' },
     },
@@ -204,7 +208,6 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
       selector: 'edge.nodeHover',
       style: {
         width: 4,
-        // @ts-ignore
         'z-index': zIndexEdgeHover,
         'line-color': theme.eui.euiColorDarkShade,
         'source-arrow-color': theme.eui.euiColorDarkShade,
@@ -224,7 +227,6 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'line-color': theme.eui.euiColorPrimary,
         'source-arrow-color': theme.eui.euiColorPrimary,
         'target-arrow-color': theme.eui.euiColorPrimary,
-        // @ts-ignore
         'z-index': zIndexEdgeHighlight,
       },
     },
@@ -256,7 +258,6 @@ ${theme.eui.euiColorLightShade}`,
 export const getCytoscapeOptions = (
   theme: EuiTheme
 ): cytoscape.CytoscapeOptions => ({
-  autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,

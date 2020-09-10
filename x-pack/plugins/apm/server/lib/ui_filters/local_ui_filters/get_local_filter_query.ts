@@ -5,26 +5,23 @@
  */
 
 import { omit } from 'lodash';
-import { IIndexPattern } from 'src/plugins/data/server';
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
-import { Projection } from '../../../../common/projections/typings';
+import { mergeProjection } from '../../../projections/util/merge_projection';
+import { Projection } from '../../../projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
 import { localUIFilters, LocalUIFilterName } from './config';
 
 export const getLocalFilterQuery = ({
-  indexPattern,
   uiFilters,
   projection,
   localUIFilterName,
 }: {
-  indexPattern: IIndexPattern | undefined;
   uiFilters: UIFilters;
   projection: Projection;
   localUIFilterName: LocalUIFilterName;
 }) => {
   const field = localUIFilters[localUIFilterName];
-  const filter = getUiFiltersES(indexPattern, omit(uiFilters, field.name));
+  const filter = getUiFiltersES(omit(uiFilters, field.name));
 
   const bucketCountAggregation = projection.body.aggs
     ? {
@@ -38,7 +35,7 @@ export const getLocalFilterQuery = ({
           },
         },
       }
-    : {};
+    : null;
 
   return mergeProjection(projection, {
     body: {

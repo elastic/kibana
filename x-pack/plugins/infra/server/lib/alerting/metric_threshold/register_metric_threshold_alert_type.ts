@@ -3,15 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { curry } from 'lodash';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  groupActionVariableDescription,
+  alertStateActionVariableDescription,
+  reasonActionVariableDescription,
+  timestampActionVariableDescription,
+  valueActionVariableDescription,
+  metricActionVariableDescription,
+  thresholdActionVariableDescription,
+} from '../common/messages';
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
@@ -32,59 +38,6 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     aggType: schema.literal('count'),
     metric: schema.never(),
   });
-
-  const groupActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.groupActionVariableDescription',
-    {
-      defaultMessage: 'Name of the group reporting data',
-    }
-  );
-
-  const alertStateActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.alertStateActionVariableDescription',
-    {
-      defaultMessage: 'Current state of the alert',
-    }
-  );
-
-  const reasonActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.reasonActionVariableDescription',
-    {
-      defaultMessage:
-        'A description of why the alert is in this state, including which metrics have crossed which thresholds',
-    }
-  );
-
-  const timestampActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
-    {
-      defaultMessage: 'A timestamp of when the alert was detected.',
-    }
-  );
-
-  const valueActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
-    {
-      defaultMessage:
-        'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
-    }
-  );
-
-  const metricActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
-    {
-      defaultMessage:
-        'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
-    }
-  );
-
-  const thresholdActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
-    {
-      defaultMessage:
-        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
-    }
-  );
 
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -107,7 +60,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: curry(createMetricThresholdExecutor)(libs, uuid.v4()),
+    executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
@@ -119,6 +72,6 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'threshold', description: thresholdActionVariableDescription },
       ],
     },
-    producer: 'metrics',
+    producer: 'infrastructure',
   };
 }

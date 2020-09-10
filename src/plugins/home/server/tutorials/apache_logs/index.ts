@@ -37,6 +37,7 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('home.tutorials.apacheLogs.nameTitle', {
       defaultMessage: 'Apache logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',

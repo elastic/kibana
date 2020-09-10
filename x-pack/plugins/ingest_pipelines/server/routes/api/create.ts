@@ -10,6 +10,7 @@ import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 import { pipelineSchema } from './pipeline_schema';
+import { isObjectWithKeys } from './shared';
 
 const bodySchema = schema.object({
   name: schema.string(),
@@ -32,6 +33,7 @@ export const registerCreateRoute = ({
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const pipeline = req.body as Pipeline;
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { name, description, processors, version, on_failure } = pipeline;
 
       try {
@@ -70,7 +72,12 @@ export const registerCreateRoute = ({
         if (isEsError(error)) {
           return res.customError({
             statusCode: error.statusCode,
-            body: error,
+            body: isObjectWithKeys(error.body)
+              ? {
+                  message: error.message,
+                  attributes: error.body,
+                }
+              : error,
           });
         }
 

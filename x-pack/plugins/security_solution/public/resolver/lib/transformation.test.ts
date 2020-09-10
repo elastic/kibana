@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { applyMatrix3 } from './vector2';
+import { applyMatrix3 } from '../models/vector2';
 import { scalingTransformation } from './transformation';
 
 describe('transforms', () => {

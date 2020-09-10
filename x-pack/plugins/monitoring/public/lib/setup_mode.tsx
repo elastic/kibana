@@ -6,14 +6,15 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { get, contains } from 'lodash';
+import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
+import { SetupModeFeature } from '../../common/enums';
 
 function isOnPage(hash: string) {
-  return contains(window.location.hash, hash);
+  return includes(window.location.hash, hash);
 }
 
 interface IAngularState {
@@ -39,11 +40,13 @@ interface ISetupModeState {
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
+  hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
   callback: null,
+  hideBottomBar: false,
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -91,15 +94,11 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
   const hasPermissions = get(data, '_meta.hasPermissions', false);
-  if (Legacy.shims.isCloud || !hasPermissions) {
+  if (!hasPermissions) {
     let text: string = '';
     if (!hasPermissions) {
       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
         defaultMessage: 'You do not have the necessary permissions to do this.',
-      });
-    } else {
-      text = i18n.translate('xpack.monitoring.setupMode.notAvailableCloud', {
-        defaultMessage: 'This feature is not available on cloud.',
       });
     }
 
@@ -111,7 +110,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
         text,
       });
     });
-    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+    return toggleSetupMode(false);
   }
   notifySetupModeDataChange();
 
@@ -126,6 +125,15 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
     }
   }
+};
+
+export const hideBottomBar = () => {
+  setupModeState.hideBottomBar = true;
+  notifySetupModeDataChange();
+};
+export const showBottomBar = () => {
+  setupModeState.hideBottomBar = false;
+  notifySetupModeDataChange();
 };
 
 export const disableElasticsearchInternalCollection = async () => {
@@ -152,7 +160,7 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
-  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  setSetupModeMenuItem();
   notifySetupModeDataChange();
 
   if (inSetupMode) {
@@ -169,7 +177,7 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const enabled = !globalState.inSetupMode && !Legacy.shims.isCloud;
+  const enabled = !globalState.inSetupMode;
 
   render(
     <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
@@ -200,4 +208,16 @@ export const isInSetupMode = () => {
   const $injector = angularState.injector || Legacy.shims.getAngularInjector();
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
+};
+
+export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
+  if (!setupModeState.enabled) {
+    return false;
+  }
+  if (feature === SetupModeFeature.MetricbeatMigration) {
+    if (Legacy.shims.isCloud) {
+      return false;
+    }
+  }
+  return true;
 };

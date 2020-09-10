@@ -13,10 +13,7 @@ const removeRelativePath = (relativePath: string): string =>
 export function useLinks() {
   const { http } = useCore();
   return {
-    toAssets: (path: string) =>
-      http.basePath.prepend(
-        `/plugins/${PLUGIN_ID}/applications/ingest_manager/sections/epm/assets/${path}`
-      ),
+    toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
     toImage: (path: string) => http.basePath.prepend(epmRouteService.getFilePath(path)),
     toRelativeImage: ({
       path,

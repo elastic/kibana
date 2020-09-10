@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getListItemResponseMock } from './list_item_schema.mock';
 import { ListItemSchema, listItemSchema } from './list_item_schema';
@@ -25,6 +25,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -36,6 +37,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "list_id"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -58,8 +60,31 @@ describe('list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for "serializer"', () => {
+    const payload = getListItemResponseMock();
+    delete payload.serializer;
+    const decoded = listItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "deserializer"', () => {
+    const payload = getListItemResponseMock();
+    delete payload.deserializer;
+    const decoded = listItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -73,6 +98,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "created_by"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.created_by;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -86,6 +112,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "tie_breaker_id"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.tie_breaker_id;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -99,6 +126,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "type"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -112,6 +140,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "updated_at"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.updated_at;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -125,6 +154,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "updated_by"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.updated_by;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -138,6 +168,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "value"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.value;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

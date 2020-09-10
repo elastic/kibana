@@ -6,7 +6,7 @@
 
 import { takeLatest } from 'redux-saga/effects';
 import {
-  FETCH_OVERVIEW_FILTERS,
+  fetchOverviewFilters as fetchAction,
   fetchOverviewFiltersFail,
   fetchOverviewFiltersSuccess,
 } from '../actions';
@@ -15,7 +15,7 @@ import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchOverviewFiltersEffect() {
   yield takeLatest(
-    FETCH_OVERVIEW_FILTERS,
+    String(fetchAction),
     fetchEffectFactory(fetchOverviewFilters, fetchOverviewFiltersSuccess, fetchOverviewFiltersFail)
   );
 }

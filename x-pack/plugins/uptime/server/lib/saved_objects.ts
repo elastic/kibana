@@ -22,7 +22,11 @@ export const umDynamicSettings: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: {
+    dynamic: false,
     properties: {
+      /* Leaving these commented to make it clear that these fields exist, even though we don't want them indexed.
+         When adding new fields please add them here. If they need to be searchable put them in the uncommented
+         part of properties.
       heartbeatIndices: {
         type: 'keyword',
       },
@@ -32,6 +36,10 @@ export const umDynamicSettings: SavedObjectsType = {
       certExpirationThreshold: {
         type: 'long',
       },
+      defaultConnectors: {
+        type: 'keyword',
+      },
+      */
     },
   },
 };

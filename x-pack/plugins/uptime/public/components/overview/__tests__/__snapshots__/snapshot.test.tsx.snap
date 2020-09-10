@@ -14,7 +14,6 @@ exports[`Snapshot component renders without errors 1`] = `
     down={2}
     height={144}
     up={8}
-    width={144}
   />
 </ChartWrapper>
 `;

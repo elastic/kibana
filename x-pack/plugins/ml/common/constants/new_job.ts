@@ -17,6 +17,7 @@ export enum CREATED_BY_LABEL {
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
   CATEGORIZATION = 'categorization-wizard',
+  APM_TRANSACTION = 'ml-module-apm-transaction',
 }
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';

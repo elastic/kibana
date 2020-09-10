@@ -16,7 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { renameKeys } from './lib/rename_keys';
-import { FindOptions } from '..';
+import { FindOptions } from '../alerts_client';
 
 // config definition
 const querySchema = schema.object({
@@ -49,9 +49,6 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       path: `${BASE_ALERT_API_PATH}/_find`,
       validate: {
         query: querySchema,
-      },
-      options: {
-        tags: ['access:alerting-read'],
       },
     },
     router.handleLegacyErrors(async function (

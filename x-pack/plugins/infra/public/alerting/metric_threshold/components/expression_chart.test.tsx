@@ -63,6 +63,8 @@ describe('ExpressionChart', () => {
         logColumns: [],
         metricAlias: 'metricbeat-*',
         logAlias: 'filebeat-*',
+        inventoryDefaultView: 'host',
+        metricsExplorerDefaultView: 'host',
         fields: {
           timestamp: '@timestamp',
           message: ['message'],

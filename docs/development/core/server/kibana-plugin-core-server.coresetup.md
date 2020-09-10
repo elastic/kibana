@@ -16,6 +16,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [auditTrail](./kibana-plugin-core-server.coresetup.audittrail.md) | <code>AuditTrailSetup</code> | [AuditTrailSetup](./kibana-plugin-core-server.audittrailsetup.md) |
 |  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-core-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
@@ -25,5 +26,4 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |
 |  [status](./kibana-plugin-core-server.coresetup.status.md) | <code>StatusServiceSetup</code> | [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) |
 |  [uiSettings](./kibana-plugin-core-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |
-|  [uuid](./kibana-plugin-core-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) |
 

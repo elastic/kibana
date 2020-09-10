@@ -57,20 +57,20 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: {
-            from: 1558048243696,
+            from: '2019-05-16T23:10:43.696Z',
             fromStr: 'now-24h',
             kind: 'relative',
-            to: 1558134643697,
+            to: '2019-05-17T23:10:43.697Z',
             toStr: 'now',
           },
           linkTo: ['timeline'],
         },
         timeline: {
           [CONSTANTS.timerange]: {
-            from: 1558048243696,
+            from: '2019-05-16T23:10:43.696Z',
             fromStr: 'now-24h',
             kind: 'relative',
-            to: 1558134643697,
+            to: '2019-05-17T23:10:43.697Z',
             toStr: 'now',
           },
           linkTo: ['global'],
@@ -81,6 +81,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     },
   };
@@ -91,12 +92,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -105,12 +106,12 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-          management: {
+          administration: {
             disabled: false,
-            href: '/app/security/management',
-            id: 'management',
-            name: 'Management',
-            urlKey: 'management',
+            href: '/app/security/administration',
+            id: 'administration',
+            name: 'Administration',
+            urlKey: 'administration',
           },
           hosts: {
             disabled: false,
@@ -140,13 +141,6 @@ describe('SIEM Navigation', () => {
             name: 'Timelines',
             urlKey: 'timeline',
           },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
-          },
         },
         pageName: 'hosts',
         pathName: '/',
@@ -160,25 +154,26 @@ describe('SIEM Navigation', () => {
         timeline: {
           id: '',
           isOpen: false,
+          graphEventId: '',
         },
         timerange: {
           global: {
             linkTo: ['timeline'],
             timerange: {
-              from: 1558048243696,
+              from: '2019-05-16T23:10:43.696Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1558134643697,
+              to: '2019-05-17T23:10:43.697Z',
               toStr: 'now',
             },
           },
           timeline: {
             linkTo: ['global'],
             timerange: {
-              from: 1558048243696,
+              from: '2019-05-16T23:10:43.696Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1558134643697,
+              to: '2019-05-17T23:10:43.697Z',
               toStr: 'now',
             },
           },
@@ -202,12 +197,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          alerts: {
+          detections: {
             disabled: false,
-            href: '/app/security/alerts',
-            id: 'alerts',
-            name: 'Alerts',
-            urlKey: 'alerts',
+            href: '/app/security/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
           },
           case: {
             disabled: false,
@@ -216,13 +211,6 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
-          },
           hosts: {
             disabled: false,
             href: '/app/security/hosts',
@@ -230,12 +218,12 @@ describe('SIEM Navigation', () => {
             name: 'Hosts',
             urlKey: 'host',
           },
-          management: {
+          administration: {
             disabled: false,
-            href: '/app/security/management',
-            id: 'management',
-            name: 'Management',
-            urlKey: 'management',
+            href: '/app/security/administration',
+            id: 'administration',
+            name: 'Administration',
+            urlKey: 'administration',
           },
           network: {
             disabled: false,
@@ -266,25 +254,25 @@ describe('SIEM Navigation', () => {
         search: '',
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false },
+        timeline: { id: '', isOpen: false, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],
             timerange: {
-              from: 1558048243696,
+              from: '2019-05-16T23:10:43.696Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1558134643697,
+              to: '2019-05-17T23:10:43.697Z',
               toStr: 'now',
             },
           },
           timeline: {
             linkTo: ['global'],
             timerange: {
-              from: 1558048243696,
+              from: '2019-05-16T23:10:43.696Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1558134643697,
+              to: '2019-05-17T23:10:43.697Z',
               toStr: 'now',
             },
           },

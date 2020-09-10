@@ -10,6 +10,7 @@ import React from 'react';
 import { TransformList } from './transform_list';
 
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {

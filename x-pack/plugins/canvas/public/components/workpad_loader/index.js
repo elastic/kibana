@@ -14,7 +14,7 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
 import { ComponentStrings, ErrorStrings } from '../../../i18n';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { withServices } from '../../services';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const { WorkpadLoader: strings } = ComponentStrings;
@@ -31,11 +31,11 @@ export const WorkpadLoader = compose(
   }),
   connect(mapStateToProps),
   withState('workpads', 'setWorkpads', null),
-  withKibana,
-  withProps(({ kibana }) => ({
-    notify: kibana.services.canvas.notify,
+  withServices,
+  withProps(({ services }) => ({
+    notify: services.notify,
   })),
-  withHandlers(({ kibana }) => ({
+  withHandlers(({ services }) => ({
     // Workpad creation via navigation
     createWorkpad: (props) => async (workpad) => {
       // workpad data uploaded, create and load it
@@ -44,7 +44,7 @@ export const WorkpadLoader = compose(
           await workpadService.create(workpad);
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
-          kibana.services.canvas.notify.error(err, {
+          services.notify.error(err, {
             title: errors.getUploadFailureErrorMessage(),
           });
         }
@@ -60,7 +60,7 @@ export const WorkpadLoader = compose(
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
       } catch (err) {
-        kibana.services.canvas.notify.error(err, { title: errors.getFindFailureErrorMessage() });
+        services.notify.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
 
@@ -76,7 +76,7 @@ export const WorkpadLoader = compose(
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
-        kibana.services.canvas.notify.error(err, { title: errors.getCloneFailureErrorMessage() });
+        services.notify.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
 
@@ -122,7 +122,7 @@ export const WorkpadLoader = compose(
         };
 
         if (errored.length > 0) {
-          kibana.services.canvas.notify.error(errors.getDeleteFailureErrorMessage());
+          services.notify.error(errors.getDeleteFailureErrorMessage());
         }
 
         setWorkpads(workpadState);
@@ -137,7 +137,7 @@ export const WorkpadLoader = compose(
   })),
   withProps((props) => ({
     formatDate: (date) => {
-      const dateFormat = props.kibana.services.uiSettings.get('dateFormat');
+      const dateFormat = props.services.platform.getUISetting('dateFormat');
       return date && moment(date).format(dateFormat);
     },
   }))

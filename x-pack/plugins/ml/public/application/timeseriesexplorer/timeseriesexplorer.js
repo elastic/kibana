@@ -27,7 +27,10 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiPanel,
   EuiTitle,
+  EuiAccordion,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { getToastNotifications } from '../util/dependency_cache';
@@ -80,6 +83,7 @@ import {
   getFocusData,
 } from './timeseriesexplorer_utils';
 import { EMPTY_FIELD_VALUE_LABEL } from './components/entity_control/entity_control';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -125,6 +129,8 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
+    focusAggregations: {},
+    focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
     fullRefresh: true,
@@ -623,7 +629,7 @@ export class TimeSeriesExplorer extends React.Component {
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .toPromise()
           .then((resp) => {
@@ -646,7 +652,7 @@ export class TimeSeriesExplorer extends React.Component {
             this.getCriteriaFields(detectorIndex, entityControls),
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .then((resp) => {
             const fullRangeRecordScoreData = processRecordScoreResults(resp.results);
@@ -697,7 +703,7 @@ export class TimeSeriesExplorer extends React.Component {
               nonBlankEntities,
               searchBounds.min.valueOf(),
               searchBounds.max.valueOf(),
-              stateUpdate.contextAggregationInterval.expression,
+              stateUpdate.contextAggregationInterval.asMilliseconds(),
               aggType
             )
             .toPromise()
@@ -828,6 +834,22 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
+    // if timeRange used in the url is incorrect
+    // perhaps due to user's advanced setting using incorrect date-maths
+    const { invalidTimeRangeError } = this.props;
+    if (invalidTimeRangeError) {
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+          defaultMessage:
+            'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
+          values: {
+            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+          },
+        })
+      );
+    }
+
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', () => {
@@ -1024,7 +1046,9 @@ export class TimeSeriesExplorer extends React.Component {
       dataNotChartable,
       entityValues,
       focusAggregationInterval,
+      focusAnnotationError,
       focusAnnotationData,
+      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1075,8 +1099,8 @@ export class TimeSeriesExplorer extends React.Component {
     const entityControls = this.getControlsForDetector();
     const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
     const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
-
-    const detectorSelectOptions = getViewableDetectors(selectedJob).map((d) => ({
+    const detectors = getViewableDetectors(selectedJob);
+    const detectorSelectOptions = detectors.map((d) => ({
       value: d.index,
       text: d.detector_description,
     }));
@@ -1311,25 +1335,80 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
-                {showAnnotations && focusAnnotationData.length > 0 && (
-                  <div>
-                    <EuiTitle className="panel-title">
+                {focusAnnotationError !== undefined && (
+                  <>
+                    <EuiTitle
+                      className="panel-title"
+                      data-test-subj="mlAnomalyExplorerAnnotations error"
+                    >
                       <h2>
                         <FormattedMessage
-                          id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
                           defaultMessage="Annotations"
                         />
                       </h2>
                     </EuiTitle>
+                    <EuiPanel>
+                      <EuiCallOut
+                        title={i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                          {
+                            defaultMessage: 'An error occurred loading annotations:',
+                          }
+                        )}
+                        color="danger"
+                        iconType="alert"
+                      >
+                        <p>{focusAnnotationError}</p>
+                      </EuiCallOut>
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {focusAnnotationData && focusAnnotationData.length > 0 && (
+                  <EuiAccordion
+                    id={'EuiAccordion-blah'}
+                    buttonContent={
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                            defaultMessage="Annotations {badge}"
+                            values={{
+                              badge: (
+                                <EuiBadge color={'hollow'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                    defaultMessage="Total: {count}"
+                                    values={{ count: focusAnnotationData.length }}
+                                  />
+                                </EuiBadge>
+                              ),
+                            }}
+                          />
+                        </h2>
+                      </EuiTitle>
+                    }
+                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
+                  >
                     <AnnotationsTable
+                      chartDetails={chartDetails}
+                      detectorIndex={selectedDetectorIndex}
+                      detectors={detectors}
+                      jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
+                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />
                     <EuiSpacer size="l" />
-                  </div>
+                  </EuiAccordion>
                 )}
-                <AnnotationFlyout />
+                <AnnotationFlyout
+                  chartDetails={chartDetails}
+                  detectorIndex={selectedDetectorIndex}
+                  detectors={detectors}
+                />
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage

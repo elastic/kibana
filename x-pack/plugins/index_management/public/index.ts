@@ -13,4 +13,6 @@ export const plugin = () => {
 
 export { IndexManagementPluginSetup };
 
-export { getIndexListUri } from './application/services/navigation';
+export { getIndexListUri } from './application/services/routing';
+
+export { Index } from '../common';

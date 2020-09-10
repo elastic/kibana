@@ -15,6 +15,7 @@ export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
   [HostStatus.ERROR]: 'danger',
   [HostStatus.ONLINE]: 'success',
   [HostStatus.OFFLINE]: 'subdued',
+  [HostStatus.UNENROLLING]: 'warning',
 });
 
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<

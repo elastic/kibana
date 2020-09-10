@@ -6,10 +6,11 @@
 
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
-import _ from 'lodash';
+import get from 'lodash/get';
+import find from 'lodash/find';
+import each from 'lodash/each';
 import { map } from 'rxjs/operators';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ml } from './ml_api_service';
 
 // Gets a basic summary of the most recently run forecasts for the specified
@@ -48,19 +49,19 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
       filterCriteria.push(query);
     }
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: maxResults,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: maxResults,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
+          sort: [{ forecast_create_timestamp: { order: 'desc' } }],
         },
-        sort: [{ forecast_create_timestamp: { order: 'desc' } }],
-      },
-    })
+      })
       .then((resp) => {
         if (resp.hits.total !== 0) {
           obj.forecasts = resp.hits.hits.map((hit) => hit._source);
@@ -106,32 +107,32 @@ function getForecastDateRange(job, forecastId) {
     // TODO - add in criteria for detector index and entity fields (by, over, partition)
     // once forecasting with these parameters is supported.
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
-          },
-        },
-        aggs: {
-          earliest: {
-            min: {
-              field: 'timestamp',
+    ml.results
+      .anomalySearch({
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
             },
           },
-          latest: {
-            max: {
-              field: 'timestamp',
+          aggs: {
+            earliest: {
+              min: {
+                field: 'timestamp',
+              },
+            },
+            latest: {
+              max: {
+                field: 'timestamp',
+              },
             },
           },
         },
-      },
-    })
+      })
       .then((resp) => {
-        obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
-        obj.latest = _.get(resp, 'aggregations.latest.value', null);
+        obj.earliest = get(resp, 'aggregations.earliest.value', null);
+        obj.latest = get(resp, 'aggregations.latest.value', null);
         if (obj.earliest === null || obj.latest === null) {
           reject(resp);
         } else {
@@ -152,14 +153,14 @@ function getForecastData(
   entityFields,
   earliestMs,
   latestMs,
-  interval,
+  intervalMs,
   aggType
 ) {
   // Extract the partition, by, over fields on which to filter.
   const criteriaFields = [];
   const detector = job.analysis_config.detectors[detectorIndex];
-  if (_.has(detector, 'partition_field_name')) {
-    const partitionEntity = _.find(entityFields, { fieldName: detector.partition_field_name });
+  if (detector.partition_field_name !== undefined) {
+    const partitionEntity = find(entityFields, { fieldName: detector.partition_field_name });
     if (partitionEntity !== undefined) {
       criteriaFields.push(
         { fieldName: 'partition_field_name', fieldValue: partitionEntity.fieldName },
@@ -168,8 +169,8 @@ function getForecastData(
     }
   }
 
-  if (_.has(detector, 'over_field_name')) {
-    const overEntity = _.find(entityFields, { fieldName: detector.over_field_name });
+  if (detector.over_field_name !== undefined) {
+    const overEntity = find(entityFields, { fieldName: detector.over_field_name });
     if (overEntity !== undefined) {
       criteriaFields.push(
         { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
@@ -178,8 +179,8 @@ function getForecastData(
     }
   }
 
-  if (_.has(detector, 'by_field_name')) {
-    const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
+  if (detector.by_field_name !== undefined) {
+    const byEntity = find(entityFields, { fieldName: detector.by_field_name });
     if (byEntity !== undefined) {
       criteriaFields.push(
         { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
@@ -223,7 +224,7 @@ function getForecastData(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, (criteria) => {
+  each(criteriaFields, (criteria) => {
     filterCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -243,9 +244,8 @@ function getForecastData(
           min: aggType.min,
         };
 
-  return ml
-    .esSearch$({
-      index: ML_RESULTS_INDEX_PATTERN,
+  return ml.results
+    .anomalySearch$({
       size: 0,
       body: {
         query: {
@@ -257,7 +257,7 @@ function getForecastData(
           times: {
             date_histogram: {
               field: 'timestamp',
-              interval: interval,
+              fixed_interval: `${intervalMs}ms`,
               min_doc_count: 1,
             },
             aggs: {
@@ -283,13 +283,13 @@ function getForecastData(
     })
     .pipe(
       map((resp) => {
-        const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
+        const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
+        each(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
-            prediction: _.get(dataForTime, ['prediction', 'value']),
-            forecastUpper: _.get(dataForTime, ['forecastUpper', 'value']),
-            forecastLower: _.get(dataForTime, ['forecastLower', 'value']),
+            prediction: get(dataForTime, ['prediction', 'value']),
+            forecastUpper: get(dataForTime, ['forecastUpper', 'value']),
+            forecastLower: get(dataForTime, ['forecastLower', 'value']),
           };
         });
 
@@ -343,21 +343,21 @@ function getForecastRequestStats(job, forecastId) {
       },
     ];
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: 1,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
         },
-      },
-    })
+      })
       .then((resp) => {
         if (resp.hits.total !== 0) {
-          obj.stats = _.first(resp.hits.hits)._source;
+          obj.stats = resp.hits.hits[0]._source;
         }
         resolve(obj);
       })

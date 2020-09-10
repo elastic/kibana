@@ -16,7 +16,6 @@ import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/publi
 import { rolesAPIClientMock } from '../index.mock';
 import { ReservedBadge, DisabledBadge } from '../../badges';
 import { findTestSubject } from 'test_utils/find_test_subject';
-import { ScopedHistory } from 'kibana/public';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 
@@ -42,10 +41,12 @@ const waitForRender = async (
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
-  let history: ScopedHistory;
+  let history: ReturnType<typeof scopedHistoryMock.create>;
 
   beforeEach(() => {
-    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history = scopedHistoryMock.create();
+    history.createHref.mockImplementation((location) => location.pathname!);
+
     apiClientMock = rolesAPIClientMock.create();
     apiClientMock.getRoles.mockResolvedValue([
       {
@@ -135,15 +136,19 @@ describe('<RolesGridPage />', () => {
     });
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]')
-    ).toHaveLength(1);
-    expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
-    ).toHaveLength(1);
+
+    const editButton = wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]');
+    expect(editButton).toHaveLength(1);
+    expect(editButton.prop('href')).toBe('/edit/test-role-1');
+
+    const cloneButton = wrapper.find(
+      'EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]'
+    );
+    expect(cloneButton).toHaveLength(1);
+    expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
 
     expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]')
+      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
     ).toHaveLength(1);
     expect(
       wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-disabled-role"]')

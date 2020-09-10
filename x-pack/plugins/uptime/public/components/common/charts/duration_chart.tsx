@@ -93,7 +93,7 @@ export const DurationChartComponent = ({
             xDomain={{ min, max }}
             showLegend
             showLegendExtra
-            legendPosition={Position.Bottom}
+            legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
             {...chartTheme}
@@ -103,9 +103,6 @@ export const DurationChartComponent = ({
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'Timestamp',
-            })}
           />
           <Axis
             domain={{ min: 0 }}
@@ -113,7 +110,7 @@ export const DurationChartComponent = ({
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration ms',
+              defaultMessage: 'Duration in ms',
             })}
           />
           <DurationLineSeriesList lines={locationDurationLines} />

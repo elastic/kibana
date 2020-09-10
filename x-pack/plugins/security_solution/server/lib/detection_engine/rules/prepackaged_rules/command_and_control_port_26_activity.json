@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects events that may indicate use of SMTP on TCP port 26. This port is commonly used by several popular mail transfer agents to deconflict with the default SMTP port 25. This port has also been used by a malware family called BadPatch for command and control of Windows systems.",
+  "false_positives": [
+    "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "SMTP on Port 26/TCP",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:26 or (event.dataset:zeek.smtp and destination.port:26))",
+  "references": [
+    "https://unit42.paloaltonetworks.com/unit42-badpatch/",
+    "https://isc.sans.edu/forums/diary/Next+up+whats+up+with+TCP+port+26/25564/"
+  ],
+  "risk_score": 21,
+  "rule_id": "d7e62693-aab9-4f66-a21a-3d79ecdd603d",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1048/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   CoreSetup,
   CoreStart,
   SavedObjectsServiceStart,
   Logger,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
@@ -62,10 +61,15 @@ export class Plugin {
       featureRegistry: this.featureRegistry,
     });
 
+    const getFeaturesUICapabilities = () =>
+      uiCapabilitiesForFeatures(this.featureRegistry.getAll());
+
+    core.capabilities.registerProvider(getFeaturesUICapabilities);
+
     return deepFreeze({
       registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
       getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
+      getFeaturesUICapabilities,
     });
   }
 
@@ -81,10 +85,7 @@ export class Plugin {
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
     const registry = savedObjects.getTypeRegistry();
-    const savedObjectTypes = registry
-      .getAllTypes()
-      .filter((t) => !t.hidden)
-      .map((t) => t.name);
+    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
 
     this.logger.debug(
       `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${

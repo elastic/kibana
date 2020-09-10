@@ -26,6 +26,7 @@ import {
   CoreStart,
   AppMountParameters,
 } from 'kibana/public';
+import { renderApp } from './application';
 import './types';
 
 export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart> {
@@ -36,7 +37,6 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
       id: 'app_status_start',
       title: 'App Status Start Page',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
         return renderApp('app_status_start', params);
       },
     });
@@ -47,7 +47,6 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
       euiIconType: 'snowflake',
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
         return renderApp('app_status', params);
       },
     });
@@ -64,7 +63,7 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
         return core.application.navigateToApp(appId);
       },
     };
-    window.__coreAppStatus = startContract;
+    window._coreAppStatus = startContract;
     return startContract;
   }
   public stop() {}

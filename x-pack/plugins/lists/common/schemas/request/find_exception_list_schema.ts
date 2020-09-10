@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
-import { NamespaceType, filter, namespace_type, sort_field, sort_order } from '../common/schemas';
+import { filter, namespace_type, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
+import { NamespaceType } from '../types';
 
 export const findExceptionListSchema = t.exact(
   t.partial({
@@ -23,21 +22,12 @@ export const findExceptionListSchema = t.exact(
   })
 );
 
-export type FindExceptionListSchemaPartial = t.TypeOf<typeof findExceptionListSchema>;
+export type FindExceptionListSchema = t.OutputOf<typeof findExceptionListSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListSchemaPartialDecoded = Omit<
-  FindExceptionListSchemaPartial,
+export type FindExceptionListSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof findExceptionListSchema>>,
   'namespace_type'
 > & {
   namespace_type: NamespaceType;
 };
-
-// This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListSchemaDecoded = RequiredKeepUndefined<
-  FindExceptionListSchemaPartialDecoded
->;
-
-export type FindExceptionListSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof findExceptionListSchema>
->;

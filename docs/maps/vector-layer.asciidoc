@@ -7,15 +7,14 @@ Vector layers display points, lines, and polygons.
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
 
-To add a vector layer to your map, click *Add layer*, then select one of the following layers:
+To add a vector layer to your map, click *Add layer*, then select one of the following:
+
+*Choropleth*:: Shaded areas to compare statistics across boundaries.
 
 *Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
-The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
-*Configured GeoJSON*:: Vector data from hosted GeoJSON configured in kibana.yml.
-See map.regionmap.* in <<settings>> for details.
-
-*Documents*:: Vector data from a Kibana index pattern.
+*Documents*:: Points, lines, and polyons from Elasticsearch.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 NOTE: Document results are limited to the `index.max_result_window` index setting, which defaults to 10000.

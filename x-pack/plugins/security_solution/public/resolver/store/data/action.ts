@@ -4,23 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ResolverEvent,
-  ResolverNodeStats,
-  ResolverRelatedEvents,
-} from '../../../../common/endpoint/types';
+import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
+import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
   readonly payload: {
-    readonly events: Readonly<ResolverEvent[]>;
-    readonly stats: Readonly<Map<string, ResolverNodeStats>>;
-    readonly lineageLimits: { readonly children: string | null; readonly ancestors: string | null };
+    /**
+     * The result of fetching data
+     */
+    result: ResolverTree;
+    /**
+     * The database parameters that was used to fetch the resolver tree
+     */
+    parameters: TreeFetcherParameters;
   };
+}
+
+interface AppRequestedResolverData {
+  readonly type: 'appRequestedResolverData';
+  /**
+   * entity ID used to make the request.
+   */
+  readonly payload: TreeFetcherParameters;
 }
 
 interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
+  /**
+   * entity ID used to make the failed request
+   */
+  readonly payload: TreeFetcherParameters;
+}
+
+interface AppAbortedResolverDataRequest {
+  readonly type: 'appAbortedResolverDataRequest';
+  /**
+   * entity ID used to make the aborted request
+   */
+  readonly payload: TreeFetcherParameters;
 }
 
 /**
@@ -43,4 +65,6 @@ export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerFailedToReturnRelatedEventData
-  | ServerReturnedRelatedEventData;
+  | ServerReturnedRelatedEventData
+  | AppRequestedResolverData
+  | AppAbortedResolverDataRequest;

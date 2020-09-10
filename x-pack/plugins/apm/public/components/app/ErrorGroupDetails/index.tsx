@@ -15,19 +15,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
+import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../observability/public';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -58,19 +56,24 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-export function ErrorGroupDetails() {
-  const location = useLocation();
+type ErrorGroupDetailsProps = RouteComponentProps<{
+  groupId: string;
+  serviceName: string;
+}>;
+
+export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
+  const { serviceName, groupId } = match.params;
   const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, start, end, errorGroupId } = urlParams;
+  const { start, end } = urlParams;
 
   const { data: errorGroupData } = useFetcher(() => {
-    if (serviceName && start && end && errorGroupId) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
         params: {
           path: {
             serviceName,
-            groupId: errorGroupId,
+            groupId,
           },
           query: {
             start,
@@ -80,10 +83,10 @@ export function ErrorGroupDetails() {
         },
       });
     }
-  }, [serviceName, start, end, errorGroupId, uiFilters]);
+  }, [serviceName, start, end, groupId, uiFilters]);
 
   const { data: errorDistributionData } = useFetcher(() => {
-    if (serviceName && start && end && errorGroupId) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/distribution',
         params: {
@@ -93,13 +96,13 @@ export function ErrorGroupDetails() {
           query: {
             start,
             end,
-            groupId: errorGroupId,
+            groupId,
             uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     }
-  }, [serviceName, start, end, errorGroupId, uiFilters]);
+  }, [serviceName, start, end, groupId, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
@@ -126,7 +129,7 @@ export function ErrorGroupDetails() {
                 {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
                   defaultMessage: 'Error group {errorGroupId}',
                   values: {
-                    errorGroupId: getShortGroupId(urlParams.errorGroupId),
+                    errorGroupId: getShortGroupId(groupId),
                   },
                 })}
               </h1>
@@ -181,24 +184,15 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-        <EuiFlexGroup gutterSize="s">
-          <ChartsSyncContextProvider>
-            <EuiFlexItem>
-              <ErrorDistribution
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                  {
-                    defaultMessage: 'Occurrences',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-          </ChartsSyncContextProvider>
-        </EuiFlexGroup>
+        <ErrorDistribution
+          distribution={errorDistributionData}
+          title={i18n.translate(
+            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+            {
+              defaultMessage: 'Occurrences',
+            }
+          )}
+        />
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (

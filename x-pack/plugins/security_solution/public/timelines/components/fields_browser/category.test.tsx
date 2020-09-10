@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 
 import { Category } from './category';

@@ -11,8 +11,8 @@ import { useKibana } from '../../../lib/kibana';
 
 interface ExplorerLinkProps {
   score: Anomaly;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   linkName: React.ReactNode;
 }
 
@@ -35,7 +35,7 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   );
 };
 
-export const createExplorerLink = (score: Anomaly, startDate: number, endDate: number): string => {
+export const createExplorerLink = (score: Anomaly, startDate: string, endDate: string): string => {
   const startDateIso = new Date(startDate).toISOString();
   const endDateIso = new Date(endDate).toISOString();
 

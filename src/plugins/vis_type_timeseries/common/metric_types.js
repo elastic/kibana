@@ -27,6 +27,9 @@ export const METRIC_TYPES = {
   VARIANCE: 'variance',
   SUM_OF_SQUARES: 'sum_of_squares',
   CARDINALITY: 'cardinality',
+  VALUE_COUNT: 'value_count',
+  AVERAGE: 'avg',
+  SUM: 'sum',
 };
 
 export const EXTENDED_STATS_TYPES = [

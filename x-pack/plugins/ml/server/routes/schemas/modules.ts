@@ -71,19 +71,19 @@ export const setupModuleBodySchema = schema.object({
   estimateModelMemory: schema.maybe(schema.boolean()),
 });
 
-export const getModuleIdParamSchema = (optional = false) => {
-  const stringType = schema.string();
-  return schema.object({
-    /**
-     * ID of the module.
-     */
-    moduleId: optional ? schema.maybe(stringType) : stringType,
-  });
-};
+export const optionalModuleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
+  moduleId: schema.maybe(schema.string()),
+});
 
-export const optionalModuleIdParamSchema = getModuleIdParamSchema(true);
-
-export const moduleIdParamSchema = getModuleIdParamSchema(false);
+export const moduleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
+  moduleId: schema.string(),
+});
 
 export const modulesIndexPatternTitleSchema = schema.object({
   /**

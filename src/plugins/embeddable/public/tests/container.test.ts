@@ -19,7 +19,13 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { isErrorEmbeddable, EmbeddableOutput, ContainerInput, ViewMode } from '../lib';
+import {
+  isErrorEmbeddable,
+  EmbeddableOutput,
+  ContainerInput,
+  ViewMode,
+  SavedObjectEmbeddableInput,
+} from '../lib';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
@@ -43,7 +49,6 @@ import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
@@ -649,7 +654,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -670,7 +675,7 @@ test('ErrorEmbeddables get updated when parent does', async (done) => {
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,

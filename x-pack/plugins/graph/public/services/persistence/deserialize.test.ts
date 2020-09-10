@@ -26,7 +26,7 @@ describe('deserialize', () => {
           { color: 'black', name: 'field1', selected: true, iconClass: 'a' },
           { color: 'black', name: 'field2', selected: true, iconClass: 'b' },
         ],
-        blacklist: [
+        blocklist: [
           {
             color: 'black',
             label: 'Z',
@@ -192,7 +192,7 @@ describe('deserialize', () => {
   it('should deserialize nodes and edges', () => {
     callSavedWorkspaceToAppState();
 
-    expect(workspace.blacklistedNodes.length).toEqual(1);
+    expect(workspace.blocklistedNodes.length).toEqual(1);
     expect(workspace.nodes.length).toEqual(5);
     expect(workspace.edges.length).toEqual(2);
 

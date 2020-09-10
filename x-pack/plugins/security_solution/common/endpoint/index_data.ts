@@ -94,6 +94,6 @@ async function indexAlerts(
       },
       []
     );
-    await client.bulk({ body, refresh: 'true' });
+    await client.bulk({ body, refresh: true });
   }
 }

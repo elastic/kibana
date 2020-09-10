@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StatusByLocation component renders all locations are down 1`] = `
-<div
-  class="euiText euiText--medium"
+<h2
+  class="euiTitle euiTitle--small"
 >
-  <h2>
-    Down in 2 Locations
-  </h2>
-</div>
+  Down in 2 locations
+</h2>
 `;
 
 exports[`StatusByLocation component renders properly against props 1`] = `
-<EuiText>
+<EuiTitle
+  size="s"
+>
   <h2>
     <FormattedMessage
-      defaultMessage="{status} in {loc} Locations"
+      defaultMessage="{status} in {loc} locations"
       id="xpack.uptime.monitorStatusBar.locations.upStatus"
       values={
         Object {
@@ -24,45 +24,37 @@ exports[`StatusByLocation component renders properly against props 1`] = `
       }
     />
   </h2>
-</EuiText>
+</EuiTitle>
 `;
 
 exports[`StatusByLocation component renders when down in some locations 1`] = `
-<div
-  class="euiText euiText--medium"
+<h2
+  class="euiTitle euiTitle--small"
 >
-  <h2>
-    Down in 1/2 Locations
-  </h2>
-</div>
+  Down in 1/2 locations
+</h2>
 `;
 
 exports[`StatusByLocation component renders when only one location and it is down 1`] = `
-<div
-  class="euiText euiText--medium"
+<h2
+  class="euiTitle euiTitle--small"
 >
-  <h2>
-    Down in 1 Location
-  </h2>
-</div>
+  Down in 1 location
+</h2>
 `;
 
 exports[`StatusByLocation component renders when only one location and it is up 1`] = `
-<div
-  class="euiText euiText--medium"
+<h2
+  class="euiTitle euiTitle--small"
 >
-  <h2>
-    Up in 1 Location
-  </h2>
-</div>
+  Up in 1 location
+</h2>
 `;
 
 exports[`StatusByLocation component renders when up in all locations 1`] = `
-<div
-  class="euiText euiText--medium"
+<h2
+  class="euiTitle euiTitle--small"
 >
-  <h2>
-    Up in 2 Locations
-  </h2>
-</div>
+  Up in 2 locations
+</h2>
 `;

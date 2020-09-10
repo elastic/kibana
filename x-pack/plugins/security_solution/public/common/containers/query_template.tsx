@@ -9,14 +9,18 @@ import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
 import { ESQuery } from '../../../common/typed_json';
+import { DocValueFields } from './source';
+
+export { DocValueFields };
 
 export interface QueryTemplateProps {
+  docValueFields?: DocValueFields[];
   id?: string;
-  endDate?: number;
+  endDate?: string;
   filterQuery?: ESQuery | string;
   skip?: boolean;
   sourceId: string;
-  startDate?: number;
+  startDate?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &

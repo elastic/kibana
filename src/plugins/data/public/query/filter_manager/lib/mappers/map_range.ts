@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, hasIn } from 'lodash';
 import {
   FilterValueFormatter,
   RangeFilter,
@@ -48,10 +48,10 @@ function getParams(filter: RangeFilter) {
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
 
-  let left = has(params, 'gte') ? params.gte : params.gt;
+  let left = hasIn(params, 'gte') ? params.gte : params.gt;
   if (left == null) left = -Infinity;
 
-  let right = has(params, 'lte') ? params.lte : params.lt;
+  let right = hasIn(params, 'lte') ? params.lte : params.lt;
   if (right == null) right = Infinity;
 
   const value = getFormattedValueFn(left, right);

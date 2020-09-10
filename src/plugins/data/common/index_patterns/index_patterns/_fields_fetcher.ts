@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { GetFieldsOptions, IIndexPatternsApiClient, IndexPattern } from '.';
+import { IndexPattern } from '.';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../types';
 
 /** @internal */
 export const createFieldsFetcher = (
   indexPattern: IndexPattern,
   apiClient: IIndexPatternsApiClient,
-  metaFields: string
+  metaFields: string[] = []
 ) => {
   const fieldFetcher = {
     fetch: (options: GetFieldsOptions) => {

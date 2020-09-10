@@ -19,7 +19,7 @@
 
 import { getReportMessageIter } from './report_metadata';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, KARMA_REPORT, MOCHA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 
 it('reads messages and screenshots from metadata-json properties', async () => {
   const ftrReport = await parseTestReport(FTR_REPORT);
@@ -43,7 +43,4 @@ it('reads messages and screenshots from metadata-json properties', async () => {
 
   const mochaReport = await parseTestReport(MOCHA_REPORT);
   expect(Array.from(getReportMessageIter(mochaReport))).toMatchInlineSnapshot(`Array []`);
-
-  const karmaReport = await parseTestReport(KARMA_REPORT);
-  expect(Array.from(getReportMessageIter(karmaReport))).toMatchInlineSnapshot(`Array []`);
 });

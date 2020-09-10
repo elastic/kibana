@@ -127,7 +127,7 @@ const componentLayoutState = ({
       gestureState: aeroStore
         ? aeroStore.getCurrentState().currentScene.gestureState
         : {
-            cursor: { x: 0, y: 0 },
+            cursor: { x: Infinity, y: Infinity },
             mouseIsDown: false,
             mouseButtonState: { buttonState: 'up', downX: null, downY: null },
           },

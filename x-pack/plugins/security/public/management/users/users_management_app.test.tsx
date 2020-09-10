@@ -12,7 +12,6 @@ jest.mock('./edit_user', () => ({
   EditUserPage: (props: any) => `User Edit Page: ${JSON.stringify(props)}`,
 }));
 
-import { ScopedHistory } from 'src/core/public';
 import { usersManagementApp } from './users_management_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
@@ -31,7 +30,7 @@ async function mountApp(basePath: string, pathname: string) {
       basePath,
       element: container,
       setBreadcrumbs,
-      history: (scopedHistoryMock.create({ pathname }) as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create({ pathname }),
     });
 
   return { unmount, container, setBreadcrumbs };

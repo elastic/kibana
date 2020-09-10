@@ -60,7 +60,7 @@ function getTabs(disableLinks: boolean): Tab[] {
       name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
         defaultMessage: 'Settings',
       }),
-      disabled: false,
+      disabled: disableLinks,
     },
   ];
 }

@@ -57,14 +57,11 @@ function buildSuggestion({
   // two match up.
   const layers = _.mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: _.pick<Record<string, IndexPatternColumn>, Record<string, IndexPatternColumn>>(
-      layer.columns,
-      layer.columnOrder
-    ),
+    columns: _.pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns;
+  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {
@@ -108,7 +105,10 @@ export function getDatasourceSuggestionsForField(
     // The field we're suggesting on matches an existing layer. In this case we find the layer with
     // the fewest configured columns and try to add the field to this table. If this layer does not
     // contain any layers yet, behave as if there is no layer.
-    const mostEmptyLayerId = _.min(layerIds, (layerId) => state.layers[layerId].columnOrder.length);
+    const mostEmptyLayerId = _.minBy(
+      layerIds,
+      (layerId) => state.layers[layerId].columnOrder.length
+    ) as string;
     if (state.layers[mostEmptyLayerId].columnOrder.length === 0) {
       return getEmptyLayerSuggestionsForField(state, mostEmptyLayerId, indexPatternId, field);
     } else {
@@ -481,17 +481,25 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const layer = state.layers[layerId];
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
+  const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const firstBucketLabel =
+    currentFields.find((field) => field.name === layer.columns[firstBucket].sourceField)
+      ?.displayName || '';
+  const secondBucketLabel =
+    currentFields.find((field) => field.name === layer.columns[secondBucket].sourceField)
+      ?.displayName || '';
+
   return buildSuggestion({
     state,
     layerId,
     updatedLayer,
-    label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
+    label: getNestedTitle([secondBucketLabel, firstBucketLabel]),
     changeType: 'reorder',
   });
 }
 
 function getMetricColumn(indexPattern: IndexPattern, layerId: string, field: IndexPatternField) {
-  const operationDefinitionsMap = _.indexBy(operationDefinitions, 'type');
+  const operationDefinitionsMap = _.keyBy(operationDefinitions, 'type');
   const [column] = getOperationTypesForField(field)
     .map((type) =>
       operationDefinitionsMap[type].buildColumn({
@@ -544,12 +552,12 @@ function createMetricSuggestion(
   });
 }
 
-function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
+function getNestedTitle([outerBucketLabel, innerBucketLabel]: string[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
     defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.sourceField,
-      outerOperation: outerBucket.sourceField,
+      innerOperation: innerBucketLabel,
+      outerOperation: outerBucketLabel,
     },
   });
 }

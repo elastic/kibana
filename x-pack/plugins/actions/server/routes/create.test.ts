@@ -28,13 +28,6 @@ describe('createActionRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-all",
-        ],
-      }
-    `);
 
     const createResult = {
       id: '1',

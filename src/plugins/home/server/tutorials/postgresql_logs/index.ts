@@ -37,6 +37,7 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.postgresqlLogs.nameTitle', {
       defaultMessage: 'PostgreSQL logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',

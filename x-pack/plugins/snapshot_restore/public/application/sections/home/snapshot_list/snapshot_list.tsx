@@ -24,6 +24,7 @@ import {
   linkToSnapshot,
 } from '../../../services/navigation';
 import { useServices } from '../../../app_context';
+import { useDecodedParams } from '../../../lib';
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
 
@@ -35,17 +36,15 @@ interface MatchParams {
 }
 
 export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { repositoryName, snapshotId },
-  },
   location: { search },
   history,
 }) => {
+  const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const {
     error,
     isLoading,
     data: { snapshots = [], repositories = [], policies = [], errors = {} },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadSnapshots();
 
   const { uiMetricService } = useServices();

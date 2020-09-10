@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies } from './types';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -32,7 +37,7 @@ export interface KFetchKibanaOptions {
 
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: { get: () => CoreStart['application']['capabilities'] };
+  capabilities: CoreStart['application']['capabilities'];
   getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
@@ -43,24 +48,29 @@ export interface IShims {
   I18nContext: CoreStart['i18n']['Context'];
   docLinks: CoreStart['docLinks'];
   docTitle: CoreStart['chrome']['docTitle'];
-  timefilter: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  uiSettings: IUiSettingsClient;
+  http: HttpSetup;
   kfetch: (
     { pathname, ...options }: KFetchOptions,
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class Legacy {
   private static _shims: IShims;
 
   public static init(
-    { core, data, isCloud }: MonitoringPluginDependencies,
+    { core, data, isCloud, triggersActionsUi }: MonitoringStartPluginDependencies,
     ngInjector: angular.auto.IInjectorService
   ) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
-      capabilities: { get: () => core.application.capabilities },
+      capabilities: core.application.capabilities,
       getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
@@ -95,6 +105,10 @@ export class Legacy {
       docLinks: core.docLinks,
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
+      actionTypeRegistry: triggersActionsUi?.actionTypeRegistry,
+      alertTypeRegistry: triggersActionsUi?.alertTypeRegistry,
+      uiSettings: core.uiSettings,
+      http: core.http,
       kfetch: async (
         { pathname, ...options }: KFetchOptions,
         kfetchOptions?: KFetchKibanaOptions
@@ -104,6 +118,7 @@ export class Legacy {
           ...options,
         }),
       isCloud,
+      triggersActionsUi,
     };
   }
 

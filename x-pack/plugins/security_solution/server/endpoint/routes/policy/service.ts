@@ -5,15 +5,25 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { INITIAL_POLICY_ID } from './index';
 
 export function getESQueryPolicyResponseByHostID(hostID: string, index: string) {
   return {
     body: {
       query: {
-        match: {
-          'host.id': hostID,
+        bool: {
+          filter: {
+            term: {
+              'host.id': hostID,
+            },
+          },
+          must_not: {
+            term: {
+              'Endpoint.policy.applied.id': INITIAL_POLICY_ID,
+            },
+          },
         },
       },
       sort: [
@@ -32,7 +42,7 @@ export function getESQueryPolicyResponseByHostID(hostID: string, index: string) 
 export async function getPolicyResponseByHostId(
   index: string,
   hostId: string,
-  dataClient: IScopedClusterClient
+  dataClient: ILegacyScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByHostID(hostId, index);
   const response = (await dataClient.callAsCurrentUser('search', query)) as SearchResponse<

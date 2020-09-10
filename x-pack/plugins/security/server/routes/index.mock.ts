@@ -14,6 +14,7 @@ import { authenticationMock } from '../authentication/index.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { sessionMock } from '../session_management/session.mock';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) => ({
@@ -21,7 +22,7 @@ export const routeDefinitionParamsMock = {
     basePath: httpServiceMock.createBasePath(),
     csp: httpServiceMock.createSetupContract().csp,
     logger: loggingSystemMock.create().get(),
-    clusterClient: elasticsearchServiceMock.createClusterClient(),
+    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
     config: createConfig(ConfigSchema.validate(config), loggingSystemMock.create().get(), {
       isTLSEnabled: false,
     }),
@@ -31,5 +32,6 @@ export const routeDefinitionParamsMock = {
     httpResources: httpResourcesMock.createRegistrar(),
     getFeatures: jest.fn(),
     getFeatureUsageService: jest.fn(),
+    session: sessionMock.create(),
   }),
 };

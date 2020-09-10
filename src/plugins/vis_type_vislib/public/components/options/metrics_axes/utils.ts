@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 
 import { BasicVislibParams, ValueAxis, SeriesParam } from '../../../types';
 import { ChartModes, ChartTypes, InterpolationModes, Positions } from '../../../utils/collections';
@@ -67,7 +67,7 @@ const getUpdatedAxisName = (
   axisPosition: ValueAxis['position'],
   valueAxes: BasicVislibParams['valueAxes']
 ) => {
-  const axisName = capitalize(axisPosition) + AXIS_PREFIX;
+  const axisName = upperFirst(axisPosition) + AXIS_PREFIX;
   const nextAxisNameNumber = valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);
 
   return `${axisName}${nextAxisNameNumber}`;

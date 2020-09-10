@@ -72,51 +72,51 @@ const breadcrumbGetters: {
     },
     { text: pkgTitle },
   ],
-  configurations: () => [
+  policies: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.configurationsPageTitle', {
-        defaultMessage: 'Configurations',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
       }),
     },
   ],
-  configurations_list: () => [
+  policies_list: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.configurationsPageTitle', {
-        defaultMessage: 'Configurations',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
       }),
     },
   ],
-  configuration_details: ({ configName }) => [
+  policy_details: ({ policyName }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.configurations(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.configurationsPageTitle', {
-        defaultMessage: 'Configurations',
+      href: pagePathGetters.policies(),
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
       }),
     },
-    { text: configName },
+    { text: policyName },
   ],
-  add_datasource_from_configuration: ({ configName, configId }) => [
+  add_integration_from_policy: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.configurations(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.configurationsPageTitle', {
-        defaultMessage: 'Configurations',
+      href: pagePathGetters.policies(),
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
       }),
     },
     {
-      href: pagePathGetters.configuration_details({ configId }),
-      text: configName,
+      href: pagePathGetters.policy_details({ policyId }),
+      text: policyName,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.addDatasourcePageTitle', {
-        defaultMessage: 'Add data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.addPackagePolicyPageTitle', {
+        defaultMessage: 'Add integration',
       }),
     },
   ],
-  add_datasource_from_integration: ({ pkgTitle, pkgkey }) => [
+  add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.integrations(),
@@ -129,26 +129,26 @@ const breadcrumbGetters: {
       text: pkgTitle,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.addDatasourcePageTitle', {
-        defaultMessage: 'Add data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.addPackagePolicyPageTitle', {
+        defaultMessage: 'Add integration',
       }),
     },
   ],
-  edit_datasource: ({ configName, configId }) => [
+  edit_integration: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.configurations(),
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.configurationsPageTitle', {
-        defaultMessage: 'Configurations',
+      href: pagePathGetters.policies(),
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Policies',
       }),
     },
     {
-      href: pagePathGetters.configuration_details({ configId }),
-      text: configName,
+      href: pagePathGetters.policy_details({ policyId }),
+      text: policyName,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.editDatasourcePageTitle', {
-        defaultMessage: 'Edit data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.editPackagePolicyPageTitle', {
+        defaultMessage: 'Edit integration',
       }),
     },
   ],

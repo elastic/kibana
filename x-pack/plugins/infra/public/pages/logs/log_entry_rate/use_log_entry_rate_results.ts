@@ -10,6 +10,7 @@ import {
   GetLogEntryRateSuccessResponsePayload,
   LogEntryRateHistogramBucket,
   LogEntryRatePartition,
+  LogEntryRateAnomaly,
 } from '../../../../common/http_api/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
@@ -23,11 +24,16 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
+export type AnomalyRecord = LogEntryRateAnomaly & {
+  partitionId: string;
+};
+
 export interface LogEntryRateResults {
   bucketDuration: number;
   totalNumberOfLogEntries: number;
   histogramBuckets: LogEntryRateHistogramBucket[];
   partitionBuckets: PartitionRecord;
+  anomalies: AnomalyRecord[];
 }
 
 export const useLogEntryRateResults = ({
@@ -35,11 +41,13 @@ export const useLogEntryRateResults = ({
   startTime,
   endTime,
   bucketDuration = 15 * 60 * 1000,
+  filteredDatasets,
 }: {
   sourceId: string;
   startTime: number;
   endTime: number;
   bucketDuration: number;
+  filteredDatasets?: string[];
 }) => {
   const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
@@ -47,7 +55,13 @@ export const useLogEntryRateResults = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callGetLogEntryRateAPI(sourceId, startTime, endTime, bucketDuration);
+        return await callGetLogEntryRateAPI(
+          sourceId,
+          startTime,
+          endTime,
+          bucketDuration,
+          filteredDatasets
+        );
       },
       onResolve: ({ data }) => {
         setLogEntryRate({
@@ -55,13 +69,14 @@ export const useLogEntryRateResults = ({
           totalNumberOfLogEntries: data.totalNumberOfLogEntries,
           histogramBuckets: data.histogramBuckets,
           partitionBuckets: formatLogEntryRateResultsByPartition(data),
+          anomalies: formatLogEntryRateResultsByAllAnomalies(data),
         });
       },
       onReject: () => {
         setLogEntryRate(null);
       },
     },
-    [sourceId, startTime, endTime, bucketDuration]
+    [sourceId, startTime, endTime, bucketDuration, filteredDatasets]
   );
 
   const isLoading = useMemo(() => getLogEntryRateRequest.state === 'pending', [
@@ -116,4 +131,24 @@ const formatLogEntryRateResultsByPartition = (
   });
 
   return resultsByPartition;
+};
+
+const formatLogEntryRateResultsByAllAnomalies = (
+  results: GetLogEntryRateSuccessResponsePayload['data']
+): AnomalyRecord[] => {
+  return results.histogramBuckets.reduce<AnomalyRecord[]>((anomalies, bucket) => {
+    return bucket.partitions.reduce<AnomalyRecord[]>((_anomalies, partition) => {
+      if (partition.anomalies.length > 0) {
+        partition.anomalies.forEach((anomaly) => {
+          _anomalies.push({
+            partitionId: partition.partitionId,
+            ...anomaly,
+          });
+        });
+        return _anomalies;
+      } else {
+        return _anomalies;
+      }
+    }, anomalies);
+  }, []);
 };

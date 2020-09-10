@@ -19,7 +19,6 @@
 
 import { services as commonServices } from '../../common/services';
 
-// @ts-ignore not TS yet
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {

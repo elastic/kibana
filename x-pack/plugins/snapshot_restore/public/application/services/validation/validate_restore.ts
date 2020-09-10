@@ -48,7 +48,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
   if (Array.isArray(indices) && indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.indicesRequiredError', {
-        defaultMessage: 'You must select at least one index.',
+        defaultMessage: 'You must select at least one data stream or index.',
       })
     );
   }
@@ -93,7 +93,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
             'xpack.snapshotRestore.restoreValidation.indexSettingsNotModifiableError',
             {
               defaultMessage: 'You can’t modify: {settings}',
-              // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
               values: {
                 settings: unmodifiableSettings.map((setting: string, index: number) =>
                   index === 0 ? `${setting} ` : setting
@@ -131,7 +130,6 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
       validation.errors.ignoreIndexSettings.push(
         i18n.translate('xpack.snapshotRestore.restoreValidation.indexSettingsNotRemovableError', {
           defaultMessage: 'You can’t reset: {settings}',
-          // @ts-ignore Bug filed: https://github.com/elastic/kibana/issues/39299
           values: {
             settings: unremovableSettings.map((setting: string, index: number) =>
               index === 0 ? `${setting} ` : setting

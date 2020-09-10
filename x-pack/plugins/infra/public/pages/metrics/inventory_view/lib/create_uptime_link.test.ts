@@ -36,12 +36,14 @@ describe('createUptimeLink()', () => {
       name: 'host-01',
       ip: '10.0.1.2',
       path: [],
-      metric: {
-        name: 'cpu' as SnapshotMetricType,
-        value: 0.5,
-        max: 0.8,
-        avg: 0.6,
-      },
+      metrics: [
+        {
+          name: 'cpu' as SnapshotMetricType,
+          value: 0.5,
+          max: 0.8,
+          avg: 0.6,
+        },
+      ],
     };
     expect(createUptimeLink(options, 'host', node)).toStrictEqual({
       app: 'uptime',
@@ -56,12 +58,14 @@ describe('createUptimeLink()', () => {
       id: 'host-01',
       name: 'host-01',
       path: [],
-      metric: {
-        name: 'cpu' as SnapshotMetricType,
-        value: 0.5,
-        max: 0.8,
-        avg: 0.6,
-      },
+      metrics: [
+        {
+          name: 'cpu' as SnapshotMetricType,
+          value: 0.5,
+          max: 0.8,
+          avg: 0.6,
+        },
+      ],
     };
     expect(createUptimeLink(options, 'host', node)).toStrictEqual({
       app: 'uptime',
@@ -76,12 +80,14 @@ describe('createUptimeLink()', () => {
       id: '29193-pod-02939',
       name: 'pod-01',
       path: [],
-      metric: {
-        name: 'cpu' as SnapshotMetricType,
-        value: 0.5,
-        max: 0.8,
-        avg: 0.6,
-      },
+      metrics: [
+        {
+          name: 'cpu' as SnapshotMetricType,
+          value: 0.5,
+          max: 0.8,
+          avg: 0.6,
+        },
+      ],
     };
     expect(createUptimeLink(options, 'pod', node)).toStrictEqual({
       app: 'uptime',
@@ -96,12 +102,14 @@ describe('createUptimeLink()', () => {
       id: 'docker-1234',
       name: 'docker-01',
       path: [],
-      metric: {
-        name: 'cpu' as SnapshotMetricType,
-        value: 0.5,
-        max: 0.8,
-        avg: 0.6,
-      },
+      metrics: [
+        {
+          name: 'cpu' as SnapshotMetricType,
+          value: 0.5,
+          max: 0.8,
+          avg: 0.6,
+        },
+      ],
     };
     expect(createUptimeLink(options, 'container', node)).toStrictEqual({
       app: 'uptime',

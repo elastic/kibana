@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
           const vizName1 = 'Visualization TileMap';
           await PageObjects.visualize.loadSavedVisualization(vizName1);
           await inspector.open();
-          await inspector.expectTableHeaders(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Filter', 'Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.setIsFilteredByCollarCheckbox(false);
           await PageObjects.visEditor.clickGo();
           await inspector.open();
-          await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 

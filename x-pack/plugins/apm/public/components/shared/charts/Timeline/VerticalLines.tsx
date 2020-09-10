@@ -16,11 +16,11 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export const VerticalLines = ({
+export function VerticalLines({
   topTraceDuration,
   plotValues,
   marks = [],
-}: VerticalLinesProps) => {
+}: VerticalLinesProps) {
   const { width, height, margins, xDomain, tickValues } = plotValues;
 
   const markTimes = marks
@@ -63,4 +63,4 @@ export const VerticalLines = ({
       </XYPlot>
     </div>
   );
-};
+}

@@ -38,6 +38,7 @@ export function formatValues([key, value]) {
     case 'model_bytes':
     case 'model_bytes_exceeded':
     case 'model_bytes_memory_limit':
+    case 'peak_model_bytes':
       value = formatData(value);
       break;
 

@@ -32,6 +32,10 @@ const Title = styled(EuiTitle)`
   padding-left: 5px;
 `;
 
+const H5 = styled.h5`
+  text-align: left;
+`;
+
 Title.displayName = 'Title';
 
 type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateColumns'> & {
@@ -64,7 +68,7 @@ export const CategoriesPane = React.memo<Props>(
   }) => (
     <>
       <Title size="xxs">
-        <h5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</h5>
+        <H5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</H5>
       </Title>
 
       <CategoryNames

@@ -8,21 +8,21 @@ exports[`ML Integrations renders without errors 1`] = `
     class="euiPopover__anchor"
   >
     <button
-      class="euiButtonEmpty euiButtonEmpty--primary"
+      aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
+      class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
       data-test-subj="uptimeEnableAnomalyBtn"
+      disabled=""
       type="button"
     >
       <span
-        class="euiButtonEmpty__content"
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
+          class="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
         />
         <span
-          class="euiButtonEmpty__text"
-        >
-          Enable anomaly detection
-        </span>
+          class="euiButton__text"
+        />
       </span>
     </button>
   </div>
@@ -80,6 +80,41 @@ exports[`ML Integrations shallow renders without errors 1`] = `
     }
   }
 >
-  <MLIntegrationComponent />
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <MLIntegrationComponent />
+  </ContextProvider>
 </ContextProvider>
 `;

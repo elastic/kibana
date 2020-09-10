@@ -15,12 +15,13 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
 describe('SSL Certificate component', () => {
   let monitorTls: Tls;
+  const dateInTwoMonths = moment().add(2, 'month').toString();
+  const yesterday = moment().subtract(1, 'day').toString();
 
   beforeEach(() => {
-    const dateInTwoMonths = moment().add(2, 'month').toString();
-
     monitorTls = {
-      not_after: dateInTwoMonths,
+      certificate_not_valid_after: dateInTwoMonths,
+      certificate_not_valid_before: yesterday,
     };
 
     const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
@@ -32,7 +33,8 @@ describe('SSL Certificate component', () => {
 
   it('shallow renders', () => {
     const monitorTls1 = {
-      not_after: '2020-04-24T11:41:38.200Z',
+      certificate_not_valid_after: '2020-04-24T11:41:38.200Z',
+      certificate_not_valid_before: '2019-04-24T11:41:38.200Z',
     };
     const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls1} />);
     expect(component).toMatchSnapshot();
@@ -45,7 +47,8 @@ describe('SSL Certificate component', () => {
 
   it('renders null if invalid date', () => {
     monitorTls = {
-      not_after: 'i am so invalid date',
+      certificate_not_valid_after: 'i am so invalid date',
+      certificate_not_valid_before: 'i am so invalid date',
     };
     const component = renderWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
     expect(component).toMatchSnapshot();
@@ -54,7 +57,8 @@ describe('SSL Certificate component', () => {
   it('renders expiration date with a warning state if ssl expiry date is less than 5 days', () => {
     const dateIn5Days = moment().add(5, 'day').toString();
     monitorTls = {
-      not_after: dateIn5Days,
+      certificate_not_valid_after: dateIn5Days,
+      certificate_not_valid_before: yesterday,
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
@@ -69,7 +73,8 @@ describe('SSL Certificate component', () => {
   it('does not render the expiration date with a warning state if expiry date is greater than a month', () => {
     const dateIn40Days = moment().add(40, 'day').toString();
     monitorTls = {
-      not_after: dateIn40Days,
+      certificate_not_valid_after: dateIn40Days,
+      certificate_not_valid_before: yesterday,
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 

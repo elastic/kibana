@@ -18,6 +18,6 @@
  */
 
 import { baseFormatters } from '../../common';
-import { DateFormat } from './converters/date';
+import { DateFormat, DateNanosFormat } from './converters';
 
-export const baseFormattersPublic = [DateFormat, ...baseFormatters];
+export const baseFormattersPublic = [DateFormat, DateNanosFormat, ...baseFormatters];

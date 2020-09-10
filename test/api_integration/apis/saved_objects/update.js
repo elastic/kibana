@@ -56,6 +56,7 @@ export default function ({ getService }) {
               attributes: {
                 title: 'My second favorite vis',
               },
+              namespaces: ['default'],
             });
           });
       });

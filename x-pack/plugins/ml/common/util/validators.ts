@@ -67,6 +67,8 @@ export function requiredValidator() {
 
 export type ValidationResult = object | null;
 
+export type MemoryInputValidatorResult = { invalidUnits: { allowedUnits: string } } | null;
+
 export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
   return (value: any) => {
     if (typeof value !== 'string' || value === '') {

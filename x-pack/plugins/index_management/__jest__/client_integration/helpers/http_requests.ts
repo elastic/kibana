@@ -92,6 +92,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setSimulateTemplateResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('POST', `${API_BASE_PATH}/index_templates/simulate`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -102,6 +113,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setUpdateTemplateResponse,
+    setSimulateTemplateResponse,
   };
 };
 

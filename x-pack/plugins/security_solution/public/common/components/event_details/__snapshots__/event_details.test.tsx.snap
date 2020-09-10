@@ -377,6 +377,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                       "auditbeat-*",
                       "endgame-*",
                       "filebeat-*",
+                      "logs-*",
                       "packetbeat-*",
                       "winlogbeat-*",
                     ],
@@ -1069,6 +1070,7 @@ In other use cases the message field can be used to concatenate different values
                         "auditbeat-*",
                         "endgame-*",
                         "filebeat-*",
+                        "logs-*",
                         "packetbeat-*",
                         "winlogbeat-*",
                       ],
@@ -1542,5 +1544,12 @@ In other use cases the message field can be used to concatenate different values
       ]
     }
   />
+  <CollapseLink
+    aria-label="Collapse"
+    data-test-subj="collapse"
+    onClick={[MockFunction]}
+  >
+    Collapse event
+  </CollapseLink>
 </Details>
 `;

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isBoom } from 'boom';
 import { IRouter } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
@@ -75,8 +74,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       try {
         await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
       } catch (err) {
-        // savedObjectClient.get() throws an boom error when object is not found.
-        if (isBoom(err) && err.output.statusCode === 404) {
+        if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
           sampleDataset.status = NOT_INSTALLED;
           return;
         }

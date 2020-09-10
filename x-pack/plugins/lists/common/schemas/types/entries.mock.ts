@@ -4,65 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ENTRY_VALUE,
-  EXISTS,
-  FIELD,
-  LIST,
-  LIST_ID,
-  MATCH,
-  MATCH_ANY,
-  NESTED,
-  OPERATOR,
-  TYPE,
-} from '../../constants.mock';
+import { EntriesArray } from './entries';
+import { getEntryMatchMock } from './entry_match.mock';
+import { getEntryMatchAnyMock } from './entry_match_any.mock';
+import { getEntryListMock } from './entry_list.mock';
+import { getEntryExistsMock } from './entry_exists.mock';
+import { getEntryNestedMock } from './entry_nested.mock';
 
-import {
-  EntriesArray,
-  EntryExists,
-  EntryList,
-  EntryMatch,
-  EntryMatchAny,
-  EntryNested,
-} from './entries';
+export const getListAndNonListEntriesArrayMock = (): EntriesArray => [
+  getEntryMatchMock(),
+  getEntryMatchAnyMock(),
+  getEntryListMock(),
+  getEntryExistsMock(),
+  getEntryNestedMock(),
+];
 
-export const getEntryMatchMock = (): EntryMatch => ({
-  field: FIELD,
-  operator: OPERATOR,
-  type: MATCH,
-  value: ENTRY_VALUE,
-});
-
-export const getEntryMatchAnyMock = (): EntryMatchAny => ({
-  field: FIELD,
-  operator: OPERATOR,
-  type: MATCH_ANY,
-  value: [ENTRY_VALUE],
-});
-
-export const getEntryListMock = (): EntryList => ({
-  field: FIELD,
-  list: { id: LIST_ID, type: TYPE },
-  operator: OPERATOR,
-  type: LIST,
-});
-
-export const getEntryExistsMock = (): EntryExists => ({
-  field: FIELD,
-  operator: OPERATOR,
-  type: EXISTS,
-});
-
-export const getEntryNestedMock = (): EntryNested => ({
-  entries: [getEntryMatchMock(), getEntryMatchMock()],
-  field: FIELD,
-  type: NESTED,
-});
+export const getListEntriesArrayMock = (): EntriesArray => [getEntryListMock(), getEntryListMock()];
 
 export const getEntriesArrayMock = (): EntriesArray => [
   getEntryMatchMock(),
   getEntryMatchAnyMock(),
-  getEntryListMock(),
   getEntryExistsMock(),
   getEntryNestedMock(),
 ];

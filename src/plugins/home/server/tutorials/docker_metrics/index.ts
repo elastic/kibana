@@ -36,6 +36,7 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.dockerMetrics.nameTitle', {
       defaultMessage: 'Docker metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.dockerMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics about your Docker containers.',

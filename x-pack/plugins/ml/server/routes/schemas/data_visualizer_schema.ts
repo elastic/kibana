@@ -11,6 +11,15 @@ export const indexPatternTitleSchema = schema.object({
   indexPatternTitle: schema.string(),
 });
 
+export const dataVisualizerFieldHistogramsSchema = schema.object({
+  /** Query to match documents in the index. */
+  query: schema.any(),
+  /** The fields to return histogram data. */
+  fields: schema.arrayOf(schema.any()),
+  /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
+  samplerShardSize: schema.number(),
+});
+
 export const dataVisualizerFieldStatsSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),
@@ -23,8 +32,8 @@ export const dataVisualizerFieldStatsSchema = schema.object({
   earliest: schema.maybe(schema.number()),
   /** Latest timestamp for search, as epoch ms (optional). */
   latest: schema.maybe(schema.number()),
-  /** Aggregation interval to use for obtaining document counts over time (optional). */
-  interval: schema.maybe(schema.string()),
+  /** Aggregation interval, in milliseconds, to use for obtaining document counts over time (optional). */
+  interval: schema.maybe(schema.number()),
   /** Maximum number of examples to return for text type fields.  */
   maxExamples: schema.number(),
 });

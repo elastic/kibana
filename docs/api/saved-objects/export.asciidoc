@@ -68,7 +68,7 @@ Export all index pattern saved objects:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_export" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/saved_objects/_export -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "type": "index-pattern"
 }'
@@ -79,7 +79,7 @@ Export all index pattern saved objects and exclude the export summary from the s
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_export" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/saved_objects/_export -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "type": "index-pattern",
   "excludeExportDetails": true
@@ -91,7 +91,7 @@ Export a specific saved object:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_export" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/saved_objects/_export -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "objects": [
     {
@@ -107,7 +107,7 @@ Export a specific saved object and it's related objects :
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_export" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/saved_objects/_export -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "objects": [
     {

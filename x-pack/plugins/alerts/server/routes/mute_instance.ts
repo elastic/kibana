@@ -30,9 +30,6 @@ export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseSta
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:alerting-all'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

@@ -14,6 +14,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.getVisibleText('noApiKeysHeader');
     },
 
+    async getApiKeyAdminDesc() {
+      return await testSubjects.getVisibleText('apiKeyAdminDescriptionCallOut');
+    },
+
     async getGoToConsoleButton() {
       return await testSubjects.find('goToConsoleButton');
     },

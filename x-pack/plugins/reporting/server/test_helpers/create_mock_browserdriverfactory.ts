@@ -7,9 +7,10 @@
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
-import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { LevelLogger } from '../lib';
-import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
+import { ElementsPositionAndAttribute } from '../lib/screenshots';
+import * as contexts from '../lib/screenshots/constants';
+import { CaptureConfig } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
@@ -129,6 +130,7 @@ export const createMockBrowserDriverFactory = async (
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
   mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
+  mockBrowserDriver.isPageOpen = () => true;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { IngestManagerSetup } from '../../../ingest_manager/public';
+import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
 import { IndexMgmtMetricsType } from '../types';
 import { AppDependencies } from './app_context';
@@ -34,7 +36,14 @@ export async function mountManagementSection(
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
-  const { docLinks, fatalErrors, application } = core;
+  const {
+    docLinks,
+    fatalErrors,
+    application,
+    chrome: { docTitle },
+  } = core;
+
+  docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
@@ -50,7 +59,13 @@ export async function mountManagementSection(
     },
     services,
     history,
+    setBreadcrumbs,
   };
 
-  return renderApp(element, { core, dependencies: appDependencies });
+  const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
+
+  return () => {
+    docTitle.reset();
+    unmountAppCallback();
+  };
 }

@@ -11,6 +11,9 @@ import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -57,11 +60,17 @@ describe('PieVisualization component', () => {
       return {
         data,
         formatFactory: getFormatSpy,
-        isDarkMode: false,
-        chartTheme: {},
         onClickValue: jest.fn(),
+        chartsThemeService,
       };
     }
+
+    test('it shows legend on correct side', () => {
+      const component = shallow(
+        <PieComponent args={{ ...args, legendPosition: 'top' }} {...getDefaultArgs()} />
+      );
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    });
 
     test('it shows legend for 2 groups using default legendDisplay', () => {
       const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);

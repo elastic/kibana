@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { getMetricOptionsForLayer, MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
@@ -63,7 +64,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <LayerSelect value={this.state.layer} onChange={this._onLayerChange} />
         <MetricSelect
           layer={this.state.layer}
@@ -75,7 +76,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
           value={this.state.display}
           onChange={this._onDisplayChange}
         />
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

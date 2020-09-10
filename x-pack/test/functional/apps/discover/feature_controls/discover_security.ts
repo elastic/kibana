@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('security', () => {
+  describe('discover feature controls security', () => {
     before(async () => {
       await esArchiver.load('discover/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.contain('Discover');
+        expect(navLinks.map((link) => link.text)).to.eql(['Discover', 'Stack Management']);
       });
 
       it('shows save button', async () => {
@@ -101,33 +101,48 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query management component popover with no query loaded', async () => {
+      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
+        await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-      });
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
-      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'foo2',
-          'bar2',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
+        await savedQueryManagementComponent.deleteSavedQuery('foo');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
 
       it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'new description',
+          true,
+          false
+        );
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:404');
+
+        // Reset after changing
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'Ok responses for jpg files',
+          true,
+          false
+        );
       });
 
-      it('allows deleting saved queries in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
+      it('allow saving currently loaded query as a copy', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'ok2',
+          'description',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+        await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
     });
 
@@ -169,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Discover');
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -260,7 +275,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Discover');
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show save button`, async () => {

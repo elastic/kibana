@@ -6,7 +6,6 @@
 
 import { createTestConfig } from '../common/config';
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig({
   license: 'trial',
   name: 'X-Pack APM API integration tests (trial)',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -157,6 +157,14 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
 
+    // erase chrome fields from a previous app while switching to a next app
+    application.currentAppId$.subscribe(() => {
+      helpExtension$.next(undefined);
+      breadcrumbs$.next([]);
+      badge$.next(undefined);
+      docTitle.reset();
+    });
+
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
@@ -185,27 +193,27 @@ export class ChromeService {
           />
         ),
       });
+    }
 
-      if (isIE()) {
-        notifications.toasts.addWarning({
-          title: mountReactNode(
-            <FormattedMessage
-              id="core.chrome.browserDeprecationWarning"
-              defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-              values={{
-                link: (
-                  <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                    <FormattedMessage
-                      id="core.chrome.browserDeprecationLink"
-                      defaultMessage="the support matrix on our website"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-        });
-      }
+    if (isIE()) {
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.browserDeprecationWarning"
+            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            values={{
+              link: (
+                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
+                  <FormattedMessage
+                    id="core.chrome.browserDeprecationLink"
+                    defaultMessage="the support matrix on our website"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
+      });
     }
 
     return {
@@ -230,7 +238,6 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
-          legacyMode={injectedMetadata.getLegacyMode()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}

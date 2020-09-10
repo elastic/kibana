@@ -290,14 +290,17 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       dashboardName: string,
       saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
     ) {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
+      await retry.try(async () => {
+        await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
-      if (saveOptions.needsConfirm) {
-        await this.clickSave();
-      }
+        if (saveOptions.needsConfirm) {
+          await this.ensureDuplicateTitleCallout();
+          await this.clickSave();
+        }
 
-      // Confirm that the Dashboard has actually been saved
-      await testSubjects.existOrFail('saveDashboardSuccess');
+        // Confirm that the Dashboard has actually been saved
+        await testSubjects.existOrFail('saveDashboardSuccess');
+      });
       const message = await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForSaveModalToClose();

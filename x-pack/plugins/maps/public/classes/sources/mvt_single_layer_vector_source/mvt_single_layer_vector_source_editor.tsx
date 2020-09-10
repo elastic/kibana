@@ -3,24 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceSettings,
+} from '../../../../common/descriptor_types';
+import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 
-export type MVTSingleLayerVectorSourceConfig = {
-  urlTemplate: string;
-  layerName: string;
-  minSourceZoom: number;
-  maxSourceZoom: number;
-};
-
-export interface Props {
-  onSourceConfigChange: (sourceConfig: MVTSingleLayerVectorSourceConfig) => void;
+interface Props {
+  onSourceConfigChange: (sourceConfig: TiledSingleLayerVectorSourceSettings) => void;
 }
 
 interface State {
@@ -28,6 +24,7 @@ interface State {
   layerName: string;
   minSourceZoom: number;
   maxSourceZoom: number;
+  fields?: MVTFieldDescriptor[];
 }
 
 export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
@@ -36,6 +33,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     layerName: '',
     minSourceZoom: MIN_ZOOM,
     maxSourceZoom: MAX_ZOOM,
+    fields: [],
   };
 
   _sourceConfigChange = _.debounce(() => {
@@ -50,6 +48,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
         layerName: this.state.layerName,
         minSourceZoom: this.state.minSourceZoom,
         maxSourceZoom: this.state.maxSourceZoom,
+        fields: this.state.fields,
       });
     }
   }, 200);
@@ -64,65 +63,48 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
     );
   };
 
-  _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const layerName = e.target.value;
-    this.setState(
-      {
-        layerName,
-      },
-      () => this._sourceConfigChange()
-    );
-  };
-
-  _handleZoomRangeChange = (e: Value) => {
-    const minSourceZoom = parseInt(e[0] as string, 10);
-    const maxSourceZoom = parseInt(e[1] as string, 10);
-
-    if (this.state.minSourceZoom !== minSourceZoom || this.state.maxSourceZoom !== maxSourceZoom) {
-      this.setState({ minSourceZoom, maxSourceZoom }, () => this._sourceConfigChange());
-    }
+  _handleChange = (state: {
+    layerName: string;
+    fields: MVTFieldDescriptor[];
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }) => {
+    this.setState(state, () => this._sourceConfigChange());
   };
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlMessage', {
             defaultMessage: 'Url',
           })}
-        >
-          <EuiFieldText value={this.state.urlTemplate} onChange={this._handleUrlTemplateChange} />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
+          helpText={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlHelpMessage',
             {
-              defaultMessage: 'Layer name',
+              defaultMessage: 'URL of the .mvt vector tile service. e.g. {url}',
+              values: {
+                url: 'http://company.com/{z}/{x}/{y}.pbf',
+              },
             }
           )}
         >
-          <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
+          <EuiFieldText
+            value={this.state.urlTemplate}
+            onChange={this._handleUrlTemplateChange}
+            compressed
+          />
         </EuiFormRow>
-        <ValidatedDualRange
-          label=""
-          formRowDisplay="columnCompressed"
-          min={MIN_ZOOM}
-          max={MAX_ZOOM}
-          value={[this.state.minSourceZoom, this.state.maxSourceZoom]}
-          showInput="inputWithPopover"
-          showRange
-          showLabels
-          onChange={this._handleZoomRangeChange}
-          allowEmptyRange={false}
-          compressed
-          prepend={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
-            {
-              defaultMessage: 'Zoom levels',
-            }
-          )}
+
+        <MVTSingleLayerSourceSettings
+          handleChange={this._handleChange}
+          layerName={this.state.layerName}
+          fields={this.state.fields}
+          minSourceZoom={this.state.minSourceZoom}
+          maxSourceZoom={this.state.maxSourceZoom}
+          showFields={false}
         />
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

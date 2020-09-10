@@ -31,7 +31,10 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'namespace' | 'sortOrder' | 'rootSearchFields'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -162,7 +165,9 @@ export class SavedObjectsClient {
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);
@@ -292,6 +297,7 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
       preference: 'preference',
     };
 

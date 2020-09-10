@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient } from 'src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
 
 export {
   // Object types
@@ -17,15 +17,18 @@ export {
   AgentEventSOAttributes,
   AgentAction,
   AgentActionSOAttributes,
-  Datasource,
-  NewDatasource,
-  DatasourceSOAttributes,
-  FullAgentConfigInput,
-  FullAgentConfig,
-  AgentConfig,
-  AgentConfigSOAttributes,
-  NewAgentConfig,
-  AgentConfigStatus,
+  PackagePolicy,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicySOAttributes,
+  FullAgentPolicyInput,
+  FullAgentPolicy,
+  AgentPolicy,
+  AgentPolicySOAttributes,
+  NewAgentPolicy,
+  AgentPolicyStatus,
   DataStream,
   Output,
   NewOutput,
@@ -34,13 +37,16 @@ export {
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  EpmPackageInstallStatus,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,
   Dataset,
+  RegistryElasticsearch,
   AssetReference,
+  EsAssetReference,
+  KibanaAssetReference,
   ElasticsearchAssetType,
-  IngestAssetType,
   RegistryPackage,
   AssetType,
   Installable,
@@ -57,13 +63,17 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  InstallType,
+  // Agent Request types
+  PostAgentEnrollRequest,
+  PostAgentCheckinRequest,
 } from '../../common';
 
-export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
-export type AgentConfigUpdateHandler = (
+export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
-  agentConfigId: string
+  agentPolicyId: string
 ) => Promise<void>;
 
 export * from './models';

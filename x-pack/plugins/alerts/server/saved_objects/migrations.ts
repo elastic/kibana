@@ -7,6 +7,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -14,24 +15,50 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
+  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
+
+  const infrastructureMigration = changeAlertingConsumer(
+    encryptedSavedObjects,
+    'metrics',
+    'infrastructure'
+  );
+
   return {
-    '7.9.0': changeAlertingConsumer(encryptedSavedObjects),
+    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+      if (doc.attributes.consumer === 'alerting') {
+        return executeMigration(doc, context, alertsMigration);
+      } else if (doc.attributes.consumer === 'metrics') {
+        return executeMigration(doc, context, infrastructureMigration);
+      }
+      return doc;
+    },
   };
 }
 
-/**
- * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
- * prior to that we were using `alerting` and we need to keep these in sync
- */
-function changeAlertingConsumer(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-): SavedObjectMigrationFn<RawAlert, RawAlert> {
-  const consumerMigration = new Map<string, string>();
-  consumerMigration.set('alerting', 'alerts');
+function executeMigration(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  context: SavedObjectMigrationContext,
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
+) {
+  try {
+    return migrationFunc(doc, context);
+  } catch (ex) {
+    context.log.error(
+      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
+      { alertDocument: doc }
+    );
+  }
+  return doc;
+}
 
+function changeAlertingConsumer(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  from: string,
+  to: string
+): SavedObjectMigrationFn<RawAlert, RawAlert> {
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return consumerMigration.has(doc.attributes.consumer);
+      return doc.attributes.consumer === from;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -41,7 +68,7 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: consumerMigration.get(consumer) ?? consumer,
+          consumer: consumer === from ? to : consumer,
         },
       };
     }

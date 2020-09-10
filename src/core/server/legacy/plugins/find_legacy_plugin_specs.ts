@@ -23,7 +23,7 @@ import { toArray, tap, distinct, map } from 'rxjs/operators';
 import {
   findPluginSpecs,
   defaultConfig,
-  // @ts-ignore
+  // @ts-expect-error
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
@@ -31,7 +31,6 @@ import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/u
 import { LoggerFactory } from '../../logging';
 import { PackageInfo } from '../../config';
 import { LegacyPluginSpec, LegacyPluginPack, LegacyConfig } from '../types';
-import { getNavLinks } from './get_nav_links';
 
 export async function findLegacyPluginSpecs(
   settings: unknown,
@@ -125,13 +124,12 @@ export async function findLegacyPluginSpecs(
     log$.pipe(toArray())
   ).toPromise();
   const uiExports = collectLegacyUiExports(pluginSpecs);
-  const navLinks = getNavLinks(uiExports, pluginSpecs);
 
   return {
     disabledPluginSpecs,
     pluginSpecs,
     pluginExtendedConfig: configToMutate,
     uiExports,
-    navLinks,
+    navLinks: [],
   };
 }

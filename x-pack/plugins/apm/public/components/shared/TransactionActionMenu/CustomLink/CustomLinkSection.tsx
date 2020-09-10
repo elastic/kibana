@@ -24,28 +24,30 @@ const TruncateText = styled(EuiText)`
   ${truncate(px(units.unit * 25))}
 `;
 
-export const CustomLinkSection = ({
+export function CustomLinkSection({
   customLinks,
   transaction,
 }: {
   customLinks: CustomLink[];
   transaction: Transaction;
-}) => (
-  <ul>
-    {customLinks.map((link) => {
-      let href = link.url;
-      try {
-        href = Mustache.render(link.url, transaction);
-      } catch (e) {
-        // ignores any error that happens
-      }
-      return (
-        <LinkContainer key={link.id}>
-          <EuiLink href={href} target="_blank">
-            <TruncateText size="s">{link.label}</TruncateText>
-          </EuiLink>
-        </LinkContainer>
-      );
-    })}
-  </ul>
-);
+}) {
+  return (
+    <ul>
+      {customLinks.map((link) => {
+        let href = link.url;
+        try {
+          href = Mustache.render(link.url, transaction);
+        } catch (e) {
+          // ignores any error that happens
+        }
+        return (
+          <LinkContainer key={link.id}>
+            <EuiLink href={href} target="_blank">
+              <TruncateText size="s">{link.label}</TruncateText>
+            </EuiLink>
+          </LinkContainer>
+        );
+      })}
+    </ul>
+  );
+}

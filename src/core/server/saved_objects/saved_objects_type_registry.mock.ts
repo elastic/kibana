@@ -25,6 +25,7 @@ const createRegistryMock = (): jest.Mocked<
   const mock = {
     registerType: jest.fn(),
     getType: jest.fn(),
+    getVisibleTypes: jest.fn(),
     getAllTypes: jest.fn(),
     getImportableAndExportableTypes: jest.fn(),
     isNamespaceAgnostic: jest.fn(),
@@ -35,6 +36,7 @@ const createRegistryMock = (): jest.Mocked<
     isImportableAndExportable: jest.fn(),
   };
 
+  mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
   mock.getImportableAndExportableTypes.mockReturnValue([]);
   mock.getIndex.mockReturnValue('.kibana-test');

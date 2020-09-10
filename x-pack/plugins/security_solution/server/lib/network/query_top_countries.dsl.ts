@@ -10,8 +10,8 @@ import {
   NetworkTopTablesSortField,
   NetworkTopTablesFields,
 } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
-
+import { createQueryFilterClauses } from '../../utils/build_query';
+import { assertUnreachable } from '../../../common/utility_types';
 import { NetworkTopCountriesRequestOptions } from './index';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
@@ -36,7 +36,11 @@ export const buildTopCountriesQuery = ({
 }: NetworkTopCountriesRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
   ];
 
   const dslQuery = {

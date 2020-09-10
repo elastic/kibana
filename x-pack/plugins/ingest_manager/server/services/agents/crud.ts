@@ -12,20 +12,24 @@ import {
   AGENT_TYPE_EPHEMERAL,
   AGENT_POLLING_THRESHOLD_MS,
 } from '../../constants';
-import { AgentSOAttributes, Agent, AgentEventSOAttributes } from '../../types';
+import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
-  options: {
-    page: number;
-    perPage: number;
-    kuery?: string;
+  options: ListWithKuery & {
     showInactive: boolean;
   }
 ) {
-  const { page, perPage, kuery, showInactive = false } = options;
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    kuery,
+    showInactive = false,
+  } = options;
 
   const filters = [];
 
@@ -47,12 +51,14 @@ export async function listAgents(
     filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { saved_objects, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
+    sortField,
+    sortOrder,
     page,
     perPage,
     filter: _joinFilters(filters),
-    ..._getSortFields(),
   });
 
   const agents: Agent[] = saved_objects.map(savedObjectToAgent);
@@ -135,23 +141,6 @@ export async function deleteAgent(soClient: SavedObjectsClientContract, agentId:
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     active: false,
   });
-}
-
-function _getSortFields(sortOption?: string) {
-  switch (sortOption) {
-    case 'ASC':
-      return {
-        sortField: 'enrolled_at',
-        sortOrder: 'ASC',
-      };
-
-    case 'DESC':
-    default:
-      return {
-        sortField: 'enrolled_at',
-        sortOrder: 'DESC',
-      };
-  }
 }
 
 function _joinFilters(filters: string[], operator = 'AND') {

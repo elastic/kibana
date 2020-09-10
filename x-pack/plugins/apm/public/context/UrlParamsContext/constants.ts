@@ -6,9 +6,3 @@
 
 export const TIME_RANGE_REFRESH = 'TIME_RANGE_REFRESH';
 export const LOCATION_UPDATE = 'LOCATION_UPDATE';
-export const TIMEPICKER_DEFAULTS = {
-  rangeFrom: 'now-24h',
-  rangeTo: 'now',
-  refreshPaused: 'true',
-  refreshInterval: '0',
-};

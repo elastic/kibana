@@ -900,10 +900,23 @@ export function getActionType(): ActionTypeModel {
 
 ![Index connector card](https://i.imgur.com/fflsmu5.png)
 
-![Index connector form](https://i.imgur.com/tbgyvAL.png)
+![Index connector form](https://i.imgur.com/IkixGMV.png)
 
 and action params form available in Create Alert form:
-![Index action form](https://i.imgur.com/VsWMLeU.png)
+![Index action form](https://i.imgur.com/mpxnPOF.png)
+
+Example of the index document for Index Threshold alert:
+
+```
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_title": "{{context.title}}",
+    "context_value": "{{context.value}}",
+    "context_message": "{{context.message}}"
+} 
+```
 
 ### Webhook
 
@@ -1252,7 +1265,7 @@ Then this dependencies will be used to embed Actions form or register your own a
  ];
 
  export const ComponentWithActionsForm: () => {
-   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
+   const { http, triggers_actions_ui, notifications } = useKibana().services;
    const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
    const initialAlert = ({
         name: 'test',
@@ -1281,7 +1294,7 @@ Then this dependencies will be used to embed Actions form or register your own a
    return (
      <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
@@ -1294,7 +1307,8 @@ Then this dependencies will be used to embed Actions form or register your own a
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={toastNotifications}
+          toastNotifications={notifications.toasts}
+          consumer={initialAlert.consumer}
         />
    );
  };
@@ -1315,8 +1329,9 @@ interface ActionAccordionFormProps {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
+  consumer: string;
 }
 
 ```
@@ -1334,6 +1349,7 @@ interface ActionAccordionFormProps {
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+|consumer|Name of the plugin that creates an action.|
 
 
 AlertsContextProvider value options:
@@ -1393,7 +1409,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
+const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1422,10 +1438,10 @@ const connector = {
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
+          toastNotifications: notifications.toasts,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
-          docLinks, 
+          capabilities: application.capabilities,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -1469,6 +1485,7 @@ export interface ActionsConnectorsContextValue {
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
+  consumer: string;
 }
 ```
 
@@ -1479,6 +1496,7 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+|consumer|Optional name of the plugin that creates an action.|
 
 
 ## Embed the Edit Connector flyout within any Kibana plugin
@@ -1508,7 +1526,7 @@ import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggers_actions_ui, notifications, application } = useKibana().services;
 
 // UI control item for open flyout
 <EuiButton
@@ -1527,9 +1545,9 @@ const { http, triggers_actions_ui, toastNotifications, capabilities } = useKiban
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
+          toastNotifications: notifications.toasts,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          capabilities: application.capabilities,
         }}
       >
         <ConnectorEditFlyout
@@ -1577,4 +1595,3 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
-

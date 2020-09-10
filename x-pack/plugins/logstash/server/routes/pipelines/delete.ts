@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { APICaller, IRouter } from 'src/core/server';
+import { LegacyAPICaller, IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
 
-async function deletePipelines(callWithRequest: APICaller, pipelineIds: string[]) {
+async function deletePipelines(callWithRequest: LegacyAPICaller, pipelineIds: string[]) {
   const deletePromises = pipelineIds.map((pipelineId) => {
     return callWithRequest('delete', {
       index: INDEX_NAMES.PIPELINES,

@@ -130,7 +130,7 @@ export const ServiceConnectorCommentParamsRt = rt.type({
 });
 
 export const ServiceConnectorCaseParamsRt = rt.type({
-  caseId: rt.string,
+  savedObjectId: rt.string,
   createdAt: rt.string,
   createdBy: ServiceConnectorUserParams,
   externalId: rt.union([rt.string, rt.null]),

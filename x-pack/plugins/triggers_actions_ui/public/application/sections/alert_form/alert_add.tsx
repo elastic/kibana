@@ -34,6 +34,7 @@ interface AlertAddProps {
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
+  initialValues?: Partial<Alert>;
 }
 
 export const AlertAdd = ({
@@ -42,6 +43,7 @@ export const AlertAdd = ({
   setAddFlyoutVisibility,
   canChangeTrigger,
   alertTypeId,
+  initialValues,
 }: AlertAddProps) => {
   const initialAlert = ({
     params: {},
@@ -52,6 +54,7 @@ export const AlertAdd = ({
     },
     actions: [],
     tags: [],
+    ...(initialValues ? initialValues : {}),
   } as unknown) as Alert;
 
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
@@ -168,6 +171,9 @@ export const AlertAdd = ({
               dispatch={dispatch}
               errors={errors}
               canChangeTrigger={canChangeTrigger}
+              operation={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.operationName', {
+                defaultMessage: 'create',
+              })}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

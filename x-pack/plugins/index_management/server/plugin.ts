@@ -16,8 +16,8 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
-  ICustomClusterClient,
+  ILegacyScopedClusterClient,
+  ILegacyCustomClusterClient,
 } from 'src/core/server';
 
 import { PLUGIN } from '../common';
@@ -28,7 +28,7 @@ import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 export interface IndexManagementPluginSetup {
@@ -48,7 +48,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   private readonly license: License;
   private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
-  private dataManagementESClient?: ICustomClusterClient;
+  private dataManagementESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();

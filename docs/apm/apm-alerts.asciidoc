@@ -15,15 +15,20 @@ and enables central management of all alerts from <<management,Kibana Management
 [role="screenshot"]
 image::apm/images/apm-alert.png[Create an alert in the APM app]
 
-There are two different types of threshold alerts: transaction duration, and error rate.
+For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
+see Kibana's <<defining-alerts,defining alerts>>.
+
+The APM app supports two different types of threshold alerts: transaction duration, and error rate.
 Below, we'll create one of each.
 
 [float]
 [[apm-create-transaction-alert]]
 === Create a transaction duration alert
 
-This guide creates an alert for the `opbeans-java` service based on the following criteria:
+Transaction duration alerts trigger when the duration of a specific transaction type in a service exceeds a defined threshold.
+This guide will create an alert for the `opbeans-java` service based on the following criteria:
 
+* Environment: Production
 * Transaction type: `transaction.type:request`
 * Average request is above `1500ms` for the last 5 minutes
 * Check every 10 minutes, and repeat the alert every 30 minutes
@@ -52,14 +57,22 @@ Enter a name for the connector,
 and paste the webhook URL.
 See Slack's webhook documentation if you need to create one.
 
+Add a message body in markdown format.
+You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
+to pass alert values at the time a condition is detected to an action.
+A list of available variables can be accessed by selecting the
+**add variable** button image:apm/images/add-variable.png[add variable button].
+
 Select **Save**. The alert has been created and is now active!
 
 [float]
 [[apm-create-error-alert]]
 === Create an error rate alert
 
+Error rate alerts trigger when the number of errors in a service exceeds a defined threshold.
 This guide creates an alert for the `opbeans-python` service based on the following criteria:
 
+* Environment: Production
 * Error rate is above 25 for the last minute
 * Check every 1 minute, and repeat the alert every 10 minutes
 * Send the alert via email to the `opbeans-python` team
@@ -80,6 +93,12 @@ Based on the alert criteria, define the following alert details:
 
 Select the **Email** action type and click **Create a connector**.
 Fill out the required details: sender, host, port, etc., and click **save**.
+
+Add a message body in markdown format.
+You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
+to pass alert values at the time a condition is detected to an action.
+A list of available variables can be accessed by selecting the
+**add variable** button image:apm/images/add-variable.png[add variable button].
 
 Select **Save**. The alert has been created and is now active!
 

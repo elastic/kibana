@@ -13,8 +13,8 @@ import {
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
-const GTE = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = '3000-01-01T00:00:00.000Z';
+const FROM = '2000-01-01T00:00:00.000Z';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const DATA_COUNT = 2;
@@ -37,13 +37,13 @@ const FILTER_VALUE = {
           filter: [
             {
               bool: {
-                should: [{ range: { '@timestamp': { gte: GTE } } }],
+                should: [{ range: { '@timestamp': { gte: FROM } } }],
                 minimum_should_match: 1,
               },
             },
             {
               bool: {
-                should: [{ range: { '@timestamp': { lte: LTE } } }],
+                should: [{ range: { '@timestamp': { lte: TO } } }],
                 minimum_should_match: 1,
               },
             },
@@ -80,7 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
+            timerange: {
+              from: FROM,
+              to: TO,
+              interval: '12h',
+            },
           },
         })
         .then((resp) => {
@@ -110,7 +116,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
+            timerange: {
+              from: FROM,
+              to: TO,
+              interval: '12h',
+            },
           },
         })
         .then((resp) => {

@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getExceptionListSchemaMock } from './exception_list_schema.mock';
 import { getFoundExceptionListSchemaMock } from './found_exception_list_schema.mock';
@@ -84,6 +84,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "page"', () => {
     const payload = getFoundExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.page;
     const decoded = foundExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -97,6 +98,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "per_page"', () => {
     const payload = getFoundExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.per_page;
     const decoded = foundExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -110,6 +112,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "total"', () => {
     const payload = getFoundExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.total;
     const decoded = foundExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -123,6 +126,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "data"', () => {
     const payload = getFoundExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.data;
     const decoded = foundExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

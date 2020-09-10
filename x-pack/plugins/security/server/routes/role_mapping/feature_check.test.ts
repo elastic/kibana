@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks'
 import {
   kibanaResponseFactory,
   RequestHandlerContext,
-  IClusterClient,
+  ILegacyClusterClient,
 } from '../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../licensing/server';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
@@ -19,7 +19,7 @@ interface TestOptions {
   canManageRoleMappings?: boolean;
   nodeSettingsResponse?: Record<string, any>;
   xpackUsageResponse?: Record<string, any>;
-  internalUserClusterClientImpl?: IClusterClient['callAsInternalUser'];
+  internalUserClusterClientImpl?: ILegacyClusterClient['callAsInternalUser'];
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -76,7 +76,7 @@ describe('GET role mappings feature check', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       mockRouteDefinitionParams.clusterClient.callAsInternalUser.mockImplementation(
         internalUserClusterClientImpl

@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { isEsError } from '../../../shared_imports';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
@@ -17,7 +17,7 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
+function fetchWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   return dataClient.callAsCurrentUser('watcher.getWatch', {
     id: watchId,
   });

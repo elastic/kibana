@@ -5,8 +5,8 @@
  */
 
 import {
-  APICaller,
   IContextProvider,
+  LegacyAPICaller,
   RequestHandler,
   SavedObjectsClientContract,
 } from 'kibana/server';
@@ -25,7 +25,7 @@ export interface PluginsSetup {
 }
 
 export type GetListClientType = (
-  dataClient: APICaller,
+  dataClient: LegacyAPICaller,
   spaceId: string,
   user: string
 ) => ListClient;

@@ -3,15 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerDataHandler, getDataHandler } from './data_handler';
+import {
+  registerDataHandler,
+  getDataHandler,
+  unregisterDataHandler,
+  fetchHasData,
+} from './data_handler';
+import moment from 'moment';
+import {
+  ApmFetchDataResponse,
+  LogsFetchDataResponse,
+  MetricsFetchDataResponse,
+  UptimeFetchDataResponse,
+} from './typings';
 
 const params = {
-  startTime: '0',
-  endTime: '1',
+  absoluteTime: {
+    start: moment('2020-07-02T13:25:11.629Z').valueOf(),
+    end: moment('2020-07-09T13:25:11.629Z').valueOf(),
+  },
+  relativeTime: {
+    start: 'now-15m',
+    end: 'now',
+  },
   bucketSize: '10s',
 };
 
 describe('registerDataHandler', () => {
+  const originalConsole = global.console;
+  beforeAll(() => {
+    // mocks console to avoid poluting the test output
+    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+  });
+
+  afterAll(() => {
+    global.console = originalConsole;
+  });
+
   describe('APM', () => {
     registerDataHandler({
       appName: 'apm',
@@ -360,6 +388,165 @@ describe('registerDataHandler', () => {
       const dataHandler = getDataHandler('apm');
       const hasData = await dataHandler?.hasData();
       expect(hasData).toBeTruthy();
+    });
+  });
+  describe('fetchHasData', () => {
+    it('returns false when an exception happens', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      expect(await fetchHasData()).toEqual({
+        apm: false,
+        uptime: false,
+        infra_logs: false,
+        infra_metrics: false,
+      });
+    });
+    it('returns true when has data and false when an exception happens', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      expect(await fetchHasData()).toEqual({
+        apm: true,
+        uptime: false,
+        infra_logs: true,
+        infra_metrics: false,
+      });
+    });
+    it('returns true when has data', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
+        hasData: async () => true,
+      });
+      expect(await fetchHasData()).toEqual({
+        apm: true,
+        uptime: true,
+        infra_logs: true,
+        infra_metrics: true,
+      });
+    });
+    it('returns false when has no data', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
+        hasData: async () => false,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
+        hasData: async () => false,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
+        hasData: async () => false,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
+        hasData: async () => false,
+      });
+      expect(await fetchHasData()).toEqual({
+        apm: false,
+        uptime: false,
+        infra_logs: false,
+        infra_metrics: false,
+      });
+    });
+    it('returns false when has data was not registered', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      expect(await fetchHasData()).toEqual({
+        apm: false,
+        uptime: false,
+        infra_logs: false,
+        infra_metrics: false,
+      });
     });
   });
 });

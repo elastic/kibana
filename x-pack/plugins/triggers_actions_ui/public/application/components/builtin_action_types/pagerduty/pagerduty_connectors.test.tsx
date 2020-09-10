@@ -34,6 +34,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 

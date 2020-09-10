@@ -70,7 +70,7 @@ export interface TestCase {
 }
 
 export interface FailedTestCase extends TestCase {
-  failure: Array<string | { _: string }>;
+  failure: Array<string | { $: { message?: string }; _: string }>;
 }
 
 /**

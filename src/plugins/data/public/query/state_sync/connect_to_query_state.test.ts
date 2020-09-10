@@ -48,7 +48,9 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return true;
-    case 'timepicker:timeDefaults':
+    case UI_SETTINGS.SEARCH_QUERY_LANGUAGE:
+      return 'kuery';
+    case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
       return { from: 'now-15m', to: 'now' };
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };
@@ -78,7 +80,11 @@ describe('connect_to_global_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
 
@@ -307,7 +313,11 @@ describe('connect_to_app_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
 
     appState = createStateContainer({});
@@ -481,7 +491,11 @@ describe('filters with different state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
 
     state = createStateContainer({});

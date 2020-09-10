@@ -24,7 +24,7 @@ import { configSchema, TelemetryConfigType } from './config';
 
 export { FetcherTask } from './fetcher';
 export { handleOldSettings } from './handle_old_settings';
-export { TelemetryPluginsSetup } from './plugin';
+export { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
@@ -47,4 +47,8 @@ export {
   getLocalLicense,
   getLocalStats,
   TelemetryLocalStats,
+  DATA_TELEMETRY_ID,
+  DataTelemetryIndex,
+  DataTelemetryPayload,
+  buildDataTelemetryPayload,
 } from './telemetry_collection';

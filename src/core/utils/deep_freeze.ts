@@ -16,19 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// if we define this inside RecursiveReadonly TypeScript complains
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
-
-/** @public */
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any
-  ? T
-  : T extends any[]
-  ? RecursiveReadonlyArray<T[number]>
-  : T extends object
-  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
-  : T;
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 /** @public */
 export type Freezable = { [k: string]: any } | any[];
@@ -47,6 +35,5 @@ export function deepFreeze<T extends Freezable>(object: T) {
       deepFreeze(value);
     }
   }
-
   return Object.freeze(object) as RecursiveReadonly<T>;
 }

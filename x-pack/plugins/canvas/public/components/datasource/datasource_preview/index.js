@@ -15,10 +15,13 @@ export const DatasourcePreview = compose(
   withState('datatable', 'setDatatable'),
   lifecycle({
     componentDidMount() {
-      interpretAst({
-        type: 'expression',
-        chain: [this.props.function],
-      }).then(this.props.setDatatable);
+      interpretAst(
+        {
+          type: 'expression',
+          chain: [this.props.function],
+        },
+        {}
+      ).then(this.props.setDatatable);
     },
   }),
   branch(({ datatable }) => !datatable, renderComponent(Loading))

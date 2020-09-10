@@ -92,6 +92,19 @@ export const validateTimelineTitle = (rule: AddPrepackagedRulesSchema): string[]
   return [];
 };
 
+export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => {
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" is required'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const addPrepackagedRuleValidateTypeDependents = (
   schema: AddPrepackagedRulesSchema
 ): string[] => {
@@ -103,5 +116,6 @@ export const addPrepackagedRuleValidateTypeDependents = (
     ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

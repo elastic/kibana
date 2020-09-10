@@ -25,6 +25,7 @@ import {
   removeProvider,
   setEventsDeleted,
   setEventsLoading,
+  setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
   setKqlFilterQueryDraft,
@@ -39,6 +40,7 @@ import {
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
+  updateDataProviderType,
   updateDescription,
   updateEventType,
   updateHighlightedDropAndProviderId,
@@ -53,6 +55,7 @@ import {
   updateRange,
   updateSort,
   updateTimeline,
+  updateTimelineGraphEventId,
   updateTitle,
   upsertColumn,
 } from './actions';
@@ -73,6 +76,7 @@ import {
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
   unPinTimelineEvent,
+  updateExcludedRowRenderersIds,
   updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
   updateTimelineColumns,
@@ -87,6 +91,7 @@ import {
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
   updateTimelineProviderKqlQuery,
+  updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -94,6 +99,7 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
   updateSavedQuery,
+  updateGraphEventId,
   updateFilters,
   updateTimelineEventType,
 } from './helpers';
@@ -125,34 +131,36 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         id,
         dataProviders,
         dateRange,
+        excludedRowRendererIds,
         show,
         columns,
         itemsPerPage,
         kqlQuery,
         sort,
         showCheckboxes,
-        showRowRenderers,
         timelineType = TimelineType.default,
         filters,
       }
-    ) => ({
-      ...state,
-      timelineById: addNewTimeline({
-        columns,
-        dataProviders,
-        dateRange,
-        filters,
-        id,
-        itemsPerPage,
-        kqlQuery,
-        sort,
-        show,
-        showCheckboxes,
-        showRowRenderers,
-        timelineById: state.timelineById,
-        timelineType,
-      }),
-    })
+    ) => {
+      return {
+        ...state,
+        timelineById: addNewTimeline({
+          columns,
+          dataProviders,
+          dateRange,
+          excludedRowRendererIds,
+          filters,
+          id,
+          itemsPerPage,
+          kqlQuery,
+          sort,
+          show,
+          showCheckboxes,
+          timelineById: state.timelineById,
+          timelineType,
+        }),
+      };
+    }
   )
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
@@ -193,6 +201,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
+  }))
+  .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
+    ...state,
+    timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
   }))
   .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
     ...state,
@@ -295,6 +307,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         loadingEventIds: [],
       },
     },
+  }))
+  .case(setExcludedRowRendererIds, (state, { id, excludedRowRendererIds }) => ({
+    ...state,
+    timelineById: updateExcludedRowRenderersIds({
+      id,
+      excludedRowRendererIds,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
@@ -419,7 +439,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     })
   )
-
+  .case(updateDataProviderType, (state, { id, type, providerId, andProviderId }) => ({
+    ...state,
+    timelineById: updateTimelineProviderType({
+      id,
+      type,
+      providerId,
+      timelineById: state.timelineById,
+      andProviderId,
+    }),
+  }))
   .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
     ...state,
     timelineById: updateTimelineProviderKqlQuery({

@@ -238,6 +238,7 @@ export const networkSchema = gql`
       defaultIndex: [String!]!
       timerange: TimerangeInput!
       stackByField: String
+      docValueFields: [docValueFieldsInput!]!
     ): NetworkDsOverTimeData!
     NetworkHttp(
       id: String

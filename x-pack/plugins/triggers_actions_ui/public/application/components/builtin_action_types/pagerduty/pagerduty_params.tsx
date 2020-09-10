@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { PagerDutyActionParams } from '.././types';
-import { AddMessageVariables } from '../../add_message_variables';
+import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,
@@ -94,15 +94,6 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
   ];
-
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(
-      paramsProperty,
-      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
-      index
-    );
-  };
-
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -159,29 +150,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'DedupKey (optional)',
               }
             )}
-            labelAppend={
-              <AddMessageVariables
-                messageVariables={messageVariables}
-                onSelectEventHandler={(variable: string) =>
-                  onSelectMessageVariable('dedupKey', variable)
-                }
-                paramsProperty="dedupKey"
-              />
-            }
           >
-            <EuiFieldText
-              fullWidth
-              name="dedupKey"
-              data-test-subj="dedupKeyInput"
-              value={dedupKey || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                editAction('dedupKey', e.target.value, index);
-              }}
-              onBlur={() => {
-                if (!dedupKey) {
-                  editAction('dedupKey', '', index);
-                }
-              }}
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editAction}
+              messageVariables={messageVariables}
+              paramsProperty={'dedupKey'}
+              inputTargetValue={dedupKey}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -196,32 +171,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'Timestamp (optional)',
               }
             )}
-            labelAppend={
-              <AddMessageVariables
-                messageVariables={messageVariables}
-                onSelectEventHandler={(variable: string) =>
-                  onSelectMessageVariable('timestamp', variable)
-                }
-                paramsProperty="timestamp"
-              />
-            }
           >
-            <EuiFieldText
-              fullWidth
-              name="timestamp"
-              data-test-subj="timestampInput"
-              value={timestamp || ''}
-              isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                editAction('timestamp', e.target.value, index);
-              }}
-              onBlur={() => {
-                if (timestamp?.trim()) {
-                  editAction('timestamp', timestamp.trim(), index);
-                } else {
-                  editAction('timestamp', '', index);
-                }
-              }}
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editAction}
+              messageVariables={messageVariables}
+              paramsProperty={'timestamp'}
+              inputTargetValue={timestamp}
+              errors={errors.timestamp as string[]}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -234,29 +191,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Component (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('component', variable)
-            }
-            paramsProperty="component"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          name="component"
-          data-test-subj="componentInput"
-          value={component || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('component', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!component) {
-              editAction('component', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'component'}
+          inputTargetValue={component}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -267,27 +208,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Group (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('group', variable)}
-            paramsProperty="group"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          name="group"
-          data-test-subj="groupInput"
-          value={group || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('group', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!group) {
-              editAction('group', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'group'}
+          inputTargetValue={group}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -298,27 +225,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Source (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('source', variable)}
-            paramsProperty="source"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          name="source"
-          data-test-subj="sourceInput"
-          value={source || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('source', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!source) {
-              editAction('source', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'source'}
+          inputTargetValue={source}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -332,30 +245,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Summary',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('summary', variable)
-            }
-            paramsProperty="summary"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          isInvalid={errors.summary.length > 0 && summary !== undefined}
-          name="summary"
-          value={summary || ''}
-          data-test-subj="pagerdutySummaryInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('summary', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!summary) {
-              editAction('summary', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'summary'}
+          inputTargetValue={summary}
+          errors={errors.summary as string[]}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -367,27 +264,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Class (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('class', variable)}
-            paramsProperty="class"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          name="class"
-          value={actionParams.class || ''}
-          data-test-subj="pagerdutyClassInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('class', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!actionParams.class) {
-              editAction('class', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'class'}
+          inputTargetValue={actionParams.class}
         />
       </EuiFormRow>
     </Fragment>

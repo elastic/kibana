@@ -26,13 +26,13 @@ import {
   getSelectOptions,
 } from './helper';
 
-export const FiltersSection = ({
+export function FiltersSection({
   filters,
   onChangeFilters,
 }: {
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
-}) => {
+}) {
   const onChangeFilter = (
     key: Filter['key'],
     value: Filter['value'],
@@ -147,25 +147,27 @@ export const FiltersSection = ({
       />
     </>
   );
-};
+}
 
-const AddFilterButton = ({
+function AddFilterButton({
   onClick,
   isDisabled,
 }: {
   onClick: () => void;
   isDisabled: boolean;
-}) => (
-  <EuiButtonEmpty
-    iconType="plusInCircle"
-    onClick={onClick}
-    disabled={isDisabled}
-  >
-    {i18n.translate(
-      'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
-      {
-        defaultMessage: 'Add another filter',
-      }
-    )}
-  </EuiButtonEmpty>
-);
+}) {
+  return (
+    <EuiButtonEmpty
+      iconType="plusInCircle"
+      onClick={onClick}
+      disabled={isDisabled}
+    >
+      {i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
+        {
+          defaultMessage: 'Add another filter',
+        }
+      )}
+    </EuiButtonEmpty>
+  );
+}

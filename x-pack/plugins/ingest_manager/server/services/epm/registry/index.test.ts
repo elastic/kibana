@@ -5,7 +5,17 @@
  */
 
 import { AssetParts } from '../../../types';
-import { pathParts } from './index';
+import { getBufferExtractor, pathParts, splitPkgKey } from './index';
+import { getArchiveLocation } from './cache';
+import { untarBuffer, unzipBuffer } from './extract';
+
+jest.mock('./cache', () => {
+  return {
+    getArchiveLocation: jest.fn(),
+  };
+});
+
+const mockedGetArchiveLocation = getArchiveLocation as jest.Mock;
 
 const testPaths = [
   {
@@ -47,4 +57,54 @@ test('testPathParts', () => {
   for (const value of testPaths) {
     expect(pathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
   }
+});
+
+describe('splitPkgKey tests', () => {
+  it('throws an error if the delimiter is not found', () => {
+    expect(() => {
+      splitPkgKey('awesome_package');
+    }).toThrow();
+  });
+
+  it('throws an error if there is nothing before the delimiter', () => {
+    expect(() => {
+      splitPkgKey('-0.0.1-dev1');
+    }).toThrow();
+  });
+
+  it('throws an error if the version is not a semver', () => {
+    expect(() => {
+      splitPkgKey('awesome-laskdfj');
+    }).toThrow();
+  });
+
+  it('returns the name and version if the delimiter is found once', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('awesome-0.1.0');
+    expect(pkgName).toBe('awesome');
+    expect(pkgVersion).toBe('0.1.0');
+  });
+
+  it('returns the name and version if the delimiter is found multiple times', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('endpoint-0.13.0-alpha.1+abcd');
+    expect(pkgName).toBe('endpoint');
+    expect(pkgVersion).toBe('0.13.0-alpha.1+abcd');
+  });
+});
+
+describe('getBufferExtractor', () => {
+  it('throws if the archive has not been downloaded/cached yet', () => {
+    expect(() => getBufferExtractor('missing', '1.2.3')).toThrow('no archive location');
+  });
+
+  it('returns unzipBuffer if the archive key ends in .zip', () => {
+    mockedGetArchiveLocation.mockImplementation(() => '.zip');
+    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+    expect(extractor).toBe(unzipBuffer);
+  });
+
+  it('returns untarBuffer if the key ends in anything else', () => {
+    mockedGetArchiveLocation.mockImplementation(() => 'xyz');
+    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+    expect(extractor).toBe(untarBuffer);
+  });
 });

@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 
 interface PipelineOptions {
   id: string;
-  description: string;
+  description?: string;
   pipeline: string;
   username?: string;
   settings?: Record<string, any>;
 }
 
 interface DownstreamPipeline {
-  description: string;
+  description?: string;
   pipeline: string;
   settings?: Record<string, any>;
 }
@@ -27,7 +27,7 @@ interface DownstreamPipeline {
  */
 export class Pipeline {
   public readonly id: string;
-  public readonly description: string;
+  public readonly description?: string;
   public readonly username?: string;
   public readonly pipeline: string;
   private readonly settings: Record<string, any>;
@@ -103,11 +103,11 @@ export class Pipeline {
         )
       );
     }
-    const id = get<string>(upstreamPipeline, '_id');
-    const description = get<string>(upstreamPipeline, '_source.description');
-    const username = get<string>(upstreamPipeline, '_source.username');
-    const pipeline = get<string>(upstreamPipeline, '_source.pipeline');
-    const settings = get<Record<string, any>>(upstreamPipeline, '_source.pipeline_settings');
+    const id = get(upstreamPipeline, '_id') as string;
+    const description = get(upstreamPipeline, '_source.description') as string;
+    const username = get(upstreamPipeline, '_source.username') as string;
+    const pipeline = get(upstreamPipeline, '_source.pipeline') as string;
+    const settings = get(upstreamPipeline, '_source.pipeline_settings') as Record<string, any>;
 
     const opts: PipelineOptions = { id, description, username, pipeline, settings };
 

@@ -1,0 +1,75 @@
+.kbnFieldButton {
+  @include euiFontSizeS;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeXS;
+  display: flex;
+  align-items: center;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+
+  &:focus-within,
+  &-isActive {
+    @include euiFocusRing;
+  }
+}
+
+.kbnFieldButton--isDraggable {
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+
+  &:hover,
+  &:focus,
+  &:focus-within {
+    @include euiBottomShadowMedium;
+    border-radius: $euiBorderRadius;
+    z-index: 2;
+  }
+
+  .kbnFieldButton__button {
+    &:hover,
+    &:focus {
+      cursor: grab;
+    }
+  }
+}
+
+.kbnFieldButton__button {
+  flex-grow: 1;
+  text-align: left;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: flex-start;
+}
+
+.kbnFieldButton__fieldIcon {
+  flex-shrink: 0;
+  line-height: 0;
+  margin-right: $euiSizeS;
+}
+
+.kbnFieldButton__name {
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.kbnFieldButton__infoIcon {
+  flex-shrink: 0;
+  margin-left: $euiSizeXS;
+}
+
+.kbnFieldButton__fieldAction {
+  margin-right: $euiSizeS;
+}
+
+// Reduce text size and spacing for the small size
+.kbnFieldButton--small {
+  font-size: $euiFontSizeXS;
+
+  .kbnFieldButton__button {
+    padding: $euiSizeXS;
+  }
+
+  .kbnFieldButton__fieldIcon,
+  .kbnFieldButton__fieldAction {
+    margin-right: $euiSizeXS;
+  }
+}

@@ -5,23 +5,41 @@
  */
 
 import React from 'react';
-
+import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
-import { LogEntryRateModuleProvider } from './use_log_entry_rate_module';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { LogFlyout } from '../../../containers/logs/log_flyout';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, sourceConfiguration } = useLogSourceContext();
-  const spaceId = useKibanaSpaceId();
+  const { space } = useActiveKibanaSpace();
+
+  // This is a rather crude way of guarding the dependent providers against
+  // arguments that are only made available asynchronously. Ideally, we'd use
+  // React concurrent mode and Suspense in order to handle that more gracefully.
+  if (sourceConfiguration?.configuration.logAlias == null || space == null) {
+    return null;
+  }
 
   return (
-    <LogEntryRateModuleProvider
-      indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
-      sourceId={sourceId}
-      spaceId={spaceId}
-      timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
-    >
-      {children}
-    </LogEntryRateModuleProvider>
+    <LogFlyout.Provider>
+      <LogEntryRateModuleProvider
+        indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+        sourceId={sourceId}
+        spaceId={space.id}
+        timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+      >
+        <LogEntryCategoriesModuleProvider
+          indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
+          sourceId={sourceId}
+          spaceId={space.id}
+          timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
+        >
+          <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
+        </LogEntryCategoriesModuleProvider>
+      </LogEntryRateModuleProvider>
+    </LogFlyout.Provider>
   );
 };

@@ -42,6 +42,19 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
+describe('#checkConflicts', () => {
+  it('redirects request to underlying base client', async () => {
+    const objects = [{ type: 'foo', id: 'bar' }];
+    const options = { namespace: 'some-namespace' };
+    const mockedResponse = { errors: [] };
+    mockBaseClient.checkConflicts.mockResolvedValue(mockedResponse);
+
+    await expect(wrapper.checkConflicts(objects, options)).resolves.toEqual(mockedResponse);
+    expect(mockBaseClient.checkConflicts).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.checkConflicts).toHaveBeenCalledWith(objects, options);
+  });
+});
+
 describe('#create', () => {
   it('redirects request to underlying base client if type is not registered', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
@@ -939,6 +952,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
         {
@@ -950,6 +964,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
       ],
@@ -1015,6 +1030,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
         {
@@ -1026,6 +1042,7 @@ describe('#bulkGet', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          namespaces: ['some-ns'],
           references: [],
         },
       ],

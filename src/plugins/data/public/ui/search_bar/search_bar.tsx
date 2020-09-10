@@ -75,6 +75,7 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  indicateNoData?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -223,9 +224,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* eslint-enable */
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
@@ -402,6 +401,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
         />
       );
     }
@@ -409,6 +409,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (

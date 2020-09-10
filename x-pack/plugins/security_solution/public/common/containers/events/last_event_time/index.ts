@@ -19,6 +19,7 @@ import { useUiSetting$ } from '../../../lib/kibana';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
 import { useApolloClient } from '../../../utils/apollo_context';
+import { useWithSource } from '../../source';
 
 export interface LastEventTimeArgs {
   id: string;
@@ -44,6 +45,8 @@ export function useLastEventTimeQuery(
   const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const apolloClient = useApolloClient();
+  const { docValueFields } = useWithSource(sourceId);
+
   async function fetchLastEventTime(signal: AbortSignal) {
     updateLoading(true);
     if (apolloClient) {
@@ -52,6 +55,7 @@ export function useLastEventTimeQuery(
           query: LastEventTimeGqlQuery,
           fetchPolicy: 'cache-first',
           variables: {
+            docValueFields,
             sourceId,
             indexKey,
             details,

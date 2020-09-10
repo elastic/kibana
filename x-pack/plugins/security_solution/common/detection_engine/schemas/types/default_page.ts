@@ -14,7 +14,7 @@ import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_
  *   - If null or undefined, then a default of 1 will be used
  *   - If the number is 0 or less this will not validate as it has to be a positive number greater than zero
  */
-export const DefaultPage = new t.Type<number, number, unknown>(
+export const DefaultPage = new t.Type<number, number | undefined, unknown>(
   'DefaultPerPage',
   t.number.is,
   (input, context): Either<t.Errors, number> => {
@@ -28,5 +28,3 @@ export const DefaultPage = new t.Type<number, number, unknown>(
   },
   t.identity
 );
-
-export type DefaultPageC = typeof DefaultPage;

@@ -6,7 +6,7 @@
 
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies } from './types';
 import { Legacy } from './legacy_shims';
 
 import {
@@ -23,6 +23,7 @@ import {
   IKbnUrlStateStorage,
   ISyncStateRef,
   syncState,
+  withNotifyOnErrors,
 } from '../../../../src/plugins/kibana_utils/public';
 
 interface Route {
@@ -64,13 +65,14 @@ export class GlobalState {
   private readonly stateStorage: IKbnUrlStateStorage;
   private readonly stateContainerChangeSub: Subscription;
   private readonly syncQueryStateWithUrlManager: { stop: () => void };
-  private readonly timefilterRef: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  private readonly timefilterRef: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
 
   private lastAssignedState: MonitoringAppState = {};
   private lastKnownGlobalState?: string;
 
   constructor(
-    queryService: MonitoringPluginDependencies['data']['query'],
+    queryService: MonitoringStartPluginDependencies['data']['query'],
+    toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'],
     rootScope: ng.IRootScopeService,
     ngLocation: ng.ILocationService,
     externalState: RawObject
@@ -78,7 +80,11 @@ export class GlobalState {
     this.timefilterRef = queryService.timefilter.timefilter;
 
     const history: History = createHashHistory();
-    this.stateStorage = createKbnUrlStateStorage({ useHash: false, history });
+    this.stateStorage = createKbnUrlStateStorage({
+      useHash: false,
+      history,
+      ...withNotifyOnErrors(toasts),
+    });
 
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 

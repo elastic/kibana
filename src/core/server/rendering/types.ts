@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Env } from '../config';
+import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
+import type { InternalStatusServiceSetup } from '../status';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -40,8 +41,11 @@ export interface RenderingMetadata {
     branch: string;
     basePath: string;
     serverBasePath: string;
-    env: Env;
-    legacyMode: boolean;
+    env: {
+      mode: EnvironmentMode;
+      packageInfo: PackageInfo;
+    };
+    anonymousStatusPage: boolean;
     i18n: {
       translationsUrl: string;
     };
@@ -75,6 +79,7 @@ export interface RenderingMetadata {
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
+  status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
 }
 

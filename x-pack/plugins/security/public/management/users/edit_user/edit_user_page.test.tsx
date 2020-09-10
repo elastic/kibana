@@ -5,7 +5,6 @@
  */
 
 import { act } from '@testing-library/react';
-import { ScopedHistory } from 'kibana/public';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
@@ -104,7 +103,7 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 }
 
 describe('EditUserPage', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
 
   it('allows reserved users to be viewed', async () => {
     const user = createUser('reserved_user');

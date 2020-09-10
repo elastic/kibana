@@ -8,6 +8,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';

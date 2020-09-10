@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/59717
-  describe.skip('Index patterns on aliases', function () {
+  describe('Index patterns on aliases', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
@@ -50,9 +49,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to create index pattern without time field', async function () {
-      await PageObjects.settings.createIndexPattern('alias1', null);
-      const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('alias1*');
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.createIndexPattern('alias1*', null);
     });
 
     it('should be able to discover and verify no of hits for alias1', async function () {
@@ -64,9 +62,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to create index pattern with timefield', async function () {
-      await PageObjects.settings.createIndexPattern('alias2', 'date');
-      const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('alias2*');
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.createIndexPattern('alias2*', 'date');
     });
 
     it('should be able to discover and verify no of hits for alias2', async function () {

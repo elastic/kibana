@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { FormattedData } from '../../../../../plugins/inspector/public';
-import { TabbedTable } from '../tabify';
+import { TabbedTable } from '../../../common';
+import { FormatFactory } from '../../../common/field_formats/utils';
 import { createFilter } from './create_filter';
 
 /**
@@ -38,14 +39,30 @@ import { createFilter } from './create_filter';
  */
 export async function buildTabularInspectorData(
   table: TabbedTable,
-  queryFilter: { addFilters: (filter: any) => void }
+  {
+    queryFilter,
+    deserializeFieldFormat,
+  }: {
+    queryFilter: { addFilters: (filter: any) => void };
+    deserializeFieldFormat: FormatFactory;
+  }
 ) {
   const aggConfigs = table.columns.map((column) => column.aggConfig);
   const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
       const value = row[cur.id];
-      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
-      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(value, fieldFormatter(value));
+
+      let format = cur.aggConfig.toSerializedFieldFormat();
+      if (Object.keys(format).length < 1) {
+        // If no format exists, fall back to string as a default
+        format = { id: 'string' };
+      }
+      const fieldFormatter = deserializeFieldFormat(format);
+
+      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(
+        value,
+        fieldFormatter.convert(value)
+      );
       return prev;
     }, {});
   });

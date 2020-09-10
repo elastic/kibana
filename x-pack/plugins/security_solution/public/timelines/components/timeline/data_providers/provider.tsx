@@ -7,7 +7,7 @@
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import { DataProvider, IS_OPERATOR } from './data_provider';
+import { DataProvider, DataProviderType, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface OwnProps {
@@ -24,8 +24,10 @@ export const Provider = React.memo<OwnProps>(({ dataProvider }) => (
     providerId={dataProvider.id}
     toggleExcludedProvider={noop}
     toggleEnabledProvider={noop}
+    toggleTypeProvider={noop}
     val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
     operator={dataProvider.queryMatch.operator || IS_OPERATOR}
+    type={dataProvider.type || DataProviderType.default}
   />
 ));
 

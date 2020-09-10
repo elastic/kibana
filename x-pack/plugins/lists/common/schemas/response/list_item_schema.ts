@@ -6,14 +6,15 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import {
+  _versionOrUndefined,
   created_at,
   created_by,
+  deserializerOrUndefined,
   id,
   list_id,
   metaOrUndefined,
+  serializerOrUndefined,
   tie_breaker_id,
   type,
   updated_at,
@@ -23,11 +24,14 @@ import {
 
 export const listItemSchema = t.exact(
   t.type({
+    _version: _versionOrUndefined,
     created_at,
     created_by,
+    deserializer: deserializerOrUndefined,
     id,
     list_id,
     meta: metaOrUndefined,
+    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,

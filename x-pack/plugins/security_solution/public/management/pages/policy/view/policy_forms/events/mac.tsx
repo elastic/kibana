@@ -102,12 +102,6 @@ export const MacEvents = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      description={i18n.translate(
-        'xpack.securitySolution.endpoint.policy.details.eventCollectionLabel',
-        {
-          defaultMessage: 'Event Collection',
-        }
-      )}
       supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.mac', {
         defaultMessage: 'Mac',
       })}

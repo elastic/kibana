@@ -34,11 +34,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.loadSavedVisualization('chained input control', {
         navigateToVisualize: false,
       });
+      await testSubjects.waitForEnabled('addFilter', 10000);
     });
 
     it('should disable child control when parent control is not set', async () => {
       const parentControlMenu = await comboBox.getOptionsList('listControlSelect0');
-      expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
+      expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
       const isDisabled = await childControlInput.getAttribute('disabled');

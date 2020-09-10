@@ -13,11 +13,9 @@ import { decorateRangeStats } from './decorate_range_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
   AggregationResultBuckets,
-  AppCounts,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
-  LayoutCounts,
   RangeStats,
   ReportingUsageType,
   SearchResponse,
@@ -75,21 +73,21 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
   if (pdfJobs) {
-    const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
-    const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
-    pdfJobs.app = getKeyCount<AppCounts>(pdfAppBuckets);
-    pdfJobs.layout = getKeyCount<LayoutCounts>(pdfLayoutBuckets);
+    const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], 'pdf.buckets', []);
+    const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], 'pdf.buckets', []);
+    pdfJobs.app = getKeyCount(pdfAppBuckets);
+    pdfJobs.layout = getKeyCount(pdfLayoutBuckets);
   }
 
   const all = aggs.doc_count;
   let statusTypes = {};
-  const statusBuckets = get<KeyCountBucket[]>(aggs[STATUS_TYPES_KEY], 'buckets', []);
+  const statusBuckets = get(aggs[STATUS_TYPES_KEY], 'buckets', []);
   if (statusBuckets) {
     statusTypes = getKeyCount(statusBuckets);
   }
 
   let statusByApp = {};
-  const statusAppBuckets = get<StatusByAppBucket[]>(aggs[STATUS_BY_APP_KEY], 'buckets', []);
+  const statusAppBuckets = get(aggs[STATUS_BY_APP_KEY], 'buckets', []);
   if (statusAppBuckets) {
     statusByApp = getAppStatuses(statusAppBuckets);
   }
@@ -97,18 +95,16 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
 }
 
-type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
-
 type RangeStatSets = Partial<RangeStats> & {
   last7Days: Partial<RangeStats>;
 };
 
 async function handleResponse(response: SearchResponse): Promise<Partial<RangeStatSets>> {
-  const buckets = get<SearchAggregation>(response, 'aggregations.ranges.buckets');
+  const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
   }
-  const { last7Days, all } = buckets;
+  const { last7Days, all } = buckets as any;
 
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};

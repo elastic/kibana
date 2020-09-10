@@ -13,6 +13,7 @@ export { useLink } from './use_link';
 export { useKibanaLink } from './use_kibana_link';
 export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
 export { usePagination, Pagination } from './use_pagination';
+export { useSorting } from './use_sorting';
 export { useDebounce } from './use_debounce';
 export * from './use_request';
 export * from './use_input';

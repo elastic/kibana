@@ -52,7 +52,7 @@ report from the Kibana UI.
 <3> Optional, default is 40
 <4> Optional, default is 15s
 <5> Provide user credentials for a user with permission to access Kibana and
-{reporting}.
+the {report-features}.
 //For more information, see <<secure-reporting>>.
 //<<reporting-app-users, Setting up a Reporting Role>>.
 

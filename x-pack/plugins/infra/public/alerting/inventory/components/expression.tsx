@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { debounce, pick, uniqBy, isEqual } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
@@ -16,20 +17,16 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiFieldSearch,
-  EuiSelect,
-  EuiButton,
+  EuiCheckbox,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  previewOptions,
-  firedTimeLabel,
-  firedTimesLabel,
-  getInventoryAlertPreview as getAlertPreview,
-} from '../../../alerting/common';
-import { AlertPreviewSuccessResponsePayload } from '../../../../common/alerting/metrics/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { AlertPreview } from '../../common';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -44,10 +41,8 @@ import {
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
-import { toMetricOpt } from '../../../pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
 import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
 import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
@@ -56,22 +51,31 @@ import { hostMetricTypes } from '../../../../common/inventory_models/host/toolba
 import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
 import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '../../../../common/inventory_models/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-interface AlertContextMeta {
+export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  customMetrics?: SnapshotCustomMetricInput[];
 }
 
 interface Props {
@@ -81,7 +85,8 @@ interface Props {
     nodeType: InventoryItemType;
     filterQuery?: string;
     filterQueryText?: string;
-    sourceId?: string;
+    sourceId: string;
+    alertOnNoData?: boolean;
   };
   alertInterval: string;
   alertsContext: AlertsContextValue<AlertContextMeta>;
@@ -95,6 +100,7 @@ const defaultExpression = {
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
+  customMetric: undefined,
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
@@ -107,31 +113,6 @@ export const Expressions: React.FC<Props> = (props) => {
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
-
-  const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
-  const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
-  const [previewError, setPreviewError] = useState<boolean>(false);
-  const [previewResult, setPreviewResult] = useState<AlertPreviewSuccessResponsePayload | null>(
-    null
-  );
-
-  const previewIntervalError = useMemo(() => {
-    const intervalInSeconds = getIntervalInSeconds(alertInterval);
-    const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
-    if (intervalInSeconds >= lookbackInSeconds) {
-      return true;
-    }
-    return false;
-  }, [previewLookbackInterval, alertInterval]);
-
-  const isPreviewDisabled = useMemo(() => {
-    if (previewIntervalError) return true;
-    const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
-    const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
-      Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
-    );
-    return hasValidationErrors;
-  }, [alertParams.criteria, previewIntervalError]);
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -235,6 +216,9 @@ export const Expressions: React.FC<Props> = (props) => {
         {
           ...defaultExpression,
           metric: md.options.metric!.type,
+          customMetric: SnapshotCustomMetricInputRT.is(md.options.metric)
+            ? md.options.metric
+            : undefined,
         } as InventoryMetricConditions,
       ]);
     } else {
@@ -252,33 +236,6 @@ export const Expressions: React.FC<Props> = (props) => {
       );
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
-
-  const onSelectPreviewLookbackInterval = useCallback((e) => {
-    setPreviewLookbackInterval(e.target.value);
-    setPreviewResult(null);
-  }, []);
-
-  const onClickPreview = useCallback(async () => {
-    setIsPreviewLoading(true);
-    setPreviewResult(null);
-    setPreviewError(false);
-    try {
-      const result = await getAlertPreview({
-        fetch: alertsContext.http.fetch,
-        params: {
-          ...pick(alertParams, 'criteria', 'nodeType'),
-          sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as Unit,
-          alertInterval,
-        },
-      });
-      setPreviewResult(result);
-    } catch (e) {
-      setPreviewError(true);
-    } finally {
-      setIsPreviewLoading(false);
-    }
-  }, [alertParams, alertInterval, alertsContext, previewLookbackInterval]);
 
   useEffect(() => {
     const md = alertsContext.metadata;
@@ -340,6 +297,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setAlertParams={updateParams}
               errors={errors[idx] || emptyError}
               expression={e || {}}
+              alertsContextMetadata={alertsContext.metadata}
             />
           );
         })}
@@ -366,6 +324,28 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </EuiButtonEmpty>
       </div>
+
+      <EuiSpacer size={'m'} />
+      <EuiCheckbox
+        id="metrics-alert-no-data-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+              defaultMessage: "Alert me if there's no data",
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        checked={alertParams.alertOnNoData}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
+      />
 
       <EuiSpacer size={'m'} />
 
@@ -396,90 +376,15 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
-      <EuiFormRow
-        label={i18n.translate('xpack.infra.metrics.alertFlyout.previewLabel', {
-          defaultMessage: 'Preview',
-        })}
-        fullWidth
-        compressed
-      >
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiSelect
-                id="selectPreviewLookbackInterval"
-                value={previewLookbackInterval}
-                onChange={onSelectPreviewLookbackInterval}
-                options={previewOptions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={isPreviewLoading}
-                isDisabled={isPreviewDisabled}
-                onClick={onClickPreview}
-              >
-                {i18n.translate('xpack.infra.metrics.alertFlyout.testAlertTrigger', {
-                  defaultMessage: 'Test alert trigger',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiSpacer size={'s'} />
-          </EuiFlexGroup>
-          {previewResult && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewResult"
-                  defaultMessage="This alert would have fired {fired} {timeOrTimes} in the past {lookback}"
-                  values={{
-                    timeOrTimes:
-                      previewResult.resultTotals.fired === 1 ? firedTimeLabel : firedTimesLabel,
-                    fired: <strong>{previewResult.resultTotals.fired}</strong>,
-                    lookback: previewOptions.find((e) => e.value === previewLookbackInterval)
-                      ?.shortText,
-                  }}
-                />{' '}
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
-                  defaultMessage="across {numberOfGroups} {groupName}{plural}."
-                  values={{
-                    numberOfGroups: <strong>{previewResult.numberOfGroups}</strong>,
-                    groupName: alertParams.nodeType,
-                    plural: previewResult.numberOfGroups !== 1 ? 's' : '',
-                  }}
-                />
-              </EuiText>
-            </>
-          )}
-          {previewIntervalError && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.previewIntervalTooShort"
-                  defaultMessage="Not enough data to preview. Please select a longer preview length, or increase the amount of time in the {checkEvery} field."
-                  values={{
-                    checkEvery: <strong>check every</strong>,
-                  }}
-                />
-              </EuiText>
-            </>
-          )}
-          {previewError && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewError"
-                  defaultMessage="An error occurred when trying to preview this alert trigger."
-                />
-              </EuiText>
-            </>
-          )}
-        </>
-      </EuiFormRow>
+      <AlertPreview
+        alertInterval={alertInterval}
+        alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+        alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
+        validate={validateMetricThreshold}
+        fetch={alertsContext.http.fetch}
+        groupByDisplayName={alertParams.nodeType}
+        showNoDataResults={alertParams.alertOnNoData}
+      />
       <EuiSpacer size={'m'} />
     </>
   );
@@ -500,6 +405,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
+  alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -513,14 +419,48 @@ const StyledExpression = euiStyled.div`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const { setAlertParams, expression, errors, expressionId, remove, canDelete } = props;
-  const { metric, comparator = Comparator.GT, threshold = [] } = expression;
+  const {
+    setAlertParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    canDelete,
+    alertsContextMetadata,
+  } = props;
+  const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
+  const [customMetrics, updateCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
+
+  // Create and uniquify a list of custom metrics including:
+  // - The alert metadata context (which only gives us custom metrics on the inventory page)
+  // - The custom metric stored in the expression (necessary when editing this alert without having
+  //    access to the metadata context)
+  // - Whatever custom metrics were previously stored in this list (to preserve the custom metric in the dropdown
+  //    if the user edits the alert and switches away from the custom metric)
+  useEffect(() => {
+    const ctxCustomMetrics = alertsContextMetadata?.customMetrics ?? [];
+    const expressionCustomMetrics = customMetric ? [customMetric] : [];
+    const newCustomMetrics = uniqBy(
+      [...customMetrics, ...ctxCustomMetrics, ...expressionCustomMetrics],
+      (cm: SnapshotCustomMetricInput) => cm.id
+    );
+    if (!isEqual(customMetrics, newCustomMetrics)) updateCustomMetrics(newCustomMetrics);
+  }, [alertsContextMetadata, customMetric, customMetrics, updateCustomMetrics]);
 
   const updateMetric = useCallback(
-    (m?: SnapshotMetricType) => {
-      setAlertParams(expressionId, { ...expression, metric: m });
+    (m?: SnapshotMetricType | string) => {
+      const newMetric = SnapshotMetricTypeRT.is(m) ? m : 'custom';
+      const newAlertParams = { ...expression, metric: newMetric };
+      if (newMetric === 'custom' && customMetrics) {
+        set(
+          newAlertParams,
+          'customMetric',
+          customMetrics.find((cm) => cm.id === m)
+        );
+      }
+      setAlertParams(expressionId, newAlertParams);
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setAlertParams, customMetrics]
   );
 
   const updateComparator = useCallback(
@@ -557,6 +497,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         break;
       case 'host':
         myMetrics = hostMetricTypes;
+
         break;
       case 'pod':
         myMetrics = podMetricTypes;
@@ -565,8 +506,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         myMetrics = containerMetricTypes;
         break;
     }
-    return myMetrics.map(toMetricOpt);
-  }, [props.nodeType]);
+    const baseMetricOpts = myMetrics.map(toMetricOpt);
+    const customMetricOpts = customMetrics
+      ? customMetrics.map((m, i) => ({
+          text: getCustomMetricLabel(m),
+          value: m.id,
+        }))
+      : [];
+    return [...baseMetricOpts, ...customMetricOpts];
+  }, [props.nodeType, customMetrics]);
+
+  const selectedMetricValue = metric === 'custom' && customMetric ? customMetric.id : metric!;
 
   return (
     <>
@@ -576,8 +526,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <StyledExpression>
               <MetricExpression
                 metric={{
-                  value: metric!,
-                  text: ofFields.find((v) => v?.value === metric)?.text || '',
+                  value: selectedMetricValue,
+                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
                 }}
                 metrics={
                   ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
@@ -679,4 +629,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
   rdsLatency: { label: 'ms' },
+  custom: { label: '' },
 };

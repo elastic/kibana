@@ -19,6 +19,7 @@
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { defaults } from 'lodash';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -149,7 +150,7 @@ export class ExpressionLoader {
       variables: params.variables || {},
       inspectorAdapters: params.inspectorAdapters,
     });
-    if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
+
     const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
     if (this.execution !== prevDataHandler) {
@@ -168,7 +169,7 @@ export class ExpressionLoader {
     }
 
     if (params.searchContext) {
-      this.params.searchContext = _.defaults(
+      this.params.searchContext = defaults(
         {},
         params.searchContext,
         this.params.searchContext || {}
@@ -180,6 +181,9 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+
+    this.params.inspectorAdapters = (params.inspectorAdapters ||
+      this.execution?.inspect()) as Adapters;
   }
 }
 

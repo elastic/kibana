@@ -24,14 +24,14 @@ import {
 } from '../../../mappings_editor';
 
 interface Props {
-  defaultValue: { [key: string]: any };
   onChange: (content: Forms.Content) => void;
-  indexSettings?: IndexSettings;
   esDocsBase: string;
+  defaultValue?: { [key: string]: any };
+  indexSettings?: IndexSettings;
 }
 
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, onChange, indexSettings, esDocsBase }) => {
+  ({ defaultValue = {}, onChange, indexSettings, esDocsBase }) => {
     const [mappings, setMappings] = useState(defaultValue);
 
     const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(

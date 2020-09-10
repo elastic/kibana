@@ -17,112 +17,72 @@
  * under the License.
  */
 
-import { inspect } from 'util';
-
-// @ts-ignore @types are outdated and module is super simple
-import exitHook from 'exit-hook';
-
-import { pickLevelFromFlags, ToolingLog } from '../tooling_log';
-import { createFlagError, isFailError } from './fail';
-import { Flags, getFlags, getHelp } from './flags';
+import { pickLevelFromFlags, ToolingLog, LogLevel } from '../tooling_log';
+import { createFlagError } from './fail';
+import { Flags, getFlags, FlagOptions } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';
+import { getHelp } from './help';
+import { CleanupTask, Cleanup } from './cleanup';
 
-type CleanupTask = () => void;
-type RunFn = (args: {
+export interface RunContext {
   log: ToolingLog;
   flags: Flags;
   procRunner: ProcRunner;
   addCleanupTask: (task: CleanupTask) => void;
-}) => Promise<void> | void;
+}
+export type RunFn = (context: RunContext) => Promise<void> | void;
 
-export interface Options {
+export interface RunOptions {
   usage?: string;
   description?: string;
-  flags?: {
-    allowUnexpected?: boolean;
-    guessTypesForUnexpectedFlags?: boolean;
-    help?: string;
-    alias?: { [key: string]: string | string[] };
-    boolean?: string[];
-    string?: string[];
-    default?: { [key: string]: any };
+  log?: {
+    defaultLevel?: LogLevel;
   };
+  flags?: FlagOptions;
 }
 
-export async function run(fn: RunFn, options: Options = {}) {
-  const flags = getFlags(process.argv.slice(2), options);
-
-  if (flags.help) {
-    process.stderr.write(getHelp(options));
-    process.exit(1);
-  }
+export async function run(fn: RunFn, options: RunOptions = {}) {
+  const flags = getFlags(process.argv.slice(2), options.flags);
+  const helpText = getHelp({
+    description: options.description,
+    usage: options.usage,
+    flagHelp: options.flags?.help,
+  });
 
   const log = new ToolingLog({
-    level: pickLevelFromFlags(flags),
+    level: pickLevelFromFlags(flags, {
+      default: options.log?.defaultLevel,
+    }),
     writeTo: process.stdout,
   });
 
-  process.on('unhandledRejection', (error) => {
-    log.error('UNHANDLED PROMISE REJECTION');
-    log.error(
-      error instanceof Error
-        ? error
-        : new Error(`non-Error type rejection value: ${inspect(error)}`)
-    );
-    process.exit(1);
-  });
+  if (flags.help) {
+    log.write(helpText);
+    process.exit();
+  }
 
-  const handleErrorWithoutExit = (error: any) => {
-    if (isFailError(error)) {
-      log.error(error.message);
+  const cleanup = Cleanup.setup(log, helpText);
 
-      if (error.showHelp) {
-        log.write(getHelp(options));
-      }
-
-      process.exitCode = error.exitCode;
-    } else {
-      log.error('UNHANDLED ERROR');
-      log.error(error);
-      process.exitCode = 1;
-    }
-  };
-
-  const doCleanup = () => {
-    const tasks = cleanupTasks.slice(0);
-    cleanupTasks.length = 0;
-
-    for (const task of tasks) {
-      try {
-        task();
-      } catch (error) {
-        handleErrorWithoutExit(error);
-      }
-    }
-  };
-
-  const unhookExit: CleanupTask = exitHook(doCleanup);
-  const cleanupTasks: CleanupTask[] = [unhookExit];
+  if (!options.flags?.allowUnexpected && flags.unexpected.length) {
+    const error = createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
+    cleanup.execute(error);
+    return;
+  }
 
   try {
-    if (!options.flags?.allowUnexpected && flags.unexpected.length) {
-      throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
-    }
-
-    try {
-      await withProcRunner(log, async (procRunner) => {
-        await fn({
-          log,
-          flags,
-          procRunner,
-          addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
-        });
+    await withProcRunner(log, async (procRunner) => {
+      await fn({
+        log,
+        flags,
+        procRunner,
+        addCleanupTask: cleanup.add.bind(cleanup),
       });
-    } finally {
-      doCleanup();
-    }
+    });
   } catch (error) {
-    handleErrorWithoutExit(error);
+    cleanup.execute(error);
+    // process.exitCode is set by `cleanup` when necessary
     process.exit();
+  } finally {
+    cleanup.execute();
   }
 }

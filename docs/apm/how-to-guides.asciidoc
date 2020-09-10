@@ -8,7 +8,6 @@ Learn how to perform common APM app tasks.
 * <<agent-configuration>>
 * <<apm-alerts>>
 * <<custom-links>>
-* <<errors-alerts-with-watcher>>
 * <<filters>>
 * <<machine-learning-integration>>
 * <<advanced-queries>>
@@ -20,8 +19,6 @@ include::agent-configuration.asciidoc[]
 include::apm-alerts.asciidoc[]
 
 include::custom-links.asciidoc[]
-
-include::error-reports-watcher.asciidoc[]
 
 include::filters.asciidoc[]
 

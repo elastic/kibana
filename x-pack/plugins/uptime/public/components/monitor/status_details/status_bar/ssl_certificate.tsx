@@ -8,7 +8,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Tls } from '../../../../../common/runtime_types';
+import { Tls, X509Expiry } from '../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants';
 import { MonListDescription, MonListTitle } from './status_bar';
 import { CertStatusColumn } from '../../../overview/monitor_list/cert_status_column';
@@ -21,7 +21,21 @@ interface Props {
 }
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
-  return tls?.not_after ? (
+  let expiry: X509Expiry | null = null;
+  if (tls?.server?.x509) {
+    expiry = tls.server.x509;
+  } else if (tls?.certificate_not_valid_after && tls?.certificate_not_valid_before) {
+    expiry = {
+      not_after: tls.certificate_not_valid_after,
+      not_before: tls.certificate_not_valid_before,
+    };
+  }
+
+  if (!expiry) {
+    return null;
+  }
+
+  return (
     <>
       <MonListTitle>
         <FormattedMessage
@@ -33,9 +47,9 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
       <EuiSpacer size="s" />
       <MonListDescription>
         <Link to={CERTIFICATES_ROUTE} className="eui-displayInline">
-          <CertStatusColumn cert={tls} boldStyle={true} />
+          <CertStatusColumn expiry={expiry} boldStyle={true} />
         </Link>
       </MonListDescription>
     </>
-  ) : null;
+  );
 };

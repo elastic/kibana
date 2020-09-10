@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { FeatureCollection } from 'geojson';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -25,12 +26,19 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
+export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const API_ROOT_PATH = `/${GIS_API_PATH}`;
+
+export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -89,7 +97,7 @@ export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 export const DEFAULT_MAX_RESULT_WINDOW = 10000;
 export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
-export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
@@ -124,7 +132,7 @@ export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;
 export const LAT_INDEX = 1;
 
-export const EMPTY_FEATURE_COLLECTION = {
+export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   type: 'FeatureCollection',
   features: [],
 };
@@ -218,9 +226,15 @@ export enum SCALING_TYPES {
   LIMIT = 'LIMIT',
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
+  MVT = 'MVT',
 }
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
+
+export enum MVT_FIELD_TYPE {
+  STRING = 'String',
+  NUMBER = 'Number',
+}
 
 export const SPATIAL_FILTERS_LAYER_ID = 'SPATIAL_FILTERS_LAYER_ID';
 
@@ -228,6 +242,7 @@ export enum INITIAL_LOCATION {
   LAST_SAVED_LOCATION = 'LAST_SAVED_LOCATION',
   FIXED_LOCATION = 'FIXED_LOCATION',
   BROWSER_LOCATION = 'BROWSER_LOCATION',
+  AUTO_FIT_TO_BOUNDS = 'AUTO_FIT_TO_BOUNDS',
 }
 
 export enum LAYER_WIZARD_CATEGORY {

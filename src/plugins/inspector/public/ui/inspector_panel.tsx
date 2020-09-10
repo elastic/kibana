@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import './inspector_panel.scss';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { Adapters, InspectorViewDescription } from '../types';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
@@ -122,7 +124,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{this.renderSelectedPanel()}</EuiFlyoutBody>
+        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+          {this.renderSelectedPanel()}
+        </EuiFlyoutBody>
       </React.Fragment>
     );
   }

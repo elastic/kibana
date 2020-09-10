@@ -57,12 +57,13 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, schema, namespace, type, search, searchFields, hasReference) to getQueryParams', () => {
+    it('passes (mappings, schema, namespaces, type, search, searchFields, rootSearchFields, hasReference) to getQueryParams', () => {
       const opts = {
-        namespace: 'foo-namespace',
+        namespaces: ['foo-namespace'],
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
+        rootSearchFields: ['qux'],
         defaultSearchOperator: 'AND',
         hasReference: {
           type: 'bar',
@@ -75,10 +76,11 @@ describe('getSearchDsl', () => {
       expect(getQueryParams).toHaveBeenCalledWith({
         mappings,
         registry,
-        namespace: opts.namespace,
+        namespaces: opts.namespaces,
         type: opts.type,
         search: opts.search,
         searchFields: opts.searchFields,
+        rootSearchFields: opts.rootSearchFields,
         defaultSearchOperator: opts.defaultSearchOperator,
         hasReference: opts.hasReference,
       });

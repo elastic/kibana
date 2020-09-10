@@ -40,6 +40,7 @@ export function setupSavedObjects(core: CoreSetup) {
         },
         expression: {
           index: false,
+          doc_values: false,
           type: 'keyword',
         },
       },

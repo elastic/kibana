@@ -7,18 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import { BaseActionContext, addMessages } from './action_context';
+import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { TimeSeriesQuery } from './lib/time_series_query';
+import { Service } from '../../types';
+import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
 
 export const ID = '.index-threshold';
 
-import { Service } from '../../types';
-
+import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
-export function getAlertType(service: Service): AlertType {
+export function getAlertType(service: Service): AlertType<Params, {}, {}, ActionContext> {
   const { logger } = service;
 
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
@@ -67,6 +68,30 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
+  const actionVariableContextThresholdLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
+    {
+      defaultMessage:
+        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+    }
+  );
+
+  const actionVariableContextThresholdComparatorLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdComparatorLabel',
+    {
+      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
+    }
+  );
+
+  const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
+    (propKey: string) => {
+      return {
+        name: propKey,
+        description: propKey,
+      };
+    }
+  );
+
   return {
     id: ID,
     name: alertTypeName,
@@ -83,14 +108,18 @@ export function getAlertType(service: Service): AlertType {
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
       ],
+      params: [
+        { name: 'threshold', description: actionVariableContextThresholdLabel },
+        { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
+        ...alertParamsVariables,
+      ],
     },
     executor,
-    producer: 'alerting',
+    producer: BUILT_IN_ALERTS_FEATURE_ID,
   };
 
-  async function executor(options: AlertExecutorOptions) {
-    const { alertId, name, services } = options;
-    const params: Params = options.params as Params;
+  async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
+    const { alertId, name, services, params } = options;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {

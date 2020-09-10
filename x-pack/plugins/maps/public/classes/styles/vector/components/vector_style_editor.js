@@ -15,7 +15,7 @@ import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
-import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
@@ -62,6 +62,7 @@ export class VectorStyleEditor extends Component {
         name: field.getName(),
         origin: field.getOrigin(),
         type: await field.getDataType(),
+        supportsAutoDomain: field.supportsAutoDomain(),
       };
     };
 
@@ -109,7 +110,9 @@ export class VectorStyleEditor extends Component {
   }
 
   _getOrdinalFields() {
-    return [...this.state.dateFields, ...this.state.numberFields];
+    return [...this.state.dateFields, ...this.state.numberFields].filter((field) => {
+      return field.supportsAutoDomain;
+    });
   }
 
   _handleSelectedFeatureChange = (selectedFeature) => {

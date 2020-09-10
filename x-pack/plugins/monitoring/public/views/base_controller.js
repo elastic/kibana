@@ -11,7 +11,8 @@ import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from '../components';
 import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
-import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
+import { SetupModeFeature } from '../../common/enums';
+import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -85,6 +86,7 @@ export class MonitoringViewBaseController {
     $scope,
     $injector,
     options = {},
+    alerts = { shouldFetch: false, options: {} },
     fetchDataImmediately = true,
   }) {
     const titleService = $injector.get('title');
@@ -112,6 +114,34 @@ export class MonitoringViewBaseController {
 
     const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
+    async function fetchAlerts() {
+      const globalState = $injector.get('globalState');
+      const bounds = Legacy.shims.timefilter.getBounds();
+      const min = bounds.min?.valueOf();
+      const max = bounds.max?.valueOf();
+      const options = alerts.options || {};
+      try {
+        return await Legacy.shims.http.post(
+          `/api/monitoring/v1/alert/${globalState.cluster_uuid}/status`,
+          {
+            body: JSON.stringify({
+              alertTypeIds: options.alertTypeIds,
+              filters: options.filters,
+              timeRange: {
+                min,
+                max,
+              },
+            }),
+          }
+        );
+      } catch (err) {
+        Legacy.shims.toastNotifications.addDanger({
+          title: 'Error fetching alert status',
+          text: err.message,
+        });
+      }
+    }
+
     this.updateData = () => {
       if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
@@ -121,15 +151,18 @@ export class MonitoringViewBaseController {
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
       const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
-      const setupMode = getSetupModeState();
-      if (setupMode.enabled) {
+      if (alerts.shouldFetch) {
+        promises.push(fetchAlerts());
+      }
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
       this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
-      return this.updateDataPromise.promise().then(([pageData]) => {
+      return this.updateDataPromise.promise().then(([pageData, alerts]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
+          $scope.alerts = this.alerts = alerts;
         });
       });
     };

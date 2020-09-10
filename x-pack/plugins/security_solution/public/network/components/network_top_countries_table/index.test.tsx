@@ -10,13 +10,15 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import '../../../common/mock/match_media';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   apolloClientObservable,
   mockGlobalState,
   mockIndexPattern,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -32,10 +34,22 @@ describe('NetworkTopCountries Table Component', () => {
   const mount = useMountAppended();
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {
@@ -62,7 +76,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
@@ -87,7 +101,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
   });
 

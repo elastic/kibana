@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../src/plugins/data/public';
 
-export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
+export type ActionContext = ApplyGlobalFilterActionContext;
 
 export interface Config {
   /**

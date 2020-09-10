@@ -47,8 +47,6 @@ describe.skip('Mappings editor: text datatype', () => {
 
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
-      _meta: {},
-      _source: {},
       properties: {
         myField: {
           type: 'text',
@@ -309,8 +307,11 @@ describe.skip('Mappings editor: text datatype', () => {
     const indexSettings = {
       analysis: {
         analyzer: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_1: {},
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_2: {},
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_3: {},
         },
       },

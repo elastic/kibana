@@ -5,32 +5,26 @@
  */
 
 import { getApmHref } from '../get_apm_href';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getApmHref', () => {
   let summary: MonitorSummary;
-
   beforeEach(() => {
     summary = {
       monitor_id: 'foo',
       state: {
         summary: {},
-        checks: [
-          {
-            monitor: {
-              ip: '151.101.202.217',
-              status: 'up',
-            },
-            container: {
-              id: 'test-container-id',
-            },
-            kubernetes: {
-              pod: {
-                uid: 'test-pod-id',
-              },
-            },
-            timestamp: 123,
-          },
+        monitor: {},
+        summaryPings: [
+          makePing({
+            docId: 'foo',
+            id: 'foo',
+            type: 'test',
+            ip: '151.101.202.217',
+            status: 'up',
+            timestamp: '123',
+            duration: 123,
+          }),
         ],
         timestamp: '123',
         url: {
@@ -53,5 +47,19 @@ describe('getApmHref', () => {
     expect(result).toMatchInlineSnapshot(
       `"/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
     );
+  });
+
+  describe('with service.name', () => {
+    const serviceName = 'MyServiceName';
+    beforeEach(() => {
+      summary.state.service = { name: serviceName };
+    });
+
+    it('links to the named service', () => {
+      const result = getApmHref(summary, 'foo', 'now-15m', 'now');
+      expect(result).toMatchInlineSnapshot(
+        `"foo/app/apm#/services?kuery=service.name:%20%22${serviceName}%22&rangeFrom=now-15m&rangeTo=now"`
+      );
+    });
   });
 });

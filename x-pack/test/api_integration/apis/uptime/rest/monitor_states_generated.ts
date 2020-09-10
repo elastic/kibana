@@ -53,18 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
         nonSummaryIp = checks[0][0].monitor.ip;
       });
 
-      it('should return all IPs', async () => {
-        const filters = makeApiParams(testMonitorId);
-        const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
-        const apiResponse = await supertest.get(url);
-        const res = apiResponse.body;
-
-        const uniqueIps = new Set<string>();
-        res.summaries[0].state.checks.forEach((c: any) => uniqueIps.add(c.monitor.ip));
-
-        expect(uniqueIps.size).to.eql(4);
-      });
-
       it('should match non summary documents without a status filter', async () => {
         const filters = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
 

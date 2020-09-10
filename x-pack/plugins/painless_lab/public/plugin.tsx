@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup } from 'kibana/public';
 import { first } from 'rxjs/operators';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
@@ -27,7 +27,7 @@ const checkLicenseStatus = (license: ILicense) => {
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
   languageService = new LanguageService();
 
-  async setup(
+  public setup(
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
   ) {
@@ -39,7 +39,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       description: i18n.translate('xpack.painlessLab.registryProviderDescription', {
         defaultMessage: 'Simulate and debug painless code.',
       }),
-      icon: '',
+      icon: 'empty',
       path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
@@ -70,7 +70,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       ) as any,
       enableRouting: false,
       disabled: false,
-      mount: async (ctx, { element }) => {
+      mount: async ({ element }) => {
         const [core] = await getStartServices();
 
         const {
@@ -115,9 +115,9 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     });
   }
 
-  async start(core: CoreStart, plugins: any) {}
+  public start() {}
 
-  async stop() {
+  public stop() {
     this.languageService.stop();
   }
 }

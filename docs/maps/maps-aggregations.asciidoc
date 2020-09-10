@@ -47,7 +47,7 @@ Grid aggregation layers use {ref}/search-aggregations-bucket-geotilegrid-aggrega
 Symbolize grid aggregation metrics as:
 
 *Clusters*:: Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
-The cluster location is the weighted centroid for all geo-points in the gridded cell.
+The cluster location is the weighted centroid for all documents in the gridded cell.
 
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
@@ -60,7 +60,7 @@ To enable a grid aggregation layer:
 To enable a blended layer that dynamically shows clusters or documents:
 
 . Click *Add layer*, then select the *Documents* layer.
-. Configure *Index pattern* and the *Geospatial field*. To enable clustering, the *Geospatial field* must be set to a field mapped as {ref}/geo-point.html[geo_point].
+. Configure *Index pattern* and the *Geospatial field*.
 . In *Scaling*, select *Show clusters when results exceed 10000*.
 
 

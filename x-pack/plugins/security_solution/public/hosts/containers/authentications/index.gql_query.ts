@@ -14,6 +14,7 @@ export const authenticationsQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $docValueFields: [docValueFieldsInput!]!
   ) {
     source(id: $sourceId) {
       id
@@ -22,6 +23,7 @@ export const authenticationsQuery = gql`
         pagination: $pagination
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
       ) {
         totalCount
         edges {

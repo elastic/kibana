@@ -5,7 +5,7 @@
  */
 
 import { registerLayerWizard } from './layer_wizard_registry';
-import { uploadLayerWizardConfig } from '../sources/client_file_source';
+import { uploadLayerWizardConfig } from './file_upload_wizard';
 // @ts-ignore
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
 // @ts-ignore
@@ -26,7 +26,7 @@ import { wmsLayerWizardConfig } from '../sources/wms_source';
 import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
-import { getEnableVectorTiles } from '../../kibana_services';
+import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 
 let registered = false;
 export function registerLayerWizards() {
@@ -41,6 +41,7 @@ export function registerLayerWizards() {
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
+  registerLayerWizard(choroplethLayerWizardConfig);
   registerLayerWizard(clustersLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(heatmapLayerWizardConfig);
@@ -58,10 +59,6 @@ export function registerLayerWizards() {
   // @ts-ignore
   registerLayerWizard(wmsLayerWizardConfig);
 
-  if (getEnableVectorTiles()) {
-    // eslint-disable-next-line no-console
-    console.warn('Vector tiles are an experimental feature and should not be used in production.');
-    registerLayerWizard(mvtVectorSourceWizardConfig);
-  }
+  registerLayerWizard(mvtVectorSourceWizardConfig);
   registered = true;
 }

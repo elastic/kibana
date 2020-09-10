@@ -22,7 +22,7 @@ const MarkerContainer = styled.div`
   bottom: 0;
 `;
 
-export const Marker: React.FC<Props> = ({ mark, x }) => {
+export function Marker({ mark, x }: Props) {
   const legendWidth = 11;
   return (
     <MarkerContainer style={{ left: px(x - legendWidth / 2) }}>
@@ -33,4 +33,4 @@ export const Marker: React.FC<Props> = ({ mark, x }) => {
       )}
     </MarkerContainer>
   );
-};
+}

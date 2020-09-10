@@ -357,6 +357,10 @@ export interface UpdateSourceInput {
   logAlias?: string | null;
   /** The field mapping to use for this source */
   fields?: UpdateSourceFieldsInput | null;
+  /** Name of default inventory view */
+  inventoryDefaultView?: string | null;
+  /** Default view for Metrics Explorer */
+  metricsExplorerDefaultView?: string | null;
   /** The log columns to display for this source */
   logColumns?: UpdateSourceLogColumnInput[] | null;
 }

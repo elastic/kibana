@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
@@ -22,7 +21,11 @@ function getExpressionForLayer(
   }
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
+    return operationDefinitionMap[column.operationType].toEsAggsConfig(
+      column,
+      columnId,
+      indexPattern
+    );
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);

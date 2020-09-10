@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   DeleteExceptionListItemSchema,
@@ -24,17 +24,6 @@ describe('delete_exception_list_item_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
-  });
-
-  // TODO It does allow an id of undefined, is this wanted behavior?
-  test.skip('it should NOT accept an undefined for an "id"', () => {
-    const payload = getDeleteExceptionListItemSchemaMock();
-    delete payload.id;
-    const decoded = deleteExceptionListItemSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
-    expect(message.schema).toEqual({});
   });
 
   test('it should accept an undefined for "namespace_type" but default to "single"', () => {

@@ -29,7 +29,11 @@ export const buildHttpQuery = ({
 }: NetworkHttpRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
     { exists: { field: 'http.request.method' } },
   ];
 

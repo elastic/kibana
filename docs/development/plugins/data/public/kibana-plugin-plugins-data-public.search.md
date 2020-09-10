@@ -14,17 +14,18 @@ search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
+        Ipv4Address: typeof Ipv4Address;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
-        isNumberType: (agg: import("./search").AggConfig) => boolean;
-        isStringType: (agg: import("./search").AggConfig) => boolean;
-        isType: (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
+        isNumberType: (agg: import("../common").AggConfig) => boolean;
+        isStringType: (agg: import("../common").AggConfig) => boolean;
+        isType: (...types: string[]) => (agg: import("../common").AggConfig) => boolean;
         isValidEsInterval: typeof isValidEsInterval;
         isValidInterval: typeof isValidInterval;
         parentPipelineType: string;

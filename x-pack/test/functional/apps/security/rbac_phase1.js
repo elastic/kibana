@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'security',
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
         roles: ['rbac_all'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.kibanauser.roles);
       expect(users.kibanauser.roles).to.eql(['rbac_all']);
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
         roles: ['rbac_read'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users1 = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       const user = users1.kibanareadonly;
       log.debug('actualUsers = %j', users1);
       log.debug('roles: ', user.roles);

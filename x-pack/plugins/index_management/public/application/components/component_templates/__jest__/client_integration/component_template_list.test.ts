@@ -14,11 +14,6 @@ import { API_BASE_PATH } from './helpers/constants';
 
 const { setup } = pageHelpers.componentTemplateList;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 describe('<ComponentTemplateList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateListTestBed;
@@ -42,6 +37,7 @@ describe('<ComponentTemplateList />', () => {
       hasAliases: true,
       hasSettings: true,
       usedBy: [],
+      isManaged: false,
     };
 
     const componentTemplate2: ComponentTemplateListItem = {
@@ -50,6 +46,7 @@ describe('<ComponentTemplateList />', () => {
       hasAliases: true,
       hasSettings: true,
       usedBy: ['test_index_template_1'],
+      isManaged: false,
     };
 
     const componentTemplates = [componentTemplate1, componentTemplate2];
@@ -65,7 +62,7 @@ describe('<ComponentTemplateList />', () => {
         const { name, usedBy } = componentTemplates[i];
         const usedByText = usedBy.length === 0 ? 'Not in use' : usedBy.length.toString();
 
-        expect(row).toEqual(['', name, usedByText, '', '', '', '']);
+        expect(row).toEqual(['', name, usedByText, '', '', '', 'EditDelete']);
       });
     });
 

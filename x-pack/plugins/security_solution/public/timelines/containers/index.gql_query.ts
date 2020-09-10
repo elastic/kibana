@@ -15,6 +15,8 @@ export const timelineQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $docValueFields: [docValueFieldsInput!]!
+    $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id
@@ -24,6 +26,8 @@ export const timelineQuery = gql`
         sortField: $sortField
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
+        timerange: $timerange
       ) {
         totalCount
         inspect @include(if: $inspect) {
@@ -87,6 +91,9 @@ export const timelineQuery = gql`
                 severity
                 start
                 timezone
+                type
+              }
+              agent {
                 type
               }
               auditd {
@@ -193,6 +200,7 @@ export const timelineQuery = gql`
                 country_iso_code
               }
               signal {
+                status
                 original_time
                 rule {
                   id
@@ -207,6 +215,9 @@ export const timelineQuery = gql`
                   to
                   filters
                   note
+                  type
+                  threshold
+                  exceptions_list
                 }
               }
               suricata {
@@ -285,6 +296,7 @@ export const timelineQuery = gql`
                 name
                 ppid
                 args
+                entity_id
                 executable
                 title
                 working_directory

@@ -6,42 +6,41 @@
 
 import { parse } from 'query-string';
 import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/recognize';
 import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
-import {
-  ANOMALY_DETECTION_BREADCRUMB,
-  CREATE_JOB_BREADCRUMB,
-  ML_BREADCRUMB,
-} from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
-  CREATE_JOB_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabelRecognize', {
-      defaultMessage: 'Recognized index',
-    }),
-    href: '',
-  },
-];
-
-export const recognizeRoute: MlRoute = {
+export const recognizeRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs/new_job/recognize',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', navigateToPath),
+    {
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabelRecognize', {
+        defaultMessage: 'Recognized index',
+      }),
+      href: '',
+    },
+  ],
+});
 
-export const checkViewOrCreateRoute: MlRoute = {
+export const checkViewOrCreateRouteFactory = (): MlRoute => ({
   path: '/modules/check_view_or_create',
   render: (props, deps) => <CheckViewOrCreateWrapper {...props} deps={deps} />,
+  // no breadcrumbs since it's just a redirect
   breadcrumbs: [],
-};
+});
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { id, index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });

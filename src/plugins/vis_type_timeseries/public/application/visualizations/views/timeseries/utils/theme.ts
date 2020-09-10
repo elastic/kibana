@@ -94,36 +94,42 @@ function isValidColor(color: string | null | undefined): color is string {
   }
 }
 
-export function getTheme(darkMode: boolean, bgColor?: string | null): Theme {
+/**
+ * compute base chart theme based on the background color
+ *
+ * @param baseTheme
+ * @param bgColor
+ */
+export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
   if (!isValidColor(bgColor)) {
-    return darkMode ? DARK_THEME : LIGHT_THEME;
+    return baseTheme;
   }
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);
   const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
   const color = findBestContrastColor(
     bgColor,
-    LIGHT_THEME.axes.axisTitleStyle.fill,
-    DARK_THEME.axes.axisTitleStyle.fill
+    LIGHT_THEME.axes.axisTitle.fill,
+    DARK_THEME.axes.axisTitle.fill
   );
   return {
     ...mainTheme,
     axes: {
       ...mainTheme.axes,
-      axisTitleStyle: {
-        ...mainTheme.axes.axisTitleStyle,
+      axisTitle: {
+        ...mainTheme.axes.axisTitle,
         fill: color,
       },
-      tickLabelStyle: {
-        ...mainTheme.axes.tickLabelStyle,
+      tickLabel: {
+        ...mainTheme.axes.tickLabel,
         fill: color,
       },
-      axisLineStyle: {
-        ...mainTheme.axes.axisLineStyle,
+      axisLine: {
+        ...mainTheme.axes.axisLine,
         stroke: color,
       },
-      tickLineStyle: {
-        ...mainTheme.axes.tickLineStyle,
+      tickLine: {
+        ...mainTheme.axes.tickLine,
         stroke: color,
       },
     },

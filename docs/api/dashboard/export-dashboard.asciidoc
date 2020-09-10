@@ -35,7 +35,7 @@ experimental[] Export dashboards and corresponding saved objects.
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c" <1>
+$ curl -X GET api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c <1>
 --------------------------------------------------
 // KIBANA
 

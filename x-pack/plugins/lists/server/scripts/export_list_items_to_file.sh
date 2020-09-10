@@ -21,6 +21,6 @@ pushd ${FOLDER} > /dev/null
 curl -s -k -OJ \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_export?list_id=list-ip"
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_export?list_id=ip_list"
 
 popd > /dev/null

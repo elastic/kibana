@@ -6,7 +6,7 @@
 import 'jest';
 import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
-import { Check, MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
+import { MonitorDetails, MonitorSummary, makePing } from '../../../../../../common/runtime_types';
 import { shallowWithRouter } from '../../../../../lib';
 
 describe('MonitorListDrawer component', () => {
@@ -17,14 +17,17 @@ describe('MonitorListDrawer component', () => {
     summary = {
       monitor_id: 'foo',
       state: {
-        checks: [
-          {
-            monitor: {
-              ip: '127.0.0.1',
-              status: 'up',
-            },
-            timestamp: 121,
-          },
+        monitor: {},
+        summaryPings: [
+          makePing({
+            docId: 'foo',
+            id: 'foo',
+            ip: '127.0.0.1',
+            type: 'icmp',
+            status: 'up',
+            timestamp: '121',
+            duration: 121,
+          }),
         ],
         summary: {
           up: 1,
@@ -49,53 +52,60 @@ describe('MonitorListDrawer component', () => {
 
   it('renders nothing when no summary data is present', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toEqual({});
   });
 
   it('renders nothing when no check data is present', () => {
-    delete summary.state.checks;
+    // @ts-expect-error According to the code, the property is optional
+    delete summary.state.summaryPings;
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toEqual({});
   });
 
   it('renders a MonitorListDrawer when there is only one check', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('renders a MonitorListDrawer when there are many checks', () => {
-    const checks: Check[] = [
-      {
-        monitor: {
-          ip: '127.0.0.1',
-          status: 'up',
-        },
-        timestamp: 121,
-      },
-      {
-        monitor: {
-          ip: '127.0.0.2',
-          status: 'down',
-        },
-        timestamp: 123,
-      },
-      {
-        monitor: {
-          ip: '127.0.0.3',
-          status: 'up',
-        },
-        timestamp: 125,
-      },
-    ];
-    summary.state.checks = checks;
+    for (let i = 0; i < 3; i++) {
+      summary.state.summaryPings.push(
+        makePing({
+          docId: `foo-${i}`,
+          id: 'foo',
+          ip: `127.0.0.${1 + i}`,
+          type: 'icmp',
+          timestamp: `${i}`,
+          duration: i,
+          status: i % 2 !== 0 ? 'up' : 'down',
+        })
+      );
+    }
+
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });

@@ -19,7 +19,12 @@ export const tmsLayerWizardConfig: LayerWizard = {
   }),
   icon: 'grid',
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig) => {
+    const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig | null) => {
+      if (!sourceConfig) {
+        previewLayers([]);
+        return;
+      }
+
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: XYZTMSSource.createDescriptor(sourceConfig),
       });

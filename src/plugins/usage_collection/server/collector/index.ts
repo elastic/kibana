@@ -18,5 +18,11 @@
  */
 
 export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
+export {
+  Collector,
+  AllowedSchemaTypes,
+  SchemaField,
+  MakeSchemaFrom,
+  CollectorOptions,
+} from './collector';
 export { UsageCollector } from './usage_collector';

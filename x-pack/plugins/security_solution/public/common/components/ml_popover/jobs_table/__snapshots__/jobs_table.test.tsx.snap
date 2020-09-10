@@ -21,7 +21,6 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       },
     ]
   }
-  compressed={true}
   data-test-subj="jobs-table"
   items={
     Array [
@@ -101,7 +100,11 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
     ]
   }
   loading={true}
-  noItemsMessage={<Memo(NoItemsMessage) />}
+  noItemsMessage={
+    <Memo(NoItemsMessage)
+      basePath="/test/base/path"
+    />
+  }
   onChange={[Function]}
   pagination={
     Object {

@@ -12,7 +12,7 @@ import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
 }
 
 export const WaffleTimeControls = withTheme(({ theme }: Props) => {
@@ -56,9 +56,9 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
       <EuiFlexItem
         grow={false}
         style={{
-          border: theme.eui.euiFormInputGroupBorder,
-          boxShadow: `0px 3px 2px ${theme.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme.eui.euiTableActionsBorderColor}`,
-          marginRight: theme.eui.paddingSizes.m,
+          border: theme?.eui.euiFormInputGroupBorder,
+          boxShadow: `0px 3px 2px ${theme?.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.eui.euiTableActionsBorderColor}`,
+          marginRight: theme?.eui.paddingSizes.m,
         }}
         data-test-subj="waffleDatePicker"
       >

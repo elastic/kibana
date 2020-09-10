@@ -19,6 +19,11 @@ export function loadInitialState() {
       [restricted.id]: restricted,
     },
     layers: {},
+    isFirstExistenceFetch: false,
   };
   return result;
 }
+
+const originalLoader = jest.requireActual('../loader');
+
+export const extractReferences = originalLoader.extractReferences;

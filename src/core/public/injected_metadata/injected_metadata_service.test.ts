@@ -58,7 +58,6 @@ describe('setup.getCspConfig()', () => {
 
     const csp = injectedMetadata.setup().getCspConfig();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
       csp.warnLegacyBrowsers = false;
     }).toThrowError();
   });
@@ -100,11 +99,11 @@ describe('setup.getPlugins()', () => {
       plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
     }).toThrowError();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].name = 'changed';
     }).toThrowError();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].newProp = 'changed';
     }).toThrowError();
   });
@@ -136,7 +135,7 @@ describe('setup.getLegacyMetadata()', () => {
       foo: true,
     });
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       legacyMetadata.foo = false;
     }).toThrowError();
   });

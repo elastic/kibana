@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
 import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
@@ -27,7 +27,7 @@ function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   );
 }
 
-function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
+function getIndices(dataClient: ILegacyScopedClusterClient, pattern: string, limit = 10) {
   return dataClient
     .callAsCurrentUser('indices.getAlias', {
       index: pattern,

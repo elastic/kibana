@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';

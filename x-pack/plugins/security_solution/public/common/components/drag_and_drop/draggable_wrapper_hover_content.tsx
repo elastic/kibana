@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
 import { getAllFieldsByName, useWithSource } from '../../containers/source';
@@ -19,20 +19,25 @@ import { allowTopN } from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../../../timelines/components/timeline/styles';
 
 interface Props {
+  closePopOver?: () => void;
   draggableId?: DraggableId;
   field: string;
+  goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
   showTopN: boolean;
-  timelineId?: string;
+  timelineId?: string | null;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
 
 const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
+  closePopOver,
   draggableId,
   field,
+  goGetTimelineId,
   onFilterAdded,
   showTopN,
   timelineId,
@@ -44,16 +49,36 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const { getTimelineFilterManager } = useManageTimeline();
+  const { getManageTimelineById, getTimelineFilterManager } = useManageTimeline();
 
   const filterManager = useMemo(
     () =>
-      timelineId === TimelineId.active ||
-      (draggableId != null && draggableId?.includes(TimelineId.active))
+      timelineId === TimelineId.active
         ? getTimelineFilterManager(TimelineId.active)
         : filterManagerBackup,
-    [draggableId, timelineId, getTimelineFilterManager, filterManagerBackup]
+    [timelineId, getTimelineFilterManager, filterManagerBackup]
   );
+
+  //  Regarding data from useManageTimeline:
+  //  * `indexToAdd`, which enables the alerts index to be appended to
+  //    the `indexPattern` returned by `useWithSource`, may only be populated when
+  //    this component is rendered in the context of the active timeline. This
+  //    behavior enables the 'All events' view by appending the alerts index
+  //    to the index pattern.
+  const { indexToAdd } = useMemo(
+    () =>
+      timelineId === TimelineId.active
+        ? getManageTimelineById(TimelineId.active)
+        : { indexToAdd: null },
+    [getManageTimelineById, timelineId]
+  );
+
+  const handleStartDragToTimeline = useCallback(() => {
+    startDragToTimeline();
+    if (closePopOver != null) {
+      closePopOver();
+    }
+  }, [closePopOver, startDragToTimeline]);
 
   const filterForValue = useCallback(() => {
     const filter =
@@ -62,13 +87,15 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
     if (activeFilterManager != null) {
       activeFilterManager.addFilters(filter);
-
+      if (closePopOver != null) {
+        closePopOver();
+      }
       if (onFilterAdded != null) {
         onFilterAdded();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field, value, filterManager, onFilterAdded]);
+  }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
   const filterOutValue = useCallback(() => {
     const filter =
@@ -78,14 +105,23 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     if (activeFilterManager != null) {
       activeFilterManager.addFilters(filter);
 
+      if (closePopOver != null) {
+        closePopOver();
+      }
       if (onFilterAdded != null) {
         onFilterAdded();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field, value, filterManager, onFilterAdded]);
+  }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
-  const { browserFields } = useWithSource();
+  const handleGoGetTimelineId = useCallback(() => {
+    if (goGetTimelineId != null && timelineId == null) {
+      goGetTimelineId(true);
+    }
+  }, [goGetTimelineId, timelineId]);
+
+  const { browserFields, indexPattern } = useWithSource('default', indexToAdd);
 
   return (
     <>
@@ -97,6 +133,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-for-value"
             iconType="magnifyWithPlus"
             onClick={filterForValue}
+            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -109,6 +146,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-out-value"
             iconType="magnifyWithMinus"
             onClick={filterOutValue}
+            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -120,7 +158,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             color="text"
             data-test-subj="add-to-timeline"
             iconType="timeline"
-            onClick={startDragToTimeline}
+            onClick={handleStartDragToTimeline}
           />
         </EuiToolTip>
       )}
@@ -139,6 +177,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                   data-test-subj="show-top-field"
                   iconType="visBarVertical"
                   onClick={toggleTopN}
+                  onMouseEnter={handleGoGetTimelineId}
                 />
               </EuiToolTip>
             )}
@@ -147,7 +186,10 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
               <StatefulTopN
                 browserFields={browserFields}
                 field={field}
+                indexPattern={indexPattern}
+                indexToAdd={indexToAdd}
                 onFilterAdded={onFilterAdded}
+                timelineId={timelineId ?? undefined}
                 toggleTopN={toggleTopN}
                 value={value}
               />
@@ -172,3 +214,30 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 DraggableWrapperHoverContentComponent.displayName = 'DraggableWrapperHoverContentComponent';
 
 export const DraggableWrapperHoverContent = React.memo(DraggableWrapperHoverContentComponent);
+
+export const useGetTimelineId = function (
+  elem: React.MutableRefObject<Element | null>,
+  getTimelineId: boolean = false
+) {
+  const [timelineId, setTimelineId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let startElem: Element | (Node & ParentNode) | null = elem.current;
+    if (startElem != null && getTimelineId) {
+      for (; startElem && startElem !== document; startElem = startElem.parentNode) {
+        const myElem: Element = startElem as Element;
+        if (
+          myElem != null &&
+          myElem.classList != null &&
+          myElem.classList.contains(SELECTOR_TIMELINE_BODY_CLASS_NAME) &&
+          myElem.hasAttribute('data-timeline-id')
+        ) {
+          setTimelineId(myElem.getAttribute('data-timeline-id'));
+          break;
+        }
+      }
+    }
+  }, [elem, getTimelineId]);
+
+  return timelineId;
+};

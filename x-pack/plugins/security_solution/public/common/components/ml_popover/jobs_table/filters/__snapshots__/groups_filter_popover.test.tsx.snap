@@ -21,6 +21,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionOnScroll={true}
 >
   <EuiFilterSelectItem
     key="0-auditbeat"

@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import './time_field.scss';
-
 import React from 'react';
 
 import {
   EuiForm,
   EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiSpacer,
   EuiLink,
   EuiSelect,
   EuiText,
@@ -54,77 +51,68 @@ export const TimeField: React.FC<TimeFieldProps> = ({
 }) => (
   <EuiForm>
     {isVisible ? (
-      <EuiFormRow
-        label={
-          <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <span>
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
-                  defaultMessage="Time Filter field name"
-                />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiLink className="timeFieldRefreshButton" onClick={fetchTimeFields}>
+      <>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
+              defaultMessage="Select a primary time field for use with the global time filter."
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
+              defaultMessage="Time field"
+            />
+          }
+          labelAppend={
+            isLoading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiText size="xs">
+                <EuiLink onClick={fetchTimeFields}>
                   <FormattedMessage
                     id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
                     defaultMessage="Refresh"
                   />
                 </EuiLink>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        helpText={
-          <div>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-                defaultMessage="The Time Filter will use this field to filter your data by time."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
-                defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-              />
-            </p>
-          </div>
-        }
-      >
-        {isLoading ? (
-          <EuiSelect
-            name="timeField"
-            data-test-subj="createIndexPatternTimeFieldSelect"
-            options={[
-              {
-                text: i18n.translate(
-                  'indexPatternManagement.createIndexPattern.stepTime.field.loadingDropDown',
-                  {
-                    defaultMessage: 'Loading…',
-                  }
-                ),
-                value: '',
-              },
-            ]}
-            disabled={true}
-          />
-        ) : (
-          <EuiSelect
-            name="timeField"
-            data-test-subj="createIndexPatternTimeFieldSelect"
-            options={timeFieldOptions}
-            isLoading={isLoading}
-            disabled={isLoading}
-            value={selectedTimeField}
-            onChange={onTimeFieldChanged}
-          />
-        )}
-      </EuiFormRow>
+              </EuiText>
+            )
+          }
+        >
+          {isLoading ? (
+            <EuiSelect
+              name="timeField"
+              data-test-subj="createIndexPatternTimeFieldSelect"
+              options={[
+                {
+                  text: i18n.translate(
+                    'indexPatternManagement.createIndexPattern.stepTime.field.loadingDropDown',
+                    {
+                      defaultMessage: 'Loading…',
+                    }
+                  ),
+                  value: '',
+                },
+              ]}
+              disabled={true}
+            />
+          ) : (
+            <EuiSelect
+              name="timeField"
+              data-test-subj="createIndexPatternTimeFieldSelect"
+              options={timeFieldOptions}
+              isLoading={isLoading}
+              disabled={isLoading}
+              value={selectedTimeField}
+              onChange={onTimeFieldChanged}
+            />
+          )}
+        </EuiFormRow>
+      </>
     ) : (
       <EuiText>
         <p>

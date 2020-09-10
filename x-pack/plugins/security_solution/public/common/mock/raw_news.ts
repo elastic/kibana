@@ -17,7 +17,7 @@ export const rawNewsJSON = `
         },
         "link_text":null,
         "link_url":{
-           "en":"https://discuss.elastic.co/c/siem?blade=securitysolutionfeed"
+           "en":"https://discuss.elastic.co/c/security?blade=securitysolutionfeed"
         },
         "languages":null,
         "badge":{

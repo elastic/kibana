@@ -44,7 +44,7 @@
       "src/plugins/telemetry_management_section"
     ],
     "tileMap": "src/plugins/tile_map",
-    "timelion": ["src/legacy/core_plugins/timelion", "src/plugins/vis_type_timelion"],
+    "timelion": ["src/plugins/timelion", "src/plugins/vis_type_timelion"],
     "uiActions": "src/plugins/ui_actions",
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",

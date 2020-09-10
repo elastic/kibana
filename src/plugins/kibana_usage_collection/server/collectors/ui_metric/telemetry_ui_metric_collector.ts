@@ -23,7 +23,6 @@ import {
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
 import { findAll } from '../find_all';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {
@@ -49,7 +48,7 @@ export function registerUiMetricUsageCollector(
   });
 
   const collector = usageCollection.makeUsageCollector({
-    type: UI_METRIC_USAGE_TYPE,
+    type: 'ui_metric',
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
       if (typeof savedObjectsClient === 'undefined') {
@@ -67,9 +66,9 @@ export function registerUiMetricUsageCollector(
           attributes: { count },
         } = rawUiMetric;
 
-        const [appName, metricType] = id.split(':');
+        const [appName, ...metricType] = id.split(':');
 
-        const pair = { key: metricType, value: count };
+        const pair = { key: metricType.join(':'), value: count };
         return {
           ...accum,
           [appName]: [...(accum[appName] || []), pair],

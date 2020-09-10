@@ -9,7 +9,7 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CustomLinkOverview } from './CustomLink';
 
-export const CustomizeUI = () => {
+export function CustomizeUI() {
   return (
     <>
       <EuiTitle size="l">
@@ -23,4 +23,4 @@ export const CustomizeUI = () => {
       <CustomLinkOverview />
     </>
   );
-};
+}

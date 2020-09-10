@@ -7,10 +7,14 @@
 import { platformService } from '../services';
 
 export const getDocumentationLinks = () => ({
-  canvas: `${platformService.getService().coreStart.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
-    platformService.getService().coreStart.docLinks.DOC_LINK_VERSION
-  }/canvas.html`,
-  numeral: `${platformService.getService().coreStart.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
-    platformService.getService().coreStart.docLinks.DOC_LINK_VERSION
-  }/guide/numeral.html`,
+  canvas: `${platformService
+    .getService()
+    .getElasticWebsiteUrl()}guide/en/kibana/${platformService
+    .getService()
+    .getDocLinkVersion()}/canvas.html`,
+  numeral: `${platformService
+    .getService()
+    .getElasticWebsiteUrl()}guide/en/kibana/${platformService
+    .getService()
+    .getDocLinkVersion()}/guide/numeral.html`,
 });

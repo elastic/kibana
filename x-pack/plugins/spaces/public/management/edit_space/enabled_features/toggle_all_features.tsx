@@ -71,8 +71,8 @@ export class ToggleAllFeatures extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={'changeAllFeatureVisibilityPopover'}
         button={button}
+        data-test-subj="changeAllFeatureVisibilityPopover"
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"

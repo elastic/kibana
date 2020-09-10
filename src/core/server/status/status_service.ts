@@ -17,10 +17,8 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { Observable, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -28,36 +26,62 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+import { PluginName } from '../plugins';
 
+import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
+import { PluginsStatusService } from './plugins_status';
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
+  pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
+  private readonly config$: Observable<StatusConfigType>;
+
+  private pluginsStatus?: PluginsStatusService;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
+    this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
   }
 
-  public setup(core: SetupDeps) {
-    const core$ = this.setupCoreStatus(core);
-    const overall$: Observable<ServiceStatus> = core$.pipe(
-      map((coreStatus) => {
-        const summary = getSummaryStatus(Object.entries(coreStatus));
+  public async setup({ elasticsearch, pluginDependencies, savedObjects }: SetupDeps) {
+    const statusConfig = await this.config$.pipe(take(1)).toPromise();
+    const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
+    this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
+
+    const overall$: Observable<ServiceStatus> = combineLatest(
+      core$,
+      this.pluginsStatus.getAll$()
+    ).pipe(
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(500),
+      map(([coreStatus, pluginsStatus]) => {
+        const summary = getSummaryStatus([
+          ...Object.entries(coreStatus),
+          ...Object.entries(pluginsStatus),
+        ]);
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual)
+      distinctUntilChanged(isDeepStrictEqual),
+      shareReplay(1)
     );
 
     return {
       core$,
       overall$,
+      plugins: {
+        set: this.pluginsStatus.set.bind(this.pluginsStatus),
+        getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
+        getDerivedStatus$: this.pluginsStatus.getDerivedStatus$.bind(this.pluginsStatus),
+      },
+      isStatusPageAnonymous: () => statusConfig.allowAnonymous,
     };
   }
 
@@ -65,7 +89,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   public stop() {}
 
-  private setupCoreStatus({ elasticsearch, savedObjects }: SetupDeps): Observable<CoreStatus> {
+  private setupCoreStatus({
+    elasticsearch,
+    savedObjects,
+  }: Pick<SetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
     return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
       map(([elasticsearchStatus, savedObjectsStatus]) => ({
         elasticsearch: elasticsearchStatus,

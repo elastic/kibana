@@ -9,6 +9,7 @@ require('../../../../src/setup_node_env');
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const fetch = require('node-fetch');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const { camelCase } = require('lodash');
 const { resolve } = require('path');
 

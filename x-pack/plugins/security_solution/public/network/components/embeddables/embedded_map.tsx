@@ -15,13 +15,13 @@ import { getIndexPatternTitleIdMapping } from '../../../common/hooks/api/helpers
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
-import { SetQuery } from './types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
@@ -71,9 +71,9 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 export interface EmbeddedMapProps {
   query: Query;
   filters: Filter[];
-  startDate: number;
-  endDate: number;
-  setQuery: SetQuery;
+  startDate: string;
+  endDate: string;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 export const EmbeddedMapComponent = ({
@@ -185,7 +185,7 @@ export const EmbeddedMapComponent = ({
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
           <EuiLink
-            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
+            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
             target="_blank"
           >
             {i18n.EMBEDDABLE_HEADER_HELP}

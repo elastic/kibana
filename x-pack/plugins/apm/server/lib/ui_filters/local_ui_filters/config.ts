@@ -14,8 +14,9 @@ import {
   TRANSACTION_URL,
   USER_AGENT_NAME,
   USER_AGENT_DEVICE,
-  CLIENT_GEO,
   USER_AGENT_OS,
+  CLIENT_GEO_COUNTRY_ISO_CODE,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 const filtersByName = {
@@ -77,13 +78,19 @@ const filtersByName = {
     title: i18n.translate('xpack.apm.localFilters.titles.location', {
       defaultMessage: 'Location',
     }),
-    fieldName: CLIENT_GEO,
+    fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
   },
   os: {
     title: i18n.translate('xpack.apm.localFilters.titles.os', {
       defaultMessage: 'OS',
     }),
     fieldName: USER_AGENT_OS,
+  },
+  serviceName: {
+    title: i18n.translate('xpack.apm.localFilters.titles.serviceName', {
+      defaultMessage: 'Service name',
+    }),
+    fieldName: SERVICE_NAME,
   },
 };
 

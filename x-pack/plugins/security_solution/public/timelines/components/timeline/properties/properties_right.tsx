@@ -16,11 +16,12 @@ import {
 } from '@elastic/eui';
 import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 
-import { disableTemplate } from '../../../../../common/constants';
-import { TimelineStatus } from '../../../../../common/types/timeline';
-
+import {
+  TimelineStatusLiteral,
+  TimelineTypeLiteral,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
 
 import { AssociateNote } from '../../notes/helpers';
@@ -68,6 +69,7 @@ interface PropertiesRightComponentProps {
   associateNote: AssociateNote;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   isDataInTimeline: boolean;
   noteIds: string[];
   onButtonClick: () => void;
@@ -82,9 +84,10 @@ interface PropertiesRightComponentProps {
   showNotesFromWidth: boolean;
   showTimelineModal: boolean;
   showUsersView: boolean;
-  status: TimelineStatus;
+  status: TimelineStatusLiteral;
   timelineId: string;
   title: string;
+  timelineType: TimelineTypeLiteral;
   updateDescription: UpdateDescription;
   updateNote: UpdateNote;
   usersViewing: string[];
@@ -94,6 +97,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   associateNote,
   description,
   getNotesByIds,
+  graphEventId,
   isDataInTimeline,
   noteIds,
   onButtonClick,
@@ -109,14 +113,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   showTimelineModal,
   showUsersView,
   status,
+  timelineType,
   timelineId,
   title,
   updateDescription,
   updateNote,
   usersViewing,
 }) => {
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -134,51 +137,49 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             id="timelineSettingsPopover"
             isOpen={showActions}
             closePopover={onClosePopover}
+            repositionOnScroll
           >
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-              {capabilitiesCanUserCRUD && (
-                <EuiFlexItem grow={false}>
-                  <NewTimeline
-                    timelineId={timelineId}
-                    title={i18n.NEW_TIMELINE}
-                    closeGearMenu={onClosePopover}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTimeline
+                  timelineId={timelineId}
+                  title={i18n.NEW_TIMELINE}
+                  closeGearMenu={onClosePopover}
+                />
+              </EuiFlexItem>
 
-              {/*
-               * CreateTemplateTimelineBtn
-               * Remove the comment here to enable CreateTemplateTimelineBtn
-               */}
-              {!disableTemplate && (
-                <EuiFlexItem grow={false}>
-                  <NewTemplateTimeline
-                    closeGearMenu={onClosePopover}
-                    timelineId={timelineId}
-                    title={i18n.NEW_TEMPLATE_TIMELINE}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTemplateTimeline
+                  closeGearMenu={onClosePopover}
+                  timelineId={timelineId}
+                  title={i18n.NEW_TEMPLATE_TIMELINE}
+                />
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <NewCase
-                  onClosePopover={onClosePopover}
-                  timelineId={timelineId}
-                  timelineTitle={title}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ExistingCase
-                  onClosePopover={onClosePopover}
-                  onOpenCaseModal={onOpenCaseModal}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
+              {timelineType === TimelineType.default && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <NewCase
+                      graphEventId={graphEventId}
+                      onClosePopover={onClosePopover}
+                      timelineId={timelineId}
+                      timelineTitle={title}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ExistingCase
+                      onClosePopover={onClosePopover}
+                      onOpenCaseModal={onOpenCaseModal}
+                      timelineStatus={status}
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
 
               <EuiFlexItem grow={false}>
                 <InspectButton
@@ -200,6 +201,8 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                     noteIds={noteIds}
                     showNotes={showNotes}
                     size="l"
+                    status={status}
+                    timelineType={timelineType}
                     text={i18n.NOTES}
                     toggleShowNotes={onToggleShowNotes}
                     toolTip={i18n.NOTES_TOOL_TIP}

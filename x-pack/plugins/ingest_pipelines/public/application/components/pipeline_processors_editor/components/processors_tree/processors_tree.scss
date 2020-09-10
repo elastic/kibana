@@ -3,7 +3,6 @@
 
 .pipelineProcessorsEditor__tree {
   &__container {
-    background-color: $euiColorLightestShade;
     padding: $euiSizeS;
   }
 
@@ -49,10 +48,6 @@
       &:hover {
         transform: none !important;
       }
-    }
-
-    &--unavailable {
-      cursor: not-allowed !important;
     }
   }
 

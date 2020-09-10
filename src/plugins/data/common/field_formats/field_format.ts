@@ -185,7 +185,7 @@ export abstract class FieldFormat {
 
     const params = transform(
       this._params,
-      (uniqParams, val, param) => {
+      (uniqParams: any, val, param) => {
         if (param && val !== get(defaultsParams, param)) {
           uniqParams[param] = val;
         }

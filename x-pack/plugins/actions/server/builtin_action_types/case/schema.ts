@@ -67,7 +67,7 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  caseId: schema.string(),
+  savedObjectId: schema.string(),
   title: schema.string(),
   description: schema.nullable(schema.string()),
   comments: schema.nullable(schema.arrayOf(CommentSchema)),

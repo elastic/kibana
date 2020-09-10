@@ -29,6 +29,7 @@
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { VisType } from './vis_types';
@@ -105,7 +106,13 @@ export class Vis {
   private getType(visType: string) {
     const type = getTypes().get(visType);
     if (!type) {
-      throw new Error(`Invalid type "${visType}"`);
+      const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+        defaultMessage: 'Invalid visualization type "{visType}"',
+        values: {
+          visType,
+        },
+      });
+      throw new Error(errorMessage);
     }
     return type;
   }
@@ -150,7 +157,13 @@ export class Vis {
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
       if (!this.data.indexPattern) {
         if (aggs.length) {
-          throw new Error('trying to initialize aggs without index pattern');
+          const errorMessage = i18n.translate(
+            'visualizations.initializeWithoutIndexPatternErrorMessage',
+            {
+              defaultMessage: 'Trying to initialize aggs without index pattern',
+            }
+          );
+          throw new Error(errorMessage);
         }
         return;
       }
@@ -189,8 +202,8 @@ export class Vis {
     };
   }
 
-  toAST() {
-    return this.type.toAST(this.params);
+  toExpressionAst() {
+    return this.type.toExpressionAst(this.params);
   }
 
   // deprecated

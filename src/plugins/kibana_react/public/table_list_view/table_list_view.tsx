@@ -20,7 +20,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { debounce, indexBy, sortBy, uniq } from 'lodash';
+import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
   EuiInMemoryTable,
@@ -178,7 +178,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       isDeletingItems: true,
     });
     try {
-      const itemsById = indexBy(this.state.items, 'id');
+      const itemsById = keyBy(this.state.items, 'id');
       await this.props.deleteItems(this.state.selectedIds.map((id) => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({

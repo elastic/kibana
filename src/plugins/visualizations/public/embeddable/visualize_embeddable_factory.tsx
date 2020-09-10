@@ -30,7 +30,7 @@ import {
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Vis } from '../vis';
+import { SerializedVis, Vis } from '../vis';
 import {
   getCapabilities,
   getTypes,
@@ -124,13 +124,20 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async create() {
+  public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    showNewVisModal({
-      originatingApp: await this.getCurrentAppId(),
-      outsideVisualizeApp: true,
-    });
-    return undefined;
+    if (input.savedVis) {
+      const visState = input.savedVis;
+      const vis = new Vis(visState.type, visState);
+      await vis.setState(visState);
+      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
+    } else {
+      showNewVisModal({
+        originatingApp: await this.getCurrentAppId(),
+        outsideVisualizeApp: true,
+      });
+      return undefined;
+    }
   }
 }

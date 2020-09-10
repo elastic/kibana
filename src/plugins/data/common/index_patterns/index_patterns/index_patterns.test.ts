@@ -17,55 +17,67 @@
  * under the License.
  */
 
-// eslint-disable-next-line max-classes-per-file
-import { IndexPatternsService } from './index_patterns';
-import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
-import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
+import { defaults } from 'lodash';
+import { IndexPatternsService } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
+import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
-const core = coreMock.createStart();
-const http = httpServiceMock.createStartContract();
+const createFieldsFetcher = jest.fn().mockImplementation(() => ({
+  getFieldsForWildcard: jest.fn().mockImplementation(() => {
+    return new Promise((resolve) => resolve([]));
+  }),
+  every: jest.fn(),
+}));
+
 const fieldFormats = fieldFormatsMock;
 
-jest.mock('./index_pattern', () => {
-  class IndexPattern {
-    init = async () => {
-      return this;
-    };
-  }
+let object: any = {};
 
-  return {
-    IndexPattern,
-  };
-});
-
-jest.mock('./index_patterns_api_client', () => {
-  class IndexPatternsApiClient {
-    getFieldsForWildcard = async () => ({});
-  }
-
-  return {
-    IndexPatternsApiClient,
-  };
-});
+function setDocsourcePayload(id: string | null, providedPayload: any) {
+  object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
+}
 
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
-  let savedObjectsClient: SavedObjectsClientContract;
+  let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
-    savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () =>
-        Promise.resolve({
-          savedObjects: [{ id: 'id', attributes: { title: 'title' } }],
-        }) as Promise<SavedObjectsFindResponsePublic<any>>
+        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
+          Array<SavedObject<any>>
+        >
     );
+    savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
+    savedObjectsClient.get = jest.fn().mockImplementation(() => object);
+    savedObjectsClient.create = jest.fn();
+    savedObjectsClient.update = jest
+      .fn()
+      .mockImplementation(async (type, id, body, { version }) => {
+        if (object.version !== version) {
+          throw new Object({
+            res: {
+              status: 409,
+            },
+          });
+        }
+        object.attributes.title = body.title;
+        object.version += 'a';
+        return {
+          id: object.id,
+          version: object.version,
+        };
+      });
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: core.uiSettings,
-      savedObjectsClient,
-      http,
+      uiSettings: ({
+        get: () => Promise.resolve(false),
+        getAll: () => {},
+      } as any) as UiSettingsCommon,
+      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -75,6 +87,14 @@ describe('IndexPatterns', () => {
 
   test('does cache gets for the same id', async () => {
     const id = '1';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+
     const indexPattern = await indexPatterns.get(id);
 
     expect(indexPattern).toBeDefined();
@@ -102,5 +122,51 @@ describe('IndexPatterns', () => {
     await indexPatterns.getTitles(true);
     await indexPatterns.getFields(['id', 'title'], true);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+  });
+
+  test('deletes the index pattern', async () => {
+    const id = '1';
+    const indexPattern = await indexPatterns.get(id);
+
+    expect(indexPattern).toBeDefined();
+    await indexPatterns.delete(id);
+    expect(indexPattern).not.toBe(await indexPatterns.get(id));
+  });
+
+  test('should handle version conflicts', async () => {
+    setDocsourcePayload(null, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+
+    // Create a normal index patterns
+    const pattern = await indexPatterns.make('foo');
+
+    expect(pattern.version).toBe('fooa');
+
+    // Create the same one - we're going to handle concurrency
+    const samePattern = await indexPatterns.make('foo');
+
+    expect(samePattern.version).toBe('fooaa');
+
+    // This will conflict because samePattern did a save (from refreshFields)
+    // but the resave should work fine
+    pattern.title = 'foo2';
+    await indexPatterns.save(pattern);
+
+    // This should not be able to recover
+    samePattern.title = 'foo3';
+
+    let result;
+    try {
+      await indexPatterns.save(samePattern);
+    } catch (err) {
+      result = err;
+    }
+
+    expect(result.res.status).toBe(409);
   });
 });

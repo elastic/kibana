@@ -7,7 +7,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { Client, SearchParams } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,13 +18,12 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es: Client = getService('legacyEs');
-  const callCluster: APICaller = (((path: 'search', searchParams: SearchParams) => {
+  const callCluster: LegacyAPICaller = (((path: 'search', searchParams: SearchParams) => {
     return es[path].call(es, searchParams);
-  }) as unknown) as APICaller;
+  }) as unknown) as LegacyAPICaller;
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -192,8 +191,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
         bar_stacked: 1,
+        lnsPie: 1,
       });
-      expect(results.saved_overall_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(3);
 
       await esArchiver.unload('lens/basic');
     });

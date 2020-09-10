@@ -85,9 +85,9 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
 
           security.authc.getCurrentUser = jest.fn(
             (r: KibanaRequest) =>
-              ({
+              (({
                 roles: [DASHBOARD_ONLY_MODE_ROLE],
-              } as AuthenticatedUser)
+              } as unknown) as AuthenticatedUser)
           );
 
           uiSettingsMock = [DASHBOARD_ONLY_MODE_ROLE];

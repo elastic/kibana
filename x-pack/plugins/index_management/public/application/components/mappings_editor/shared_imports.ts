@@ -49,4 +49,5 @@ export {
 export {
   JsonEditor,
   OnJsonEditorUpdateHandler,
+  GlobalFlyout,
 } from '../../../../../../../src/plugins/es_ui_shared/public';

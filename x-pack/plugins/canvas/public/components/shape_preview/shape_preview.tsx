@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 
 interface Props {
   shape?: string;
 }
 
-export const ShapePreview = ({ shape }: Props) => {
+export const ShapePreview: FC<Props> = ({ shape }) => {
   if (!shape) {
     return <div className="canvasShapePreview" />;
   }

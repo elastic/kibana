@@ -10,6 +10,7 @@ import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
+import '../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { deleteItemIdx, findItem } from './helpers';

@@ -12,6 +12,7 @@ import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/publ
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -42,7 +43,19 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
 
-    return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
+    /**
+     * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
+     * and triggers that current embeddable supports
+     */
+    const allPossibleTriggers = this.params
+      .start()
+      .plugins.uiActionsEnhanced.getActionFactories()
+      .map((factory) => factory.supportedTriggers())
+      .reduce((res, next) => res.concat(next), []);
+
+    return ensureNestedTriggers(supportedTriggers).some((trigger) =>
+      allPossibleTriggers.includes(trigger)
+    );
   }
 
   public async isCompatible(context: EmbeddableContext) {
@@ -66,6 +79,8 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
+          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          placeContext={{ embeddable }}
         />
       ),
       {

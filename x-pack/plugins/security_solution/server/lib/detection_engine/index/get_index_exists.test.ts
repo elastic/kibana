@@ -5,7 +5,6 @@
  */
 
 import { getIndexExists } from './get_index_exists';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
 
 class StatusCode extends Error {
   status: number = -1;
@@ -16,14 +15,6 @@ class StatusCode extends Error {
 }
 
 describe('get_index_exists', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should return a true if you have _shards', async () => {
     const callWithRequest = jest.fn().mockResolvedValue({ _shards: { total: 1 } });
     const indexExists = await getIndexExists(callWithRequest, 'some-index');

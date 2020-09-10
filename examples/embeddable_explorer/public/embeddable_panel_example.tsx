@@ -33,6 +33,7 @@ import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/pu
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
+  BOOK_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SearchableListContainerFactory,
 } from '../../embeddable_examples/public';
@@ -70,6 +71,35 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
           icon: 'searchProfilerApp',
           title: 'Learn more',
           tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
+        },
+      },
+      '4': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '4',
+          savedObjectId: 'sample-book-saved-object',
+        },
+      },
+      '5': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '5',
+          attributes: {
+            title: 'The Sympathizer',
+            author: 'Viet Thanh Nguyen',
+            readIt: true,
+          },
+        },
+      },
+      '6': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '6',
+          attributes: {
+            title: 'The Hobbit',
+            author: 'J.R.R. Tolkien',
+            readIt: false,
+          },
         },
       },
     },

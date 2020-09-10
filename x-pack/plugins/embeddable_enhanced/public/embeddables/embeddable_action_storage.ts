@@ -46,7 +46,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
 
   public async create(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = input.enhancements?.dynamicActions?.events || [];
+    const events = this.getEventsFromEmbeddable();
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
@@ -61,7 +61,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
 
   public async update(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = input.enhancements?.dynamicActions?.events || [];
+    const events = this.getEventsFromEmbeddable();
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
     if (index === -1) {
@@ -77,7 +77,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
 
   public async remove(eventId: string) {
     const input = this.embbeddable.getInput();
-    const events = input.enhancements?.dynamicActions?.events || [];
+    const events = this.getEventsFromEmbeddable();
     const index = events.findIndex((event) => eventId === event.eventId);
 
     if (index === -1) {
@@ -93,7 +93,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
 
   public async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
-    const events = input.enhancements?.dynamicActions?.events || [];
+    const events = this.getEventsFromEmbeddable();
     const event = events.find((ev) => eventId === ev.eventId);
 
     if (!event) {
@@ -107,8 +107,28 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
   }
 
   public async list(): Promise<SerializedEvent[]> {
+    return this.getEventsFromEmbeddable();
+  }
+
+  private getEventsFromEmbeddable() {
     const input = this.embbeddable.getInput();
     const events = input.enhancements?.dynamicActions?.events || [];
-    return events;
+    return this.migrate(events);
+  }
+
+  // TODO: https://github.com/elastic/kibana/issues/71431
+  // Migration implementation should use registry
+  // Action factories implementations should register own migrations
+  private migrate(events: SerializedEvent[]): SerializedEvent[] {
+    return events.map((event) => {
+      // Initially dashboard drilldown relied on VALUE_CLICK & RANGE_SELECT
+      if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
+        return {
+          ...event,
+          triggers: ['FILTER_TRIGGER'],
+        };
+      }
+      return event;
+    });
   }
 }

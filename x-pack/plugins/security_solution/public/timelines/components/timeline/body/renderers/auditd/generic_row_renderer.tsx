@@ -10,6 +10,8 @@ import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { RowRendererId } from '../../../../../../../common/types/timeline';
+
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';
 import { AuditdGenericFileDetails } from './generic_file_details';
@@ -22,6 +24,7 @@ export const createGenericAuditRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
+  id: RowRendererId.auditd,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -54,6 +57,7 @@ export const createGenericFileRowRenderer = ({
   text: string;
   fileIcon?: IconType;
 }): RowRenderer => ({
+  id: RowRendererId.auditd_file,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);

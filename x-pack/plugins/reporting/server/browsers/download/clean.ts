@@ -29,7 +29,7 @@ export async function clean(dir: string, expectedPaths: string[], logger: LevelL
   await asyncMap(filenames, async (filename) => {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
-      logger.warn(`Deleting unexpected file ${path}`);
+      logger.warning(`Deleting unexpected file ${path}`);
       await del(path, { force: true });
     }
   });

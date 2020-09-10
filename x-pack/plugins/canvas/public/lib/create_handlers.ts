@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { setFilter } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';

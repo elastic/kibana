@@ -51,12 +51,11 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     request: FrameworkRequest,
     options: TimelineRequestOptions
   ): Promise<TimelineData> {
-    const queryOptions = cloneDeep(options);
+    const { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = uniq([
-      ...queryOptions.fieldRequested,
+      ...fieldRequested,
       ...reduceFields(queryOptions.fields, eventFieldsMap),
     ]);
-    delete queryOptions.fieldRequested;
     const dsl = buildTimelineQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
@@ -84,7 +83,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     request: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData> {
-    const dsl = buildDetailsQuery(options.indexName, options.eventId);
+    const dsl = buildDetailsQuery(options.indexName, options.eventId, options.docValueFields ?? []);
     const searchResponse = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',

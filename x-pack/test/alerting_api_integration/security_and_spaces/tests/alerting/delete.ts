@@ -6,7 +6,13 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestAlertData,
+  getConsumerUnauthorizedErrorMessage,
+  getProducerUnauthorizedErrorMessage,
+  ObjectRemover,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,11 +52,15 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
               // Ensure task still exists
@@ -58,6 +68,185 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle delete alert request appropriately when consumer is the same as producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle delete alert request appropriately when consumer is not the producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({ alertTypeId: 'test.unrestricted-noop', consumer: 'alertsFixture' })
+            )
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.unrestricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle delete alert request appropriately when consumer is "alerts"', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.noop',
+                consumer: 'alerts',
+              })
+            )
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
@@ -91,12 +280,8 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -137,11 +322,15 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'delete',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
               // Ensure task still exists
@@ -149,6 +338,8 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {

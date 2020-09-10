@@ -31,6 +31,7 @@ const env = {
   ES_HOST: 'https://super:changeme@some.fake.host:9243',
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
+  FETCHED_PREVIOUS: 'FAKE_PREVIOUS_SHA',
 };
 
 describe('Ingesting coverage', () => {
@@ -47,7 +48,7 @@ describe('Ingesting coverage', () => {
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';
-    const siteUrlRegex = /staticSiteUrl:\s*(.+,)/;
+    const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
 
     beforeAll(async () => {
       const opts = [...verboseArgs, resolved];
@@ -66,66 +67,6 @@ describe('Ingesting coverage', () => {
     it('should contain the folder structure', () => {
       const folderStructure = /(?:.*|.*-combined)\//;
       expect(folderStructure.test(actualUrl)).ok();
-    });
-  });
-
-  describe(`vcsInfo`, () => {
-    let vcsInfo;
-    describe(`without a commit msg in the vcs info file`, () => {
-      const args = [
-        'scripts/ingest_coverage.js',
-        '--verbose',
-        '--vcsInfoPath',
-        'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
-        '--path',
-      ];
-
-      beforeAll(async () => {
-        const opts = [...args, resolved];
-        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-        vcsInfo = stdout;
-      });
-
-      it(`should be an obj w/o a commit msg`, () => {
-        const commitMsgRE = /"commitMsg"/;
-        expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
-      });
-    });
-  });
-  describe(`team assignment`, () => {
-    let shouldNotHavePipelineOut = '';
-    let shouldIndeedHavePipelineOut = '';
-
-    const args = [
-      'scripts/ingest_coverage.js',
-      '--verbose',
-      '--vcsInfoPath',
-      'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-      '--path',
-    ];
-
-    const teamAssignRE = /pipeline:/;
-
-    beforeAll(async () => {
-      const summaryPath = 'jest-combined/coverage-summary-just-total.json';
-      const resolved = resolve(MOCKS_DIR, summaryPath);
-      const opts = [...args, resolved];
-      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-      shouldNotHavePipelineOut = stdout;
-    });
-    beforeAll(async () => {
-      const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
-      const resolved = resolve(MOCKS_DIR, summaryPath);
-      const opts = [...args, resolved];
-      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-      shouldIndeedHavePipelineOut = stdout;
-    });
-
-    it(`should not occur when going to the totals index`, () => {
-      expect(teamAssignRE.test(shouldNotHavePipelineOut)).to.not.be.ok();
-    });
-    it(`should indeed occur when going to the coverage index`, () => {
-      expect(teamAssignRE.test(shouldIndeedHavePipelineOut)).to.be.ok();
     });
   });
 });

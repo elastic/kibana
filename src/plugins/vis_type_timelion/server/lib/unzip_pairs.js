@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 export default function unzipPairs(timeValObject) {
   const paired = _.chain(timeValObject)
-    .pairs()
+    .toPairs()
     .map(function (point) {
       return [parseInt(point[0], 10), point[1]];
     })

@@ -29,6 +29,7 @@ export const transformNewCase = ({
   connectorId,
   createdDate,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   newCase,
   username,
@@ -63,6 +64,7 @@ export const transformNewComment = ({
   comment,
   createdDate,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({

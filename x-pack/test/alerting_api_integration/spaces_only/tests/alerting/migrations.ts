@@ -22,13 +22,22 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('alerts');
     });
 
-    it('7.9.0 migrates the `alerting` consumer to be the `alerts`', async () => {
+    it('7.10.0 migrates the `alerting` consumer to be the `alerts`', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
       );
 
       expect(response.status).to.eql(200);
       expect(response.body.consumer).to.equal('alerts');
+    });
+
+    it('7.10.0 migrates the `metrics` consumer to be the `infrastructure`', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.consumer).to.equal('infrastructure');
     });
   });
 }

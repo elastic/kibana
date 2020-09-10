@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 
@@ -36,8 +36,7 @@ export class SavedObjectLoader {
 
   constructor(
     SavedObjectClass: any,
-    private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly chrome: ChromeStart
+    private readonly savedObjectsClient: SavedObjectsClientContract
   ) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
@@ -51,14 +50,17 @@ export class SavedObjectLoader {
   }
 
   /**
-   * Retrieve a saved object by id. Returns a promise that completes when the object finishes
+   * Retrieve a saved object by id or create new one.
+   * Returns a promise that completes when the object finishes
    * initializing.
-   * @param id
+   * @param opts
    * @returns {Promise<SavedObject>}
    */
-  async get(id?: string) {
+  async get(opts?: Record<string, unknown> | string) {
+    // can accept object as argument in accordance to SavedVis class
+    // see src/plugins/saved_objects/public/saved_object/saved_object_loader.ts
     // @ts-ignore
-    const obj = new this.Class(id);
+    const obj = new this.Class(opts);
     return obj.init();
   }
 
@@ -75,19 +77,6 @@ export class SavedObjectLoader {
       return savedObject.delete();
     });
     await Promise.all(deletions);
-
-    const coreNavLinks = this.chrome.navLinks;
-    /**
-     * Modify last url for deleted saved objects to avoid loading pages with "Could not locate..."
-     */
-    coreNavLinks
-      .getAll()
-      .filter(
-        (link) =>
-          link.linkToLastSubUrl &&
-          idsUsed.find((deletedId) => link.url && link.url.includes(deletedId)) !== undefined
-      )
-      .forEach((link) => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**

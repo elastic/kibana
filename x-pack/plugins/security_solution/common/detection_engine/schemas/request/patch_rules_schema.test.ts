@@ -1176,11 +1176,15 @@ describe('patch_rules_schema', () => {
         exceptions_list: [
           {
             id: 'some_uuid',
+            list_id: 'list_id_single',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
-            id: 'some_uuid',
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1249,6 +1253,8 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
         'Invalid value "[{"id":"uuid_here","namespace_type":"not a namespace type"}]" supplied to "exceptions_list"',
       ]);

@@ -51,7 +51,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
           }}
           disabled={this.props.disabled}
         >
-          {_.capitalize(privilege.id)}
+          {_.upperFirst(privilege.id)}
         </EuiContextMenuItem>
       );
     });
@@ -65,7 +65,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         }}
         disabled={this.props.disabled}
       >
-        {_.capitalize(NO_PRIVILEGE_VALUE)}
+        {_.upperFirst(NO_PRIVILEGE_VALUE)}
       </EuiContextMenuItem>
     );
 

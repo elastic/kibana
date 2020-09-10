@@ -23,11 +23,13 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 // @ts-ignore
 import { ReactVisType } from './react_vis_type';
+import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface VisType {
   name: string;
   title: string;
   description?: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   visualization: any;
   isAccessible?: boolean;
   requestHandler: string | unknown;

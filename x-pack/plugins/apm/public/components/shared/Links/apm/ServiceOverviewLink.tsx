@@ -14,12 +14,12 @@ import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 
-const ServiceOverviewLink = (props: APMLinkExtendProps) => {
+function ServiceOverviewLink(props: APMLinkExtendProps) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(urlParams, 'host', 'agentName');
 
   return <APMLink path="/services" query={persistedFilters} {...props} />;
-};
+}
 
 export { ServiceOverviewLink };

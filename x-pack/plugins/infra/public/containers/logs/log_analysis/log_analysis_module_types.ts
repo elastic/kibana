@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  ValidateLogEntryDatasetsResponsePayload,
+  ValidationIndicesResponsePayload,
+} from '../../../../common/http_api/log_analysis';
+import { DatasetFilter } from '../../../../common/log_analysis';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
-import {
-  ValidationIndicesResponsePayload,
-  ValidateLogEntryDatasetsResponsePayload,
-} from '../../../../common/http_api/log_analysis';
-import { DatasetFilter } from '../../../../common/log_analysis';
+
+export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
 export interface ModuleDescriptor<JobType extends string> {
   moduleId: string;
+  moduleName: string;
+  moduleDescription: string;
   jobTypes: JobType[];
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
@@ -46,3 +50,43 @@ export interface ModuleSourceConfiguration {
   spaceId: string;
   timestampField: string;
 }
+
+interface ManyCategoriesWarningReason {
+  type: 'manyCategories';
+  categoriesDocumentRatio: number;
+}
+
+interface ManyDeadCategoriesWarningReason {
+  type: 'manyDeadCategories';
+  deadCategoriesRatio: number;
+}
+
+interface ManyRareCategoriesWarningReason {
+  type: 'manyRareCategories';
+  rareCategoriesRatio: number;
+}
+
+interface NoFrequentCategoriesWarningReason {
+  type: 'noFrequentCategories';
+}
+
+interface SingleCategoryWarningReason {
+  type: 'singleCategory';
+}
+
+export type CategoryQualityWarningReason =
+  | ManyCategoriesWarningReason
+  | ManyDeadCategoriesWarningReason
+  | ManyRareCategoriesWarningReason
+  | NoFrequentCategoriesWarningReason
+  | SingleCategoryWarningReason;
+
+export type CategoryQualityWarningReasonType = CategoryQualityWarningReason['type'];
+
+export interface CategoryQualityWarning {
+  type: 'categoryQualityWarning';
+  jobId: string;
+  reasons: CategoryQualityWarningReason[];
+}
+
+export type QualityWarning = CategoryQualityWarning;

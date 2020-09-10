@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitoring-kibana]]
-=== Collect monitoring data using legacy collectors
+= Collect monitoring data using legacy collectors
 ++++
 <titleabbrev>Legacy collection methods</titleabbrev>
 ++++
@@ -20,9 +20,10 @@ node in the production cluster. By default, it is is disabled (`false`).
 +
 --
 NOTE: You can specify this setting in either the `elasticsearch.yml` on each
-node or across the cluster as a dynamic cluster setting. If {es}
-{security-features} are enabled, you must have `monitor` cluster privileges to
-view the cluster settings and `manage` cluster privileges to change them.
+node or across the cluster as a dynamic cluster setting. If
+{stack-security-features} are enabled, you must have `monitor` cluster
+privileges to view the cluster settings and `manage` cluster privileges to
+change them.
 
 --
 
@@ -33,7 +34,7 @@ view the cluster settings and `manage` cluster privileges to change them.
 --
 By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 
-If {es} {security-features} are enabled, log in.
+If {security-features} are enabled, log in.
 --
 
 ... Open the menu, then go to *Stack Monitoring*. If data collection is
@@ -80,13 +81,13 @@ monitoring cluster prevents production cluster outages from impacting your
 ability to access your monitoring data. It also prevents monitoring activities
 from impacting the performance of your production cluster.
 
-If {security} is enabled on the production cluster, use an HTTPS URL such
-as `https://<your_production_cluster>:9200` in this setting.
+If {security-features} are enabled on the production cluster, use an HTTPS
+URL such as `https://<your_production_cluster>:9200` in this setting.
 ===============================
 
 --
 
-. If the Elastic {security-features} are enabled on the production cluster:
+. If {security-features} are enabled on the production cluster:
 
 .. Verify that there is a
 valid user ID and password in the `elasticsearch.username` and

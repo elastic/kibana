@@ -37,9 +37,9 @@ export class PipelineListItem {
   static fromUpstreamJSON(pipeline: Hit) {
     const opts = {
       id: pipeline._id,
-      description: get<string>(pipeline, '_source.description'),
-      last_modified: get<string>(pipeline, '_source.last_modified'),
-      username: get<string>(pipeline, '_source.username'),
+      description: get(pipeline, '_source.description') as string,
+      last_modified: get(pipeline, '_source.last_modified') as string,
+      username: get(pipeline, '_source.username') as string,
     };
 
     return new PipelineListItem(opts);

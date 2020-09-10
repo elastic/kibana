@@ -6,7 +6,7 @@
 
 import lowPolyLayerFeatures from './low_poly_layer.json';
 import { LocationPoint } from './embedded_map';
-import { UptimeAppColors } from '../../../../../uptime_app';
+import { UptimeAppColors } from '../../../../../apps/uptime_app';
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,

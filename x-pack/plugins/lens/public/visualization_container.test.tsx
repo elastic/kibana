@@ -60,4 +60,13 @@ describe('VisualizationContainer', () => {
 
     expect(reportingEl.prop('style')).toEqual({ color: 'blue' });
   });
+
+  test('combines class names with container class', () => {
+    const component = mount(
+      <VisualizationContainer className="myClass">Hello!</VisualizationContainer>
+    );
+    const reportingEl = component.find('[data-shared-item]').first();
+
+    expect(reportingEl.prop('className')).toEqual('myClass lnsVisualizationContainer');
+  });
 });

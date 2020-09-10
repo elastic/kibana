@@ -5,22 +5,23 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
-  DataPublicPluginSetup,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
   margin-bottom: 4px;
+  position: relative;
 `;
 
 interface State {
@@ -35,7 +36,6 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   'aria-label': string;
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   defaultKuery?: string;
   'data-test-subj': string;
   shouldUpdateUrl?: boolean;
@@ -44,7 +44,6 @@ interface Props {
 
 export function KueryBar({
   'aria-label': ariaLabel,
-  autocomplete: autocompleteService,
   defaultKuery,
   'data-test-subj': dataTestSubj,
   shouldUpdateUrl,
@@ -52,6 +51,12 @@ export function KueryBar({
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
   const { updateSearchText } = useSearchText();
+
+  const {
+    services: {
+      data: { autocomplete },
+    },
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -80,7 +85,7 @@ export function KueryBar({
 
   const indexPatternMissing = loading && !indexPattern;
 
-  async function onChange(inputValue: string, selectionStart: number) {
+  async function onChange(inputValue: string, selectionStart: number | null) {
     if (!indexPattern) {
       return;
     }
@@ -89,17 +94,17 @@ export function KueryBar({
     setState({ ...state, suggestions: [] });
     setSuggestionLimit(15);
 
-    const currentRequest = uniqueId();
+    const currentRequest = htmlIdGenerator()();
     currentRequestCheck = currentRequest;
 
     try {
       const suggestions = (
-        (await autocompleteService.getQuerySuggestions({
+        (await autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
           boolFilter: [
             {
               range: {
@@ -111,8 +116,7 @@ export function KueryBar({
             },
           ],
         })) || []
-      ).filter((suggestion) => !startsWith(suggestion.text, 'span.'));
-
+      ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {
         return;
       }
@@ -155,8 +159,8 @@ export function KueryBar({
   return (
     <Container>
       <Typeahead
-        aria-label={ariaLabel}
-        data-test-subj={dataTestSubj}
+        ariaLabel={ariaLabel}
+        dataTestSubj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
         initialValue={defaultKuery || kuery}

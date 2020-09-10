@@ -49,7 +49,7 @@ type Props = Omit<
 > & {
   fields?: IFieldType[];
   onChange: (fieldName?: string) => void;
-  value?: string; // index pattern field name
+  value: string | null; // index pattern field name
   isFieldDisabled?: (field: IFieldType) => boolean;
   getFieldDisabledReason?: (field: IFieldType) => string | null;
 };

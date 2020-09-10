@@ -19,7 +19,7 @@ export interface ITooltipProperty {
 
 export interface LoadFeatureProps {
   layerId: string;
-  featureId: number;
+  featureId?: number | string;
 }
 
 export interface FeatureGeometry {

@@ -27,7 +27,6 @@ import {
   normalizeTimes,
 } from './job_select_service_utils';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../services/ml_api_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { JobSelectionMaps } from './job_selector';
 
@@ -66,7 +65,10 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   withTimeRangeSelector = true,
 }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      mlServices: { mlApiServices },
+    },
   } = useMlKibana();
 
   const [newSelection, setNewSelection] = useState(selectedIds);
@@ -151,7 +153,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
 
   async function fetchJobs() {
     try {
-      const resp = await ml.jobs.jobsWithTimerange(dateFormatTz);
+      const resp = await mlApiServices.jobs.jobsWithTimerange(dateFormatTz);
       const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
       const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
       setJobs(normalizedJobs);
@@ -191,7 +193,6 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
       ref={flyoutEl}
       onClose={onFlyoutClose}
       aria-labelledby="jobSelectorFlyout"
-      size="l"
       data-test-subj="mlFlyoutJobSelector"
     >
       <EuiFlyoutHeader hasBorder>
@@ -236,7 +237,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
                     label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
-                      defaultMessage: 'Apply timerange',
+                      defaultMessage: 'Apply time range',
                     })}
                     checked={applyTimeRange}
                     onChange={toggleTimerangeSwitch}

@@ -15,7 +15,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../common/constants';
-import { mapSavedObjects } from './saved_objects';
+import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
 import { setInternalRepository } from './kibana_server_services';
@@ -26,12 +26,15 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -48,7 +51,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapConfig: any
+    mapsLegacyConfig: MapsLegacyConfig
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
@@ -121,7 +124,7 @@ export class MapsPlugin implements Plugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
+          emsLandingPageUrl: mapsLegacyConfig.emsLandingPageUrl,
         })
       );
     }
@@ -129,9 +132,10 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features } = plugins;
+    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
+    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
     const currentConfig = await config$.pipe(take(1)).toPromise();
 
     // @ts-ignore
@@ -150,14 +154,14 @@ export class MapsPlugin implements Plugin {
         initRoutes(
           core.http.createRouter(),
           license.uid,
-          currentConfig,
+          mapsLegacyConfig,
           this.kibanaVersion,
           this._logger
         );
       }
     });
 
-    this._initHomeData(home, core.http.basePath.prepend, currentConfig);
+    this._initHomeData(home, core.http.basePath.prepend, mapsLegacyConfig);
 
     features.registerFeature({
       id: APP_ID,
@@ -191,6 +195,7 @@ export class MapsPlugin implements Plugin {
       },
     });
 
+    core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
 

@@ -8,26 +8,20 @@ import React, { FC } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-interface Props extends CreateAnalyticsFormProps {
+interface Props {
+  isDisabled: boolean;
   setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
 }
 
-export const CreateAnalyticsButton: FC<Props> = ({
-  state,
-  actions,
-  setIsSourceIndexModalVisible,
-}) => {
-  const { disabled } = state;
-
+export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, setIsSourceIndexModalVisible }) => {
   const handleClick = () => {
     setIsSourceIndexModalVisible(true);
   };
 
   const button = (
     <EuiButton
-      disabled={disabled}
+      disabled={isDisabled}
       fill
       onClick={handleClick}
       iconType="plusInCircle"
@@ -40,7 +34,7 @@ export const CreateAnalyticsButton: FC<Props> = ({
     </EuiButton>
   );
 
-  if (disabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

@@ -91,7 +91,7 @@ export default class TransformObjStream extends Stream.Transform {
         method: event.method || '',
         headers: event.headers,
         remoteAddress: source.remoteAddress,
-        userAgent: source.remoteAddress,
+        userAgent: source.userAgent,
         referer: source.referer,
       };
 
@@ -144,7 +144,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message = message || 'Unknown error (no message)';
     } else if (event.error instanceof Error) {
       data.type = 'error';
-      data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
+      data.level = _.includes(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.error);
       const message = get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';

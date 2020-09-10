@@ -7,6 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
+import { clone } from 'lodash/fp';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled, { css } from 'styled-components';
@@ -38,7 +39,7 @@ const REL_NOREFERRER = 'noreferrer';
 export const Markdown = React.memo<{
   disableLinks?: boolean;
   raw?: string;
-  onClickTimeline?: (timelineId: string) => void;
+  onClickTimeline?: (timelineId: string, graphEventId?: string) => void;
   size?: 'xs' | 's' | 'm';
 }>(({ disableLinks = false, onClickTimeline, raw, size = 's' }) => {
   const markdownRenderers = {
@@ -63,11 +64,14 @@ export const Markdown = React.memo<{
     ),
     link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => {
       if (onClickTimeline != null && href != null && href.indexOf(`timelines?timeline=(id:`) > -1) {
-        const timelineId = href.split('timelines?timeline=(id:')[1].split("'")[1] ?? '';
+        const timelineId = clone(href).split('timeline=(id:')[1].split("'")[1] ?? '';
+        const graphEventId = href.includes('graphEventId:')
+          ? clone(href).split('graphEventId:')[1].split("'")[1] ?? ''
+          : '';
         return (
           <EuiToolTip content={i18n.TIMELINE_ID(timelineId)}>
             <EuiLink
-              onClick={() => onClickTimeline(timelineId)}
+              onClick={() => onClickTimeline(timelineId, graphEventId)}
               data-test-subj="markdown-timeline-link"
             >
               {children}

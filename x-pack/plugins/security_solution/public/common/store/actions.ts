@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostAction } from '../../management/pages/endpoint_hosts/store/action';
-import { AlertAction } from '../../endpoint_alerts/store/action';
+import { EndpointAction } from '../../management/pages/endpoint_hosts/store/action';
 import { PolicyListAction } from '../../management/pages/policy/store/policy_list';
 import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
+import { TrustedAppsPageAction } from '../../management/pages/trusted_apps/store/action';
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
@@ -15,8 +15,8 @@ export { inputsActions } from './inputs';
 import { RoutingAction } from './routing';
 
 export type AppAction =
-  | HostAction
-  | AlertAction
+  | EndpointAction
   | RoutingAction
   | PolicyListAction
-  | PolicyDetailsAction;
+  | PolicyDetailsAction
+  | TrustedAppsPageAction;

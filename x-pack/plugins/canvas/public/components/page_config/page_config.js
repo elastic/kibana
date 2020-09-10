@@ -30,7 +30,7 @@ export const PageConfig = ({
 }) => {
   return (
     <Fragment>
-      <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
+      <EuiTitle size="xs" className="canvasSidebar__panelTitleHeading">
         <h4>{strings.getTitle()}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />

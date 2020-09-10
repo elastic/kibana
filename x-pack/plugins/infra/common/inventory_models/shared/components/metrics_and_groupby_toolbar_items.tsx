@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import { toMetricOpt } from '../../../snapshot_metric_i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -16,7 +17,6 @@ import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory
 import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls';
 import {
   toGroupByOpt,
-  toMetricOpt,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { SnapshotMetricType } from '../../types';

@@ -57,13 +57,9 @@ export const FormRow = ({
     titleWrapped = title;
   }
 
-  if (!children && !field) {
-    throw new Error('You need to provide either children or a field to the FormRow');
-  }
-
   return (
     <EuiDescribedFormGroup title={titleWrapped} description={description} fullWidth>
-      {children ? children : <Field field={field!} {...rest} />}
+      {children ? children : field ? <Field field={field!} {...rest} /> : null}
     </EuiDescribedFormGroup>
   );
 };

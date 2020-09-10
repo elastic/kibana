@@ -24,9 +24,10 @@ interface Props {
 
 export interface StatusTag {
   label: string;
-  timestamp: string;
+  timestamp?: string;
   color: string;
-  availability: number;
+  availability?: number;
+  status: 'up' | 'down';
 }
 
 export const LocationStatusTags = ({ locations }: Props) => {
@@ -48,6 +49,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
       timestamp: moment(new Date(item.timestamp).valueOf()).fromNow(),
       color: item.summary.down === 0 ? gray : danger,
       availability: (item.up_history / (item.up_history + item.down_history)) * 100,
+      status: item.summary.down === 0 ? 'up' : 'down',
     });
   });
 

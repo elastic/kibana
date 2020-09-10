@@ -36,6 +36,7 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.postgresqlMetrics.nameTitle', {
       defaultMessage: 'PostgreSQL metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {

@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
-import { metricsExplorerSeriesRT } from './metrics_explorer';
+import { MetricsAPISeriesRT } from './metrics_api';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -22,7 +22,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
   value: rt.union([rt.number, rt.null]),
   avg: rt.union([rt.number, rt.null]),
   max: rt.union([rt.number, rt.null]),
-  timeseries: metricsExplorerSeriesRT,
+  timeseries: MetricsAPISeriesRT,
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
@@ -34,8 +34,9 @@ export const SnapshotNodeMetricRT = rt.intersection([
   SnapshotNodeMetricOptionalRT,
 ]);
 export const SnapshotNodeRT = rt.type({
-  metric: SnapshotNodeMetricRT,
+  metrics: rt.array(SnapshotNodeMetricRT),
   path: rt.array(SnapshotNodePathRT),
+  name: rt.string,
 });
 
 export const SnapshotNodeResponseRT = rt.type({
@@ -97,7 +98,7 @@ export const SnapshotMetricInputRT = rt.union([
 export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
-    metric: SnapshotMetricInputRT,
+    metrics: rt.array(SnapshotMetricInputRT),
     groupBy: SnapshotGroupByRT,
     nodeType: ItemTypeRT,
     sourceId: rt.string,
@@ -107,6 +108,7 @@ export const SnapshotRequestRT = rt.intersection([
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
     includeTimeseries: rt.boolean,
+    overrideCompositeSize: rt.number,
   }),
 ]);
 

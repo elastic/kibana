@@ -43,5 +43,38 @@
     ],
     "updated_at": "2019-01-31T23:19:55.855Z",
     "version": 1
+  },
+  {
+    "type": "gis-map",
+    "id": "643da1e6-c628-11ea-87d0-0242ac130003",
+    "attributes": {
+      "title": "Single cluster layer with geo_shape field",
+      "description": "",
+      "mapStateJSON": "{\"zoom\":2.12,\"center\":{\"lon\":-88.67592,\"lat\":34.23257},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"lucene\"}}",
+      "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"id\":\"51afb7d0-c628-11ea-87d0-0242ac130003\",\"geoField\":\"geometry\",\"metrics\":[{\"type\":\"count\"}],\"requestType\":\"point\",\"resolution\":\"COARSE\",\"indexPatternId\":\"4a7f6010-0aed-11ea-9dd2-95afd7ad44d4\"},\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}},\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"colorCategory\":\"palette_0\",\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":true,\"sigma\":3},\"type\":\"ORDINAL\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":0}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":7,\"maxSize\":32,\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":true,\"sigma\":3}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"}}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true},\"id\":\"8d384d5d-6353-468f-b8f8-8eaa487358c4\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"type\":\"VECTOR\",\"joins\":[]}]",
+      "uiStateJSON": "{}"
+    },
+    "references": [
+    ],
+    "updated_at": "2019-01-31T23:19:55.855Z",
+    "version": 1
+  },
+  {
+    "type": "gis-map",
+    "id": "5efd136a-c628-11ea-87d0-0242ac130003",
+    "attributes": {
+      "title": "Single heatmap layer with geo_shape field",
+      "description": "",
+      "mapStateJSON": "{\"zoom\":2.12,\"center\":{\"lon\":-88.67592,\"lat\":34.23257},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"lucene\"}}",
+      "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"id\":\"51afb7d0-c628-11ea-87d0-0242ac130003\",\"geoField\":\"geometry\",\"metrics\":[{\"type\":\"count\"}],\"requestType\":\"heatmap\",\"resolution\":\"COARSE\",\"indexPatternId\":\"4a7f6010-0aed-11ea-9dd2-95afd7ad44d4\"},\"id\":\"52eade74-1c78-4e18-8670-2061f38b613b\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"HEATMAP\",\"colorRampName\":\"theclassic\"},\"type\":\"HEATMAP\",\"joins\":[]}]",
+      "uiStateJSON": "{}"
+    },
+    "references": [
+    ],
+    "updated_at": "2019-01-31T23:19:55.855Z",
+    "version": 1
   }
+
 ]
+
+

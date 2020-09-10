@@ -106,7 +106,7 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async filterAndFormatPropertiesToHtml(properties) {
+  async getTooltipProperties(properties) {
     const tooltipProperties = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {
@@ -122,7 +122,7 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return true;
   }
 

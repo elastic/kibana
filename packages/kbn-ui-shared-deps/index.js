@@ -42,7 +42,9 @@ exports.externals = {
   'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
+  'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
+  '@kbn/ui-shared-deps/theme': '__kbnSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 
@@ -58,14 +60,7 @@ exports.externals = {
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
-  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.ElasticEuiLightTheme',
-  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.ElasticEuiDarkTheme',
-
-  /**
-   * massive deps that we should really get rid of or reduce in size substantially
-   */
-  elasticsearch: '__kbnSharedDeps__.ElasticsearchBrowser',
-  'elasticsearch-browser': '__kbnSharedDeps__.ElasticsearchBrowser',
-  'elasticsearch-browser/elasticsearch': '__kbnSharedDeps__.ElasticsearchBrowser',
+  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
+  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

@@ -21,7 +21,6 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);

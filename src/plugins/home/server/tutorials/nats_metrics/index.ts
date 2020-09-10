@@ -36,6 +36,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.natsMetrics.nameTitle', {
       defaultMessage: 'NATS metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the Nats server.',

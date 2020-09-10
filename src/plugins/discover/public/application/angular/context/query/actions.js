@@ -70,7 +70,7 @@ export function QueryActionsProvider(Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
       (anchorDocument) => {
         setLoadedStatus(state)('anchor');

@@ -29,7 +29,7 @@ export function StatusPagePageProvider({ getService, getPageObjects }) {
     async expectStatusPage() {
       return await retry.try(async () => {
         log.debug(`expectStatusPage()`);
-        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+        await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(`/status`);
       });

@@ -148,7 +148,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
-            all: ['dashboard', 'url', 'query'],
+            all: ['dashboard', 'query'],
             read: [
               'index-pattern',
               'search',
@@ -172,6 +172,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'visualization',
               'timelion-sheet',
               'canvas-workpad',
+              'lens',
               'map',
               'dashboard',
               'query',
@@ -294,16 +295,16 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 1600,
       icon: 'indexPatternApp',
       app: ['kibana'],
-      catalogue: ['index_patterns'],
+      catalogue: ['indexPatterns'],
       management: {
-        kibana: ['index_patterns'],
+        kibana: ['indexPatterns'],
       },
       privileges: {
         all: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: ['index-pattern'],
@@ -313,9 +314,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         },
         read: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: [],
@@ -349,7 +350,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
+          ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
         },
         read: {
           app: ['kibana'],

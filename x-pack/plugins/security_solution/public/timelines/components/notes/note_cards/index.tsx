@@ -12,6 +12,7 @@ import { Note } from '../../../../common/lib/note';
 import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
+import { TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
@@ -49,6 +50,7 @@ interface Props {
   getNewNoteId: GetNewNoteId;
   noteIds: string[];
   showAddNote: boolean;
+  status: TimelineStatusLiteral;
   toggleShowAddNote: () => void;
   updateNote: UpdateNote;
 }
@@ -61,6 +63,7 @@ export const NoteCards = React.memo<Props>(
     getNewNoteId,
     noteIds,
     showAddNote,
+    status,
     toggleShowAddNote,
     updateNote,
   }) => {

@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import {
@@ -41,8 +41,7 @@ export interface Field {
   script?: string;
 }
 
-// TODO: Pull this from kibana advanced settings
-const metaFields = ['_source', '_id', '_type', '_index', '_score'];
+const metaFields = ['_source', '_type'];
 
 export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
@@ -137,6 +136,18 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
     indexPatternId
   );
   const indexPatternTitle = indexPattern.attributes.title;
+
+  if (indexPatternTitle.includes(':')) {
+    // Cross cluster search patterns include a colon, and we aren't able to fetch
+    // mapping information.
+    return {
+      indexPattern,
+      indexPatternTitle,
+      mappings: {},
+      fieldDescriptors: [],
+    };
+  }
+
   // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
   // to look up field values in the resulting documents. We can accomplish the same
   // using the mappings which we're also fetching here.
@@ -166,10 +177,10 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
  */
 export function buildFieldList(
   indexPattern: SavedObject<IndexPatternAttributes>,
-  mappings: MappingResult,
+  mappings: MappingResult | {},
   fieldDescriptors: FieldDescriptor[]
 ): Field[] {
-  const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
+  const aliasMap = Object.entries(Object.values(mappings)[0]?.mappings.properties ?? {})
     .map(([name, v]) => ({ ...v, name }))
     .filter((f) => f.type === 'alias')
     .reduce((acc, f) => {
@@ -207,7 +218,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -242,6 +253,7 @@ async function fetchIndexPatternStats({
     body: {
       size: SAMPLE_SIZE,
       query,
+      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       // _source is required because we are also providing script fields.
       _source: '*',
       script_fields: scriptedFields.reduce((acc, field) => {

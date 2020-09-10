@@ -19,30 +19,43 @@ import {
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
+import { resilientActionType } from './common/lib/connectors';
+import {
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins,
+  StartServices,
+  AppObservableLibs,
+} from './types';
 import {
   APP_ID,
   APP_ICON,
-  APP_ALERTS_PATH,
+  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
-  SHOW_ENDPOINT_ALERTS_NAV,
-  APP_ENDPOINT_ALERTS_PATH,
   APP_PATH,
 } from '../common/constants';
-import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
+import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
+import {
+  OVERVIEW,
+  HOSTS,
+  NETWORK,
+  TIMELINES,
+  DETECTION_ENGINE,
+  CASE,
+  ADMINISTRATION,
+} from './app/home/translations';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -52,25 +65,38 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
-    initTelemetry(plugins.usageCollection, APP_ID);
-
-    plugins.home.featureCatalogue.register({
-      id: APP_ID,
-      title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
-        defaultMessage: 'Security',
-      }),
-      description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
-        defaultMessage: 'Explore security metrics and logs for events and alerts',
-      }),
-      icon: APP_ICON,
-      path: APP_OVERVIEW_PATH,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
+    const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
+      defaultMessage: 'Security',
     });
 
-    plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
-    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
+    initTelemetry(plugins.usageCollection, APP_ID);
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.registerSolution({
+        id: APP_ID,
+        title: APP_NAME,
+        subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
+          defaultMessage: 'SIEM & Endpoint Security',
+        }),
+        descriptions: [
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
+            defaultMessage: 'Prevent threats autonomously.',
+          }),
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription2', {
+            defaultMessage: 'Detect and respond.',
+          }),
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription3', {
+            defaultMessage: 'Investigate incidents.',
+          }),
+        ],
+        icon: 'logoSecurity',
+        path: APP_OVERVIEW_PATH,
+        order: 300,
+      });
+    }
+
+    plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
 
     const mountSecurityFactory = async () => {
       const storage = new Storage(localStorage);
@@ -91,10 +117,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core.application.register({
       exactRoute: true,
       id: APP_ID,
-      title: 'Security',
+      title: APP_NAME,
       appRoute: APP_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async (params: AppMountParameters) => {
+      mount: async () => {
         const [{ application }] = await core.getStartServices();
         application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
         return () => true;
@@ -103,9 +129,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.overview}`,
-      title: i18n.translate('xpack.securitySolution.overviewPage.title', {
-        defaultMessage: 'Overview',
-      }),
+      title: OVERVIEW,
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -120,6 +144,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.downloadAssets(),
           this.downloadSubPlugins(),
         ]);
+
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -131,19 +156,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.alerts}`,
-      title: i18n.translate('xpack.securitySolution.alertsPage.title', {
-        defaultMessage: 'Alerts',
-      }),
+      id: `${APP_ID}:${SecurityPageName.detections}`,
+      title: DETECTION_ENGINE,
       order: 9001,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_ALERTS_PATH,
+      appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services, storage },
           { renderApp, composeLibs },
-          { alertsSubPlugin },
+          { detectionsSubPlugin },
         ] = await Promise.all([
           mountSecurityFactory(),
           this.downloadAssets(),
@@ -154,14 +177,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: alertsSubPlugin.start(storage).SubPluginRoutes,
+          SubPluginRoutes: detectionsSubPlugin.start(storage).SubPluginRoutes,
         });
       },
     });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.hosts}`,
-      title: 'Hosts',
+      title: HOSTS,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -188,7 +211,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.network}`,
-      title: 'Network',
+      title: NETWORK,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -215,7 +238,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.timelines}`,
-      title: 'Timelines',
+      title: TIMELINES,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -242,7 +265,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.case}`,
-      title: 'Cases',
+      title: CASE,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -268,8 +291,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.management}`,
-      title: 'Management',
+      id: `${APP_ID}:${SecurityPageName.administration}`,
+      title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -294,35 +317,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (SHOW_ENDPOINT_ALERTS_NAV) {
-      core.application.register({
-        id: `${APP_ID}:${SecurityPageName.endpointAlerts}`,
-        title: 'Endpoint Alerts',
-        order: 9002,
-        euiIconType: APP_ICON,
-        category: DEFAULT_APP_CATEGORIES.security,
-        appRoute: APP_ENDPOINT_ALERTS_PATH,
-        mount: async (params: AppMountParameters) => {
-          const [
-            { coreStart, startPlugins, store, services },
-            { renderApp, composeLibs },
-            { endpointAlertsSubPlugin },
-          ] = await Promise.all([
-            mountSecurityFactory(),
-            this.downloadAssets(),
-            this.downloadSubPlugins(),
-          ]);
-          return renderApp({
-            ...composeLibs(coreStart),
-            ...params,
-            services,
-            store,
-            SubPluginRoutes: endpointAlertsSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
-          });
-        },
-      });
-    }
-
     core.application.register({
       id: 'siem',
       appRoute: 'app/siem',
@@ -335,12 +329,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {};
+    return {
+      resolver: async () => {
+        const { resolverPluginSetup } = await import('./resolver');
+        return resolverPluginSetup();
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    plugins.ingestManager.registerDatasource('endpoint', ConfigureEndpointDatasource);
+    if (plugins.ingestManager) {
+      plugins.ingestManager.registerPackagePolicyComponent(
+        'endpoint',
+        ConfigureEndpointPackagePolicy
+      );
+    }
 
     return {};
   }
@@ -363,24 +367,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private async downloadSubPlugins() {
     const {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       casesSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await import('./sub_plugins');
 
     return {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       casesSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     };
   }
@@ -389,21 +391,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { composeLibs } = await this.downloadAssets();
 
     const {
-      alertsSubPlugin,
+      detectionsSubPlugin,
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await this.downloadSubPlugins();
+    const { apolloClient } = composeLibs(coreStart);
+    const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+    const libs$ = new BehaviorSubject(appLibs);
 
-    const libs$ = new BehaviorSubject(composeLibs(coreStart));
-
-    const alertsStart = alertsSubPlugin.start(storage);
+    const detectionsStart = detectionsSubPlugin.start(storage);
     const hostsStart = hostsSubPlugin.start(storage);
     const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
-    const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
     const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
     const timelineInitialState = {
@@ -411,7 +412,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...timelinesStart.store.initialState.timeline!,
         timelineById: {
           ...timelinesStart.store.initialState.timeline!.timelineById,
-          ...alertsStart.storageTimelines!.timelineById,
+          ...detectionsStart.storageTimelines!.timelineById,
           ...hostsStart.storageTimelines!.timelineById,
           ...networkStart.storageTimelines!.timelineById,
         },
@@ -423,22 +424,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...hostsStart.store.initialState,
         ...networkStart.store.initialState,
         ...timelineInitialState,
-        ...endpointAlertsStart.store.initialState,
         ...managementSubPluginStart.store.initialState,
       }),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,
         ...timelinesStart.store.reducer,
-        ...endpointAlertsStart.store.reducer,
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
+      libs$.pipe(pluck('kibana')),
       storage,
-      [
-        ...(endpointAlertsStart.store.middleware ?? []),
-        ...(managementSubPluginStart.store.middleware ?? []),
-      ]
+      [...(managementSubPluginStart.store.middleware ?? [])]
     );
   }
 }

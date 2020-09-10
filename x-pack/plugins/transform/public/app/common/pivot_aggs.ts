@@ -110,8 +110,8 @@ export function getAggConfigFromEsAgg(
   // Find the main aggregation key
   const agg = aggKeys.find((aggKey) => aggKey !== 'aggs');
 
-  if (!isPivotSupportedAggs(agg)) {
-    throw new Error(`Aggregation "${agg}" is not supported`);
+  if (agg === undefined) {
+    throw new Error(`Aggregation key is required`);
   }
 
   const commonConfig: PivotAggsConfigBase = {

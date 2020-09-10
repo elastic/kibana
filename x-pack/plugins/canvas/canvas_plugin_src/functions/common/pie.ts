@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map, groupBy } from 'lodash';
-// @ts-expect-error lodash.keyby imports invalid member from @types/lodash
-import keyBy from 'lodash.keyby';
+import { get, keyBy, map, groupBy } from 'lodash';
 // @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-expect-error untyped local
@@ -41,9 +39,9 @@ interface PieOptions {
   colors: string[];
   legend: {
     show: boolean;
-    backgroundOpacity: number;
-    labelBoxBorderColor: string;
-    position: Legend;
+    backgroundOpacity?: number;
+    labelBoxBorderColor?: string;
+    position?: Legend;
   };
   grid: {
     show: boolean;
@@ -59,7 +57,7 @@ interface PieData {
   color?: string;
 }
 
-interface Pie {
+export interface Pie {
   font: Style;
   data: PieData[];
   options: PieOptions;

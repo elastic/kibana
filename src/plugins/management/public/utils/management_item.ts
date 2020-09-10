@@ -16,21 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ReactElement } from 'react';
 import { CreateManagementItemArgs } from '../types';
 
 export class ManagementItem {
   public readonly id: string = '';
-  public readonly title: string | ReactElement = '';
+  public readonly title: string;
+  public readonly tip?: string;
   public readonly order: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
 
   public enabled: boolean = true;
 
-  constructor({ id, title, order = 100, euiIconType, icon }: CreateManagementItemArgs) {
+  constructor({ id, title, tip, order = 100, euiIconType, icon }: CreateManagementItemArgs) {
     this.id = id;
     this.title = title;
+    this.tip = tip;
     this.order = order;
     this.euiIconType = euiIconType;
     this.icon = icon;

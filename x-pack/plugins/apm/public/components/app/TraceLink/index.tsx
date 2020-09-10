@@ -6,7 +6,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import url from 'url';
 import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
@@ -58,9 +58,10 @@ const redirectToTracePage = ({
     },
   });
 
-export const TraceLink = () => {
+export function TraceLink({ match }: RouteComponentProps<{ traceId: string }>) {
+  const { traceId } = match.params;
   const { urlParams } = useUrlParams();
-  const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
+  const { rangeFrom, rangeTo } = urlParams;
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
@@ -93,4 +94,4 @@ export const TraceLink = () => {
       <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching trace...</h2>} />
     </CentralizedContainer>
   );
-};
+}

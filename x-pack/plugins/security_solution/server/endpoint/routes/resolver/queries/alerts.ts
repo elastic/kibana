@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
+import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving alerts for a node.
  */
-export class AlertsQuery extends ResolverQuery<PaginatedResults> {
+export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
+  private readonly kqlQuery: JsonObject[] = [];
   constructor(
     private readonly pagination: PaginationBuilder,
     indexPattern: string | string[],
-    endpointID?: string
+    endpointID?: string,
+    kql?: string
   ) {
     super(indexPattern, endpointID);
+    if (kql) {
+      this.kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
+    }
   }
 
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
@@ -26,6 +32,7 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'endgame.unique_pid': uniquePIDs },
             },
@@ -38,11 +45,7 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(
-        uniquePIDs.length,
-        'endgame.serial_event_id',
-        'endgame.unique_pid'
-      ),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'asc'),
     };
   }
 
@@ -51,6 +54,7 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'process.entity_id': entityIDs },
             },
@@ -60,14 +64,11 @@ export class AlertsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.entity_id'),
+      ...this.pagination.buildQueryFields('event.id', 'asc'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
-    return {
-      results: ResolverQuery.getResults(response),
-      totals: PaginationBuilder.getTotals(response.aggregations),
-    };
+  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+    return this.getResults(response);
   }
 }

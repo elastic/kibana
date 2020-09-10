@@ -89,7 +89,10 @@ export const metricsExplorerRowRT = rt.intersection([
   rt.type({
     timestamp: rt.number,
   }),
-  rt.record(rt.string, rt.union([rt.string, rt.number, rt.null, rt.undefined])),
+  rt.record(
+    rt.string,
+    rt.union([rt.string, rt.number, rt.null, rt.undefined, rt.array(rt.object)])
+  ),
 ]);
 
 export const metricsExplorerSeriesRT = rt.intersection([
@@ -107,6 +110,8 @@ export const metricsExplorerResponseRT = rt.type({
   series: rt.array(metricsExplorerSeriesRT),
   pageInfo: metricsExplorerPageInfoRT,
 });
+
+export type AfterKey = rt.TypeOf<typeof afterKeyObjectRT>;
 
 export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
 

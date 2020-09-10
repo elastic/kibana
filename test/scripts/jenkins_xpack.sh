@@ -3,12 +3,6 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]] ; then
-  echo " -> Running mocha tests"
-  cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:karma
-  echo ""
-  echo ""
-
   echo " -> Running jest tests"
   cd "$XPACK_DIR"
   checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose

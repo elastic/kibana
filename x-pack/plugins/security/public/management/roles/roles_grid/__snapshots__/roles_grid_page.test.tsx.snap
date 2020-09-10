@@ -68,7 +68,9 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle>
+                    <EuiTitle
+                      size="m"
+                    >
                       <h2
                         className="euiTitle euiTitle--medium"
                       >

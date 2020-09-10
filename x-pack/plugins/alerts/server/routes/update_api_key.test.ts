@@ -29,13 +29,6 @@ describe('updateApiKeyRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_update_api_key"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
 
     alertsClient.updateApiKey.mockResolvedValueOnce();
 

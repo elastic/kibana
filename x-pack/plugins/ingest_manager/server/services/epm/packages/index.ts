@@ -11,8 +11,7 @@ import {
   Installation,
   InstallationStatus,
   KibanaAssetType,
-} from '../../../../common/types/models/epm';
-
+} from '../../../types';
 export {
   getCategories,
   getFile,
@@ -20,10 +19,11 @@ export {
   getInstallation,
   getPackageInfo,
   getPackages,
+  getLimitedPackages,
   SearchParams,
 } from './get';
 
-export { installKibanaAssets, installPackage, ensureInstalledPackage } from './install';
+export { installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
 type RequiredPackage = 'system' | 'endpoint';

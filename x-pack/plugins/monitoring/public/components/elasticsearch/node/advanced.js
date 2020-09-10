@@ -19,7 +19,7 @@ import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const AdvancedNode = ({ nodeSummary, metrics, ...props }) => {
+export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [
     metrics.node_gc,
     metrics.node_gc_time,
@@ -50,7 +50,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, ...props }) => {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <NodeDetailStatus stats={nodeSummary} />
+          <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>

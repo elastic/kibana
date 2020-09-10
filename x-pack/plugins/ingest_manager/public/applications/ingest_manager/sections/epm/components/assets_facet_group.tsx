@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React, { Fragment } from 'react';
 import {
   EuiFacetButton,
   EuiFacetGroup,
@@ -14,8 +14,8 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   AssetsGroupedByServiceByType,
   AssetTypeToParts,
@@ -30,19 +30,31 @@ import {
   ServiceTitleMap,
 } from '../constants';
 
+const FirstHeaderRow = styled(EuiFlexGroup)`
+  padding: 0 0 ${(props) => props.theme.eui.paddingSizes.m} 0;
+`;
+
+const HeaderRow = styled(EuiFlexGroup)`
+  padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
+`;
+
+const FacetGroup = styled(EuiFacetGroup)`
+  flex-grow: 0;
+`;
+
+const FacetButton = styled(EuiFacetButton)`
+  &&& {
+    .euiFacetButton__icon,
+    .euiFacetButton__quantity {
+      opacity: 1;
+    }
+    .euiFacetButton__text {
+      color: ${(props) => props.theme.eui.euiTextColor};
+    }
+  }
+`;
+
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
-  const FirstHeaderRow = styled(EuiFlexGroup)`
-    padding: 0 0 ${(props) => props.theme.eui.paddingSizes.m} 0;
-  `;
-
-  const HeaderRow = styled(EuiFlexGroup)`
-    padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
-  `;
-
-  const FacetGroup = styled(EuiFacetGroup)`
-    flex-grow: 0;
-  `;
-
   return (
     <Fragment>
       {entries(assets).map(([service, typeToParts], index) => {
@@ -65,7 +77,15 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
               <EuiFlexItem>
                 <EuiTitle key={service} size="xs">
                   <EuiText>
-                    <h4>{ServiceTitleMap[service]} Assets</h4>
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.ingestManager.epm.assetGroupTitle"
+                        defaultMessage="{assetType} assets"
+                        values={{
+                          assetType: ServiceTitleMap[service],
+                        }}
+                      />
+                    </h4>
                   </EuiText>
                 </EuiTitle>
               </EuiFlexItem>
@@ -77,18 +97,8 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                 // only kibana assets have icons
                 const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
-                const FacetButton = styled(EuiFacetButton)`
-                  padding: '${(props) => props.theme.eui.paddingSizes.xs} 0';
-                  height: 'unset';
-                `;
                 return (
-                  <FacetButton
-                    key={type}
-                    quantity={parts.length}
-                    icon={iconNode}
-                    // https://github.com/elastic/eui/issues/2216
-                    buttonRef={() => {}}
-                  >
+                  <FacetButton key={type} quantity={parts.length} icon={iconNode} isDisabled={true}>
                     <EuiTextColor color="subdued">{AssetTitleMap[type]}</EuiTextColor>
                   </FacetButton>
                 );

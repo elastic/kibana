@@ -7,14 +7,14 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { DefaultCommentsArray } from './default_comments_array';
-import { CommentsArray } from './comments';
-import { getCommentsArrayMock } from './comments.mock';
+import { CommentsArray } from './comment';
+import { getCommentsArrayMock } from './comment.mock';
 
 describe('default_comments_array', () => {
-  test('it should validate an empty array', () => {
+  test('it should pass validation when supplied an empty array', () => {
     const payload: CommentsArray = [];
     const decoded = DefaultCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -23,7 +23,7 @@ describe('default_comments_array', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should validate an array of comments', () => {
+  test('it should pass validation when supplied an array of comments', () => {
     const payload: CommentsArray = getCommentsArrayMock();
     const decoded = DefaultCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -32,27 +32,24 @@ describe('default_comments_array', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate an array of numbers', () => {
+  test('it should fail validation when supplied an array of numbers', () => {
     const payload = [1];
     const decoded = DefaultCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    // TODO: Known weird error formatting that is on our list to address
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
-      'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+      'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an array of strings', () => {
+  test('it should fail validation when supplied an array of strings', () => {
     const payload = ['some string'];
     const decoded = DefaultCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
-      'Invalid value "some string" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+      'Invalid value "some string" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
     ]);
     expect(message.schema).toEqual({});
   });

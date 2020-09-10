@@ -5,9 +5,8 @@
  */
 
 import './styles/_index.scss';
-import { PluginInitializerContext } from 'src/core/public';
 import { SearchProfilerUIPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new SearchProfilerUIPlugin(ctx);
+export function plugin() {
+  return new SearchProfilerUIPlugin();
 }

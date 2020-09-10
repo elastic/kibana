@@ -59,7 +59,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<get-data-in>>.
+This page has moved. Please see <<gs-get-data-into-kibana>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
@@ -80,3 +80,23 @@ This page was deleted. See <<development-visualize-index>>.
 == Developing Visualizations
 
 This page was deleted. See <<development-visualize-index>>.
+
+[role="exclude",id="errors-alerts-with-watcher"]
+== Error reports with Watcher
+
+deprecated::[7.9.0]
+
+Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
+To create error alerts with new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
+
+More information on this new feature is available in <<apm-alerts>>.
+
+[role="exclude",id="development-security-rbac"]
+== Role-based access control
+
+This content has moved to the <<development-rbac, Security>> page.
+
+[role="exclude",id="TSVB"]
+== TSVB
+
+This page was deleted. See <<tsvb>>.

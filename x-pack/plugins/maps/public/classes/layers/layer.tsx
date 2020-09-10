@@ -14,16 +14,26 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
+  AGG_TYPE,
+  FIELD_ORIGIN,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_REQUEST_ID,
+  STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
-import { LayerDescriptor, MapExtent, StyleDescriptor } from '../../../common/descriptor_types';
+import {
+  AggDescriptor,
+  JoinDescriptor,
+  LayerDescriptor,
+  MapExtent,
+  StyleDescriptor,
+} from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
+import { getJoinAggKey } from '../../../common/get_agg_key';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
@@ -76,6 +86,11 @@ export interface ILayer {
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
   isPreviewLayer: () => boolean;
+  areLabelsOnTop: () => boolean;
+  supportsLabelsOnTop: () => boolean;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
+  isFittable(): Promise<boolean>;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -139,13 +154,12 @@ export class AbstractLayer implements ILayer {
   }
 
   static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
-    // @ts-ignore
+    // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
-    // @ts-ignore
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
@@ -153,15 +167,44 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
 
-    // todo: remove this
-    // This should not be in AbstractLayer. It relies on knowledge of VectorLayerDescriptor
-    // @ts-ignore
     if (clonedDescriptor.joins) {
-      // @ts-ignore
-      clonedDescriptor.joins.forEach((joinDescriptor) => {
+      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        const originalJoinId = joinDescriptor.right.id!;
+
         // right.id is uuid used to track requests in inspector
-        // @ts-ignore
         joinDescriptor.right.id = uuid();
+
+        // Update all data driven styling properties using join fields
+        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
+          const metrics =
+            joinDescriptor.right.metrics && joinDescriptor.right.metrics.length
+              ? joinDescriptor.right.metrics
+              : [{ type: AGG_TYPE.COUNT }];
+          metrics.forEach((metricsDescriptor: AggDescriptor) => {
+            const originalJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              rightSourceId: originalJoinId,
+            });
+            const newJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+              rightSourceId: joinDescriptor.right.id!,
+            });
+
+            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
+              const styleProp = clonedDescriptor.style.properties[key];
+              if (
+                styleProp.type === STYLE_TYPE.DYNAMIC &&
+                styleProp.options.field &&
+                styleProp.options.field.origin === FIELD_ORIGIN.JOIN &&
+                styleProp.options.field.name === originalJoinKey
+              ) {
+                styleProp.options.field.name = newJoinKey;
+              }
+            });
+          });
+        }
       });
     }
     return clonedDescriptor;
@@ -171,8 +214,12 @@ export class AbstractLayer implements ILayer {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
   }
 
-  isJoinable(): boolean {
-    return this.getSource().isJoinable();
+  showJoinEditor(): boolean {
+    return this.getSource().showJoinEditor();
+  }
+
+  getJoinsDisabledReason() {
+    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {
@@ -185,6 +232,10 @@ export class AbstractLayer implements ILayer {
 
   async supportsFitToBounds(): Promise<boolean> {
     return await this.getSource().supportsFitToBounds();
+  }
+
+  async isFittable(): Promise<boolean> {
+    return (await this.supportsFitToBounds()) && this.isVisible();
   }
 
   async getDisplayName(source?: ISource): Promise<string> {
@@ -325,27 +376,28 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
+  _getMbSourceId() {
+    return this.getId();
+  }
+
   _requiresPrevSourceCleanup(mbMap: unknown) {
     return false;
   }
 
   _removeStaleMbSourcesAndLayers(mbMap: unknown) {
     if (this._requiresPrevSourceCleanup(mbMap)) {
-      // @ts-ignore
+      // @ts-expect-error
       const mbStyle = mbMap.getStyle();
-      // @ts-ignore
+      // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-ignore
         if (this.ownsMbLayerId(mbLayer.id)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-ignore
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-ignore
         if (this.ownsMbSourceId(mbSourceId)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeSource(mbSourceId);
         }
       });
@@ -391,7 +443,6 @@ export class AbstractLayer implements ILayer {
     const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
-    // @ts-ignore
     return _.compact(requestTokens);
   }
 
@@ -429,7 +480,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
-  ownsMbSourceId(sourceId: string): boolean {
+  ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 
@@ -475,11 +526,19 @@ export class AbstractLayer implements ILayer {
   }
 
   syncVisibilityWithMb(mbMap: unknown, mbLayerId: string) {
-    // @ts-ignore
+    // @ts-expect-error
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
   getType(): string | undefined {
     return this._descriptor.type;
+  }
+
+  areLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelsOnTop(): boolean {
+    return false;
   }
 }

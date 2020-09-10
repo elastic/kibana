@@ -18,54 +18,19 @@
  */
 
 import { getSearchParams } from './get_search_params';
-import { IUiSettingsClient } from 'kibana/public';
-import { UI_SETTINGS } from '../../../common';
+import { GetConfigFn, UI_SETTINGS } from '../../../common';
 
-function getConfigStub(config: any = {}) {
-  return {
-    get: (key) => config[key],
-  } as IUiSettingsClient;
+function getConfigStub(config: any = {}): GetConfigFn {
+  return (key) => config[key];
 }
 
 describe('getSearchParams', () => {
-  test('includes rest_total_hits_as_int', () => {
-    const config = getConfigStub();
+  test('includes custom preference', () => {
+    const config = getConfigStub({
+      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
+      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
+    });
     const searchParams = getSearchParams(config);
-    expect(searchParams.rest_total_hits_as_int).toBe(true);
-  });
-
-  test('includes ignore_unavailable', () => {
-    const config = getConfigStub();
-    const searchParams = getSearchParams(config);
-    expect(searchParams.ignore_unavailable).toBe(true);
-  });
-
-  test('includes ignore_throttled according to search:includeFrozen', () => {
-    let config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true });
-    let searchParams = getSearchParams(config);
-    expect(searchParams.ignore_throttled).toBe(false);
-
-    config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false });
-    searchParams = getSearchParams(config);
-    expect(searchParams.ignore_throttled).toBe(true);
-  });
-
-  test('includes max_concurrent_shard_requests according to courier:maxConcurrentShardRequests', () => {
-    let config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 0 });
-    let searchParams = getSearchParams(config);
-    expect(searchParams.max_concurrent_shard_requests).toBe(undefined);
-
-    config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 5 });
-    searchParams = getSearchParams(config);
-    expect(searchParams.max_concurrent_shard_requests).toBe(5);
-  });
-
-  test('includes timeout according to esShardTimeout if greater than 0', () => {
-    const config = getConfigStub();
-    let searchParams = getSearchParams(config, 0);
-    expect(searchParams.timeout).toBe(undefined);
-
-    searchParams = getSearchParams(config, 100);
-    expect(searchParams.timeout).toBe('100ms');
+    expect(searchParams.preference).toBe('aaa');
   });
 });

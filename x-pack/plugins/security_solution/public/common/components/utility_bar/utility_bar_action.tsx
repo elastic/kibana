@@ -33,6 +33,7 @@ const Popover = React.memo<UtilityBarActionProps>(
         }
         closePopover={() => setPopoverState(false)}
         isOpen={popoverState}
+        repositionOnScroll
       >
         {popoverContent?.(closePopover)}
       </EuiPopover>

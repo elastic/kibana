@@ -10,6 +10,7 @@ import { UpdateExceptionListSchema } from './update_exception_list_schema';
 
 export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema => ({
   _tags: _TAGS,
+  _version: undefined,
   description: DESCRIPTION,
   id: ID,
   list_id: LIST_ID,
@@ -17,5 +18,16 @@ export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema =>
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
   tags: ['malware'],
+  type: 'endpoint',
+});
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ * after doing a get of the structure.
+ */
+export const getUpdateMinimalExceptionListSchemaMock = (): UpdateExceptionListSchema => ({
+  description: DESCRIPTION,
+  list_id: LIST_ID,
+  name: NAME,
   type: 'endpoint',
 });

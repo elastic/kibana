@@ -6,10 +6,11 @@
 
 import _ from 'lodash';
 import React from 'react';
+import rison from 'rison-node';
 
 import { AbstractESSource } from '../es_source';
-import { getSearchService } from '../../../kibana_services';
-import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
+import { getSearchService, getHttp } from '../../../kibana_services';
+import { hitsToGeoJson } from '../../../../common/elasticsearch_geo_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
@@ -18,6 +19,9 @@ import {
   SORT_ORDER,
   SCALING_TYPES,
   VECTOR_SHAPE_TYPE,
+  MVT_SOURCE_LAYER_NAME,
+  GIS_API_PATH,
+  MVT_GETTILE_API_PATH,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -96,6 +100,7 @@ export class ESSearchSource extends AbstractESSource {
     return new ESDocField({
       fieldName,
       source: this,
+      canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 
@@ -385,7 +390,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, sourceType: SOURCE_TYPES.ES_SEARCH },
+      meta,
     };
   }
 
@@ -433,7 +438,7 @@ export class ESSearchSource extends AbstractESSource {
     return properties;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
+  async getTooltipProperties(properties) {
     const indexPattern = await this.getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(
       properties._id,
@@ -448,9 +453,13 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.scalingType === SCALING_TYPES.CLUSTER
-      ? true
-      : this._descriptor.filterByMapBounds;
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTER) {
+      return true;
+    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return false;
+    } else {
+      return this._descriptor.filterByMapBounds;
+    }
   }
 
   async getLeftJoinFields() {
@@ -549,6 +558,68 @@ export class ESSearchSource extends AbstractESSource {
       index: properties._index, // Can not use index pattern title because it may reference many indices
       id: properties._id,
       path: geoField.name,
+    };
+  }
+
+  getJoinsDisabledReason() {
+    let reason;
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
+        defaultMessage: 'Joins are not supported when scaling by clusters',
+      });
+    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
+        defaultMessage: 'Joins are not supported when scaling by mvt vector tiles',
+      });
+    } else {
+      reason = null;
+    }
+    return reason;
+  }
+
+  getLayerName() {
+    return MVT_SOURCE_LAYER_NAME;
+  }
+
+  async getUrlTemplateWithMeta(searchFilters) {
+    const indexPattern = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(indexPattern.title);
+
+    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
+      indexPattern,
+      searchFilters.fieldNames
+    );
+
+    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
+
+    const searchSource = await this.makeSearchSource(
+      searchFilters,
+      indexSettings.maxResultWindow,
+      initialSearchContext
+    );
+    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    if (sourceOnlyFields.length === 0) {
+      searchSource.setField('source', false); // do not need anything from _source
+    } else {
+      searchSource.setField('source', sourceOnlyFields);
+    }
+    if (this._hasSort()) {
+      searchSource.setField('sort', this._buildEsSort());
+    }
+
+    const dsl = await searchSource.getSearchRequestBody();
+    const risonDsl = rison.encode(dsl);
+
+    const mvtUrlServicePath = getHttp().basePath.prepend(
+      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
+    );
+
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}`;
+    return {
+      layerName: this.getLayerName(),
+      minSourceZoom: this.getMinZoom(),
+      maxSourceZoom: this.getMaxZoom(),
+      urlTemplate: urlTemplate,
     };
   }
 }

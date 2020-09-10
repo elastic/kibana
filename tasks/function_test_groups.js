@@ -41,6 +41,8 @@ const getDefaultArgs = (tag) => {
     // '--config', 'test/functional/config.firefox.js',
     '--bail',
     '--debug',
+    '--config',
+    'test/new_visualize_flow/config.js',
   ];
 };
 

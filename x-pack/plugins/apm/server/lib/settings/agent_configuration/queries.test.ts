@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAllEnvironments } from './get_environments/get_all_environments';
 import { getExistingEnvironmentsForService } from './get_environments/get_existing_environments_for_service';
 import { getServiceNames } from './get_service_names';
 import { listConfigurations } from './list_configurations';
@@ -12,7 +11,7 @@ import { searchConfigurations } from './search_configurations';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../../public/utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { findExactConfiguration } from './find_exact_configuration';
 
 describe('agent configuration queries', () => {
@@ -20,19 +19,6 @@ describe('agent configuration queries', () => {
 
   afterEach(() => {
     mock.teardown();
-  });
-
-  describe('getAllEnvironments', () => {
-    it('fetches all environments', async () => {
-      mock = await inspectSearchParams((setup) =>
-        getAllEnvironments({
-          serviceName: 'foo',
-          setup,
-        })
-      );
-
-      expect(mock.params).toMatchSnapshot();
-    });
   });
 
   describe('getExistingEnvironmentsForService', () => {

@@ -12,7 +12,7 @@ interface Props extends APMLinkExtendProps {
   serviceName: string;
 }
 
-const MetricOverviewLink = ({ serviceName, ...rest }: Props) => {
+function MetricOverviewLink({ serviceName, ...rest }: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -30,6 +30,6 @@ const MetricOverviewLink = ({ serviceName, ...rest }: Props) => {
       {...rest}
     />
   );
-};
+}
 
 export { MetricOverviewLink };

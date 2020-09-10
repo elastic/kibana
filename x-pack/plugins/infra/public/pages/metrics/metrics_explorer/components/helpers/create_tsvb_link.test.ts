@@ -157,6 +157,25 @@ describe('createTSVBLink()', () => {
     });
   });
 
+  it('should use the workaround index pattern when there are multiple listed in the source', () => {
+    const customSource = {
+      ...source,
+      metricAlias: 'my-beats-*,metrics-*',
+      fields: { ...source.fields, timestamp: 'time' },
+    };
+    const link = createTSVBLink(customSource, options, series, timeRange, chartOptions);
+    expect(link).toStrictEqual({
+      app: 'visualize',
+      hash: '/create',
+      search: {
+        _a:
+          "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'metric*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'metric*',interval:auto,series:!((axis_position:right,chart_type:line,color:#6092C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:time,type:timeseries),title:example-01,type:metrics))",
+        _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
+        type: 'metrics',
+      },
+    });
+  });
+
   test('createFilterFromOptions()', () => {
     const customOptions = { ...options, groupBy: 'host.name' };
     const customSeries = { ...series, id: 'test"foo' };

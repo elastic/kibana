@@ -164,6 +164,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               },
             ],
             "name": "Actions",
+            "width": "80px",
           },
         ]
       }
@@ -178,7 +179,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               "icon": "indexPatternApp",
               "inAppUrl": Object {
                 "path": "/management/kibana/indexPatterns/patterns/1",
-                "uiCapabilitiesPath": "management.kibana.index_patterns",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
             },
@@ -379,6 +380,7 @@ exports[`Table should render normally 1`] = `
               },
             ],
             "name": "Actions",
+            "width": "80px",
           },
         ]
       }
@@ -393,7 +395,7 @@ exports[`Table should render normally 1`] = `
               "icon": "indexPatternApp",
               "inAppUrl": Object {
                 "path": "/management/kibana/indexPatterns/patterns/1",
-                "uiCapabilitiesPath": "management.kibana.index_patterns",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
             },

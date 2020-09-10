@@ -13,7 +13,7 @@ import { getIndexPatternService, getIndexPatternSelectComponent } from '../../..
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
 import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
@@ -200,11 +200,11 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <Fragment>
+      <EuiPanel>
         {callout}
         {this._renderIndexPatternSelect()}
         {this._renderGeoSelects()}
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

@@ -43,7 +43,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
     const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
@@ -72,7 +72,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
     const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
@@ -96,7 +96,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
     const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
@@ -120,7 +120,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
 
     const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
@@ -144,7 +144,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: { enabled: true } }));
 
     const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
@@ -168,7 +168,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: {} } })
     );
@@ -194,7 +194,7 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: { http: { enabled: true } } } })
     );

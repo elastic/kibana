@@ -262,7 +262,7 @@ export class RolesGridPage extends Component<Props, State> {
                   iconType={'copy'}
                   {...reactRouterNavigate(
                     this.props.history,
-                    getRoleManagementHref('edit', role.name)
+                    getRoleManagementHref('clone', role.name)
                   )}
                 />
               );

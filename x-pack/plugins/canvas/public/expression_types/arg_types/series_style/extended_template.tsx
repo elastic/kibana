@@ -46,7 +46,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
     name = typeInstance.name;
   }
 
-  const fields = get<string[]>(typeInstance, 'options.include', []);
+  const fields: string[] = get(typeInstance, 'options.include', []);
   const hasPropFields = fields.some((field) => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
   const handleChange: <T extends Argument>(key: T, val: ChangeEvent<HTMLSelectElement>) => void = (

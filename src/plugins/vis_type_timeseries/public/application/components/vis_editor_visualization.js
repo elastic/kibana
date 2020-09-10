@@ -19,7 +19,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
+import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   getInterval,
@@ -73,6 +73,7 @@ class VisEditorVisualizationUI extends Component {
 
     this._handler = embeddableHandler;
     await this._handler.render(this._visEl.current);
+    this.props.eventEmitter.emit('embeddableRendered');
 
     this._subscription = this._handler.handler.data$.subscribe((data) => {
       this.setPanelInterval(data.value.visData);
@@ -95,11 +96,11 @@ class VisEditorVisualizationUI extends Component {
    * defined minimum width (MIN_CHART_HEIGHT).
    */
   onSizeHandleKeyDown = (ev) => {
-    const { keyCode } = ev;
-    if (keyCode === keyCodes.UP || keyCode === keyCodes.DOWN) {
+    const { key } = ev;
+    if (key === keys.ARROW_UP || key === keys.ARROW_DOWN) {
       ev.preventDefault();
       this.setState((prevState) => {
-        const newHeight = prevState.height + (keyCode === keyCodes.UP ? -15 : 15);
+        const newHeight = prevState.height + (key === keys.ARROW_UP ? -15 : 15);
         return {
           height: Math.max(MIN_CHART_HEIGHT, newHeight),
         };
@@ -279,6 +280,7 @@ VisEditorVisualizationUI.propTypes = {
   uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
   embeddableHandler: PropTypes.object,
+  eventEmitter: PropTypes.object,
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,

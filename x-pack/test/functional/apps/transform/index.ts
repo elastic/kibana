@@ -30,6 +30,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
+      await transform.securityUI.logout();
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));

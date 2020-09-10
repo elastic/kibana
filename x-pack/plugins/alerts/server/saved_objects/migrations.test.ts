@@ -13,7 +13,7 @@ import { migrationMocks } from 'src/core/server/mocks';
 const { log } = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-describe('7.9.0', () => {
+describe('7.10.0', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(
@@ -22,9 +22,9 @@ describe('7.9.0', () => {
   });
 
   test('changes nothing on alerts by other plugins', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({});
-    expect(migration790(alert, { log })).toMatchObject(alert);
+    expect(migration710(alert, { log })).toMatchObject(alert);
 
     expect(encryptedSavedObjectsSetup.createMigration).toHaveBeenCalledWith(
       expect.any(Function),
@@ -32,18 +32,66 @@ describe('7.9.0', () => {
     );
   });
 
+  test('migrates the consumer for metrics', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'metrics',
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        consumer: 'infrastructure',
+      },
+    });
+  });
+
   test('migrates the consumer for alerting', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({
       consumer: 'alerting',
     });
-    expect(migration790(alert, { log })).toMatchObject({
+    expect(migration710(alert, { log })).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
         consumer: 'alerts',
       },
     });
+  });
+});
+
+describe('7.10.0 migrates with failure', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockRejectedValueOnce(
+      new Error(`Can't migrate!`) as never
+    );
+  });
+
+  test('should show the proper exception', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'alerting',
+    });
+    const res = migration710(alert, { log });
+    expect(res).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+      },
+    });
+    expect(log.error).toHaveBeenCalledWith(
+      `encryptedSavedObject migration failed for alert ${alert.id} with error: migrationFunc is not a function`,
+      {
+        alertDocument: {
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+          },
+        },
+      }
+    );
   });
 });
 

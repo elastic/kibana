@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visChart.waitForVisualization();
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 
@@ -191,57 +191,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -277,6 +245,80 @@ export default function ({ getService, getPageObjects }) {
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
+      });
+    });
+
+    describe('pipeline aggregations', () => {
+      before(async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickLineChart');
+        await PageObjects.visualize.clickLineChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      describe('parent pipeline', () => {
+        it('should have an error if bucket is not selected', async () => {
+          await PageObjects.visEditor.clickMetricEditor();
+          log.debug('Metrics agg = Serial diff');
+          await PageObjects.visEditor.selectAggregation('Serial diff', 'metrics');
+          await testSubjects.existOrFail('bucketsError');
+        });
+
+        it('should apply with selected bucket', async () => {
+          log.debug('Bucket = X-axis');
+          await PageObjects.visEditor.clickBucket('X-axis');
+          log.debug('Aggregation = Date Histogram');
+          await PageObjects.visEditor.selectAggregation('Date Histogram');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Serial Diff of Count');
+        });
+
+        it('should change y-axis label to custom', async () => {
+          log.debug('set custom label of y-axis to "Custom"');
+          await PageObjects.visEditor.setCustomLabel('Custom', 1);
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Custom');
+        });
+
+        it('should have advanced accordion and json input', async () => {
+          await testSubjects.click('advancedParams-1');
+          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+        });
+      });
+
+      describe('sibling pipeline', () => {
+        it('should apply with selected bucket', async () => {
+          log.debug('Metrics agg = Average Bucket');
+          await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Overall Average of Count');
+        });
+
+        it('should change sub metric custom label and calculate y-axis title', async () => {
+          log.debug('set custom label of sub metric to "Cats"');
+          await PageObjects.visEditor.setCustomLabel('Cats', '1-metric');
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Overall Average of Cats');
+        });
+
+        it('should outer custom label', async () => {
+          log.debug('set custom label to "Custom"');
+          await PageObjects.visEditor.setCustomLabel('Custom', 1);
+          await PageObjects.visEditor.clickGo();
+          const title = await PageObjects.visChart.getYAxisTitle();
+          expect(title).to.be('Custom');
+        });
+
+        it('should have advanced accordion and json input', async () => {
+          await testSubjects.click('advancedParams-1');
+          await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
+        });
       });
     });
   });

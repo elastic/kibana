@@ -9,6 +9,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '../../../../../../src/core/server';
 
 import {
   ExternalIncidentServiceConfigurationSchema,
@@ -122,7 +123,12 @@ export interface ExternalServiceApi {
 
 export interface CreateExternalServiceBasicArgs {
   api: ExternalServiceApi;
-  createExternalService: (credentials: ExternalServiceCredentials) => ExternalService;
+  createExternalService: (
+    credentials: ExternalServiceCredentials,
+    logger: Logger,
+    proxySettings?: any
+  ) => ExternalService;
+  logger: Logger;
 }
 
 export interface CreateExternalServiceArgs extends CreateExternalServiceBasicArgs {
@@ -144,7 +150,7 @@ export interface PipedField {
 }
 
 export interface PrepareFieldsForTransformArgs {
-  params: PushToServiceApiParams;
+  externalCase: Record<string, any>;
   mapping: Map<string, MapRecord>;
   defaultPipes?: string[];
 }

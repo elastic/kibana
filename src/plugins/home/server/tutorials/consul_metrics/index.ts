@@ -36,6 +36,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.consulMetrics.nameTitle', {
       defaultMessage: 'Consul metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the Consul server.',

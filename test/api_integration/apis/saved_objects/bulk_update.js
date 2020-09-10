@@ -65,6 +65,7 @@ export default function ({ getService }) {
           attributes: {
             title: 'An existing visualization',
           },
+          namespaces: ['default'],
         });
 
         expect(secondObject)
@@ -77,6 +78,7 @@ export default function ({ getService }) {
           attributes: {
             title: 'An existing dashboard',
           },
+          namespaces: ['default'],
         });
       });
 
@@ -233,6 +235,7 @@ export default function ({ getService }) {
             attributes: {
               title: 'An existing dashboard',
             },
+            namespaces: ['default'],
           });
         });
       });

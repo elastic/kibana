@@ -31,9 +31,9 @@ export const initLogSourceStatusRoutes = ({
       const { sourceId } = request.params;
 
       try {
-        const logIndexNames = await sourceStatus.getLogIndexNames(requestContext, sourceId);
+        const logIndexStatus = await sourceStatus.getLogIndexStatus(requestContext, sourceId);
         const logIndexFields =
-          logIndexNames.length > 0
+          logIndexStatus !== 'missing'
             ? await fields.getFields(requestContext, sourceId, InfraIndexType.LOGS)
             : [];
 
@@ -41,7 +41,7 @@ export const initLogSourceStatusRoutes = ({
           body: getLogSourceStatusSuccessResponsePayloadRT.encode({
             data: {
               logIndexFields,
-              logIndexNames,
+              logIndexStatus,
             },
           }),
         });

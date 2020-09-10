@@ -6,3 +6,4 @@
 
 export * from './eui_draggable';
 export * from './eui_styled_components';
+export * from './fetch_overview_data';

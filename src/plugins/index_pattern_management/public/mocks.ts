@@ -39,6 +39,9 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
     getAll: jest.fn(),
     getById: jest.fn(),
   } as any,
+  environment: {
+    update: jest.fn(),
+  },
 });
 
 const createStartContract = (): IndexPatternManagementStart => ({
@@ -76,6 +79,13 @@ const createInstance = async () => {
   };
 };
 
+const docLinks = {
+  links: {
+    indexPatterns: {},
+    scriptedFields: {},
+  },
+};
+
 const createIndexPatternManagmentContext = () => {
   const {
     chrome,
@@ -84,7 +94,6 @@ const createIndexPatternManagmentContext = () => {
     uiSettings,
     notifications,
     overlays,
-    docLinks,
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();

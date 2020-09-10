@@ -36,6 +36,7 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.cephMetrics.nameTitle', {
       defaultMessage: 'Ceph metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {

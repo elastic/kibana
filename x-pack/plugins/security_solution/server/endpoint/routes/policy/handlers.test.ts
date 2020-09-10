@@ -10,7 +10,7 @@ import {
 } from '../../mocks';
 import { getHostPolicyResponseHandler } from './handlers';
 import {
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaResponseFactory,
   SavedObjectsClientContract,
 } from 'kibana/server';
@@ -27,12 +27,12 @@ import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
   beforeEach(() => {
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();

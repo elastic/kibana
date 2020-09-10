@@ -26,9 +26,6 @@ export const getActionRoute = (router: IRouter, licenseState: ILicenseState) => 
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

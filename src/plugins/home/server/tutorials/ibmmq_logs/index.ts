@@ -37,6 +37,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.ibmmqLogs.nameTitle', {
       defaultMessage: 'IBM MQ logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.ibmmqLogs.shortDescription', {
       defaultMessage: 'Collect IBM MQ logs with Filebeat.',

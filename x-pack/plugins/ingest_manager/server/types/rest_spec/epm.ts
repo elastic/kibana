@@ -5,9 +5,16 @@
  */
 import { schema } from '@kbn/config-schema';
 
+export const GetCategoriesRequestSchema = {
+  query: schema.object({
+    experimental: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
+    experimental: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -29,6 +36,11 @@ export const InstallPackageRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };
 
 export const DeletePackageRequestSchema = {

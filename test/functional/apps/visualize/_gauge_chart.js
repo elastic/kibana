@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');

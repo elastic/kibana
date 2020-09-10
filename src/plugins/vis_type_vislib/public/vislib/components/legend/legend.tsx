@@ -18,10 +18,10 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniq, map, every, isUndefined } from 'lodash';
+import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
+import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
@@ -75,7 +75,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
-    if ((event as KeyboardEvent).keyCode && (event as KeyboardEvent).keyCode !== keyCodes.ENTER) {
+    if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }
 
@@ -106,11 +106,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
-    if (
-      event &&
-      (event as KeyboardEvent).keyCode &&
-      (event as KeyboardEvent).keyCode !== keyCodes.ENTER
-    ) {
+    if (event && (event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }
     this.setState({ selectedLabel: this.state.selectedLabel === label ? null : label });
@@ -119,7 +115,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   getSeriesLabels = (data: any[]) => {
     const values = data.map((chart) => chart.series).reduce((a, b) => a.concat(b), []);
 
-    return compact(uniq(values, 'label')).map((label: any) => ({
+    return compact(uniqBy(values, 'label')).map((label: any) => ({
       ...label,
       values: [label.values[0].seriesRaw],
     }));
@@ -258,6 +254,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           type="button"
           onClick={this.toggleLegend}
           className={classNames('visLegend__toggle kbn-resetFocusState', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'visLegend__toggle--isOpen': open,
           })}
           aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {

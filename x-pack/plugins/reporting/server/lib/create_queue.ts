@@ -6,10 +6,10 @@
 
 import { ReportingCore } from '../core';
 import { JobSource, TaskRunResult } from '../types';
-import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
+import { createTaggedLogger } from './esqueue/create_tagged_logger';
 import { LevelLogger } from './level_logger';
 import { ReportingStore } from './store';
 

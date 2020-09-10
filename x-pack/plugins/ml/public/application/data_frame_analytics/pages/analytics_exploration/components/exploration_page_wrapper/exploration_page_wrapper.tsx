@@ -38,6 +38,7 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
     jobConfig,
     jobConfigErrorMessage,
     jobStatus,
+    needsDestIndexPattern,
   } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
 
@@ -50,7 +51,6 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
       />
     );
   }
-
   return (
     <>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
@@ -64,9 +64,10 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
         indexPattern !== undefined &&
         isInitialized === true && (
           <ExplorationResultsTable
-            jobConfig={jobConfig}
             indexPattern={indexPattern}
+            jobConfig={jobConfig}
             jobStatus={jobStatus}
+            needsDestIndexPattern={needsDestIndexPattern}
             setEvaluateSearchQuery={setSearchQuery}
             title={title}
           />

@@ -47,6 +47,25 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
   }
 }
 
+export async function unwrapPromise<T, E>(future: Promise<Result<T, E>>): Promise<T> {
+  return future
+    .catch(
+      // catch rejection as we expect the result of the rejected promise
+      // to be wrapped in a Result - sadly there's no way to "Type" this
+      // requirment in Typescript as Promises do not enfore a type on their
+      // rejection
+      // The `then` will then unwrap the Result from around `ex` for us
+      (ex: Err<E>) => ex
+    )
+    .then((result: Result<T, E>) =>
+      map(
+        result,
+        (value: T) => Promise.resolve(value),
+        (err: E) => Promise.reject(err)
+      )
+    );
+}
+
 export function unwrap<T, E>(result: Result<T, E>): T | E {
   return isOk(result) ? result.value : result.error;
 }

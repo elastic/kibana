@@ -55,11 +55,11 @@ export class SpecDefinitionsService {
     });
 
     if (urlParamsDef) {
-      description.url_params = _.extend(description.url_params || {}, copiedDescription.url_params);
+      description.url_params = _.assign(description.url_params || {}, copiedDescription.url_params);
       _.defaults(description.url_params, urlParamsDef);
     }
 
-    _.extend(copiedDescription, description);
+    _.assign(copiedDescription, description);
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],

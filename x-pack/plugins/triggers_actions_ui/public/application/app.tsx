@@ -17,8 +17,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 import { Section, routeToAlertDetails } from './constants';
-import { AppContextProvider, useAppDependencies } from './app_context';
-import { hasShowAlertsCapability } from './lib/capabilities';
+import { AppContextProvider } from './app_context';
 import { ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
@@ -27,8 +26,8 @@ import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
-const AlertDetailsRoute = lazy(() =>
-  import('./sections/alert_details/components/alert_details_route')
+const AlertDetailsRoute = lazy(
+  () => import('./sections/alert_details/components/alert_details_route')
 );
 
 export interface AppDeps {
@@ -63,22 +62,17 @@ export const App = (appDeps: AppDeps) => {
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
-  const { capabilities } = useAppDependencies();
-  const canShowAlerts = hasShowAlertsCapability(capabilities);
-  const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>
       <Route
         path={`/:section(${sectionsRegex})`}
         component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
       />
-      {canShowAlerts && (
-        <Route
-          path={routeToAlertDetails}
-          component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
-        />
-      )}
-      <Redirect from={'/'} to={`${DEFAULT_SECTION}`} />
+      <Route
+        path={routeToAlertDetails}
+        component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
+      />
+      <Redirect from={'/'} to="alerts" />
     </Switch>
   );
 };

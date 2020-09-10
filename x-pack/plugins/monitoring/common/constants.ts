@@ -139,7 +139,7 @@ export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
 export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
+export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
@@ -222,41 +222,54 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
  * as the only way to see the new UI and actually run Kibana alerts. It will
  * be false until all alerts have been migrated, then it will be removed
  */
-export const KIBANA_ALERTING_ENABLED = false;
+export const KIBANA_CLUSTER_ALERTS_ENABLED = false;
 
 /**
  * The prefix for all alert types used by monitoring
  */
-export const ALERT_TYPE_PREFIX = 'monitoring_';
-
-/**
- * This is the alert type id for the license expiration alert
- */
-export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
-/**
- * This is the alert type id for the cluster state alert
- */
-export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_state`;
+export const ALERT_PREFIX = 'monitoring_';
+export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration`;
+export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
+export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
+export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
+export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
+export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
+export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
 
 /**
  * A listing of all alert types
  */
-export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION, ALERT_TYPE_CLUSTER_STATE];
+export const ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+];
+
+/**
+ * A list of all legacy alerts, which means they are powered by watcher
+ */
+export const LEGACY_ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+];
 
 /**
  * Matches the id for the built-in in email action type
  * See x-pack/plugins/actions/server/builtin_action_types/email.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
-
 /**
- * The number of alerts that have been migrated
+ * Matches the id for the built-in in log action type
+ * See x-pack/plugins/actions/server/builtin_action_types/log.ts
  */
-export const NUMBER_OF_MIGRATED_ALERTS = 2;
-
-/**
- * The advanced settings config name for the email address
- */
-export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alertingEmailAddress';
+export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];

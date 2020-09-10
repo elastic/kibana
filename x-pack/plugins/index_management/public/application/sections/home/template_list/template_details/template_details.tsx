@@ -5,8 +5,18 @@
  */
 
 import React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 
-export const TemplateDetails: React.FunctionComponent = () => {
-  // TODO new (V2) templatte details
-  return null;
+import { TemplateDetailsContent, Props } from './template_details_content';
+
+export const TemplateDetails = (props: Props) => {
+  return (
+    <EuiFlyout
+      onClose={props.onClose}
+      data-test-subj="templateDetails"
+      aria-labelledby="templateDetailsFlyoutTitle"
+    >
+      <TemplateDetailsContent {...props} />
+    </EuiFlyout>
+  );
 };

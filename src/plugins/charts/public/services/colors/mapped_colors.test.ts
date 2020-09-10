@@ -61,7 +61,7 @@ describe('Mapped Colors', () => {
     mappedColors.mapKeys(arr);
 
     const colorValues = _(mappedColors.mapping).values();
-    expect(colorValues.contains(seedColors[0])).toBe(false);
+    expect(colorValues.includes(seedColors[0])).toBe(false);
     expect(colorValues.uniq().size()).toBe(arr.length);
   });
 

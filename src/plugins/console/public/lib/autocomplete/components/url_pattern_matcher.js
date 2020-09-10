@@ -61,73 +61,64 @@ export class UrlPatternMatcher {
       }
       const endpointComponents = endpoint.url_components || {};
       const partList = pattern.split('/');
-      _.each(
-        partList,
-        function (part, partIndex) {
-          if (part.search(/^{.+}$/) >= 0) {
-            part = part.substr(1, part.length - 2);
-            if (activeComponent.getComponent(part)) {
-              // we already have something for this, reuse
-              activeComponent = activeComponent.getComponent(part);
-              return;
-            }
-            // a new path, resolve.
-
-            if ((c = endpointComponents[part])) {
-              // endpoint specific. Support list
-              if (Array.isArray(c)) {
-                c = new ListComponent(part, c, activeComponent);
-              } else if (_.isObject(c) && c.type === 'list') {
-                c = new ListComponent(
-                  part,
-                  c.list,
-                  activeComponent,
-                  c.multiValued,
-                  c.allow_non_valid
-                );
-              } else {
-                console.warn(
-                  'incorrectly configured url component ',
-                  part,
-                  ' in endpoint',
-                  endpoint
-                );
-                c = new SharedComponent(part);
-              }
-            } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
-              // c is a f
-              c = c(part, activeComponent);
-            } else {
-              // just accept whatever with not suggestions
-              c = new SimpleParamComponent(part, activeComponent);
-            }
-
-            activeComponent = c;
-          } else {
-            // not pattern
-            let lookAhead = part;
-            let s;
-
-            for (partIndex++; partIndex < partList.length; partIndex++) {
-              s = partList[partIndex];
-              if (s.indexOf('{') >= 0) {
-                break;
-              }
-              lookAhead += '/' + s;
-            }
-
-            if (activeComponent.getComponent(part)) {
-              // we already have something for this, reuse
-              activeComponent = activeComponent.getComponent(part);
-              activeComponent.addOption(lookAhead);
-            } else {
-              c = new ConstantComponent(part, activeComponent, lookAhead);
-              activeComponent = c;
-            }
+      _.each(partList, (part, partIndex) => {
+        if (part.search(/^{.+}$/) >= 0) {
+          part = part.substr(1, part.length - 2);
+          if (activeComponent.getComponent(part)) {
+            // we already have something for this, reuse
+            activeComponent = activeComponent.getComponent(part);
+            return;
           }
-        },
-        this
-      );
+          // a new path, resolve.
+
+          if ((c = endpointComponents[part])) {
+            // endpoint specific. Support list
+            if (Array.isArray(c)) {
+              c = new ListComponent(part, c, activeComponent);
+            } else if (_.isObject(c) && c.type === 'list') {
+              c = new ListComponent(
+                part,
+                c.list,
+                activeComponent,
+                c.multiValued,
+                c.allow_non_valid
+              );
+            } else {
+              console.warn('incorrectly configured url component ', part, ' in endpoint', endpoint);
+              c = new SharedComponent(part);
+            }
+          } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
+            // c is a f
+            c = c(part, activeComponent);
+          } else {
+            // just accept whatever with not suggestions
+            c = new SimpleParamComponent(part, activeComponent);
+          }
+
+          activeComponent = c;
+        } else {
+          // not pattern
+          let lookAhead = part;
+          let s;
+
+          for (partIndex++; partIndex < partList.length; partIndex++) {
+            s = partList[partIndex];
+            if (s.indexOf('{') >= 0) {
+              break;
+            }
+            lookAhead += '/' + s;
+          }
+
+          if (activeComponent.getComponent(part)) {
+            // we already have something for this, reuse
+            activeComponent = activeComponent.getComponent(part);
+            activeComponent.addOption(lookAhead);
+          } else {
+            c = new ConstantComponent(part, activeComponent, lookAhead);
+            activeComponent = c;
+          }
+        }
+      });
       // mark end of endpoint path
       new AcceptEndpointComponent(endpoint, activeComponent);
     });

@@ -19,11 +19,11 @@ class FooPlugin implements Plugin {
       name: 'Foo',
       icon: 'upArrow',
       navLinkId: 'foo_plugin',
-      app: ['kibana'],
+      app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {
         all: {
-          app: ['kibana'],
+          app: ['foo_plugin', 'kibana'],
           catalogue: ['foo'],
           savedObject: {
             all: ['foo'],
@@ -32,7 +32,7 @@ class FooPlugin implements Plugin {
           ui: ['create', 'edit', 'delete', 'show'],
         },
         read: {
-          app: ['kibana'],
+          app: ['foo_plugin', 'kibana'],
           catalogue: ['foo'],
           savedObject: {
             all: [],

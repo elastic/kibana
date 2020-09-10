@@ -34,7 +34,6 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
         >
           Hello
         </GoogleLink>
-        <ExternalLinkIcon />
       </div>
     </DefaultDraggable>
   </LinkFlexItem>

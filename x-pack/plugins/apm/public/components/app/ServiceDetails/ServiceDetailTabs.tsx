@@ -10,7 +10,6 @@ import React from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
@@ -22,23 +21,15 @@ import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { TransactionOverview } from '../TransactionOverview';
-import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
-import { RumOverview } from '../RumDashboard';
 
 interface Props {
+  serviceName: string;
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
 }
 
-export function ServiceDetailTabs({ tab }: Props) {
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
+export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useAgentName();
   const { serviceMapEnabled } = useApmPluginContext().config;
-
-  if (!serviceName) {
-    // this never happens, urlParams type is not accurate enough
-    throw new Error('Service name was not defined');
-  }
 
   const transactionsTab = {
     link: (
@@ -48,7 +39,7 @@ export function ServiceDetailTabs({ tab }: Props) {
         })}
       </TransactionOverviewLink>
     ),
-    render: () => <TransactionOverview />,
+    render: () => <TransactionOverview serviceName={serviceName} />,
     name: 'transactions',
   };
 
@@ -61,7 +52,7 @@ export function ServiceDetailTabs({ tab }: Props) {
       </ErrorOverviewLink>
     ),
     render: () => {
-      return <ErrorGroupOverview />;
+      return <ErrorGroupOverview serviceName={serviceName} />;
     },
     name: 'errors',
   };
@@ -77,7 +68,7 @@ export function ServiceDetailTabs({ tab }: Props) {
           })}
         </ServiceNodeOverviewLink>
       ),
-      render: () => <ServiceNodeOverview />,
+      render: () => <ServiceNodeOverview serviceName={serviceName} />,
       name: 'nodes',
     };
     tabs.push(nodesListTab);
@@ -90,7 +81,9 @@ export function ServiceDetailTabs({ tab }: Props) {
           })}
         </MetricOverviewLink>
       ),
-      render: () => <ServiceMetrics agentName={agentName} />,
+      render: () => (
+        <ServiceMetrics agentName={agentName} serviceName={serviceName} />
+      ),
       name: 'metrics',
     };
     tabs.push(metricsTab);
@@ -110,20 +103,6 @@ export function ServiceDetailTabs({ tab }: Props) {
 
   if (serviceMapEnabled) {
     tabs.push(serviceMapTab);
-  }
-
-  if (isRumAgentName(agentName)) {
-    tabs.push({
-      link: (
-        <RumOverviewLink>
-          {i18n.translate('xpack.apm.home.rumTabLabel', {
-            defaultMessage: 'Real User Monitoring',
-          })}
-        </RumOverviewLink>
-      ),
-      render: () => <RumOverview />,
-      name: 'rum-overview',
-    });
   }
 
   const selectedTab = tabs.find((serviceTab) => serviceTab.name === tab);

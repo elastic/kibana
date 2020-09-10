@@ -13,10 +13,20 @@ export function resultsServiceProvider(
     jobIds: string[],
     earliestMs: number,
     latestMs: number,
-    interval: string | number,
-    maxResults: number
+    intervalMs: number,
+    perPage?: number,
+    fromPage?: number
   ): Promise<any>;
-  getTopInfluencers(): Promise<any>;
+  getTopInfluencers(
+    selectedJobIds: string[],
+    earliestMs: number,
+    latestMs: number,
+    maxFieldValues: number,
+    perPage?: number,
+    fromPage?: number,
+    influencers?: any[],
+    influencersFilterQuery?: any
+  ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
   getOverallBucketScores(
     jobIds: any,
@@ -31,8 +41,10 @@ export function resultsServiceProvider(
     influencerFieldValues: string[],
     earliestMs: number,
     latestMs: number,
-    interval: string,
+    intervalMs: number,
     maxResults: number,
+    perPage: number,
+    fromPage: number,
     influencersFilterQuery: any
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
@@ -45,8 +57,25 @@ export function resultsServiceProvider(
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: string | number
+    intervalMs: number
   ): Promise<any>;
-  getEventDistributionData(): Promise<any>;
-  getRecordMaxScoreByTime(): Promise<any>;
+  getEventDistributionData(
+    index: string,
+    splitField: string,
+    filterField: string,
+    query: any,
+    metricFunction: string, // ES aggregation name
+    metricFieldName: string,
+    timeFieldName: string,
+    earliestMs: number,
+    latestMs: number,
+    intervalMs: number
+  ): Promise<any>;
+  getRecordMaxScoreByTime(
+    jobId: string,
+    criteriaFields: any[],
+    earliestMs: number,
+    latestMs: number,
+    intervalMs: number
+  ): Promise<any>;
 };

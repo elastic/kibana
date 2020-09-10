@@ -5,7 +5,7 @@ exports[`LayerPanel is rendered 1`] = `
   services={
     Object {
       "appName": "maps",
-      "data": undefined,
+      "data": Object {},
       "storage": Storage {
         "clear": [Function],
         "get": [Function],
@@ -57,6 +57,8 @@ exports[`LayerPanel is rendered 1`] = `
           buttonContent="Source details"
           id="accordion1"
           initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
           paddingSize="none"
         >
           <EuiText
@@ -89,12 +91,35 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__bodyOverflow"
       >
         <LayerErrors />
-        <LayerSettings />
+        <LayerSettings
+          layer={
+            Object {
+              "getDisplayName": [Function],
+              "getId": [Function],
+              "getImmutableSourceProperties": [Function],
+              "getLayerTypeIconName": [Function],
+              "renderSourceSettingsEditor": [Function],
+              "showJoinEditor": [Function],
+              "supportsElasticsearchFilters": [Function],
+            }
+          }
+        />
         <div>
           mockSourceSettings
         </div>
         <EuiPanel>
           <JoinEditor
+            layer={
+              Object {
+                "getDisplayName": [Function],
+                "getId": [Function],
+                "getImmutableSourceProperties": [Function],
+                "getLayerTypeIconName": [Function],
+                "renderSourceSettingsEditor": [Function],
+                "showJoinEditor": [Function],
+                "supportsElasticsearchFilters": [Function],
+              }
+            }
             layerDisplayName="layer 1"
             leftJoinFields={Array []}
           />

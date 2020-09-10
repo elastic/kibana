@@ -8,19 +8,22 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
-import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
   stateToAlertMessage,
-} from './messages';
+} from '../common/messages';
+import { createFormatter } from '../../../../common/formatters';
+import { AlertStates } from './types';
+import { evaluateAlert } from './lib/evaluate_alert';
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   async function (options: AlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
+    if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
@@ -34,9 +37,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     const alertResults = await evaluateAlert(services.callCluster, params, config);
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
-    const groups = Object.keys(first(alertResults));
+    const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${group}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -45,7 +48,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
       );
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group].isNoData);
+      const isNoData = alertResults.some((result) => last(result[group].isNoData));
       const isError = alertResults.some((result) => result[group].isError);
 
       const nextState = isError
@@ -58,7 +61,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
+        reason = alertResults
+          .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
+          .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -74,13 +79,21 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
         }
       }
       if (reason) {
+        const firstResult = first(alertResults);
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
-          timestamp: moment().toISOString(),
-          value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          timestamp,
+          value: mapToConditionsLookup(
+            alertResults,
+            (result) => formatAlertResult(result[group]).currentValue
+          ),
+          threshold: mapToConditionsLookup(
+            alertResults,
+            (result) => formatAlertResult(result[group]).threshold
+          ),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
@@ -109,3 +122,20 @@ const mapToConditionsLookup = (
       (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
       {}
     );
+
+const formatAlertResult = <AlertResult>(
+  alertResult: {
+    metric: string;
+    currentValue: number;
+    threshold: number[];
+  } & AlertResult
+) => {
+  const { metric, currentValue, threshold } = alertResult;
+  if (!metric.endsWith('.pct')) return alertResult;
+  const formatter = createFormatter('percent');
+  return {
+    ...alertResult,
+    currentValue: formatter(currentValue),
+    threshold: Array.isArray(threshold) ? threshold.map((v: number) => formatter(v)) : threshold,
+  };
+};

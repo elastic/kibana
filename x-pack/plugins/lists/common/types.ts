@@ -20,11 +20,3 @@ export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infe
     ? { [K in keyof U]: U[K][0] }
     : never
   : never;
-
-/**
- * This is just a helper to cleanup nasty intersections and unions to make them
- * readable from io.ts, it's an identity that strips away the uglyness of them.
- */
-export type Identity<T> = {
-  [P in keyof T]: T[P];
-};

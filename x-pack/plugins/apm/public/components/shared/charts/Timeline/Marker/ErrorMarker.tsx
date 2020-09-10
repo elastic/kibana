@@ -53,7 +53,7 @@ function truncateMessage(errorMessage?: string) {
   }
 }
 
-export const ErrorMarker: React.FC<Props> = ({ mark }) => {
+export function ErrorMarker({ mark }: Props) {
   const theme = useTheme();
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
@@ -123,4 +123,4 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       </Popover>
     </EuiPopover>
   );
-};
+}

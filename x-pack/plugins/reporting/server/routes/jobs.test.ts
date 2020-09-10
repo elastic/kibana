@@ -16,12 +16,12 @@ import { createMockReportingCore } from '../test_helpers';
 import { ExportTypeDefinition } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/reporting/jobs/download', () => {
   const reportingSymbol = Symbol('reporting');
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
 
@@ -47,6 +47,9 @@ describe('GET /api/reporting/jobs/download', () => {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',
@@ -113,6 +116,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => undefined,
         },
@@ -136,6 +142,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',

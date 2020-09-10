@@ -16,7 +16,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
     processTitle="/lib/systemd/systemd-journald"
     result="success"
     secondary="root"
-    session="unset"
+    session="242"
     text="generic-text-123"
     userName="root"
     workingDirectory="/"
@@ -34,7 +34,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "success",
           ],
           "session": Array [
-            "unset",
+            "242",
           ],
           "summary": Object {
             "actor": Object {

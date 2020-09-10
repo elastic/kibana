@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
+import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initHttp } from './application/services/http';
@@ -33,7 +33,7 @@ export class RemoteClustersUIPlugin
     } = this.initializerContext.config.get<ClientConfigType>();
 
     if (isRemoteClustersUiEnabled) {
-      const esSection = management.sections.getSection(ManagementSectionId.Data);
+      const esSection = management.sections.section.data;
 
       esSection.registerApp({
         id: 'remote_clusters',
@@ -44,10 +44,13 @@ export class RemoteClustersUIPlugin
         mount: async ({ element, setBreadcrumbs, history }) => {
           const [core] = await getStartServices();
           const {
+            chrome: { docTitle },
             i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
           } = core;
+
+          docTitle.change(PLUGIN.getI18nName());
 
           // Initialize services
           initBreadcrumbs(setBreadcrumbs);
@@ -59,7 +62,17 @@ export class RemoteClustersUIPlugin
           const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext, { isCloudEnabled }, history);
+          const unmountAppCallback = await renderApp(
+            element,
+            i18nContext,
+            { isCloudEnabled },
+            history
+          );
+
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
         },
       });
     }

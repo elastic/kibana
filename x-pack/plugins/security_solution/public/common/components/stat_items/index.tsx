@@ -66,10 +66,10 @@ export interface StatItems {
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartSeriesData[];
   barChart?: ChartSeriesData[];
-  from: number;
+  from: string;
   id: string;
   narrowDateRange: UpdateDateRange;
-  to: number;
+  to: string;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -160,8 +160,8 @@ export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
   data: KpiHostsData | KpiNetworkData,
   id: string,
-  from: number,
-  to: number,
+  from: string,
+  to: string,
   narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);

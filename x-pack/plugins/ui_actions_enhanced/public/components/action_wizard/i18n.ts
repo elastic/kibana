@@ -12,3 +12,24 @@ export const txtChangeButton = i18n.translate(
     defaultMessage: 'Change',
   }
 );
+
+export const txtTriggerPickerLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerLabel',
+  {
+    defaultMessage: 'Show option on:',
+  }
+);
+
+export const txtTriggerPickerHelpText = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerHelpText',
+  {
+    defaultMessage: "What's this?",
+  }
+);
+
+export const txtTriggerPickerHelpTooltip = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerHelpTooltip',
+  {
+    defaultMessage: 'Determines when the drilldown appears in context menu',
+  }
+);

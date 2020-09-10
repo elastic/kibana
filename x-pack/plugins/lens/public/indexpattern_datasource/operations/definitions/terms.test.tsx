@@ -13,7 +13,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from './index';
-import { IndexPatternPrivateState } from '../../types';
+import { IndexPatternPrivateState, IndexPattern } from '../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -34,6 +34,7 @@ describe('terms', () => {
       indexPatterns: {},
       existingFields: {},
       currentIndexPatternId: '1',
+      isFirstExistenceFetch: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -68,7 +69,8 @@ describe('terms', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = termsOperation.toEsAggsConfig(
         state.layers.first.columns.col1 as TermsIndexPatternColumn,
-        'col1'
+        'col1',
+        {} as IndexPattern
       );
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
@@ -117,6 +119,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
           aggregationRestrictions: {
             terms: {
@@ -135,6 +138,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'number',
           aggregationRestrictions: {
             terms: {
@@ -153,6 +157,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'boolean',
         })
       ).toEqual({
@@ -166,6 +171,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'ip',
         })
       ).toEqual({
@@ -181,6 +187,7 @@ describe('terms', () => {
           aggregatable: false,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -191,6 +198,7 @@ describe('terms', () => {
           aggregationRestrictions: {},
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -208,6 +216,7 @@ describe('terms', () => {
           searchable: true,
           type: 'boolean',
           name: 'test',
+          displayName: 'test',
         },
         columns: {},
       });
@@ -233,6 +242,7 @@ describe('terms', () => {
           searchable: true,
           type: 'boolean',
           name: 'test',
+          displayName: 'test',
         },
       });
       expect(termsColumn.params).toEqual(

@@ -28,6 +28,9 @@ jest.mock('../../kibana_services', () => ({
     chrome: {
       setBreadcrumbs: () => {},
     },
+    tutorialService: {
+      getModuleNotices: () => [],
+    },
   }),
 }));
 jest.mock('../../../../../kibana_react/public', () => {

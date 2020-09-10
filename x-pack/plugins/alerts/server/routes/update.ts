@@ -49,9 +49,6 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         body: bodySchema,
         params: paramSchema,
       },
-      options: {
-        tags: ['access:alerting-all'],
-      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (

@@ -36,6 +36,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.muninMetrics.nameTitle', {
       defaultMessage: 'Munin metrics',
     }),
+    moduleName,
     euiIconType: '/plugins/home/assets/logos/munin.svg',
     isBeta: true,
     category: TutorialsCategory.METRICS,

@@ -28,8 +28,8 @@ import {
 } from '../../../../embeddable/public';
 
 import { TimeRange } from '../../../../data/public';
-import { SearchEmbeddable } from './search_embeddable';
-import { SearchInput, SearchOutput } from './types';
+
+import { SearchInput, SearchOutput, SearchEmbeddable } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface StartServices {
@@ -92,7 +92,8 @@ export class SearchEmbeddableFactory
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      return new SearchEmbeddable(
+      const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
+      return new SearchEmbeddableClass(
         {
           savedSearch: savedObject,
           $rootScope,

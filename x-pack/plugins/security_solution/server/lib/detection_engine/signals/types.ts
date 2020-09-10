@@ -6,10 +6,16 @@
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerts/server';
+import { AlertType, AlertTypeState, AlertExecutorOptions } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
+
+// used for gap detection code
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type unitType = 's' | 'm' | 'h';
+export const isValidUnit = (unitParam: string): unitParam is unitType =>
+  ['s', 'm', 'h'].includes(unitParam);
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
@@ -38,8 +44,16 @@ export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
   signal?: {
-    parent: Ancestor;
+    // parent is deprecated: new signals should populate parents instead
+    // both are optional until all signals with parent are gone and we can safely remove it
+    parent?: Ancestor;
+    parents?: Ancestor[];
     ancestors: Ancestor[];
+    rule: {
+      id: string;
+    };
+    // signal.depth doesn't exist on pre-7.10 signals
+    depth?: number;
   };
 }
 
@@ -103,11 +117,11 @@ export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is Aler
 };
 
 export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
 };
 
 export interface Ancestor {
-  rule: string;
+  rule?: string;
   id: string;
   type: string;
   index: string;
@@ -116,11 +130,15 @@ export interface Ancestor {
 
 export interface Signal {
   rule: Partial<RulesSchema>;
-  parent: Ancestor;
+  // DEPRECATED: use parents instead of parent
+  parent?: Ancestor;
+  parents: Ancestor[];
   ancestors: Ancestor[];
-  original_time: string;
+  original_time?: string;
   original_event?: SearchTypes;
   status: Status;
+  threshold_count?: SearchTypes;
+  depth: number;
 }
 
 export interface SignalHit {
