@@ -193,6 +193,8 @@ export async function createIndexPattern(indexPatternName) {
     const indexPattern = await indexPatternService.create({
       title: indexPatternName,
     });
+    // saveNew is temp name function naae
+    await indexPatternService.saveNew(indexPattern);
     return {
       success: true,
       id: indexPattern.id,
