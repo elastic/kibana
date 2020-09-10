@@ -72,12 +72,11 @@ const SubButton = React.memo(
     title: string;
     nodeID: string;
   }) => {
-    const hasIcon = hasMenu ?? false;
     const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
     return (
       <StyledActionButton
         onClick={action}
-        iconType={hasIcon ? iconType : 'none'}
+        iconType={hasMenu ? iconType : 'none'}
         fill={false}
         color={'primary'}
         size="s"
