@@ -116,6 +116,7 @@ export const relatedEventsStats: (
 
 /**
  * Map of related events... by entity id
+ * @deprecated
  */
 export const relatedEventsByEntityId = composeSelectors(
   dataStateSelector,
@@ -125,6 +126,7 @@ export const relatedEventsByEntityId = composeSelectors(
 /**
  * Returns a function that returns the information needed to display related event details based on
  * the related event's entityID and its own ID.
+ * @deprecated
  */
 export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
   dataStateSelector,
@@ -134,6 +136,7 @@ export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
 export const relatedEventsByCategory = composeSelectors(
   dataStateSelector,
@@ -142,6 +145,7 @@ export const relatedEventsByCategory = composeSelectors(
 
 /**
  * Entity ids to booleans for waiting status
+ * @deprecated
  */
 export const relatedEventsReady = composeSelectors(
   dataStateSelector,
@@ -152,6 +156,7 @@ export const relatedEventsReady = composeSelectors(
  * Business logic lookup functions by ECS category by entity id.
  * Example usage:
  * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ * @deprecated
  */
 export const relatedEventInfoByEntityId = composeSelectors(
   dataStateSelector,
