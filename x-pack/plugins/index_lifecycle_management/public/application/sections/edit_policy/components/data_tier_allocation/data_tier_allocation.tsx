@@ -64,6 +64,7 @@ export const DataTierAllocation = (
     <div data-test-subj={`${phase}-dataTierAllocationControls`}>
       <EuiFormRow label={i18nTexts.allocationFieldLabel}>
         <EuiSuperSelect
+          data-test-subj="dataTierSelect"
           hasDividers
           valueOfSelected={phaseData.dataTierAllocationType}
           onChange={(value) => setPhaseData('dataTierAllocationType', value)}
@@ -84,6 +85,7 @@ export const DataTierAllocation = (
                 ),
               },
               {
+                'data-test-subj': 'customDataAllocationOption',
                 value: 'custom',
                 inputDisplay: i18nTexts.allocationOptions.custom.inputDisplay,
                 dropdownDisplay: (

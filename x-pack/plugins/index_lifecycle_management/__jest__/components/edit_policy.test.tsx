@@ -93,13 +93,11 @@ const activatePhase = async (rendered: ReactWrapper, phase: string) => {
 const openNodeAttributesSection = (rendered: ReactWrapper, phase: string) => {
   const getControls = () => findTestSubject(rendered, `${phase}-dataTierAllocationControls`);
   act(() => {
-    findTestSubject(getControls(), 'advancedAllocationSettingsButton').simulate('click');
+    findTestSubject(getControls(), 'dataTierSelect').simulate('click');
   });
   rendered.update();
   act(() => {
-    findTestSubject(getControls(), 'useCustomAllocationSwitch').simulate('click', {
-      target: { checked: true },
-    });
+    findTestSubject(getControls(), 'customDataAllocationOption').simulate('click');
   });
   rendered.update();
 };
