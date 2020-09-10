@@ -71,9 +71,8 @@ export const AnalyzerParameter = ({
   allowsIndexDefaultOption = true,
   'data-test-subj': dataTestSubj,
 }: Props) => {
-  const indexSettings = useIndexSettings();
+  const { value: indexSettings } = useIndexSettings();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
-
   const analyzerOptions = allowsIndexDefaultOption
     ? ANALYZER_OPTIONS
     : ANALYZER_OPTIONS_WITHOUT_DEFAULT;
