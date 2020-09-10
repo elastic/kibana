@@ -45,6 +45,8 @@ export const newFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRou
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath),
+
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
         defaultMessage: 'Create',
@@ -60,6 +62,7 @@ export const editFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRo
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',

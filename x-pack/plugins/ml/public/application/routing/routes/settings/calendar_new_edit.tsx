@@ -44,6 +44,7 @@ export const newCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
@@ -59,6 +60,7 @@ export const editCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRout
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',

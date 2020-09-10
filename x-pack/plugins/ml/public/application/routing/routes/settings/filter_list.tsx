@@ -10,7 +10,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -26,7 +25,7 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
 
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
@@ -36,12 +35,7 @@ export const filterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute 
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    {
-      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
-        defaultMessage: 'Filter lists',
-      }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists', navigateToPath),
-    },
+    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath),
   ],
 });
 
