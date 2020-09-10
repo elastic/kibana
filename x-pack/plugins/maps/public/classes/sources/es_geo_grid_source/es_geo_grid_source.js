@@ -406,10 +406,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
-
   async getSupportedShapeTypes() {
     if (this._descriptor.requestType === RENDER_AS.GRID) {
       return [VECTOR_SHAPE_TYPE.POLYGON];

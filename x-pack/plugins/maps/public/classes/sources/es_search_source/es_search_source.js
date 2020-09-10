@@ -438,7 +438,7 @@ export class ESSearchSource extends AbstractESSource {
     return properties;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
+  async getTooltipProperties(properties) {
     const indexPattern = await this.getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(
       properties._id,

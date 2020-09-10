@@ -12,6 +12,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
+import { IField } from '../../fields/field';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
 
 export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
@@ -29,6 +30,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   getFieldNames(): string[];
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
+  createField({ fieldName }: { fieldName: string }): IField;
 
   getLayerName(): string;
 
