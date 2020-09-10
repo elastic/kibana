@@ -36,6 +36,7 @@ exports[`renders without crashing 1`] = `
         />
         <EuiLink
           aria-label="Customize the URL identifier"
+          data-test-subj="CustomizeOrReset"
           onClick={[Function]}
         >
           <FormattedMessage
@@ -49,6 +50,7 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="spaceURLDisplay"
       fullWidth={true}
       inputRef={[Function]}
       onChange={[Function]}

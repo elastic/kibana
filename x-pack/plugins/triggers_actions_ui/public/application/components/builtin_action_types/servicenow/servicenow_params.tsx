@@ -79,7 +79,14 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Incident</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.title',
+            {
+              defaultMessage: 'Incident',
+            }
+          )}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
