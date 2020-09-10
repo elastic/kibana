@@ -428,7 +428,9 @@ export class VisualizeEmbeddable
       input.savedVis.title = this.getTitle();
     }
     delete input.savedVis.id;
-    return input as VisualizeByValueInput;
+    return new Promise<VisualizeByValueInput>((resolve) => {
+      resolve({ ...(input as VisualizeByValueInput) });
+    });
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
