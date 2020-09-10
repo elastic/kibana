@@ -18,9 +18,15 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
+  EuiFieldText,
 } from '@elastic/eui';
 
-import { UseField, ArrayItem, Field } from '../../../../../../shared_imports';
+import {
+  UseField,
+  ArrayItem,
+  ValidationFunc,
+  getFieldValidityAndErrorMessage,
+} from '../../../../../../shared_imports';
 
 import './drag_and_drop_text_list.scss';
 
@@ -30,6 +36,10 @@ interface Props {
   onAdd: () => void;
   onRemove: (id: number) => void;
   addLabel: string;
+  /**
+   * Validation to be applied to every text item
+   */
+  textValidation?: ValidationFunc<any, string, string>;
 }
 
 const i18nTexts = {
@@ -45,6 +55,7 @@ function DragAndDropTextListComponent({
   onAdd,
   onRemove,
   addLabel,
+  textValidation,
 }: Props): JSX.Element {
   const [droppableId] = useState(() => uuid.v4());
 
@@ -86,10 +97,25 @@ function DragAndDropTextListComponent({
                       <EuiFlexItem>
                         <UseField<string>
                           path={item.path}
-                          component={Field}
-                          componentProps={{ euiFieldProps: { compressed: true } }}
+                          config={{
+                            validations: textValidation
+                              ? [{ validator: textValidation }]
+                              : undefined,
+                          }}
                           readDefaultValueOnForm={!item.isNew}
-                        />
+                        >
+                          {(field) => {
+                            const { isInvalid } = getFieldValidityAndErrorMessage(field);
+                            return (
+                              <EuiFieldText
+                                compressed
+                                isInvalid={isInvalid}
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
+                            );
+                          }}
+                        </UseField>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon

@@ -14,6 +14,8 @@ import {
   UseArray,
   ToggleField,
   fieldValidators,
+  ValidationFunc,
+  ArrayItem,
 } from '../../../../../../shared_imports';
 
 import { XJsonEditor, DragAndDropTextList } from '../field_components';
@@ -22,7 +24,7 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
-const { isJsonField } = fieldValidators;
+const { isJsonField, emptyField } = fieldValidators;
 
 const i18nTexts = {
   addPatternLabel: i18n.translate(
@@ -30,6 +32,21 @@ const i18nTexts = {
     { defaultMessage: 'Add pattern' }
   ),
 };
+
+const valueRequiredMessage = i18n.translate(
+  'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
+  { defaultMessage: 'A value is required.' }
+);
+
+const patternsValidation: ValidationFunc<any, string, ArrayItem[]> = ({ value, formData }) => {
+  if (value.length === 0) {
+    return {
+      message: valueRequiredMessage,
+    };
+  }
+};
+
+const patternValidation = emptyField(valueRequiredMessage);
 
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
@@ -43,16 +60,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     validations: [
       {
-        validator: ({ value }) => {
-          if ((value as any[]).length === 0) {
-            return {
-              message: i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
-                { defaultMessage: 'A value is required.' }
-              ),
-            };
-          }
-        },
+        validator: patternsValidation as ValidationFunc,
       },
     ],
   },
@@ -129,6 +137,7 @@ export const Grok: FunctionComponent = () => {
                 onAdd={addItem}
                 onRemove={removeItem}
                 addLabel={i18nTexts.addPatternLabel}
+                textValidation={patternValidation}
               />
             </EuiFormRow>
           );
