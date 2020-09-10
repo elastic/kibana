@@ -51,7 +51,10 @@ export const isRangeWithin = (range: RangeTypeLens): boolean => range.from <= ra
 const isFullRange = ({ from, to }: RangeType) => isValidNumber(from) && isValidNumber(to);
 export const isValidRange = (range: RangeTypeLens): boolean => {
   const { from, to } = range;
-  return (isFullRange(range) && isRangeWithin(range)) || isValidNumber(from) || isValidNumber(to);
+  if (isFullRange(range)) {
+    return isRangeWithin(range);
+  }
+  return isValidNumber(from) || isValidNumber(to);
 };
 
 function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
