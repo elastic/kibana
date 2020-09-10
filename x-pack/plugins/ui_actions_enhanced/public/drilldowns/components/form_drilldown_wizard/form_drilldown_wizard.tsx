@@ -75,7 +75,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   );
 
   const hasNotCompatibleLicenseFactory = () =>
-    actionFactories?.some((f) => !f.isCompatibleLicence());
+    actionFactories?.some((f) => !f.isCompatibleLicense());
 
   const renderGetMoreActionsLink = () => (
     <EuiText size="s">

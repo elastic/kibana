@@ -147,6 +147,7 @@ export const CalendarForm = ({
         checked={isGlobalCalendar}
         onChange={onGlobalCalendarChange}
         disabled={saving === true || canCreateCalendar === false}
+        data-test-subj="mlCalendarApplyToAllJobsSwitch"
       />
 
       {isGlobalCalendar === false && (
@@ -166,6 +167,7 @@ export const CalendarForm = ({
               selectedOptions={selectedJobOptions}
               onChange={onJobSelection}
               isDisabled={saving === true || canCreateCalendar === false}
+              data-test-subj="mlCalendarJobSelection"
             />
           </EuiFormRow>
 
@@ -183,6 +185,7 @@ export const CalendarForm = ({
               selectedOptions={selectedGroupOptions}
               onChange={onGroupSelection}
               isDisabled={saving === true || canCreateCalendar === false}
+              data-test-subj="mlCalendarJobGroupSelection"
             />
           </EuiFormRow>
         </>

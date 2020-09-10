@@ -5,7 +5,12 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { deleteMetadataStream } from './data_stream_helper';
+import {
+  deleteAllDocsFromMetadataCurrentIndex,
+  deleteMetadataCurrentStream,
+  deleteAllDocsFromMetadataIndex,
+  deleteMetadataStream,
+} from './data_stream_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -15,12 +20,14 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+
   describe('test metadata api', () => {
     describe('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
-        // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
-        // to do it manually
         await deleteMetadataStream(getService);
+        await deleteAllDocsFromMetadataIndex(getService);
+        await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -34,12 +41,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/endpoint/metadata when index is not empty', () => {
-      before(
-        async () => await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true })
-      );
+      before(async () => {
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        // wait for transform
+        await new Promise((r) => setTimeout(r, 120000));
+      });
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
-      after(async () => await deleteMetadataStream(getService));
+      after(async () => {
+        await deleteMetadataStream(getService);
+        await deleteAllDocsFromMetadataIndex(getService);
+        await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
+      });
       it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
@@ -121,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not host.ip:10.46.229.234',
+              kql: 'not HostDetails.host.ip:10.46.229.234',
             },
           })
           .expect(200);
@@ -146,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not host.ip:${notIncludedIp}`,
+              kql: `not HostDetails.host.ip:${notIncludedIp}`,
             },
           })
           .expect(200);
@@ -154,12 +168,14 @@ export default function ({ getService }: FtrProviderContext) {
         const resultIps: string[] = [].concat(
           ...body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.ip)
         );
-        expect(resultIps).to.eql([
-          '10.192.213.130',
-          '10.70.28.129',
-          '10.101.149.26',
-          '2606:a000:ffc0:39:11ef:37b9:3371:578c',
-        ]);
+        expect(resultIps.sort()).to.eql(
+          [
+            '10.192.213.130',
+            '10.70.28.129',
+            '10.101.149.26',
+            '2606:a000:ffc0:39:11ef:37b9:3371:578c',
+          ].sort()
+        );
         expect(resultIps).not.include.eql(notIncludedIp);
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
@@ -173,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
@@ -194,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
@@ -215,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not Endpoint.policy.applied.status:success`,
+              kql: `not HostDetails.Endpoint.policy.applied.status:success`,
             },
           })
           .expect(200);
@@ -236,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);

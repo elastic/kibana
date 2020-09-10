@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
-import { intervalOptions } from '../_interval_options';
+import { intervalOptions, autoInterval } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
@@ -33,7 +33,10 @@ describe('AggConfig Filters', () => {
     let bucketStart: any;
     let field: any;
 
-    const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
+    const init = (
+      interval: string = autoInterval,
+      duration: any = moment.duration(15, 'minutes')
+    ) => {
       field = {
         name: 'date',
       };

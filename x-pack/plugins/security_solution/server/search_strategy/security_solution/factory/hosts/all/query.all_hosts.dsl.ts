@@ -10,8 +10,10 @@ import {
   Direction,
   HostsRequestOptions,
   SortField,
-} from '../../../../../../common/search_strategy/security_solution';
+  HostsFields,
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 
 export const buildHostsQuery = ({
   defaultIndex,
@@ -77,11 +79,13 @@ export const buildHostsQuery = ({
 
 type QueryOrder = { lastSeen: Direction } | { _key: Direction };
 
-const getQueryOrder = (sort: SortField): QueryOrder => {
+const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
   switch (sort.field) {
-    case 'lastSeen':
+    case HostsFields.lastSeen:
       return { lastSeen: sort.direction };
-    case 'hostName':
+    case HostsFields.hostName:
       return { _key: sort.direction };
+    default:
+      return assertUnreachable(sort.field as never);
   }
 };

@@ -12,6 +12,8 @@ const DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM =
   'actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
 const DASHBOARD_TO_DASHBOARD_ACTION_WIZARD =
   'selectedActionFactory-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
+const DASHBOARD_TO_URL_ACTION_LIST_ITEM = 'actionFactoryItem-URL_DRILLDOWN';
+const DASHBOARD_TO_URL_ACTION_WIZARD = 'selectedActionFactory-URL_DRILLDOWN';
 const DESTINATION_DASHBOARD_SELECT = 'dashboardDrilldownSelectDashboard';
 const DRILLDOWN_WIZARD_SUBMIT = 'drilldownWizardSubmit';
 
@@ -68,8 +70,30 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       await this.selectDestinationDashboard(destinationDashboardTitle);
     }
 
+    async fillInDashboardToURLDrilldownWizard({
+      drilldownName,
+      destinationURLTemplate,
+      trigger,
+    }: {
+      drilldownName: string;
+      destinationURLTemplate: string;
+      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER';
+    }) {
+      await this.fillInDrilldownName(drilldownName);
+      await this.selectDashboardToURLActionIfNeeded();
+      await this.selectTriggerIfNeeded(trigger);
+      await this.fillInURLTemplate(destinationURLTemplate);
+    }
+
     async fillInDrilldownName(name: string) {
       await testSubjects.setValue('drilldownNameInput', name);
+    }
+
+    async selectDashboardToURLActionIfNeeded() {
+      if (await testSubjects.exists(DASHBOARD_TO_URL_ACTION_LIST_ITEM)) {
+        await testSubjects.click(DASHBOARD_TO_URL_ACTION_LIST_ITEM);
+      }
+      await testSubjects.existOrFail(DASHBOARD_TO_URL_ACTION_WIZARD);
     }
 
     async selectDashboardToDashboardActionIfNeeded() {
@@ -81,6 +105,18 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async selectDestinationDashboard(title: string) {
       await comboBox.set(DESTINATION_DASHBOARD_SELECT, title);
+    }
+
+    async selectTriggerIfNeeded(trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER') {
+      if (await testSubjects.exists(`triggerPicker`)) {
+        const container = await testSubjects.find(`triggerPicker-${trigger}`);
+        const radio = await container.findByCssSelector('input[type=radio]');
+        await radio.click();
+      }
+    }
+
+    async fillInURLTemplate(destinationURLTemplate: string) {
+      await testSubjects.setValue('urlInput', destinationURLTemplate);
     }
 
     async saveChanges() {

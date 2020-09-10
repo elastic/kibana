@@ -13,6 +13,7 @@ import React, {
   useState,
 } from 'react';
 import cytoscape from 'cytoscape';
+import dagre from 'cytoscape-dagre';
 import { debounce } from 'lodash';
 import { useTheme } from '../../../hooks/useTheme';
 import {
@@ -22,6 +23,8 @@ import {
 } from './cytoscapeOptions';
 import { useUiTracker } from '../../../../../observability/public';
 
+cytoscape.use(dagre);
+
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
 );
@@ -30,7 +33,6 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
-  width: number;
   serviceName?: string;
   style?: CSSProperties;
 }
@@ -57,59 +59,52 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
 
-function rotatePoint(
-  { x, y }: { x: number; y: number },
-  degreesRotated: number
-) {
-  const radiansPerDegree = Math.PI / 180;
-  const θ = radiansPerDegree * degreesRotated;
-  const cosθ = Math.cos(θ);
-  const sinθ = Math.sin(θ);
+function getLayoutOptions(nodeHeight: number): cytoscape.LayoutOptions {
   return {
-    x: x * cosθ - y * sinθ,
-    y: x * sinθ + y * cosθ,
-  };
-}
-
-function getLayoutOptions(
-  selectedRoots: string[],
-  height: number,
-  width: number,
-  nodeHeight: number
-): cytoscape.LayoutOptions {
-  return {
-    name: 'breadthfirst',
-    // @ts-ignore DefinitelyTyped is incorrect here. Roots can be an Array
-    roots: selectedRoots.length ? selectedRoots : undefined,
+    name: 'dagre',
     fit: true,
     padding: nodeHeight,
     spacingFactor: 1.2,
     // @ts-ignore
-    // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
-    // The extra 5° achieves the effect of separating overlapping taxi-styled edges.
-    transform: (node: any, pos: cytoscape.Position) => rotatePoint(pos, -95),
-    // swap width/height of boundingBox to compensate for the rotation
-    boundingBox: { x1: 0, y1: 0, w: height, h: width },
+    nodeSep: nodeHeight,
+    edgeSep: 32,
+    rankSep: 128,
+    rankDir: 'LR',
+    ranker: 'network-simplex',
   };
 }
 
-function selectRoots(cy: cytoscape.Core): string[] {
-  const bfs = cy.elements().bfs({
-    roots: cy.elements().leaves(),
+/*
+ * @notice
+ * This product includes code in the function applyCubicBezierStyles that was
+ * inspired by a public Codepen, which was available under a "MIT" license.
+ *
+ * Copyright (c) 2020 by Guillaume (https://codepen.io/guillaumethomas/pen/xxbbBKO)
+ * MIT License http://www.opensource.org/licenses/mit-license
+ */
+function applyCubicBezierStyles(edges: cytoscape.EdgeCollection) {
+  edges.forEach((edge) => {
+    const { x: x0, y: y0 } = edge.source().position();
+    const { x: x1, y: y1 } = edge.target().position();
+    const x = x1 - x0;
+    const y = y1 - y0;
+    const z = Math.sqrt(x * x + y * y);
+    const costheta = z === 0 ? 0 : x / z;
+    const alpha = 0.25;
+    // Two values for control-point-distances represent a pair symmetric quadratic
+    // bezier curves joined in the middle as a seamless cubic bezier curve:
+    edge.style('control-point-distances', [
+      -alpha * y * costheta,
+      alpha * y * costheta,
+    ]);
+    edge.style('control-point-weights', [alpha, 1 - alpha]);
   });
-  const furthestNodeFromLeaves = bfs.path.last();
-  return cy
-    .elements()
-    .roots()
-    .union(furthestNodeFromLeaves)
-    .map((el) => el.id());
 }
 
 export function Cytoscape({
   children,
   elements,
   height,
-  width,
   serviceName,
   style,
 }: CytoscapeProps) {
@@ -151,13 +146,7 @@ export function Cytoscape({
         } else {
           resetConnectedEdgeStyle();
         }
-
-        const selectedRoots = selectRoots(event.cy);
-        const layout = cy.layout(
-          getLayoutOptions(selectedRoots, height, width, nodeHeight)
-        );
-
-        layout.run();
+        cy.layout(getLayoutOptions(nodeHeight)).run();
       }
     };
     let layoutstopDelayTimeout: NodeJS.Timeout;
@@ -180,6 +169,7 @@ export function Cytoscape({
           event.cy.fit(undefined, nodeHeight);
         }
       }, 0);
+      applyCubicBezierStyles(event.cy.edges());
     };
     // debounce hover tracking so it doesn't spam telemetry with redundant events
     const trackNodeEdgeHover = debounce(
@@ -211,6 +201,9 @@ export function Cytoscape({
         console.debug('cytoscape:', event);
       }
     };
+    const dragHandler: cytoscape.EventHandler = (event) => {
+      applyCubicBezierStyles(event.target.connectedEdges());
+    };
 
     if (cy) {
       cy.on('data layoutstop select unselect', debugHandler);
@@ -220,6 +213,7 @@ export function Cytoscape({
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
+      cy.on('drag', 'node', dragHandler);
 
       cy.remove(cy.elements());
       cy.add(elements);
@@ -239,19 +233,11 @@ export function Cytoscape({
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
+        cy.removeListener('drag', 'node', dragHandler);
       }
       clearTimeout(layoutstopDelayTimeout);
     };
-  }, [
-    cy,
-    elements,
-    height,
-    serviceName,
-    trackApmEvent,
-    width,
-    nodeHeight,
-    theme,
-  ]);
+  }, [cy, elements, height, serviceName, trackApmEvent, nodeHeight, theme]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

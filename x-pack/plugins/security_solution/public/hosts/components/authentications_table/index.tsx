@@ -10,8 +10,8 @@ import { has } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { AuthenticationsEdges } from '../../../graphql/types';
+import { AuthenticationsEdges } from '../../../../common/search_strategy/security_solution/hosts/authentications';
+
 import { State } from '../../../common/store';
 import {
   DragEffects,
@@ -20,13 +20,15 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { HostDetailsLink, IPDetailsLink } from '../../../common/components/links';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { getRowItemDraggables } from '../../../common/components/tables/helpers';
+
+import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
@@ -262,7 +264,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
-        render: (item) => <IPDetailsLink ip={item} />,
+        render: (item) => <NetworkDetailsLink ip={item} />,
       }),
   },
   {
@@ -307,7 +309,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastFailureSource`,
-        render: (item) => <IPDetailsLink ip={item} />,
+        render: (item) => <NetworkDetailsLink ip={item} />,
       }),
   },
   {

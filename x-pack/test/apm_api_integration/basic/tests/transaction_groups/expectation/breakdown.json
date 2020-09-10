@@ -1,26 +1,4 @@
 {
-  "kpis":[
-     {
-        "name":"app",
-        "percentage":0.16700861715223636,
-        "color":"#54b399"
-     },
-     {
-        "name":"http",
-        "percentage":0.7702092736971686,
-        "color":"#6092c0"
-     },
-     {
-        "name":"postgresql",
-        "percentage":0.0508822322527698,
-        "color":"#d36086"
-     },
-     {
-        "name":"redis",
-        "percentage":0.011899876897825195,
-        "color":"#9170b8"
-     }
-  ],
   "timeseries":[
      {
         "title":"app",
@@ -64,7 +42,8 @@
               "y":null
            }
         ],
-        "hideLegend":true
+        "hideLegend":false,
+        "legendValue": "17%"
      },
      {
         "title":"http",
@@ -108,7 +87,8 @@
               "y":null
            }
         ],
-        "hideLegend":true
+        "hideLegend":false,
+        "legendValue": "77%"
      },
      {
         "title":"postgresql",
@@ -152,7 +132,8 @@
               "y":null
            }
         ],
-        "hideLegend":true
+        "hideLegend":false,
+        "legendValue": "5.1%"
      },
      {
         "title":"redis",
@@ -196,7 +177,8 @@
               "y":null
            }
         ],
-        "hideLegend":true
+        "hideLegend":false,
+        "legendValue": "1.2%"
      }
   ]
 }

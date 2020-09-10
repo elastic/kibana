@@ -12,6 +12,7 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
@@ -125,7 +126,7 @@ export const makeMapStateToProps = () => {
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const flyoutTimeline = getTimeline(state, 'timeline-1');
+    const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
         ? {
@@ -228,7 +229,7 @@ export const updateUrlStateString = ({
     }
   } else if (urlKey === CONSTANTS.sourcerer) {
     const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-    console.log('replace sourcerer in url', sourcererState);
+    // console.log('replace sourcerer in url', sourcererState);
     // if (sourcererState != null && Object.keys(sourcererState).length > 0) {
     //   return replaceStateInLocation({
     //     history,

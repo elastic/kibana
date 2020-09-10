@@ -42,7 +42,7 @@ const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logg
       ({ total }) =>
         total &&
         logger.warn(
-          'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation.'
+          'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation.'
         )
     );
 };
