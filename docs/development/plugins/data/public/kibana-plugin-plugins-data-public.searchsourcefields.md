@@ -16,6 +16,7 @@ export interface SearchSourceFields
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-public.searchsourcefields.aggs.md) | <code>any</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.searchsourcefields.fields.md) | <code>NameList</code> |  |
+|  [fieldsApi](./kibana-plugin-plugins-data-public.searchsourcefields.fieldsapi.md) | <code>NameList</code> |  |
 |  [filter](./kibana-plugin-plugins-data-public.searchsourcefields.filter.md) | <code>Filter[] &#124; Filter &#124; (() =&gt; Filter[] &#124; Filter &#124; undefined)</code> |  |
 |  [from](./kibana-plugin-plugins-data-public.searchsourcefields.from.md) | <code>number</code> |  |
 |  [highlight](./kibana-plugin-plugins-data-public.searchsourcefields.highlight.md) | <code>any</code> |  |

@@ -47,6 +47,7 @@ export interface SearchSourceFields {
   source?: NameList;
   version?: boolean;
   fields?: NameList;
+  fieldsApi?: NameList;
   index?: IndexPattern;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;

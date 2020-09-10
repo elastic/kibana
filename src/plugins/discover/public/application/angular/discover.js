@@ -948,18 +948,13 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource } = $scope;
-    const indexPatternFields = indexPattern.getComputedFields();
-    const columns = $scope.state.columns.filter((name) => {
-      return !indexPatternFields.docvalueFields.find((docVal) => docVal.field === name);
-    });
-    const fields = [
-      ...columns,
-      ...indexPatternFields.docvalueFields,
-      ...Object.keys(indexPatternFields.scriptFields),
-    ];
+    const { docvalueFields } = indexPattern.getComputedFields();
+    const columns = $scope.state.columns.filter(
+      (name) => !docvalueFields.find((docVal) => docVal.field === name)
+    );
     searchSource
       .setField('index', $scope.indexPattern)
-      .setField('fields', fields)
+      .setField('fieldsApi', columns)
       .setField('source', true)
       .setField('size', $scope.opts.sampleSize)
       .setField(

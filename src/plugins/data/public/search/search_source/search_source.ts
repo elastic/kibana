@@ -381,6 +381,8 @@ export class SearchSource {
       case 'fields':
         const fields = uniq((data[key] || []).concat(val));
         return addToRoot(key, fields);
+      case 'fieldsApi':
+        return key && data[key] == null && addToBody('fields', val);
       case 'index':
       case 'type':
       case 'highlightAll':
@@ -465,7 +467,7 @@ export class SearchSource {
 
       // request the remaining fields from both stored_fields and _source
       const remainingFields = difference(fields, keys(body.script_fields));
-      body.fields = remainingFields;
+      body.stored_fields = remainingFields;
       setWith(body, '_source.includes', remainingFields, (nsValue) =>
         isObject(nsValue) ? {} : nsValue
       );

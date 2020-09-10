@@ -1771,6 +1771,8 @@ export interface SearchSourceFields {
     // (undocumented)
     fields?: NameList;
     // (undocumented)
+    fieldsApi?: NameList;
+    // (undocumented)
     filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
     // (undocumented)
     from?: number;
