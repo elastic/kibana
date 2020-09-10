@@ -29,7 +29,7 @@ function getMetricData(
   entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
-  interval: string
+  intervalMs: number
 ): Observable<ModelPlotOutput> {
   if (
     isModelPlotChartableForDetector(job, detectorIndex) &&
@@ -76,7 +76,7 @@ function getMetricData(
       criteriaFields,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     );
   } else {
     const obj: ModelPlotOutput = {
@@ -96,7 +96,7 @@ function getMetricData(
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        interval
+        intervalMs
       )
       .pipe(
         map((resp) => {

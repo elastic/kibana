@@ -17,6 +17,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
       message: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <EmailParamsFields
         actionParams={actionParams}
