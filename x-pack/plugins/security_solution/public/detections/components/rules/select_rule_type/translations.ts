@@ -17,7 +17,7 @@ export const EQL_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.eqlTypeDescription',
   {
     defaultMessage:
-      'Use Event Query Language (EQL) to match events, generate squences, and stack data',
+      'Use Event Query Language (EQL) to match events, generate sequences, and stack data',
   }
 );
 
