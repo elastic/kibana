@@ -14,13 +14,6 @@ import {
   TopNetworkTablesEcsField,
 } from '../common';
 
-export enum FlowTarget {
-  client = 'client',
-  destination = 'destination',
-  server = 'server',
-  source = 'source',
-}
-
 export interface TopCountriesItemSource {
   country?: Maybe<string>;
   destination_ips?: Maybe<number>;

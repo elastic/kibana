@@ -141,7 +141,7 @@ const getCountIndicators = (importItems: ImportItem[]) => {
   );
 };
 
-const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
+const getStatusIndicator = ({ outcome, errorMessage = 'Error' }: ImportItem) => {
   switch (outcome) {
     case 'created':
       return (
@@ -168,8 +168,8 @@ const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
           type={'alert'}
           color={'danger'}
           content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
-            defaultMessage: 'Error{message}',
-            values: { message: errorMessage ? `: ${errorMessage}` : '' },
+            defaultMessage: '{errorMessage}',
+            values: { errorMessage },
           })}
         />
       );
@@ -194,11 +194,18 @@ export const ImportSummary = ({ failedImports, successfulImports }: ImportSummar
         }
       >
         <h3>
-          <FormattedMessage
-            id="savedObjectsManagement.importSummary.headerLabel"
-            defaultMessage="{importCount} object(s) imported"
-            values={{ importCount: importItems.length }}
-          />
+          {importItems.length === 1 ? (
+            <FormattedMessage
+              id="savedObjectsManagement.importSummary.headerLabelSingular"
+              defaultMessage="1 object imported"
+            />
+          ) : (
+            <FormattedMessage
+              id="savedObjectsManagement.importSummary.headerLabelPlural"
+              defaultMessage="{importCount} objects imported"
+              values={{ importCount: importItems.length }}
+            />
+          )}
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
