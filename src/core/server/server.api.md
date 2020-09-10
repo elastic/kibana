@@ -40,6 +40,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -118,6 +119,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -141,6 +143,7 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -150,10 +153,12 @@ import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
 
-// Warning: (ae-forgotten-export) The symbol "appendersSchema" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = TypeOf<typeof appendersSchema>;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
 
 // @public
 export function assertNever(x: never): never;
@@ -322,108 +327,45 @@ export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capa
 export const config: {
     elasticsearch: {
         schema: import("@kbn/config-schema").ObjectType<{
-            sniffOnStart: import("@kbn/config-schema").Type<boolean>;
-            sniffInterval: import("@kbn/config-schema").Type<false | import("moment").Duration>;
-            sniffOnConnectionFault: import("@kbn/config-schema").Type<boolean>;
-            hosts: import("@kbn/config-schema").Type<string | string[]>;
-            preserveHost: import("@kbn/config-schema").Type<boolean>;
-            username: import("@kbn/config-schema").Type<string | undefined>;
-            password: import("@kbn/config-schema").Type<string | undefined>;
-            requestHeadersWhitelist: import("@kbn/config-schema").Type<string | string[]>;
-            customHeaders: import("@kbn/config-schema").Type<Record<string, string>>;
-            shardTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            requestTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            pingTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            startupTimeout: import("@kbn/config-schema").Type<import("moment").Duration>;
-            logQueries: import("@kbn/config-schema").Type<boolean>;
+            sniffOnStart: Type<boolean>;
+            sniffInterval: Type<false | import("moment").Duration>;
+            sniffOnConnectionFault: Type<boolean>;
+            hosts: Type<string | string[]>;
+            preserveHost: Type<boolean>;
+            username: Type<string | undefined>;
+            password: Type<string | undefined>;
+            requestHeadersWhitelist: Type<string | string[]>;
+            customHeaders: Type<Record<string, string>>;
+            shardTimeout: Type<import("moment").Duration>;
+            requestTimeout: Type<import("moment").Duration>;
+            pingTimeout: Type<import("moment").Duration>;
+            startupTimeout: Type<import("moment").Duration>;
+            logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: import("@kbn/config-schema").Type<"none" | "certificate" | "full">;
-                certificateAuthorities: import("@kbn/config-schema").Type<string | string[] | undefined>;
-                certificate: import("@kbn/config-schema").Type<string | undefined>;
-                key: import("@kbn/config-schema").Type<string | undefined>;
-                keyPassphrase: import("@kbn/config-schema").Type<string | undefined>;
+                verificationMode: Type<"none" | "certificate" | "full">;
+                certificateAuthorities: Type<string | string[] | undefined>;
+                certificate: Type<string | undefined>;
+                key: Type<string | undefined>;
+                keyPassphrase: Type<string | undefined>;
                 keystore: import("@kbn/config-schema").ObjectType<{
-                    path: import("@kbn/config-schema").Type<string | undefined>;
-                    password: import("@kbn/config-schema").Type<string | undefined>;
+                    path: Type<string | undefined>;
+                    password: Type<string | undefined>;
                 }>;
                 truststore: import("@kbn/config-schema").ObjectType<{
-                    path: import("@kbn/config-schema").Type<string | undefined>;
-                    password: import("@kbn/config-schema").Type<string | undefined>;
+                    path: Type<string | undefined>;
+                    password: Type<string | undefined>;
                 }>;
-                alwaysPresentCertificate: import("@kbn/config-schema").Type<boolean>;
+                alwaysPresentCertificate: Type<boolean>;
             }>;
-            apiVersion: import("@kbn/config-schema").Type<string>;
+            apiVersion: Type<string>;
             healthCheck: import("@kbn/config-schema").ObjectType<{
-                delay: import("@kbn/config-schema").Type<import("moment").Duration>;
+                delay: Type<import("moment").Duration>;
             }>;
             ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
-        appenders: import("@kbn/config-schema").Type<Readonly<{} & {
-            layout: Readonly<{} & {
-                kind: "json";
-            }> | Readonly<{
-                pattern?: string | undefined;
-                highlight?: boolean | undefined;
-            } & {
-                kind: "pattern";
-            }>;
-            kind: "console";
-        }> | Readonly<{} & {
-            path: string;
-            layout: Readonly<{} & {
-                kind: "json";
-            }> | Readonly<{
-                pattern?: string | undefined;
-                highlight?: boolean | undefined;
-            } & {
-                kind: "pattern";
-            }>;
-            kind: "file";
-        }> | Readonly<{
-            legacyLoggingConfig?: any;
-        } & {
-            kind: "legacy-appender";
-        }>>;
-        loggers: import("@kbn/config-schema").ObjectType<{
-            appenders: import("@kbn/config-schema").Type<string[]>;
-            context: import("@kbn/config-schema").Type<string>;
-            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
-        }>;
-        loggerContext: import("@kbn/config-schema").ObjectType<{
-            appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
-                layout: Readonly<{} & {
-                    kind: "json";
-                }> | Readonly<{
-                    pattern?: string | undefined;
-                    highlight?: boolean | undefined;
-                } & {
-                    kind: "pattern";
-                }>;
-                kind: "console";
-            }> | Readonly<{} & {
-                path: string;
-                layout: Readonly<{} & {
-                    kind: "json";
-                }> | Readonly<{
-                    pattern?: string | undefined;
-                    highlight?: boolean | undefined;
-                } & {
-                    kind: "pattern";
-                }>;
-                kind: "file";
-            }> | Readonly<{
-                legacyLoggingConfig?: any;
-            } & {
-                kind: "legacy-appender";
-            }>>>;
-            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
-                context: string;
-                appenders: string[];
-                level: import("./logging/log_level").LogLevelId;
-            }>[]>;
-        }>;
+        appenders: Type<AppenderConfigType>;
     };
 };
 
@@ -2855,17 +2797,10 @@ export type SharedGlobalConfig = RecursiveReadonly<{
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
-//
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
-    dependencies$: Observable<Record<string, ServiceStatus>>;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
-    derivedStatus$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
-    set(status$: Observable<ServiceStatus>): void;
 }
 
 // @public
@@ -2953,13 +2888,13 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:163:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:164:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:132:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:133:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:134:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:135:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:136:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

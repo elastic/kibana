@@ -19,11 +19,10 @@ import {
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
-  ISearchOptions,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
-import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
+import { ISearchOptions, IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
 
 function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
   return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');
@@ -71,9 +70,8 @@ export const enhancedEsSearchStrategyProvider = (
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.debug(`cancel ${id}`);
-    await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'DELETE',
-      path: encodeURI(`/_async_search/${id}`),
+    await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
+      id,
     });
   };
 
@@ -85,39 +83,29 @@ async function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ): Promise<IEsSearchResponse> {
-  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    ...request.params,
-  };
-
-  params.trackTotalHits = true; // Get the exact count of hits
-
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-
-  const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
-
-  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
-  const batchedReduceSize = request.id ? undefined : 64;
+  let promise;
 
   const asyncOptions = {
     waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
     keepAlive: '1m', // Extend the TTL for this search request by one minute
   };
 
-  const querystring = toSnakeCase({
-    ...asyncOptions,
-    ...(batchedReduceSize && { batchedReduceSize }),
-    ...queryParams,
-  });
+  // If we have an ID, then just poll for that ID, otherwise send the entire request body
+  if (!request.id) {
+    const submitOptions = toSnakeCase({
+      batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+      trackTotalHits: true, // Get the exact count of hits
+      ...asyncOptions,
+      ...request.params,
+    });
 
-  // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
-  const promise = client.transport.request({
-    method,
-    path,
-    body,
-    querystring,
-  });
+    promise = client.asyncSearch.submit(submitOptions);
+  } else {
+    promise = client.asyncSearch.get({
+      id: request.id,
+      ...toSnakeCase(asyncOptions),
+    });
+  }
 
   // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
   if (options?.signal) options.signal.addEventListener('abort', () => promise.abort());

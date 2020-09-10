@@ -40,6 +40,7 @@ describe('AggConfig Filters', () => {
           getByName: () => field,
           filter: () => [field],
         },
+        getFormatterForField: () => new BytesFormat({}, getConfig),
       } as any;
 
       return new AggConfigs(
