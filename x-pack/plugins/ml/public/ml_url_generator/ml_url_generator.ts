@@ -43,8 +43,12 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
 
   public readonly id = ML_APP_URL_GENERATOR;
 
-  public readonly createUrl = async (mlUrlGeneratorState: MlUrlGeneratorState): Promise<string> => {
-    const appBasePath = this.params.appBasePath;
+  public readonly createUrl = async (
+    mlUrlGeneratorParams: MlUrlGeneratorState
+  ): Promise<string> => {
+    const { excludeBasePath, ...mlUrlGeneratorState } = mlUrlGeneratorParams;
+    const appBasePath = excludeBasePath === true ? '' : this.params.appBasePath;
+
     switch (mlUrlGeneratorState.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         return createAnomalyDetectionJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);

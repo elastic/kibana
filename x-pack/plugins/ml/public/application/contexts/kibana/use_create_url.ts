@@ -22,8 +22,8 @@ export const useMlUrlGenerator = () => {
   return getUrlGenerator(ML_APP_URL_GENERATOR);
 };
 
-export const useMlLink = (params: MlUrlGeneratorState): string | undefined => {
-  const [href, setHref] = useState<string | undefined>(undefined);
+export const useMlLink = (params: MlUrlGeneratorState): string => {
+  const [href, setHref] = useState<string>(params.page);
   const mlUrlGenerator = useMlUrlGenerator();
 
   const generateUrl = useCallback(async () => {

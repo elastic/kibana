@@ -12,9 +12,9 @@ import { DataFrameAnalyticsType } from './data_frame_analytics';
 type OptionalPageState = object | undefined;
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
-  ? { page: PageType; pageState?: PageState }
+  ? { page: PageType; pageState?: PageState; excludeBasePath?: boolean }
   : PageState extends object
-  ? { page: PageType; pageState: PageState }
+  ? { page: PageType; pageState: PageState; excludeBasePath?: boolean }
   : { page: PageType };
 
 export interface MlCommonGlobalState {

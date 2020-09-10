@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
+import { Link } from 'react-router-dom';
+import { useMlLink } from '../../../contexts/kibana';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
@@ -20,22 +21,6 @@ interface Props {
 }
 
 export const ViewLink: FC<Props> = ({ item }) => {
-  const navigateToPath = useNavigateToPath();
-  const urlGenerator = useMlUrlGenerator();
-
-  const clickHandler = useCallback(async () => {
-    const analysisType = getAnalysisType(item.config.analysis);
-    const url = await urlGenerator.createUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-      pageState: {
-        jobId: item.id,
-        analysisType: analysisType as DataFrameAnalyticsType,
-      },
-    });
-
-    navigateToPath(url);
-  }, []);
-
   const { disabled, tooltipContent } = getViewLinkStatus(item);
 
   const viewJobResultsButtonText = i18n.translate(
@@ -46,23 +31,34 @@ export const ViewLink: FC<Props> = ({ item }) => {
   );
 
   const tooltipText = disabled === false ? viewJobResultsButtonText : tooltipContent;
+  const analysisType = useMemo(() => getAnalysisType(item.config.analysis), [item]);
+
+  const viewAnalyticsResultsLink = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+    pageState: {
+      jobId: item.id,
+      analysisType: analysisType as DataFrameAnalyticsType,
+    },
+    excludeBasePath: true,
+  });
 
   return (
     <EuiToolTip position="bottom" content={tooltipText}>
-      <EuiButtonEmpty
-        color="text"
-        size="xs"
-        onClick={clickHandler}
-        iconType="visTable"
-        aria-label={viewJobResultsButtonText}
-        className="results-button"
-        data-test-subj="mlOverviewAnalyticsJobViewButton"
-        isDisabled={disabled}
-      >
-        {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
-          defaultMessage: 'View',
-        })}
-      </EuiButtonEmpty>
+      <Link to={viewAnalyticsResultsLink}>
+        <EuiButtonEmpty
+          color="text"
+          size="xs"
+          iconType="visTable"
+          aria-label={viewJobResultsButtonText}
+          className="results-button"
+          data-test-subj="mlOverviewAnalyticsJobViewButton"
+          isDisabled={disabled}
+        >
+          {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
+            defaultMessage: 'View',
+          })}
+        </EuiButtonEmpty>
+      </Link>
     </EuiToolTip>
   );
 };
