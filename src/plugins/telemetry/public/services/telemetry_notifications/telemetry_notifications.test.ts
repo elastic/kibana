@@ -70,7 +70,7 @@ describe('shouldShowOptedInNoticeBanner', () => {
     expect(telemetryNotifications.shouldShowOptedInNoticeBanner()).toBe(false);
   });
 
-  it('should return false because already seen or the user cannot change the settings', () => {
+  it("should return false because the banner has already been seen or the user doesn't have privileges to change saved objects", () => {
     const telemetryService = mockTelemetryService();
     telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(false);
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
