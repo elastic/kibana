@@ -35,13 +35,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
     defaultTemplate = DefaultTemplate
 
-//        triggers {
-//            vcs {
-//                perCheckinTriggering = true
-//            }
-//        }
-//    }
-
     features {
       val sizes = listOf("2", "4", "8", "16")
       for (size in sizes) {
