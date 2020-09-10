@@ -7,9 +7,15 @@
 import { pick, cloneDeep } from 'lodash';
 
 import { PluginInitializerContext, Logger } from '../../../../../../core/server';
+import {
+  TelemetryPluginsStart,
+  TelemetryPluginsSetup,
+} from '../../../../../../src/plugins/telemetry/server';
 
 export interface TelemetryEventsSenderContract {
   logger: Logger;
+  telemetryStart: TelemetryPluginsStart;
+  telemetrySetup: TelemetryPluginsSetup;
 }
 
 // Allowlist for the fields that we copy from the original event to the
@@ -30,12 +36,17 @@ export class TelemetryEventsSender {
   private readonly checkIntervalMs = 5 * 1000;
   private readonly maxQueueSize = 100;
   private readonly logger: Logger;
+  private readonly telemetryStart: TelemetryPluginsStart;
+  private readonly telemetrySetup: TelemetryPluginsSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private queue: object[] = [];
+  private isOptedIn = true; // Assume true until the first check
 
   public start(startContract: TelemetryEventsSenderContract) {
     this.logger = startContract.logger.get('telemetry_events');
+    this.telemetrySetup = startContract.telemetrySetup;
+    this.telemetryStart = startContract.telemetryStart;
 
     this.logger.debug(`Starting task`);
     setTimeout(() => {
@@ -64,8 +75,6 @@ export class TelemetryEventsSender {
       return;
     }
 
-    // TODO check that telemetry is opted-in
-
     if (events.length > this.maxQueueSize - qlength) {
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
@@ -74,7 +83,6 @@ export class TelemetryEventsSender {
   }
 
   private processEvents(events: object[]): object[] {
-    this.logger.debug(`Before processing events: ${JSON.stringify(events, null, 2)}`);
     return events.map(function (obj: object): object {
       const newObj = pick(obj, allowlistTop);
       if ('file' in obj) {
@@ -104,6 +112,16 @@ export class TelemetryEventsSender {
       return;
     }
 
+    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+    if (!this.isOptedIn) {
+      this.logger.debug(`Telemetry is not opted-in.`);
+      this.queue = [];
+      return;
+    }
+
+    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+    this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+
     try {
       this.isSending = true;
       const toSend: object[] = cloneDeep(this.queue);
@@ -117,6 +135,7 @@ export class TelemetryEventsSender {
 
   private async sendEvents(events: object[]) {
     // TODO
-    this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
+    this.logger.debug(`Events sent!`);
+    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
   }
 }
