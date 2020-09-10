@@ -143,7 +143,12 @@ async function installPipeline({
     body: pipeline.contentForInstallation,
   };
   if (pipeline.extension === 'yml') {
-    callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
+    callClusterParams.headers = {
+      // pipeline is YAML
+      'Content-Type': 'application/yaml',
+      // but we want JSON responses (to extract error messages, status code, or other metadata)
+      Accept: 'application/json',
+    };
   }
 
   // This uses the catch-all endpoint 'transport.request' because we have to explicitly

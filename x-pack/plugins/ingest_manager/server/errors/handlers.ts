@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable max-classes-per-file */
 import Boom, { isBoom } from 'boom';
 import {
   RequestHandlerContext,
@@ -12,25 +11,39 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'src/core/server';
-import { appContextService } from './services';
+import { errors as LegacyESErrors } from 'elasticsearch';
+import { appContextService } from '../services';
+import { IngestManagerError, RegistryError, PackageNotFoundError } from './index';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
-
 interface IngestErrorHandlerParams {
   error: IngestManagerError | Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;
 }
+// unsure if this is correct. would prefer to use something "official"
+// this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 
-export class IngestManagerError extends Error {
-  constructor(message?: string) {
-    super(message);
-    this.name = this.constructor.name; // for stack traces
-  }
+interface LegacyESClientError {
+  message: string;
+  stack: string;
+  status: number;
+  displayName: string;
+  path?: string;
+  query?: string | undefined;
+  body?: {
+    error: object;
+    status: number;
+  };
+  statusCode?: number;
+  response?: string;
 }
+export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
+  return error instanceof LegacyESErrors._Abstract;
+};
 
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
@@ -48,6 +61,22 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
   const logger = appContextService.getLogger();
+  if (isLegacyESClientError(error)) {
+    // there was a problem communicating with ES (e.g. via `callCluster`)
+    // only log the message
+    const message =
+      error?.path && error?.response
+        ? // if possible, return the failing endpoint and its response
+          `${error.message} response from ${error.path}: ${error.response}`
+        : error.message;
+
+    logger.error(message);
+
+    return response.customError({
+      statusCode: error?.statusCode || error.status,
+      body: { message },
+    });
+  }
 
   // our "expected" errors
   if (error instanceof IngestManagerError) {
@@ -76,9 +105,3 @@ export const defaultIngestErrorHandler: IngestErrorHandler = async ({
     body: { message: error.message },
   });
 };
-
-export class RegistryError extends IngestManagerError {}
-export class RegistryConnectionError extends RegistryError {}
-export class RegistryResponseError extends RegistryError {}
-export class PackageNotFoundError extends IngestManagerError {}
-export class PackageOutdatedError extends IngestManagerError {}
