@@ -309,7 +309,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async create(spec: IndexPatternSpec): Promise<IndexPattern> {
+  async newIndexPattern(spec: IndexPatternSpec): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
@@ -333,8 +333,14 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  // make private
-  async saveNew(indexPattern: IndexPattern, override = false) {
+  async newIndexPatternAndSave(spec: IndexPatternSpec, override = false) {
+    const indexPattern = await this.newIndexPattern(spec);
+    await this.create(indexPattern, override);
+    await this.setDefault(indexPattern.id as string);
+    return indexPattern;
+  }
+
+  async create(indexPattern: IndexPattern, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe && override) {
       await this.delete(dupe.id);

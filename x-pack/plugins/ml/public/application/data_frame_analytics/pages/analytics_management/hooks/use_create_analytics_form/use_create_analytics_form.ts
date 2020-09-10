@@ -131,12 +131,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await mlContext.indexPatterns.create({ title: indexPatternName });
-      await mlContext.indexPatterns.saveNew(newIndexPattern);
-
-      // check if there's a default index pattern, if not,
-      // set the newly created one as the default index pattern.
-      await mlContext.indexPatterns.setDefault(newIndexPattern.id as string);
+      await mlContext.indexPatterns.newIndexPatternAndSave({
+        title: indexPatternName,
+      });
 
       addRequestMessage({
         message: i18n.translate(
