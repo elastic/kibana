@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import { isGetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
+
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { generateTransformConfig } from './common';
 
@@ -36,6 +40,44 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createTransform(transformId, config);
   }
 
+  function assertTransformsResponseBody(body: GetTransformsResponseSchema) {
+    expect(isGetTransformsResponseSchema(body)).to.be(true);
+
+    expect(body.count).to.eql(expected.apiTransformTransforms.count);
+    expect(body.transforms).to.have.length(expected.apiTransformTransforms.count);
+
+    const transform1 = body.transforms[0];
+    expect(transform1.id).to.eql(expected.apiTransformTransforms.transform1.id);
+    expect(transform1.dest.index).to.eql(expected.apiTransformTransforms.transform1.destIndex);
+    expect(typeof transform1.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
+    expect(typeof transform1.create_time).to.eql(expected.apiTransformTransforms.typeOfCreateTime);
+
+    const transform2 = body.transforms[1];
+    expect(transform2.id).to.eql(expected.apiTransformTransforms.transform2.id);
+    expect(transform2.dest.index).to.eql(expected.apiTransformTransforms.transform2.destIndex);
+    expect(typeof transform2.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
+    expect(typeof transform2.create_time).to.eql(expected.apiTransformTransforms.typeOfCreateTime);
+  }
+
+  function assertSingleTransformResponseBody(body: GetTransformsResponseSchema) {
+    expect(isGetTransformsResponseSchema(body)).to.be(true);
+
+    expect(body.count).to.eql(expected.apiTransformTransformsTransformId.count);
+    expect(body.transforms).to.have.length(expected.apiTransformTransformsTransformId.count);
+
+    const transform1 = body.transforms[0];
+    expect(transform1.id).to.eql(expected.apiTransformTransformsTransformId.transform1.id);
+    expect(transform1.dest.index).to.eql(
+      expected.apiTransformTransformsTransformId.transform1.destIndex
+    );
+    expect(typeof transform1.version).to.eql(
+      expected.apiTransformTransformsTransformId.typeOfVersion
+    );
+    expect(typeof transform1.create_time).to.eql(
+      expected.apiTransformTransformsTransformId.typeOfCreateTime
+    );
+  }
+
   describe('/api/transform/transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -49,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('/transforms', function () {
-      it('should return a list of transforms', async () => {
+      it('should return a list of transforms for super-user', async () => {
         const { body } = await supertest
           .get('/api/transform/transforms')
           .auth(
@@ -60,28 +102,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send()
           .expect(200);
 
-        expect(body.count).to.eql(expected.apiTransformTransforms.count);
-        expect(body.transforms).to.have.length(expected.apiTransformTransforms.count);
-
-        const transform1 = body.transforms[0];
-        expect(transform1.id).to.eql(expected.apiTransformTransforms.transform1.id);
-        expect(transform1.dest.index).to.eql(expected.apiTransformTransforms.transform1.destIndex);
-        expect(typeof transform1.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
-        expect(typeof transform1.create_time).to.eql(
-          expected.apiTransformTransforms.typeOfCreateTime
-        );
-
-        const transform2 = body.transforms[1];
-        expect(transform2.id).to.eql(expected.apiTransformTransforms.transform2.id);
-        expect(transform2.dest.index).to.eql(expected.apiTransformTransforms.transform2.destIndex);
-        expect(typeof transform2.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
-        expect(typeof transform2.create_time).to.eql(
-          expected.apiTransformTransforms.typeOfCreateTime
-        );
+        assertTransformsResponseBody(body);
       });
 
-      it('should return 200 for transform view-only user', async () => {
-        await supertest
+      it('should return a list of transforms for transform view-only user', async () => {
+        const { body } = await supertest
           .get(`/api/transform/transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
@@ -90,6 +115,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .send()
           .expect(200);
+
+        assertTransformsResponseBody(body);
       });
     });
 
@@ -105,24 +132,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send()
           .expect(200);
 
-        expect(body.count).to.eql(expected.apiTransformTransformsTransformId.count);
-        expect(body.transforms).to.have.length(expected.apiTransformTransformsTransformId.count);
-
-        const transform1 = body.transforms[0];
-        expect(transform1.id).to.eql(expected.apiTransformTransformsTransformId.transform1.id);
-        expect(transform1.dest.index).to.eql(
-          expected.apiTransformTransformsTransformId.transform1.destIndex
-        );
-        expect(typeof transform1.version).to.eql(
-          expected.apiTransformTransformsTransformId.typeOfVersion
-        );
-        expect(typeof transform1.create_time).to.eql(
-          expected.apiTransformTransformsTransformId.typeOfCreateTime
-        );
+        assertSingleTransformResponseBody(body);
       });
 
       it('should return 200 for transform view-only user', async () => {
-        await supertest
+        const { body } = await supertest
           .get(`/api/transform/transforms/the-transform-1`)
           .auth(
             USER.TRANSFORM_VIEWER,
@@ -131,6 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .send()
           .expect(200);
+
+        assertSingleTransformResponseBody(body);
       });
     });
   });
