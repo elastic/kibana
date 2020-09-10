@@ -179,10 +179,10 @@ async function getMemoryStats({
   const { apmEventClient } = setup;
 
   const getAvgMemoryUsage = async ({
-    adicionalFilters,
+    additionalFilters,
     script,
   }: {
-    adicionalFilters: ESFilter[];
+    additionalFilters: ESFilter[];
     script: typeof percentCgroupMemoryUsedScript;
   }) => {
     const response = await apmEventClient.search({
@@ -192,7 +192,7 @@ async function getMemoryStats({
       body: {
         query: {
           bool: {
-            filter: [...filter, ...adicionalFilters],
+            filter: [...filter, ...additionalFilters],
           },
         },
         aggs: {
@@ -205,13 +205,15 @@ async function getMemoryStats({
   };
 
   let avgMemoryUsage = await getAvgMemoryUsage({
-    adicionalFilters: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
+    additionalFilters: [
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+    ],
     script: percentCgroupMemoryUsedScript,
   });
 
   if (!avgMemoryUsage) {
     avgMemoryUsage = await getAvgMemoryUsage({
-      adicionalFilters: [
+      additionalFilters: [
         { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
         { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
       ],

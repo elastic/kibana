@@ -46,6 +46,12 @@ const chartBase: ChartBase = {
   series,
 };
 
+/*
+  When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+  This number represents the max possible value for the limit field.
+*/
+const CGROUP_LIMIT_MAX_VALUE = '9223372036854771712';
+
 export const percentSystemMemoryUsedScript = {
   lang: 'expression',
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
@@ -58,6 +64,7 @@ export const percentCgroupMemoryUsedScript = {
     return doc.containsKey(x) 
       && !doc[x].empty
   }
+
   if(!isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_USAGE_BYTES}')) {
     return null;
   }
@@ -65,17 +72,19 @@ export const percentCgroupMemoryUsedScript = {
   double total = -1;
   // uses cgroup.memory.mem.limit as total when it is available and not empty
   if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}')){
-    total = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value
+    total = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value;
+
   //Otherwise uses system.memory.total as total
   }else if (isFieldAvailable(doc, '${METRIC_SYSTEM_TOTAL_MEMORY}')){
-    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value
+    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
   }
   
   // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
   if(total == -1) {
     return null;
-  //9223372036854771712L = memory limit for a c-group when no memory limit is specified, in that case uses system.memory.total as total
-  } else if(total == 9223372036854771712L){
+
+  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
+  } else if(total == ${CGROUP_LIMIT_MAX_VALUE}L){
     total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
   }
 
