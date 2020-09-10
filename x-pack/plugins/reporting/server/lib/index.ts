@@ -13,4 +13,3 @@ export { LevelLogger } from './level_logger';
 export { statuses } from './statuses';
 export { ReportingStore } from './store';
 export { startTrace } from './trace';
-export { runValidations } from './validate';

@@ -24,6 +24,12 @@ export const MANAGEMENT_STORE_POLICY_LIST_NAMESPACE = 'policyList';
 export const MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE = 'policyDetails';
 /** Namespace within the Management state where endpoint-host state is maintained */
 export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';
+/** Namespace within the Management state where trusted apps page state is maintained */
+export const MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE = 'trustedApps';
+
+export const MANAGEMENT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50];
+export const MANAGEMENT_DEFAULT_PAGE = 0;
+export const MANAGEMENT_DEFAULT_PAGE_SIZE = 10;
 
 // --[ DEFAULTS ]---------------------------------------------------------------------------
 /** The default polling interval to start all polling pages */
