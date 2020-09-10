@@ -7,6 +7,7 @@
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -106,11 +107,17 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   protected showTimeoutError = debounce(
     (e: Error) => {
       const message = this.application.capabilities.advancedSettings?.save
-        ? 'Increase the advanced setting timeout to ensure queries can run to completion.'
-        : 'Contact an administrator to increase the advanced setting.';
+        ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
+            defaultMessage:
+              'One or more queries timed out. Increase run time with the search.timeout advanced setting.',
+          })
+        : i18n.translate('xpack.data.search.timeoutContactAdmin', {
+            defaultMessage:
+              'One or more queries timed out. Contact your system administrator to increase the run time.',
+          });
       this.deps.toasts.addError(e, {
         title: 'Timed out',
-        toastMessage: `One or more queries timed out. ${message}`,
+        toastMessage: message,
       });
     },
     60000,

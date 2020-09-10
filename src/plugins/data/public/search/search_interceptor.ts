@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   getCombinedSignal,
   AbortError,
@@ -188,8 +189,10 @@ export class SearchInterceptor {
     (e: Error) => {
       this.deps.toasts.addError(e, {
         title: 'Timed out',
-        toastMessage:
-          'One or more queries timed out. Upgrade to a free Basic license to allow queries to complete.', // TODO: Improve this message
+        toastMessage: i18n.translate('data.search.upgradeLicense', {
+          defaultMessage:
+            'One or more queries timed out. With our free Basic tier, your queries never time out.',
+        }),
       });
     },
     60000,
