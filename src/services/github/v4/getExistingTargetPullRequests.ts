@@ -1,7 +1,7 @@
 import { filterNil } from '../../../utils/filterEmpty';
 import { getFirstCommitMessageLine } from '../commitFormatters';
 
-export const pullRequestFragmentName = 'SourcePRAndTargetPRs';
+export const pullRequestFragmentName = 'ExistingTargetPullRequests';
 export const pullRequestFragment = /* GraphQL */ `
   fragment ${pullRequestFragmentName} on PullRequest {
     # Source PR

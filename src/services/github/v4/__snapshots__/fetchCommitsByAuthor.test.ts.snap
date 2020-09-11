@@ -45,7 +45,7 @@ Array [
                     associatedPullRequests(first: 1) {
                       edges {
                         node {
-                          ...SourcePRAndTargetPRs
+                          ...ExistingTargetPullRequests
                         }
                       }
                     }
@@ -58,8 +58,8 @@ Array [
       }
     }
 
-    
-  fragment SourcePRAndTargetPRs on PullRequest {
+
+  fragment ExistingTargetPullRequests on PullRequest {
     # Source PR
     number
     repository {
