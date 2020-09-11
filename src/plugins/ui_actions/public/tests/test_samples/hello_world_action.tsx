@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
 import { createAction, ActionByType } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
@@ -49,14 +49,11 @@ export function createHelloWorldAction(
     getIconType: () => 'lock',
     MenuItem: UiMenuItem,
     execute: async () => {
-      const flyoutSession = overlays.openFlyout(
-        toMountPoint(
-          <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
-            Hello World, I am a hello world action!
-          </EuiFlyout>
-        ),
+      overlays.openFlyout(
+        toMountPoint(<EuiFlyoutBody>Hello World, I am a hello world action!</EuiFlyoutBody>),
         {
           'data-test-subj': 'helloWorldAction',
+          ownFocus: true,
         }
       );
     },
