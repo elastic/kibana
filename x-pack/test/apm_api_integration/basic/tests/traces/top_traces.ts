@@ -7,7 +7,6 @@ import expect from '@kbn/expect';
 import { sortBy, omit } from 'lodash';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectTopTraces from './expectation/top_traces.expectation.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
