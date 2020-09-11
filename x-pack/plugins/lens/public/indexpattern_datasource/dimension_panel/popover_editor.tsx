@@ -160,6 +160,11 @@ export function PopoverEditor(props: PopoverEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         onClick() {
+          // todo: when moving from terms agg to filters, we want to create a filter `$field.name : *`
+          // it probably has to be re-thought when removing the field name.
+          const isTermsToFilters =
+            selectedColumn?.operationType === 'terms' && operationType === 'filters';
+
           if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || [];
 
@@ -186,7 +191,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           }
-          if (incompatibleSelectedOperationType) {
+          if (incompatibleSelectedOperationType && !isTermsToFilters) {
             setInvalidOperationType(null);
           }
           if (selectedColumn.operationType === operationType) {
