@@ -17,6 +17,7 @@ import {
   EsAssetReference,
   ElasticsearchAssetType,
   InstallType,
+  KibanaAssetType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -150,12 +151,13 @@ export async function installPackage({
   }
   const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
   const kibanaAssets = await getKibanaAssets(paths);
+
   if (installedPkg)
     await deleteKibanaSavedObjectsAssets(
       savedObjectsClient,
       installedPkg.attributes.installed_kibana
     );
-  // save new kibana refs before installing the assets
+
   const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
@@ -288,9 +290,9 @@ export async function createInstallation(options: {
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  kibanaAssets: ArchiveAsset[]
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
-  const assetRefs = kibanaAssets.map(toAssetReference);
+  const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: assetRefs,
   });

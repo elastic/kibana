@@ -92,6 +92,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.statusCode).equal(200);
       });
       it('should have installed the kibana assets', async function () {
+        // Kibana Assets installed as part of Fleet, not from a particular package
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
           type: 'index-pattern',
           id: 'logs-*',
@@ -106,6 +107,8 @@ export default function (providerContext: FtrProviderContext) {
           type: 'dashboard',
           id: 'sample_dashboard',
         });
+
+        // Kibana Assets installed from the package
         expect(resDashboard.id).equal('sample_dashboard');
         const resDashboard2 = await kibanaServer.savedObjects.get({
           type: 'dashboard',
@@ -122,6 +125,22 @@ export default function (providerContext: FtrProviderContext) {
           id: 'sample_search',
         });
         expect(resSearch.id).equal('sample_search');
+        const resIndexPattern = await kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'test-*',
+        });
+        expect(resIndexPattern.id).equal('test-*');
+
+        let resInvalidTypeIndexPattern;
+        try {
+          resInvalidTypeIndexPattern = await kibanaServer.savedObjects.get({
+            type: 'invalid-type',
+            id: 'invalid',
+          });
+        } catch (err) {
+          resInvalidTypeIndexPattern = err;
+        }
+        expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
       });
       it('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
@@ -139,12 +158,16 @@ export default function (providerContext: FtrProviderContext) {
               type: 'dashboard',
             },
             {
+              id: 'sample_visualization',
+              type: 'visualization',
+            },
+            {
               id: 'sample_search',
               type: 'search',
             },
             {
-              id: 'sample_visualization',
-              type: 'visualization',
+              id: 'test-*',
+              type: 'index-pattern',
             },
           ],
           installed_es: [
@@ -301,6 +324,16 @@ export default function (providerContext: FtrProviderContext) {
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
+        let resIndexPattern;
+        try {
+          resIndexPattern = await kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'test-*',
+          });
+        } catch (err) {
+          resIndexPattern = err;
+        }
+        expect(resIndexPattern.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
