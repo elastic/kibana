@@ -17,25 +17,12 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { CoreContext } from './core_context';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { ILoggingSystem } from './logging';
-
-function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
-  logger = loggingSystemMock.create(),
-  configService = configServiceMock.create(),
-}: {
-  env?: Env;
-  logger?: jest.Mocked<ILoggingSystem>;
-  configService?: jest.Mocked<IConfigService>;
-} = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
-}
-
-export const mockCoreContext = {
-  create,
-};
+// these CANT be exported by the main entrypoint, as it cause ts check failures
+// in `src/test` and `src/xpack/test` projects due to definition conflicts between
+// mocha and jest declaring the same globals such as `it` or `beforeAll`, as the test
+// files imports types from `core` that is importing the main `@kbn/config` entrypoint.
+// For now, these should be imported using `import {} from '@kbn/config/target/mocks'`
+export { configMock } from './config.mock';
+export { configServiceMock } from './config_service.mock';
+export { rawConfigServiceMock } from './raw/raw_config_service.mock';
+export { getEnvOptions } from './__mocks__/env';

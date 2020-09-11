@@ -22,7 +22,7 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { getEnvOptions, rawConfigServiceMock } from '@kbn/config';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';

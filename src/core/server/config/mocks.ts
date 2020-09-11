@@ -17,25 +17,9 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { CoreContext } from './core_context';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { ILoggingSystem } from './logging';
-
-function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
-  logger = loggingSystemMock.create(),
-  configService = configServiceMock.create(),
-}: {
-  env?: Env;
-  logger?: jest.Mocked<ILoggingSystem>;
-  configService?: jest.Mocked<IConfigService>;
-} = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
-}
-
-export const mockCoreContext = {
-  create,
-};
+export {
+  getEnvOptions,
+  rawConfigServiceMock,
+  configServiceMock,
+  configMock,
+} from '@kbn/config/target/mocks';

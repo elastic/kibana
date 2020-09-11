@@ -21,8 +21,8 @@ import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_serv
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { configServiceMock, getEnvOptions } from '@kbn/config';
 import { Env } from '../config';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';

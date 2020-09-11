@@ -19,11 +19,11 @@
 
 import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { getEnvOptions } from '@kbn/config';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Env } from '../../config';
+import { getEnvOptions } from '../../config/mocks';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
 import { createHttpServer } from '../../http/test_utils';
 

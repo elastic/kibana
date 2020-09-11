@@ -26,7 +26,7 @@ import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
 import { ConfigPath, ConfigService, Env } from '../config';
-import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { environmentServiceMock } from '../environment/environment_service.mock';

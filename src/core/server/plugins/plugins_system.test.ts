@@ -24,9 +24,9 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
-import { Env } from '../config';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { configServiceMock, getEnvOptions } from '@kbn/config';
+import { Env } from '../config';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 

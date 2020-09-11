@@ -36,7 +36,7 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 

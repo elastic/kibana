@@ -19,12 +19,12 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';

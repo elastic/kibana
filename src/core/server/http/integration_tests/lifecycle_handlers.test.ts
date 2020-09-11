@@ -27,7 +27,7 @@ import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
 import { IRouter, RouteRegistrar } from '../router';
 
-import { configServiceMock } from '@kbn/config';
+import { configServiceMock } from '../../config/mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
 
 const actualVersion = pkg.version;

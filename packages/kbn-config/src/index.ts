@@ -35,9 +35,3 @@ export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env } from './env';
 export { EnvironmentMode, PackageInfo } from './types';
 export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
-
-// mocks
-export { configMock } from './config.mock';
-export { configServiceMock } from './config_service.mock';
-export { rawConfigServiceMock } from './raw/raw_config_service.mock';
-export { getEnvOptions } from './__mocks__/env';

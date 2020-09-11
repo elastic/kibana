@@ -2,20 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
-    "outDir": "./target/out",
+    "outDir": "./target",
     "stripInternal": false,
     "declarationMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "./src/**/*.ts",
-    "../../typings/index.d.ts"
-  ],
-  "exclude": [
-    "target"
-  ]
+  "include": ["./src/**/*.ts", "../../typings/index.d.ts"],
+  "exclude": ["target"]
 }

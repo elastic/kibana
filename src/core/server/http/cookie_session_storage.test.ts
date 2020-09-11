@@ -21,7 +21,6 @@ import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
-import { getEnvOptions, configServiceMock } from '@kbn/config';
 
 import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
@@ -30,8 +29,9 @@ import { Env } from '../config';
 
 import { contextServiceMock } from '../context/context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-
+import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
+
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpService;

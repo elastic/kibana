@@ -43,7 +43,7 @@ jest.mock('./legacy/legacy_service', () => ({
 
 const realKbnConfig = jest.requireActual('@kbn/config');
 
-import { configServiceMock } from '@kbn/config';
+import { configServiceMock } from './config/mocks';
 export const mockConfigService = configServiceMock.create();
 jest.doMock('@kbn/config', () => ({
   ...realKbnConfig,
