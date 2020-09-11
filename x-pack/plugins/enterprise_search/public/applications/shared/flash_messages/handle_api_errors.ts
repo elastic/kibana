@@ -25,18 +25,28 @@ interface IErrorResponse {
     errors: string[];
   };
 }
+interface IOptions {
+  isQueued?: boolean;
+}
 
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
-export const handleAPIError = (error: HttpResponse<IErrorResponse>) => {
+export const handleAPIError = (
+  error: HttpResponse<IErrorResponse>,
+  { isQueued }: IOptions = {}
+) => {
   const defaultErrorMessage = 'An unexpected error occurred';
 
   const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)
     ? error.body!.attributes.errors.map((message) => ({ type: 'error', message }))
     : [{ type: 'error', message: defaultErrorMessage }];
 
-  FlashMessagesLogic.actions.setFlashMessages(errorFlashMessages);
+  if (isQueued) {
+    FlashMessagesLogic.actions.setQueuedMessages(errorFlashMessages);
+  } else {
+    FlashMessagesLogic.actions.setFlashMessages(errorFlashMessages);
+  }
 
   // If this was a programming error or a failed request (such as a CORS) error,
   // we rethrow the error so it shows up in the developer console

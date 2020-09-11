@@ -5,7 +5,12 @@
  */
 
 jest.mock('./', () => ({
-  FlashMessagesLogic: { actions: { setFlashMessages: jest.fn() } },
+  FlashMessagesLogic: {
+    actions: {
+      setFlashMessages: jest.fn(),
+      setQueuedMessages: jest.fn(),
+    },
+  },
 }));
 import { FlashMessagesLogic } from './';
 
@@ -31,6 +36,16 @@ describe('handleAPIError', () => {
     handleAPIError(mockHttpError);
 
     expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+      { type: 'error', message: 'Could not find X' },
+      { type: 'error', message: 'Could not find Y' },
+      { type: 'error', message: 'Something else bad happened' },
+    ]);
+  });
+
+  it('queues messages when isQueued is passed', () => {
+    handleAPIError(mockHttpError, { isQueued: true });
+
+    expect(FlashMessagesLogic.actions.setQueuedMessages).toHaveBeenCalledWith([
       { type: 'error', message: 'Could not find X' },
       { type: 'error', message: 'Could not find Y' },
       { type: 'error', message: 'Something else bad happened' },
