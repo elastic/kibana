@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
+import { Type } from '@kbn/config-schema';
+import { Logger, LoggerFactory } from '@kbn/logging';
 
 import { Config, ConfigPath, Env } from '.';
-import { Logger, LoggerFactory } from './logging';
+
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw/raw_config_service';
 import {

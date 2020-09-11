@@ -19,7 +19,9 @@
 
 import { ConfigPath } from '../config';
 import { ObjectToConfigAdapter } from '../object_to_config_adapter';
-import { LoggingConfigType } from '../logging';
+
+// TODO: fix once core schemas are moved to this package
+type LoggingConfigType = any;
 
 /**
  * @internal
