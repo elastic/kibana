@@ -48,7 +48,7 @@ export const writePidFile = async ({
 
   await writeFile(path, pid);
 
-  logger.info(`wrote pid file to ${path}`, { path, pid });
+  logger.debug(`wrote pid file to ${path}`, { path, pid });
 
   const clean = once(() => {
     unlink(path);
@@ -62,6 +62,8 @@ export const writePidFile = async ({
     process.kill(process.pid, 'SIGINT');
   });
 
+  // was present in the legacy file, but should probably be removed as it seems
+  // handled by `kibana/src/setup_node_env/exit_on_warning.js`
   process.on('unhandledRejection', function (reason) {
     logger.warn(`Detected an unhandled Promise rejection.\n${reason}`);
   });

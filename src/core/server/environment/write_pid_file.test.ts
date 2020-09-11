@@ -85,7 +85,7 @@ describe('writePidFile', () => {
     expect(allLogs()).toMatchInlineSnapshot(`
       Array [
         Array [
-          "info",
+          "debug",
           "wrote pid file to /pid-file",
         ],
       ]
@@ -131,7 +131,7 @@ describe('writePidFile', () => {
     expect(allLogs()).toMatchInlineSnapshot(`
       Array [
         Array [
-          "info",
+          "debug",
           "wrote pid file to /pid-file",
         ],
         Array [
