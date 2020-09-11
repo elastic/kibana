@@ -116,12 +116,12 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
         throw new Error('agentService not available');
       }
       const metadataRequestContext = {
-        agentService,
+        endpointAppContextService: this.endpointContext.service,
         logger,
         requestHandlerContext: request.context,
       };
       const endpointData =
-        hostId != null && metadataRequestContext.agentService != null
+        hostId != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
           ? await getHostData(metadataRequestContext, hostId)
           : null;
       return endpointData != null && endpointData.metadata

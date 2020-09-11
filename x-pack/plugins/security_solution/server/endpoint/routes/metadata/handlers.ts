@@ -6,24 +6,32 @@
 
 import { SearchResponse } from 'elasticsearch';
 import Boom from 'boom';
-import { RequestHandlerContext, Logger } from 'kibana/server';
+import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
   HostMetadata,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
-import { getESQueryHostMetadataByID, metadataQueryConfigV1 } from './query_builders';
+import {
+  getESQueryHostMetadataByID,
+  kibanaRequestToMetadataListESQuery,
+  metadataQueryConfigV1,
+} from './query_builders';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentService } from '../../../../../ingest_manager/server/services';
+import { EndpointAppContext } from '../../types';
+import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
+import { findAllUnenrolledAgentIds } from './support/unenroll';
+import { findAgentIDsByStatus } from './support/agent_status';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 interface HitSource {
   _source: HostMetadata;
 }
 
 export interface MetadataRequestContext {
-  agentService: AgentService;
+  endpointAppContextService: EndpointAppContextService;
   logger: Logger;
   requestHandlerContext: RequestHandlerContext;
 }
@@ -34,11 +42,118 @@ const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['unenrolling', HostStatus.UNENROLLING],
 ]);
 
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
+
+export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
+  return endpointAppContext.logFactory.get('metadata');
+};
+
+export const getMetadataListRequestHandler = function (
+  endpointAppContext: EndpointAppContext,
+  logger: Logger
+): RequestHandler<undefined, TypeOf<typeof GetMetadataListRequestSchema.body>, undefined> {
+  return async (context, request, response) => {
+    try {
+      const agentService = endpointAppContext.service.getAgentService();
+      if (agentService === undefined) {
+        throw new Error('agentService not available');
+      }
+
+      const metadataRequestContext: MetadataRequestContext = {
+        endpointAppContextService: endpointAppContext.service,
+        logger,
+        requestHandlerContext: context,
+      };
+
+      const unenrolledAgentIds = await findAllUnenrolledAgentIds(
+        agentService,
+        context.core.savedObjects.client
+      );
+
+      const statusIDs = request.body?.filters?.host_status?.length
+        ? await findAgentIDsByStatus(
+            agentService,
+            context.core.savedObjects.client,
+            request.body?.filters?.host_status
+          )
+        : undefined;
+
+      const queryParams = await kibanaRequestToMetadataListESQuery(
+        request,
+        endpointAppContext,
+        endpointAppContext.service?.getMetadataService().queryConfig(),
+        {
+          unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+          statusAgentIDs: statusIDs,
+        }
+      );
+
+      const searchResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+        'search',
+        queryParams
+      )) as SearchResponse<HostMetadata>;
+
+      return response.ok({
+        body: await mapToHostResultList(queryParams, searchResponse, metadataRequestContext),
+      });
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      return response.internalError({ body: err });
+    }
+  };
+};
+
+export const getMetadataRequestHandler = function (
+  endpointAppContext: EndpointAppContext,
+  logger: Logger
+): RequestHandler<undefined, TypeOf<typeof GetMetadataRequestSchema.params>, undefined> {
+  return async (context, request, response) => {
+    const agentService = endpointAppContext.service.getAgentService();
+    if (agentService === undefined) {
+      return response.internalError({ body: 'agentService not available' });
+    }
+
+    const metadataRequestContext: MetadataRequestContext = {
+      endpointAppContextService: endpointAppContext.service,
+      logger,
+      requestHandlerContext: context,
+    };
+
+    try {
+      const doc = await getHostData(metadataRequestContext, request.params.id);
+      if (doc) {
+        return response.ok({ body: doc });
+      }
+      return response.notFound({ body: 'Endpoint Not Found' });
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      if (err.isBoom) {
+        return response.customError({
+          statusCode: err.output.statusCode,
+          body: { message: err.message },
+        });
+      }
+      return response.internalError({ body: err });
+    }
+  };
+};
+
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const query = getESQueryHostMetadataByID(id, metadataQueryConfigV1());
+  const query = getESQueryHostMetadataByID(
+    id,
+    metadataRequestContext.endpointAppContextService?.getMetadataService().queryConfig()
+  );
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
     query
@@ -63,10 +178,12 @@ async function findAgent(
   hostMetadata: HostMetadata
 ): Promise<Agent | undefined> {
   try {
-    return await metadataRequestContext.agentService.getAgent(
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      hostMetadata.elastic.agent.id
-    );
+    return await metadataRequestContext.endpointAppContextService
+      .getAgentService()
+      .getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        hostMetadata.elastic.agent.id
+      );
   } catch (e) {
     if (
       metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
@@ -129,10 +246,12 @@ async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.agentService.getAgentStatusById(
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      elasticAgentId
-    );
+    const status = await metadataRequestContext.endpointAppContextService
+      .getAgentService()
+      .getAgentStatusById(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
     if (

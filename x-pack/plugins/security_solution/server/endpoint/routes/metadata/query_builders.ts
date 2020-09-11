@@ -5,53 +5,11 @@
  */
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppContext } from '../../types';
-import { JsonObject } from '../../../../../infra/common/typed_json';
-import { metadataIndexPattern } from '../../../../common/endpoint/constants';
+import { EndpointAppContext, MetadataQueryConfig } from '../../types';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
   statusAgentIDs?: string[];
-}
-
-export interface MetadataQueryConfig {
-  index: string;
-  elasticAgentIdProperty: string;
-  hostIdProperty: string;
-  sortProperty: JsonObject[];
-  extraBodyProperties?: JsonObject;
-}
-
-export function metadataQueryConfigV1(): MetadataQueryConfig {
-  return {
-    index: metadataIndexPattern,
-    elasticAgentIdProperty: 'elastic.agent.id',
-    hostIdProperty: 'host.id',
-    sortProperty: [
-      {
-        'event.created': {
-          order: 'desc',
-        },
-      },
-    ],
-    extraBodyProperties: {
-      collapse: {
-        field: 'host.id',
-        inner_hits: {
-          name: 'most_recent',
-          size: 1,
-          sort: [{ 'event.created': 'desc' }],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'host.id',
-          },
-        },
-      },
-    },
-  };
 }
 
 export async function kibanaRequestToMetadataListESQuery(

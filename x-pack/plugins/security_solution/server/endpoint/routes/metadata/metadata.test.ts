@@ -27,7 +27,7 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes, endpointFilters } from './index';
+import { registerEndpointRoutes, endpointFilters, METADATA_REQUEST_V1_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -87,7 +87,7 @@ describe('test endpoint route', () => {
     const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
+      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
     )!;
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
@@ -127,7 +127,7 @@ describe('test endpoint route', () => {
       Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
+      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
     )!;
 
     await routeHandler(
@@ -180,7 +180,7 @@ describe('test endpoint route', () => {
       Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/metadata')
+      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
     )!;
 
     await routeHandler(
@@ -247,7 +247,7 @@ describe('test endpoint route', () => {
       } as unknown) as Agent);
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
       )!;
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -278,7 +278,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -316,7 +316,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -349,7 +349,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -380,7 +380,7 @@ describe('test endpoint route', () => {
       } as unknown) as Agent);
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith('/api/endpoint/metadata')
+        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
       )!;
 
       await routeHandler(

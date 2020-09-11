@@ -13,6 +13,11 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { ExceptionListClient } from '../../../lists/server';
+import { MetadataQueryConfig, metadataQueryConfigV1 } from './types';
+
+export interface MetadataService {
+  queryConfig(version?: string): MetadataQueryConfig;
+}
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<IngestManagerStartContract, 'agentService'>
@@ -33,12 +38,21 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private exceptionsListService: ExceptionListClient | undefined;
+  private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.exceptionsListService = dependencies.exceptionsListService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
+    this.metadataService = {
+      queryConfig(version: string): MetadataQueryConfig {
+        if (version === 'v1') {
+          return metadataQueryConfigV1();
+        }
+        return metadataQueryConfigV1();
+      },
+    };
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
@@ -52,6 +66,10 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
+  }
+
+  public getMetadataService(): MetadataService | undefined {
+    return this.metadataService;
   }
 
   public getExceptionsList() {

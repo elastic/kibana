@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import {
-  kibanaRequestToMetadataListESQuery,
-  getESQueryHostMetadataByID,
-  metadataQueryConfigV1,
-} from './query_builders';
+import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
+import { metadataQueryConfigV1 } from '../../types';
 
-describe('query builder', () => {
+describe('query builder v1', () => {
   describe('MetadataListESQuery', () => {
     it('test default query params for all endpoints metadata when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({

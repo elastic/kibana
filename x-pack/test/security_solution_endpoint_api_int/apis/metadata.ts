@@ -6,6 +6,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataStream } from './data_stream_helper';
+import { METADATA_REQUEST_V1_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';
 
 /**
  * The number of host documents in the es archive.
@@ -15,14 +16,14 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('test metadata api', () => {
-    describe('POST /api/endpoint/metadata when index is empty', () => {
+  describe('test metadata api v1', () => {
+    describe(`POST ${METADATA_REQUEST_V1_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
         // to do it manually
         await deleteMetadataStream(getService);
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -33,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/endpoint/metadata when index is not empty', () => {
+    describe(`POST ${METADATA_REQUEST_V1_ROUTE} when index is not empty`, () => {
       before(
         async () => await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true })
       );
@@ -42,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => await deleteMetadataStream(getService));
       it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on paging properties passed.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
        */
       it('metadata api should return accurate total metadata if page index produces no result', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -99,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return 400 when pagingProperties is below boundaries.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -117,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on filters passed.', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -134,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('metadata api should return page based on filters and paging passed.', async () => {
         const notIncludedIp = '10.46.229.234';
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -169,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
         const variantValue = 'Windows Pro';
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -190,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('metadata api should return the latest event for all the events for an endpoint', async () => {
         const targetEndpointIp = '10.46.229.234';
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -211,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return the latest event for all the events where policy status is not success', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -232,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -254,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return all hosts when filter is empty string', async () => {
         const { body } = await supertest
-          .post('/api/endpoint/metadata')
+          .post(`${METADATA_REQUEST_V1_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
