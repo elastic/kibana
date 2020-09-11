@@ -68,7 +68,9 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
           if (isApiResponse && hasErrorConnecting) {
             actions.setErrorConnecting(true);
           }
-          return httpResponse;
+
+          // Re-throw error so that downstream catches work as expected
+          return Promise.reject(httpResponse);
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);
