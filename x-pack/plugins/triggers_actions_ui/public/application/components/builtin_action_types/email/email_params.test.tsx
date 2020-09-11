@@ -27,6 +27,7 @@ describe('EmailParamsFields renders', () => {
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
+
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="toEmailAddressInput"]').first().prop('selectedOptions')
