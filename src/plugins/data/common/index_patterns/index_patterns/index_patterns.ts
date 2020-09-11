@@ -227,12 +227,6 @@ export class IndexPatternsService {
       return cache;
     }
 
-    //
-    // const indexPattern = await this.make(id);
-    // get saved object, convert to spec, create new IndexPattern instance
-    //
-    //  progress - no longer calls `make`, no longer calls `init`
-    // todo - create index pattern isn't  showing field list
     const {
       version,
       attributes: {
@@ -282,7 +276,6 @@ export class IndexPatternsService {
       type,
     };
 
-    // return indexPatternCache.set(id, indexPattern);
     const indexPattern = await this.specToIndexPattern(spec);
     indexPatternCache.set(id, indexPattern);
     return indexPattern;
@@ -359,15 +352,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async save(indexPattern: IndexPattern, overwrite = false) {
-    // if(overwrite || !indexPattern.id){
-    // saveNew
-    // } else {
-    return this.update(indexPattern);
-    // }
-  }
-
-  async update(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
     if (!indexPattern.id) return;
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -447,7 +432,7 @@ export class IndexPatternsService {
             indexPatternCache.clear(indexPattern.id!);
 
             // Try the save again
-            return this.update(indexPattern, saveAttempts);
+            return this.save(indexPattern, saveAttempts);
           });
         }
         throw err;
