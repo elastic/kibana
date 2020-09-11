@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
 import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
-import { CommitSelected } from '../../../types/Commit';
+import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { logger, consoleLog } from '../../logger';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
@@ -89,7 +89,7 @@ export function getBody({
   targetBranch,
 }: {
   options: BackportOptions;
-  commits: CommitSelected[];
+  commits: Commit[];
   targetBranch: string;
 }) {
   const commitMessages = commits
@@ -107,7 +107,7 @@ export function getTitle({
   targetBranch,
 }: {
   options: BackportOptions;
-  commits: CommitSelected[];
+  commits: Commit[];
   targetBranch: string;
 }) {
   const commitMessages = commits

@@ -1,7 +1,9 @@
+import { ExistingTargetPullRequests } from './getExistingTargetPullRequests';
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 describe('getTargetBranchesFromLabels', () => {
   it(`should support Kibana's label format`, () => {
+    const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'v8.0.0': '', // current major (master) should be ignored
       '^v7.8.0$': '7.x', // current minor (7.x)
@@ -33,8 +35,9 @@ describe('getTargetBranchesFromLabels', () => {
       'v8.0.0', // master
     ];
     const targetBranches = getTargetBranchesFromLabels({
-      labels,
+      existingTargetPullRequests,
       branchLabelMapping,
+      labels,
     });
     expect(targetBranches).toEqual([
       '5.4',
@@ -62,24 +65,60 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should only get first match', () => {
+    const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-2': 'branch-b',
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
       labels,
       branchLabelMapping,
     });
     expect(targetBranches).toEqual(['branch-b']);
   });
 
+  it('should remove PRs that are already open', () => {
+    const existingTargetPullRequests = [
+      { branch: 'branch-3', state: 'OPEN' },
+    ] as ExistingTargetPullRequests;
+    const branchLabelMapping = {
+      'label-(\\d+)': 'branch-$1',
+    };
+    const labels = ['label-1', 'label-2', 'label-3', 'label-4'];
+    const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
+      labels,
+      branchLabelMapping,
+    });
+    expect(targetBranches).toEqual(['branch-1', 'branch-2', 'branch-4']);
+  });
+
+  it('should remove PRs that are already merged', () => {
+    const existingTargetPullRequests = [
+      { branch: 'branch-2', state: 'MERGED' },
+    ] as ExistingTargetPullRequests;
+    const branchLabelMapping = {
+      'label-(\\d+)': 'branch-$1',
+    };
+    const labels = ['label-1', 'label-2', 'label-3', 'label-4'];
+    const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
+      labels,
+      branchLabelMapping,
+    });
+    expect(targetBranches).toEqual(['branch-1', 'branch-3', 'branch-4']);
+  });
+
   it('should remove duplicates', () => {
+    const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-1', 'label-2', 'label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
       labels,
       branchLabelMapping,
     });
@@ -87,11 +126,13 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should ignore non-matching labels', () => {
+    const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-1', 'label-2', 'foo', 'bar'];
     const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
       labels,
       branchLabelMapping,
     });
@@ -99,12 +140,14 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should omit empty labels', () => {
+    const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-2': '',
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-1', 'label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
       labels,
       branchLabelMapping,
     });

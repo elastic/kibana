@@ -31,3 +31,10 @@ export function getFormattedCommitMessage({
   // pull number not available. Add commit
   return `${firstMessageLine} (${getShortSha(sha)})`;
 }
+
+export function getPullNumberFromMessage(firstMessageLine: string) {
+  const matches = firstMessageLine.match(/\(#(\d+)\)/);
+  if (matches) {
+    return parseInt(matches[1], 10);
+  }
+}

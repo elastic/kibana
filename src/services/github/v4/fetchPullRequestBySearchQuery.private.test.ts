@@ -45,7 +45,7 @@ describe('fetchPullRequestBySearchQuery', () => {
 
       expect(await fetchPullRequestBySearchQuery(options)).toEqual([
         {
-          existingTargetPullRequests: [],
+          existingTargetPullRequests: [{ branch: '7.8', state: 'OPEN' }],
           formattedMessage: 'Add sheep emoji (#9)',
           originalMessage: 'Add sheep emoji (#9)',
           pullNumber: 9,
@@ -54,7 +54,10 @@ describe('fetchPullRequestBySearchQuery', () => {
           targetBranchesFromLabels: [],
         },
         {
-          existingTargetPullRequests: [],
+          existingTargetPullRequests: [
+            { branch: '7.x', state: 'MERGED' },
+            { branch: '7.8', state: 'MERGED' },
+          ],
           formattedMessage: 'Add 🍏 emoji (#5)',
           originalMessage: 'Add 🍏 emoji (#5)',
           pullNumber: 5,

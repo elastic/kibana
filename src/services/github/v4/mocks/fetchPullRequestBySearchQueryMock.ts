@@ -1,238 +1,844 @@
-export const fetchPullRequestBySearchQueryMock = {
-  data: {
-    search: {
-      nodes: [
-        {
-          number: 58727,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
-              },
-              {
-                name: 'release_note:fix',
-              },
-              {
-                name: 'v7.6.1',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: 'd474ccf244d22b8abf7df1be3e96b36b715281f1',
-            message:
-              '[APM] Fix timeout in APM setup (#58727)\n\n* [APM] Fix timeout in APM setup\r\n\r\n* Update plugin.ts',
+import { DataResponse } from '../fetchPullRequestBySearchQuery';
+
+export const fetchPullRequestBySearchQueryMock: DataResponse = {
+  search: {
+    nodes: [
+      {
+        number: 76492,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 58467,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: 'e0f4775b780aada005bdd1774edcceac0ffee006',
+          message:
+            '[APM] @ts-error -> @ts-expect-error (#76492)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.10.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] @ts-error -> @ts-expect-error (#76492)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] @ts-error -> @ts-expect-error (#76492)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:skip',
-              },
-              {
-                name: 'v7.7.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '0e0f114d03f0becb9bbc5b93cbed217f2663efbd',
-            message: '[APM] Improve debug output (#58467)',
+            },
+          ],
+        },
+      },
+      {
+        number: 76638,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 53541,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: 'fae1e02e0f7a475bf92da05be52a817aa2a84959',
+          message:
+            '[APM] Avoid negative offset for error marker on timeline (#76638)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:fix',
+            },
+            {
+              name: 'v7.10.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.x] [APM] Avoid negative offset for error marker on timeline (#76638)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Avoid negative offset for error marker on timeline (#76638)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'apm-test-plan-7.6.0',
-              },
-              {
-                name: 'apm-test-plan-done',
-              },
-              {
-                name: 'release_note:skip',
-              },
-              {
-                name: 'v7.6.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '8b0d5f54dd701f0f5a9b36d2a8a1a27cffbdb6e3',
-            message:
-              '[APM] Fix missing apm indicies (#53541)\n\n* [APM] Fix missing apm indicies\r\n\r\n* Fix infinite loop in ui indices\r\n\r\n* Add test for empty settings',
+            },
+          ],
+        },
+      },
+      {
+        number: 73120,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 52262,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: 'aa68e3b63a4b513294dc58eaf4422e66a0beffb1',
+          message:
+            '[APM] Add anomaly detection API tests + fixes (#73120)\n\nCo-authored-by: Nathan L Smith <nathan.smith@elastic.co>',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.10.0',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.x] [APM] Add anomaly detection API tests + fixes (#73120)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Add anomaly detection API tests + fixes (#73120)\n\nCo-authored-by: Nathan L Smith <nathan.smith@elastic.co>',
+                          },
+                        },
+                      },
+                      {
+                        node: {
+                          commit: {
+                            message: 'i18n fixes',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'apm-test-plan-7.6.0',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.9] [APM] Add anomaly detection API tests + fixes (#73120)',
+                  state: 'MERGED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Add anomaly detection API tests + fixes (#73120)\n\nCo-authored-by: Nathan L Smith <nathan.smith@elastic.co>\n# Conflicts:\n#\tx-pack/plugins/apm/public/components/app/Settings/anomaly_detection/jobs_list.tsx',
+                          },
+                        },
+                      },
+                      {
+                        node: {
+                          commit: {
+                            message: 'i18n fix',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'apm-test-plan-done',
-              },
-              {
-                name: 'release_note:fix',
-              },
-              {
-                name: 'v7.5.1',
-              },
-              {
-                name: 'v7.6.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '47dcf87e791c14c853172972232eaabebd8f609d',
-            message:
-              '[APM] Quick fix for ACM to ensure more than 10 items are displayed (#52262)\n\n* [APM] Quick fix for ACM to ensure more than 10 items are displayed\r\n\r\n* Fix snapshot',
+            },
+          ],
+        },
+      },
+      {
+        number: 72599,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 53775,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
-              },
-              {
-                name: 'release_note:skip',
-              },
-              {
-                name: 'v8.0.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '53513f6b7b85f1140352a99f65ff53f5cdb1ec79',
-            message:
-              '[APM] Add log statements for flaky test (#53775)\n\n* [APM] Add log statements for flaky test\r\n\r\n* Improve logging\r\n\r\n* Improve logging\r\n\r\n* Log full index on error',
+        mergeCommit: {
+          oid: '2fc7112ec27a9f8ded0e2f9e097613721f1179dd',
+          message:
+            '[APM] Update script with new roles/users (#72599)\n\n* [APM] Update script with new roles/users\r\n\r\n* add log\r\n\r\n* Add validation for http prefix',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'backport:skip',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v8.0.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [],
+        },
+      },
+      {
+        number: 72797,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 52149,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: '7e126bfab6a3bfc44f9fa50feecfe22b4634e1a0',
+          message: 'Update jobs_list.tsx (#72797)',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.10.0',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] Update jobs_list.tsx (#72797)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message: 'Update jobs_list.tsx (#72797)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:skip',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.9] Update jobs_list.tsx (#72797)',
+                  state: 'MERGED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message: 'Update jobs_list.tsx (#72797)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'v7.6.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '085a2af8ec3771c80ea2aeb8e592fd7c4c18c259',
-            message: '[APM] Fix failing ACM integration test (#52149)',
+            },
+          ],
+        },
+      },
+      {
+        number: 69143,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 52162,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: 'd12208c7ea9513529ea1aff42d154db89e3573ff',
+          message: '[APM] Fix confusing request/minute viz (#69143)',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'apm-test-plan-7.9.0',
+            },
+            {
+              name: 'apm-test-plan-done',
+            },
+            {
+              name: 'release_note:enhancement',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.x] [APM] Fix confusing request/minute viz (#69143)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Fix confusing request/minute viz (#69143)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:skip',
-              },
-              {
-                name: 'v8.0.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: 'b9e2895f2258da4b01f96ac2000514ef01f47379',
-            message: '[APM] Add support for basepath (#52162)',
+            },
+          ],
+        },
+      },
+      {
+        number: 71655,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 50127,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: 'f760d8513b0216a73e9a476661f0fb8fb0887a61',
+          message: '[APM] Remove watcher integration (#71655)',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'apm-test-plan-7.9.0',
+            },
+            {
+              name: 'apm-test-plan-done',
+            },
+            {
+              name: 'release_note:deprecation',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] Remove watcher integration (#71655)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Remove watcher integration (#71655)\n\n# Conflicts:\n#\tx-pack/plugins/apm/public/components/app/ServiceDetails/ServiceIntegrations/__test__/esResponse.ts',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:skip',
-              },
-              {
-                name: 'technical debt',
-              },
-              {
-                name: 'v7.6.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '551b03b215e8c399d7ae6cac404d9d49f17c45d4',
-            message:
-              '[APM] Improve index pattern handling (#50127)\n\n* [APM] Improve index pattern handling\r\n\r\nHandle exceptions\r\n\r\nExtract index pattern id as constant\r\n\r\nCatch error when dynamic index pattern cannot be fetched\r\n\r\nUse req instead of request\r\n\r\n* [APM] Address feedback\r\n\r\n* Check for data before creating index pattern\r\n\r\n* Add test\r\n\r\n* Created ProcessorEvent as enum\r\n\r\n* Revert ProcessorEvent back to type',
+            },
+          ],
+        },
+      },
+      {
+        number: 72614,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 48404,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: '05ee3da80db34ccf93e7424aa2704c098a1b49fa',
+          message: '[APM] Disable flaky rum e2e’s (#72614)',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.10.0',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] Disable flaky rum e2e’s (#72614)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message: '[APM] Disable flaky rum e2e’s (#72614)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:skip',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.9] [APM] Disable flaky rum e2e’s (#72614)',
+                  state: 'MERGED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message: '[APM] Disable flaky rum e2e’s (#72614)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'v7.6.0',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'Issue',
+                },
               },
-            ],
-          },
-          mergeCommit: {
-            oid: '77247773b9cdcfc2257713f1df2a49e1c31d7066',
-            message: '[APM] Remove `type` from agent configuration (#48404)',
+            },
+          ],
+        },
+      },
+      {
+        number: 71661,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-        {
-          number: 44093,
-          labels: {
-            nodes: [
-              {
-                name: 'Team:apm',
+        mergeCommit: {
+          oid: '51a862988c344b34bd9da57dd57008df12e1b5e5',
+          message:
+            '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'apm-test-plan-7.9.0',
+            },
+            {
+              name: 'apm-test-plan-done',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize`',
+                  state: 'CLOSED',
+                  baseRefName: 'master',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize`',
+                          },
+                        },
+                      },
+                      {
+                        node: {
+                          commit: {
+                            message: 'Hardcode top traces to 10000 buckets',
+                          },
+                        },
+                      },
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              "Merge branch 'master' into increase-transactionGroupBucketSize",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: '[zube]: Done',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.x] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                  state: 'CLOSED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'apm-test-plan-7.4.0',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.x] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'release_note:enhancement',
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[7.9] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                  state: 'MERGED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
-              {
-                name: 'v7.4.0',
-              },
-            ],
-          },
-          mergeCommit: {
-            oid: '4657f0b041bd4a05102c18889121db252f23bf07',
-            message:
-              '[APM] Show loading state on waterfall and avoid re-fetching distribution chart when changing bucket (#44093)',
+            },
+          ],
+        },
+      },
+      {
+        number: 72316,
+        repository: {
+          name: 'kibana',
+          owner: {
+            login: 'elastic',
           },
         },
-      ],
-    },
+        mergeCommit: {
+          oid: '511e4543a7828cf0cdb157b88b01352947e0384f',
+          message:
+            '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+        },
+        labels: {
+          nodes: [
+            {
+              name: 'Team:apm',
+            },
+            {
+              name: 'release_note:skip',
+            },
+            {
+              name: 'v7.10.0',
+            },
+            {
+              name: 'v7.9.0',
+            },
+          ],
+        },
+        baseRefName: 'master',
+        timelineItems: {
+          edges: [
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.9] [APM] Handle ML errors (#72316)',
+                  state: 'MERGED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] Handle ML errors (#72316)',
+                  state: 'MERGED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] Handle ML errors (#72316)',
+                  state: 'CLOSED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.9] [APM] Handle ML errors (#72316)',
+                  state: 'CLOSED',
+                  baseRefName: '7.9',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title: '[7.x] [APM] Handle ML errors (#72316)',
+                  state: 'CLOSED',
+                  baseRefName: '7.x',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'PullRequest',
+                  title:
+                    '[APM] Fixes error when loading APM without ML read permissions',
+                  state: 'CLOSED',
+                  baseRefName: 'master',
+                  commits: {
+                    edges: [
+                      {
+                        node: {
+                          commit: {
+                            message:
+                              'Fixes error when loading APM with an APM ready-only user.',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              node: {
+                source: {
+                  __typename: 'Issue',
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
   },
 };

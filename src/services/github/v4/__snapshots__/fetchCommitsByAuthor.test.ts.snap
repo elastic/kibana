@@ -45,49 +45,7 @@ Array [
                     associatedPullRequests(first: 1) {
                       edges {
                         node {
-                          repository {
-                            owner {
-                              login
-                            }
-                            name
-                          }
-                          number
-                          mergeCommit {
-                            oid
-                          }
-                          labels(first: 50) {
-                            nodes {
-                              name
-                            }
-                          }
-                          timelineItems(
-                            last: 20
-                            itemTypes: CROSS_REFERENCED_EVENT
-                          ) {
-                            edges {
-                              node {
-                                ... on CrossReferencedEvent {
-                                  source {
-                                    __typename
-                                    ... on PullRequest {
-                                      title
-                                      state
-                                      baseRefName
-                                      commits(first: 20) {
-                                        edges {
-                                          node {
-                                            commit {
-                                              message
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
+                          ...SourcePRAndTargetPRs
                         }
                       }
                     }
@@ -99,6 +57,56 @@ Array [
         }
       }
     }
+
+    
+  fragment SourcePRAndTargetPRs on PullRequest {
+    # Source PR
+    number
+    repository {
+      name
+      owner {
+        login
+      }
+    }
+    mergeCommit {
+      oid
+      message
+    }
+    labels(first: 50) {
+      nodes {
+        name
+      }
+    }
+    baseRefName
+    timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
+      edges {
+        node {
+          ... on CrossReferencedEvent {
+            source {
+              __typename
+
+              # Target PRs
+              ... on PullRequest {
+                title
+                state
+                baseRefName
+                commits(first: 20) {
+                  edges {
+                    node {
+                      commit {
+                        message
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   ",
     "variables": Object {
       "authorId": "myUserId",

@@ -1,25 +1,30 @@
-import flatMap from 'lodash.flatmap';
+import intersection from 'lodash.intersection';
 import isEmpty from 'lodash.isempty';
 import { BackportOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';
-import { CommitSelected } from '../types/Commit';
-import { filterEmpty } from '../utils/filterEmpty';
+import { Commit } from '../types/Commit';
+import { filterNil } from '../utils/filterEmpty';
 
-export function getTargetBranches(
-  options: BackportOptions,
-  commits: CommitSelected[]
-) {
+export function getTargetBranches(options: BackportOptions, commits: Commit[]) {
   // target branches already specified (in contrast to letting the user choose from a list)
   if (!isEmpty(options.targetBranches)) {
     return options.targetBranches;
   }
 
-  // combine target branches from commits that were selected for backporting
-  const targetBranchesFromLabels = flatMap(
-    commits,
-    (commit) => commit.targetBranchesFromLabels
-  ).filter(filterEmpty);
+  // intersection of target branches from the selected commits
+  const targetBranchesFromLabels = intersection(
+    ...commits.map((commit) => commit.targetBranchesFromLabels)
+  ).filter(filterNil);
+
+  // automatically backport to specified target branches
+  if (options.ci) {
+    if (isEmpty(targetBranchesFromLabels)) {
+      throw new HandledError(`There are no branches to backport to. Aborting.`);
+    }
+
+    return targetBranchesFromLabels;
+  }
 
   // sourceBranch should be the same for all commits, so picking `sourceBranch` from the first commit should be fine 🤞
   // this is specifically needed when backporting a PR like `backport --pr 123` and the source PR was merged to a non-default (aka non-master) branch.
@@ -30,19 +35,6 @@ export function getTargetBranches(
     targetBranchesFromLabels,
     sourceBranch
   );
-
-  // automatically select the pre-checked branches
-  if (options.ci) {
-    const branches = targetBranchChoices
-      .filter((branch) => branch.checked)
-      .map((branch) => branch.name);
-
-    if (isEmpty(branches)) {
-      throw new HandledError(`There are no branches to backport to. Aborting.`);
-    }
-
-    return branches;
-  }
 
   // render interactive list of branches
   return promptForTargetBranches({
@@ -57,25 +49,21 @@ export function getTargetBranchChoices(
   sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
-  const targetBranchesFromOptions = options.targetBranchChoices.filter(
+  const targetBranchesChoices = options.targetBranchChoices.filter(
     (choice) => choice.name !== sourceBranch
   );
 
-  if (isEmpty(targetBranchesFromOptions)) {
+  if (isEmpty(targetBranchesChoices)) {
     throw new HandledError('Missing target branch choices');
   }
 
-  // automatially select target branches based on pull request labels
-  const preSelectedBranches = targetBranchesFromOptions.map((choice) => {
+  if (!options.branchLabelMapping) {
+    return targetBranchesChoices;
+  }
+
+  // select target branches based on pull request labels
+  return targetBranchesChoices.map((choice) => {
     const isChecked = targetBranchesFromLabels.includes(choice.name);
     return { ...choice, checked: isChecked };
   });
-
-  // if none of the choices are pre-selected (via PR labels) use the default selection (given via config options)
-  const hasAnySelections = preSelectedBranches.some((branch) => branch.checked);
-  if (!hasAnySelections && !options.ci) {
-    return targetBranchesFromOptions;
-  }
-
-  return preSelectedBranches;
 }

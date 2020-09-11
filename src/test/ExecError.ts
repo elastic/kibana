@@ -1,3 +1,5 @@
+import { SignalConstants } from 'os';
+
 export class ExecError extends Error {
   code: number | undefined;
   cmd: string | undefined;
@@ -7,7 +9,7 @@ export class ExecError extends Error {
     cmd?: string;
     killed?: boolean;
     code?: number;
-    signal?: NodeJS.Signals | null;
+    signal?: SignalConstants | null;
     stdout?: string;
     stderr?: string;
   }) {

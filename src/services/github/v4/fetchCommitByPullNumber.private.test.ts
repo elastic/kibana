@@ -9,8 +9,8 @@ describe('fetchCommitByPullNumber', () => {
     devAccessToken = await getDevAccessToken();
   });
 
-  describe('when PR exists', () => {
-    it('throws an error', async () => {
+  describe('when PR was merged', () => {
+    it('is returned', async () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
@@ -26,11 +26,15 @@ describe('fetchCommitByPullNumber', () => {
         sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
         sourceBranch: 'master',
         targetBranchesFromLabels: [],
+        existingTargetPullRequests: [
+          { branch: '7.x', state: 'MERGED' },
+          { branch: '7.8', state: 'MERGED' },
+        ],
       });
     });
   });
 
-  describe('when PR has not been merged', () => {
+  describe('when PR is still open', () => {
     it('throws an error', async () => {
       const options = {
         accessToken: devAccessToken,

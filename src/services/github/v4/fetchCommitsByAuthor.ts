@@ -1,23 +1,29 @@
 import isEmpty from 'lodash.isempty';
 import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
-import { CommitChoice } from '../../../types/Commit';
-import { filterEmpty } from '../../../utils/filterEmpty';
+import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import {
-  getFirstCommitMessageLine,
   getFormattedCommitMessage,
+  getPullNumberFromMessage,
 } from '../commitFormatters';
 import { apiRequestV4 } from './apiRequestV4';
 import { fetchAuthorId } from './fetchAuthorId';
+import {
+  pullRequestFragment,
+  pullRequestFragmentName,
+  PullRequestNode,
+  getExistingTargetPullRequests,
+  getPullRequestLabels,
+} from './getExistingTargetPullRequests';
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 export async function fetchCommitsByAuthor(
   options: BackportOptions
-): Promise<CommitChoice[]> {
+): Promise<Commit[]> {
   const {
     accessToken,
-    branchLabelMapping,
+
     githubApiBaseUrlV4,
     maxNumber,
     path,
@@ -51,49 +57,7 @@ export async function fetchCommitsByAuthor(
                     associatedPullRequests(first: 1) {
                       edges {
                         node {
-                          repository {
-                            owner {
-                              login
-                            }
-                            name
-                          }
-                          number
-                          mergeCommit {
-                            oid
-                          }
-                          labels(first: 50) {
-                            nodes {
-                              name
-                            }
-                          }
-                          timelineItems(
-                            last: 20
-                            itemTypes: CROSS_REFERENCED_EVENT
-                          ) {
-                            edges {
-                              node {
-                                ... on CrossReferencedEvent {
-                                  source {
-                                    __typename
-                                    ... on PullRequest {
-                                      title
-                                      state
-                                      baseRefName
-                                      commits(first: 20) {
-                                        edges {
-                                          node {
-                                            commit {
-                                              message
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
+                          ...${pullRequestFragmentName}
                         }
                       }
                     }
@@ -105,6 +69,8 @@ export async function fetchCommitsByAuthor(
         }
       }
     }
+
+    ${pullRequestFragment}
   `;
 
   const spinner = ora(
@@ -139,40 +105,50 @@ export async function fetchCommitsByAuthor(
   }
 
   const commits = res.repository.ref.target.history.edges.map((edge) => {
-    // it is assumed that there can only be a single PR associated with a commit
-    // that assumption might not hold true forever but for now it works out
-    const pullRequestEdge = edge.node.associatedPullRequests.edges[0];
     const commitMessage = edge.node.message;
     const sha = edge.node.oid;
 
-    // get the source pull request unless the commit was merged directly
-    const sourcePullRequest = getSourcePullRequest({
-      pullRequestEdge,
-      options,
-      sha,
-    });
+    // it is assumed that there can only be a single PR associated with a commit
+    // that assumption might not hold true forever but for now it works out
+    const pullRequestNode = edge.node.associatedPullRequests.edges[0]?.node;
 
-    // find any existing target pull requests
-    const existingTargetPullRequests = getExistingTargetPullRequests(
-      commitMessage,
-      sourcePullRequest
-    );
+    // the source pull request for the commit cannot be retrieved
+    // This happens if the commits was pushed directly to a branch (not merging via a PR)
+    if (!isSourcePullRequest({ pullRequestNode, options, sha })) {
+      const pullNumber = getPullNumberFromMessage(commitMessage);
+      const formattedMessage = getFormattedCommitMessage({
+        message: commitMessage,
+        pullNumber,
+        sha,
+      });
 
-    const pullNumber =
-      sourcePullRequest?.node.number || getPullNumberFromMessage(commitMessage);
+      return {
+        sourceBranch,
+        targetBranchesFromLabels: [],
+        sha,
+        formattedMessage,
+        originalMessage: commitMessage,
+        pullNumber,
+        existingTargetPullRequests: [],
+      };
+    }
 
+    const pullNumber = pullRequestNode.number;
     const formattedMessage = getFormattedCommitMessage({
       message: commitMessage,
       pullNumber,
       sha,
     });
 
-    const labels = sourcePullRequest?.node.labels.nodes.map(
-      (node) => node.name
+    const existingTargetPullRequests = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestNode
     );
+
     const targetBranchesFromLabels = getTargetBranchesFromLabels({
-      labels,
-      branchLabelMapping,
+      existingTargetPullRequests,
+      branchLabelMapping: options.branchLabelMapping,
+      labels: getPullRequestLabels(pullRequestNode),
     });
 
     return {
@@ -202,74 +178,20 @@ export async function fetchCommitsByAuthor(
   return commits;
 }
 
-function getPullNumberFromMessage(firstMessageLine: string) {
-  const matches = firstMessageLine.match(/\(#(\d+)\)/);
-  if (matches) {
-    return parseInt(matches[1], 10);
-  }
-}
-
-function getSourcePullRequest({
-  pullRequestEdge,
+function isSourcePullRequest({
+  pullRequestNode,
   options,
   sha,
 }: {
-  pullRequestEdge: PullRequestEdge | undefined;
+  pullRequestNode: PullRequestNode | undefined;
   options: BackportOptions;
   sha: string;
 }) {
-  if (
-    pullRequestEdge?.node.repository.name === options.repoName &&
-    pullRequestEdge.node.repository.owner.login === options.repoOwner &&
-    pullRequestEdge.node.mergeCommit.oid === sha
-  ) {
-    return pullRequestEdge;
-  }
-}
-
-export function getExistingTargetPullRequests(
-  commitMessage: string,
-  sourcePullRequest: PullRequestEdge | undefined
-) {
-  if (!sourcePullRequest) {
-    return [];
-  }
-
-  const firstMessageLine = getFirstCommitMessageLine(commitMessage);
-  return sourcePullRequest.node.timelineItems.edges
-    .filter(filterEmpty)
-    .filter((item) => {
-      const { source } = item.node;
-
-      const isPullRequest = source.__typename === 'PullRequest';
-      const isMergedOrOpen =
-        source.state === 'MERGED' || source.state === 'OPEN';
-
-      if (!isPullRequest || !isMergedOrOpen) {
-        return false;
-      }
-
-      const commitMatch = source.commits.edges.some((commit) => {
-        return (
-          getFirstCommitMessageLine(commit.node.commit.message) ===
-          firstMessageLine
-        );
-      });
-
-      const prTitleMatch = source.title.includes(firstMessageLine);
-      const prNumberMatch = source.title.includes(
-        sourcePullRequest.node.number.toString()
-      );
-
-      return commitMatch || (prTitleMatch && prNumberMatch);
-    })
-    .map((item) => {
-      const { source } = item.node;
-      return {
-        branch: source.baseRefName,
-        state: source.state,
-      };
-    });
+  return (
+    pullRequestNode?.repository.name === options.repoName &&
+    pullRequestNode.repository.owner.login === options.repoOwner &&
+    pullRequestNode.mergeCommit?.oid === sha
+  );
 }
 
 export interface DataResponse {
@@ -295,46 +217,5 @@ interface HistoryEdge {
 }
 
 export interface PullRequestEdge {
-  node: {
-    number: number;
-    mergeCommit: {
-      oid: string;
-    };
-    labels: {
-      nodes: {
-        name: string;
-      }[];
-    };
-    repository: {
-      owner: {
-        login: string;
-      };
-      name: string;
-    };
-    timelineItems: {
-      edges: (TimelineItemEdge | null)[];
-    };
-  };
-}
-
-interface TimelineItemEdge {
-  node: {
-    source: {
-      __typename: string;
-      title: string;
-      state: 'OPEN' | 'CLOSED' | 'MERGED';
-      baseRefName: string;
-      commits: {
-        edges: CommitEdge[];
-      };
-    };
-  };
-}
-
-interface CommitEdge {
-  node: {
-    commit: {
-      message: string;
-    };
-  };
+  node: PullRequestNode;
 }

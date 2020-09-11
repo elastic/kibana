@@ -1,20 +1,26 @@
 import isEmpty from 'lodash.isempty';
 import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
-import { CommitChoice } from '../../../types/Commit';
+import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { getFormattedCommitMessage } from '../commitFormatters';
 import { apiRequestV4 } from './apiRequestV4';
+import {
+  pullRequestFragment,
+  pullRequestFragmentName,
+  PullRequestNode,
+  getExistingTargetPullRequests,
+  getPullRequestLabels,
+} from './getExistingTargetPullRequests';
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 export async function fetchPullRequestBySearchQuery(
   options: BackportOptions
-): Promise<CommitChoice[]> {
+): Promise<Commit[]> {
   const {
     accessToken,
     all,
     author,
-    branchLabelMapping,
     githubApiBaseUrlV4,
     maxNumber,
     prFilter,
@@ -27,26 +33,20 @@ export async function fetchPullRequestBySearchQuery(
       search(query: $query, type: ISSUE, first: $maxNumber) {
         nodes {
           ... on PullRequest {
-            number
-            labels(first: 50) {
-              nodes {
-                name
-              }
-            }
-            mergeCommit {
-              oid
-              message
-            }
+            ...${pullRequestFragmentName}
           }
         }
       }
     }
+
+    ${pullRequestFragment}
   `;
 
   const authorFilter = all ? '' : `author:${author}`;
   const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
   const spinner = ora('Loading pull requests...').start();
   let res: DataResponse;
+
   try {
     res = await apiRequestV4<DataResponse>({
       githubApiBaseUrlV4,
@@ -63,30 +63,41 @@ export async function fetchPullRequestBySearchQuery(
     throw e;
   }
 
-  const commits = res.search.nodes.map((searchNode) => {
-    const labels = searchNode.labels.nodes.map((labelNode) => labelNode.name);
+  const commits = res.search.nodes.map((pullRequestNode) => {
+    // this should never happen since we are searching for merged PR (is:merged) in the first place
+    // but typescript doesn't know about this
+    if (pullRequestNode.mergeCommit == null) {
+      throw new Error('Pull Request is not merged');
+    }
 
-    const targetBranchesFromLabels = getTargetBranchesFromLabels({
-      labels,
-      branchLabelMapping,
-    });
-    const sha = searchNode.mergeCommit.oid;
-    const pullNumber = searchNode.number;
-    const commitMessage = searchNode.mergeCommit.message;
+    const sha = pullRequestNode.mergeCommit.oid;
+    const pullNumber = pullRequestNode.number;
+    const commitMessage = pullRequestNode.mergeCommit.message;
     const formattedMessage = getFormattedCommitMessage({
       message: commitMessage,
       sha,
       pullNumber,
     });
 
-    const choice: CommitChoice = {
+    const existingTargetPullRequests = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestNode
+    );
+
+    const targetBranchesFromLabels = getTargetBranchesFromLabels({
+      existingTargetPullRequests,
+      branchLabelMapping: options.branchLabelMapping,
+      labels: getPullRequestLabels(pullRequestNode),
+    });
+
+    const choice: Commit = {
       sourceBranch,
       targetBranchesFromLabels,
       sha,
       formattedMessage,
       originalMessage: commitMessage,
       pullNumber,
-      existingTargetPullRequests: [],
+      existingTargetPullRequests,
     };
 
     return choice;
@@ -104,19 +115,8 @@ export async function fetchPullRequestBySearchQuery(
   return commits;
 }
 
-interface DataResponse {
+export interface DataResponse {
   search: {
-    nodes: {
-      number: number;
-      labels: {
-        nodes: {
-          name: string;
-        }[];
-      };
-      mergeCommit: {
-        oid: string;
-        message: string;
-      };
-    }[];
+    nodes: PullRequestNode[];
   };
 }

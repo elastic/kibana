@@ -1,7 +1,7 @@
 import { BranchChoice } from '../options/ConfigOptions';
 import { BackportOptions } from '../options/options';
 import * as prompts from '../services/prompts';
-import { CommitSelected } from '../types/Commit';
+import { Commit } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
 import { getTargetBranches, getTargetBranchChoices } from './getTargetBranches';
 
@@ -29,6 +29,7 @@ describe('getTargetBranches', () => {
           { name: '7.6' },
           { name: '7.5' },
         ] as BranchChoice[],
+        branchLabelMapping: {},
         sourceBranch: 'master',
       } as unknown) as BackportOptions;
 
@@ -122,7 +123,7 @@ describe('getTargetBranches', () => {
         multipleBranches: false,
       } as unknown) as BackportOptions;
 
-      const commits: CommitSelected[] = [
+      const commits: Commit[] = [
         {
           formattedMessage: 'hey',
           originalMessage: 'hey',
@@ -130,6 +131,7 @@ describe('getTargetBranches', () => {
           sha: 'abcd',
           sourceBranch: '7.x',
           pullNumber: 1337,
+          existingTargetPullRequests: [],
         },
       ];
 
@@ -181,12 +183,13 @@ describe('getTargetBranchChoices', () => {
       { name: '7.8', checked: false },
       { name: '7.7', checked: false },
     ],
+    branchLabelMapping: {},
   } as unknown) as BackportOptions;
 
-  const targetBranchesFromLabels = [] as string[];
   const sourceBranch = 'master';
 
-  it('should return default branches if none are preselected via labels ', () => {
+  it('should not check any branches if no labels match', () => {
+    const targetBranchesFromLabels = [] as string[];
     const branches = getTargetBranchChoices(
       options,
       targetBranchesFromLabels,
@@ -194,13 +197,14 @@ describe('getTargetBranchChoices', () => {
     );
 
     expect(branches).toEqual([
-      { checked: true, name: '7.x' },
+      { checked: false, name: '7.x' },
       { checked: false, name: '7.8' },
       { checked: false, name: '7.7' },
     ]);
   });
 
   it('should not return default branches when running in "--ci" mode', () => {
+    const targetBranchesFromLabels = [] as string[];
     const branches = getTargetBranchChoices(
       { ...options, ci: true },
       targetBranchesFromLabels,

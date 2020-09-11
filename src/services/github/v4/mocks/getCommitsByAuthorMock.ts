@@ -15,11 +15,14 @@ export const getCommitsByAuthorMock = (repoName: string): DataResponse => ({
                   edges: [
                     {
                       node: {
+                        baseRefName: 'master',
                         labels: {
                           nodes: [{ name: 'my-label-a' }],
                         },
                         mergeCommit: {
                           oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+                          message:
+                            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
                         },
                         repository: {
                           name: repoName,

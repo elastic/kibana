@@ -126,7 +126,7 @@ describe('runWithOptions', () => {
     ]);
   });
 
-  it('it retrieves author id', () => {
+  it('retrieves author id', () => {
     expect(authorIdCalls).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -145,7 +145,7 @@ describe('runWithOptions', () => {
     `);
   });
 
-  it('it retrieves commits by author', () => {
+  it('retrieves commits by author', () => {
     expect(commitsByAuthorCalls.map((body) => body.variables)).toEqual([
       {
         authorId: 'sqren_author_id',

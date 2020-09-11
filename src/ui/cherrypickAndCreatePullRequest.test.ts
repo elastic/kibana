@@ -5,7 +5,7 @@ import * as childProcess from '../services/child-process-promisified';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
 import { ExecError } from '../test/ExecError';
-import { CommitSelected } from '../types/Commit';
+import { Commit } from '../types/Commit';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { SpyHelper } from '../types/SpyHelper';
 import { cherrypickAndCreateTargetPullRequest } from './cherrypickAndCreateTargetPullRequest';
@@ -56,7 +56,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         sourcePRLabels: [] as string[],
       } as BackportOptions;
 
-      const commits: CommitSelected[] = [
+      const commits: Commit[] = [
         {
           sourceBranch: '7.x',
           sha: 'mySha',
@@ -64,6 +64,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           originalMessage: 'My original commit message',
           pullNumber: 1000,
           targetBranchesFromLabels: [],
+          existingTargetPullRequests: [],
         },
         {
           sourceBranch: '7.x',
@@ -72,6 +73,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           originalMessage: 'My original commit message',
           pullNumber: 2000,
           targetBranchesFromLabels: [],
+          existingTargetPullRequests: [],
         },
       ];
 
@@ -164,6 +166,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             formattedMessage: 'myCommitMessage (mySha)',
             originalMessage: 'My original commit message',
             targetBranchesFromLabels: [],
+            existingTargetPullRequests: [],
           },
         ],
         targetBranch: '6.x',
@@ -216,6 +219,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             formattedMessage: 'myCommitMessage',
             originalMessage: 'My original commit message',
             targetBranchesFromLabels: [],
+            existingTargetPullRequests: [],
           },
         ],
         targetBranch: '6.x',

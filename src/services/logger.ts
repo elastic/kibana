@@ -79,6 +79,12 @@ export function initLogger() {
               );
             }
 
+            if (info.metadata.meta.stack) {
+              return redact(
+                `${info.timestamp}: ${info.message}\n${info.metadata.meta.stack}\n`
+              );
+            }
+
             // format when metadata is an object
             return redact(
               `${info.timestamp}: ${info.message}\n${safeJsonStringify(

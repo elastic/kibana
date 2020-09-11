@@ -13,7 +13,7 @@ describe('fetchPullRequestBySearchQuery', () => {
     mockCalls = mockGqlRequest({
       name: 'PullRequestBySearchQuery',
       statusCode: 200,
-      body: fetchPullRequestBySearchQueryMock,
+      body: { data: fetchPullRequestBySearchQueryMock },
     });
 
     res = await fetchPullRequestBySearchQuery({
@@ -46,134 +46,183 @@ describe('fetchPullRequestBySearchQuery', () => {
     expect(res).toMatchInlineSnapshot(`
       Array [
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Fix timeout in APM setup (#58727)",
-          "originalMessage": "[APM] Fix timeout in APM setup (#58727)
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] @ts-error -> @ts-expect-error (#76492)",
+          "originalMessage": "[APM] @ts-error -> @ts-expect-error (#76492)
 
-      * [APM] Fix timeout in APM setup
+      Co-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>",
+          "pullNumber": 76492,
+          "sha": "e0f4775b780aada005bdd1774edcceac0ffee006",
+          "sourceBranch": "master",
+          "targetBranchesFromLabels": Array [],
+        },
+        Object {
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Avoid negative offset for error marker on timeline (#76638)",
+          "originalMessage": "[APM] Avoid negative offset for error marker on timeline (#76638)
 
-      * Update plugin.ts",
-          "pullNumber": 58727,
-          "sha": "d474ccf244d22b8abf7df1be3e96b36b715281f1",
+      Co-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>",
+          "pullNumber": 76638,
+          "sha": "fae1e02e0f7a475bf92da05be52a817aa2a84959",
+          "sourceBranch": "master",
+          "targetBranchesFromLabels": Array [],
+        },
+        Object {
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+            Object {
+              "branch": "7.9",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Add anomaly detection API tests + fixes (#73120)",
+          "originalMessage": "[APM] Add anomaly detection API tests + fixes (#73120)
+
+      Co-authored-by: Nathan L Smith <nathan.smith@elastic.co>",
+          "pullNumber": 73120,
+          "sha": "aa68e3b63a4b513294dc58eaf4422e66a0beffb1",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
           "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Improve debug output (#58467)",
-          "originalMessage": "[APM] Improve debug output (#58467)",
-          "pullNumber": 58467,
-          "sha": "0e0f114d03f0becb9bbc5b93cbed217f2663efbd",
+          "formattedMessage": "[APM] Update script with new roles/users (#72599)",
+          "originalMessage": "[APM] Update script with new roles/users (#72599)
+
+      * [APM] Update script with new roles/users
+
+      * add log
+
+      * Add validation for http prefix",
+          "pullNumber": 72599,
+          "sha": "2fc7112ec27a9f8ded0e2f9e097613721f1179dd",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Fix missing apm indicies (#53541)",
-          "originalMessage": "[APM] Fix missing apm indicies (#53541)
-
-      * [APM] Fix missing apm indicies
-
-      * Fix infinite loop in ui indices
-
-      * Add test for empty settings",
-          "pullNumber": 53541,
-          "sha": "8b0d5f54dd701f0f5a9b36d2a8a1a27cffbdb6e3",
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+            Object {
+              "branch": "7.9",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "Update jobs_list.tsx (#72797)",
+          "originalMessage": "Update jobs_list.tsx (#72797)",
+          "pullNumber": 72797,
+          "sha": "7e126bfab6a3bfc44f9fa50feecfe22b4634e1a0",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Quick fix for ACM to ensure more than 10 items are displayed (#52262)",
-          "originalMessage": "[APM] Quick fix for ACM to ensure more than 10 items are displayed (#52262)
-
-      * [APM] Quick fix for ACM to ensure more than 10 items are displayed
-
-      * Fix snapshot",
-          "pullNumber": 52262,
-          "sha": "47dcf87e791c14c853172972232eaabebd8f609d",
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Fix confusing request/minute viz (#69143)",
+          "originalMessage": "[APM] Fix confusing request/minute viz (#69143)",
+          "pullNumber": 69143,
+          "sha": "d12208c7ea9513529ea1aff42d154db89e3573ff",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Add log statements for flaky test (#53775)",
-          "originalMessage": "[APM] Add log statements for flaky test (#53775)
-
-      * [APM] Add log statements for flaky test
-
-      * Improve logging
-
-      * Improve logging
-
-      * Log full index on error",
-          "pullNumber": 53775,
-          "sha": "53513f6b7b85f1140352a99f65ff53f5cdb1ec79",
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Remove watcher integration (#71655)",
+          "originalMessage": "[APM] Remove watcher integration (#71655)",
+          "pullNumber": 71655,
+          "sha": "f760d8513b0216a73e9a476661f0fb8fb0887a61",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Fix failing ACM integration test (#52149)",
-          "originalMessage": "[APM] Fix failing ACM integration test (#52149)",
-          "pullNumber": 52149,
-          "sha": "085a2af8ec3771c80ea2aeb8e592fd7c4c18c259",
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+            Object {
+              "branch": "7.9",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Disable flaky rum e2e’s (#72614)",
+          "originalMessage": "[APM] Disable flaky rum e2e’s (#72614)",
+          "pullNumber": 72614,
+          "sha": "05ee3da80db34ccf93e7424aa2704c098a1b49fa",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Add support for basepath (#52162)",
-          "originalMessage": "[APM] Add support for basepath (#52162)",
-          "pullNumber": 52162,
-          "sha": "b9e2895f2258da4b01f96ac2000514ef01f47379",
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+            Object {
+              "branch": "7.9",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Increase \`xpack.apm.ui.transactionGroupBucketSize\` (#71661)",
+          "originalMessage": "[APM] Increase \`xpack.apm.ui.transactionGroupBucketSize\` (#71661)",
+          "pullNumber": 71661,
+          "sha": "51a862988c344b34bd9da57dd57008df12e1b5e5",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },
         Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Improve index pattern handling (#50127)",
-          "originalMessage": "[APM] Improve index pattern handling (#50127)
+          "existingTargetPullRequests": Array [
+            Object {
+              "branch": "7.9",
+              "state": "MERGED",
+            },
+            Object {
+              "branch": "7.x",
+              "state": "MERGED",
+            },
+          ],
+          "formattedMessage": "[APM] Handle ML errors (#72316)",
+          "originalMessage": "[APM] Handle ML errors (#72316)
 
-      * [APM] Improve index pattern handling
+      * [APM] Handle ML errors
 
-      Handle exceptions
+      * Add capability check
 
-      Extract index pattern id as constant
+      * Improve test
 
-      Catch error when dynamic index pattern cannot be fetched
+      * Address Caue’s feedback
 
-      Use req instead of request
+      * Move getSeverity
 
-      * [APM] Address feedback
+      * Fix tsc
 
-      * Check for data before creating index pattern
-
-      * Add test
-
-      * Created ProcessorEvent as enum
-
-      * Revert ProcessorEvent back to type",
-          "pullNumber": 50127,
-          "sha": "551b03b215e8c399d7ae6cac404d9d49f17c45d4",
-          "sourceBranch": "master",
-          "targetBranchesFromLabels": Array [],
-        },
-        Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Remove \`type\` from agent configuration (#48404)",
-          "originalMessage": "[APM] Remove \`type\` from agent configuration (#48404)",
-          "pullNumber": 48404,
-          "sha": "77247773b9cdcfc2257713f1df2a49e1c31d7066",
-          "sourceBranch": "master",
-          "targetBranchesFromLabels": Array [],
-        },
-        Object {
-          "existingTargetPullRequests": Array [],
-          "formattedMessage": "[APM] Show loading state on waterfall and avoid re-fetching distribution chart when changing bucket (#44093)",
-          "originalMessage": "[APM] Show loading state on waterfall and avoid re-fetching distribution chart when changing bucket (#44093)",
-          "pullNumber": 44093,
-          "sha": "4657f0b041bd4a05102c18889121db252f23bf07",
+      * Fix copy",
+          "pullNumber": 72316,
+          "sha": "511e4543a7828cf0cdb157b88b01352947e0384f",
           "sourceBranch": "master",
           "targetBranchesFromLabels": Array [],
         },

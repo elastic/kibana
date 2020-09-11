@@ -1,7 +1,7 @@
 import { BackportOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
-import { fetchCommitBySha } from '../services/github/v3/fetchCommitBySha';
 import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommitByPullNumber';
+import { fetchCommitBySha } from '../services/github/v4/fetchCommitBySha';
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommitsByAuthor';
 import { fetchPullRequestBySearchQuery } from '../services/github/v4/fetchPullRequestBySearchQuery';
 import { promptForCommits } from '../services/prompts';

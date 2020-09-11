@@ -35,7 +35,7 @@ import {
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
-import { CommitSelected } from '../types/Commit';
+import { Commit } from '../types/Commit';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -43,7 +43,7 @@ export async function cherrypickAndCreateTargetPullRequest({
   targetBranch,
 }: {
   options: BackportOptions;
-  commits: CommitSelected[];
+  commits: Commit[];
   targetBranch: string;
 }) {
   const backportBranch = getBackportBranchName(targetBranch, commits);
@@ -190,7 +190,7 @@ async function backportViaFilesystem({
 }: {
   options: BackportOptions;
   prPayload: PullRequestPayload;
-  commits: CommitSelected[];
+  commits: Commit[];
   targetBranch: string;
   backportBranch: string;
 }) {
@@ -219,10 +219,7 @@ async function backportViaFilesystem({
  * For a single commit: `backport/7.x/commit-abcdef`
  * For multiple: `backport/7.x/pr-1234_commit-abcdef`
  */
-export function getBackportBranchName(
-  targetBranch: string,
-  commits: CommitSelected[]
-) {
+export function getBackportBranchName(targetBranch: string, commits: Commit[]) {
   const refValues = commits
     .map((commit) =>
       commit.pullNumber
@@ -236,7 +233,7 @@ export function getBackportBranchName(
 
 async function waitForCherrypick(
   options: BackportOptions,
-  commit: CommitSelected,
+  commit: Commit,
   targetBranch: string
 ) {
   const spinnerText = `Cherry-picking: ${chalk.greenBright(

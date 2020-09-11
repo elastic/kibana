@@ -4,7 +4,7 @@ import isEmpty from 'lodash.isempty';
 import uniq from 'lodash.uniq';
 import ora from 'ora';
 import { BackportOptions } from '../options/options';
-import { CommitSelected } from '../types/Commit';
+import { Commit } from '../types/Commit';
 import { HandledError } from './HandledError';
 import { execAsCallback, exec } from './child-process-promisified';
 import { getRepoOwnerPath, getRepoPath } from './env';
@@ -101,10 +101,7 @@ export async function addRemote(options: BackportOptions, remoteName: string) {
   }
 }
 
-export async function cherrypick(
-  options: BackportOptions,
-  commit: CommitSelected
-) {
+export async function cherrypick(options: BackportOptions, commit: Commit) {
   await exec(
     `git fetch ${options.repoOwner} ${commit.sourceBranch}:${commit.sourceBranch} --force`,
     { cwd: getRepoPath(options) }
@@ -128,7 +125,7 @@ export async function cherrypick(
     if (e.message.includes('The previous cherry-pick is now empty')) {
       const shortSha = getShortSha(commit.sha);
       throw new HandledError(
-        `Cherrypick failed because the selected commit (${shortSha}) is empty. This is most likely caused by attemping to backporting a commit that was already backported`
+        `Cherrypick failed because the selected commit (${shortSha}) is empty. Did you already backport this commit?`
       );
     }
 
@@ -151,10 +148,7 @@ export async function cherrypick(
   }
 }
 
-export async function commitChanges(
-  commit: CommitSelected,
-  options: BackportOptions
-) {
+export async function commitChanges(commit: Commit, options: BackportOptions) {
   const noVerify = options.noVerify ? ` --no-verify` : '';
 
   try {

@@ -15,7 +15,7 @@ describe('apiRequestV4', () => {
       commitsByAuthorCalls = mockGqlRequest({
         name: 'MyQuery',
         statusCode: 200,
-        body: { data: 'some data' },
+        body: { data: { hello: 'world' } },
       });
 
       res = await apiRequestV4({
@@ -27,7 +27,7 @@ describe('apiRequestV4', () => {
     });
 
     it('should return correct response', async () => {
-      expect(res).toEqual('some data');
+      expect(res).toEqual({ hello: 'world' });
     });
 
     it('should call with correct args', async () => {

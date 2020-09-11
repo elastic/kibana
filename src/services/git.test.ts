@@ -11,7 +11,7 @@ import {
   pushBackportBranch,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
-import { CommitSelected } from '../types/Commit';
+import { Commit } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
 
 beforeEach(() => {
@@ -174,12 +174,13 @@ describe('cherrypick', () => {
     repoName: 'kibana',
   } as BackportOptions;
 
-  const commit = {
+  const commit: Commit = {
     sourceBranch: '7.x',
     formattedMessage: '',
     originalMessage: '',
     sha: 'abcd',
     targetBranchesFromLabels: [],
+    existingTargetPullRequests: [],
   };
 
   it('should return `needsResolving: false` when no errors are encountered', async () => {
@@ -249,7 +250,7 @@ describe('cherrypick', () => {
     });
   });
 
-  it('it should let the user know about the "--mainline" argument when cherry-picking a merge commit without specifying it', async () => {
+  it('should let the user know about the "--mainline" argument when cherry-picking a merge commit without specifying it', async () => {
     jest
       .spyOn(childProcess, 'exec')
 
@@ -281,7 +282,7 @@ or:
 Or refer to the git documentation for more information: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt---mainlineparent-number`);
   });
 
-  it('it should gracefully handle empty commits', async () => {
+  it('should gracefully handle empty commits', async () => {
     jest
       .spyOn(childProcess, 'exec')
 
@@ -303,7 +304,7 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
       );
 
     await expect(cherrypick(options, commit)).rejects.toThrowError(
-      `Cherrypick failed because the selected commit (abcd) is empty. This is most likely caused by attemping to backporting a commit that was already backported`
+      `Cherrypick failed because the selected commit (abcd) is empty. Did you already backport this commit?`
     );
   });
 
@@ -337,7 +338,7 @@ describe('commitChanges', () => {
 
   const commit = {
     originalMessage: 'The original commit message',
-  } as CommitSelected;
+  } as Commit;
 
   it('should return when changes committed successfully', async () => {
     jest

@@ -3,7 +3,11 @@ import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
-import { getFormattedCommitMessage } from '../commitFormatters';
+import {
+  getFormattedCommitMessage,
+  getShortSha,
+  getPullNumberFromMessage,
+} from '../commitFormatters';
 import { apiRequestV4 } from './apiRequestV4';
 import {
   PullRequestNode,
@@ -14,35 +18,34 @@ import {
 } from './getExistingTargetPullRequests';
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
-export async function fetchCommitByPullNumber(
-  options: BackportOptions & { pullNumber: number }
+export async function fetchCommitBySha(
+  options: BackportOptions & { sha: string }
 ): Promise<Commit> {
-  const {
-    accessToken,
-    githubApiBaseUrlV4,
-    pullNumber,
-    repoName,
-    repoOwner,
-  } = options;
+  const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
+
   const query = /* GraphQL */ `
-    query CommitByPullNumber(
-      $repoOwner: String!
-      $repoName: String!
-      $pullNumber: Int!
-    ) {
-      repository(owner: $repoOwner, name: $repoName) {
-        pullRequest(number: $pullNumber) {
-          ...${pullRequestFragmentName}
+  query CommitsBySha($repoOwner: String!, $repoName: String!, $oid: String!) {
+    repository(owner: $repoOwner, name: $repoName) {
+      object(expression: $oid) {
+        ... on Commit {
+          message
+          oid
+          associatedPullRequests(first: 1) {
+            edges {
+              node {
+                ...${pullRequestFragmentName}
+              }
+            }
+          }
         }
       }
     }
+  }
 
     ${pullRequestFragment}
   `;
 
-  const spinner = ora(
-    `Loading merge commit from pull request #${options.pullNumber}`
-  ).start();
+  const spinner = ora(`Loading commit "${getShortSha(options.sha)}"`).start();
 
   let res: DataResponse;
   try {
@@ -53,7 +56,7 @@ export async function fetchCommitByPullNumber(
       variables: {
         repoOwner,
         repoName,
-        pullNumber,
+        oid: options.sha,
       },
     });
     spinner.stop();
@@ -62,27 +65,31 @@ export async function fetchCommitByPullNumber(
     throw e;
   }
 
-  const pullRequestNode = res.repository.pullRequest;
-
-  if (pullRequestNode.mergeCommit === null) {
-    throw new HandledError(`The PR #${pullNumber} is not merged`);
+  if (!res.repository.object) {
+    throw new HandledError(
+      `No commit found on branch "${options.sourceBranch}" with sha "${options.sha}"`
+    );
   }
 
-  const sourceBranch = pullRequestNode.baseRefName;
-  const sha = pullRequestNode.mergeCommit.oid;
-  const commitMessage = pullRequestNode.mergeCommit.message;
+  const sha = res.repository.object.oid;
+  const commitMessage = res.repository.object.message;
+  const pullRequestNode =
+    res.repository.object.associatedPullRequests.edges?.[0]?.node;
+
+  const pullNumber =
+    pullRequestNode?.number || getPullNumberFromMessage(commitMessage);
+
+  const sourceBranch = pullRequestNode?.baseRefName || options.sourceBranch;
+
   const formattedMessage = getFormattedCommitMessage({
     message: commitMessage,
-    sha,
     pullNumber,
+    sha,
   });
 
-  // add styles to make it look like a prompt question
   spinner.stopAndPersist({
     symbol: chalk.green('?'),
-    text: `${chalk.bold('Select pull request')} ${chalk.cyan(
-      formattedMessage
-    )}`,
+    text: `${chalk.bold('Select commit')} ${chalk.cyan(formattedMessage)}`,
   });
 
   const existingTargetPullRequests = getExistingTargetPullRequests(
@@ -109,6 +116,16 @@ export async function fetchCommitByPullNumber(
 
 interface DataResponse {
   repository: {
-    pullRequest: PullRequestNode;
+    object: {
+      message: string;
+      oid: string;
+      associatedPullRequests: {
+        edges:
+          | {
+              node: PullRequestNode;
+            }[]
+          | null;
+      };
+    } | null;
   };
 }

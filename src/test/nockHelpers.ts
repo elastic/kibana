@@ -11,7 +11,7 @@ export function mockGqlRequest({
 }: {
   name: string;
   statusCode: number;
-  body?: any;
+  body?: { data: Record<any, any> } | { errors: any[] };
   headers?: any;
   apiBaseUrl?: string;
 }) {

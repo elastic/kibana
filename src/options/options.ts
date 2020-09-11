@@ -34,7 +34,7 @@ export async function getOptions(
   return {
     ...validatedOptions,
 
-    // use the default branch as source branch (normally master) unless an explicit `sourceBranch` has been given
+    // use the default branch as source branch (normally "master") unless an explicit `sourceBranch` has been given
     sourceBranch: validatedOptions.sourceBranch
       ? validatedOptions.sourceBranch
       : defaultBranch,
