@@ -71,7 +71,7 @@ function addJsonFieldToIndexPattern(
 async function importIndexPattern(
   doc: SavedObjectsRawDoc,
   indexPatterns: IndexPatternsContract,
-  overwriteAll: boolean,
+  overwriteAll: boolean = false,
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
@@ -98,7 +98,7 @@ async function importIndexPattern(
   addJsonFieldToIndexPattern(indexPatternSpec, sourceFilters, 'sourceFilters', title);
   addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
   try {
-    emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, false, true);
+    emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, overwriteAll, true);
   } catch (err) {
     if (err instanceof DuplicateIndexPatternError) {
       // We can override and we want to prompt for confirmation

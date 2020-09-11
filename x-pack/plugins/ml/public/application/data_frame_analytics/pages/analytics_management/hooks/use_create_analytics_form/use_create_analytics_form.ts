@@ -163,7 +163,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         });
       } else {
         addRequestMessage({
-          error: getErrorMessage(e),
+          error: extractErrorMessage(e),
           message: i18n.translate(
             'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
             {
