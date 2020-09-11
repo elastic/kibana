@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+jest.mock('./', () => ({
+  FlashMessagesLogic: { actions: { setFlashMessages: jest.fn() } },
+}));
+import { FlashMessagesLogic } from './';
+
+import { handleAPIError } from './handle_api_errors';
+
+describe('handleAPIError', () => {
+  const mockHttpError = {
+    body: {
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Could not find X,Could not find Y,Something else bad happened',
+      attributes: {
+        errors: ['Could not find X', 'Could not find Y', 'Something else bad happened'],
+      },
+    },
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('converts API errors into flash messages', () => {
+    handleAPIError(mockHttpError);
+
+    expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+      { type: 'error', message: 'Could not find X' },
+      { type: 'error', message: 'Could not find Y' },
+      { type: 'error', message: 'Something else bad happened' },
+    ]);
+  });
+
+  it('displays a generic error message and re-throws non-API errors', () => {
+    try {
+      handleAPIError(Error('whatever') as any);
+    } catch (e) {
+      expect(e.message).toEqual('whatever');
+      expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+        { type: 'error', message: 'An unexpected error occurred' },
+      ]);
+    }
+  });
+});
