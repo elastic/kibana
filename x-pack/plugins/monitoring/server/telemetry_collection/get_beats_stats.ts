@@ -355,7 +355,7 @@ async function fetchBeatsByType(
       }),
       from: page * HITS_SIZE,
       collapse: { field: `${type}.beat.uuid` },
-      sort: [{ [`${type}.timestamp`]: 'desc', unmapped_type: 'long' }],
+      sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
       size: HITS_SIZE,
     },
   };
