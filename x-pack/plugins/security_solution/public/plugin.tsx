@@ -21,7 +21,6 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { resilientActionType } from './common/lib/connectors';
 import {
   PluginSetup,
   PluginStart,
@@ -95,8 +94,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         order: 300,
       });
     }
-
-    plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
 
     const mountSecurityFactory = async () => {
       const storage = new Storage(localStorage);
