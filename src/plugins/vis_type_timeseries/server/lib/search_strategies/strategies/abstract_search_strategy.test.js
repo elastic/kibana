@@ -58,21 +58,23 @@ describe('AbstractSearchStrategy', () => {
 
     const responses = await abstractSearchStrategy.search(
       {
-        getStartServices: jest.fn().mockReturnValue(
-          Promise.resolve([
-            {},
-            {
-              data: {
-                search: {
-                  search: searchFn,
-                },
-              },
-            },
-          ])
-        ),
-      },
-      {
         requestContext: {},
+        framework: {
+          core: {
+            getStartServices: jest.fn().mockReturnValue(
+              Promise.resolve([
+                {},
+                {
+                  data: {
+                    search: {
+                      search: searchFn,
+                    },
+                  },
+                },
+              ])
+            ),
+          },
+        },
       },
       searches
     );
