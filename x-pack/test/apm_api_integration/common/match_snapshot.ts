@@ -4,15 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotState, toMatchSnapshot } from 'jest-snapshot';
+import { SnapshotState, toMatchSnapshot, toMatchInlineSnapshot } from 'jest-snapshot';
 import path from 'path';
 import { Context } from 'mocha';
 import expect from '@kbn/expect';
+// @ts-expect-error
+import prettier from 'prettier';
+// @ts-expect-error
+import babelTraverse from '@babel/traverse';
 
 let testContext: { file: string; testTitle: string } | null = null;
+interface SnapshotContext {
+  snapshotState: InstanceType<typeof SnapshotState>;
+}
 
 export function init() {
-  // @ts-ignore
+  // @ts-expect-error
   const mochaContext = this as Context;
   const file = mochaContext.currentTest?.file;
   const testTitle = mochaContext.currentTest?.fullTitle();
@@ -31,7 +38,22 @@ export function teardown() {
   testContext = null;
 }
 
-export function expectToMatchSnapshot(actual: any) {
+const originalPrepareStackTrace = Error.prepareStackTrace;
+
+// jest-snapshot uses a stack trace to determine which file/line/column
+// an inline snapshot should be written to. We filter out match_snapshot
+// from the stack trace to prevent it from wanting to write to this file.
+
+Error.prepareStackTrace = (error, structuredStackTrace) => {
+  const filteredStrackTrace = structuredStackTrace.filter((callSite) => {
+    return !callSite.getFileName()?.endsWith('match_snapshot.ts');
+  });
+  if (originalPrepareStackTrace) {
+    return originalPrepareStackTrace(error, filteredStrackTrace);
+  }
+};
+
+function getSnapshotContextOrThrow() {
   if (!testContext) {
     throw new Error('A current Mocha context is needed to match snapshots');
   }
@@ -43,19 +65,43 @@ export function expectToMatchSnapshot(actual: any) {
 
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
-    // not passing babel or prettier
-    // @ts-ignore
     {
       updateSnapshot: process.env.UPDATE_APM_SNAPSHOTS ? 'all' : 'new',
+      getPrettier: () => prettier,
+      getBabelTraverse: () => babelTraverse,
     }
   );
 
-  // not passing assertions
-  // @ts-ignore
-  const matcher = toMatchSnapshot.bind({ snapshotState, currentTestName: testTitle });
-  const result = matcher(actual);
+  return {
+    snapshotState,
+    currentTestName: testTitle,
+  } as SnapshotContext;
+}
 
-  snapshotState.save();
+export function expectSnapshot(received: any) {
+  const snapshotContext = getSnapshotContextOrThrow();
 
-  return expect(result.pass).to.eql(true, result.message());
+  return {
+    toMatch: expectToMatchSnapshot.bind(snapshotContext, received),
+    toMatchInline: expectToMatchInlineSnapshot.bind(snapshotContext, received),
+  };
+}
+
+function expectToMatchSnapshot(this: SnapshotContext, received: any) {
+  const matcher = toMatchSnapshot.bind(this as any);
+  const result = matcher(received);
+
+  this.snapshotState.save();
+
+  expect(result.pass).to.eql(true, result.message());
+}
+
+function expectToMatchInlineSnapshot(this: SnapshotContext, received: any, _actual?: any) {
+  const matcher = toMatchInlineSnapshot.bind(this as any);
+
+  const result = matcher(received);
+
+  this.snapshotState.save();
+
+  expect(result.pass).to.eql(true, result.message());
 }
