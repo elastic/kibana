@@ -26,6 +26,27 @@ export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
   defaultMessage: 'Total blocking time',
 });
 
+export const NO_OF_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.noOfLongTasks',
+  {
+    defaultMessage: 'No of long task',
+  }
+);
+
+export const LONGEST_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.longestLongTasks',
+  {
+    defaultMessage: 'Longest long task',
+  }
+);
+
+export const SUM_LONG_TASKS = i18n.translate(
+  'xpack.apm.rum.uxMetrics.longestLongTasks',
+  {
+    defaultMessage: 'Sum of long tasks',
+  }
+);
+
 export const POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
   defaultMessage: 'a poor',
 });

@@ -12,6 +12,7 @@ import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getRumServices } from './get_rum_services';
+import { getLongTaskMetrics } from './get_long_task_metrics';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;
@@ -54,6 +55,15 @@ describe('rum client dashboard queries', () => {
   it('fetches rum services', async () => {
     mock = await inspectSearchParams((setup) =>
       getRumServices({
+        setup,
+      })
+    );
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches key ux metrics', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getLongTaskMetrics({
         setup,
       })
     );

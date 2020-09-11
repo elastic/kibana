@@ -13,8 +13,10 @@ import {
 } from '../helpers/setup_request';
 import {
   CLS_FIELD,
+  FCP_FIELD,
   FID_FIELD,
   LCP_FIELD,
+  TBT_FIELD,
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getWebCoreVitals({
@@ -60,6 +62,18 @@ export async function getWebCoreVitals({
             percents: [50],
           },
         },
+        tbt: {
+          percentiles: {
+            field: TBT_FIELD,
+            percents: [50],
+          },
+        },
+        fcp: {
+          percentiles: {
+            field: FCP_FIELD,
+            percents: [50],
+          },
+        },
         lcpRanks: {
           percentile_ranks: {
             field: LCP_FIELD,
@@ -92,6 +106,8 @@ export async function getWebCoreVitals({
     lcp,
     cls,
     fid,
+    tbt,
+    fcp,
     lcpRanks,
     fidRanks,
     clsRanks,
@@ -115,6 +131,8 @@ export async function getWebCoreVitals({
     cls: String(cls.values['50.0'] || 0),
     fid: ((fid.values['50.0'] || 0) / 1000).toFixed(2),
     lcp: ((lcp.values['50.0'] || 0) / 1000).toFixed(2),
+    tbt: ((tbt.values['50.0'] || 0) / 1000).toFixed(2),
+    fcp: ((fcp.values['50.0'] || 0) / 1000).toFixed(2),
 
     lcpRanks: getRanksPercentages(lcpRanks.values),
     fidRanks: getRanksPercentages(fidRanks.values),
