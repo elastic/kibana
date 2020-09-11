@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
@@ -92,7 +94,7 @@ describe('PluginsService', () => {
       },
     };
 
-    const env = Env.createDefault(getEnvOptions());
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = new BehaviorSubject<Record<string, any>>({
       plugins: {
         initialize: true,

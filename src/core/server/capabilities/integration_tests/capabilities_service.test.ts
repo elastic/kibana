@@ -18,6 +18,7 @@
  */
 
 import supertest from 'supertest';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { getEnvOptions } from '@kbn/config';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
@@ -27,7 +28,8 @@ import { CapabilitiesService, CapabilitiesSetup } from '..';
 import { createHttpServer } from '../../http/test_utils';
 
 const coreId = Symbol('core');
-const env = Env.createDefault(getEnvOptions());
+
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 describe('CapabilitiesService', () => {
   let server: HttpService;

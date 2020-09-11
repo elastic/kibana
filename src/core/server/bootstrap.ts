@@ -19,6 +19,7 @@
 
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
@@ -60,7 +61,7 @@ export async function bootstrap({
     return;
   }
 
-  const env = Env.createDefault({
+  const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,

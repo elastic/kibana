@@ -17,7 +17,10 @@
  * under the License.
  */
 
-jest.mock('path', () => ({
+const realPath = jest.requireActual('path');
+
+jest.doMock('path', () => ({
+  ...realPath,
   resolve(...pathSegments: string[]) {
     return pathSegments.join('/');
   },
@@ -26,5 +29,10 @@ jest.mock('path', () => ({
   },
 }));
 
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../package.json', () => mockPackage);
+export const mockPackage = {
+  raw: {},
+};
+
+jest.doMock('load-json-file', () => ({
+  sync: () => mockPackage.raw,
+}));

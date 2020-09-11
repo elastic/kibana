@@ -18,6 +18,7 @@
  */
 import request from 'request';
 import supertest from 'supertest';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 import { getEnvOptions, configServiceMock } from '@kbn/config';
@@ -71,7 +72,7 @@ configService.atPath.mockReturnValue(
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   server = new HttpService(coreContext);

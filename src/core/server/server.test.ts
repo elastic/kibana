@@ -35,13 +35,14 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
 import { Env } from './config';
 import { Server } from './server';
 
 import { loggingSystemMock } from './logging/logging_system.mock';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 

@@ -19,6 +19,7 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { schema } from '@kbn/config-schema';
 import { getEnvOptions, configServiceMock } from '@kbn/config';
 
@@ -76,7 +77,7 @@ const setupDeps = coreMock.createInternalSetup();
 
 beforeEach(() => {
   coreId = Symbol('core');
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
   instanceInfo = {
     uuid: 'instance-uuid',
   };

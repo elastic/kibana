@@ -22,6 +22,12 @@ import { mockPackage } from './env.test.mocks';
 import { Env } from '.';
 import { getEnvOptions } from './__mocks__/env';
 
+const REPO_ROOT = '/test/kibanaRoot';
+
+beforeEach(() => {
+  mockPackage.raw = {};
+});
+
 test('correctly creates default environment in dev mode.', () => {
   mockPackage.raw = {
     branch: 'some-branch',
@@ -29,6 +35,7 @@ test('correctly creates default environment in dev mode.', () => {
   };
 
   const defaultEnv = Env.createDefault(
+    REPO_ROOT,
     getEnvOptions({
       configs: ['/test/cwd/config/kibana.yml'],
       isDevClusterMaster: true,
@@ -50,6 +57,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
   };
 
   const defaultEnv = Env.createDefault(
+    REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false },
       configs: ['/some/other/path/some-kibana.yml'],
@@ -71,6 +79,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
   };
 
   const defaultEnv = Env.createDefault(
+    REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false },
       configs: ['/some/other/path/some-kibana.yml'],
@@ -92,6 +101,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
   };
 
   const defaultDevEnv = Env.createDefault(
+    REPO_ROOT,
     getEnvOptions({
       cliArgs: { envName: 'development' },
       configs: ['/some/other/path/some-kibana.yml'],
@@ -99,6 +109,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
   );
 
   const defaultProdEnv = Env.createDefault(
+    REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false, envName: 'production' },
       configs: ['/some/other/path/some-kibana.yml'],
@@ -110,18 +121,17 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
 });
 
 test('correctly creates environment with constructor.', () => {
-  mockPackage.raw = {
-    branch: 'feature-v1',
-    version: 'v1',
-    build: {
-      distributable: true,
-      number: 100,
-      sha: 'feature-v1-build-sha',
-    },
-  };
-
   const env = new Env(
     '/some/home/dir',
+    {
+      branch: 'feature-v1',
+      version: 'v1',
+      build: {
+        distributable: true,
+        number: 100,
+        sha: 'feature-v1-build-sha',
+      },
+    },
     getEnvOptions({
       cliArgs: { dev: false },
       configs: ['/some/other/path/some-kibana.yml'],
@@ -134,6 +144,7 @@ test('correctly creates environment with constructor.', () => {
 test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { oss: false },
     })
@@ -145,6 +156,7 @@ test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', ()
 test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { oss: true },
     })
@@ -156,6 +168,7 @@ test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is t
 test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { runExamples: true },
     })
@@ -167,6 +180,7 @@ test('pluginSearchPaths contains examples plugins path if --run-examples flag is
 test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { runExamples: true },
     })
@@ -178,6 +192,7 @@ test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples 
 test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { runExamples: false },
     })
@@ -189,6 +204,7 @@ test('pluginSearchPaths does not contains examples plugins path if --run-example
 test('pluginSearchPaths does not contains x-pack/examples plugins path if --run-examples flag is false', () => {
   const env = new Env(
     '/some/home/dir',
+    {},
     getEnvOptions({
       cliArgs: { runExamples: false },
     })

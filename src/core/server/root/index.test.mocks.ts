@@ -23,10 +23,13 @@ jest.doMock('../logging/logging_system', () => ({
   LoggingSystem: jest.fn(() => logger),
 }));
 
+const realKbnConfig = jest.requireActual('@kbn/config');
+
 import { configServiceMock, rawConfigServiceMock } from '@kbn/config';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
 jest.doMock('@kbn/config', () => ({
+  ...realKbnConfig,
   ConfigService: jest.fn(() => configService),
   RawConfigService: jest.fn(() => rawConfigService),
 }));

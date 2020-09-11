@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -93,6 +95,7 @@ describe('plugins discovery system', () => {
     };
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { envName: 'development' },
       })
@@ -381,6 +384,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'development' },
       })
@@ -408,6 +412,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'production' },
       })

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { configServiceMock, getEnvOptions } from '@kbn/config';
 import { CoreContext } from './core_context';
 import { Env, IConfigService } from './config';
@@ -24,7 +25,7 @@ import { loggingSystemMock } from './logging/logging_system.mock';
 import { ILoggingSystem } from './logging';
 
 function create({
-  env = Env.createDefault(getEnvOptions()),
+  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
   logger = loggingSystemMock.create(),
   configService = configServiceMock.create(),
 }: {

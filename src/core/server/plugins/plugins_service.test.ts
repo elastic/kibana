@@ -17,12 +17,13 @@
  * under the License.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
@@ -115,7 +116,7 @@ describe('PluginsService', () => {
     };
 
     coreId = Symbol('core');
-    env = Env.createDefault(getEnvOptions());
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
     config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
     const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });

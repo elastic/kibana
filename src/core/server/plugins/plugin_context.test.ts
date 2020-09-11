@@ -23,6 +23,7 @@ import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config';
 import { PluginManifest } from './types';
 import { Server } from '../server';
@@ -57,7 +58,7 @@ describe('createPluginInitializerContext', () => {
     instanceInfo = {
       uuid: 'instance-uuid',
     };
-    env = Env.createDefault(getEnvOptions());
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
     await server.setupCoreConfig();

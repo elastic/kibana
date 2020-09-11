@@ -25,6 +25,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 
 import { Env } from '../config';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { configServiceMock, getEnvOptions } from '@kbn/config';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
@@ -73,7 +74,7 @@ const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 

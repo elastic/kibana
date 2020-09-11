@@ -26,11 +26,12 @@ import {
 } from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions, configServiceMock } from '@kbn/config';
 
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { getEnvOptions, configServiceMock } from '@kbn/config';
 import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
@@ -67,7 +68,7 @@ let environmentSetup: ReturnType<typeof environmentServiceMock.createSetupContra
 
 beforeEach(() => {
   coreId = Symbol();
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
   configService = configServiceMock.create();
   environmentSetup = environmentServiceMock.createSetupContract();
 
@@ -362,6 +363,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
+        REPO_ROOT,
         getEnvOptions({
           cliArgs: { silent: true, basePath: false },
           isDevClusterMaster: true,
@@ -390,6 +392,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
+        REPO_ROOT,
         getEnvOptions({
           cliArgs: { quiet: true, basePath: true },
           isDevClusterMaster: true,

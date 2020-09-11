@@ -20,6 +20,7 @@
 import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { configServiceMock, getEnvOptions } from '@kbn/config';
 import { Env } from '../config';
 import { CoreContext } from '../core_context';
@@ -63,7 +64,7 @@ let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createC
 let mockLegacyClusterClientInstance: ReturnType<typeof elasticsearchServiceMock.createLegacyCustomClusterClient>;
 
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);

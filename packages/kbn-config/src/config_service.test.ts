@@ -20,7 +20,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockPackage, mockApplyDeprecations } from './config_service.test.mocks';
+import { mockApplyDeprecations } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
@@ -30,7 +30,7 @@ import { ConfigService, Env } from '.';
 import { getEnvOptions } from './__mocks__/env';
 
 const emptyArgv = getEnvOptions();
-const defaultEnv = new Env('/kibana', emptyArgv);
+const defaultEnv = new Env('/kibana', {}, emptyArgv);
 
 // TODO: fix
 // import { loggingSystemMock } from '../logging/logging_system.mock';
@@ -242,7 +242,7 @@ test('tracks unhandled paths', async () => {
 });
 
 test('correctly passes context', async () => {
-  mockPackage.raw = {
+  const mockPackage = {
     branch: 'feature-v1',
     version: 'v1',
     build: {
@@ -252,7 +252,7 @@ test('correctly passes context', async () => {
     },
   };
 
-  const env = new Env('/kibana', getEnvOptions());
+  const env = new Env('/kibana', mockPackage, getEnvOptions());
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { foo: {} } });
 
   const schemaDefinition = schema.object({

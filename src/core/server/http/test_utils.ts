@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { getEnvOptions, configServiceMock } from '@kbn/config';
 import { Env } from '../config';
@@ -26,7 +27,7 @@ import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const coreId = Symbol('core');
-const env = Env.createDefault(getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 const logger = loggingSystemMock.create();
 
