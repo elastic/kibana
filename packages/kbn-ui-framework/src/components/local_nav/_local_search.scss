@@ -26,13 +26,6 @@
   border-radius: 0;
   border-left-width: 0;
 }
-
-.kuiLocalSearchAssistedInput {
-  display: flex;
-  flex: 1 1 100%;
-  position: relative;
-}
-
 /**
  * 1. em used for right padding so documentation link and query string
  *    won't overlap if the user increases their default browser font size
