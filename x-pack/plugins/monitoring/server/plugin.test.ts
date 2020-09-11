@@ -76,6 +76,9 @@ describe('Monitoring plugin', () => {
         subscribe: jest.fn(),
       },
     },
+    savedObjects: {
+      registerType: jest.fn(),
+    },
   };
 
   const setupPlugins = {

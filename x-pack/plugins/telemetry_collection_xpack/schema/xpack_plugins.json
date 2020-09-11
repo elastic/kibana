@@ -168,7 +168,7 @@
     },
     "monitoring": {
       "properties": {
-        "isEnabled": {
+        "hasMonitoringData": {
           "type": "boolean"
         },
         "license": {
@@ -177,92 +177,74 @@
         "clusterUuid": {
           "type": "keyword"
         },
-        "stackProductCount": {
-          "type": "long"
+        "allClusterUuids": {
+          "type": "keyword"
         },
-        "stackProductMbCount": {
-          "type": "long"
-        },
-        "stackProductMbRatio": {
-          "type": "float"
+        "metricbeatUsed": {
+          "type": "boolean"
         },
         "elasticsearch": {
           "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
             "count": {
               "type": "long"
             },
-            "mbCount": {
-              "type": "long"
-            },
-            "mbPercentage": {
-              "type": "float"
-            },
-            "versions": {
-              "type": "keyword"
+            "metricbeatUsed": {
+              "type": "boolean"
             }
           }
         },
         "kibana": {
           "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
             "count": {
               "type": "long"
             },
-            "mbCount": {
-              "type": "long"
-            },
-            "mbPercentage": {
-              "type": "float"
-            },
-            "versions": {
-              "type": "keyword"
+            "metricbeatUsed": {
+              "type": "boolean"
             }
           }
         },
         "logstash": {
           "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
             "count": {
               "type": "long"
             },
-            "mbCount": {
-              "type": "long"
-            },
-            "mbPercentage": {
-              "type": "float"
-            },
-            "versions": {
-              "type": "keyword"
+            "metricbeatUsed": {
+              "type": "boolean"
             }
           }
         },
         "beats": {
           "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
             "count": {
               "type": "long"
             },
-            "mbCount": {
-              "type": "long"
-            },
-            "mbPercentage": {
-              "type": "float"
-            },
-            "versions": {
-              "type": "keyword"
+            "metricbeatUsed": {
+              "type": "boolean"
             }
           }
         },
         "apm": {
           "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
             "count": {
               "type": "long"
             },
-            "mbCount": {
-              "type": "long"
-            },
-            "mbPercentage": {
-              "type": "float"
-            },
-            "versions": {
-              "type": "keyword"
+            "metricbeatUsed": {
+              "type": "boolean"
             }
           }
         }
