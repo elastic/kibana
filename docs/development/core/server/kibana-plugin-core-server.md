@@ -28,6 +28,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
+|  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
 |  [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. |
 
 ## Enumerations
@@ -123,7 +124,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
 |  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
-|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |  |
+|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |

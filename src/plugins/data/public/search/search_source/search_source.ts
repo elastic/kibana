@@ -143,15 +143,19 @@ export class SearchSource {
    * PUBLIC API
    *****/
 
+  /**
+   * internal, dont use
+   * @param searchStrategyId
+   */
   setPreferredSearchStrategyId(searchStrategyId: string) {
     this.searchStrategyId = searchStrategyId;
   }
 
-  setFields(newFields: SearchSourceFields) {
-    this.fields = newFields;
-    return this;
-  }
-
+  /**
+   * sets value to a single search source feild
+   * @param field: field name
+   * @param value: value for the field
+   */
   setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
     if (value == null) {
       delete this.fields[field];
@@ -161,16 +165,33 @@ export class SearchSource {
     return this;
   }
 
+  /**
+   * Internal, do not use. Overrides all search source fields with the new field array.
+   *
+   * @private
+   * @param newFields New field array.
+   */
+  setFields(newFields: SearchSourceFields) {
+    this.fields = newFields;
+    return this;
+  }
+
+  /**
+   * returns search source id
+   */
   getId() {
     return this.id;
   }
 
+  /**
+   * returns all search source fields
+   */
   getFields() {
     return { ...this.fields };
   }
 
   /**
-   * Get fields from the fields
+   * Gets a single field from the fields
    */
   getField<K extends keyof SearchSourceFields>(field: K, recurse = true): SearchSourceFields[K] {
     if (!recurse || this.fields[field] !== void 0) {
@@ -187,10 +208,16 @@ export class SearchSource {
     return this.getField(field, false);
   }
 
+  /**
+   * @deprecated Don't use.
+   */
   create() {
     return new SearchSource({}, this.dependencies);
   }
 
+  /**
+   * creates a copy of this search source (without its children)
+   */
   createCopy() {
     const newSearchSource = new SearchSource({}, this.dependencies);
     newSearchSource.setFields({ ...this.fields });
@@ -201,6 +228,10 @@ export class SearchSource {
     return newSearchSource;
   }
 
+  /**
+   * creates a new child search source
+   * @param options
+   */
   createChild(options = {}) {
     const childSearchSource = new SearchSource({}, this.dependencies);
     childSearchSource.setParent(this, options);
@@ -227,42 +258,6 @@ export class SearchSource {
     return this.parent;
   }
 
-  /**
-   * Run a search using the search service
-   * @return {Observable<SearchResponse<unknown>>}
-   */
-  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { search, getConfig } = this.dependencies;
-
-    const params = getSearchParamsFromRequest(searchRequest, {
-      getConfig,
-    });
-
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
-    );
-  }
-
-  /**
-   * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
-   */
-  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { http, getConfig, loadingCount$ } = this.dependencies;
-
-    return await fetchSoon(
-      searchRequest,
-      {
-        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
-        ...options,
-      },
-      {
-        http,
-        config: { get: getConfig },
-        loadingCount$,
-      }
-    );
-  }
   /**
    * Fetch this source and reject the returned Promise on error
    *
@@ -301,6 +296,9 @@ export class SearchSource {
     this.requestStartHandlers.push(handler);
   }
 
+  /**
+   * Returns body contents of the search request, often referred as query DSL.
+   */
   async getSearchRequestBody() {
     const searchRequest = await this.flatten();
     return searchRequest.body;
@@ -317,6 +315,43 @@ export class SearchSource {
   /** ****
    * PRIVATE APIS
    ******/
+
+  /**
+   * Run a search using the search service
+   * @return {Observable<SearchResponse<unknown>>}
+   */
+  private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { search, getConfig } = this.dependencies;
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      getConfig,
+    });
+
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
+    );
+  }
+
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { http, getConfig, loadingCount$ } = this.dependencies;
+
+    return await fetchSoon(
+      searchRequest,
+      {
+        ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
+        ...options,
+      },
+      {
+        http,
+        config: { get: getConfig },
+        loadingCount$,
+      }
+    );
+  }
 
   /**
    *  Called by requests of this search source when they are started
@@ -480,6 +515,9 @@ export class SearchSource {
     return searchRequest;
   }
 
+  /**
+   * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
+   */
   public getSerializedFields() {
     const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
       'sort',
@@ -531,5 +569,8 @@ export class SearchSource {
   }
 }
 
-/** @public **/
+/**
+ * search source interface
+ * @public
+ */
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;

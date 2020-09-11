@@ -12,7 +12,8 @@ import {
   DeleteTransformStatus,
   TransformEndpointRequest,
 } from '../../../common';
-import { extractErrorMessage, getErrorMessage } from '../../shared_imports';
+import { extractErrorMessage } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';

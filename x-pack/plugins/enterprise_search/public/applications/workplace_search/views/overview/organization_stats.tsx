@@ -14,18 +14,17 @@ import { i18n } from '@kbn/i18n';
 import { ContentSection } from '../../components/shared/content_section';
 import { ORG_SOURCES_PATH, USERS_PATH } from '../../routes';
 
+import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
-  const {
-    sourcesCount,
-    pendingInvitationsCount,
-    accountsCount,
-    personalSourcesCount,
-    isFederatedAuth,
-  } = useValues(OverviewLogic);
+  const { isFederatedAuth } = useValues(AppLogic);
+
+  const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } = useValues(
+    OverviewLogic
+  );
 
   return (
     <ContentSection
