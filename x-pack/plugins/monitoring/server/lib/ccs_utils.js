@@ -13,7 +13,7 @@ export function appendMetricbeatIndex(config, indexPattern) {
   if (isFunction(config.get)) {
     mbIndex = config.get('monitoring.ui.metricbeat.index');
   } else {
-    mbIndex = get(config, 'monitoring.ui.metricbeat.index');
+    mbIndex = get(config, 'ui.metricbeat.index');
   }
 
   const newIndexPattern = `${indexPattern},${mbIndex}`;

@@ -69,7 +69,11 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     });
     const monitoringCluster = null;
     const config = {
-      ui: { ccs: { enabled: true }, container: { elasticsearch: { enabled: false } } },
+      ui: {
+        ccs: { enabled: true },
+        container: { elasticsearch: { enabled: false } },
+        metricbeat: { index: 'metricbeat-*' },
+      },
     };
     const kibanaUrl = 'http://localhost:5601';
 

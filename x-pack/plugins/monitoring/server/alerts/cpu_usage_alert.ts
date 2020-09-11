@@ -31,6 +31,7 @@ import {
   CommonAlertParams,
   CommonAlertParamDetail,
 } from '../../common/types';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.cpuUsage.resolved', {
   defaultMessage: 'resolved',
@@ -137,7 +138,7 @@ export class CpuUsageAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
