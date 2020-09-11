@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SavedObjectsClient } from 'src/core/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { MonitoringConfig } from '../../config';
@@ -12,10 +14,11 @@ import { MonitoringConfig } from '../../config';
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  callCluster: any
+  callCluster: CallCluster,
+  getSavedObjectClient: () => Promise<SavedObjectsClient>
 ) {
   usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
   usageCollection.registerCollector(
-    getMonitoringUsageCollector(usageCollection, config, callCluster)
+    getMonitoringUsageCollector(usageCollection, config, callCluster, getSavedObjectClient)
   );
 }

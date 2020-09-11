@@ -21,11 +21,13 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
   ALERTS,
+  SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
@@ -148,7 +150,32 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      core.savedObjects.registerType({
+        name: SAVED_OBJECT_TELEMETRY,
+        hidden: true,
+        namespaceType: 'agnostic',
+        mappings: {
+          properties: {
+            reportedClusterUuids: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      const getSavedObjectClient = async () => {
+        const coreStart = (await core.getStartServices())[0];
+        return new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository([SAVED_OBJECT_TELEMETRY])
+        );
+      };
+
+      registerCollectors(
+        plugins.usageCollection,
+        config,
+        cluster.callAsInternalUser,
+        getSavedObjectClient
+      );
     }
 
     // Always create the bulk uploader

@@ -5,6 +5,7 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { get } from 'lodash';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
 import { prefixIndexPattern } from '../../../lib/ccs_utils';
@@ -20,10 +21,7 @@ interface ESResponse {
 
 interface UuidBucket {
   key: string;
-  version: {
-    buckets: KeyBucket[];
-  };
-  index: {
+  indices: {
     buckets: KeyBucket[];
   };
 }
@@ -39,7 +37,6 @@ export async function fetchStackProductUsage(
   index: string,
   type: string,
   uuidPath: string,
-  versionPath: string,
   filters: any[] = []
 ): Promise<StackProductUsage> {
   const size = config.ui.max_bucket_size;
@@ -66,6 +63,13 @@ export async function fetchStackProductUsage(
                 },
               },
             },
+            {
+              range: {
+                timestamp: {
+                  gte: 'now-1h',
+                },
+              },
+            },
             ...filters,
           ],
         },
@@ -77,16 +81,10 @@ export async function fetchStackProductUsage(
             size,
           },
           aggs: {
-            version: {
-              terms: {
-                field: versionPath,
-                size: 1,
-              },
-            },
-            index: {
+            indices: {
               terms: {
                 field: '_index',
-                size: 1,
+                size: 2,
               },
             },
           },
@@ -96,36 +94,16 @@ export async function fetchStackProductUsage(
   };
 
   const response = (await callCluster('search', params)) as ESResponse;
-  if (!response.aggregations) {
-    return {
-      count: 0,
-      mbCount: 0,
-      mbPercentage: 0,
-      versions: [],
-    };
-  }
-
-  const mbCount = response.aggregations.uuids.buckets.reduce((accum: number, uuidBucket) => {
-    return (
-      accum +
-      uuidBucket.index.buckets.reduce((count: number, indexBucket) => {
-        if (indexBucket.key.includes('-mb-')) {
-          count++;
-        }
-        return count;
-      }, 0)
-    );
-  }, 0);
-
-  const count = response.aggregations.uuids.buckets.length;
-  const versions = response.aggregations.uuids.buckets.reduce((accum: string[], uuidBucket) => {
-    return [...accum, ...uuidBucket.version.buckets.map((versionBucket) => versionBucket.key)];
-  }, []);
-
+  const uuidBuckets = get(response, 'aggregations.uuids.buckets', []) as UuidBucket[];
+  const count = uuidBuckets.length;
+  const metricbeatUsed = Boolean(
+    uuidBuckets.find((uuidBucket) =>
+      uuidBucket.indices.buckets.find((indexBucket) => indexBucket.key.includes('-mb-'))
+    )
+  );
   return {
     count,
-    versions,
-    mbCount,
-    mbPercentage: mbCount / count,
+    enabled: count > 0,
+    metricbeatUsed,
   };
 }

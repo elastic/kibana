@@ -39,8 +39,7 @@ export const getStackProductsUsage = async (
       clusterUuid,
       kibanaIndex,
       'kibana_stats',
-      'kibana_stats.kibana.uuid',
-      'kibana_stats.kibana.version'
+      'kibana_stats.kibana.uuid'
     ),
     fetchStackProductUsage(
       config,
@@ -48,8 +47,15 @@ export const getStackProductsUsage = async (
       clusterUuid,
       logstashIndex,
       'logstash_stats',
-      'logstash_stats.logstash.uuid',
-      'logstash_stats.logstash.version'
+      'logstash_stats.logstash.uuid'
+    ),
+    fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      beatsIndex,
+      'beats_stats',
+      'beats_stats.beats.uuid'
     ),
     fetchStackProductUsage(
       config,
@@ -58,16 +64,6 @@ export const getStackProductsUsage = async (
       beatsIndex,
       'beats_stats',
       'beats_stats.beats.uuid',
-      'beats_stats.beats.version'
-    ),
-    fetchStackProductUsage(
-      config,
-      callCluster,
-      clusterUuid,
-      beatsIndex,
-      'beats_stats',
-      'beats_stats.beats.uuid',
-      'beats_stats.beats.version',
       [{ term: { 'beats_stats.beat.type': 'apm-server' } }]
     ),
   ]);

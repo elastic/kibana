@@ -5,22 +5,20 @@
  */
 
 export interface MonitoringUsage {
-  isEnabled: boolean;
+  hasMonitoringData: boolean;
   clusterUuid: string;
   license: string;
+  allClusterUuids: string[];
   elasticsearch: StackProductUsage;
   logstash: StackProductUsage;
   kibana: StackProductUsage;
   beats: StackProductUsage;
   apm: StackProductUsage;
-  stackProductCount: number;
-  stackProductMbCount: number;
-  stackProductMbRatio: number;
+  metricbeatUsed: boolean;
 }
 
 export interface StackProductUsage {
   count: number;
-  versions: string[];
-  mbCount: number;
-  mbPercentage: number;
+  enabled: boolean;
+  metricbeatUsed: boolean;
 }

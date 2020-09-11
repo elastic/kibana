@@ -5,25 +5,29 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SavedObjectsClient } from 'src/core/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { MonitoringConfig } from '../../config';
 import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
-import { MonitoringUsage } from './types';
+import { MonitoringUsage, StackProductUsage } from './types';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 import { getCcsIndexPattern } from '../../lib/alerts/get_ccs_index_pattern';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
+import { pickCluster } from './lib/pick_cluster';
 
 export function getMonitoringUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  callCluster: any
+  callCluster: CallCluster,
+  getSavedObjectClient: () => Promise<SavedObjectsClient>
 ) {
   return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',
     isReady: () => true,
     schema: {
-      isEnabled: {
+      hasMonitoringData: {
         type: 'boolean',
       },
       license: {
@@ -32,91 +36,74 @@ export function getMonitoringUsageCollector(
       clusterUuid: {
         type: 'keyword',
       },
-      stackProductCount: {
-        type: 'long',
+      allClusterUuids: {
+        type: 'keyword',
       },
-      stackProductMbCount: {
-        type: 'long',
-      },
-      stackProductMbRatio: {
-        type: 'float',
+      metricbeatUsed: {
+        type: 'boolean',
       },
       elasticsearch: {
+        enabled: {
+          type: 'boolean',
+        },
         count: {
           type: 'long',
         },
-        mbCount: {
-          type: 'long',
-        },
-        mbPercentage: {
-          type: 'float',
-        },
-        versions: {
-          type: 'keyword',
+        metricbeatUsed: {
+          type: 'boolean',
         },
       },
       kibana: {
+        enabled: {
+          type: 'boolean',
+        },
         count: {
           type: 'long',
         },
-        mbCount: {
-          type: 'long',
-        },
-        mbPercentage: {
-          type: 'float',
-        },
-        versions: {
-          type: 'keyword',
+        metricbeatUsed: {
+          type: 'boolean',
         },
       },
       logstash: {
+        enabled: {
+          type: 'boolean',
+        },
         count: {
           type: 'long',
         },
-        mbCount: {
-          type: 'long',
-        },
-        mbPercentage: {
-          type: 'float',
-        },
-        versions: {
-          type: 'keyword',
+        metricbeatUsed: {
+          type: 'boolean',
         },
       },
       beats: {
+        enabled: {
+          type: 'boolean',
+        },
         count: {
           type: 'long',
         },
-        mbCount: {
-          type: 'long',
-        },
-        mbPercentage: {
-          type: 'float',
-        },
-        versions: {
-          type: 'keyword',
+        metricbeatUsed: {
+          type: 'boolean',
         },
       },
       apm: {
+        enabled: {
+          type: 'boolean',
+        },
         count: {
           type: 'long',
         },
-        mbCount: {
-          type: 'long',
-        },
-        mbPercentage: {
-          type: 'float',
-        },
-        versions: {
-          type: 'keyword',
+        metricbeatUsed: {
+          type: 'boolean',
         },
       },
     },
     fetch: async () => {
+      const savedObjectsClient = await getSavedObjectClient();
       const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
       const clusters = await fetchClusters(callCluster, elasticsearchIndex);
-      const cluster = clusters[0];
+      const cluster = await pickCluster(clusters, savedObjectsClient);
       const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
       const stackProducts = await getStackProductsUsage(
         config,
@@ -125,19 +112,21 @@ export function getMonitoringUsageCollector(
         cluster.clusterUuid
       );
 
-      const stackProductCount = Object.values(stackProducts).reduce((spc, sp) => spc + sp.count, 0);
-      const stackProductMbCount = Object.values(stackProducts).reduce(
-        (spc, sp) => spc + sp.mbCount,
-        0
+      const hasMonitoringData = Object.values(stackProducts).reduce(
+        (accum: boolean, usage: StackProductUsage) => {
+          return accum || usage.enabled;
+        },
+        false
       );
 
-      const usage = {
-        isEnabled: config.ui.enabled,
+      const usage: MonitoringUsage = {
+        hasMonitoringData,
         clusterUuid: cluster.clusterUuid,
+        allClusterUuids: clusters.map((_cluster) => _cluster.clusterUuid),
         license,
-        stackProductCount,
-        stackProductMbCount,
-        stackProductMbRatio: stackProductMbCount / stackProductCount,
+        metricbeatUsed: Object.values(stackProducts).some(
+          (_usage: StackProductUsage) => _usage.metricbeatUsed
+        ),
         ...stackProducts,
       };
 
