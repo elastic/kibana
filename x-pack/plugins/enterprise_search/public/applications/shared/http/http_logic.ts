@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError } from 'src/core/public';
 
 export interface IHttpValues {
   http: HttpSetup;
@@ -70,7 +70,7 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
           }
 
           // Re-throw error so that downstream catches work as expected
-          return Promise.reject(httpResponse);
+          return Promise.reject(httpResponse) as Promise<HttpInterceptorResponseError>;
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);
