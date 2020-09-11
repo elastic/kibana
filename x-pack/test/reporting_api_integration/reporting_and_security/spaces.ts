@@ -27,8 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/76551
-  describe.skip('Exports from Non-default Space', () => {
+  describe('Exports from Non-default Space', () => {
     before(async () => {
       await esArchiver.load('reporting/ecommerce');
       await esArchiver.load('reporting/ecommerce_kibana_spaces'); // dashboard in non default space
@@ -54,7 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(reportCompleted).to.match(/^"order_date",/);
     });
 
-    it('should complete a job of PNG export of a dashboard in non-default space', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/76551
+    it.skip('should complete a job of PNG export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJob(
         `/s/non_default_space/api/reporting/generate/png?jobParams=%28browserTimezone%3AUTC%2Clayout%3A%28dimensions%3A%28height%3A512%2Cwidth%3A2402%29%2Cid%3Apng%29%2CobjectType%3Adashboard%2CrelativeUrl%3A%27%2Fs%2Fnon_default_space%2Fapp%2Fdashboards%23%2Fview%2F3c9ee360-e7ee-11ea-a730-d58e9ea7581b%3F_g%3D%28filters%3A%21%21%28%29%2CrefreshInterval%3A%28pause%3A%21%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3A%21%272019-06-10T03%3A17%3A28.800Z%21%27%2Cto%3A%21%272019-07-14T19%3A25%3A06.385Z%21%27%29%29%26_a%3D%28description%3A%21%27%21%27%2Cfilters%3A%21%21%28%29%2CfullScreenMode%3A%21%21f%2Coptions%3A%28hidePanelTitles%3A%21%21f%2CuseMargins%3A%21%21t%29%2Cquery%3A%28language%3Akuery%2Cquery%3A%21%27%21%27%29%2CtimeRestore%3A%21%21t%2Ctitle%3A%21%27Ecom%2520Dashboard%2520Non%2520Default%2520Space%21%27%2CviewMode%3Aview%29%27%2Ctitle%3A%27Ecom%20Dashboard%20Non%20Default%20Space%27%29`
       );
@@ -64,7 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(reportCompleted).to.not.be(null);
     });
 
-    it('should complete a job of PDF export of a dashboard in non-default space', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/76551
+    it.skip('should complete a job of PDF export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJob(
         `/s/non_default_space/api/reporting/generate/printablePdf?jobParams=%28browserTimezone%3AUTC%2Clayout%3A%28dimensions%3A%28height%3A512%2Cwidth%3A2402%29%2Cid%3Apreserve_layout%29%2CobjectType%3Adashboard%2CrelativeUrls%3A%21%28%27%2Fs%2Fnon_default_space%2Fapp%2Fdashboards%23%2Fview%2F3c9ee360-e7ee-11ea-a730-d58e9ea7581b%3F_g%3D%28filters%3A%21%21%28%29%2CrefreshInterval%3A%28pause%3A%21%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3A%21%272019-06-10T03%3A17%3A28.800Z%21%27%2Cto%3A%21%272019-07-14T19%3A25%3A06.385Z%21%27%29%29%26_a%3D%28description%3A%21%27%21%27%2Cfilters%3A%21%21%28%29%2CfullScreenMode%3A%21%21f%2Coptions%3A%28hidePanelTitles%3A%21%21f%2CuseMargins%3A%21%21t%29%2Cquery%3A%28language%3Akuery%2Cquery%3A%21%27%21%27%29%2CtimeRestore%3A%21%21t%2Ctitle%3A%21%27Ecom%2520Dashboard%2520Non%2520Default%2520Space%21%27%2CviewMode%3Aview%29%27%29%2Ctitle%3A%27Ecom%20Dashboard%20Non%20Default%20Space%27%29`
       );

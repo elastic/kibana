@@ -42,36 +42,62 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
 };
 describe('install', () => {
   describe('getInstallType', () => {
-    it('should return correct type when installing and no other version is currently installed', () => {});
-    const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
-    expect(installTypeInstall).toBe('install');
+    it('should return correct type when installing and no other version is currently installed', () => {
+      const installTypeInstall = getInstallType({ pkgVersion: '1.0.0', installedPkg: undefined });
+      expect(installTypeInstall).toBe('install');
 
-    it('should return correct type when installing the same version', () => {});
-    const installTypeReinstall = getInstallType({
-      pkgVersion: '1.0.0',
-      installedPkg: mockInstallation,
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'update').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'reinstall').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'reupdate').toBe(false);
+      // @ts-expect-error can only be 'install' if no installedPkg given
+      expect(installTypeInstall === 'rollback').toBe(false);
     });
-    expect(installTypeReinstall).toBe('reinstall');
 
-    it('should return correct type when moving from one version to another', () => {});
-    const installTypeUpdate = getInstallType({
-      pkgVersion: '1.0.1',
-      installedPkg: mockInstallation,
-    });
-    expect(installTypeUpdate).toBe('update');
+    it('should return correct type when installing the same version', () => {
+      const installTypeReinstall = getInstallType({
+        pkgVersion: '1.0.0',
+        installedPkg: mockInstallation,
+      });
+      expect(installTypeReinstall).toBe('reinstall');
 
-    it('should return correct type when update fails and trys again', () => {});
-    const installTypeReupdate = getInstallType({
-      pkgVersion: '1.0.1',
-      installedPkg: mockInstallationUpdateFail,
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeReinstall === 'install').toBe(false);
     });
-    expect(installTypeReupdate).toBe('reupdate');
 
-    it('should return correct type when attempting to rollback from a failed update', () => {});
-    const installTypeRollback = getInstallType({
-      pkgVersion: '1.0.0',
-      installedPkg: mockInstallationUpdateFail,
+    it('should return correct type when moving from one version to another', () => {
+      const installTypeUpdate = getInstallType({
+        pkgVersion: '1.0.1',
+        installedPkg: mockInstallation,
+      });
+      expect(installTypeUpdate).toBe('update');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeUpdate === 'install').toBe(false);
     });
-    expect(installTypeRollback).toBe('rollback');
+
+    it('should return correct type when update fails and trys again', () => {
+      const installTypeReupdate = getInstallType({
+        pkgVersion: '1.0.1',
+        installedPkg: mockInstallationUpdateFail,
+      });
+      expect(installTypeReupdate).toBe('reupdate');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeReupdate === 'install').toBe(false);
+    });
+
+    it('should return correct type when attempting to rollback from a failed update', () => {
+      const installTypeRollback = getInstallType({
+        pkgVersion: '1.0.0',
+        installedPkg: mockInstallationUpdateFail,
+      });
+      expect(installTypeRollback).toBe('rollback');
+
+      // @ts-expect-error cannot be 'install' if given installedPkg
+      expect(installTypeRollback === 'install').toBe(false);
+    });
   });
 });

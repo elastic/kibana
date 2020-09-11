@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       ],
       samplerShardSize: -1, // No sampling, as otherwise counts could vary on each run.
       timeFieldName: '@timestamp',
-      interval: '1d',
+      interval: 86400000,
       maxExamples: 10,
     },
     expected: {
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       responseBody: [
         {
           documentCounts: {
-            interval: '1d',
+            interval: 86400000,
             buckets: {
               '1454803200000': 846,
               '1454889600000': 846,
@@ -145,6 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       ],
       samplerShardSize: -1, // No sampling, as otherwise counts could vary on each run.
       timeFieldName: '@timestamp',
+      interval: 86400000,
       maxExamples: 10,
     },
     expected: {

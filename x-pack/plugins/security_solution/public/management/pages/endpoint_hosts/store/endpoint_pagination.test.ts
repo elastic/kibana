@@ -77,6 +77,7 @@ describe('endpoint list pagination: ', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+          filters: { kql: '' },
         }),
       });
     });

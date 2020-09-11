@@ -17,6 +17,7 @@ import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
+import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
@@ -32,8 +33,9 @@ export interface IFeedActivity {
 export const RecentActivity: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    activityFeed,
-  } = useValues(OverviewLogic);
+  } = useValues(AppLogic);
+
+  const { activityFeed } = useValues(OverviewLogic);
 
   return (
     <ContentSection
