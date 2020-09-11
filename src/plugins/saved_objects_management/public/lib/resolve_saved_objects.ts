@@ -75,7 +75,6 @@ async function importIndexPattern(
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  // const emptyPattern = await indexPatterns.make();
   const {
     title,
     timeFieldName,
@@ -99,7 +98,7 @@ async function importIndexPattern(
   addJsonFieldToIndexPattern(indexPatternSpec, sourceFilters, 'sourceFilters', title);
   addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
   try {
-    emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec);
+    emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, false, true);
   } catch (err) {
     if (err instanceof DuplicateIndexPatternError) {
       // We can override and we want to prompt for confirmation
@@ -123,7 +122,7 @@ async function importIndexPattern(
       );
 
       if (isConfirmed) {
-        emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, true);
+        emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, true, true);
       } else {
         return;
       }

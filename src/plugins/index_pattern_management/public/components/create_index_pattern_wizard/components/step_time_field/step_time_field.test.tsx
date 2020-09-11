@@ -48,7 +48,7 @@ const fields = [
   },
 ];
 mockContext.data.indexPatterns = {
-  make: () => ({
+  newIndexPattern: () => ({
     fieldsFetcher: {
       fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
     },

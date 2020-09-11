@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientCommon } from '../..';
+import { SavedObjectsClientCommon, DuplicateIndexPatternError } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -309,7 +309,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async newIndexPattern(spec: IndexPatternSpec): Promise<IndexPattern> {
+  async newIndexPattern(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
@@ -326,15 +326,15 @@ export class IndexPatternsService {
       metaFields,
     });
 
-    await indexPattern._fetchFields();
-    // todo should save as separate step
-    // await indexPattern.create();
+    if (!skipFetchFields) {
+      await indexPattern._fetchFields();
+    }
 
     return indexPattern;
   }
 
-  async newIndexPatternAndSave(spec: IndexPatternSpec, override = false) {
-    const indexPattern = await this.newIndexPattern(spec);
+  async newIndexPatternAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
+    const indexPattern = await this.newIndexPattern(spec, skipFetchFields);
     await this.create(indexPattern, override);
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
@@ -346,7 +346,7 @@ export class IndexPatternsService {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new Error(`Duplicate index pattern: ${indexPattern.title}`);
+        throw new DuplicateIndexPatternError(`Duplicate index pattern: ${indexPattern.title}`);
       }
     }
 
@@ -355,6 +355,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
+    indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
   }
 
