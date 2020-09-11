@@ -116,6 +116,7 @@ export const CalendarsListTable = ({
           canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false
         }
         data-test-subj="mlCalendarButtonDelete"
+        key="delete_calendar_button"
       >
         <FormattedMessage
           id="xpack.ml.calendarsList.table.deleteButtonLabel"
