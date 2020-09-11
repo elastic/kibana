@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart.fieldFormats property
 
+field formats service [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md)
+
 <b>Signature:</b>
 
 ```typescript
