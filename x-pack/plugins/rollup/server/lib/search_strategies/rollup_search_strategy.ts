@@ -29,7 +29,7 @@ export const getRollupSearchStrategy = (
       super(ENHANCED_ES_SEARCH_STRATEGY, 'rollup', { rest_total_hits_as_int: true });
     }
 
-    async search(core: CoreSetup, req: ReqFacade, bodies: any[], options = {}) {
+    async search(req: ReqFacade, bodies: any[], options = {}) {
       const rollupService = await getRollupService(req);
       const requests: any[] = [];
       bodies.forEach((body) => {

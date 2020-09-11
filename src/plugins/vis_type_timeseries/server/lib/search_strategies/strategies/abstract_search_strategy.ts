@@ -22,9 +22,8 @@ import {
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
-  CoreSetup,
 } from 'kibana/server';
-import { Framework, VisTypeTimeseriesPluginStartDependencies } from '../../../plugin';
+import { Framework } from '../../../plugin';
 import { IndexPatternsFetcher } from '../../../../../data/server';
 
 /**
@@ -56,8 +55,8 @@ export class AbstractSearchStrategy {
     this.additionalParams = additionalParams;
   }
 
-  async search(core: CoreSetup, req: ReqFacade, bodies: any[], options = {}) {
-    const deps = (await core.getStartServices())[1] as VisTypeTimeseriesPluginStartDependencies;
+  async search(req: ReqFacade, bodies: any[], options = {}) {
+    const [, deps] = await req.framework.core.getStartServices();
     const requests: any[] = [];
     bodies.forEach((body) => {
       requests.push(

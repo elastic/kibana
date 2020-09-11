@@ -48,7 +48,7 @@ interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface VisTypeTimeseriesPluginStartDependencies {
+interface VisTypeTimeseriesPluginStartDependencies {
   data: PluginStart;
 }
 
@@ -62,7 +62,7 @@ export interface VisTypeTimeseriesSetup {
 }
 
 export interface Framework {
-  core: CoreSetup;
+  core: CoreSetup<VisTypeTimeseriesPluginStartDependencies>;
   plugins: any;
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
@@ -79,7 +79,10 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     this.validationTelementryService = new ValidationTelemetryService();
   }
 
-  public setup(core: CoreSetup, plugins: VisTypeTimeseriesPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<VisTypeTimeseriesPluginStartDependencies>,
+    plugins: VisTypeTimeseriesPluginSetupDependencies
+  ) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     core.uiSettings.register(uiSettings);
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();

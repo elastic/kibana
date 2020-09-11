@@ -40,7 +40,7 @@ export async function getTableData(req, panel) {
 
   try {
     const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
-    const [resp] = await searchStrategy.search(req.framework.core, req, [
+    const [resp] = await searchStrategy.search(req, [
       {
         body,
         index: panelIndexPattern,
@@ -60,7 +60,6 @@ export async function getTableData(req, panel) {
       series: buckets.map(processBucket(panel)),
     };
   } catch (err) {
-    console.log(err);
     if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
 

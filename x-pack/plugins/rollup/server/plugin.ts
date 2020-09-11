@@ -20,6 +20,7 @@ import {
   PluginInitializerContext,
   ILegacyScopedClusterClient,
   SharedGlobalConfig,
+  KibanaRequest,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
@@ -116,7 +117,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (visTypeTimeseries) {
-      const getRollupService = async (request: any) => {
+      const getRollupService = async (request: KibanaRequest) => {
         this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
         return this.rollupEsClient.asScoped(request);
       };

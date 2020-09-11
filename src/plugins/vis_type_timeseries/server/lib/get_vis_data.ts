@@ -21,7 +21,7 @@ import { FakeRequest, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
-import { Framework } from '../index';
+import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 interface GetVisDataResponse {
