@@ -58,7 +58,7 @@ Array [
       }
     }
 
-
+    
   fragment ExistingTargetPullRequests on PullRequest {
     # Source PR
     number
