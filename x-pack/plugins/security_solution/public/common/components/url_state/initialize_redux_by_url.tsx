@@ -23,6 +23,7 @@ import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SecurityPageName } from '../../../../common/constants';
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
@@ -44,8 +45,8 @@ export const dispatchSetInitialStateFromUrl = (
     if (urlKey === CONSTANTS.sourcerer) {
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
       if (sourcererState != null) {
-        const activeScopes: SourcererScopeName[] = Object.keys(
-          sourcererState
+        const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
+          (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.detections)
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) =>
           dispatch(

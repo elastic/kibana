@@ -152,10 +152,9 @@ export const makeMapStateToProps = () => {
     }
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes.reduce(
-      (acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }),
-      {}
-    );
+    const selectedPatterns: SourcererScopePatterns = activeScopes
+      .filter((scope) => scope !== SourcererScopeName.detections)
+      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
 
     return {
       urlState: {
@@ -228,17 +227,16 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.sourcerer) {
-    // const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-    // console.log('replace sourcerer in url', sourcererState);
-    // if (sourcererState != null && Object.keys(sourcererState).length > 0) {
-    //   return replaceStateInLocation({
-    //     history,
-    //     pathName,
-    //     search,
-    //     urlStateToReplace: sourcererState,
-    //     urlStateKey: urlKey,
-    //   });
-    // }
+    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+    if (sourcererState != null && Object.keys(sourcererState).length > 0) {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: sourcererState,
+        urlStateKey: urlKey,
+      });
+    }
   } else if (urlKey === CONSTANTS.filters) {
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {

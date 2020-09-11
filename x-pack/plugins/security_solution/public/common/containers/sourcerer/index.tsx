@@ -9,14 +9,14 @@ import isEqual from 'lodash/isEqual';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY, SecurityPageName } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
-import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { KibanaIndexPatterns, ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { State } from '../../store';
+import { useUserInfo } from '../../../detections/components/user_info';
 
 export const dedupeIndexName = (kibanaIndex: string[], configIndex: string[]) => {
   return [
@@ -32,31 +32,18 @@ export const dedupeIndexName = (kibanaIndex: string[], configIndex: string[]) =>
   ];
 };
 
-export const getSourcererScopeName = (pageName: string): sourcererModel.SourcererScopeName => {
-  switch (pageName) {
-    case SecurityPageName.detections:
-    case SecurityPageName.overview:
-    case SecurityPageName.hosts:
-    case SecurityPageName.network:
-    case SecurityPageName.timelines:
-    case SecurityPageName.case:
-    case SecurityPageName.administration:
-      return sourcererModel.SourcererScopeName.default;
-    default:
-      return sourcererModel.SourcererScopeName.default;
-  }
-};
-
-export const useInitSourcerer = () => {
+export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeName.default) => {
   const dispatch = useDispatch();
-  const [{ pageName }] = useRouteSpy();
+
+  const { isSignalIndexExists, signalIndexName } = useUserInfo();
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const getkibanaIndexPatternsSelector = useMemo(
     () => sourcererSelectors.kibanaIndexPatternsSelector(),
     []
   );
   const kibanaIndexPatterns = useSelector(getkibanaIndexPatternsSelector, isEqual);
-  useIndexFields(getSourcererScopeName(pageName));
+
+  useIndexFields(scopeId);
 
   const setIndexPatternsList = useCallback(
     (kibanaIndexPatternsToPersist: KibanaIndexPatterns, allIndexPatternsToPersist: string[]) => {
@@ -70,13 +57,35 @@ export const useInitSourcerer = () => {
     [dispatch]
   );
 
+  const allIndexPatterns = useMemo(
+    () =>
+      dedupeIndexName(
+        kibanaIndexPatterns.map((kip) => kip.title),
+        configIndex
+      ),
+    [kibanaIndexPatterns, configIndex]
+  );
+
   useEffect(() => {
-    const allIndexPatterns = dedupeIndexName(
-      kibanaIndexPatterns.map((kip) => kip.title),
-      configIndex
-    );
-    setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
-  }, [configIndex, kibanaIndexPatterns, setIndexPatternsList]);
+    if (
+      scopeId === SourcererScopeName.detections &&
+      isSignalIndexExists &&
+      signalIndexName != null
+    ) {
+      dispatch(
+        sourcererActions.setSelectedIndexPatterns({
+          id: scopeId,
+          selectedPatterns: [signalIndexName],
+        })
+      );
+    }
+  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName]);
+
+  useEffect(() => {
+    if (scopeId !== SourcererScopeName.detections) {
+      setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
+    }
+  }, [allIndexPatterns, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {

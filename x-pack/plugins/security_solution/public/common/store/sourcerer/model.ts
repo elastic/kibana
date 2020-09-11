@@ -12,12 +12,12 @@ import {
   EMPTY_INDEX_PATTERN,
 } from '../../containers/sourcerer/format';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 export type ErrorModel = Error[];
 
 export enum SourcererScopeName {
   default = 'default',
+  detections = 'detections',
   timeline = 'timeline',
 }
 
@@ -68,6 +68,10 @@ export const initialSourcererState: SourcererModel = {
       ...initSourcererScope,
       id: SourcererScopeName.default,
     },
+    [SourcererScopeName.detections]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.detections,
+    },
     [SourcererScopeName.timeline]: {
       ...initSourcererScope,
       id: SourcererScopeName.timeline,
@@ -79,10 +83,3 @@ export type FSourcererScopePatterns = {
   [id in SourcererScopeName]: string[];
 };
 export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;
-
-export const sourcererScopePatterns: FSourcererScopePatterns = {
-  [SourcererScopeName.default]: DEFAULT_INDEX_PATTERN,
-  [SourcererScopeName.timeline]: DEFAULT_INDEX_PATTERN,
-};
-
-export type SourcererIndexPatterns = Record<string, IIndexPattern>;
