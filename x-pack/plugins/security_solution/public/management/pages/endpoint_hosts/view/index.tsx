@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -93,6 +94,7 @@ export const EndpointList = () => {
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
+    areEndpointsEnrolling,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -354,7 +356,7 @@ export const EndpointList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (endpointsExist || areEndpointsEnrolling) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
@@ -396,6 +398,7 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
+    areEndpointsEnrolling,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -431,6 +434,20 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
+        {areEndpointsEnrolling && (
+          <>
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
+                  defaultMessage="Endpoints are enrolling, please stand by!"
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFlexGroup>
           {endpointsExist && !patternsError && (
             <EuiFlexItem>

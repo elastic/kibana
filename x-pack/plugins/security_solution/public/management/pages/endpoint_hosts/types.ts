@@ -63,6 +63,7 @@ export interface EndpointState {
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
+  agentsWithEndpointsTotal: number;
 }
 
 /**

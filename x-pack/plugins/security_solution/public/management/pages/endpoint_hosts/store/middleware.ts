@@ -23,6 +23,7 @@ import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetAgentPolicyList,
+  sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
@@ -103,6 +104,17 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
+
+        try {
+          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+          dispatch({
+            type: 'serverReturnedAgenstWithEndpointsTotal',
+            payload: agentsWithEndpoint.total,
+          });
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.log(error);
+        }
 
         try {
           const missingPolicies = await getNonExistingPoliciesForEndpointsList(

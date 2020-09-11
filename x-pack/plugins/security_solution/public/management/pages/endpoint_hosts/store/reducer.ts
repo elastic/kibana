@@ -35,6 +35,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   patternsError: undefined,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+  agentsWithEndpointsTotal: 0,
 };
 
 /* eslint-disable-next-line complexity */
@@ -147,6 +148,11 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       endpointsExist: action.payload,
+    };
+  } else if (action.type === 'serverReturnedAgenstWithEndpointsTotal') {
+    return {
+      ...state,
+      agentsWithEndpointsTotal: action.payload,
     };
   } else if (action.type === 'userUpdatedEndpointListRefreshOptions') {
     return {
