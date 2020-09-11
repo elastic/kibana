@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { stripAnsiSnapshotSerializer } from '../../../test_helpers/strip_ansi_snapshot_serializer';
-import { LogLevel } from '../log_level';
-import { LogRecord } from '../log_record';
 import { PatternLayout, patternSchema } from './pattern_layout';
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));

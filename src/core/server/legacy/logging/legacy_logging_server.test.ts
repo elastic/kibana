@@ -20,7 +20,7 @@
 jest.mock('../../../../legacy/server/config');
 jest.mock('../../../../legacy/server/logging');
 
-import { LogLevel } from '../../logging/log_level';
+import { LogLevel } from '../../logging';
 import { LegacyLoggingServer } from './legacy_logging_server';
 
 test('correctly forwards log records.', () => {

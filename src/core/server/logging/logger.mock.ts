@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger } from './logger';
+import { Logger } from '@kbn/logging';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 
