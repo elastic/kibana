@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare interface MlMessageBarService {
-  notify: {
-    error(text: any, resp?: any): void;
-  };
-}
-
-export const mlMessageBarService: MlMessageBarService;
+export {
+  ToastNotificationService,
+  toastNotificationServiceProvider,
+  useToastNotificationService,
+  getToastNotificationService,
+} from './toast_notification_service';
