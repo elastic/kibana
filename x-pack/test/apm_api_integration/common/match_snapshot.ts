@@ -99,7 +99,7 @@ function expectToMatchSnapshot(this: SnapshotContext, received: any) {
 function expectToMatchInlineSnapshot(this: SnapshotContext, received: any, _actual?: any) {
   const matcher = toMatchInlineSnapshot.bind(this as any);
 
-  const result = matcher(received);
+  const result = arguments.length === 1 ? matcher(received) : matcher(received, _actual);
 
   this.snapshotState.save();
 
