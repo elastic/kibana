@@ -105,6 +105,57 @@ export function initPlugin(router: IRouter, path: string) {
       });
     }
   );
+
+  router.get(
+    {
+      path: `${path}/rest/capabilities`,
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return jsonResponse(res, 200, {
+        capabilities: {},
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: `${path}/rest/api/2/issue/createmeta`,
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return jsonResponse(res, 200, {
+        projects: [
+          {
+            issuetypes: [
+              {
+                id: '10006',
+                name: 'Task',
+              },
+              {
+                id: '10007',
+                name: 'Sub-task',
+              },
+            ],
+          },
+        ],
+      });
+    }
+  );
 }
 
 function jsonResponse(

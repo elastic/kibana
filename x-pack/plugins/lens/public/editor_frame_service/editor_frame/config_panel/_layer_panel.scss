@@ -43,6 +43,14 @@
   min-height: $euiSizeXXL;
 }
 
+.lnsLayerPanel__anchor {
+  width: 100%;
+}
+
+.lnsLayerPanel__dndGrab {
+  padding: $euiSizeS;
+}
+
 .lnsLayerPanel__styleEditor {
   width: $euiSize * 30;
   padding: $euiSizeS;
