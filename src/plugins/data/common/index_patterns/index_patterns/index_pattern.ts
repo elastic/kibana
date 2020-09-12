@@ -524,26 +524,6 @@ export class IndexPattern implements IIndexPattern {
     return await _create(potentialDuplicateByTitle.id);
   }
 
-  /*
-  async _fetchFields() {
-    const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields().map((field) => field.spec);
-    try {
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
-    } catch (err) {
-      if (err instanceof FieldTypeUnknownError) {
-        indexPattern.unknownFieldErrorNotification(
-          err.fieldSpec.name,
-          err.fieldSpec.type,
-          indexPattern.title
-        );
-      } else {
-        throw err;
-      }
-    }
-  }
-  */
-
   refreshFields() {
     return this.indexPatternsService
       .refreshFields(this)

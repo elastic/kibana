@@ -62,7 +62,7 @@ export interface BucketSpanEstimatorResponse {
   name: string;
   ms: number;
   error?: boolean;
-  message?: { msg: string } | string;
+  message?: string;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -485,7 +485,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliest?: number;
       latest?: number;
       samplerShardSize?: number;
-      interval?: string;
+      interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
     }) {

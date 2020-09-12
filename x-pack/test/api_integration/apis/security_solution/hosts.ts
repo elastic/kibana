@@ -13,7 +13,7 @@ import {
   GetHostsTableQuery,
   HostsFields,
 } from '../../../../plugins/security_solution/public/graphql/types';
-import { HostOverviewQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/overview/host_overview.gql_query';
+import { HostOverviewQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/details/host_overview.gql_query';
 import { HostFirstLastSeenGqlQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/first_last_seen/first_last_seen.gql_query';
 import { HostsTableQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/hosts_table.gql_query';
 import { FtrProviderContext } from '../../ftr_provider_context';

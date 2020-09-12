@@ -6,7 +6,7 @@
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { MSearchResponse, SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
@@ -37,7 +37,7 @@ export interface QueryInfo {
   /**
    * a function to handle the response
    */
-  handler: (response: SearchResponse<ResolverEvent>) => void;
+  handler: (response: SearchResponse<SafeResolverEvent>) => void;
 }
 
 /**
@@ -65,7 +65,7 @@ export class MultiSearcher {
     for (const info of queries) {
       searchQuery.push(...info.query.buildMSearch(info.ids));
     }
-    const res: MSearchResponse<ResolverEvent> = await this.client.callAsCurrentUser('msearch', {
+    const res: MSearchResponse<SafeResolverEvent> = await this.client.callAsCurrentUser('msearch', {
       body: searchQuery,
     });
 
