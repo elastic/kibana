@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import Boom from 'boom';
 import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
   HostMetadata,
-  HostMetadataDetails,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
@@ -58,7 +56,7 @@ export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryConfigVersion: MetadataQueryConfigVersions
-): RequestHandler<undefined, TypeOf<typeof GetMetadataListRequestSchema.body>, undefined> {
+): RequestHandler<undefined, undefined, TypeOf<typeof GetMetadataListRequestSchema.body>> {
   return async (context, request, response) => {
     try {
       const agentService = endpointAppContext.service.getAgentService();
@@ -77,7 +75,7 @@ export const getMetadataListRequestHandler = function (
         context.core.savedObjects.client
       );
 
-      const statusIDs = request.body?.filters?.host_status?.length
+      const statusIDs = request?.body?.filters?.host_status?.length
         ? await findAgentIDsByStatus(
             agentService,
             context.core.savedObjects.client,
@@ -85,25 +83,25 @@ export const getMetadataListRequestHandler = function (
           )
         : undefined;
 
-      const queryConfig: MetadataQueryConfig = endpointAppContext.service
+      const queryConfig:
+        | MetadataQueryConfig
+        | undefined = endpointAppContext.service
         ?.getMetadataService()
-        .queryConfig(queryConfigVersion);
+        ?.queryConfig(queryConfigVersion);
 
       const queryParams = await kibanaRequestToMetadataListESQuery(
         request,
         endpointAppContext,
-        queryConfig,
+        queryConfig!,
         {
           unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           statusAgentIDs: statusIDs,
         }
       );
 
-      const searchResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        queryParams
-      )) as SearchResponse<HostMetadata | HostMetadataDetails>;
-      const hostListQueryResult = queryConfig.queryResponseToHostListResult(searchResponse);
+      const hostListQueryResult = queryConfig!.queryResponseToHostListResult(
+        await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
+      );
       return response.ok({
         body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
       });
@@ -118,7 +116,7 @@ export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryConfigVersion: MetadataQueryConfigVersions
-): RequestHandler<undefined, TypeOf<typeof GetMetadataRequestSchema.params>, undefined> {
+): RequestHandler<TypeOf<typeof GetMetadataRequestSchema.params>, undefined, undefined> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
     if (agentService === undefined) {
@@ -132,7 +130,11 @@ export const getMetadataRequestHandler = function (
     };
 
     try {
-      const doc = await getHostData(metadataRequestContext, request.params.id, queryConfigVersion);
+      const doc = await getHostData(
+        metadataRequestContext,
+        request?.params?.id,
+        queryConfigVersion
+      );
       if (doc) {
         return response.ok({ body: doc });
       }
@@ -155,23 +157,22 @@ export async function getHostData(
   id: string,
   queryConfigVersion: MetadataQueryConfigVersions
 ): Promise<HostInfo | undefined> {
-  const queryConfig: MetadataQueryConfig = metadataRequestContext.endpointAppContextService
+  const queryConfig = metadataRequestContext.endpointAppContextService
     ?.getMetadataService()
-    .queryConfig(queryConfigVersion);
+    ?.queryConfig(queryConfigVersion);
 
-  const query = getESQueryHostMetadataByID(id, queryConfig);
-  const hostResult = queryConfig.queryResponseToHostResult(
+  const query = getESQueryHostMetadataByID(id, queryConfig!);
+  const hostResult = queryConfig!.queryResponseToHostResult(
     await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
       'search',
       query
     )
   );
-
-  if (hostResult.resultLength === 0) {
+  const hostMetadata: HostMetadata | undefined = hostResult.result;
+  if (!hostMetadata) {
     return undefined;
   }
 
-  const hostMetadata: HostMetadata = hostResult?.result;
   const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
@@ -187,8 +188,8 @@ async function findAgent(
 ): Promise<Agent | undefined> {
   try {
     return await metadataRequestContext.endpointAppContextService
-      .getAgentService()
-      .getAgent(
+      ?.getAgentService()
+      ?.getAgent(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         hostMetadata.elastic.agent.id
       );
@@ -254,12 +255,12 @@ async function enrichHostMetadata(
     }
 
     const status = await metadataRequestContext.endpointAppContextService
-      .getAgentService()
+      ?.getAgentService()
       ?.getAgentStatusById(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         elasticAgentId
       );
-    hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
+    hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
   } catch (e) {
     if (
       metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(

@@ -49,7 +49,7 @@ jest.mock('./query.last_first_seen_host.dsl', () => {
     buildLastFirstSeenHostQuery: jest.fn(() => mockGetHostLastFirstSeenDsl),
   };
 });
-jest.mock('../../endpoint/routes/metadata', () => {
+jest.mock('../../endpoint/routes/metadata/handlers', () => {
   return {
     getHostData: jest.fn(() => mockEndpointMetadata),
   };

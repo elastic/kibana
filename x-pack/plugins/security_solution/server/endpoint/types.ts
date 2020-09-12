@@ -45,10 +45,10 @@ export interface MetadataQueryConfig {
   sortProperty: JsonObject[];
   extraBodyProperties?: JsonObject;
   queryResponseToHostListResult: (
-    searchResponse: SearchResponse<HostMetadata | undefined>
+    searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
   ) => HostListQueryResult;
   queryResponseToHostResult: (
-    searchResponse: SearchResponse<HostMetadata | undefined>
+    searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
   ) => HostQueryResult;
 }
 
@@ -87,23 +87,24 @@ export function metadataQueryConfigV1(): MetadataQueryConfig {
       },
     },
     queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata>
+      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostListQueryResult => {
+      const response = searchResponse as SearchResponse<HostMetadata>;
       return {
-        resultLength: searchResponse?.aggregations?.total?.value || 0,
-        resultList: searchResponse.hits.hits
-          .map((response) => response.inner_hits.most_recent.hits.hits)
+        resultLength: response?.aggregations?.total?.value || 0,
+        resultList: response.hits.hits
+          .map((hit) => hit.inner_hits.most_recent.hits.hits)
           .flatMap((data) => data as HitSource)
           .map((entry) => entry._source),
       };
     },
     queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | undefined>
+      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostQueryResult => {
+      const response = searchResponse as SearchResponse<HostMetadata>;
       return {
-        resultLength: searchResponse.hits.hits.length,
-        result:
-          searchResponse.hits.hits.length > 0 ? searchResponse.hits.hits[0]._source : undefined,
+        resultLength: response.hits.hits.length,
+        result: response.hits.hits.length > 0 ? response.hits.hits[0]._source : undefined,
       };
     },
   };
@@ -124,25 +125,24 @@ export function metadataQueryConfigV2(): MetadataQueryConfig {
     queryResponseToHostListResult: (
       searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostListQueryResult => {
+      const response = searchResponse as SearchResponse<HostMetadataDetails>;
       return {
         resultLength:
-          ((searchResponse.hits?.total as unknown) as { value: number; relation: string }).value ||
-          0,
+          ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
         resultList:
-          searchResponse.hits.hits.length > 0
-            ? searchResponse.hits.hits.map((entry) => entry._source.HostDetails)
+          response.hits.hits.length > 0
+            ? response.hits.hits.map((entry) => entry._source.HostDetails)
             : [],
       };
     },
     queryResponseToHostResult: (
       searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostQueryResult => {
+      const response = searchResponse as SearchResponse<HostMetadataDetails>;
       return {
-        resultLength: searchResponse.hits.hits.length,
+        resultLength: response.hits.hits.length,
         result:
-          searchResponse.hits.hits.length > 0
-            ? searchResponse.hits.hits[0]._source.HostDetails
-            : undefined,
+          response.hits.hits.length > 0 ? response.hits.hits[0]._source.HostDetails : undefined,
       };
     },
   };

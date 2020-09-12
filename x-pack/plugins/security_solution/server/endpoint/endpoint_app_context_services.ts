@@ -12,7 +12,6 @@ import {
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
-import { ExceptionListClient } from '../../../lists/server';
 import {
   MetadataQueryConfig,
   metadataQueryConfigV1,
@@ -41,7 +40,6 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
-  private exceptionsListService: ExceptionListClient | undefined;
   private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
