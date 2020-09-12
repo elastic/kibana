@@ -4,6 +4,8 @@
 
 ## SearchSourceFields.sort property
 
+[EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -5,7 +5,7 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
-import { ResolverEvent, EventStats } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent, EventStats } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 export interface StatsResult {
@@ -185,7 +185,7 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     };
   }
 
-  public formatResponse(response: SearchResponse<ResolverEvent>): StatsResult {
+  public formatResponse(response: SearchResponse<SafeResolverEvent>): StatsResult {
     let alerts: Record<string, number> = {};
 
     if (response.aggregations?.alerts?.ids?.buckets) {

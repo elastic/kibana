@@ -6,14 +6,15 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import {
-  ResolverChildNode,
-  ResolverLifecycleNode,
-  ResolverEvent,
+  SafeResolverChildNode,
+  SafeResolverLifecycleNode,
+  SafeResolverEvent,
   ResolverNodeStats,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
-  parentEntityId,
-  eventId,
+  parentEntityIDSafeVersion,
+  entityIDSafeVersion,
+  eventIDSafeVersion,
 } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import {
   Event,
@@ -24,12 +25,32 @@ import {
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 
 /**
+ * Creates the ancestry array based on an array of events. The order of the ancestry array will match the order
+ * of the events passed in.
+ *
+ * @param events an array of generated events
+ */
+export const createAncestryArray = (events: Event[]) => {
+  const ancestry: string[] = [];
+  for (const event of events) {
+    const entityID = entityIDSafeVersion(event);
+    if (entityID) {
+      ancestry.push(entityID);
+    }
+  }
+  return ancestry;
+};
+
+/**
  * Check that the given lifecycle is in the resolver tree's corresponding map
  *
  * @param node a lifecycle node containing the start and end events for a node
  * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
  */
-const expectLifecycleNodeInMap = (node: ResolverLifecycleNode, nodeMap: Map<string, TreeNode>) => {
+const expectLifecycleNodeInMap = (
+  node: SafeResolverLifecycleNode,
+  nodeMap: Map<string, TreeNode>
+) => {
   const genNode = nodeMap.get(node.entityID);
   expect(genNode).to.be.ok();
   compareArrays(genNode!.lifecycle, node.lifecycle, true);
@@ -44,7 +65,7 @@ const expectLifecycleNodeInMap = (node: ResolverLifecycleNode, nodeMap: Map<stri
  *  does not contain all the ancestors, the last one will not have the parent
  */
 export const verifyAncestry = (
-  ancestors: ResolverLifecycleNode[],
+  ancestors: SafeResolverLifecycleNode[],
   tree: Tree,
   verifyLastParent: boolean
 ) => {
@@ -52,7 +73,7 @@ export const verifyAncestry = (
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   // group by parent entity_id
   const groupedAncestorsParent = _.groupBy(ancestors, (ancestor) =>
-    parentEntityId(ancestor.lifecycle[0])
+    parentEntityIDSafeVersion(ancestor.lifecycle[0])
   );
   // make sure there aren't any nodes with the same entity_id
   expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
@@ -69,7 +90,7 @@ export const verifyAncestry = (
   let foundParents = 0;
   let node = ancestors[0];
   for (let i = 0; i < ancestors.length; i++) {
-    const parentID = parentEntityId(node.lifecycle[0]);
+    const parentID = parentEntityIDSafeVersion(node.lifecycle[0]);
     if (parentID !== undefined) {
       const nextNode = groupedAncestors[parentID];
       if (!nextNode) {
@@ -95,12 +116,12 @@ export const verifyAncestry = (
  *
  * @param ancestors an array of ancestor nodes
  */
-export const retrieveDistantAncestor = (ancestors: ResolverLifecycleNode[]) => {
+export const retrieveDistantAncestor = (ancestors: SafeResolverLifecycleNode[]) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   let node = ancestors[0];
   for (let i = 0; i < ancestors.length; i++) {
-    const parentID = parentEntityId(node.lifecycle[0]);
+    const parentID = parentEntityIDSafeVersion(node.lifecycle[0]);
     if (parentID !== undefined) {
       const nextNode = groupedAncestors[parentID];
       if (nextNode) {
@@ -122,7 +143,7 @@ export const retrieveDistantAncestor = (ancestors: ResolverLifecycleNode[]) => {
  * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
  */
 export const verifyChildren = (
-  children: ResolverChildNode[],
+  children: SafeResolverChildNode[],
   tree: Tree,
   numberOfParents?: number,
   childrenPerParent?: number
@@ -132,7 +153,9 @@ export const verifyChildren = (
   // make sure each child is unique
   expect(Object.keys(groupedChildren).length).to.eql(children.length);
   if (numberOfParents !== undefined) {
-    const groupParent = _.groupBy(children, (child) => parentEntityId(child.lifecycle[0]));
+    const groupParent = _.groupBy(children, (child) =>
+      parentEntityIDSafeVersion(child.lifecycle[0])
+    );
     expect(Object.keys(groupParent).length).to.eql(numberOfParents);
     if (childrenPerParent !== undefined) {
       Object.values(groupParent).forEach((childNodes) =>
@@ -155,7 +178,7 @@ export const verifyChildren = (
  */
 export const compareArrays = (
   expected: Event[],
-  toTest: ResolverEvent[],
+  toTest: SafeResolverEvent[],
   lengthCheck: boolean = false
 ) => {
   if (lengthCheck) {
@@ -168,7 +191,7 @@ export const compareArrays = (
         // we're only checking that the event ids are the same here. The reason we can't check the entire document
         // is because ingest pipelines are used to add fields to the document when it is received by elasticsearch,
         // therefore it will not be the same as the document created by the generator
-        return eventId(toTestEvent) === eventId(arrEvent);
+        return eventIDSafeVersion(toTestEvent) === eventIDSafeVersion(arrEvent);
       })
     ).to.be.ok();
   });
@@ -212,7 +235,7 @@ export const verifyStats = (
  * @param categories the related event info used when generating the resolver tree
  */
 export const verifyLifecycleStats = (
-  nodes: ResolverLifecycleNode[],
+  nodes: SafeResolverLifecycleNode[],
   categories: RelatedEventInfo[],
   relatedAlerts: number
 ) => {

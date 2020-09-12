@@ -99,7 +99,7 @@ export const getResilientConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     orgId: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -118,6 +118,7 @@ export const getResilientConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 
