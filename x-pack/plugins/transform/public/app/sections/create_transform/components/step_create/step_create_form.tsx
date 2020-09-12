@@ -183,10 +183,14 @@ export const StepCreateForm: FC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await indexPatterns.newIndexPatternAndSave({
-          title: indexPatternName,
-          timeFieldName,
-        });
+        const newIndexPattern = await indexPatterns.newIndexPatternAndSave(
+          {
+            title: indexPatternName,
+            timeFieldName,
+          },
+          false,
+          true
+        );
 
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
