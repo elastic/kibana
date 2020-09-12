@@ -1,5 +1,5 @@
 {
-  "id": "triggers_actions_ui",
+  "id": "triggersActionsUi",
   "version": "kibana",
   "server": false,
   "ui": true,
