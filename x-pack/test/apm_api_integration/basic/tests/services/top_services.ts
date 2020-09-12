@@ -6,6 +6,7 @@
 
 import { sortBy } from 'lodash';
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -41,32 +42,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const services = sortBy(response.body.items, ['serviceName']);
 
         expect(response.status).to.be(200);
-        expect(services).to.eql([
-          {
-            serviceName: 'client',
-            agentName: 'rum-js',
-            transactionsPerMinute: 2,
-            errorsPerMinute: 2.75,
-            avgResponseTime: 116375,
-            environments: [],
-          },
-          {
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-            transactionsPerMinute: 30.75,
-            errorsPerMinute: 4.5,
-            avgResponseTime: 25636.349593495936,
-            environments: ['production'],
-          },
-          {
-            serviceName: 'opbeans-node',
-            agentName: 'nodejs',
-            transactionsPerMinute: 31,
-            errorsPerMinute: 3.75,
-            avgResponseTime: 38682.52419354839,
-            environments: ['production'],
-          },
-        ]);
+        expectSnapshot(services).toMatchInline(`
+          Array [
+            Object {
+              "agentName": "rum-js",
+              "avgResponseTime": 116375,
+              "environments": Array [],
+              "errorsPerMinute": 2.75,
+              "serviceName": "client",
+              "transactionsPerMinute": 2,
+            },
+            Object {
+              "agentName": "java",
+              "avgResponseTime": 25636.349593495936,
+              "environments": Array [
+                "production",
+              ],
+              "errorsPerMinute": 4.5,
+              "serviceName": "opbeans-java",
+              "transactionsPerMinute": 30.75,
+            },
+            Object {
+              "agentName": "nodejs",
+              "avgResponseTime": 38682.52419354839,
+              "environments": Array [
+                "production",
+              ],
+              "errorsPerMinute": 3.75,
+              "serviceName": "opbeans-node",
+              "transactionsPerMinute": 31,
+            },
+          ]
+        `);
 
         expect(response.body.hasHistoricalData).to.be(true);
         expect(response.body.hasLegacyData).to.be(false);

@@ -5,8 +5,8 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectedTransactionGroups from './expectation/top_transaction_groups.json';
 
 function sortTransactionGroups(items: any[]) {
   return sortBy(items, 'impact');
@@ -34,7 +34,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "bucketSize": 1000,
+            "isAggregationAccurate": true,
+            "items": Array [],
+          }
+        `);
       });
     });
 
@@ -53,13 +59,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expect(response.body.items.length).to.be(18);
+        expectSnapshot(response.body.items.length).toMatchInline(`18`);
       });
 
       it('returns the correct buckets (when ignoring samples)', async () => {
-        expect(omitSampleFromTransactionGroups(response.body.items)).to.eql(
-          omitSampleFromTransactionGroups(expectedTransactionGroups.items)
-        );
+        expectSnapshot(omitSampleFromTransactionGroups(response.body.items)).toMatch();
       });
 
       it('returns the correct buckets and samples', async () => {

@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -23,7 +24,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ transactionTypes: [] });
+
+        expect(response.body.transactionTypes.length).to.be(0);
       });
     });
 
@@ -37,7 +39,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ transactionTypes: ['request', 'Worker'] });
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "transactionTypes": Array [
+              "request",
+              "Worker",
+            ],
+          }
+        `);
       });
     });
   });

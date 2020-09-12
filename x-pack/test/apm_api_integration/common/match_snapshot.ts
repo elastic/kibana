@@ -13,16 +13,24 @@ import { once } from 'lodash';
 // @ts-expect-error
 import babelTraverse from '@babel/traverse';
 
+type ISnapshotState = InstanceType<typeof SnapshotState>;
+
 let testContext: {
   file: string;
   testTitle: string;
   getSnapshotContext: () => SnapshotContext;
 } | null = null;
 interface SnapshotContext {
-  snapshotState: InstanceType<typeof SnapshotState>;
+  snapshotState: ISnapshotState;
 }
 
+let registered: boolean = false;
+
 export function registerMochaHooksForSnapshots() {
+  const snapshotsToSave: ISnapshotState[] = [];
+
+  registered = true;
+
   beforeEach(function () {
     const mochaContext = this;
     const file = mochaContext.currentTest?.file;
@@ -35,12 +43,30 @@ export function registerMochaHooksForSnapshots() {
     testContext = {
       file,
       testTitle,
-      getSnapshotContext: once(() => getSnapshotContextOrThrow({ file, testTitle })),
+      getSnapshotContext: once(() => {
+        const ctx = getSnapshotContextOrThrow({ file, testTitle });
+        snapshotsToSave.push(ctx.snapshotState);
+        return ctx;
+      }),
     };
   });
 
   afterEach(() => {
     testContext = null;
+  });
+
+  after(() => {
+    // save snapshot after tests complete, in reverse order (bottom to top)
+    // to not change line/column number of successive inline snapshot tests
+    snapshotsToSave
+      .concat()
+      .reverse()
+      .forEach((snapshot) => {
+        snapshot.save();
+      });
+    snapshotsToSave.length = 0;
+
+    registered = false;
   });
 }
 
@@ -79,6 +105,12 @@ function getSnapshotContextOrThrow({ file, testTitle }: { file: string; testTitl
 }
 
 export function expectSnapshot(received: any) {
+  if (!registered) {
+    throw new Error(
+      'Mocha hooks were not registered before expectSnapshot was used. Call `registerMochaHooksForSnapshots` in your top-level describe().'
+    );
+  }
+
   if (!testContext) {
     throw new Error('A current Mocha context is needed to match snapshots');
   }
@@ -95,8 +127,6 @@ function expectToMatchSnapshot(this: SnapshotContext, received: any) {
   const matcher = toMatchSnapshot.bind(this as any);
   const result = matcher(received);
 
-  this.snapshotState.save();
-
   expect(result.pass).to.eql(true, result.message());
 }
 
@@ -104,8 +134,6 @@ function expectToMatchInlineSnapshot(this: SnapshotContext, received: any, _actu
   const matcher = toMatchInlineSnapshot.bind(this as any);
 
   const result = arguments.length === 1 ? matcher(received) : matcher(received, _actual);
-
-  this.snapshotState.save();
 
   expect(result.pass).to.eql(true, result.message());
 }

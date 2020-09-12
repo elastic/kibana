@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -46,24 +47,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           errorRateResponse = response.body;
         });
 
-        it('has the correct start date', async () => {
-          expect(first(errorRateResponse.erroneousTransactionsRate)?.x).to.be(1598439600000);
+        it('has the correct start date', () => {
+          expectSnapshot(first(errorRateResponse.erroneousTransactionsRate)?.x).toMatchInline(
+            `1598439600000`
+          );
         });
 
-        it('has the correct end date', async () => {
-          expect(last(errorRateResponse.erroneousTransactionsRate)?.x).to.be(1598441400000);
+        it('has the correct end date', () => {
+          expectSnapshot(last(errorRateResponse.erroneousTransactionsRate)?.x).toMatchInline(
+            `1598441400000`
+          );
         });
 
-        it('has the correct number of buckets', async () => {
-          expect(errorRateResponse.erroneousTransactionsRate.length).to.be(61);
+        it('has the correct number of buckets', () => {
+          expectSnapshot(errorRateResponse.erroneousTransactionsRate.length).toMatchInline(`61`);
         });
 
-        it('has the correct calculation for average', async () => {
-          expect(errorRateResponse.average).to.be(0.18894993894993897);
+        it('has the correct calculation for average', () => {
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.18894993894993897`);
         });
 
-        it('has the correct error rate', async () => {
-          expect(first(errorRateResponse.erroneousTransactionsRate)?.y).to.be(0.5);
+        it('has the correct error rate', () => {
+          expectSnapshot(first(errorRateResponse.erroneousTransactionsRate)?.y).toMatchInline(
+            `0.5`
+          );
         });
       });
     });

@@ -25,7 +25,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expectSnapshot(response.body).toMatch();
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "bucketSize": 1000,
+            "isAggregationAccurate": true,
+            "items": Array [],
+          }
+        `);
       });
     });
 
@@ -57,6 +63,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const lastItem = responseWithoutSamples[responseWithoutSamples.length - 1];
 
         const groups = responseWithoutSamples.map((item) => item.key).slice(0, 5);
+
+        expectSnapshot(responseWithoutSamples).toMatch();
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
