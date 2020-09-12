@@ -220,8 +220,6 @@ export class IndexPatternsService {
   };
 
   get = async (id: string): Promise<IndexPattern> => {
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-
     const cache = indexPatternCache.get(id);
     if (cache) {
       return cache;
@@ -245,19 +243,38 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     let parsedFields = fields ? JSON.parse(fields) : [];
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
-    // todo need to save refreshed field list
+
     const isFieldRefreshRequired = this.isFieldRefreshRequired(parsedFields);
-    parsedFields = isFieldRefreshRequired
-      ? await this.refreshFields(parsedFields, id, title, {
-          pattern: title,
-          metaFields,
-          type,
-          params: parsedTypeMeta && parsedTypeMeta.params,
-        })
-      : parsedFields;
-    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
+    let isSaveRequired = isFieldRefreshRequired;
+    try {
+      parsedFields = isFieldRefreshRequired
+        ? await this.refreshFields(parsedFields, id, title, {
+            pattern: title,
+            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+            type,
+            params: parsedTypeMeta && parsedTypeMeta.params,
+          })
+        : parsedFields;
+    } catch (err) {
+      isSaveRequired = false;
+      if (err instanceof IndexPatternMissingIndices) {
+        this.onNotification({
+          title: (err as any).message,
+          color: 'danger',
+          iconType: 'alert',
+        });
+      } else {
+        this.onError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: { id, title },
+          }),
+        });
+      }
+    }
 
     Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
       const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
@@ -280,12 +297,20 @@ export class IndexPatternsService {
 
     const indexPattern = await this.specToIndexPattern(spec);
     indexPatternCache.set(id, indexPattern);
-    if (isFieldRefreshRequired) {
+    if (isSaveRequired) {
       try {
         this.save(indexPattern);
       } catch (err) {
-        // todo display error
-        throw err;
+        this.onError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
+            defaultMessage:
+              'Error saving after fetching fields for index pattern {title} (ID: {id})',
+            values: {
+              id: indexPattern.id,
+              title: indexPattern.title,
+            },
+          }),
+        });
       }
     }
     // todo better way to do this
