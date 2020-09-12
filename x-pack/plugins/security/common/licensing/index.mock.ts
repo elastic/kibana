@@ -9,6 +9,7 @@ import { SecurityLicense } from '.';
 
 export const licenseMock = {
   create: (): jest.Mocked<SecurityLicense> => ({
+    isLicenseAvailable: jest.fn(),
     isEnabled: jest.fn().mockReturnValue(true),
     getFeatures: jest.fn(),
     features$: of(),
