@@ -326,7 +326,6 @@ export class IndexPatternsService {
       spec,
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
-      patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
       indexPatternsService: this,
       onNotification: this.onNotification,
@@ -347,7 +346,6 @@ export class IndexPatternsService {
       spec,
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
-      patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
       indexPatternsService: this,
       onNotification: this.onNotification,
@@ -391,8 +389,6 @@ export class IndexPatternsService {
 
   async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
     if (!indexPattern.id) return;
-    // const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    // const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
     // get the list of attributes
     const body = indexPattern.prepBody();

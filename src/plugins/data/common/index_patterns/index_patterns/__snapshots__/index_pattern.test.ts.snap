@@ -632,6 +632,7 @@ Object {
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
   "title": "title",
+  "type": undefined,
   "typeMeta": undefined,
   "version": 2,
 }

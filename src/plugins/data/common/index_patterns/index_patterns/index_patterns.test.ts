@@ -31,17 +31,6 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 }));
 
 const fieldFormats = fieldFormatsMock;
-
-/*
-jest.mock('./index_pattern', () => {
-  class IndexPattern {
-    init = async () => {
-      return this;
-    };
-    initFromSpec = async () => {};
-  }
-});
-*/
 let object: any = {};
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
@@ -59,12 +48,6 @@ describe('IndexPatterns', () => {
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
-    /*
-    savedObjectsClient.get = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(indexPatternObj) as Promise<SavedObject<any>>);
-*/
-    // savedObjectsClient.get = jest.fn().mockImplementation(() => object);
     savedObjectsClient.create = jest.fn();
     savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
       id: object.id,
@@ -74,7 +57,6 @@ describe('IndexPatterns', () => {
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
-        // debugger;
         if (object.version !== version) {
           throw new Object({
             res: {

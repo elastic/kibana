@@ -30,14 +30,12 @@ import {
   FieldTypeUnknownError,
   FieldFormatNotFoundError,
 } from '../../../common';
-import { findByTitle } from '../utils';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { OnNotification, OnError, IIndexPatternsApiClient, IndexPatternAttributes } from '../types';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
@@ -49,7 +47,6 @@ interface IndexPatternDeps {
   spec?: IndexPatternSpec;
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
-  patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
   indexPatternsService: IndexPatternsService;
   onNotification: OnNotification;
@@ -75,7 +72,6 @@ export class IndexPattern implements IIndexPattern {
   // todo rename
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private patternCache: PatternCache;
   public sourceFilters?: SourceFilter[];
   // todo make read  only, update via  method or factor out
   public originalBody: { [key: string]: any } = {};
@@ -112,7 +108,6 @@ export class IndexPattern implements IIndexPattern {
     spec = {},
     savedObjectsClient,
     apiClient,
-    patternCache,
     fieldFormats,
     indexPatternsService,
     onNotification,
@@ -122,7 +117,6 @@ export class IndexPattern implements IIndexPattern {
   }: IndexPatternDeps) {
     // set dependencies
     this.savedObjectsClient = savedObjectsClient;
-    this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
     this.indexPatternsService = indexPatternsService;
     // set callbacks
@@ -494,39 +488,7 @@ export class IndexPattern implements IIndexPattern {
     );
   }
 
-  // todo remove
-  async create(allowOverride: boolean = false) {
-    const _create = async (duplicateId?: string) => {
-      if (duplicateId) {
-        this.patternCache.clear(duplicateId);
-        await this.savedObjectsClient.delete(savedObjectType, duplicateId);
-      }
-
-      const body = this.prepBody();
-      const response = await this.savedObjectsClient.create(savedObjectType, body, { id: this.id });
-
-      this.id = response.id;
-      return response.id;
-    };
-
-    // search by title
-    // if dupe and override, delete index pattern
-    // if no dupe, create
-
-    const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
-    // If there is potentially duplicate title, just create it
-    if (!potentialDuplicateByTitle) {
-      return await _create();
-    }
-
-    // We found a duplicate but we aren't allowing override, show the warn modal
-    if (!allowOverride) {
-      return false;
-    }
-
-    return await _create(potentialDuplicateByTitle.id);
-  }
-
+  // kill
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
@@ -541,6 +503,7 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  // kill
   refreshFields() {
     return (
       this._fetchFields()

@@ -96,13 +96,6 @@ const savedObjectsClient = {
   }),
 };
 
-const patternCache = {
-  clear: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  clearAll: jest.fn(),
-};
-
 const apiClient = {
   _getUrl: jest.fn(),
   getFieldsForTimePattern: jest.fn(),
@@ -115,7 +108,6 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     spec: { id },
     savedObjectsClient: savedObjectsClient as any,
     apiClient,
-    patternCache,
     fieldFormats: fieldFormatsMock,
     indexPatternsService: {} as IndexPatternsService,
     onNotification: () => {},
