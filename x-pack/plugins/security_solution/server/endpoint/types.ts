@@ -38,7 +38,7 @@ export interface HostQueryResult {
   result: HostMetadata | undefined;
 }
 
-export interface MetadataQueryConfig {
+export interface MetadataQueryStrategy {
   index: string;
   elasticAgentIdProperty: string;
   hostIdProperty: string;
@@ -52,12 +52,12 @@ export interface MetadataQueryConfig {
   ) => HostQueryResult;
 }
 
-export enum MetadataQueryConfigVersions {
+export enum MetadataQueryStrategyVersions {
   VERSION_1 = 'v1',
   VERSION_2 = 'v2',
 }
 
-export function metadataQueryConfigV1(): MetadataQueryConfig {
+export function metadataQueryStrategyV1(): MetadataQueryStrategy {
   return {
     index: metadataIndexPattern,
     elasticAgentIdProperty: 'elastic.agent.id',
@@ -110,7 +110,7 @@ export function metadataQueryConfigV1(): MetadataQueryConfig {
   };
 }
 
-export function metadataQueryConfigV2(): MetadataQueryConfig {
+export function metadataQueryStrategyV2(): MetadataQueryStrategy {
   return {
     index: metadataCurrentIndexPattern,
     elasticAgentIdProperty: 'HostDetails.elastic.agent.id',

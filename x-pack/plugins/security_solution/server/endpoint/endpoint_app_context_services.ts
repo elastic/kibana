@@ -13,14 +13,14 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import {
-  MetadataQueryConfig,
-  metadataQueryConfigV1,
-  metadataQueryConfigV2,
-  MetadataQueryConfigVersions,
+  MetadataQueryStrategy,
+  metadataQueryStrategyV1,
+  metadataQueryStrategyV2,
+  MetadataQueryStrategyVersions,
 } from './types';
 
 export interface MetadataService {
-  queryConfig(version?: MetadataQueryConfigVersions): MetadataQueryConfig;
+  queryStrategy(version?: MetadataQueryStrategyVersions): MetadataQueryStrategy;
 }
 
 export type EndpointAppContextServiceStartContract = Partial<
@@ -47,13 +47,13 @@ export class EndpointAppContextService {
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = {
-      queryConfig(version: MetadataQueryConfigVersions): MetadataQueryConfig {
-        if (version === MetadataQueryConfigVersions.VERSION_1) {
-          return metadataQueryConfigV1();
-        } else if (version === MetadataQueryConfigVersions.VERSION_2) {
-          return metadataQueryConfigV2();
+      queryStrategy(version: MetadataQueryStrategyVersions): MetadataQueryStrategy {
+        if (version === MetadataQueryStrategyVersions.VERSION_1) {
+          return metadataQueryStrategyV1();
+        } else if (version === MetadataQueryStrategyVersions.VERSION_2) {
+          return metadataQueryStrategyV2();
         }
-        return metadataQueryConfigV1();
+        return metadataQueryStrategyV1();
       },
     };
 

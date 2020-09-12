@@ -18,8 +18,7 @@ import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/m
 import {
   EndpointAppContext,
   HostListQueryResult,
-  MetadataQueryConfig,
-  MetadataQueryConfigVersions,
+  MetadataQueryStrategyVersions,
 } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -55,7 +54,7 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
 export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
-  queryConfigVersion: MetadataQueryConfigVersions
+  queryStrategyVersion: MetadataQueryStrategyVersions
 ): RequestHandler<undefined, undefined, TypeOf<typeof GetMetadataListRequestSchema.body>> {
   return async (context, request, response) => {
     try {
@@ -83,23 +82,21 @@ export const getMetadataListRequestHandler = function (
           )
         : undefined;
 
-      const queryConfig:
-        | MetadataQueryConfig
-        | undefined = endpointAppContext.service
+      const queryStrategy = endpointAppContext.service
         ?.getMetadataService()
-        ?.queryConfig(queryConfigVersion);
+        ?.queryStrategy(queryStrategyVersion);
 
       const queryParams = await kibanaRequestToMetadataListESQuery(
         request,
         endpointAppContext,
-        queryConfig!,
+        queryStrategy!,
         {
           unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           statusAgentIDs: statusIDs,
         }
       );
 
-      const hostListQueryResult = queryConfig!.queryResponseToHostListResult(
+      const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(
         await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
       );
       return response.ok({
@@ -115,7 +112,7 @@ export const getMetadataListRequestHandler = function (
 export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
-  queryConfigVersion: MetadataQueryConfigVersions
+  queryStrategyVersion: MetadataQueryStrategyVersions
 ): RequestHandler<TypeOf<typeof GetMetadataRequestSchema.params>, undefined, undefined> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
@@ -133,7 +130,7 @@ export const getMetadataRequestHandler = function (
       const doc = await getHostData(
         metadataRequestContext,
         request?.params?.id,
-        queryConfigVersion
+        queryStrategyVersion
       );
       if (doc) {
         return response.ok({ body: doc });
@@ -155,14 +152,14 @@ export const getMetadataRequestHandler = function (
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string,
-  queryConfigVersion: MetadataQueryConfigVersions
+  queryStrategyVersion: MetadataQueryStrategyVersions
 ): Promise<HostInfo | undefined> {
-  const queryConfig = metadataRequestContext.endpointAppContextService
+  const queryStrategy = metadataRequestContext.endpointAppContextService
     ?.getMetadataService()
-    ?.queryConfig(queryConfigVersion);
+    ?.queryStrategy(queryStrategyVersion);
 
-  const query = getESQueryHostMetadataByID(id, queryConfig!);
-  const hostResult = queryConfig!.queryResponseToHostResult(
+  const query = getESQueryHostMetadataByID(id, queryStrategy!);
+  const hostResult = queryStrategy!.queryResponseToHostResult(
     await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
       'search',
       query

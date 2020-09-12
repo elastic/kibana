@@ -5,7 +5,7 @@
  */
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppContext, MetadataQueryConfig } from '../../types';
+import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
@@ -16,7 +16,7 @@ export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  metadataConfig: MetadataQueryConfig,
+  metadataConfig: MetadataQueryStrategy,
   queryBuilderOptions?: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
@@ -63,7 +63,7 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
-  metadataConfig: MetadataQueryConfig,
+  metadataConfig: MetadataQueryStrategy,
   unerolledAgentIds: string[] | undefined,
   statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,7 +115,7 @@ function buildQueryBody(
       };
 }
 
-export function getESQueryHostMetadataByID(hostID: string, metadataConfig: MetadataQueryConfig) {
+export function getESQueryHostMetadataByID(hostID: string, metadataConfig: MetadataQueryStrategy) {
   return {
     body: {
       query: {

@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
-import { EndpointAppContext, MetadataQueryConfigVersions } from '../../types';
+import { EndpointAppContext, MetadataQueryStrategyVersions } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
@@ -68,7 +68,11 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger, MetadataQueryConfigVersions.VERSION_1)
+    getMetadataListRequestHandler(
+      endpointAppContext,
+      logger,
+      MetadataQueryStrategyVersions.VERSION_1
+    )
   );
 
   router.post(
@@ -77,7 +81,11 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger, MetadataQueryConfigVersions.VERSION_2)
+    getMetadataListRequestHandler(
+      endpointAppContext,
+      logger,
+      MetadataQueryStrategyVersions.VERSION_2
+    )
   );
 
   router.get(
@@ -86,7 +94,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryConfigVersions.VERSION_1)
+    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryStrategyVersions.VERSION_1)
   );
 
   router.get(
@@ -95,6 +103,6 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryConfigVersions.VERSION_2)
+    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryStrategyVersions.VERSION_2)
   );
 }

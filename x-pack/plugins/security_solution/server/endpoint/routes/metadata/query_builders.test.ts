@@ -8,7 +8,7 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
-import { metadataQueryConfigV2 } from '../../types';
+import { metadataQueryStrategyV2 } from '../../types';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -23,7 +23,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataQueryConfigV2()
+        metadataQueryStrategyV2()
       );
       expect(query).toEqual({
         body: {
@@ -60,7 +60,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataQueryConfigV2(),
+          metadataQueryStrategyV2(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -108,7 +108,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataQueryConfigV2()
+        metadataQueryStrategyV2()
       );
 
       expect(query).toEqual({
@@ -167,7 +167,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataQueryConfigV2(),
+          metadataQueryStrategyV2(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -226,7 +226,7 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataQueryConfigV2());
+      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
       expect(query).toEqual({
         body: {
