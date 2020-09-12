@@ -190,9 +190,12 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
 
 export async function createIndexPattern(indexPatternName) {
   try {
-    const indexPattern = await indexPatternService.newIndexPatternAndSave({
-      title: indexPatternName,
-    });
+    const indexPattern = await indexPatternService.newIndexPatternAndSave(
+      {
+        title: indexPatternName,
+      },
+      true
+    );
     return {
       success: true,
       id: indexPattern.id,

@@ -608,8 +608,6 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
       timeFieldName,
     });
 
-    await indexPatterns.clearCache();
-
     return {
       success: true,
       id: emptyPattern.id,
