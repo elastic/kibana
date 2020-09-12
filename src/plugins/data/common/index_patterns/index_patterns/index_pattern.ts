@@ -234,6 +234,7 @@ export class IndexPattern implements IIndexPattern {
       }
     }
     this.typeMeta = spec.typeMeta;
+    this.type = spec.type;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
@@ -268,7 +269,6 @@ export class IndexPattern implements IIndexPattern {
     }
     this.version = response.version;
     this.fields.replaceAll(response.fields);
-    // return this.indexFields(response.fields);
   }
 
   getComputedFields() {
@@ -357,6 +357,7 @@ export class IndexPattern implements IIndexPattern {
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
+      type: this.type,
     };
   }
 

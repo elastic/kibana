@@ -64,11 +64,17 @@ describe('IndexPatterns', () => {
       .fn()
       .mockImplementation(() => Promise.resolve(indexPatternObj) as Promise<SavedObject<any>>);
 */
-    savedObjectsClient.get = jest.fn().mockImplementation(() => object);
+    // savedObjectsClient.get = jest.fn().mockImplementation(() => object);
     savedObjectsClient.create = jest.fn();
+    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
+      id: object.id,
+      version: object.version,
+      attributes: object.attributes,
+    }));
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
+        // debugger;
         if (object.version !== version) {
           throw new Object({
             res: {
@@ -156,12 +162,13 @@ describe('IndexPatterns', () => {
     });
 
     // Create a normal index patterns
-    const pattern = await indexPatterns.make('foo');
+    const pattern = await indexPatterns.get('foo');
 
     expect(pattern.version).toBe('fooa');
+    indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = await indexPatterns.make('foo');
+    const samePattern = await indexPatterns.get('foo');
 
     expect(samePattern.version).toBe('fooaa');
 
