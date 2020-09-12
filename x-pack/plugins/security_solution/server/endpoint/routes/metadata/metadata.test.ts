@@ -23,11 +23,12 @@ import {
 import {
   HostInfo,
   HostMetadata,
+  HostMetadataDetails,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes, endpointFilters, METADATA_REQUEST_V1_ROUTE } from './index';
+import { registerEndpointRoutes, endpointFilters, METADATA_REQUEST_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -87,7 +88,7 @@ describe('test endpoint route', () => {
     const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+      path.startsWith(`${METADATA_REQUEST_ROUTE}`)
     )!;
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
@@ -127,7 +128,7 @@ describe('test endpoint route', () => {
       Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+      path.startsWith(`${METADATA_REQUEST_ROUTE}`)
     )!;
 
     await routeHandler(
@@ -141,7 +142,7 @@ describe('test endpoint route', () => {
       bool: {
         must_not: {
           terms: {
-            'elastic.agent.id': [
+            'HostDetails.elastic.agent.id': [
               '00000000-0000-0000-0000-000000000000',
               '11111111-1111-1111-1111-111111111111',
             ],
@@ -180,7 +181,7 @@ describe('test endpoint route', () => {
       Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+      path.startsWith(`${METADATA_REQUEST_ROUTE}`)
     )!;
 
     await routeHandler(
@@ -197,7 +198,7 @@ describe('test endpoint route', () => {
             bool: {
               must_not: {
                 terms: {
-                  'elastic.agent.id': [
+                  'HostDetails.elastic.agent.id': [
                     '00000000-0000-0000-0000-000000000000',
                     '11111111-1111-1111-1111-111111111111',
                   ],
@@ -247,7 +248,7 @@ describe('test endpoint route', () => {
       } as unknown) as Agent);
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -278,7 +279,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -316,7 +317,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -349,7 +350,7 @@ describe('test endpoint route', () => {
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -380,7 +381,7 @@ describe('test endpoint route', () => {
       } as unknown) as Agent);
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
+        path.startsWith(`${METADATA_REQUEST_ROUTE}`)
       )!;
 
       await routeHandler(
@@ -442,7 +443,7 @@ describe('Filters Schema Test', () => {
   });
 });
 
-function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
+function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadataDetails> {
   return ({
     took: 15,
     timed_out: false,
@@ -454,7 +455,7 @@ function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostM
     },
     hits: {
       total: {
-        value: 5,
+        value: 1,
         relation: 'eq',
       },
       max_score: null,
@@ -464,36 +465,18 @@ function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostM
               _index: 'metrics-endpoint.metadata-default',
               _id: '8FhM0HEBYyRTvb6lOQnw',
               _score: null,
-              _source: hostMetadata,
-              sort: [1588337587997],
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    total: {
-                      value: 2,
-                      relation: 'eq',
-                    },
-                    max_score: null,
-                    hits: [
-                      {
-                        _index: 'metrics-endpoint.metadata-default',
-                        _id: 'W6Vo1G8BYQH1gtPUgYkC',
-                        _score: null,
-                        _source: hostMetadata,
-                        sort: [1579816615336],
-                      },
-                    ],
-                  },
+              _source: {
+                agent: {
+                  id: '1e3472bb-5c20-4946-b469-b5af1a809e4f',
+                },
+                HostDetails: {
+                  ...hostMetadata,
                 },
               },
+              sort: [1588337587997],
             },
           ]
         : [],
     },
-    aggregations: {
-      total: {
-        value: 1,
-      },
-    },
-  } as unknown) as SearchResponse<HostMetadata>;
+  } as unknown) as SearchResponse<HostMetadataDetails>;
 }

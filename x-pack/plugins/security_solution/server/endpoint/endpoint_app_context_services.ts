@@ -13,16 +13,20 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { ExceptionListClient } from '../../../lists/server';
-import { MetadataQueryConfig, metadataQueryConfigV1 } from './types';
+import {
+  MetadataQueryConfig,
+  metadataQueryConfigV1,
+  metadataQueryConfigV2,
+  MetadataQueryConfigVersions,
+} from './types';
 
 export interface MetadataService {
-  queryConfig(version?: string): MetadataQueryConfig;
+  queryConfig(version?: MetadataQueryConfigVersions): MetadataQueryConfig;
 }
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<IngestManagerStartContract, 'agentService'>
 > & {
-  exceptionsListService: ExceptionListClient;
   logger: Logger;
   manifestManager?: ManifestManager;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
@@ -42,13 +46,14 @@ export class EndpointAppContextService {
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
-    this.exceptionsListService = dependencies.exceptionsListService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = {
-      queryConfig(version: string): MetadataQueryConfig {
-        if (version === 'v1') {
+      queryConfig(version: MetadataQueryConfigVersions): MetadataQueryConfig {
+        if (version === MetadataQueryConfigVersions.VERSION_1) {
           return metadataQueryConfigV1();
+        } else if (version === MetadataQueryConfigVersions.VERSION_2) {
+          return metadataQueryConfigV2();
         }
         return metadataQueryConfigV1();
       },
@@ -70,13 +75,6 @@ export class EndpointAppContextService {
 
   public getMetadataService(): MetadataService | undefined {
     return this.metadataService;
-  }
-
-  public getExceptionsList() {
-    if (!this.exceptionsListService) {
-      throw new Error('exceptionsListService not set');
-    }
-    return this.exceptionsListService;
   }
 
   public getManifestManager(): ManifestManager | undefined {

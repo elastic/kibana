@@ -51,6 +51,27 @@
         }
       }
     },
+    "enterprise_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "app_search": {
+              "type": "long"
+            },
+            "workplace_search": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "workplace_search": {
       "properties": {
         "ui_viewed": {

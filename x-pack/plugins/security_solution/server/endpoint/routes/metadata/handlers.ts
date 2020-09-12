@@ -11,24 +11,22 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
   HostMetadata,
+  HostMetadataDetails,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
-import {
-  getESQueryHostMetadataByID,
-  kibanaRequestToMetadataListESQuery,
-  metadataQueryConfigV1,
-} from './query_builders';
+import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
-import { EndpointAppContext } from '../../types';
+import {
+  EndpointAppContext,
+  HostListQueryResult,
+  MetadataQueryConfig,
+  MetadataQueryConfigVersions,
+} from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIDsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-
-interface HitSource {
-  _source: HostMetadata;
-}
 
 export interface MetadataRequestContext {
   endpointAppContextService: EndpointAppContextService;
@@ -58,7 +56,8 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
 
 export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
-  logger: Logger
+  logger: Logger,
+  queryConfigVersion: MetadataQueryConfigVersions
 ): RequestHandler<undefined, TypeOf<typeof GetMetadataListRequestSchema.body>, undefined> {
   return async (context, request, response) => {
     try {
@@ -86,10 +85,14 @@ export const getMetadataListRequestHandler = function (
           )
         : undefined;
 
+      const queryConfig: MetadataQueryConfig = endpointAppContext.service
+        ?.getMetadataService()
+        .queryConfig(queryConfigVersion);
+
       const queryParams = await kibanaRequestToMetadataListESQuery(
         request,
         endpointAppContext,
-        endpointAppContext.service?.getMetadataService().queryConfig(),
+        queryConfig,
         {
           unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           statusAgentIDs: statusIDs,
@@ -99,10 +102,10 @@ export const getMetadataListRequestHandler = function (
       const searchResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
         'search',
         queryParams
-      )) as SearchResponse<HostMetadata>;
-
+      )) as SearchResponse<HostMetadata | HostMetadataDetails>;
+      const hostListQueryResult = queryConfig.queryResponseToHostListResult(searchResponse);
       return response.ok({
-        body: await mapToHostResultList(queryParams, searchResponse, metadataRequestContext),
+        body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
       });
     } catch (err) {
       logger.warn(JSON.stringify(err, null, 2));
@@ -113,7 +116,8 @@ export const getMetadataListRequestHandler = function (
 
 export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
-  logger: Logger
+  logger: Logger,
+  queryConfigVersion: MetadataQueryConfigVersions
 ): RequestHandler<undefined, TypeOf<typeof GetMetadataRequestSchema.params>, undefined> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
@@ -128,7 +132,7 @@ export const getMetadataRequestHandler = function (
     };
 
     try {
-      const doc = await getHostData(metadataRequestContext, request.params.id);
+      const doc = await getHostData(metadataRequestContext, request.params.id, queryConfigVersion);
       if (doc) {
         return response.ok({ body: doc });
       }
@@ -148,22 +152,26 @@ export const getMetadataRequestHandler = function (
 
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
-  id: string
+  id: string,
+  queryConfigVersion: MetadataQueryConfigVersions
 ): Promise<HostInfo | undefined> {
-  const query = getESQueryHostMetadataByID(
-    id,
-    metadataRequestContext.endpointAppContextService?.getMetadataService().queryConfig()
-  );
-  const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
-    'search',
-    query
-  )) as SearchResponse<HostMetadata>;
+  const queryConfig: MetadataQueryConfig = metadataRequestContext.endpointAppContextService
+    ?.getMetadataService()
+    .queryConfig(queryConfigVersion);
 
-  if (response.hits.hits.length === 0) {
+  const query = getESQueryHostMetadataByID(id, queryConfig);
+  const hostResult = queryConfig.queryResponseToHostResult(
+    await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
+      'search',
+      query
+    )
+  );
+
+  if (hostResult.resultLength === 0) {
     return undefined;
   }
 
-  const hostMetadata: HostMetadata = response.hits.hits[0]._source;
+  const hostMetadata: HostMetadata = hostResult?.result;
   const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
@@ -203,19 +211,18 @@ async function findAgent(
 export async function mapToHostResultList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<HostMetadata>,
+  hostListQueryResult: HostListQueryResult,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostResultList> {
-  const totalNumberOfHosts = searchResponse?.aggregations?.total?.value || 0;
-  if (searchResponse.hits.hits.length > 0) {
+  const totalNumberOfHosts = hostListQueryResult.resultLength;
+  if (hostListQueryResult.resultList.length > 0) {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
       hosts: await Promise.all(
-        searchResponse.hits.hits
-          .map((response) => response.inner_hits.most_recent.hits.hits)
-          .flatMap((data) => data as HitSource)
-          .map(async (entry) => enrichHostMetadata(entry._source, metadataRequestContext))
+        hostListQueryResult.resultList.map(async (entry) =>
+          enrichHostMetadata(entry, metadataRequestContext)
+        )
       ),
       total: totalNumberOfHosts,
     };
@@ -248,7 +255,7 @@ async function enrichHostMetadata(
 
     const status = await metadataRequestContext.endpointAppContextService
       .getAgentService()
-      .getAgentStatusById(
+      ?.getAgentStatusById(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         elasticAgentId
       );
