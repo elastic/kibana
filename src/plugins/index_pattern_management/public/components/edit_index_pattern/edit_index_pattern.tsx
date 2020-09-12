@@ -123,7 +123,7 @@ export const EditIndexPattern = withRouter(
         if (isConfirmed) {
           // todo catch error as in index_pattern
           await data.indexPatterns.refreshFields(indexPattern);
-          indexPattern.save();
+          data.indexPatterns.save(indexPattern);
           setFields(indexPattern.getNonScriptedFields());
         }
       });
