@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import * as matchSnapshot from '../../common/match_snapshot';
+import { registerMochaHooksForSnapshots } from '../../common/match_snapshot';
 
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (basic)', function () {
-    beforeEach(matchSnapshot.init);
-    afterEach(matchSnapshot.teardown);
+    registerMochaHooksForSnapshots();
 
     this.tags('ciGroup1');
 

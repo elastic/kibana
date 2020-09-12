@@ -6,36 +6,42 @@
 
 import { SnapshotState, toMatchSnapshot, toMatchInlineSnapshot } from 'jest-snapshot';
 import path from 'path';
-import { Context } from 'mocha';
 import expect from '@kbn/expect';
 // @ts-expect-error
 import prettier from 'prettier';
+import { once } from 'lodash';
 // @ts-expect-error
 import babelTraverse from '@babel/traverse';
 
-let testContext: { file: string; testTitle: string } | null = null;
+let testContext: {
+  file: string;
+  testTitle: string;
+  getSnapshotContext: () => SnapshotContext;
+} | null = null;
 interface SnapshotContext {
   snapshotState: InstanceType<typeof SnapshotState>;
 }
 
-export function init() {
-  // @ts-expect-error
-  const mochaContext = this as Context;
-  const file = mochaContext.currentTest?.file;
-  const testTitle = mochaContext.currentTest?.fullTitle();
+export function registerMochaHooksForSnapshots() {
+  beforeEach(function () {
+    const mochaContext = this;
+    const file = mochaContext.currentTest?.file;
+    const testTitle = mochaContext.currentTest?.fullTitle();
 
-  if (!file || !testTitle) {
-    throw new Error(`file or fullTitle not found in Mocha test context`);
-  }
+    if (!file || !testTitle) {
+      throw new Error(`file or fullTitle not found in Mocha test context`);
+    }
 
-  testContext = {
-    file,
-    testTitle,
-  };
-}
+    testContext = {
+      file,
+      testTitle,
+      getSnapshotContext: once(() => getSnapshotContextOrThrow({ file, testTitle })),
+    };
+  });
 
-export function teardown() {
-  testContext = null;
+  afterEach(() => {
+    testContext = null;
+  });
 }
 
 const originalPrepareStackTrace = Error.prepareStackTrace;
@@ -53,13 +59,7 @@ Error.prepareStackTrace = (error, structuredStackTrace) => {
   }
 };
 
-function getSnapshotContextOrThrow() {
-  if (!testContext) {
-    throw new Error('A current Mocha context is needed to match snapshots');
-  }
-
-  const { file, testTitle } = testContext;
-
+function getSnapshotContextOrThrow({ file, testTitle }: { file: string; testTitle: string }) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
@@ -79,7 +79,11 @@ function getSnapshotContextOrThrow() {
 }
 
 export function expectSnapshot(received: any) {
-  const snapshotContext = getSnapshotContextOrThrow();
+  if (!testContext) {
+    throw new Error('A current Mocha context is needed to match snapshots');
+  }
+
+  const snapshotContext = testContext.getSnapshotContext();
 
   return {
     toMatch: expectToMatchSnapshot.bind(snapshotContext, received),
