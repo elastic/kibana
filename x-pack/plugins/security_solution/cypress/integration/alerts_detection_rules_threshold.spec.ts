@@ -5,6 +5,14 @@
  */
 
 import { newThresholdRule } from '../objects/rule';
+import {
+  ALERT_RULE_METHOD,
+  ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_VERSION,
+  NUMBER_OF_ALERTS,
+} from '../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -33,7 +41,7 @@ import {
   INVESTIGATION_NOTES_TOGGLE,
   RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
+  SCHEDULE_LOOKBACK,
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
 } from '../screens/rule_details';
@@ -55,10 +63,12 @@ import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
+  fillScheduleRuleAndContinue,
   selectThresholdRuleType,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -81,6 +91,7 @@ describe('Detection rules, threshold', () => {
     selectThresholdRuleType();
     fillDefineThresholdRuleAndContinue(newThresholdRule);
     fillAboutRuleAndContinue(newThresholdRule);
+    fillScheduleRuleAndContinue(newThresholdRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
@@ -168,7 +179,28 @@ describe('Detection rules, threshold', () => {
         `Results aggregated by ${newThresholdRule.thresholdField} >= ${newThresholdRule.threshold}`
       );
 
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_STEP)
+      .eq(SCHEDULE_RUNS)
+      .invoke('text')
+      .should('eql', `${newThresholdRule.runsEvery.interval}${newThresholdRule.runsEvery.type}`);
+    cy.get(SCHEDULE_STEP)
+      .eq(SCHEDULE_LOOKBACK)
+      .invoke('text')
+      .should('eql', `${newThresholdRule.lookBack.interval}${newThresholdRule.lookBack.type}`);
+
+    refreshPage();
+
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .then((numberOfAlertsText) => {
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.below', 20);
+      });
+    cy.get(ALERT_RULE_NAME).first().should('have.text', newThresholdRule.name);
+    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
+    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');
+    cy.get(ALERT_RULE_SEVERITY)
+      .first()
+      .should('have.text', newThresholdRule.severity.toLowerCase());
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThresholdRule.riskScore);
   });
 });
