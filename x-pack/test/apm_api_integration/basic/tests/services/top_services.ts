@@ -5,40 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import * as t from 'io-ts';
-import { isEmpty } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getValueOrThrow } from '../../../../../plugins/apm/common/utils/get_value_or_throw';
-import archives_metadata from '../../archives_metadata';
-
-const metricType = t.strict({
-  value: t.number,
-  timeseries: t.array(
-    t.type({
-      x: t.number,
-      y: t.union([t.number, t.null]),
-    })
-  ),
-});
-
-const serviceType = t.strict({
-  serviceName: t.string,
-  agentName: t.string,
-  transactionsPerMinute: metricType,
-  avgResponseTime: metricType,
-  // the RUM service will not have transaction error data
-  transactionErrorRate: t.union([metricType, t.undefined]),
-  environments: t.array(t.string),
-  // basic license should not have anomaly scores
-  severity: t.undefined,
-});
-
-const responseType = t.type({
-  items: t.array(serviceType),
-  hasHistoricalData: t.literal(true),
-  hasLegacyData: t.literal(false),
-});
+import archives_metadata from '../../../common/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -82,32 +52,106 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.eql(200);
         });
 
-        it('the response outline matches the shape we expect', () => {
-          expect(() => {
-            getValueOrThrow(responseType, response.body);
-          }).not.throwError();
+        it('returns hasHistoricalData: true', () => {
+          expect(response.body.hasHistoricalData).to.be(true);
+        });
+
+        it('returns hasLegacyData: false', () => {
+          expect(response.body.hasLegacyData).to.be(false);
+        });
+
+        it('returns the correct service names', () => {
+          expect(response.body.items.map((item: any) => item.serviceName)).to.eql([
+            'opbeans-python',
+            'opbeans-node',
+            'opbeans-ruby',
+            'opbeans-go',
+            'opbeans-dotnet',
+            'opbeans-java',
+            'opbeans-rum',
+          ]);
+        });
+
+        it('returns the correct metrics averages', () => {
+          expect(
+            response.body.items.map((item: any) =>
+              pick(
+                item,
+                'transactionErrorRate.value',
+                'avgResponseTime.value',
+                'transactionsPerMinute.value'
+              )
+            )
+          ).to.eql([
+            {
+              transactionErrorRate: { value: 0.041666666666666664 },
+              avgResponseTime: { value: 208079.9121184089 },
+              transactionsPerMinute: { value: 18.016666666666666 },
+            },
+            {
+              transactionErrorRate: { value: 0.03317535545023697 },
+              avgResponseTime: { value: 578297.1431623931 },
+              transactionsPerMinute: { value: 7.8 },
+            },
+            {
+              transactionErrorRate: { value: 0.013123359580052493 },
+              avgResponseTime: { value: 60518.587926509186 },
+              transactionsPerMinute: { value: 6.35 },
+            },
+            {
+              transactionErrorRate: { value: 0.014577259475218658 },
+              avgResponseTime: { value: 25259.78717201166 },
+              transactionsPerMinute: { value: 5.716666666666667 },
+            },
+            {
+              transactionErrorRate: { value: 0.01532567049808429 },
+              avgResponseTime: { value: 527290.3218390804 },
+              transactionsPerMinute: { value: 4.35 },
+            },
+            {
+              transactionErrorRate: { value: 0.15384615384615385 },
+              avgResponseTime: { value: 530245.8571428572 },
+              transactionsPerMinute: { value: 3.033333333333333 },
+            },
+            {
+              avgResponseTime: { value: 896134.328358209 },
+              transactionsPerMinute: { value: 2.2333333333333334 },
+            },
+          ]);
+        });
+
+        it('returns environments', () => {
+          expect(response.body.items.map((item: any) => item.environments ?? [])).to.eql([
+            ['production'],
+            ['testing'],
+            ['production'],
+            ['testing'],
+            ['production'],
+            ['production'],
+            ['testing'],
+          ]);
         });
 
         it(`RUM services don't report any transaction error rates`, () => {
           // RUM transactions don't have event.outcome set,
           // so they should not have an error rate
 
-          const data = getValueOrThrow(responseType, response.body);
-
-          const rumServices = data.items.filter((item) => item.agentName === 'rum-js');
+          const rumServices = response.body.items.filter(
+            (item: any) => item.agentName === 'rum-js'
+          );
 
           expect(rumServices.length).to.be.greaterThan(0);
 
-          expect(rumServices.every((item) => isEmpty(item.transactionErrorRate?.value)));
+          expect(rumServices.every((item: any) => isEmpty(item.transactionErrorRate?.value)));
         });
 
         it('non-RUM services all report transaction error rates', () => {
-          const data = getValueOrThrow(responseType, response.body);
-
-          const nonRumServices = data.items.filter((item) => item.agentName !== 'rum-js');
+          const nonRumServices = response.body.items.filter(
+            (item: any) => item.agentName !== 'rum-js'
+          );
 
           expect(
-            nonRumServices.every((item) => {
+            nonRumServices.every((item: any) => {
               return (
                 typeof item.transactionErrorRate?.value === 'number' &&
                 item.transactionErrorRate.timeseries.length > 0
