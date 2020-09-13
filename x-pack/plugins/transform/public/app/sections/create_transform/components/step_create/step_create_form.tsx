@@ -32,7 +32,7 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
