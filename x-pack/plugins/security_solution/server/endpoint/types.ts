@@ -9,7 +9,11 @@ import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { JsonObject } from '../../../infra/common/typed_json';
 import { metadataCurrentIndexPattern, metadataIndexPattern } from '../../common/endpoint/constants';
-import { HostMetadata, HostMetadataDetails } from '../../common/endpoint/types';
+import {
+  HostMetadata,
+  HostMetadataDetails,
+  MetadataQueryStrategyVersions,
+} from '../../common/endpoint/types';
 
 /**
  * The context for Endpoint apps.
@@ -27,6 +31,7 @@ export interface EndpointAppContext {
 export interface HostListQueryResult {
   resultLength: number;
   resultList: HostMetadata[];
+  queryStrategyVersion: MetadataQueryStrategyVersions;
 }
 
 interface HitSource {
@@ -36,6 +41,7 @@ interface HitSource {
 export interface HostQueryResult {
   resultLength: number;
   result: HostMetadata | undefined;
+  queryStrategyVersion: MetadataQueryStrategyVersions;
 }
 
 export interface MetadataQueryStrategy {
@@ -50,11 +56,6 @@ export interface MetadataQueryStrategy {
   queryResponseToHostResult: (
     searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
   ) => HostQueryResult;
-}
-
-export enum MetadataQueryStrategyVersions {
-  VERSION_1 = 'v1',
-  VERSION_2 = 'v2',
 }
 
 export function metadataQueryStrategyV1(): MetadataQueryStrategy {
@@ -96,6 +97,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
           .map((hit) => hit.inner_hits.most_recent.hits.hits)
           .flatMap((data) => data as HitSource)
           .map((entry) => entry._source),
+        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
       };
     },
     queryResponseToHostResult: (
@@ -105,6 +107,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
       return {
         resultLength: response.hits.hits.length,
         result: response.hits.hits.length > 0 ? response.hits.hits[0]._source : undefined,
+        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
       };
     },
   };
@@ -133,6 +136,7 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
           response.hits.hits.length > 0
             ? response.hits.hits.map((entry) => entry._source.HostDetails)
             : [],
+        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
     queryResponseToHostResult: (
@@ -143,6 +147,7 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
         resultLength: response.hits.hits.length,
         result:
           response.hits.hits.length > 0 ? response.hits.hits[0]._source.HostDetails : undefined,
+        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
   };

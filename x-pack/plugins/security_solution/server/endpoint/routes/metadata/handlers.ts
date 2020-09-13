@@ -12,14 +12,11 @@ import {
   HostMetadata,
   HostResultList,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
-import {
-  EndpointAppContext,
-  HostListQueryResult,
-  MetadataQueryStrategyVersions,
-} from '../../types';
+import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIDsByStatus } from './support/agent_status';
@@ -54,7 +51,7 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
 export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
-  queryStrategyVersion: MetadataQueryStrategyVersions
+  queryStrategyVersion?: MetadataQueryStrategyVersions
 ): RequestHandler<undefined, undefined, TypeOf<typeof GetMetadataListRequestSchema.body>> {
   return async (context, request, response) => {
     try {
@@ -82,9 +79,9 @@ export const getMetadataListRequestHandler = function (
           )
         : undefined;
 
-      const queryStrategy = endpointAppContext.service
+      const queryStrategy = await endpointAppContext.service
         ?.getMetadataService()
-        ?.queryStrategy(queryStrategyVersion);
+        ?.queryStrategy(context.core.savedObjects.client, queryStrategyVersion);
 
       const queryParams = await kibanaRequestToMetadataListESQuery(
         request,
@@ -112,7 +109,7 @@ export const getMetadataListRequestHandler = function (
 export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
-  queryStrategyVersion: MetadataQueryStrategyVersions
+  queryStrategyVersion?: MetadataQueryStrategyVersions
 ): RequestHandler<TypeOf<typeof GetMetadataRequestSchema.params>, undefined, undefined> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
@@ -152,11 +149,14 @@ export const getMetadataRequestHandler = function (
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string,
-  queryStrategyVersion: MetadataQueryStrategyVersions
+  queryStrategyVersion?: MetadataQueryStrategyVersions
 ): Promise<HostInfo | undefined> {
-  const queryStrategy = metadataRequestContext.endpointAppContextService
+  const queryStrategy = await metadataRequestContext.endpointAppContextService
     ?.getMetadataService()
-    ?.queryStrategy(queryStrategyVersion);
+    ?.queryStrategy(
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+      queryStrategyVersion
+    );
 
   const query = getESQueryHostMetadataByID(id, queryStrategy!);
   const hostResult = queryStrategy!.queryResponseToHostResult(
@@ -176,7 +176,12 @@ export async function getHostData(
     throw Boom.badRequest('the requested endpoint is unenrolled');
   }
 
-  return enrichHostMetadata(hostMetadata, metadataRequestContext);
+  const metadata = await enrichHostMetadata(
+    hostMetadata,
+    metadataRequestContext,
+    hostResult.queryStrategyVersion
+  );
+  return { ...metadata, query_strategy_version: hostResult.queryStrategyVersion };
 }
 
 async function findAgent(
@@ -219,10 +224,15 @@ export async function mapToHostResultList(
       request_page_index: queryParams.from,
       hosts: await Promise.all(
         hostListQueryResult.resultList.map(async (entry) =>
-          enrichHostMetadata(entry, metadataRequestContext)
+          enrichHostMetadata(
+            entry,
+            metadataRequestContext,
+            hostListQueryResult.queryStrategyVersion
+          )
         )
       ),
       total: totalNumberOfHosts,
+      query_strategy_version: hostListQueryResult.queryStrategyVersion,
     };
   } else {
     return {
@@ -230,13 +240,15 @@ export async function mapToHostResultList(
       request_page_index: queryParams.from,
       total: totalNumberOfHosts,
       hosts: [],
+      query_strategy_version: hostListQueryResult.queryStrategyVersion,
     };
   }
 }
 
 async function enrichHostMetadata(
   hostMetadata: HostMetadata,
-  metadataRequestContext: MetadataRequestContext
+  metadataRequestContext: MetadataRequestContext,
+  metadataQueryStrategyVersion: MetadataQueryStrategyVersions
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.ERROR;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
@@ -273,5 +285,6 @@ async function enrichHostMetadata(
   return {
     metadata: hostMetadata,
     host_status: hostStatus,
+    query_strategy_version: metadataQueryStrategyVersion,
   };
 }

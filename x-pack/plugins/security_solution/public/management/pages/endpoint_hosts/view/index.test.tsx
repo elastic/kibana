@@ -21,6 +21,7 @@ import {
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -132,6 +133,7 @@ describe('when on the list page', () => {
               hostListData[index] = {
                 metadata: hostListData[index].metadata,
                 host_status: status,
+                query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
               };
             }
           );
@@ -302,6 +304,8 @@ describe('when on the list page', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { host, ...details },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        query_strategy_version,
       } = mockEndpointDetailsApiResult();
 
       hostDetails = {
@@ -313,6 +317,7 @@ describe('when on the list page', () => {
             id: '1',
           },
         },
+        query_strategy_version,
       };
 
       agentId = hostDetails.metadata.elastic.agent.id;

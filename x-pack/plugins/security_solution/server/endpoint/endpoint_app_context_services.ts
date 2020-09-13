@@ -9,22 +9,56 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  PackageService,
+} from '../../../ingest_manager/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
-import {
-  MetadataQueryStrategy,
-  metadataQueryStrategyV1,
-  metadataQueryStrategyV2,
-  MetadataQueryStrategyVersions,
-} from './types';
+import { MetadataQueryStrategy, metadataQueryStrategyV1, metadataQueryStrategyV2 } from './types';
+import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
 
 export interface MetadataService {
-  queryStrategy(version?: MetadataQueryStrategyVersions): MetadataQueryStrategy;
+  queryStrategy(
+    savedObjectsClient: SavedObjectsClientContract,
+    version?: MetadataQueryStrategyVersions
+  ): Promise<MetadataQueryStrategy>;
 }
 
+export const createMetadataService = (packageService: PackageService): MetadataService => {
+  return {
+    async queryStrategy(
+      savedObjectsClient: SavedObjectsClientContract,
+      version?: MetadataQueryStrategyVersions
+    ): Promise<MetadataQueryStrategy> {
+      if (!packageService) {
+        throw new Error('package service is uninitialized');
+      }
+      if (version === MetadataQueryStrategyVersions.VERSION_1) {
+        return metadataQueryStrategyV1();
+      } else if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
+        const assets = await packageService.getInstalledEsAssetReferences(
+          savedObjectsClient,
+          'endpoint'
+        );
+        const expectedTransformAssets = assets.filter(
+          (ref) =>
+            ref.type.toString() === 'transform' &&
+            ref.id.toString().startsWith('metrics-endpoint.metadata-current-default')
+        );
+        if (expectedTransformAssets && expectedTransformAssets.length === 1) {
+          return metadataQueryStrategyV2();
+        }
+        return metadataQueryStrategyV1();
+      }
+      return metadataQueryStrategyV1();
+    },
+  };
+};
+
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService'>
+  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -46,16 +80,7 @@ export class EndpointAppContextService {
     this.agentService = dependencies.agentService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
-    this.metadataService = {
-      queryStrategy(version: MetadataQueryStrategyVersions): MetadataQueryStrategy {
-        if (version === MetadataQueryStrategyVersions.VERSION_1) {
-          return metadataQueryStrategyV1();
-        } else if (version === MetadataQueryStrategyVersions.VERSION_2) {
-          return metadataQueryStrategyV2();
-        }
-        return metadataQueryStrategyV1();
-      },
-    };
+    this.metadataService = createMetadataService(dependencies.packageService!);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(

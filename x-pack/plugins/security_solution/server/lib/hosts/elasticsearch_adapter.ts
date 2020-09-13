@@ -33,7 +33,7 @@ import {
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-import { EndpointAppContext, MetadataQueryStrategyVersions } from '../../endpoint/types';
+import { EndpointAppContext } from '../../endpoint/types';
 import { getHostData } from '../../endpoint/routes/metadata/handlers';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
@@ -122,11 +122,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       };
       const endpointData =
         hostId != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-          ? await getHostData(
-              metadataRequestContext,
-              hostId,
-              MetadataQueryStrategyVersions.VERSION_2
-            )
+          ? await getHostData(metadataRequestContext, hostId)
           : null;
       return endpointData != null && endpointData.metadata
         ? {

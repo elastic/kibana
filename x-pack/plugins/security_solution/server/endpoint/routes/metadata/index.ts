@@ -7,8 +7,8 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
-import { HostStatus } from '../../../../common/endpoint/types';
-import { EndpointAppContext, MetadataQueryStrategyVersions } from '../../types';
+import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/endpoint/types';
+import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
@@ -81,11 +81,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(
-      endpointAppContext,
-      logger,
-      MetadataQueryStrategyVersions.VERSION_2
-    )
+    getMetadataListRequestHandler(endpointAppContext, logger)
   );
 
   router.get(
@@ -103,6 +99,6 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryStrategyVersions.VERSION_2)
+    getMetadataRequestHandler(endpointAppContext, logger)
   );
 }

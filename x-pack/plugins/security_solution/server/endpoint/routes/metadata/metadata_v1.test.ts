@@ -22,20 +22,22 @@ import {
 } from '../../../../../../../src/core/server/mocks';
 import {
   HostInfo,
-  HostMetadata,
   HostResultList,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
-import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes, endpointFilters, METADATA_REQUEST_V1_ROUTE } from './index';
+import { registerEndpointRoutes, METADATA_REQUEST_V1_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
+  createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent } from '../../../../../ingest_manager/common/types/models';
+import { Agent, EsAssetReference } from '../../../../../ingest_manager/common/types/models';
+import { createV1SearchResponse } from './support/test_support';
+import { PackageService } from '../../../../../ingest_manager/server/services';
 
 describe('test endpoint route v1', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -43,6 +45,7 @@ describe('test endpoint route v1', () => {
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,8 +72,11 @@ describe('test endpoint route v1', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
+    mockPackageService = createMockPackageService();
+    const assets: EsAssetReference = [];
+    mockPackageService.getInstalledEsAssetReferences.mockReturnValue(Promise.resolve(assets));
     const startContract = createMockEndpointAppContextServiceStartContract();
-    endpointAppContextService.start(startContract);
+    endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;
 
     registerEndpointRoutes(routerMock, {
@@ -84,7 +90,7 @@ describe('test endpoint route v1', () => {
 
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
-    const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+    const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
@@ -105,6 +111,9 @@ describe('test endpoint route v1', () => {
     expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(0);
     expect(endpointResultList.request_page_size).toEqual(10);
+    expect(endpointResultList.query_strategy_version).toEqual(
+      MetadataQueryStrategyVersions.VERSION_1
+    );
   });
 
   it('test find the latest of all endpoints with paging properties', async () => {
@@ -124,7 +133,7 @@ describe('test endpoint route v1', () => {
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
+      Promise.resolve(createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
@@ -156,6 +165,9 @@ describe('test endpoint route v1', () => {
     expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
+    expect(endpointResultList.query_strategy_version).toEqual(
+      MetadataQueryStrategyVersions.VERSION_1
+    );
   });
 
   it('test find the latest of all endpoints with paging and filters properties', async () => {
@@ -177,7 +189,7 @@ describe('test endpoint route v1', () => {
     mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
     mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve(createSearchResponse(new EndpointDocGenerator().generateHostMetadata()))
+      Promise.resolve(createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata()))
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith(`${METADATA_REQUEST_V1_ROUTE}`)
@@ -231,6 +243,9 @@ describe('test endpoint route v1', () => {
     expect(endpointResultList.total).toEqual(1);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
+    expect(endpointResultList.query_strategy_version).toEqual(
+      MetadataQueryStrategyVersions.VERSION_1
+    );
   });
 
   describe('Endpoint Details route', () => {
@@ -238,7 +253,7 @@ describe('test endpoint route v1', () => {
       const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-        Promise.resolve(createSearchResponse())
+        Promise.resolve(createV1SearchResponse())
       );
 
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
@@ -266,7 +281,7 @@ describe('test endpoint route v1', () => {
     });
 
     it('should return a single endpoint with status online', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
       });
@@ -299,7 +314,7 @@ describe('test endpoint route v1', () => {
     });
 
     it('should return a single endpoint with status error when AgentService throw 404', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -336,7 +351,7 @@ describe('test endpoint route v1', () => {
     });
 
     it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -369,7 +384,7 @@ describe('test endpoint route v1', () => {
     });
 
     it('should throw error when endpoint agent is not active', async () => {
-      const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
+      const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -394,106 +409,3 @@ describe('test endpoint route v1', () => {
     });
   });
 });
-
-describe('Filters Schema Test', () => {
-  it('accepts a single host status', () => {
-    expect(
-      endpointFilters.validate({
-        host_status: ['error'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts multiple host status filters', () => {
-    expect(
-      endpointFilters.validate({
-        host_status: ['offline', 'unenrolling'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('rejects invalid statuses', () => {
-    expect(() =>
-      endpointFilters.validate({
-        host_status: ['foobar'],
-      })
-    ).toThrowError();
-  });
-
-  it('accepts a KQL string', () => {
-    expect(
-      endpointFilters.validate({
-        kql: 'whatever.field',
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts KQL + status', () => {
-    expect(
-      endpointFilters.validate({
-        kql: 'thing.var',
-        host_status: ['online'],
-      })
-    ).toBeTruthy();
-  });
-
-  it('accepts no filters', () => {
-    expect(endpointFilters.validate({})).toBeTruthy();
-  });
-});
-
-function createSearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
-  return ({
-    took: 15,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 5,
-        relation: 'eq',
-      },
-      max_score: null,
-      hits: hostMetadata
-        ? [
-            {
-              _index: 'metrics-endpoint.metadata-default',
-              _id: '8FhM0HEBYyRTvb6lOQnw',
-              _score: null,
-              _source: hostMetadata,
-              sort: [1588337587997],
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    total: {
-                      value: 2,
-                      relation: 'eq',
-                    },
-                    max_score: null,
-                    hits: [
-                      {
-                        _index: 'metrics-endpoint.metadata-default',
-                        _id: 'W6Vo1G8BYQH1gtPUgYkC',
-                        _score: null,
-                        _source: hostMetadata,
-                        sort: [1579816615336],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ]
-        : [],
-    },
-    aggregations: {
-      total: {
-        value: 1,
-      },
-    },
-  } as unknown) as SearchResponse<HostMetadata>;
-}
