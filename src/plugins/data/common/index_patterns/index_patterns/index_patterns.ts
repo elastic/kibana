@@ -137,14 +137,6 @@ export class IndexPatternsService {
     });
   };
 
-  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForTimePattern(options);
-  };
-
-  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForWildcard(options);
-  };
-
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
@@ -193,7 +185,35 @@ export class IndexPatternsService {
     });
   }
 
-  private refreshFields = async (
+  getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    return this.apiClient.getFieldsForWildcard({
+      pattern: options.pattern,
+      metaFields,
+      type: options.type,
+      params: options.params || {},
+    });
+  };
+
+  getFieldsForIndexPattern = async (
+    indexPattern: IndexPattern | IndexPatternSpec,
+    options: GetFieldsOptions = {}
+  ) =>
+    this.getFieldsForWildcard({
+      pattern: indexPattern.title as string,
+      ...options,
+      type: indexPattern.type,
+      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+    });
+
+  // grab fields, grab scripted fields, mash together
+  refreshFields = async (indexPattern: IndexPattern) => {
+    const fields = await this.getFieldsForIndexPattern(indexPattern);
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    indexPattern.fields.replaceAll([...fields, ...scripted]);
+  };
+
+  private refreshFieldSpecArray = async (
     fields: FieldSpec[],
     id: string,
     title: string,
@@ -251,7 +271,7 @@ export class IndexPatternsService {
     let isSaveRequired = isFieldRefreshRequired;
     try {
       parsedFields = isFieldRefreshRequired
-        ? await this.refreshFields(parsedFields, id, title, {
+        ? await this.refreshFieldSpecArray(parsedFields, id, title, {
             pattern: title,
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
@@ -327,9 +347,7 @@ export class IndexPatternsService {
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       fieldFormats: this.fieldFormats,
-      indexPatternsService: this,
       onNotification: this.onNotification,
-      onError: this.onError,
       shortDotsEnable,
       metaFields,
     });
@@ -347,15 +365,13 @@ export class IndexPatternsService {
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       fieldFormats: this.fieldFormats,
-      indexPatternsService: this,
       onNotification: this.onNotification,
-      onError: this.onError,
       shortDotsEnable,
       metaFields,
     });
 
     if (!skipFetchFields) {
-      await indexPattern._fetchFields();
+      await this.refreshFields(indexPattern); // indexPattern._fetchFields();
     }
 
     return indexPattern;

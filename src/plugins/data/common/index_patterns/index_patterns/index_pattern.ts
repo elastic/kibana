@@ -20,8 +20,7 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
-import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
-import { IndexPatternMissingIndices } from '../lib';
+import { DuplicateField } from '../../../../kibana_utils/common';
 
 import {
   ES_FIELD_TYPES,
@@ -34,12 +33,11 @@ import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields'
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { OnNotification, OnError, IIndexPatternsApiClient, IndexPatternAttributes } from '../types';
+import { OnNotification, IIndexPatternsApiClient } from '../types';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
+import { expandShorthand, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
-import { IndexPatternsService } from '..';
 
 const savedObjectType = 'index-pattern';
 
@@ -48,9 +46,7 @@ interface IndexPatternDeps {
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
-  indexPatternsService: IndexPatternsService;
   onNotification: OnNotification;
-  onError: OnError;
   shortDotsEnable: boolean;
   metaFields: string[];
 }
@@ -76,11 +72,9 @@ export class IndexPattern implements IIndexPattern {
   // todo make read  only, update via  method or factor out
   public originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
-  private indexPatternsService: IndexPatternsService;
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
-  private onError: OnError;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -109,26 +103,22 @@ export class IndexPattern implements IIndexPattern {
     savedObjectsClient,
     apiClient,
     fieldFormats,
-    indexPatternsService,
     onNotification,
-    onError,
     shortDotsEnable = false,
     metaFields = [],
   }: IndexPatternDeps) {
     // set dependencies
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
-    this.indexPatternsService = indexPatternsService;
     // set callbacks
     this.onNotification = onNotification;
-    this.onError = onError;
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
     // initialize functionality
     this.fields = fieldList([], this.shortDotsEnable);
 
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
+    this.fieldsFetcher = createFieldsFetcher(apiClient);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
@@ -237,34 +227,6 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  private updateFromElasticSearch(response: any) {
-    if (!response.found) {
-      throw new SavedObjectNotFound(savedObjectType, this.id, 'management/kibana/indexPatterns');
-    }
-
-    _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
-      if (!fieldMapping._deserialize || !name) {
-        return;
-      }
-
-      response[name] = fieldMapping._deserialize(response[name]);
-    });
-
-    this.title = response.title;
-    this.timeFieldName = response.timeFieldName;
-    this.intervalName = response.intervalName;
-    this.sourceFilters = response.sourceFilters;
-    this.fieldFormatMap = response.fieldFormatMap;
-    this.type = response.type;
-    this.typeMeta = response.typeMeta;
-
-    if (!this.title && this.id) {
-      this.title = this.id;
-    }
-    this.version = response.version;
-    this.fields.replaceAll(response.fields);
-  }
-
   getComputedFields() {
     const scriptFields: any = {};
     if (!this.fields) {
@@ -304,41 +266,6 @@ export class IndexPattern implements IIndexPattern {
       scriptFields,
       docvalueFields,
     };
-  }
-
-  // loads saved object
-  // caches object state
-  // deserializes and sets values
-  // todo kill this and updateFromES
-  async init() {
-    if (!this.id) {
-      return this; // no id === no elasticsearch document
-    }
-
-    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
-      savedObjectType,
-      this.id
-    );
-
-    const response = {
-      version: savedObject.version,
-      found: savedObject.version ? true : false,
-      title: savedObject.attributes.title,
-      timeFieldName: savedObject.attributes.timeFieldName,
-      intervalName: savedObject.attributes.intervalName,
-      fields: savedObject.attributes.fields,
-      sourceFilters: savedObject.attributes.sourceFilters,
-      fieldFormatMap: savedObject.attributes.fieldFormatMap,
-      typeMeta: savedObject.attributes.typeMeta,
-      type: savedObject.attributes.type,
-    };
-    // Do this before we attempt to update from ES since that call can potentially perform a save
-    this.originalBody = this.prepBody();
-    await this.updateFromElasticSearch(response);
-    // Do it after to ensure we have the most up to date information
-    this.originalBody = this.prepBody();
-
-    return this;
   }
 
   public toSpec(): IndexPatternSpec {
@@ -489,6 +416,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   // kill
+  /*
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
@@ -502,40 +430,5 @@ export class IndexPattern implements IIndexPattern {
       }
     }
   }
-
-  // kill
-  refreshFields() {
-    return (
-      this._fetchFields()
-        // todo
-        .then(() => this.indexPatternsService.save(this))
-        .catch((err) => {
-          // https://github.com/elastic/kibana/issues/9224
-          // This call will attempt to remap fields from the matching
-          // ES index which may not actually exist. In that scenario,
-          // we still want to notify the user that there is a problem
-          // but we do not want to potentially make any pages unusable
-          // so do not rethrow the error here
-
-          if (err instanceof IndexPatternMissingIndices) {
-            this.onNotification({
-              title: (err as any).message,
-              color: 'danger',
-              iconType: 'alert',
-            });
-            return [];
-          }
-
-          this.onError(err, {
-            title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-              defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-              values: {
-                id: this.id,
-                title: this.title,
-              },
-            }),
-          });
-        })
-    );
-  }
+  */
 }

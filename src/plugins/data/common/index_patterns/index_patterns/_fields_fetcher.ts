@@ -17,27 +17,15 @@
  * under the License.
  */
 
-import { IndexPattern } from '.';
 import { GetFieldsOptions, IIndexPatternsApiClient } from '../types';
 
 /** @internal */
-export const createFieldsFetcher = (
-  indexPattern: IndexPattern,
-  apiClient: IIndexPatternsApiClient,
-  metaFields: string[] = []
-) => {
+export const createFieldsFetcher = (apiClient: IIndexPatternsApiClient) => {
   const fieldFetcher = {
-    fetch: (options: GetFieldsOptions) => {
-      return fieldFetcher.fetchForWildcard(indexPattern.title, {
-        ...options,
-        type: indexPattern.type,
-        params: indexPattern.typeMeta && indexPattern.typeMeta.params,
-      });
-    },
     fetchForWildcard: (pattern: string, options: GetFieldsOptions = {}) => {
       return apiClient.getFieldsForWildcard({
         pattern,
-        metaFields,
+        metaFields: options.metaFields,
         type: options.type,
         params: options.params || {},
       });
