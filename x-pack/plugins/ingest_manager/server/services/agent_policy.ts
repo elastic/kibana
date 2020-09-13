@@ -398,7 +398,7 @@ class AgentPolicyService {
     const packages = policy.inputs.reduce<string[]>((acc, input) => {
       const packageName = input.meta?.package?.name;
       if (packageName && acc.indexOf(packageName) < 0) {
-        return [packageName, ...acc];
+        acc.push(packageName);
       }
       return acc;
     }, []);

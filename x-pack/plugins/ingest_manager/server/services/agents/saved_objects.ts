@@ -51,7 +51,7 @@ export function savedObjectToAgentAction(
   }
 
   // If it's an AgentPolicyAction
-  if (so.attributes.policy_id !== undefined && so.attributes.policy_revision !== undefined) {
+  if (isPolicyActionSavedObject(so)) {
     return {
       id: so.id,
       type: so.attributes.type,
@@ -63,7 +63,7 @@ export function savedObjectToAgentAction(
     };
   }
 
-  if (so.attributes.agent_id === undefined) {
+  if (!isAgentActionSavedObject(so)) {
     throw new Error(`Malformed saved object AgentAction ${so.id}`);
   }
 
@@ -76,4 +76,16 @@ export function savedObjectToAgentAction(
     data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
     ack_data: so.attributes.ack_data ? JSON.parse(so.attributes.ack_data) : undefined,
   };
+}
+
+export function isAgentActionSavedObject(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): so is SavedObject<AgentActionSOAttributes> {
+  return (so.attributes as AgentActionSOAttributes).agent_id !== undefined;
+}
+
+export function isPolicyActionSavedObject(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): so is SavedObject<AgentPolicyActionSOAttributes> {
+  return (so.attributes as AgentPolicyActionSOAttributes).policy_id !== undefined;
 }

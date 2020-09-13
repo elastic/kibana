@@ -29,7 +29,7 @@ export interface NewAgentAction {
   sent_at?: string;
 }
 
-export interface AgentAction {
+export interface AgentAction extends NewAgentAction {
   type: AgentActionType;
   data?: any;
   sent_at?: string;
@@ -39,7 +39,7 @@ export interface AgentAction {
   ack_data?: any;
 }
 
-export interface AgentPolicyAction {
+export interface AgentPolicyAction extends NewAgentAction {
   id: string;
   type: AgentActionType;
   data?: any;
@@ -58,12 +58,6 @@ interface CommonAgentActionSOAttributes {
   ack_data?: string;
 }
 
-export type BaseAgentActionSOAttributes = CommonAgentActionSOAttributes & {
-  agent_id?: string;
-  policy_id?: string;
-  policy_revision?: number;
-};
-
 export type AgentActionSOAttributes = CommonAgentActionSOAttributes & {
   agent_id: string;
 };
@@ -71,6 +65,8 @@ export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
   policy_id: string;
   policy_revision: number;
 };
+
+export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
 export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';

@@ -175,7 +175,7 @@ export function agentCheckinStateNewActionsFactory() {
         if (!data) {
           return;
         }
-        const newActions = data.filter((action) => action.agent_id);
+        const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
           return;
         }

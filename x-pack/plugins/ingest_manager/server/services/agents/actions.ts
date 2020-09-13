@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import {
   Agent,
   AgentAction,
@@ -14,7 +14,11 @@ import {
   AgentPolicyActionSOAttributes,
 } from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { savedObjectToAgentAction } from './saved_objects';
+import {
+  isAgentActionSavedObject,
+  isPolicyActionSavedObject,
+  savedObjectToAgentAction,
+} from './saved_objects';
 import { appContextService } from '../app_context';
 import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
@@ -49,13 +53,18 @@ async function createAction(
     ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
   });
 
-  const agentAction =
-    so.attributes.agent_id !== undefined
-      ? savedObjectToAgentAction(so as SavedObject<AgentActionSOAttributes>)
-      : savedObjectToAgentAction(so as SavedObject<AgentPolicyActionSOAttributes>);
-  agentAction.data = newAgentAction.data;
+  if (isAgentActionSavedObject(so)) {
+    const agentAction = savedObjectToAgentAction(so);
+    agentAction.data = newAgentAction.data;
 
-  return agentAction;
+    return agentAction;
+  } else if (isPolicyActionSavedObject(so)) {
+    const agentAction = savedObjectToAgentAction(so);
+    agentAction.data = newAgentAction.data;
+
+    return agentAction;
+  }
+  throw new Error('Invalid action');
 }
 
 export async function getAgentActionsForCheckin(
@@ -163,12 +172,6 @@ export async function getAgentPolicyActionByIds(
   );
 }
 
-function isAgentActionSavedObject(
-  so: SavedObject<BaseAgentActionSOAttributes>
-): so is SavedObject<AgentActionSOAttributes> {
-  return so.attributes.agent_id !== undefined;
-}
-
 export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
@@ -194,7 +197,7 @@ export async function getNewActionsSince(soClient: SavedObjectsClientContract, t
 
   return res.saved_objects
     .filter(isAgentActionSavedObject)
-    .map((so) => savedObjectToAgentAction(so as SavedObject<AgentActionSOAttributes>));
+    .map((so) => savedObjectToAgentAction(so));
 }
 
 export async function getLatestConfigChangeAction(
