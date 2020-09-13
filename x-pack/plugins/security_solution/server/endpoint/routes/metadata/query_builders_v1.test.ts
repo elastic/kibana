@@ -80,8 +80,6 @@ describe('query builder v1', () => {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
-        // eslint-disable-next-line no-console
-        console.log(JSON.stringify(query));
         expect(query).toEqual({
           body: {
             query: {

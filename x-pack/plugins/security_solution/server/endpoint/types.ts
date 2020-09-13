@@ -8,7 +8,6 @@ import { SearchResponse } from 'elasticsearch';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { JsonObject } from '../../../infra/common/typed_json';
-import { metadataCurrentIndexPattern, metadataIndexPattern } from '../../common/endpoint/constants';
 import {
   HostMetadata,
   HostMetadataDetails,
@@ -56,99 +55,4 @@ export interface MetadataQueryStrategy {
   queryResponseToHostResult: (
     searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
   ) => HostQueryResult;
-}
-
-export function metadataQueryStrategyV1(): MetadataQueryStrategy {
-  return {
-    index: metadataIndexPattern,
-    elasticAgentIdProperty: 'elastic.agent.id',
-    hostIdProperty: 'host.id',
-    sortProperty: [
-      {
-        'event.created': {
-          order: 'desc',
-        },
-      },
-    ],
-    extraBodyProperties: {
-      collapse: {
-        field: 'host.id',
-        inner_hits: {
-          name: 'most_recent',
-          size: 1,
-          sort: [{ 'event.created': 'desc' }],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'host.id',
-          },
-        },
-      },
-    },
-    queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostListQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadata>;
-      return {
-        resultLength: response?.aggregations?.total?.value || 0,
-        resultList: response.hits.hits
-          .map((hit) => hit.inner_hits.most_recent.hits.hits)
-          .flatMap((data) => data as HitSource)
-          .map((entry) => entry._source),
-        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
-      };
-    },
-    queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadata>;
-      return {
-        resultLength: response.hits.hits.length,
-        result: response.hits.hits.length > 0 ? response.hits.hits[0]._source : undefined,
-        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
-      };
-    },
-  };
-}
-
-export function metadataQueryStrategyV2(): MetadataQueryStrategy {
-  return {
-    index: metadataCurrentIndexPattern,
-    elasticAgentIdProperty: 'HostDetails.elastic.agent.id',
-    hostIdProperty: 'HostDetails.host.id',
-    sortProperty: [
-      {
-        'HostDetails.event.created': {
-          order: 'desc',
-        },
-      },
-    ],
-    queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostListQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
-      return {
-        resultLength:
-          ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
-        resultList:
-          response.hits.hits.length > 0
-            ? response.hits.hits.map((entry) => entry._source.HostDetails)
-            : [],
-        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
-      };
-    },
-    queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
-      return {
-        resultLength: response.hits.hits.length,
-        result:
-          response.hits.hits.length > 0 ? response.hits.hits[0]._source.HostDetails : undefined,
-        queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
-      };
-    },
-  };
 }

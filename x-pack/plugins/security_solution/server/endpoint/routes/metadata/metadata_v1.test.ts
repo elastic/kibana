@@ -73,8 +73,9 @@ describe('test endpoint route v1', () => {
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
     mockPackageService = createMockPackageService();
-    const assets: EsAssetReference[] = [];
-    mockPackageService.getInstalledEsAssetReferences.mockReturnValue(Promise.resolve(assets));
+    mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
+      Promise.resolve(([] as unknown) as EsAssetReference[])
+    );
     const startContract = createMockEndpointAppContextServiceStartContract();
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;

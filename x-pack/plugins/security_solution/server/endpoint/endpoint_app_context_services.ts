@@ -16,8 +16,12 @@ import {
 } from '../../../ingest_manager/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
-import { MetadataQueryStrategy, metadataQueryStrategyV1, metadataQueryStrategyV2 } from './types';
+import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
+import {
+  metadataQueryStrategyV1,
+  metadataQueryStrategyV2,
+} from './routes/metadata/support/query_strategies';
 
 export interface MetadataService {
   queryStrategy(
