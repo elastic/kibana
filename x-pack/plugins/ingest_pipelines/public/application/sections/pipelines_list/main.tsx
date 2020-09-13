@@ -51,7 +51,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
-  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
+  const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
   // Track component loaded
   useEffect(() => {
@@ -98,7 +98,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   } else if (data?.length) {
     content = (
       <PipelineTable
-        onReloadClick={sendRequest}
+        onReloadClick={resendRequest}
         onEditPipelineClick={goToEditPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
@@ -182,7 +182,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
                   defaultMessage="Unable to load pipelines. {reloadLink}"
                   values={{
                     reloadLink: (
-                      <EuiLink onClick={sendRequest}>
+                      <EuiLink onClick={resendRequest}>
                         <FormattedMessage
                           id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
                           defaultMessage="Try again."
@@ -204,7 +204,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedPipelines) {
               // reload pipelines list
-              sendRequest();
+              resendRequest();
               setSelectedPipeline(undefined);
               goHome();
             }

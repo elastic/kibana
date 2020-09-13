@@ -12,6 +12,10 @@ function sortTransactionGroups(items: any[]) {
   return sortBy(items, 'impact');
 }
 
+function omitSampleFromTransactionGroups(items: any[]) {
+  return sortTransactionGroups(items).map(({ sample, ...item }) => ({ ...item }));
+}
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -53,9 +57,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct buckets (when ignoring samples)', async () => {
-        expect(sortTransactionGroups(response.body.items)).to.eql(
-          sortTransactionGroups(expectedTransactionGroups.items)
+        expect(omitSampleFromTransactionGroups(response.body.items)).to.eql(
+          omitSampleFromTransactionGroups(expectedTransactionGroups.items)
         );
+      });
+
+      it('returns the correct buckets and samples', async () => {
+        // sample should provide enough information to deeplink to a transaction detail page
+        response.body.items.forEach((item: any) => {
+          expect(item.sample.trace.id).to.be.an('string');
+          expect(item.sample.transaction.id).to.be.an('string');
+          expect(item.sample.service.name).to.be('opbeans-node');
+          expect(item.sample.transaction.name).to.be(item.key);
+        });
       });
     });
   });

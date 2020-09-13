@@ -19,7 +19,14 @@
 
 export * from './expressions';
 
-export { ISearch, ISearchGeneric, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
+export {
+  ISearch,
+  ISearchGeneric,
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
+  SearchEnhancements,
+} from './types';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 

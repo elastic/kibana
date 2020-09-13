@@ -49,22 +49,6 @@ export default () =>
 
     csp: HANDLED_IN_NEW_PLATFORM,
 
-    cpu: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
-
-    cpuacct: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
-
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
       // keep them for BWC, remove when not used in Legacy.
@@ -144,6 +128,10 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
+      cGroupOverrides: Joi.object().keys({
+        cpuPath: Joi.string().default(),
+        cpuAcctPath: Joi.string().default(),
+      }),
     }).default(),
 
     plugins: Joi.object({
