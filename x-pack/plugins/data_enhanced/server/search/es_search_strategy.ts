@@ -7,6 +7,7 @@
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { SharedGlobalConfig, RequestHandlerContext, Logger } from '../../../../../src/core/server';
 import {
   getTotalLoaded,
@@ -72,7 +73,7 @@ export const enhancedEsSearchStrategyProvider = (
     request: IEnhancedEsSearchRequest,
     options?: ISearchOptions
   ): Promise<IEsSearchResponse> {
-    let promise;
+    let promise: TransportRequestPromise<any>;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const uiSettingsClient = await context.core.uiSettings.client;
 
