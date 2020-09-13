@@ -66,16 +66,19 @@ describe('test endpoint route', () => {
     perPage: 1,
   };
 
+  beforeEach(() => {
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
+      ILegacyClusterClient
+    >;
+    mockSavedObjectClient = savedObjectsClientMock.create();
+    mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
+    routerMock = httpServiceMock.createRouter();
+    mockResponse = httpServerMock.createResponseFactory();
+  });
+
   describe('with no transform package', () => {
     beforeEach(() => {
-      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
-        ILegacyClusterClient
-      >;
-      mockSavedObjectClient = savedObjectsClientMock.create();
-      mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
-      routerMock = httpServiceMock.createRouter();
-      mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
       const startContract = createMockEndpointAppContextServiceStartContract();
       mockPackageService = createMockPackageService();
@@ -162,14 +165,6 @@ describe('test endpoint route', () => {
 
   describe('with new transform package', () => {
     beforeEach(() => {
-      mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
-        ILegacyClusterClient
-      >;
-      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockSavedObjectClient = savedObjectsClientMock.create();
-      mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
-      routerMock = httpServiceMock.createRouter();
-      mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
       const startContract = createMockEndpointAppContextServiceStartContract();
       mockPackageService = createMockPackageService();

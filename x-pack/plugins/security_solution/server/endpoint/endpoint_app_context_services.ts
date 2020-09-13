@@ -23,6 +23,7 @@ import {
   metadataQueryStrategyV2,
 } from './routes/metadata/support/query_strategies';
 import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
+import { metadataTransformPrefix } from '../../common/endpoint/constants';
 
 export interface MetadataService {
   queryStrategy(
@@ -37,12 +38,14 @@ export const createMetadataService = (packageService: PackageService): MetadataS
       savedObjectsClient: SavedObjectsClientContract,
       version?: MetadataQueryStrategyVersions
     ): Promise<MetadataQueryStrategy> {
+      if (version === MetadataQueryStrategyVersions.VERSION_1) {
+        return metadataQueryStrategyV1();
+      }
       if (!packageService) {
         throw new Error('package service is uninitialized');
       }
-      if (version === MetadataQueryStrategyVersions.VERSION_1) {
-        return metadataQueryStrategyV1();
-      } else if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
+
+      if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
         const assets = await packageService.getInstalledEsAssetReferences(
           savedObjectsClient,
           'endpoint'
@@ -50,7 +53,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
         const expectedTransformAssets = assets.filter(
           (ref) =>
             ref.type === ElasticsearchAssetType.transform &&
-            ref.id.toString().startsWith('metrics-endpoint.metadata-current-default')
+            ref.id.toString().startsWith(metadataTransformPrefix)
         );
         if (expectedTransformAssets && expectedTransformAssets.length === 1) {
           return metadataQueryStrategyV2();
