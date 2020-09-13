@@ -89,8 +89,8 @@ const severityOverride1: SeverityOverride = {
 };
 
 const severityOverride2: SeverityOverride = {
-  sourceField: 'agent.type',
-  sourceValue: 'endpoint',
+  sourceField: '@timestamp',
+  sourceValue: '10/02/2020',
 };
 
 const severityOverride3: SeverityOverride = {
@@ -99,8 +99,8 @@ const severityOverride3: SeverityOverride = {
 };
 
 const severityOverride4: SeverityOverride = {
-  sourceField: '@timestamp',
-  sourceValue: '10/02/2020',
+  sourceField: 'agent.type',
+  sourceValue: 'auditbeat',
 };
 
 const runsEvery: Interval = {

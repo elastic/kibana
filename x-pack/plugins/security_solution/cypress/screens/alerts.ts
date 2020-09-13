@@ -10,6 +10,8 @@ export const ALERT_CHECKBOX = '[data-test-subj="select-event-container"] .euiChe
 
 export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
 
+export const ALERT_RISK_SCORE_HEADER = '[data-test-subj="header-text-signal.rule.risk_score"]';
+
 export const ALERT_RULE_METHOD = '[data-test-subj="draggable-content-signal.rule.type"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="draggable-content-signal.rule.name"]';

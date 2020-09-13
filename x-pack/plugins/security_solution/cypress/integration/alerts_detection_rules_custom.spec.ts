@@ -8,6 +8,7 @@ import { newRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
@@ -200,9 +201,7 @@ describe('Detection rules, custom', () => {
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', newRule.severity.toLowerCase());
-    cy.get('[data-test-subj="draggable-content-signal.rule.risk_score"]')
-      .first()
-      .should('have.text', newRule.riskScore);
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newRule.riskScore);
   });
 });
 
