@@ -30,7 +30,7 @@ import {
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
+  SCHEDULE_LOOKBACK,
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
   RULE_TYPE,
@@ -156,6 +156,6 @@ describe('Detection rules, machine learning', () => {
     cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
 
     cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOKBACK).invoke('text').should('eql', '1m');
   });
 });
