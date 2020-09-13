@@ -35,7 +35,11 @@ import {
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent, ElasticsearchAssetType, EsAssetReference } from '../../../../../ingest_manager/common/types/models';
+import {
+  Agent,
+  ElasticsearchAssetType,
+  EsAssetReference,
+} from '../../../../../ingest_manager/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../ingest_manager/server/services';
 
