@@ -18,6 +18,7 @@ import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 import { CoreVitals } from './CoreVitals';
+import { ImpactfulMetrics } from './ImpactfulMetrics';
 
 export function RumDashboard() {
   return (
@@ -69,6 +70,9 @@ export function RumDashboard() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ImpactfulMetrics />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
