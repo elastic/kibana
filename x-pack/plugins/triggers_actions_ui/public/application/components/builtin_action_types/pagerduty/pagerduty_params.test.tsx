@@ -22,6 +22,7 @@ describe('PagerDutyParamsFields renders', () => {
       group: 'group',
       class: 'test class',
     };
+
     const wrapper = mountWithIntl(
       <PagerDutyParamsFields
         actionParams={actionParams}
