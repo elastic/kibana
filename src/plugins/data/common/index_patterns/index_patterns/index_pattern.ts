@@ -30,10 +30,9 @@ import {
   FieldFormatNotFoundError,
 } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
-import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { OnNotification, IIndexPatternsApiClient } from '../types';
+import { OnNotification } from '../types';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { expandShorthand, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
@@ -44,7 +43,6 @@ const savedObjectType = 'index-pattern';
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
   savedObjectsClient: SavedObjectsClientCommon;
-  apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   shortDotsEnable: boolean;
@@ -71,7 +69,6 @@ export class IndexPattern implements IIndexPattern {
   public sourceFilters?: SourceFilter[];
   // todo make read  only, update via  method or factor out
   public originalBody: { [key: string]: any } = {};
-  public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
@@ -101,7 +98,6 @@ export class IndexPattern implements IIndexPattern {
   constructor({
     spec = {},
     savedObjectsClient,
-    apiClient,
     fieldFormats,
     onNotification,
     shortDotsEnable = false,
@@ -118,7 +114,6 @@ export class IndexPattern implements IIndexPattern {
     // initialize functionality
     this.fields = fieldList([], this.shortDotsEnable);
 
-    this.fieldsFetcher = createFieldsFetcher(apiClient);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
@@ -414,21 +409,4 @@ export class IndexPattern implements IIndexPattern {
       )
     );
   }
-
-  // kill
-  /*
-  async _fetchFields() {
-    const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields().map((field) => field.spec);
-    try {
-      this.fields.replaceAll([...fields, ...scripted]);
-    } catch (err) {
-      if (err instanceof FieldTypeUnknownError) {
-        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
-      } else {
-        throw err;
-      }
-    }
-  }
-  */
 }

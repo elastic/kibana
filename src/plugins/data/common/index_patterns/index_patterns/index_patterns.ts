@@ -345,7 +345,6 @@ export class IndexPatternsService {
     const indexPattern = new IndexPattern({
       spec,
       savedObjectsClient: this.savedObjectsClient,
-      apiClient: this.apiClient,
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       shortDotsEnable,
@@ -363,7 +362,6 @@ export class IndexPatternsService {
     const indexPattern = new IndexPattern({
       spec,
       savedObjectsClient: this.savedObjectsClient,
-      apiClient: this.apiClient,
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       shortDotsEnable,
