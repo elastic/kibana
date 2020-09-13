@@ -33,7 +33,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       ),
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
-      requiresAppContext: false,
+      requiresAppContext: true,
     };
   });
 }

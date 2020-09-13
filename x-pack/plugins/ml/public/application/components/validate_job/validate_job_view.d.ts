@@ -8,7 +8,7 @@ import { FC } from 'react';
 declare const ValidateJob: FC<{
   getJobConfig: any;
   getDuration: any;
-  mlJobService: any;
+  ml: any;
   embedded?: boolean;
   setIsValid?: (valid: boolean) => void;
   idFilterList?: string[];

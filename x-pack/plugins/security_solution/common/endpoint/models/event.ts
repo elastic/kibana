@@ -9,7 +9,7 @@ import {
   SafeResolverEvent,
   SafeLegacyEndpointEvent,
 } from '../types';
-import { firstNonNullValue } from './ecs_safety_helpers';
+import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
 /*
  * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
@@ -27,32 +27,24 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessRunning(event: ResolverEvent): boolean {
-  if (isLegacyEvent(event)) {
+export function isProcessRunning(event: SafeResolverEvent): boolean {
+  if (isLegacyEventSafeVersion(event)) {
     return (
-      event.event?.type === 'process_start' ||
-      event.event?.action === 'fork_event' ||
-      event.event?.type === 'already_running'
-    );
-  }
-
-  if (Array.isArray(event.event.type)) {
-    return (
-      event.event.type.includes('start') ||
-      event.event.type.includes('change') ||
-      event.event.type.includes('info')
+      hasValue(event.event?.type, 'process_start') ||
+      hasValue(event.event?.action, 'fork_event') ||
+      hasValue(event.event?.type, 'already_running')
     );
   }
 
   return (
-    event.event.type === 'start' || event.event.type === 'change' || event.event.type === 'info'
+    hasValue(event.event?.type, 'start') ||
+    hasValue(event.event?.type, 'change') ||
+    hasValue(event.event?.type, 'info')
   );
 }
 
-export function timestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
-  return isLegacyEventSafeVersion(event)
-    ? firstNonNullValue(event.endgame?.timestamp_utc)
-    : firstNonNullValue(event?.['@timestamp']);
+export function timestampSafeVersion(event: SafeResolverEvent): undefined | number {
+  return firstNonNullValue(event?.['@timestamp']);
 }
 
 /**
@@ -75,11 +67,7 @@ export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | und
 }
 
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
-  if (isLegacyEvent(event)) {
-    return event.endgame.timestamp_utc;
-  } else {
-    return event['@timestamp'];
-  }
+  return event['@timestamp'];
 }
 
 export function eventName(event: ResolverEvent): string {
@@ -105,14 +93,7 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
-export function eventSequence(event: ResolverEvent): number | undefined {
-  if (isLegacyEvent(event)) {
-    return firstNonNullValue(event.endgame.serial_event_id);
-  }
-  return firstNonNullValue(event.event?.sequence);
-}
-
-export function eventSequenceSafeVersion(event: SafeResolverEvent): number | undefined {
+export function eventSequence(event: SafeResolverEvent): number | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return firstNonNullValue(event.endgame.serial_event_id);
   }
@@ -156,16 +137,16 @@ export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | un
   return firstNonNullValue(event.process?.parent?.entity_id);
 }
 
-export function ancestryArray(event: ResolverEvent): string[] | undefined {
-  if (isLegacyEvent(event)) {
+export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
+  if (isLegacyEventSafeVersion(event)) {
     return undefined;
   }
   // this is to guard against the endpoint accidentally not sending the ancestry array
   // otherwise the request will fail when really we should just try using the parent entity id
-  return event.process.Ext?.ancestry;
+  return values(event.process?.Ext?.ancestry);
 }
 
-export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
+export function getAncestryAsArray(event: SafeResolverEvent | undefined): string[] {
   if (!event) {
     return [];
   }
@@ -175,7 +156,7 @@ export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
     return ancestors;
   }
 
-  const parentID = parentEntityId(event);
+  const parentID = parentEntityIDSafeVersion(event);
   if (parentID) {
     return [parentID];
   }

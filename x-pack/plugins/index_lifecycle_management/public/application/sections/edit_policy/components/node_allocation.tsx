@@ -52,7 +52,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
   phaseData,
   isShowingErrors,
 }: React.PropsWithChildren<Props<T>>) => {
-  const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
+  const { isLoading, data: nodes, error, resendRequest } = useLoadNodes();
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
@@ -84,7 +84,7 @@ export const NodeAllocation = <T extends PhaseWithAllocationAction>({
           <p>
             {message} ({statusCode})
           </p>
-          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
               defaultMessage="Try again"
