@@ -48,29 +48,5 @@ export const createUsageCollector = (
         SEARCH_EVENT_TYPE.QUERIES_CANCELLED
       );
     },
-    trackLongQueryPopupShown: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.LONG_QUERY_POPUP_SHOWN
-      );
-    },
-    trackLongQueryDialogDismissed: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.CLICK,
-        SEARCH_EVENT_TYPE.LONG_QUERY_DIALOG_DISMISSED
-      );
-    },
-    trackLongQueryRunBeyondTimeout: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.CLICK,
-        SEARCH_EVENT_TYPE.LONG_QUERY_RUN_BEYOND_TIMEOUT
-      );
-    },
   };
 };
