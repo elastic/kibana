@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
+import Boom from 'boom';
+import { EsErrorBody } from '../util/errors';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
-  error?: CustomHttpResponseOptions<ResponseError>;
+  error?: EsErrorBody | Boom;
 }
 
 export type IndexName = string;
@@ -78,4 +79,10 @@ export interface DataFrameAnalyticsConfig {
   create_time: number;
   version: string;
   allow_lazy_start?: boolean;
+}
+
+export enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
 }

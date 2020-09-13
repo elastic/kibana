@@ -267,6 +267,10 @@ describe('Flyout', () => {
 
       expect(component.state('status')).toBe('success');
       expect(component.find('EuiFlyout ImportSummary')).toMatchSnapshot();
+      const cancelButton = await component.find(
+        'EuiButtonEmpty[data-test-subj="importSavedObjectsCancelBtn"]'
+      );
+      expect(cancelButton.prop('disabled')).toBe(true);
     });
   });
 

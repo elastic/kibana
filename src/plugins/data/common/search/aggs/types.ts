@@ -93,7 +93,7 @@ export interface AggsCommonStart {
  * is only used internally. The difference is that AggsStart includes the
  * typings for the registry with initialized agg types.
  *
- * @internal
+ * @public
  */
 export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }>;
 
