@@ -405,6 +405,10 @@ It will query the list of all incomplete sessions, and check the status of each 
 
 Once there's a notification area in Kibana, we may use that mechanism to push completion \ error notifications to the client.
 
+### Feature Controls
+
+Background sessions as a feature will be enabled/disabled per role/space by an admin. When set to "all", the feature will be available in its entirety, and when set to "read" or "none", the feature will be unavailable (i.e. search requests will only continue to run while a user waits on page, with no way to continue requests in the background).
+
 ## Miscellaneous
 
 #### Relative dates and restore URLs
@@ -449,7 +453,9 @@ background expressions in the background session service.
 # Drawbacks
 
 One drawback of this approach is that we will be regularly polling Elasticsearch for saved objects, which will increase
-load on the Elasticsearch server. Whether or not this is significant is something that should be investigated.
+load on the Elasticsearch server, in addition to the Kibana server (since all server-side processes share the same event
+loop). We've opened https://github.com/elastic/kibana/issues/77293 to track this, and hopefully come up with benchmarks
+so we feel comfortable moving forward with this approach.
 
 Two potential drawbacks stem from storing things in server memory. If a Kibana server is restarted, in-memory results
 will be lost. (This can be an issue if a search request has started, and the user has sent to background, but the
