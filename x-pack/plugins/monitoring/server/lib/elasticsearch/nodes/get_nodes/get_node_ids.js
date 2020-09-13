@@ -19,6 +19,7 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
     filterPath: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
+        type: 'node_stats',
         start,
         end,
         metric: ElasticsearchMetric.getMetricFields(),

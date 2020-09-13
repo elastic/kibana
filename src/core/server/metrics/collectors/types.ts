@@ -85,6 +85,33 @@ export interface OpsOsMetrics {
   };
   /** the OS uptime */
   uptime_in_millis: number;
+
+  /** cpu accounting metrics, undefined when not running in a cgroup */
+  cpuacct?: {
+    /** name of this process's cgroup */
+    control_group: string;
+    /** cpu time used by this process's cgroup */
+    usage_nanos: number;
+  };
+
+  /** cpu cgroup metrics, undefined when not running in a cgroup */
+  cpu?: {
+    /** name of this process's cgroup */
+    control_group: string;
+    /** the length of the cfs period */
+    cfs_period_micros: number;
+    /** total available run-time within a cfs period */
+    cfs_quota_micros: number;
+    /** current stats on the cfs periods */
+    stat: {
+      /** number of cfs periods that elapsed */
+      number_of_elapsed_periods: number;
+      /** number of times the cgroup has been throttled */
+      number_of_times_throttled: number;
+      /** total amount of time the cgroup has been throttled for */
+      time_throttled_nanos: number;
+    };
+  };
 }
 
 /**

@@ -82,8 +82,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   } else {
     tableType =
       flowTargeted === FlowTargetSourceDest.source
-        ? networkModel.IpDetailsTableType.topNFlowSource
-        : networkModel.IpDetailsTableType.topNFlowDestination;
+        ? networkModel.NetworkDetailsTableType.topNFlowSource
+        : networkModel.NetworkDetailsTableType.topNFlowDestination;
   }
 
   const onChange = useCallback(

@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { getNavigateToApp } from '../../../kibana_services';
-// @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
 
 export const unsavedChangesWarning = i18n.translate(
@@ -25,7 +24,7 @@ export function getBreadcrumbs({
   title: string;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
-  getAppNameFromId?: (id: string) => string;
+  getAppNameFromId?: (id: string) => string | undefined;
 }) {
   const breadcrumbs = [];
   if (originatingApp && getAppNameFromId) {

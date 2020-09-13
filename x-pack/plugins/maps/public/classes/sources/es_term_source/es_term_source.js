@@ -129,10 +129,6 @@ export class ESTermSource extends AbstractESAggSource {
     return `es_table ${this.getIndexPatternId()}`;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
-
   getFieldNames() {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
