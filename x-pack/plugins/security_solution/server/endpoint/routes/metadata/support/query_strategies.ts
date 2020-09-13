@@ -15,6 +15,10 @@ import {
 } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult, MetadataQueryStrategy } from '../../../types';
 
+interface HitSource {
+  _source: HostMetadata;
+}
+
 export function metadataQueryStrategyV1(): MetadataQueryStrategy {
   return {
     index: metadataIndexPattern,

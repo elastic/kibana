@@ -33,10 +33,6 @@ export interface HostListQueryResult {
   queryStrategyVersion: MetadataQueryStrategyVersions;
 }
 
-interface HitSource {
-  _source: HostMetadata;
-}
-
 export interface HostQueryResult {
   resultLength: number;
   result: HostMetadata | undefined;

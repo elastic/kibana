@@ -35,6 +35,7 @@ import {
   createMockPackageService,
 } from '../../endpoint/mocks';
 import { PackageService } from '../../../../ingest_manager/server/services';
+import { ElasticsearchAssetType } from '../../../../ingest_manager/common/types/models';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
@@ -176,7 +177,7 @@ describe('hosts elasticsearch_adapter', () => {
     Promise.resolve([
       {
         id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
-        type: 'transform',
+        type: ElasticsearchAssetType.transform,
       },
     ])
   );

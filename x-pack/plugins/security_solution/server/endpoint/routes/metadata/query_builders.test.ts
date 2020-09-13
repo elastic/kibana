@@ -8,7 +8,7 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
-import { metadataQueryStrategyV2 } from '../../types';
+import { metadataQueryStrategyV2 } from './support/query_strategies';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {

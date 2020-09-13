@@ -22,6 +22,7 @@ import {
   metadataQueryStrategyV1,
   metadataQueryStrategyV2,
 } from './routes/metadata/support/query_strategies';
+import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
 
 export interface MetadataService {
   queryStrategy(
@@ -48,7 +49,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
         );
         const expectedTransformAssets = assets.filter(
           (ref) =>
-            ref.type.toString() === 'transform' &&
+            ref.type === ElasticsearchAssetType.transform &&
             ref.id.toString().startsWith('metrics-endpoint.metadata-current-default')
         );
         if (expectedTransformAssets && expectedTransformAssets.length === 1) {
