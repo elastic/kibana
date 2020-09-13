@@ -29,6 +29,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
         expect(body.statusCode).to.be(403);
         expect(body.error).to.be('Forbidden');
+
         expectSnapshot(body.message).toMatchInline(
           `"To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning."`
         );

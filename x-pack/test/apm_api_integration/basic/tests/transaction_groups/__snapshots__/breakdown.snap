@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM specs (basic) Transaction Group Breakdown when data is loaded returns the transaction breakdown for a service 1`] = `
+exports[`Breakdown when data is loaded returns the transaction breakdown for a service 1`] = `
 Object {
   "timeseries": Array [
     Object {

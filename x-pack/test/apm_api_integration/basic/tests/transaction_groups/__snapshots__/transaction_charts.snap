@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM specs (basic) Transaction Group Transaction charts when data is loaded returns the transaction charts 1`] = `
+exports[`Transaction charts when data is loaded returns the transaction charts 1`] = `
 Object {
   "apmTimeseries": Object {
     "overallAvgDuration": 38682.52419354839,

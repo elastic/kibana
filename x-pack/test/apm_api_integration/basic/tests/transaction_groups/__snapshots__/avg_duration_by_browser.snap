@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM specs (basic) Transaction Group Average duration by browser when data is loaded returns the average duration by browser 1`] = `
+exports[`Average duration by browser when data is loaded returns the average duration by browser 1`] = `
 Array [
   Object {
     "data": Array [
@@ -738,7 +738,7 @@ Array [
 ]
 `;
 
-exports[`APM specs (basic) Transaction Group Average duration by browser when data is loaded returns the average duration by browser filtering by transaction name 1`] = `
+exports[`Average duration by browser when data is loaded returns the average duration by browser filtering by transaction name 1`] = `
 Array [
   Object {
     "data": Array [

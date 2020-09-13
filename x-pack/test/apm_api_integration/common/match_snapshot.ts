@@ -9,62 +9,111 @@ import path from 'path';
 import expect from '@kbn/expect';
 // @ts-expect-error
 import prettier from 'prettier';
-import { once } from 'lodash';
 // @ts-expect-error
 import babelTraverse from '@babel/traverse';
+import { Suite, Test } from 'mocha';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
-let testContext: {
-  file: string;
-  testTitle: string;
-  getSnapshotContext: () => SnapshotContext;
-} | null = null;
 interface SnapshotContext {
   snapshotState: ISnapshotState;
+  currentTestName: string;
 }
+
+let testContext: {
+  file: string;
+  snapshotTitle: string;
+  snapshotContext: SnapshotContext;
+} | null = null;
 
 let registered: boolean = false;
 
+function getSnapshotMeta(currentTest: Test) {
+  // Make sure snapshot title is unique per-file, rather than entire
+  // suite. This allows reuse of tests, for instance to compare
+  // results for different configurations.
+
+  const titles = [currentTest.title];
+  const file = currentTest.file;
+
+  let test: Suite | undefined = currentTest?.parent;
+
+  while (test && test.file === file) {
+    titles.push(test.title);
+    test = test.parent;
+  }
+
+  const snapshotTitle = titles.reverse().join(' ');
+
+  if (!file || !snapshotTitle) {
+    throw new Error(`file or snapshotTitle not available in Mocha test context`);
+  }
+
+  return {
+    file,
+    snapshotTitle,
+  };
+}
+
 export function registerMochaHooksForSnapshots() {
-  const snapshotsToSave: ISnapshotState[] = [];
+  let snapshotStatesByFilePath: Record<string, ISnapshotState> = {};
 
   registered = true;
 
   beforeEach(function () {
-    const mochaContext = this;
-    const file = mochaContext.currentTest?.file;
-    const testTitle = mochaContext.currentTest?.fullTitle();
+    const { file, snapshotTitle } = getSnapshotMeta(this.currentTest!);
 
-    if (!file || !testTitle) {
-      throw new Error(`file or fullTitle not found in Mocha test context`);
+    if (!snapshotStatesByFilePath[file]) {
+      snapshotStatesByFilePath[file] = getSnapshotState(file);
     }
 
     testContext = {
       file,
-      testTitle,
-      getSnapshotContext: once(() => {
-        const ctx = getSnapshotContextOrThrow({ file, testTitle });
-        snapshotsToSave.push(ctx.snapshotState);
-        return ctx;
-      }),
+      snapshotTitle,
+      snapshotContext: {
+        snapshotState: snapshotStatesByFilePath[file],
+        currentTestName: snapshotTitle,
+      },
     };
   });
 
-  afterEach(() => {
+  afterEach(function () {
+    if (!this.currentTest?.isPassed()) {
+      const { file, snapshotTitle } = getSnapshotMeta(this.currentTest!);
+      snapshotStatesByFilePath[file].markSnapshotsAsCheckedForTest(snapshotTitle);
+    }
+
     testContext = null;
   });
 
-  after(() => {
-    // save snapshot after tests complete, in reverse order (bottom to top)
-    // to not change line/column number of successive inline snapshot tests
-    snapshotsToSave
-      .concat()
-      .reverse()
-      .forEach((snapshot) => {
-        snapshot.save();
-      });
-    snapshotsToSave.length = 0;
+  after(function () {
+    // save snapshot after tests complete
+
+    const unused: string[] = [];
+
+    const isUpdatingSnapshots = process.env.UPDATE_SNAPSHOTS;
+
+    Object.keys(snapshotStatesByFilePath).forEach((file) => {
+      const snapshot = snapshotStatesByFilePath[file];
+
+      if (!isUpdatingSnapshots) {
+        unused.push(...snapshot.getUncheckedKeys());
+      } else {
+        snapshot.removeUncheckedKeys();
+      }
+
+      snapshot.save();
+    });
+
+    if (unused.length) {
+      throw new Error(
+        `${unused.length} obsolete snapshot(s) found:\n${unused.join(
+          '\n\t'
+        )}.\n\nRun tests again with \`UPDATE_SNAPSHOTS=1\` to remove them.`
+      );
+    }
+
+    snapshotStatesByFilePath = {};
 
     registered = false;
   });
@@ -85,23 +134,20 @@ Error.prepareStackTrace = (error, structuredStackTrace) => {
   }
 };
 
-function getSnapshotContextOrThrow({ file, testTitle }: { file: string; testTitle: string }) {
+function getSnapshotState(file: string) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
-      updateSnapshot: process.env.UPDATE_APM_SNAPSHOTS ? 'all' : 'new',
+      updateSnapshot: process.env.UPDATE_SNAPSHOTS ? 'all' : 'new',
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,
     }
   );
 
-  return {
-    snapshotState,
-    currentTestName: testTitle,
-  } as SnapshotContext;
+  return snapshotState;
 }
 
 export function expectSnapshot(received: any) {
@@ -115,23 +161,26 @@ export function expectSnapshot(received: any) {
     throw new Error('A current Mocha context is needed to match snapshots');
   }
 
-  const snapshotContext = testContext.getSnapshotContext();
-
   return {
-    toMatch: expectToMatchSnapshot.bind(snapshotContext, received),
-    toMatchInline: expectToMatchInlineSnapshot.bind(snapshotContext, received),
+    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, received),
+    // use bind to support optional 3rd argument (actual)
+    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, received),
   };
 }
 
-function expectToMatchSnapshot(this: SnapshotContext, received: any) {
-  const matcher = toMatchSnapshot.bind(this as any);
+function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
+  const matcher = toMatchSnapshot.bind(snapshotContext as any);
   const result = matcher(received);
 
   expect(result.pass).to.eql(true, result.message());
 }
 
-function expectToMatchInlineSnapshot(this: SnapshotContext, received: any, _actual?: any) {
-  const matcher = toMatchInlineSnapshot.bind(this as any);
+function expectToMatchInlineSnapshot(
+  snapshotContext: SnapshotContext,
+  received: any,
+  _actual?: any
+) {
+  const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
   const result = arguments.length === 1 ? matcher(received) : matcher(received, _actual);
 

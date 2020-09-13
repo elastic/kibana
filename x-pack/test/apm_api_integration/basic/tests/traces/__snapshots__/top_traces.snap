@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM specs (basic) Traces Top traces when data is loaded returns the correct buckets 1`] = `
+exports[`Top traces when data is loaded returns the correct buckets 1`] = `
 Array [
   Object {
     "averageResponseTime": 2577,
@@ -300,12 +300,4 @@ Array [
     "transactionsPerMinute": 0.25,
   },
 ]
-`;
-
-exports[`APM specs (basic) Traces Top traces when data is not loaded  handles empty state 1`] = `
-Object {
-  "bucketSize": 1000,
-  "isAggregationAccurate": true,
-  "items": Array [],
-}
 `;
