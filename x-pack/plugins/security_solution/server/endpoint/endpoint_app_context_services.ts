@@ -53,7 +53,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
         const expectedTransformAssets = assets.filter(
           (ref) =>
             ref.type === ElasticsearchAssetType.transform &&
-            ref.id.toString().startsWith(metadataTransformPrefix)
+            ref.id.startsWith(metadataTransformPrefix)
         );
         if (expectedTransformAssets && expectedTransformAssets.length === 1) {
           return metadataQueryStrategyV2();

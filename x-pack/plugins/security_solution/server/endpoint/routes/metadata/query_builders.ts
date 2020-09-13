@@ -16,7 +16,7 @@ export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  metadataConfig: MetadataQueryStrategy,
+  metadataQueryStrategy: MetadataQueryStrategy,
   queryBuilderOptions?: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
@@ -26,16 +26,16 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        metadataConfig,
+        metadataQueryStrategy,
         queryBuilderOptions?.unenrolledAgentIds!,
         queryBuilderOptions?.statusAgentIDs!
       ),
-      ...metadataConfig.extraBodyProperties,
-      sort: metadataConfig.sortProperty,
+      ...metadataQueryStrategy.extraBodyProperties,
+      sort: metadataQueryStrategy.sortProperty,
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index: metadataConfig.index,
+    index: metadataQueryStrategy.index,
   };
 }
 
@@ -63,7 +63,7 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
-  metadataConfig: MetadataQueryStrategy,
+  metadataQueryStrategy: MetadataQueryStrategy,
   unerolledAgentIds: string[] | undefined,
   statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,7 +73,7 @@ function buildQueryBody(
       ? {
           must_not: {
             terms: {
-              [metadataConfig.elasticAgentIdProperty]: unerolledAgentIds,
+              [metadataQueryStrategy.elasticAgentIdProperty]: unerolledAgentIds,
             },
           },
         }
@@ -82,7 +82,7 @@ function buildQueryBody(
     ? {
         must: {
           terms: {
-            [metadataConfig.elasticAgentIdProperty]: statusAgentIDs,
+            [metadataQueryStrategy.elasticAgentIdProperty]: statusAgentIDs,
           },
         },
       }
@@ -115,17 +115,20 @@ function buildQueryBody(
       };
 }
 
-export function getESQueryHostMetadataByID(hostID: string, metadataConfig: MetadataQueryStrategy) {
+export function getESQueryHostMetadataByID(
+  hostID: string,
+  metadataQueryStrategy: MetadataQueryStrategy
+) {
   return {
     body: {
       query: {
         match: {
-          [metadataConfig.hostIdProperty]: hostID,
+          [metadataQueryStrategy.hostIdProperty]: hostID,
         },
       },
-      sort: metadataConfig.sortProperty,
+      sort: metadataQueryStrategy.sortProperty,
       size: 1,
     },
-    index: metadataConfig.index,
+    index: metadataQueryStrategy.index,
   };
 }
