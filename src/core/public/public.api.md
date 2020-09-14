@@ -29,7 +29,6 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { ShallowPromise } from '@kbn/utility-types';
-import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';

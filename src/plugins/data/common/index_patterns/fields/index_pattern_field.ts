@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
-import { FieldTypeUnknownError } from '../errors';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
@@ -35,13 +32,6 @@ export class IndexPatternField implements IFieldType {
     this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const msg = i18n.translate('data.indexPatterns.unknownFieldTypeErrorMsg', {
-        values: { type: spec.type, name: spec.name },
-        defaultMessage: `Field '{name}' Unknown field type '{type}'`,
-      });
-      throw new FieldTypeUnknownError(msg, spec);
-    }
   }
 
   // writable attrs

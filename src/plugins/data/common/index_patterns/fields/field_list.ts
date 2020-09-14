@@ -20,7 +20,7 @@
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec } from '../types';
 import { IndexPattern } from '../index_patterns';
 import { shortenDottedString } from '../../utils';
 
@@ -37,13 +37,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   update(field: FieldSpec): void;
   toSpec(options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }): FieldSpec[];
 }
-
-export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
-  specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
-) => IIndexPatternFieldList;
 
 // extending the array class and using a constructor doesn't work well
 // when calling filter and similar so wrapping in a callback.

@@ -346,7 +346,6 @@ export class IndexPatternsService {
       spec,
       savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
-      onNotification: this.onNotification,
       shortDotsEnable,
       metaFields,
     });
@@ -363,13 +362,12 @@ export class IndexPatternsService {
       spec,
       savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
-      onNotification: this.onNotification,
       shortDotsEnable,
       metaFields,
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern); // indexPattern._fetchFields();
+      await this.refreshFields(indexPattern);
     }
 
     return indexPattern;

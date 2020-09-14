@@ -29,7 +29,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat, IndexPatternsService } from '../..';
+import { FieldFormat } from '../..';
 
 class MockFieldFormatter {}
 
@@ -96,22 +96,12 @@ const savedObjectsClient = {
   }),
 };
 
-const apiClient = {
-  _getUrl: jest.fn(),
-  getFieldsForTimePattern: jest.fn(),
-  getFieldsForWildcard: jest.fn(),
-};
-
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern({
     spec: { id },
     savedObjectsClient: savedObjectsClient as any,
-    apiClient,
     fieldFormats: fieldFormatsMock,
-    indexPatternsService: {} as IndexPatternsService,
-    onNotification: () => {},
-    onError: () => {},
     shortDotsEnable: false,
     metaFields: [],
   });

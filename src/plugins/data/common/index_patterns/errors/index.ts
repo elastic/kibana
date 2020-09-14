@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './field_type_unknown';
 export * from './duplicate_index_pattern';

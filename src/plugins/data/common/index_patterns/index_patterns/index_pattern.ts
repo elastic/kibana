@@ -18,7 +18,6 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
@@ -26,13 +25,11 @@ import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IIndexPattern,
-  FieldTypeUnknownError,
   FieldFormatNotFoundError,
 } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { OnNotification } from '../types';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { expandShorthand, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
@@ -44,7 +41,6 @@ interface IndexPatternDeps {
   spec?: IndexPatternSpec;
   savedObjectsClient: SavedObjectsClientCommon;
   fieldFormats: FieldFormatsStartCommon;
-  onNotification: OnNotification;
   shortDotsEnable: boolean;
   metaFields: string[];
 }
@@ -71,7 +67,6 @@ export class IndexPattern implements IIndexPattern {
   public originalBody: { [key: string]: any } = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
-  private onNotification: OnNotification;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -99,15 +94,12 @@ export class IndexPattern implements IIndexPattern {
     spec = {},
     savedObjectsClient,
     fieldFormats,
-    onNotification,
     shortDotsEnable = false,
     metaFields = [],
   }: IndexPatternDeps) {
     // set dependencies
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
-    // set callbacks
-    this.onNotification = onNotification;
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -138,22 +130,6 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
-  }
-
-  private unknownFieldErrorNotification(
-    fieldType: string,
-    fieldName: string,
-    indexPatternTitle: string
-  ) {
-    const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
-      values: { type: fieldType },
-      defaultMessage: 'Unknown field type {type}',
-    });
-    const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-      values: { name: fieldName, title: indexPatternTitle },
-      defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
-    });
-    this.onNotification({ title, text, color: 'danger', iconType: 'alert' });
   }
 
   private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
@@ -203,15 +179,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    try {
-      this.fields.replaceAll(spec.fields || []);
-    } catch (err) {
-      if (err instanceof FieldTypeUnknownError) {
-        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
-      } else {
-        throw err;
-      }
-    }
+    this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
     this.type = spec.type;
 
@@ -292,25 +260,17 @@ export class IndexPattern implements IIndexPattern {
       throw new DuplicateField(name);
     }
 
-    try {
-      this.fields.add({
-        name,
-        script,
-        type: fieldType,
-        scripted: true,
-        lang,
-        aggregatable: true,
-        searchable: true,
-        count: 0,
-        readFromDocValues: false,
-      });
-    } catch (err) {
-      if (err instanceof FieldTypeUnknownError) {
-        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
-      } else {
-        throw err;
-      }
-    }
+    this.fields.add({
+      name,
+      script,
+      type: fieldType,
+      scripted: true,
+      lang,
+      aggregatable: true,
+      searchable: true,
+      count: 0,
+      readFromDocValues: false,
+    });
   }
 
   removeScriptedField(fieldName: string) {

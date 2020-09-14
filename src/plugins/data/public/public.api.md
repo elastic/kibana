@@ -792,15 +792,6 @@ export interface FieldMappingSpec {
     type: ES_FIELD_TYPES;
 }
 
-// Warning: (ae-missing-release-tag) "FieldTypeUnknownError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export class FieldTypeUnknownError extends Error {
-    constructor(message: string, spec: FieldSpec);
-    // (undocumented)
-    readonly fieldSpec: FieldSpec;
-}
-
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1099,7 +1090,7 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor({ spec, savedObjectsClient, apiClient, fieldFormats, onNotification, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    constructor({ spec, savedObjectsClient, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
@@ -1108,8 +1099,6 @@ export class IndexPattern implements IIndexPattern {
     fields: IIndexPatternFieldList & {
         toSpec: () => FieldSpec[];
     };
-    // (undocumented)
-    fieldsFetcher: any;
     // (undocumented)
     flattenHit: any;
     // (undocumented)
