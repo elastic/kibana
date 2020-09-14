@@ -8,13 +8,13 @@ import { useEffect, useState } from 'react';
 
 import { useXJsonMode } from '../../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { PreviewRequestBody } from '../../../../../common';
+import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
 import { StepDefineExposedState } from '../common';
 
 export const useAdvancedPivotEditor = (
   defaults: StepDefineExposedState,
-  previewRequest: PreviewRequestBody
+  previewRequest: PostTransformsPreviewRequestSchema
 ) => {
   const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
 

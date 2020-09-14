@@ -8,7 +8,7 @@ import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListRow } from '../../../../common';
 import {
