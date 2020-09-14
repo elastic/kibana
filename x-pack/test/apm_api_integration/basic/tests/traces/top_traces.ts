@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('Top traces', () => {
     describe('when data is not loaded ', () => {
-      it('handles empty state', async function () {
+      it('handles empty state', async () => {
         const response = await supertest.get(
           `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
