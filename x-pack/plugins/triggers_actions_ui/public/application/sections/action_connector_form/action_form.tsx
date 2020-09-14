@@ -311,6 +311,7 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               defaultMessage={defaultActionMessage ?? undefined}
               docLinks={docLinks}
+              actionConnector={actionConnector}
             />
           </Suspense>
         ) : null}

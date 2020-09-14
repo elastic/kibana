@@ -51,8 +51,7 @@ const createNewCopiesDisabled = {
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
     {
-      defaultMessage:
-        'Check if each object was previously copied or imported into the destination space.',
+      defaultMessage: 'Check if objects were previously copied or imported.',
     }
   ),
 };
@@ -64,21 +63,23 @@ const createNewCopiesEnabled = {
   ),
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
-    { defaultMessage: 'All imported objects will be created with new random IDs.' }
+    {
+      defaultMessage: 'Use this option to create one or more copies of the object.',
+    }
   ),
 };
 const overwriteEnabled = {
   id: 'overwriteEnabled',
   label: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.overwrite.enabledLabel',
-    { defaultMessage: 'Automatically try to overwrite conflicts' }
+    { defaultMessage: 'Automatically overwrite conflicts' }
   ),
 };
 const overwriteDisabled = {
   id: 'overwriteDisabled',
   label: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.overwrite.disabledLabel',
-    { defaultMessage: 'Request action when conflict occurs' }
+    { defaultMessage: 'Request action on conflict' }
   ),
 };
 const importOptionsTitle = i18n.translate(

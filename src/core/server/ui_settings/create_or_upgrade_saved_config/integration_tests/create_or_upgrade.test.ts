@@ -36,8 +36,6 @@ describe('createOrUpgradeSavedConfig()', () => {
   let esServer: TestElasticsearchUtils;
   let kbn: TestKibanaUtils;
 
-  let kbnServer: TestKibanaUtils['kbnServer'];
-
   beforeAll(async function () {
     servers = createTestServers({
       adjustTimeout: (t) => {
@@ -46,10 +44,8 @@ describe('createOrUpgradeSavedConfig()', () => {
     });
     esServer = await servers.startES();
     kbn = await servers.startKibana();
-    kbnServer = kbn.kbnServer;
 
-    const savedObjects = kbnServer.server.savedObjects;
-    savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
       httpServerMock.createKibanaRequest()
     );
 

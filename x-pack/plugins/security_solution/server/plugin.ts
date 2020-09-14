@@ -315,7 +315,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager?.agentService,
-      exceptionsListService: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
       logger: this.logger,
       manifestManager,
       registerIngestCallback,

@@ -101,6 +101,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
 

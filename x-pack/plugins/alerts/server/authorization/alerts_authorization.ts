@@ -18,7 +18,7 @@ import { Space } from '../../../spaces/server';
 export enum ReadOperations {
   Get = 'get',
   GetAlertState = 'getAlertState',
-  GetAlertStatus = 'getAlertStatus',
+  GetAlertInstanceSummary = 'getAlertInstanceSummary',
   Find = 'find',
 }
 

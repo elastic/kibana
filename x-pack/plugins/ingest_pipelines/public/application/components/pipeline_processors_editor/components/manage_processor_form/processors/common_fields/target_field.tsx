@@ -21,7 +21,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldHelpText',
       {
-        defaultMessage: 'Field to assign the value to. If empty, the field is updated in-place.',
+        defaultMessage: 'Output field. If empty, the input field is updated in place.',
       }
     ),
   },
