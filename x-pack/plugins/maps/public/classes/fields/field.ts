@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELD_ORIGIN } from '../../../common/constants';
+import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 
@@ -32,6 +32,14 @@ export interface IField {
   supportsFieldMeta(): boolean;
 
   canReadFromGeoJson(): boolean;
+
+  // Returns the name that should be used for accessing the data from the mb-style rule
+  // Depending on
+  // - whether the field is used for labeling, icon-orientation, or other properties (color, size, ...), `feature-state` and or `get` is used
+  // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
+  // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
+  // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
+  getMbPropertyName(styleName: VECTOR_STYLES): string;
 }
 
 export class AbstractField implements IField {
@@ -99,4 +107,20 @@ export class AbstractField implements IField {
   canReadFromGeoJson(): boolean {
     return true;
   }
+
+  getMbPropertyName(styleName: VECTOR_STYLES): string {
+    return getMbPropertyName(this, styleName);
+  }
+}
+
+export function getMbPropertyName(field: IField, styleName: VECTOR_STYLES) {
+  let targetName;
+  if (field.canReadFromGeoJson()) {
+    targetName = field.supportsAutoDomain()
+      ? getComputedFieldName(styleName, field.getName())
+      : field.getName();
+  } else {
+    targetName = field.getName();
+  }
+  return targetName;
 }

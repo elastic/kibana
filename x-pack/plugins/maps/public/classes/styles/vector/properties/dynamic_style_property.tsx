@@ -46,6 +46,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
+  getMbPropertyValue(value: string | number | null | undefined): string | number | null | undefined;
 }
 
 export type FieldFormatter = (value: string | number | undefined) => string | number;
@@ -345,4 +346,21 @@ export class DynamicStyleProperty<T>
       />
     );
   }
+
+  getMbPropertyValue(
+    rawValue: string | number | null | undefined
+  ): string | number | null | undefined {
+    if (this.supportsMbFeatureState()) {
+      return getNumericalMbFeatureStateValue(rawValue);
+    } else {
+      return this.isOrdinal()
+        ? getNumericalMbFeatureStateValue(rawValue)
+        : this.formatField(rawValue);
+    }
+  }
+}
+
+export function getNumericalMbFeatureStateValue(value: string | number) {
+  const valueAsFloat = parseFloat(value);
+  return isNaN(valueAsFloat) ? null : valueAsFloat;
 }
