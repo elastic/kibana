@@ -28,6 +28,8 @@ import {
   INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
+  getAnalysisType,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -36,6 +38,7 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -70,18 +73,27 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     setEvaluateSearchQuery,
     title,
   }) => {
+    const {
+      services: {
+        mlServices: { mlApiServices },
+      },
+    } = useMlKibana();
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
+    const analysisType = getAnalysisType(jobConfig.analysis);
+
     const classificationData = useExplorationResults(
       indexPattern,
       jobConfig,
       searchQuery,
-      getToastNotifications()
+      getToastNotifications(),
+      mlApiServices
     );
+
     const docFieldsCount = classificationData.columnsWithCharts.length;
     const {
       columnsWithCharts,
@@ -94,7 +106,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
-
     // if it's a searchBar syntax error leave the table visible so they can try again
     if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
@@ -184,6 +195,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
+                analysisType={(analysisType as unknown) as ANALYSIS_CONFIG_TYPE}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

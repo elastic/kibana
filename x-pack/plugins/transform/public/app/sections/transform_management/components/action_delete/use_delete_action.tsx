@@ -6,7 +6,7 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useDeleteIndexAndTargetIndex, useDeleteTransforms } from '../../../../hooks';
@@ -55,7 +55,16 @@ export const useDeleteAction = (forceDisable: boolean) => {
     const forceDelete = isBulkAction
       ? shouldForceDelete
       : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
-    deleteTransforms(items, shouldDeleteDestIndex, shouldDeleteDestIndexPattern, forceDelete);
+
+    deleteTransforms({
+      transformsInfo: items.map((i) => ({
+        id: i.config.id,
+        state: i.stats.state,
+      })),
+      deleteDestIndex: shouldDeleteDestIndex,
+      deleteDestIndexPattern: shouldDeleteDestIndexPattern,
+      forceDelete,
+    });
   };
 
   const openModal = (newItems: TransformListRow[]) => {

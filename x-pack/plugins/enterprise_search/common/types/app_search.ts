@@ -23,3 +23,10 @@ export interface IRole {
     availableRoleTypes: string[];
   };
 }
+
+export interface IConfiguredLimits {
+  engine: {
+    maxDocumentByteSize: number;
+    maxEnginesPerMetaEngine: number;
+  };
+}

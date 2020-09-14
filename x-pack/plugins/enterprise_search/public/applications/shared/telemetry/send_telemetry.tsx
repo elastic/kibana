@@ -35,8 +35,20 @@ export const sendTelemetry = async ({ http, product, action, metric }: ISendTele
 
 /**
  * React component helpers - useful for on-page-load/views
- * TODO: SendEnterpriseSearchTelemetry
  */
+
+export const SendEnterpriseSearchTelemetry: React.FC<ISendTelemetryProps> = ({
+  action,
+  metric,
+}) => {
+  const { http } = useContext(KibanaContext) as IKibanaContext;
+
+  useEffect(() => {
+    sendTelemetry({ http, action, metric, product: 'enterprise_search' });
+  }, [action, metric, http]);
+
+  return null;
+};
 
 export const SendAppSearchTelemetry: React.FC<ISendTelemetryProps> = ({ action, metric }) => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
