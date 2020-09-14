@@ -10,6 +10,7 @@ import {
   AsyncResourceState,
   getCurrentResourceError,
   getLastLoadedResourceState,
+  isFailedResourceState,
   isLoadingResourceState,
   isOutdatedResourceState,
   LoadedResourceState,
@@ -76,4 +77,24 @@ export const getListErrorMessage = (
 
 export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boolean => {
   return isLoadingResourceState(state.listView.currentListResourceState);
+};
+
+export const isDeletionDialogOpen = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return Boolean(state.deletionDialog);
+};
+
+export const isDeletionInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  if (state.deletionDialog) {
+    return isLoadingResourceState(state.deletionDialog.submissionResourceState);
+  } else {
+    return false;
+  }
+};
+
+export const hasDeletionError = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  if (state.deletionDialog) {
+    return isFailedResourceState(state.deletionDialog.submissionResourceState);
+  } else {
+    return false;
+  }
 };
