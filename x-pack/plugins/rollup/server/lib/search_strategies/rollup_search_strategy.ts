@@ -5,7 +5,6 @@
  */
 import { keyBy, isString } from 'lodash';
 
-import { CoreSetup } from 'src/core/server';
 import { ReqFacade } from '../../../../../../src/plugins/vis_type_timeseries/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/server';
 import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
