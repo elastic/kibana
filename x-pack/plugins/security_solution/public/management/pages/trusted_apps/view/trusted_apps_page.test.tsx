@@ -8,6 +8,10 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => 'mockId',
+}));
+
 describe('TrustedAppsPage', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
 

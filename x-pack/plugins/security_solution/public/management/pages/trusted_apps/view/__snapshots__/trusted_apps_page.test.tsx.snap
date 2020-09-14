@@ -186,7 +186,7 @@ Object {
               </div>
               <table
                 class="euiTable euiTable--responsive"
-                id="__table_1191f4c1-f6ab-11ea-a5f0-2976142f9114"
+                id="mockId"
                 tabindex="-1"
               >
                 <caption
@@ -410,7 +410,7 @@ Object {
             </div>
             <table
               class="euiTable euiTable--responsive"
-              id="__table_1191f4c1-f6ab-11ea-a5f0-2976142f9114"
+              id="mockId"
               tabindex="-1"
             >
               <caption
