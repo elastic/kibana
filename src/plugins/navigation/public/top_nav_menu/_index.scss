@@ -1,15 +1,4 @@
-.kbnTopNavMenu__wrapper {
-  z-index: 5;
-
-  .kbnTopNavMenu {
-    padding: $euiSizeS 0;
-
-    .kbnTopNavItemEmphasized {
-      padding: 0 $euiSizeS;
-    }
-  }
-
-  .kbnTopNavMenu-isFullScreen {
-    padding: 0;
-  }
+.kbnTopNavMenu > * > * {
+  // TEMP fix to adjust spacing between EuiHeaderList__list items
+  margin: 0 $euiSizeXS;
 }
