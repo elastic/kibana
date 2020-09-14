@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
+export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
+  defaultMessage: 'Machine Learning',
+});

@@ -20,6 +20,7 @@ import { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
 
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
@@ -51,7 +52,11 @@ export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const redirectToMlAccessDeniedPage = async () => {
-    const accessDeniedPageUrl = `${coreStart.http.basePath.get()}/app/ml/access-denied`;
+    const accessDeniedPageUrl = await deps.share.urlGenerators
+      .getUrlGenerator(ML_APP_URL_GENERATOR)
+      .createUrl({
+        page: ML_PAGES.ACCESS_DENIED,
+      });
     await coreStart.application.navigateToUrl(accessDeniedPageUrl);
   };
 
