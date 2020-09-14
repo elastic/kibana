@@ -13,6 +13,7 @@ import {
   SUPPORTED_CONNECTORS,
   SERVICENOW_ACTION_TYPE_ID,
   JIRA_ACTION_TYPE_ID,
+  RESILIENT_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
 
 /*
@@ -37,8 +38,12 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           (action) =>
             SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
             // Need this filtering temporary to display only Case owned ServiceNow connectors
-            (![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID].includes(action.actionTypeId) ||
-              ([SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID].includes(action.actionTypeId) &&
+            (![SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
+              action.actionTypeId
+            ) ||
+              ([SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
+                action.actionTypeId
+              ) &&
                 action.config?.isCaseOwned === true))
         );
         return response.ok({ body: results });

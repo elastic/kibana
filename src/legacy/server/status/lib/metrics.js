@@ -116,8 +116,8 @@ export class Metrics {
   async captureCGroups() {
     try {
       const cgroup = await cGroupStats({
-        cpuPath: this.config.get('cpu.cgroup.path.override'),
-        cpuAcctPath: this.config.get('cpuacct.cgroup.path.override'),
+        cpuPath: this.config.get('ops.cGroupOverrides.cpuPath'),
+        cpuAcctPath: this.config.get('ops.cGroupOverrides.cpuAcctPath'),
       });
 
       if (isObject(cgroup)) {

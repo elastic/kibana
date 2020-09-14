@@ -102,7 +102,7 @@ describe('useRequest hook', () => {
         setupSuccessRequest();
         expect(hookResult.isInitialRequest).toBe(true);
 
-        hookResult.sendRequest();
+        hookResult.resendRequest();
         await completeRequest();
         expect(hookResult.isInitialRequest).toBe(false);
       });
@@ -148,7 +148,7 @@ describe('useRequest hook', () => {
         expect(hookResult.error).toBe(getErrorResponse().error);
 
         act(() => {
-          hookResult.sendRequest();
+          hookResult.resendRequest();
         });
         expect(hookResult.isLoading).toBe(true);
         expect(hookResult.error).toBe(getErrorResponse().error);
@@ -183,7 +183,7 @@ describe('useRequest hook', () => {
         expect(hookResult.data).toBe(getSuccessResponse().data);
 
         act(() => {
-          hookResult.sendRequest();
+          hookResult.resendRequest();
         });
         expect(hookResult.isLoading).toBe(true);
         expect(hookResult.data).toBe(getSuccessResponse().data);
@@ -215,7 +215,7 @@ describe('useRequest hook', () => {
   });
 
   describe('callbacks', () => {
-    describe('sendRequest', () => {
+    describe('resendRequest', () => {
       it('sends the request', async () => {
         const { setupSuccessRequest, completeRequest, hookResult, getSendRequestSpy } = helpers;
         setupSuccessRequest();
@@ -224,7 +224,7 @@ describe('useRequest hook', () => {
         expect(getSendRequestSpy().callCount).toBe(1);
 
         await act(async () => {
-          hookResult.sendRequest();
+          hookResult.resendRequest();
           await completeRequest();
         });
         expect(getSendRequestSpy().callCount).toBe(2);
@@ -239,17 +239,17 @@ describe('useRequest hook', () => {
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(1);
         act(() => {
-          hookResult.sendRequest();
+          hookResult.resendRequest();
         });
 
         // The manual request resolves, and we'll send yet another one...
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(2);
         act(() => {
-          hookResult.sendRequest();
+          hookResult.resendRequest();
         });
 
-        // At this point, we've moved forward 3s. The poll is set at 2s. If sendRequest didn't
+        // At this point, we've moved forward 3s. The poll is set at 2s. If resendRequest didn't
         // reset the poll, the request call count would be 4, not 3.
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(3);
@@ -291,14 +291,14 @@ describe('useRequest hook', () => {
       const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
       setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
 
-      // Before the original request resolves, we make a manual sendRequest call.
+      // Before the original request resolves, we make a manual resendRequest call.
       await advanceTime(HALF_REQUEST_TIME);
       expect(getSendRequestSpy().callCount).toBe(0);
       act(() => {
-        hookResult.sendRequest();
+        hookResult.resendRequest();
       });
 
-      // The original quest resolves but it's been marked as outdated by the the manual sendRequest
+      // The original quest resolves but it's been marked as outdated by the the manual resendRequest
       // call "interrupts", so data is left undefined.
       await advanceTime(HALF_REQUEST_TIME);
       expect(getSendRequestSpy().callCount).toBe(1);
