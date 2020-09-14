@@ -22,7 +22,13 @@ describe('test agent actions services', () => {
     };
     mockSavedObjectsClient.create.mockReturnValue(
       Promise.resolve({
-        attributes: {},
+        attributes: {
+          agent_id: 'agentid',
+          type: 'CONFIG_CHANGE',
+          data: JSON.stringify({ content: 'data' }),
+          sent_at: '2020-03-14T19:45:02.620Z',
+          created_at: '2020-03-14T19:45:02.620Z',
+        },
       } as SavedObject)
     );
     await createAgentAction(mockSavedObjectsClient, newAgentAction);
