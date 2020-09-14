@@ -10,7 +10,7 @@ import { ChildrenPaginationBuilder } from '../utils/children_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
- * This type represents the document returned from ES when using the ChildrenQuery to fetch legacy events.
+ * This type represents the document returned from ES for a legacy event when using the ChildrenQuery to fetch legacy events.
  * It contains only the necessary fields that the children api needs to process the results before
  * it requests the full lifecycle information for the children in a later query.
  */
@@ -27,6 +27,11 @@ export type LegacyChildEvent = Partial<{
   }>;
 }>;
 
+/**
+ * This type represents the document returned from ES for an event when using the ChildrenQuery to fetch legacy events.
+ * It contains only the necessary fields that the children api needs to process the results before
+ * it requests the full lifecycle information for the children in a later query.
+ */
 export type EndpointChildEvent = Partial<{
   '@timestamp': ECSField<number>;
   event: Partial<{
@@ -48,6 +53,8 @@ export type ChildEvent = EndpointChildEvent | LegacyChildEvent;
 
 /**
  * Builds a query for retrieving descendants of a node.
+ * The first type `ChildEvent[]` represents the final formatted result. The second type `ChildEvent` defines the type
+ * used in the `SearchResponse<T>` field returned from the ES query.
  */
 export class ChildrenQuery extends ResolverQuery<ChildEvent[], ChildEvent> {
   constructor(

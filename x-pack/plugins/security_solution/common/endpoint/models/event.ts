@@ -6,12 +6,17 @@
 import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSField } from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
+/**
+ * Legacy events will define the `endgame` object. This is used to narrow a ResolverEvent.
+ */
 interface LegacyEvent {
   endgame?: object;
 }
 
 /*
- * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
+ * Determine if a higher level event type is the legacy variety. Can be used to narrow an event type.
+ * T optionally defines an `endgame` object field used for determining the type of event. If T doesn't contain the
+ * `endgame` field it will serve as the narrowed type.
  */
 export function isLegacyEventSafeVersion<T extends LegacyEvent>(
   event: LegacyEvent | {}
@@ -26,6 +31,9 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type ProcessRunningFields = Partial<
   | {
       endgame: object;
@@ -57,6 +65,9 @@ export function isProcessRunning(event: ProcessRunningFields): boolean {
   );
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type TimestampFields = Pick<SafeResolverEvent, '@timestamp'>;
 
 export function timestampSafeVersion(event: TimestampFields): undefined | number {
@@ -109,6 +120,9 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type EventSequenceFields = Partial<
   | {
       endgame: Partial<{
@@ -142,6 +156,9 @@ export function entityId(event: ResolverEvent): string {
   return event.process.entity_id;
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type EntityIDFields = Partial<
   | {
       endgame: Partial<{
@@ -172,6 +189,9 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type ParentEntityIDFields = Partial<
   | {
       endgame: Partial<{
@@ -216,6 +236,9 @@ export function ancestryArray(event: AncestryArrayFields): string[] | undefined 
   return values(event.process?.Ext?.ancestry);
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
 
 export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
