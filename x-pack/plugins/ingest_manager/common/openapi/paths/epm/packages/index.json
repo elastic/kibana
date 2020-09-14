@@ -10,7 +10,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "../../../components/schemas/SearchResult.json"
+                "$ref": "../../../components/schemas/search_result.json"
               }
             }
           }

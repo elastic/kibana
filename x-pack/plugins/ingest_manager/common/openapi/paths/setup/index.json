@@ -37,7 +37,7 @@
     "operationId": "post-setup",
     "parameters": [
       {
-        "$ref": "../../components/parameters/xsrfHeader.json"
+        "$ref": "../../components/parameters/xsrf_header.json"
       }
     ]
   }

@@ -11,7 +11,7 @@
               "type": "object",
               "properties": {
                 "item": {
-                  "$ref": "../../../components/schemas/PackagePolicy.json"
+                  "$ref": "../../../components/schemas/package_policy.json"
                 }
               },
               "required": ["item"]
@@ -20,21 +20,21 @@
         }
       }
     },
-    "operationId": "get-packagePolicies-packagePolicyId"
+    "operationId": "get-packagePolicies-package_policy_id"
   },
   "parameters": [
     {
       "schema": {
         "type": "string"
       },
-      "name": "packagePolicyId",
+      "name": "package_policy_id",
       "in": "path",
       "required": true
     }
   ],
   "put": {
     "summary": "PackagePolicies - Update",
-    "operationId": "put-packagePolicies-packagePolicyId",
+    "operationId": "put-packagePolicies-package_policy_id",
     "responses": {
       "200": {
         "description": "OK",
@@ -44,7 +44,7 @@
               "type": "object",
               "properties": {
                 "item": {
-                  "$ref": "../../../components/schemas/PackagePolicy.json"
+                  "$ref": "../../../components/schemas/package_policy.json"
                 },
                 "sucess": {
                   "type": "boolean"
@@ -58,7 +58,7 @@
     },
     "parameters": [
       {
-        "$ref": "../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../components/parameters/xsrf_header.json"
       }
     ]
   }

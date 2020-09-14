@@ -35,7 +35,7 @@
     "operationId": "get-fleet-agents",
     "security": [
       {
-        "basicAuth": []
+        "basic_auth": []
       }
     ]
   }

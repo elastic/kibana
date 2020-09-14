@@ -32,7 +32,7 @@
           "schema": {
             "type": "object",
             "properties": {
-              "agentPolicyIds": {
+              "agent_policy_ids": {
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -45,7 +45,7 @@
     },
     "parameters": [
       {
-        "$ref": "../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../components/parameters/xsrf_header.json"
       }
     ]
   },

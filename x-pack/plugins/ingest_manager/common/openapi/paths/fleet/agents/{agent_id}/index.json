@@ -4,7 +4,7 @@
       "schema": {
         "type": "string"
       },
-      "name": "agentId",
+      "name": "agent_id",
       "in": "path",
       "required": true
     }
@@ -30,16 +30,16 @@
         }
       }
     },
-    "operationId": "get-fleet-agents-agentId"
+    "operationId": "get-fleet-agents-agent_id"
   },
   "put": {
     "summary": "Fleet - Agent - Update",
     "tags": [],
     "responses": {},
-    "operationId": "put-fleet-agents-agentId",
+    "operationId": "put-fleet-agents-agent_id",
     "parameters": [
       {
-        "$ref": "../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../components/parameters/xsrf_header.json"
       }
     ]
   },
@@ -47,10 +47,10 @@
     "summary": "Fleet - Agent - Delete",
     "tags": [],
     "responses": {},
-    "operationId": "delete-fleet-agents-agentId",
+    "operationId": "delete-fleet-agents-agent_id",
     "parameters": [
       {
-        "$ref": "../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../components/parameters/xsrf_header.json"
       }
     ]
   }

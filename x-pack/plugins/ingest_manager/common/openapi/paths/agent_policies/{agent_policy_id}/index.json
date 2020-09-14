@@ -4,7 +4,7 @@
       "schema": {
         "type": "string"
       },
-      "name": "agentPolicyId",
+      "name": "agent_policy_id",
       "in": "path",
       "required": true
     }
@@ -21,7 +21,7 @@
               "type": "object",
               "properties": {
                 "item": {
-                  "$ref": "../../../components/schemas/AgentPolicy.json"
+                  "$ref": "../../../components/schemas/agent_policy.json"
                 }
               },
               "required": ["item"]
@@ -46,7 +46,7 @@
               "type": "object",
               "properties": {
                 "item": {
-                  "$ref": "../../../components/schemas/AgentPolicy.json"
+                  "$ref": "../../../components/schemas/agent_policy.json"
                 }
               },
               "required": ["item"]
@@ -55,19 +55,19 @@
         }
       }
     },
-    "operationId": "put-agent-policy-agentPolicyId",
+    "operationId": "put-agent-policy-agent_policy_id",
     "requestBody": {
       "content": {
         "application/json": {
           "schema": {
-            "$ref": "../../../components/schemas/NewAgentPolicy.json"
+            "$ref": "../../../components/schemas/new_agent_policy.json"
           }
         }
       }
     },
     "parameters": [
       {
-        "$ref": "../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../components/parameters/xsrf_header.json"
       }
     ]
   }

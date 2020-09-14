@@ -1,7 +1,7 @@
 {
   "allOf": [
     {
-      "$ref": "./NewAgentPolicy.json"
+      "$ref": "./new_agent_policy.json"
     },
     {
       "type": "object",
@@ -22,7 +22,7 @@
             },
             {
               "items": {
-                "$ref": "./PackagePolicy.json"
+                "$ref": "./package_policy.json"
               }
             }
           ],

@@ -4,7 +4,7 @@
       "schema": {
         "type": "string"
       },
-      "name": "agentId",
+      "name": "agent_id",
       "in": "path",
       "required": true
     }
@@ -13,6 +13,6 @@
     "summary": "Fleet - Agent - Events",
     "tags": [],
     "responses": {},
-    "operationId": "get-fleet-agents-agentId-events"
+    "operationId": "get-fleet-agents-agent_id-events"
   }
 }

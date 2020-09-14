@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "type": {
-      "$ref": "./AgentType.json"
+      "$ref": "./agent_type.json"
     },
     "active": {
       "type": "boolean"
@@ -37,10 +37,10 @@
       "type": "string"
     },
     "user_provided_metadata": {
-      "$ref": "./AgentMetadata.json"
+      "$ref": "./agent_metadata.json"
     },
     "local_metadata": {
-      "$ref": "./AgentMetadata.json"
+      "$ref": "./agent_metadata.json"
     },
     "id": {
       "type": "string"
@@ -48,14 +48,14 @@
     "current_error_events": {
       "type": "array",
       "items": {
-        "$ref": "./AgentEvent.json"
+        "$ref": "./agent_event.json"
       }
     },
     "access_api_key": {
       "type": "string"
     },
     "status": {
-      "$ref": "./AgentStatus.json"
+      "$ref": "./agent_status.json"
     },
     "default_api_key": {
       "type": "string"

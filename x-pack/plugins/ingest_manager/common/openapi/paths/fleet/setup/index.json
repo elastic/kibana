@@ -23,7 +23,7 @@
     "operationId": "get-fleet-setup",
     "security": [
       {
-        "basicAuth": []
+        "basic_auth": []
       }
     ]
   },
@@ -68,7 +68,7 @@
     },
     "parameters": [
       {
-        "$ref": "../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../components/parameters/xsrf_header.json"
       }
     ]
   }

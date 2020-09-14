@@ -13,7 +13,7 @@
                 {
                   "properties": {
                     "response": {
-                      "$ref": "../../../../components/schemas/PackageInfo.json"
+                      "$ref": "../../../../components/schemas/package_info.json"
                     }
                   }
                 },
@@ -38,7 +38,7 @@
     "operationId": "get-epm-package-pkgkey",
     "security": [
       {
-        "basicAuth": []
+        "basic_auth": []
       }
     ]
   },
@@ -89,7 +89,7 @@
     "description": "",
     "parameters": [
       {
-        "$ref": "../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../components/parameters/xsrf_header.json"
       }
     ]
   },
@@ -129,7 +129,7 @@
     "operationId": "post-epm-delete-pkgkey",
     "parameters": [
       {
-        "$ref": "../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../components/parameters/xsrf_header.json"
       }
     ]
   }

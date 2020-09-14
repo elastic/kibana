@@ -1,7 +1,7 @@
 Paths
 =====
 
-Organize your path definitions within this folder.  You will reference your paths from your main `openapi.yaml` entrypoint file.
+Organize your path definitions within this folder.  You will reference your paths from your main `openapi.json` entrypoint file.
 
 It may help you to adopt some conventions:
 
@@ -45,7 +45,7 @@ In this case, if you want all paths at the top-level, you can concatenate the ht
 
 ### Files at top-level of `paths`
 
-You may name your files with some concatenation for the http method. For example, following a convention such as: `<path with allowed separator>-<http-method>.yaml`.
+You may name your files with some concatenation for the http method. For example, following a convention such as: `<path with allowed separator>-<http-method>.json`.
 
 #### Motivations
 
@@ -61,7 +61,7 @@ Example:
 ```
 GET /customers
 
-/paths/customers/get.yaml
+/paths/customers/get.json
 ```
 
 In this case, the path id defined within subfolders which mirror the API URL structure.
@@ -70,7 +70,7 @@ Example with path parameter:
 ```
 GET /customers/{id}
 
-/paths/customers/{id}/get.yaml
+/paths/customers/{id}/get.json
 ```
 
 #### Motivations
@@ -79,13 +79,13 @@ It matches the URL structure.
 
 It is pretty easy to reference:
 
-```yaml
+```json
 paths:
   '/customers/{id}':
     get:
-      $ref: ./paths/customers/{id}/get.yaml
+      $ref: ./paths/customers/{id}/get.json
     put:
-      $ref: ./paths/customers/{id}/put.yaml
+      $ref: ./paths/customers/{id}/put.json
 ```
 
 #### Drawbacks
@@ -94,12 +94,12 @@ If you have a lot of nested folders, it may be confusing to reference your schem
 
 Example
 ```
-file: /paths/customers/{id}/timeline/{messageId}/get.yaml
+file: /paths/customers/{id}/timeline/{messageId}/get.json
 
 # excerpt of file
     headers:
       Rate-Limit-Remaining: 
-        $ref: ../../../../../components/headers/Rate-Limit-Remaining.yaml
+        $ref: ../../../../../components/headers/Rate-Limit-Remaining.json
 
 ```
 Notice the `../../../../../` in the ref which requires some attention to formulate correctly.  While openapi-cli has a linter which suggests possible refs when there is a mistake, this is still a net drawback for APIs with deep paths.

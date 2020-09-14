@@ -4,14 +4,14 @@
       "schema": {
         "type": "string"
       },
-      "name": "agentPolicyId",
+      "name": "agent_id",
       "in": "path",
       "required": true
     }
   ],
   "post": {
-    "summary": "Agent policy - copy one policy",
-    "operationId": "agent-policy-copy",
+    "summary": "Fleet - Agent - Acks",
+    "tags": [],
     "responses": {
       "200": {
         "description": "OK",
@@ -20,35 +20,32 @@
             "schema": {
               "type": "object",
               "properties": {
-                "item": {
-                  "$ref": "../../../../components/schemas/AgentPolicy.json"
+                "action": {
+                  "type": "string",
+                  "enum": ["acks"]
                 }
               },
-              "required": ["item"]
+              "required": ["action"]
             }
           }
         }
       }
     },
+    "operationId": "post-fleet-agents-agent_id-acks",
+    "parameters": [
+      {
+        "$ref": "../../../../../components/parameters/xsrf_header.json"
+      }
+    ],
     "requestBody": {
       "content": {
         "application/json": {
           "schema": {
             "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              }
-            },
-            "required": ["name"]
+            "properties": {}
           }
         }
-      },
-      "description": ""
-    },
-    "description": "Copies one agent policy"
+      }
+    }
   }
 }

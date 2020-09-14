@@ -18,7 +18,7 @@
       "required": ["id", "revision"]
     },
     {
-      "$ref": "./NewPackagePolicy.json"
+      "$ref": "./new_package_policy.json"
     }
   ]
 }

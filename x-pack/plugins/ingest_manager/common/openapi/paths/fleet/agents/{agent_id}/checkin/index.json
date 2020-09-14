@@ -4,7 +4,7 @@
       "schema": {
         "type": "string"
       },
-      "name": "agentId",
+      "name": "agent_id",
       "in": "path",
       "required": true
     }
@@ -55,15 +55,15 @@
         }
       }
     },
-    "operationId": "post-fleet-agents-agentId-checkin",
+    "operationId": "post-fleet-agents-agent_id-checkin",
     "parameters": [
       {
-        "$ref": "../../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../../components/parameters/xsrf_header.json"
       }
     ],
     "security": [
       {
-        "Access_API_Key": []
+        "access_api_key": []
       }
     ],
     "requestBody": {
@@ -73,12 +73,12 @@
             "type": "object",
             "properties": {
               "local_metadata": {
-                "$ref": "../../../../../components/schemas/AgentMetadata.json"
+                "$ref": "../../../../../components/schemas/agent_metadata.json"
               },
               "events": {
                 "type": "array",
                 "items": {
-                  "$ref": "../../../../../components/schemas/NewAgentEvent.json"
+                  "$ref": "../../../../../components/schemas/new_agent_event.json"
                 }
               }
             }

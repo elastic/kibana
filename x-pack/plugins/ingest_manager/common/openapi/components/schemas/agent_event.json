@@ -11,7 +11,7 @@
       "required": ["id"]
     },
     {
-      "$ref": "./NewAgentEvent.json"
+      "$ref": "./new_agent_event.json"
     }
   ]
 }

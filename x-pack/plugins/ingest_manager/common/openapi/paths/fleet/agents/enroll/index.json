@@ -14,7 +14,7 @@
                   "type": "string"
                 },
                 "item": {
-                  "$ref": "../../../../components/schemas/Agent.json"
+                  "$ref": "../../../../components/schemas/agent.json"
                 }
               }
             }
@@ -25,7 +25,7 @@
     "operationId": "post-fleet-agents-enroll",
     "parameters": [
       {
-        "$ref": "../../../../components/parameters/xsrfHeader.json"
+        "$ref": "../../../../components/parameters/xsrf_header.json"
       }
     ],
     "requestBody": {
@@ -46,10 +46,10 @@
                 "required": ["local", "user_provided"],
                 "properties": {
                   "local": {
-                    "$ref": "../../../../components/schemas/AgentMetadata.json"
+                    "$ref": "../../../../components/schemas/agent_metadata.json"
                   },
                   "user_provided": {
-                    "$ref": "../../../../components/schemas/AgentMetadata.json"
+                    "$ref": "../../../../components/schemas/agent_metadata.json"
                   }
                 }
               }
@@ -61,7 +61,7 @@
     },
     "security": [
       {
-        "Enrollment_API_Key": []
+        "enrollment_api_key": []
       }
     ]
   }

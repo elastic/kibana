@@ -13,7 +13,7 @@
                 "items": {
                   "type": "array",
                   "items": {
-                    "$ref": "../../components/schemas/PackagePolicy.json"
+                    "$ref": "../../components/schemas/package_policy.json"
                   }
                 },
                 "total": {
@@ -49,14 +49,14 @@
       "content": {
         "application/json": {
           "schema": {
-            "$ref": "../../components/schemas/NewPackagePolicy.json"
+            "$ref": "../../components/schemas/new_package_policy.json"
           }
         }
       }
     },
     "parameters": [
       {
-        "$ref": "../../components/parameters/xsrfHeader.json"
+        "$ref": "../../components/parameters/xsrf_header.json"
       }
     ]
   }

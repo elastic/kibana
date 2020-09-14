@@ -13,7 +13,7 @@
                 "items": {
                   "type": "array",
                   "items": {
-                    "$ref": "../../components/schemas/AgentPolicy.json"
+                    "$ref": "../../components/schemas/agent_policy.json"
                   }
                 },
                 "total": {
@@ -35,13 +35,13 @@
     "operationId": "agent-policy-list",
     "parameters": [
       {
-        "$ref": "../../components/parameters/pageSizeParam.json"
+        "$ref": "../../components/parameters/page_size_param.json"
       },
       {
-        "$ref": "../../components/parameters/pageIndexParam.json"
+        "$ref": "../../components/parameters/page_index_param.json"
       },
       {
-        "$ref": "../../components/parameters/kueryParam.json"
+        "$ref": "../../components/parameters/kuery_param.json"
       }
     ],
     "description": ""
@@ -58,7 +58,7 @@
               "type": "object",
               "properties": {
                 "item": {
-                  "$ref": "../../components/schemas/AgentPolicy.json"
+                  "$ref": "../../components/schemas/agent_policy.json"
                 }
               }
             }
@@ -71,7 +71,7 @@
       "content": {
         "application/json": {
           "schema": {
-            "$ref": "../../components/schemas/NewAgentPolicy.json"
+            "$ref": "../../components/schemas/new_agent_policy.json"
           }
         }
       }
@@ -79,7 +79,7 @@
     "security": [],
     "parameters": [
       {
-        "$ref": "../../components/parameters/xsrfHeader.json"
+        "$ref": "../../components/parameters/xsrf_header.json"
       }
     ]
   }
