@@ -106,6 +106,13 @@ export const isFailedResourceState = <Data, Error>(
   state: Immutable<AsyncResourceState<Data, Error>>
 ): state is Immutable<FailedResourceState<Data, Error>> => state.type === 'FailedResourceState';
 
+export const isStaleResourceState = <Data, Error>(
+  state: Immutable<AsyncResourceState<Data, Error>>
+): state is Immutable<StaleResourceState<Data, Error>> =>
+  isUninitialisedResourceState(state) ||
+  isLoadedResourceState(state) ||
+  isFailedResourceState(state);
+
 // Set of functions to work with AsyncResourceState
 
 export const getLastLoadedResourceState = <Data, Error>(
