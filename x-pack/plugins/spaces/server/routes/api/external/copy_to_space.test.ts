@@ -30,10 +30,10 @@ import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
 jest.mock('../../../../../../../src/core/server', () => {
   return {
+    ...(jest.requireActual('../../../../../../../src/core/server') as Record<string, unknown>),
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
     resolveSavedObjectsImportErrors: jest.fn(),
-    kibanaResponseFactory: jest.requireActual('src/core/server').kibanaResponseFactory,
   };
 });
 import {
