@@ -75,3 +75,24 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 ];
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
+
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
+export const TRANSFORM_STATE = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+} as const;
+
+const transformStates = Object.values(TRANSFORM_STATE);
+export type TransformState = typeof transformStates[number];
+
+export const TRANSFORM_MODE = {
+  BATCH: 'batch',
+  CONTINUOUS: 'continuous',
+} as const;
+
+const transformModes = Object.values(TRANSFORM_MODE);
+export type TransformMode = typeof transformModes[number];
