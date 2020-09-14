@@ -84,9 +84,11 @@ const refreshList = async (
 };
 
 const createTrustedApp = async (
-  { dispatch, getState }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
+  const { dispatch, getState } = store;
+
   if (isCreatePending(getState())) {
     try {
       const newTrustedApp = getTrustedAppCreateData(getState());
@@ -100,6 +102,7 @@ const createTrustedApp = async (
           data: createdTrustedApp,
         },
       });
+      refreshList(store, trustedAppsService);
     } catch (error) {
       dispatch({
         type: 'serverReturnedCreateTrustedAppFailure',
