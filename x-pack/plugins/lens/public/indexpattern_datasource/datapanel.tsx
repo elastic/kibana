@@ -212,18 +212,21 @@ interface DataPanelState {
   isTypeFilterOpen: boolean;
   isAvailableAccordionOpen: boolean;
   isEmptyAccordionOpen: boolean;
+  isMetaAccordionOpen: boolean;
 }
 
 export interface FieldsGroup {
   specialFields: IndexPatternField[];
   availableFields: IndexPatternField[];
   emptyFields: IndexPatternField[];
+  metaFields: IndexPatternField[];
 }
 
 const defaultFieldGroups = {
   specialFields: [],
   availableFields: [],
   emptyFields: [],
+  metaFields: [],
 };
 
 const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
@@ -261,6 +264,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isTypeFilterOpen: false,
     isAvailableAccordionOpen: true,
     isEmptyAccordionOpen: false,
+    isMetaAccordionOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -301,6 +305,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         ...groupBy(sorted, (field) => {
           if (field.type === 'document') {
             return 'specialFields';
+          } else if (field.meta) {
+            return 'metaFields';
           } else {
             return 'emptyFields';
           }
@@ -312,6 +318,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       ...groupBy(sorted, (field) => {
         if (field.type === 'document') {
           return 'specialFields';
+        } else if (field.meta) {
+          return 'metaFields';
         } else if (containsData(field)) {
           return 'availableFields';
         } else return 'emptyFields';
@@ -352,6 +360,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       if (nearBottom) {
         const displayedFieldsLength =
           (localState.isAvailableAccordionOpen ? filteredFieldGroups.availableFields.length : 0) +
+          (localState.isMetaAccordionOpen ? filteredFieldGroups.metaFields.length : 0) +
           (localState.isEmptyAccordionOpen ? filteredFieldGroups.emptyFields.length : 0);
         setPageSize(
           Math.max(
@@ -365,37 +374,47 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     scrollContainer,
     localState.isAvailableAccordionOpen,
     localState.isEmptyAccordionOpen,
+    localState.isMetaAccordionOpen,
     filteredFieldGroups,
     pageSize,
     setPageSize,
   ]);
 
-  const [paginatedAvailableFields, paginatedEmptyFields]: [
+  const [paginatedAvailableFields, paginatedEmptyFields, paginatedMetaFields]: [
+    IndexPatternField[],
     IndexPatternField[],
     IndexPatternField[]
   ] = useMemo(() => {
-    const { availableFields, emptyFields } = filteredFieldGroups;
+    const { availableFields, emptyFields, metaFields } = filteredFieldGroups;
     const isAvailableAccordionOpen = localState.isAvailableAccordionOpen;
     const isEmptyAccordionOpen = localState.isEmptyAccordionOpen;
+    const isMetaAccordionOpen = localState.isMetaAccordionOpen;
 
-    if (isAvailableAccordionOpen && isEmptyAccordionOpen) {
-      if (availableFields.length > pageSize) {
-        return [availableFields.slice(0, pageSize), []];
-      } else {
-        return [availableFields, emptyFields.slice(0, pageSize - availableFields.length)];
-      }
-    }
-    if (isAvailableAccordionOpen && !isEmptyAccordionOpen) {
-      return [availableFields.slice(0, pageSize), []];
+    let slicedAvailableFields: IndexPatternField[] = [];
+    let slicedEmptyFields: IndexPatternField[] = [];
+    let slicedMetaFields: IndexPatternField[] = [];
+
+    let remainingItems = pageSize;
+
+    if (isAvailableAccordionOpen) {
+      slicedAvailableFields = availableFields.slice(0, remainingItems);
+      remainingItems = remainingItems - availableFields.length;
     }
 
-    if (!isAvailableAccordionOpen && isEmptyAccordionOpen) {
-      return [[], emptyFields.slice(0, pageSize)];
+    if (isEmptyAccordionOpen && remainingItems > 0) {
+      slicedEmptyFields = emptyFields.slice(0, remainingItems);
+      remainingItems = remainingItems - slicedEmptyFields.length;
     }
-    return [[], []];
+
+    if (isMetaAccordionOpen && remainingItems > 0) {
+      slicedMetaFields = metaFields.slice(0, remainingItems);
+    }
+
+    return [slicedAvailableFields, slicedEmptyFields, slicedMetaFields];
   }, [
     localState.isAvailableAccordionOpen,
     localState.isEmptyAccordionOpen,
+    localState.isMetaAccordionOpen,
     filteredFieldGroups,
     pageSize,
   ]);
@@ -579,7 +598,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         defaultMessage: 'Available fields',
                       })
                 }
-                exists={true}
+                exists={() => true}
                 hideDetails={fieldInfoUnavailable}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={filteredFieldGroups.availableFields.length}
@@ -595,6 +614,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   }));
                   const displayedFieldLength =
                     (open ? filteredFieldGroups.availableFields.length : 0) +
+                    (localState.isMetaAccordionOpen ? filteredFieldGroups.metaFields.length : 0) +
                     (localState.isEmptyAccordionOpen ? filteredFieldGroups.emptyFields.length : 0);
                   setPageSize(
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
@@ -622,7 +642,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   fieldsCount={filteredFieldGroups.emptyFields.length}
                   paginatedFields={paginatedEmptyFields}
                   hasLoaded={!!hasSyncedExistingFields}
-                  exists={false}
+                  exists={() => false}
                   fieldProps={fieldProps}
                   id="lnsIndexPatternEmptyFields"
                   label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
@@ -636,7 +656,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     const displayedFieldLength =
                       (localState.isAvailableAccordionOpen
                         ? filteredFieldGroups.availableFields.length
-                        : 0) + (open ? filteredFieldGroups.emptyFields.length : 0);
+                        : 0) +
+                      (localState.isMetaAccordionOpen ? filteredFieldGroups.metaFields.length : 0) +
+                      (open ? filteredFieldGroups.emptyFields.length : 0);
                     setPageSize(
                       Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                     );
@@ -651,6 +673,45 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   }
                 />
               )}
+              <EuiSpacer size="m" />
+              <FieldsAccordion
+                initialIsOpen={localState.isMetaAccordionOpen}
+                isFiltered={filteredFieldGroups.metaFields.length !== fieldGroups.metaFields.length}
+                fieldsCount={filteredFieldGroups.metaFields.length}
+                paginatedFields={paginatedMetaFields}
+                hasLoaded={!!hasSyncedExistingFields}
+                exists={(field) =>
+                  fieldExists(existingFields, currentIndexPattern.title, field.name)
+                }
+                fieldProps={fieldProps}
+                id="lnsIndexPatternMetaFields"
+                label={i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
+                  defaultMessage: 'Meta fields',
+                })}
+                onToggle={(open) => {
+                  setLocalState((s) => ({
+                    ...s,
+                    isMetaAccordionOpen: open,
+                  }));
+                  const displayedFieldLength =
+                    (localState.isAvailableAccordionOpen
+                      ? filteredFieldGroups.availableFields.length
+                      : 0) +
+                    (localState.isEmptyAccordionOpen ? filteredFieldGroups.emptyFields.length : 0) +
+                    (open ? filteredFieldGroups.emptyFields.length : 0);
+                  setPageSize(
+                    Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
+                  );
+                }}
+                renderCallout={
+                  <NoFieldsCallout
+                    isAffectedByFieldFilter={
+                      !!(localState.typeFilter.length || localState.nameFilter.length)
+                    }
+                    existFieldsInIndex={!!fieldGroups.metaFields.length}
+                  />
+                }
+              />
               <EuiSpacer size="m" />
             </div>
           </div>

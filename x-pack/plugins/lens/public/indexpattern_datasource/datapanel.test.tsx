@@ -627,7 +627,7 @@ describe('IndexPattern Data Panel', () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
       );
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -654,7 +654,7 @@ describe('IndexPattern Data Panel', () => {
           .length
       ).toEqual(1);
       wrapper.setProps({ existingFields: { idx1: {} } });
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
     it('should filter down by name', () => {
@@ -699,7 +699,7 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
       ]);
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
     });
 
     it('should toggle type if clicked again', () => {
