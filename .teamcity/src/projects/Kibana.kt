@@ -84,6 +84,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       }
 
       buildType(ApiIntegration)
+      buildType(QuickTests)
       buildType(AllTests)
     }
 
