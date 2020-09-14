@@ -18,10 +18,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import {
-  AggName,
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
