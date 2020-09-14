@@ -21,7 +21,9 @@ import { run, createFlagError } from '@kbn/dev-utils';
 import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
+import { push } from './enumeration_helpers';
 import { resolve } from 'path';
+import { pipe } from '../utils';
 
 const ROOT = resolve(__dirname, '../../../../..');
 
@@ -33,15 +35,25 @@ const flags = {
         `,
 };
 
+const data = [];
+const mutateData = push(data);
+
 export const generateTeamAssignments = () => {
   run(
     ({ flags, log }) => {
       if (flags.src === '') throw createFlagError('please provide a single --src flag');
       if (flags.dest === '') throw createFlagError('please provide a single --dest flag');
-      const parseCodeOwners = parse(flags.src);
-      // TODO: Change the flow such that "Find Definition" easily finds these symbols.
-      // Currently, I'm just passing closures, point free.
-      parseCodeOwners(log)(enumeratePatterns(ROOT))(flush(flags.dest));
+
+      parse(flags.src).subscribe(
+        mutateData,
+        (e) => log.error(e),
+        () =>
+          pipe(
+            logSuccess(flags.src, log),
+            enumeratePatterns(ROOT)(log),
+            flush(flags.dest)(log)
+          )(new Map(data))
+      );
     },
     {
       description: `
@@ -55,3 +67,10 @@ Create a file defining the team assignments,
     }
   );
 };
+
+function logSuccess(src, log) {
+  return (dataObj) => {
+    log.verbose(`\n### Parsing [${src}] Complete`);
+    return dataObj;
+  };
+}
