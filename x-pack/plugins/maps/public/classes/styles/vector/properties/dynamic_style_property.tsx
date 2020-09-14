@@ -384,11 +384,7 @@ export class DynamicStyleProperty<T>
   getMbPropertyValue(
     rawValue: string | number | null | undefined
   ): string | number | null | undefined {
-    if (this.supportsMbFeatureState()) {
-      return getNumericalMbFeatureStateValue(rawValue);
-    } else {
-      return rawValue;
-    }
+    return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
   }
 }
 
