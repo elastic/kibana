@@ -5,8 +5,8 @@
  */
 
 import { RequestHandlerContext } from '../../../../../src/core/server';
-import { pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+import { BehaviorSubject } from 'rxjs';
 
 const mockAsyncResponse = {
   body: {
@@ -42,6 +42,11 @@ describe('ES search strategy', () => {
   };
   const mockContext = {
     core: {
+      uiSettings: {
+        client: {
+          get: jest.fn(),
+        },
+      },
       elasticsearch: {
         client: {
           asCurrentUser: {
@@ -55,7 +60,15 @@ describe('ES search strategy', () => {
       },
     },
   };
-  const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
+  const mockConfig$ = new BehaviorSubject<any>({
+    elasticsearch: {
+      shardTimeout: {
+        asMilliseconds: () => {
+          return 100;
+        },
+      },
+    },
+  });
 
   beforeEach(() => {
     mockApiCaller.mockClear();

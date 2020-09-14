@@ -74,7 +74,7 @@ describe(`feature_privilege_builder`, () => {
           Array [
             "alerting:1.0.0-zeta1:alert-type/my-feature/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertStatus",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/find",
           ]
         `);
@@ -111,7 +111,7 @@ describe(`feature_privilege_builder`, () => {
           Array [
             "alerting:1.0.0-zeta1:alert-type/my-feature/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertStatus",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
@@ -158,7 +158,7 @@ describe(`feature_privilege_builder`, () => {
           Array [
             "alerting:1.0.0-zeta1:alert-type/my-feature/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertStatus",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertInstanceSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
@@ -172,7 +172,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteInstance",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertStatus",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertInstanceSummary",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/find",
           ]
         `);

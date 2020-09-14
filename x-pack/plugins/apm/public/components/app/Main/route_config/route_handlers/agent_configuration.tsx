@@ -5,14 +5,17 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { toQuery } from '../../../../shared/Links/url_helpers';
 import { Settings } from '../../../Settings';
 import { AgentConfigurationCreateEdit } from '../../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
 
-export function EditAgentConfigurationRouteHandler() {
-  const history = useHistory();
+type EditAgentConfigurationRouteHandler = RouteComponentProps<{}>;
+
+export function EditAgentConfigurationRouteHandler({
+  history,
+}: EditAgentConfigurationRouteHandler) {
   const { search } = history.location;
 
   // typescript complains because `pageStop` does not exist in `APMQueryParams`
@@ -40,8 +43,11 @@ export function EditAgentConfigurationRouteHandler() {
   );
 }
 
-export function CreateAgentConfigurationRouteHandler() {
-  const history = useHistory();
+type CreateAgentConfigurationRouteHandlerProps = RouteComponentProps<{}>;
+
+export function CreateAgentConfigurationRouteHandler({
+  history,
+}: CreateAgentConfigurationRouteHandlerProps) {
   const { search } = history.location;
 
   // Ignoring here because we specifically DO NOT want to add the query params to the global route handler

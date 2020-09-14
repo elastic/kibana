@@ -24,15 +24,23 @@ import {
 import { xpackMocks } from '../../../../../../mocks';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { EndpointAppContext } from '../../types';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ExceptionListClient, ListClient } from '../../../../../lists/server';
+import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
 import { DeleteTrustedAppsRequestParams } from './types';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+
+type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
+  lists?: {
+    getListClient: () => jest.Mocked<ListClient>;
+    getExceptionListClient: () => jest.Mocked<ExceptionListClient>;
+  };
+};
 
 describe('when invoking endpoint trusted apps route handlers', () => {
   let routerMock: jest.Mocked<IRouter>;
   let endpointAppContextService: EndpointAppContextService;
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: RequestHandlerContextWithLists;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let exceptionsListClient: jest.Mocked<ExceptionListClient>;
   let endpointAppContext: EndpointAppContext;
@@ -41,7 +49,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    exceptionsListClient = startContract.exceptionsListService as jest.Mocked<ExceptionListClient>;
+    exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
     endpointAppContextService.start(startContract);
     endpointAppContext = {
       ...createMockEndpointAppContext(),
@@ -50,7 +58,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     registerTrustedAppsRoutes(routerMock, endpointAppContext);
 
     // For use in individual API calls
-    context = xpackMocks.createRequestHandlerContext();
+    context = {
+      ...xpackMocks.createRequestHandlerContext(),
+      lists: {
+        getListClient: jest.fn(),
+        getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+      },
+    };
     response = httpServerMock.createResponseFactory();
   });
 
@@ -72,6 +86,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       [, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith(TRUSTED_APPS_LIST_API)
       )!;
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createListRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
     });
 
     it('should create the Trusted Apps List first', async () => {
@@ -155,6 +175,12 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       });
     });
 
+    it('should use ExceptionListClient from route handler context', async () => {
+      const request = createPostRequest();
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
     it('should create trusted app list first', async () => {
       const request = createPostRequest();
       await routeHandler(context, request, response);
@@ -236,6 +262,11 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         path: TRUSTED_APPS_DELETE_API.replace('{id}', '123'),
         method: 'delete',
       });
+    });
+
+    it('should use ExceptionListClient from route handler context', async () => {
+      await routeHandler(context, request, response);
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
     });
 
     it('should return 200 on successful delete', async () => {
