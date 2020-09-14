@@ -51,7 +51,12 @@ type GetCompositeKeys<
 
 type CompositeOptionsSource = Record<
   string,
-  { terms: { field: string; missing_bucket?: boolean } } | undefined
+  | {
+      terms: ({ field: string } | { script: Script }) & {
+        missing_bucket?: boolean;
+      };
+    }
+  | undefined
 >;
 
 export interface AggregationOptionsByType {
@@ -141,7 +146,7 @@ export interface AggregationOptionsByType {
     buckets: number;
   } & AggregationSourceOptions;
   percentile_ranks: {
-    values: string[];
+    values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
@@ -281,10 +286,9 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<
-      GetCompositeKeys<TAggregationOptionsMap>,
-      string | number
-    >;
+    after_key: {
+      [key in GetCompositeKeys<TAggregationOptionsMap>]: TAggregationOptionsMap;
+    };
     buckets: Array<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;

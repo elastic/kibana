@@ -92,8 +92,8 @@ export const CreateArchives: Task = {
       });
 
       metrics.push({
-        group: `${build.isOss() ? 'oss ' : ''}distributable file count`,
-        id: 'total',
+        group: 'distributable file count',
+        id: build.isOss() ? 'oss' : 'default',
         value: fileCount,
       });
     }

@@ -48,6 +48,8 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
+  DEFINE_EDIT_BUTTON,
+  ABOUT_EDIT_BUTTON,
 } from '../screens/create_new_rule';
 import { TIMELINE } from '../screens/timeline';
 
@@ -173,6 +175,20 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+};
+
+export const expectDefineFormToRepopulateAndContinue = (rule: CustomRule) => {
+  cy.get(DEFINE_EDIT_BUTTON).click();
+  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+  cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
+};
+
+export const expectAboutFormToRepopulateAndContinue = (rule: CustomRule) => {
+  cy.get(ABOUT_EDIT_BUTTON).click();
+  cy.get(RULE_NAME_INPUT).invoke('val').should('eq', rule.name);
+  cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+  cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {

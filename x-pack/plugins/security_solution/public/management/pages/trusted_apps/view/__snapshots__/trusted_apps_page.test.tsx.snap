@@ -17,5 +17,7 @@ exports[`TrustedAppsPage rendering 1`] = `
       values={Object {}}
     />
   }
-/>
+>
+  <TrustedAppsList />
+</AdministrationListPage>
 `;

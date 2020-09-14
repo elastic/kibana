@@ -19,9 +19,7 @@
 
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
-jest.mock('./config/legacy_deprecation_adapters', () => ({
-  convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
-}));
+
 import {
   findLegacyPluginSpecsMock,
   logLegacyThirdPartyPluginDeprecationWarningMock,
@@ -446,46 +444,8 @@ describe('#discoverPlugins()', () => {
     expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger, env.packageInfo);
   });
 
-  it(`register legacy plugin's deprecation providers`, async () => {
-    findLegacyPluginSpecsMock.mockImplementation(
-      (settings) =>
-        Promise.resolve({
-          pluginSpecs: [
-            {
-              getDeprecationsProvider: () => undefined,
-            },
-            {
-              getDeprecationsProvider: () => 'providerA',
-            },
-            {
-              getDeprecationsProvider: () => 'providerB',
-            },
-          ],
-          pluginExtendedConfig: settings,
-          disabledPluginSpecs: [],
-          uiExports: {},
-          navLinks: [],
-        }) as any
-    );
-
-    const legacyService = new LegacyService({
-      coreId,
-      env,
-      logger,
-      configService: configService as any,
-    });
-
-    await legacyService.discoverPlugins();
-    expect(configService.addDeprecationProvider).toHaveBeenCalledTimes(2);
-    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
-    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
-  });
-
   it(`logs deprecations for legacy third party plugins`, async () => {
-    const pluginSpecs = [
-      { getId: () => 'pluginA', getDeprecationsProvider: () => undefined },
-      { getId: () => 'pluginB', getDeprecationsProvider: () => undefined },
-    ];
+    const pluginSpecs = [{ getId: () => 'pluginA' }, { getId: () => 'pluginB' }];
     findLegacyPluginSpecsMock.mockImplementation(
       (settings) =>
         Promise.resolve({

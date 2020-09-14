@@ -8,7 +8,7 @@ import { uniq } from 'lodash';
 import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-const readOperations: string[] = ['get', 'getAlertState', 'getAlertStatus', 'find'];
+const readOperations: string[] = ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'];
 const writeOperations: string[] = [
   'create',
   'delete',

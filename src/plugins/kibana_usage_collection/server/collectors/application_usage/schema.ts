@@ -66,6 +66,7 @@ export const applicationUsageSchema = {
   csm: commonSchema,
   canvas: commonSchema,
   dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
+  enterpriseSearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,

@@ -16,7 +16,7 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';

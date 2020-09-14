@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
 import { Cluster } from './server/lib/cluster';
 import { createProxy } from './server/lib/create_proxy';
 
 export default function (kibana) {
-  let defaultVars;
-
   return new kibana.Plugin({
     require: [],
-
-    uiExports: { injectDefaultVars: () => defaultVars },
 
     async init(server) {
       // All methods that ES plugin exposes are synchronous so we should get the first
@@ -35,16 +30,6 @@ export default function (kibana) {
       const { client } = server.newPlatform.setup.core.elasticsearch.legacy;
       const adminCluster = new Cluster(client);
       const dataCluster = new Cluster(client);
-
-      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
-        .pipe(first())
-        .toPromise();
-
-      defaultVars = {
-        esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
-        esShardTimeout: esConfig.shardTimeout.asMilliseconds(),
-        esApiVersion: esConfig.apiVersion,
-      };
 
       const clusters = new Map();
       server.expose('getCluster', (name) => {

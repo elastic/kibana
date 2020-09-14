@@ -24,7 +24,7 @@ export interface DataTypeDefinition {
 export interface ParameterDefinition {
   title?: string;
   description?: JSX.Element | string;
-  fieldConfig: FieldConfig;
+  fieldConfig: FieldConfig<any, any>;
   schema?: any;
   props?: { [key: string]: ParameterDefinition };
   documentation?: {
@@ -124,6 +124,7 @@ export type ParameterName =
   | 'eager_global_ordinals_join'
   | 'index_prefixes'
   | 'index_phrases'
+  | 'positive_score_impact'
   | 'norms'
   | 'norms_keyword'
   | 'term_vector'

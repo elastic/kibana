@@ -75,7 +75,7 @@ export function Screenshots(props: ScreenshotProps) {
               set image to same width.  Will need to update if size changes.
             */}
           <EuiImage
-            url={toImage(image.src)}
+            url={toImage(image.path || image.src)}
             alt="screenshot image preview"
             size="l"
             allowFullScreen
