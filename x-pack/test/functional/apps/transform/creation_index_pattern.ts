@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface GroupByEntry {
@@ -141,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             values: [`Men's Accessories`],
           },
           row: {
-            status: 'stopped',
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
           },
@@ -239,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             values: ['AE', 'CO', 'EG', 'FR', 'GB'],
           },
           row: {
-            status: 'stopped',
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
           },

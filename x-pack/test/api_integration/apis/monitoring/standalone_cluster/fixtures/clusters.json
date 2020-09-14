@@ -102,7 +102,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": true
+      "enabled": false
     },
     "clusterMeta": {
       "enabled": false,
@@ -170,7 +170,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": true
+      "enabled": false
     },
     "clusterMeta": {
       "enabled": false,
