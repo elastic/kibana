@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux';
+
 import { AsyncResourceState, TrustedAppsListData } from '../state';
 
-export interface TrustedAppsListResourceStateChanged {
-  type: 'trustedAppsListResourceStateChanged';
-  payload: {
-    newState: AsyncResourceState<TrustedAppsListData>;
-  };
+interface ResourceStateChanged<T, D = null> extends Action<T> {
+  payload: { newState: AsyncResourceState<D> };
 }
+
+export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
+  'trustedAppsListResourceStateChanged',
+  TrustedAppsListData
+>;
 
 export type TrustedAppsPageAction = TrustedAppsListResourceStateChanged;
