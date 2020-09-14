@@ -37,7 +37,7 @@ import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_typ
 interface Props {
   hit: ElasticSearchHit;
   columns: string[];
-  getContextAppHref: (id: string | number | Record<string, unknown>) => string;
+  getContextAppHref: (id: string) => string;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onClose: () => void;

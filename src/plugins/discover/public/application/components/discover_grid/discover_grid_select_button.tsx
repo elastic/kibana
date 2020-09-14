@@ -21,10 +21,19 @@ import { EuiCheckbox } from '@elastic/eui';
 import { GridContext, DiscoverGridContext } from './discover_grid_context';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
-export const DiscoverGridSelectButton = ({ col, rows }: { col: any; rows: ElasticSearchHit[] }) => {
+export const DiscoverGridSelectButton = ({
+  col,
+  rows,
+}: {
+  col: any;
+  rows?: ElasticSearchHit[];
+}) => {
   const { selected, setSelected } = useContext<GridContext>(DiscoverGridContext);
   const rowIndex = col.rowIndex;
   const isChecked = selected.includes(rowIndex);
+  if (!rows) {
+    return null;
+  }
 
   return (
     <EuiCheckbox

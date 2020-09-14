@@ -99,3 +99,13 @@ div[data-rbd-draggable-id='Time'] {
 .euiDataGridRowCell--numeric {
   text-align: right;
 }
+
+.euiDataGrid__noResults {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
