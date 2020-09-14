@@ -7,14 +7,15 @@
 import { Duration } from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { ListClient } from '../../../../../../lists/server';
-
 import {
   Type,
   LanguageOrUndefined,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { AlertServices } from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';

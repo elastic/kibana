@@ -6,7 +6,7 @@
 
 import get from 'lodash/fp/get';
 import { Filter } from 'src/plugins/data/common';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,

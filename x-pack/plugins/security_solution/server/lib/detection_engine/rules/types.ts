@@ -84,11 +84,14 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import {
   ThreatIndexOrUndefined,
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
   ThreatFiltersOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';

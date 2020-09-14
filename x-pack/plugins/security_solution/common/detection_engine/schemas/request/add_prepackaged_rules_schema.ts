@@ -44,11 +44,13 @@ import {
   Author,
   RiskScoreMapping,
   SeverityMapping,
+} from '../common/schemas';
+import {
+  threat_index,
+  threat_query,
   threat_filters,
   threat_mapping,
-  threat_query,
-  threat_index,
-} from '../common/schemas';
+} from '../types/threat_mapping';
 
 import {
   DefaultStringArray,

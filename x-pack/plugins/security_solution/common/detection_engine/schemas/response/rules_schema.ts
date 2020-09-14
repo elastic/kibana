@@ -59,11 +59,14 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+} from '../common/schemas';
+import {
   threat_index,
   threat_query,
   threat_filters,
   threat_mapping,
-} from '../common/schemas';
+} from '../types/threat_mapping';
+
 import { DefaultListArray } from '../types/lists_default_array';
 import {
   DefaultStringArray,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { Filter } from 'src/plugins/data/common';
 
 import { SearchResponse } from 'elasticsearch';
