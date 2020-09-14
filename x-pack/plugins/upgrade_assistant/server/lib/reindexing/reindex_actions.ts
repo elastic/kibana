@@ -253,7 +253,7 @@ export const reindexActionsFactory = (
           // The IndexGroup enum value (a string) serves as the ID of the lock doc
           return await client.get<ReindexOperation>(REINDEX_OP_TYPE, indexGroup);
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 404) {
+          if (client.errors.isNotFoundError(e)) {
             return await client.create<ReindexOperation>(
               REINDEX_OP_TYPE,
               {

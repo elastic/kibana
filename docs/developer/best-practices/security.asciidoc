@@ -1,5 +1,5 @@
 [[security-best-practices]]
-=== Security best practices
+== Security best practices
 
 * XSS
 ** Check for usages of `dangerouslySetInnerHtml`, `Element.innerHTML`,
@@ -44,7 +44,7 @@ sensitive information which end up in the HTTP Response
 ** Ensure no sensitive cookies are forwarded to external resources.
 ** Ensure that all user controllable variables that are used in
 constructing a URL are escaped properly. This is relevant when using
-`transport.request` with the Elasticsearch client as no automatic
+`transport.request` with the {es} client as no automatic
 escaping is performed.
 * Reverse tabnabbing -
 https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing

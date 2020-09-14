@@ -60,7 +60,7 @@ interface Props {
   indicator?: () => React.ReactNode;
 }
 
-export const Legend: React.FC<Props> = ({
+export function Legend({
   onClick,
   text,
   color,
@@ -71,7 +71,7 @@ export const Legend: React.FC<Props> = ({
   shape = Shape.circle,
   indicator,
   ...rest
-}) => {
+}: Props) {
   const theme = useTheme();
   const indicatorColor = color || theme.eui.euiColorVis1;
 
@@ -96,4 +96,4 @@ export const Legend: React.FC<Props> = ({
       {text}
     </Container>
   );
-};
+}

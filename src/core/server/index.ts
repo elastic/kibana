@@ -39,13 +39,14 @@
  * @packageDocumentation
  */
 
+import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
   ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
+  IScopedClusterClient,
 } from './elasticsearch';
-
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
@@ -59,16 +60,10 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { UuidServiceSetup } from './uuid';
 import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
-import {
-  LoggingServiceSetup,
-  appendersSchema,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging';
+import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -109,6 +104,18 @@ export {
   LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchClient,
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  IScopedClusterClient,
+  SearchResponse,
+  CountResponse,
+  ShardsInfo,
+  ShardsResponse,
+  Explanation,
+  GetResponse,
+  DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
 export {
@@ -228,6 +235,8 @@ export {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -241,11 +250,13 @@ export {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
@@ -255,13 +266,13 @@ export {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -282,6 +293,7 @@ export {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectsUtils,
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
@@ -359,10 +371,13 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
+ *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
+ *    - {@link Auditor | uiSettings.auditor} - AuditTrail client scoped to the incoming request
  *
  * @public
  */
@@ -373,6 +388,7 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
+      client: IScopedClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
       };
@@ -413,8 +429,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
-  /** {@link UuidServiceSetup} */
-  uuid: UuidServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link AuditTrailSetup} */
@@ -464,7 +478,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  UuidServiceSetup,
   AuditTrailStart,
 };
 
@@ -478,8 +491,6 @@ export const config = {
     schema: elasticsearchConfigSchema,
   },
   logging: {
-    appenders: appendersSchema,
-    loggers: loggerSchema,
-    loggerContext: loggerContextConfigSchema,
+    appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };

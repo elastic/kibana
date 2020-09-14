@@ -19,7 +19,6 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { coreMock } from '../../../../core/public/mocks';
 

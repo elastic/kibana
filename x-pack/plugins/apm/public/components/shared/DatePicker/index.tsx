@@ -5,26 +5,23 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
 import { isEmpty, isEqual, pickBy } from 'lodash';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { history } from '../../../utils/history';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
-import {
-  TimePickerQuickRange,
-  TimePickerTimeDefaults,
-  TimePickerRefreshInterval,
-} from './typings';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
 function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
   return pickBy(obj, (value) => value !== undefined && !isEmpty(String(value)));
 }
 
 export function DatePicker() {
+  const history = useHistory();
   const location = useLocation();
   const { core } = useApmPluginContext();
 
@@ -36,19 +33,9 @@ export function DatePicker() {
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
-  const timePickerRefreshIntervalDefaults = core.uiSettings.get<
-    TimePickerRefreshInterval
-  >(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
-
   const DEFAULT_VALUES = {
     rangeFrom: timePickerTimeDefaults.from,
     rangeTo: timePickerTimeDefaults.to,
-    refreshPaused: timePickerRefreshIntervalDefaults.pause,
-    /*
-     * Must be replaced by timePickerRefreshIntervalDefaults.value when this issue is fixed.
-     * https://github.com/elastic/kibana/issues/70562
-     */
-    refreshInterval: 10000,
   };
 
   const commonlyUsedRanges = timePickerQuickRanges.map(
@@ -103,7 +90,14 @@ export function DatePicker() {
     ...timePickerURLParams,
   };
   if (!isEqual(nextParams, timePickerURLParams)) {
-    updateUrl(nextParams);
+    // When the default parameters are not availbale in the url, replace it adding the necessary parameters.
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...nextParams,
+      }),
+    });
   }
 
   return (

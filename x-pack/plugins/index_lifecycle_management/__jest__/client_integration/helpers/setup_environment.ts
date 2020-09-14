@@ -29,6 +29,8 @@ export const setupEnvironment = () => {
   );
 
   mockHttpClient.interceptors.response.use(({ data }) => data);
+  // This expects HttpSetup but we're giving it AxiosInstance.
+  // @ts-ignore
   initHttp(mockHttpClient);
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

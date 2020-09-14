@@ -493,7 +493,7 @@ describe('Index Templates tab', () => {
       });
 
       describe('tabs', () => {
-        test('should have 4 tabs', async () => {
+        test('should have 5 tabs', async () => {
           const template = fixtures.getTemplate({
             name: `a${getRandomString()}`,
             indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -524,35 +524,48 @@ describe('Index Templates tab', () => {
           const { find, actions, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(template);
+          httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
             'Summary',
             'Settings',
             'Mappings',
             'Aliases',
+            'Preview',
           ]);
 
           // Summary tab should be initial active tab
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify all tabs
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(false);
           expect(exists('aliasesTabContent')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(false);
           expect(exists('aliasesTabContent')).toBe(false);
           expect(exists('mappingsTabContent')).toBe(true);
+
+          await actions.selectDetailsTab('preview');
+          expect(exists('summaryTab')).toBe(false);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(false);
+          expect(exists('previewTabContent')).toBe(true);
+
+          expect(find('simulateTemplatePreview').text().replace(/\s/g, '')).toEqual(
+            JSON.stringify({ simulateTemplate: 'response' })
+          );
         });
 
         test('should show an info callout if data is not present', async () => {
@@ -568,17 +581,17 @@ describe('Index Templates tab', () => {
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify callout message per tab
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('noSettingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('noMappingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('noAliasesCallout')).toBe(true);
         });
       });

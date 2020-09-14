@@ -48,7 +48,6 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
 
   return (
     <EmptyPrompt
-      iconType="securityAnalyticsApp"
       title={<h2>{i18n.PRE_BUILT_TITLE}</h2>}
       body={<p>{i18n.PRE_BUILT_MSG}</p>}
       actions={

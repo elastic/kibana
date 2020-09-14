@@ -18,7 +18,7 @@
  */
 
 import { ExpressionType } from '../expression_types';
-import { DataAdapter, RequestAdapter } from '../../../inspector/common';
+import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
 import { TimeRange, Query, Filter } from '../../../data/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 
@@ -26,7 +26,7 @@ import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultInspectorAdapters> {
+export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
   /**
    * Get initial input with which execution started.
    */
@@ -75,7 +75,7 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
 /**
  * Default inspector adapters created if inspector adapters are not set explicitly.
  */
-export interface DefaultInspectorAdapters {
+export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   data: DataAdapter;
 }

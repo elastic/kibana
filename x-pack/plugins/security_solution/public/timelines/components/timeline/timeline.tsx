@@ -7,7 +7,6 @@
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -17,7 +16,6 @@ import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { getInvestigateInResolverAction } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -43,6 +41,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
+import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -168,7 +167,6 @@ export const TimelineComponent: React.FC<Props> = ({
   toggleColumn,
   usersViewing,
 }) => {
-  const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
@@ -213,7 +211,10 @@ export const TimelineComponent: React.FC<Props> = ({
     [isLoadingSource, combinedQueries, start, end]
   );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
+  const timelineQueryFields = useMemo(() => {
+    const columnFields = columnsHeader.map((c) => c.id);
+    return [...columnFields, ...requiredFieldsForActions];
+  }, [columnsHeader]);
   const timelineQuerySortField = useMemo(
     () => ({
       sortFieldId: sort.columnId,
@@ -228,7 +229,6 @@ export const TimelineComponent: React.FC<Props> = ({
       filterManager,
       id,
       indexToAdd,
-      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId: id })],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -286,6 +286,7 @@ export const TimelineComponent: React.FC<Props> = ({
           filterQuery={combinedQueries!.filterQuery}
           sortField={timelineQuerySortField}
           startDate={start}
+          queryDeduplication="timeline"
         >
           {({
             events,
@@ -316,6 +317,7 @@ export const TimelineComponent: React.FC<Props> = ({
                     data={events}
                     docValueFields={docValueFields}
                     id={id}
+                    refetch={refetch}
                     sort={sort}
                     toggleColumn={toggleColumn}
                   />

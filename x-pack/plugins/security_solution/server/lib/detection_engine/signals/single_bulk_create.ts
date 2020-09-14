@@ -51,7 +51,10 @@ export const filterDuplicateRules = (
     if (doc._source.signal == null) {
       return true;
     } else {
-      return !doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId);
+      return !(
+        doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
+        doc._source.signal.rule.id === ruleId
+      );
     }
   });
 };
@@ -83,6 +86,7 @@ export const singleBulkCreate = async ({
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
+  logger.debug(`about to bulk create ${filteredEvents.hits.hits.length} events`);
   if (filteredEvents.hits.hits.length === 0) {
     logger.debug(`all events were duplicates`);
     return { success: true, createdItemsCount: 0 };
@@ -135,6 +139,8 @@ export const singleBulkCreate = async ({
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
+    const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+    logger.debug(`ignored ${duplicateSignalsCount} duplicate signals`);
     const errorCountByMessage = errorAggregator(response, [409]);
     if (!isEmpty(errorCountByMessage)) {
       logger.error(
@@ -144,6 +150,6 @@ export const singleBulkCreate = async ({
   }
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
-
+  logger.debug(`bulk created ${createdItemsCount} signals`);
   return { success: true, bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
 };

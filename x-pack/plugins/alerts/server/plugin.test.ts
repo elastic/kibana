@@ -11,6 +11,8 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
 import { KibanaRequest, CoreSetup } from 'kibana/server';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { Feature } from '../../features/server';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -80,8 +82,10 @@ describe('Alerting Plugin', () => {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
+              getActionsAuthorizationWithRequest: jest.fn(),
             },
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+            features: mockFeatures(),
           } as unknown) as AlertingPluginsStart
         );
 
@@ -124,9 +128,11 @@ describe('Alerting Plugin', () => {
             actions: {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
+              getActionsAuthorizationWithRequest: jest.fn(),
             },
             spaces: () => null,
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+            features: mockFeatures(),
           } as unknown) as AlertingPluginsStart
         );
 
@@ -150,3 +156,31 @@ describe('Alerting Plugin', () => {
     });
   });
 });
+
+function mockFeatures() {
+  const features = featuresPluginMock.createSetup();
+  features.getFeatures.mockReturnValue([
+    new Feature({
+      id: 'appName',
+      name: 'appName',
+      app: [],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    }),
+  ]);
+  return features;
+}

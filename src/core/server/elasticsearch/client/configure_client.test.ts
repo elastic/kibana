@@ -118,26 +118,78 @@ describe('configureClient', () => {
   });
 
   describe('Client logging', () => {
-    it('logs error when the client emits an error', () => {
+    it('logs error when the client emits an @elastic/elasticsearch error', () => {
       const client = configureClient(config, { logger, scoped: false });
 
-      const response = createApiResponse({
-        body: {
-          error: {
-            type: 'error message',
-          },
-        },
-      });
-      client.emit('response', new errors.ResponseError(response), null);
-      client.emit('response', new Error('some error'), null);
+      const response = createApiResponse({ body: {} });
+      client.emit('response', new errors.TimeoutError('message', response), response);
 
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "ResponseError: error message",
+            "[TimeoutError]: message",
           ],
+        ]
+      `);
+    });
+
+    it('logs error when the client emits an ResponseError returned by elasticsearch', () => {
+      const client = configureClient(config, { logger, scoped: false });
+
+      const response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+            reason: 'request [/_path] contains unrecognized parameter: [name]',
+          },
+        },
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
           Array [
-            "Error: some error",
+            "[illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+          ],
+        ]
+      `);
+    });
+
+    it('logs default error info when the error response body is empty', () => {
+      const client = configureClient(config, { logger, scoped: false });
+
+      let response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {
+          error: {},
+        },
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
+          ],
+        ]
+      `);
+
+      logger.error.mockClear();
+
+      response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {} as any,
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
           ],
         ]
       `);

@@ -17,6 +17,7 @@ import {
   IContextProvider,
   RequestHandler,
 } from 'src/core/server';
+import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
 import {
   IEventLogConfig,
@@ -29,6 +30,7 @@ import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -39,28 +41,36 @@ const ACTIONS = {
   stopping: 'stopping',
 };
 
+interface PluginSetupDeps {
+  spaces?: SpacesPluginSetup;
+}
+
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
   private readonly config$: IEventLogConfig$;
   private systemLogger: Logger;
-  private eventLogService?: IEventLogService;
+  private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
+  private spacesService?: SpacesServiceSetup;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
     this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
+  async setup(core: CoreSetup, { spaces }: PluginSetupDeps): Promise<IEventLogService> {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const kibanaIndex = globalConfig.kibana.index;
 
     this.systemLogger.debug('setting up plugin');
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.spacesService = spaces?.spacesService;
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
@@ -75,7 +85,8 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
-      kibanaUUID: core.uuid.getInstanceUuid(),
+      kibanaUUID: this.context.env.instanceUuid,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -89,7 +100,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // Routes
     const router = core.http.createRouter();
     // Register routes
-    findRoute(router);
+    findRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }
@@ -112,9 +123,15 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       message: 'eventLog starting',
     });
 
+    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
+      const client = core.savedObjects.getScopedClient(request);
+      return client.get.bind(client);
+    });
+
     this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
-      savedObjectsService: core.savedObjects,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      spacesService: this.spacesService,
     });
     return this.eventLogClientService;
   }
@@ -125,8 +142,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   > => {
     return async (context, request) => {
       return {
-        getEventLogClient: () =>
-          this.eventLogClientService!.getClient(request, context.core.savedObjects.client),
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
       };
     };
   };

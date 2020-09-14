@@ -30,7 +30,8 @@ import {
 } from '@elastic/eui';
 
 import { DataTableFormat } from './data_table';
-import { InspectorViewProps, Adapters } from '../../../types';
+import { InspectorViewProps } from '../../../types';
+import { Adapters } from '../../../../common';
 import {
   TabularLoaderOptions,
   TabularData,

@@ -47,6 +47,7 @@ describe('error_schema', () => {
 
   test('it should NOT validate an error when it has required elements deleted from it', () => {
     const error = getErrorSchemaMock();
+    // @ts-expect-error
     delete error.error;
     const decoded = errorSchema.decode(error);
     const checked = exactCheck(error, decoded);

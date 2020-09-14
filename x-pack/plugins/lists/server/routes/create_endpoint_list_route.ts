@@ -5,12 +5,11 @@
  */
 
 import { IRouter } from 'kibana/server';
-import * as t from 'io-ts';
 
 import { ENDPOINT_LIST_URL } from '../../common/constants';
 import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
-import { exceptionListSchema } from '../../common/schemas';
+import { validate } from '../../common/shared_imports';
+import { createEndpointListSchema } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
 
@@ -27,7 +26,7 @@ export const createEndpointListRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_URL,
       validate: false,
@@ -35,21 +34,19 @@ export const createEndpointListRoute = (router: IRouter): void => {
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        // Our goal is be fast as possible and block the least amount of
         const exceptionLists = getExceptionListClient(context);
         const createdList = await exceptionLists.createEndpointList();
-        if (createdList != null) {
-          const [validated, errors] = validate(createdList, t.union([exceptionListSchema, t.null]));
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+        // We always return ok on a create  endpoint list route but with an empty body as
+        // an additional fetch of the full list would be slower and the UI has everything hard coded
+        // within it to get the list if it needs details about it. Our goal is to be as fast as possible
+        // and block the least amount of time with this route since it could end up in various parts of the
+        // stack at some point such as repeatedly being called by endpoint agents.
+        const body = createdList ?? {};
+        const [validated, errors] = validate(body, createEndpointListSchema);
+        if (errors != null) {
+          return siemResponse.error({ body: errors, statusCode: 500 });
         } else {
-          // We always return ok on a create  endpoint list route but with an empty body as
-          // an additional fetch of the full list would be slower and the UI has everything hard coded
-          // within it to get the  list if it needs details about it.
-          return response.ok({ body: {} });
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

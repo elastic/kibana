@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import { id, list_id, namespace_type } from '../common/schemas';
@@ -20,19 +18,12 @@ export const readExceptionListSchema = t.exact(
   })
 );
 
-export type ReadExceptionListSchemaPartial = t.TypeOf<typeof readExceptionListSchema>;
+export type ReadExceptionListSchema = t.OutputOf<typeof readExceptionListSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type ReadExceptionListSchemaPartialDecoded = Omit<
-  ReadExceptionListSchemaPartial,
+export type ReadExceptionListSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof readExceptionListSchema>>,
   'namespace_type'
 > & {
   namespace_type: NamespaceType;
 };
-
-// This type is used after a decode since some things are defaults after a decode.
-export type ReadExceptionListSchemaDecoded = RequiredKeepUndefined<
-  ReadExceptionListSchemaPartialDecoded
->;
-
-export type ReadExceptionListSchema = RequiredKeepUndefined<ReadExceptionListSchemaPartial>;

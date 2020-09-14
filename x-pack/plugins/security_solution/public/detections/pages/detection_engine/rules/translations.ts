@@ -16,7 +16,7 @@ export const BACK_TO_DETECTIONS = i18n.translate(
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
   {
-    defaultMessage: 'Import rule…',
+    defaultMessage: 'Import rule',
   }
 );
 
@@ -24,6 +24,14 @@ export const UPLOAD_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
   {
     defaultMessage: 'Upload value lists',
+  }
+);
+
+export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip',
+  {
+    defaultMessage:
+      'Use value lists to create an exception when a field value matches a value found in a list',
   }
 );
 
@@ -92,7 +100,7 @@ export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -108,7 +116,7 @@ export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -122,14 +130,14 @@ export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
 export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Duplicate selected…',
+    defaultMessage: 'Duplicate selected',
   }
 );
 
 export const BATCH_ACTION_DELETE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedTitle',
   {
-    defaultMessage: 'Delete selected…',
+    defaultMessage: 'Delete selected',
   }
 );
 
@@ -145,7 +153,7 @@ export const BATCH_ACTION_DELETE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}…',
+      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -216,7 +224,7 @@ export const DUPLICATE = i18n.translate(
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
-    defaultMessage: 'Duplicate rule…',
+    defaultMessage: 'Duplicate rule',
   }
 );
 
@@ -233,7 +241,7 @@ export const SUCCESSFULLY_DUPLICATED_RULES = (totalRules: number) =>
 export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
   {
-    defaultMessage: 'Error duplicating rule…',
+    defaultMessage: 'Error duplicating rule',
   }
 );
 
@@ -247,7 +255,7 @@ export const EXPORT_RULE = i18n.translate(
 export const DELETE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteeRuleDescription',
   {
-    defaultMessage: 'Delete rule…',
+    defaultMessage: 'Delete rule',
   }
 );
 
@@ -279,10 +287,24 @@ export const COLUMN_LAST_COMPLETE_RUN = i18n.translate(
   }
 );
 
+export const COLUMN_LAST_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastUpdateTitle',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
 export const COLUMN_LAST_RESPONSE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle',
   {
     defaultMessage: 'Last response',
+  }
+);
+
+export const COLUMN_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
+  {
+    defaultMessage: 'Version',
   }
 );
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { createContext, useContext } from 'react';
+
 import { IndexSettings } from './types';
 
 const IndexSettingsContext = createContext<IndexSettings | undefined>(undefined);

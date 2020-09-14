@@ -98,6 +98,14 @@ export function getVariableValue(node: ts.Node): string | Record<string, any> {
     return serializeObject(node);
   }
 
+  if (ts.isIdentifier(node)) {
+    const declaration = getIdentifierDeclaration(node);
+    if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+      return getVariableValue(declaration.initializer);
+    }
+    // TODO: If this is another imported value from another file, we'll need to go fetch it like in getPropertyValue
+  }
+
   throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
 }
 
@@ -112,10 +120,11 @@ export function serializeObject(node: ts.Node) {
     if (typeof propertyName === 'undefined') {
       throw new Error(`Unable to get property name ${property.getText()}`);
     }
+    const cleanPropertyName = propertyName.replace(/["']/g, '');
     if (ts.isPropertyAssignment(property)) {
-      value[propertyName] = getVariableValue(property.initializer);
+      value[cleanPropertyName] = getVariableValue(property.initializer);
     } else {
-      value[propertyName] = getVariableValue(property);
+      value[cleanPropertyName] = getVariableValue(property);
     }
   }
 
@@ -222,9 +231,29 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
 };
 
 export function difference(actual: any, expected: any) {
-  function changes(obj: any, base: any) {
+  function changes(obj: { [key: string]: any }, base: { [key: string]: any }) {
     return transform(obj, function (result, value, key) {
-      if (key && !isEqual(value, base[key])) {
+      if (key && /@@INDEX@@/.test(`${key}`)) {
+        // The type definition is an Index Signature, fuzzy searching for similar keys
+        const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+        const keysInBase = Object.keys(base)
+          .map((k) => {
+            const match = k.match(regexp);
+            return match && match[0];
+          })
+          .filter((s): s is string => !!s);
+
+        if (keysInBase.length === 0) {
+          // Mark this key as wrong because we couldn't find any matching keys
+          result[key] = value;
+        }
+
+        keysInBase.forEach((k) => {
+          if (!isEqual(value, base[k])) {
+            result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+          }
+        });
+      } else if (key && !isEqual(value, base[key])) {
         result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
       }
     });

@@ -65,7 +65,8 @@ export function runTelemetryCheck() {
         },
         {
           title: 'Checking Matching collector.schema against stored json files',
-          task: (context) => new Listr(checkMatchingSchemasTask(context), { exitOnError: true }),
+          task: (context) =>
+            new Listr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
         },
         {
           enabled: (_) => fix,

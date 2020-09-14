@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { listSchema, readListSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -17,7 +17,7 @@ export const readListRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: LIST_URL,
       validate: {

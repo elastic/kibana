@@ -23,9 +23,11 @@ import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-// @ts-ignore
+// @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
+import { createInspectorAdapters } from './vega_inspector';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
@@ -53,6 +55,9 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       showQueryBar: true,
       showFilterBar: true,
     },
-    stage: 'experimental',
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    },
+    inspectorAdapters: createInspectorAdapters,
   };
 };

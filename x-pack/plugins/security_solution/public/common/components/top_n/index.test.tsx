@@ -18,7 +18,6 @@ import {
   createSecuritySolutionStorageMock,
   mockIndexPattern,
 } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
 
@@ -29,6 +28,7 @@ import {
   getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -45,7 +45,7 @@ jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const field = 'process.name';
 const value = 'nice';

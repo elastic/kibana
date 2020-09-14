@@ -102,9 +102,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex?: Maybe<number>;
+  pageIndex: number;
 
-  pageSize?: Maybe<number>;
+  pageSize: number;
 }
 
 export interface SortTimeline {
@@ -397,11 +397,6 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -427,6 +422,10 @@ export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 export type ToStringArray = string[];
 
@@ -627,6 +626,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -1017,6 +1020,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[]>;
+
+  status?: Maybe<string[]>;
 }
 
 export interface RuleField {
@@ -2316,7 +2321,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
@@ -2325,8 +2330,6 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
-
-  templateTimelineType?: Maybe<TemplateTimelineType>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -2780,6 +2783,10 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<ToStringArrayNoNullable>;
+
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 
@@ -4423,7 +4430,6 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
-    templateTimelineType?: Maybe<TemplateTimelineType>;
     status?: Maybe<TimelineStatus>;
   };
 
@@ -5094,6 +5100,8 @@ export namespace GetTimelineQuery {
   export type Signal = {
     __typename?: 'SignalField';
 
+    status: Maybe<string[]>;
+
     original_time: Maybe<string[]>;
 
     rule: Maybe<_Rule>;
@@ -5654,6 +5662,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<_QueryMatch>;
   };
 
@@ -5870,6 +5880,8 @@ export namespace PersistTimelineMutation {
 
     eventType: Maybe<string>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5932,6 +5944,8 @@ export namespace PersistTimelineMutation {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5963,6 +5977,8 @@ export namespace PersistTimelineMutation {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<_QueryMatch>;
   };

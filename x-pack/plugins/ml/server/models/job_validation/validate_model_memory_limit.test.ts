@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
-import { ModelMemoryEstimate } from '../calculate_model_memory_limit/calculate_model_memory_limit';
+import { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {
@@ -65,44 +65,36 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   // mock estimate model memory
-  const modelMemoryEstimateResponse: ModelMemoryEstimate = {
+  const modelMemoryEstimateResponse: ModelMemoryEstimateResponse = {
     model_memory_estimate: '40mb',
   };
 
   interface MockAPICallResponse {
-    'ml.estimateModelMemory'?: ModelMemoryEstimate;
+    'ml.estimateModelMemory'?: ModelMemoryEstimateResponse;
   }
 
-  // mock callAsCurrentUser
+  // mock asCurrentUser
   // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
   // - to retrieve field capabilities used in search for split field cardinality
   const getMockMlClusterClient = ({
     'ml.estimateModelMemory': estimateModelMemory,
-  }: MockAPICallResponse = {}): ILegacyScopedClusterClient => {
-    const callAs = (call: string) => {
-      if (typeof call === undefined) {
-        return Promise.reject();
-      }
-
-      let response = {};
-      if (call === 'ml.info') {
-        response = mlInfoResponse;
-      } else if (call === 'search') {
-        response = cardinalitySearchResponse;
-      } else if (call === 'fieldCaps') {
-        response = fieldCapsResponse;
-      } else if (call === 'ml.estimateModelMemory') {
-        response = estimateModelMemory || modelMemoryEstimateResponse;
-      }
-      return Promise.resolve(response);
+  }: MockAPICallResponse = {}): IScopedClusterClient => {
+    const callAs = {
+      ml: {
+        info: () => Promise.resolve({ body: mlInfoResponse }),
+        estimateModelMemory: () =>
+          Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
+      },
+      search: () => Promise.resolve({ body: cardinalitySearchResponse }),
+      fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
     };
 
-    return {
-      callAsCurrentUser: callAs,
-      callAsInternalUser: callAs,
-    };
+    return ({
+      asCurrentUser: callAs,
+      asInternalUser: callAs,
+    } as unknown) as IScopedClusterClient;
   };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
@@ -208,6 +200,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
+    // @ts-expect-error
     delete mlInfoResponse.limits.max_model_memory_limit;
     // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10mb';

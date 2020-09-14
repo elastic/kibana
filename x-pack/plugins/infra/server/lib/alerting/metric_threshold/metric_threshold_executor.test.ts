@@ -318,6 +318,31 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold: 1,
+              metric: 'test.metric.3',
+              aggType: 'rate',
+            },
+          ],
+          alertOnNoData: true,
+        },
+      });
+    test('sends a No Data alert', async () => {
+      await execute();
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+  });
+
   // describe('querying a metric that later recovers', () => {
   //   const instanceID = '*';
   //   const execute = (threshold: number[]) =>
@@ -362,6 +387,36 @@ describe('The metric threshold alert type', () => {
   //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
   //   });
   // });
+
+  describe('querying a metric with a percentage metric', () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        services,
+        params: {
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseCriterion,
+              metric: 'test.metric.pct',
+              comparator: Comparator.GT,
+              threshold: [0.75],
+            },
+          ],
+        },
+      });
+    test('reports values converted from decimals to percentages to the action context', async () => {
+      const now = 1577858400000;
+      await execute();
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toContain('current value is 100%');
+      expect(action.reason).toContain('threshold of 75%');
+      expect(action.threshold.condition0[0]).toBe('75%');
+      expect(action.value.condition0).toBe('100%');
+      expect(action.timestamp).toBe(new Date(now).toISOString());
+    });
+  });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
@@ -401,7 +456,9 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
   } else if (metric === 'test.metric.3') {
-    return mocks.emptyMetricResponse;
+    return body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+      ? mocks.emptyRateResponse
+      : mocks.emptyMetricResponse;
   }
   return mocks.basicMetricResponse;
 });

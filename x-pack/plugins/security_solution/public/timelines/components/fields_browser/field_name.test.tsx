@@ -28,6 +28,10 @@ const defaultProps = {
 };
 
 describe('FieldName', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   test('it renders the field name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -46,7 +50,9 @@ describe('FieldName', () => {
         <FieldName {...defaultProps} />
       </TestProviders>
     );
-    wrapper.find('div').at(1).simulate('mouseenter');
+    wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
+    wrapper.update();
+    jest.runAllTimers();
     wrapper.update();
     expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
   });
@@ -60,6 +66,6 @@ describe('FieldName', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('strong').first().text()).toEqual(highlight);
+    expect(wrapper.find('mark').first().text()).toEqual(highlight);
   });
 });

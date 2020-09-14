@@ -143,7 +143,7 @@ export const PingType = t.intersection([
       response: t.partial({
         body: HttpResponseBodyType,
         bytes: t.number,
-        redirects: t.string,
+        redirects: t.array(t.string),
         status_code: t.number,
       }),
       version: t.string,
@@ -196,6 +196,9 @@ export const PingType = t.intersection([
       port: t.number,
       scheme: t.string,
     }),
+    service: t.partial({
+      name: t.string,
+    }),
   }),
 ]);
 
@@ -211,6 +214,9 @@ export const makePing = (f: {
   ip?: string;
   status?: string;
   duration?: number;
+  location?: string;
+  name?: string;
+  url?: string;
 }): Ping => {
   return {
     docId: f.docId || 'myDocId',
@@ -221,7 +227,10 @@ export const makePing = (f: {
       ip: f.ip || '127.0.0.1',
       status: f.status || 'up',
       duration: { us: f.duration || 100000 },
+      name: f.name,
     },
+    ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
+    ...(f.url ? { url: { full: f.url } } : {}),
   };
 };
 

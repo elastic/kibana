@@ -13,15 +13,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import {
   RuleStep,
   RuleStepProps,
   ActionsStepRule,
 } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import {
   ThrottleSelectField,
@@ -33,16 +34,14 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
-import { SecurityPageName } from '../../../../app/types';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: string[];
+  actionMessageParams: ActionVariable[];
 }
 
-const stepActionsDefaultValue = {
+const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
-  isNew: true,
   actions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
@@ -65,68 +64,69 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  setStepData,
+  onSubmit,
   setForm,
   actionMessageParams,
 }) => {
-  const initialState = defaultValues ?? stepActionsDefaultValue;
-  const [myStepData, setMyStepData] = useState<ActionsStepRule>(initialState);
   const {
     services: {
       application,
       triggers_actions_ui: { actionTypeRegistry },
     },
   } = useKibana();
+  const kibanaAbsoluteUrl = useMemo(
+    () =>
+      application.getUrlForApp(`${APP_ID}`, {
+        absolute: true,
+      }),
+    [application]
+  );
+  const initialState = {
+    ...(defaultValues ?? stepActionsDefaultValue),
+    kibanaSiemAppUrl: kibanaAbsoluteUrl,
+  };
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
-
-  const { form } = useForm({
+  const { form } = useForm<ActionsStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
+  const { getFields, getFormData, submit } = form;
+  const [{ throttle: formThrottle }] = (useFormData({
+    form,
+    watch: ['throttle'],
+  }) as unknown) as [Partial<ActionsStepRule>];
+  const throttle = formThrottle || initialState.throttle;
 
-  // TO DO need to make sure that logic is still valid
-  const kibanaAbsoluteUrl = useMemo(() => {
-    const url = application.getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-      absolute: true,
-    });
-    if (url != null && url.includes('app/security/alerts')) {
-      return url.replace('app/security/alerts', 'app/security');
-    }
-    return url;
-  }, [application]);
-
-  const onSubmit = useCallback(
-    async (enabled: boolean) => {
-      if (setStepData) {
-        setStepData(RuleStep.ruleActions, null, false);
-        const { isValid: newIsValid, data } = await submit();
-        if (newIsValid) {
-          setStepData(RuleStep.ruleActions, { ...data, enabled }, newIsValid);
-          setMyStepData({ ...data, isNew: false } as ActionsStepRule);
-        }
+  const handleSubmit = useCallback(
+    (enabled: boolean) => {
+      getFields().enabled.setValue(enabled);
+      if (onSubmit) {
+        onSubmit();
       }
     },
-    [setStepData, submit]
+    [getFields, onSubmit]
   );
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.ruleActions, form);
+      setForm(RuleStep.ruleActions, getData);
     }
-  }, [form, setForm]);
-
-  const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
-    myStepData,
-    setMyStepData,
-  ]);
+  }, [getData, setForm]);
 
   const throttleOptions = useMemo(() => {
-    const throttle = myStepData.throttle;
-
     return getThrottleOptions(throttle);
-  }, [myStepData]);
+  }, [throttle]);
 
   const throttleFieldComponentProps = useMemo(
     () => ({
@@ -134,18 +134,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       isDisabled: isLoading,
       dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
       hasNoInitialSelection: false,
-      handleChange: updateThrottle,
       euiFieldProps: {
         options: throttleOptions,
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLoading, updateThrottle]
+    [isLoading, throttleOptions]
   );
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription schema={schema} data={myStepData} columns="single" />
+      <StepRuleDescription schema={schema} data={initialState} columns="single" />
     </StepContentWrapper>
   ) : (
     <>
@@ -157,12 +155,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               component={ThrottleSelectField}
               componentProps={throttleFieldComponentProps}
             />
-            {myStepData.throttle !== stepActionsDefaultValue.throttle ? (
+            {throttle !== stepActionsDefaultValue.throttle ? (
               <>
                 <EuiSpacer />
                 <UseField
                   path="actions"
-                  defaultValue={myStepData.actions}
                   component={RuleActionsField}
                   componentProps={{
                     messageVariables: actionMessageParams,
@@ -170,18 +167,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 />
               </>
             ) : (
-              <UseField
-                path="actions"
-                defaultValue={myStepData.actions}
-                component={GhostFormField}
-              />
+              <UseField path="actions" component={GhostFormField} />
             )}
-            <UseField
-              path="kibanaSiemAppUrl"
-              defaultValue={kibanaAbsoluteUrl}
-              component={GhostFormField}
-            />
-            <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
+            <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
+            <UseField path="enabled" component={GhostFormField} />
           </EuiForm>
         </Form>
       </StepContentWrapper>
@@ -200,7 +189,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 fill={false}
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={onSubmit.bind(null, false)}
+                onClick={() => handleSubmit(false)}
               >
                 {I18n.COMPLETE_WITHOUT_ACTIVATING}
               </EuiButton>
@@ -210,7 +199,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 fill
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={onSubmit.bind(null, true)}
+                onClick={() => handleSubmit(true)}
                 data-test-subj="create-activate"
               >
                 {I18n.COMPLETE_WITH_ACTIVATING}

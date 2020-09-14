@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { borderRadius, px, unit, units } from '../../../style/variables';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { KeyValueTable } from '../KeyValueTable';
 import { flattenObject } from '../../../utils/flattenObject';
 
@@ -20,10 +20,10 @@ const VariablesContainer = styled.div`
 `;
 
 interface Props {
-  vars: IStackframe['vars'];
+  vars: Stackframe['vars'];
 }
 
-export const Variables = ({ vars }: Props) => {
+export function Variables({ vars }: Props) {
   if (!vars) {
     return null;
   }
@@ -46,4 +46,4 @@ export const Variables = ({ vars }: Props) => {
       </VariablesContainer>
     </React.Fragment>
   );
-};
+}

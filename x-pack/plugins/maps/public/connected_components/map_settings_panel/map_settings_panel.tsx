@@ -96,6 +96,7 @@ export function MapSettingsPanel({
               iconType="check"
               onClick={keepChanges}
               fill
+              data-test-subj="mapSettingSubmitButton"
             >
               <FormattedMessage
                 id="xpack.maps.mapSettingsPanel.keepChangesButtonLabel"

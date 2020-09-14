@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   IInterpreterRenderHandlers,
@@ -71,6 +72,11 @@ export const pie: ExpressionFunctionDefinition<
     },
     nestedLegend: {
       types: ['boolean'],
+      help: '',
+    },
+    legendPosition: {
+      types: ['string'],
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
       help: '',
     },
     percentDecimals: {

@@ -5,9 +5,9 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
+// @ts-expect-error
 import { calculateAuto } from './calculate_auto';
-// @ts-ignore
+// @ts-expect-error
 import { unitToSeconds } from './unit_to_seconds';
 
 export function getBucketSize(start: number, end: number, interval: string) {

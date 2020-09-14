@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
@@ -42,8 +43,8 @@ export type ReturnUseAddOrUpdateException = [
 
 export interface UseAddOrUpdateExceptionProps {
   http: HttpStart;
-  onError: (arg: Error) => void;
-  onSuccess: () => void;
+  onError: (arg: Error, code: number | null, message: string | null) => void;
+  onSuccess: (updated: number, conficts: number) => void;
 }
 
 /**
@@ -60,7 +61,19 @@ export const useAddOrUpdateException = ({
   onSuccess,
 }: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
   const [isLoading, setIsLoading] = useState(false);
-  const addOrUpdateException = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
+    async (exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+      if (addOrUpdateExceptionRef.current !== null) {
+        addOrUpdateExceptionRef.current(
+          exceptionItemsToAddOrUpdate,
+          alertIdToClose,
+          bulkCloseIndex
+        );
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -110,10 +123,13 @@ export const useAddOrUpdateException = ({
     ) => {
       try {
         setIsLoading(true);
-        if (alertIdToClose !== null && alertIdToClose !== undefined) {
-          await updateAlertStatus({
+        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
+        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        if (alertIdToClose != null) {
+          alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
             status: 'closed',
+            signal: abortCtrl.signal,
           });
         }
 
@@ -126,34 +142,49 @@ export const useAddOrUpdateException = ({
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
           );
-          await updateAlertStatus({
+
+          bulkResponse = await updateAlertStatus({
             query: {
               query: filter,
             },
             status: 'closed',
+            signal: abortCtrl.signal,
           });
         }
 
         await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
+        // NOTE: there could be some overlap here... it's possible that the first response had conflicts
+        // but that the alert was closed in the second call. In this case, a conflict will be reported even
+        // though it was already resolved. I'm not sure that there's an easy way to solve this, but it should
+        // have minimal impact on the user... they'd see a warning that indicates a possible conflict, but the
+        // state of the alerts and their representation in the UI would be consistent.
+        const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
+        const conflicts =
+          alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
+
         if (isSubscribed) {
           setIsLoading(false);
-          onSuccess();
+          onSuccess(updated, conflicts);
         }
       } catch (error) {
         if (isSubscribed) {
           setIsLoading(false);
-          onError(error);
+          if (error.body != null) {
+            onError(error, error.body.status_code, error.body.message);
+          } else {
+            onError(error, null, null);
+          }
         }
       }
     };
 
-    addOrUpdateException.current = addOrUpdateExceptionItems;
+    addOrUpdateExceptionRef.current = addOrUpdateExceptionItems;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [http, onSuccess, onError]);
 
-  return [{ isLoading }, addOrUpdateException.current];
+  return [{ isLoading }, addOrUpdateException];
 };

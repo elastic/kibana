@@ -13,13 +13,6 @@ interface ProviderContainerProps {
 }
 
 const ProviderContainerComponent = styled.div<ProviderContainerProps>`
-  &,
-  &::before,
-  &::after {
-    transition: background ${({ theme }) => theme.eui.euiAnimSpeedFast} ease,
-      color ${({ theme }) => theme.eui.euiAnimSpeedFast} ease;
-  }
-
   ${({ isDragging }) =>
     !isDragging &&
     css`

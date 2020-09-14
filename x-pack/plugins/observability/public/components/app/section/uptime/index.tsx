@@ -35,7 +35,7 @@ interface Props {
   bucketSize?: string;
 }
 
-export const UptimeSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
+export function UptimeSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
@@ -48,7 +48,7 @@ export const UptimeSection = ({ absoluteTime, relativeTime, bucketSize }: Props)
         bucketSize,
       });
     }
-  }, [start, end, bucketSize]);
+  }, [start, end, bucketSize, relativeTime]);
 
   const min = moment.utc(absoluteTime.start).valueOf();
   const max = moment.utc(absoluteTime.end).valueOf();
@@ -138,9 +138,9 @@ export const UptimeSection = ({ absoluteTime, relativeTime, bucketSize }: Props)
       </ChartContainer>
     </SectionContainer>
   );
-};
+}
 
-const UptimeBarSeries = ({
+function UptimeBarSeries({
   id,
   label,
   series,
@@ -152,7 +152,7 @@ const UptimeBarSeries = ({
   series?: Series;
   color: string;
   ticktFormatter: TickFormatter;
-}) => {
+}) {
   if (!series) {
     return null;
   }
@@ -182,10 +182,10 @@ const UptimeBarSeries = ({
       />
       <Axis
         id="y-axis"
-        showGridLines
+        gridLine={{ visible: true }}
         position={Position.Left}
         tickFormat={(x: any) => numeral(x).format('0a')}
       />
     </>
   );
-};
+}

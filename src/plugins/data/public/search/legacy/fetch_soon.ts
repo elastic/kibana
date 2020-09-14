@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { callClient } from './call_client';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
-import { UI_SETTINGS } from '../../../common';
+import { FetchHandlers } from '../fetch/types';
+import { SearchRequest } from '../index';
+import { UI_SETTINGS, ISearchOptions } from '../../../common';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
@@ -28,7 +29,7 @@ import { UI_SETTINGS } from '../../../common';
  */
 export async function fetchSoon(
   request: SearchRequest,
-  options: FetchOptions,
+  options: ISearchOptions,
   fetchHandlers: FetchHandlers
 ) {
   const msToDelay = fetchHandlers.config.get(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
@@ -50,10 +51,10 @@ function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
 
 // The current batch/queue of requests to fetch
 let requestsToFetch: SearchRequest[] = [];
-let requestOptions: FetchOptions[] = [];
+let requestOptions: ISearchOptions[] = [];
 
 // The in-progress fetch (if there is one)
-let fetchInProgress: Promise<SearchResponse> | null = null;
+let fetchInProgress: any = null;
 
 /**
  * Delay fetching for a given amount of time, while batching up the requests to be fetched.
@@ -64,10 +65,10 @@ let fetchInProgress: Promise<SearchResponse> | null = null;
  */
 async function delayedFetch(
   request: SearchRequest,
-  options: FetchOptions,
+  options: ISearchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
-) {
+): Promise<SearchResponse<any>> {
   if (ms === 0) {
     return callClient([request], [options], fetchHandlers)[0];
   }
@@ -75,7 +76,10 @@ async function delayedFetch(
   const i = requestsToFetch.length;
   requestsToFetch = [...requestsToFetch, request];
   requestOptions = [...requestOptions, options];
-  const responses: SearchResponse[] = await (fetchInProgress =
+
+  // Note: the typescript here only worked because `SearchResponse` was `any`
+  // Since this code is legacy, I'm leaving the any here.
+  const responses: any[] = await (fetchInProgress =
     fetchInProgress ||
     delay(() => {
       const response = callClient(requestsToFetch, requestOptions, fetchHandlers);

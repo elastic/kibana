@@ -139,7 +139,7 @@ export function ChartSwitch(props: Props) {
       dataLoss = 'nothing';
     } else if (!topSuggestion) {
       dataLoss = 'everything';
-    } else if (layers.length > 1) {
+    } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
     } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
       dataLoss = 'columns';
@@ -160,12 +160,16 @@ export function ChartSwitch(props: Props) {
         : () => {
             return switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI)
+              newVisualization.initialize(
+                props.framePublicAPI,
+                props.visualizationId === newVisualization.id ? props.visualizationState : undefined
+              )
             );
           },
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
       datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
+      sameDatasources: dataLoss === 'nothing' && props.visualizationId === newVisualization.id,
     };
   }
 
@@ -184,6 +188,7 @@ export function ChartSwitch(props: Props) {
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
       props.visualizationMap,
@@ -255,17 +260,18 @@ export function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  newVisualization: Visualization<unknown, unknown>,
+  newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
-  const suggestions = getSuggestions({
+  const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates: props.datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
-  }).filter((suggestion) => {
+  });
+  const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (

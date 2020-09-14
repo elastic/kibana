@@ -6,11 +6,11 @@
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import * as rulesApi from '../../../detections/containers/detection_engine/rules/api';
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { ExceptionListType } from '../../../lists_plugin_deps';
 import { ListArray } from '../../../../common/detection_engine/schemas/types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
@@ -20,7 +20,7 @@ import {
   ReturnUseFetchOrCreateRuleExceptionList,
 } from './use_fetch_or_create_rule_exception_list';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('../../../detections/containers/detection_engine/rules/api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
@@ -38,6 +38,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     ReturnUseFetchOrCreateRuleExceptionList
   >;
   const onError = jest.fn();
+  const onSuccess = jest.fn();
   const error = new Error('Something went wrong');
   const ruleId = 'myRuleId';
   const abortCtrl = new AbortController();
@@ -94,6 +95,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
             ruleId,
             exceptionListType: listType,
             onError,
+            onSuccess,
           })
       );
   });
@@ -168,6 +170,15 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
     });
+    it('invokes onSuccess indicating that the rule changed', async () => {
+      await act(async () => {
+        const { waitForNextUpdate } = render();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).toHaveBeenCalledWith(true);
+      });
+    });
   });
 
   describe("when the rule has exception list references and 'detection' is passed in", () => {
@@ -205,6 +216,15 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(result.current[1]).toEqual(detectionExceptionList);
+      });
+    });
+    it('invokes onSuccess indicating that the rule did not change', async () => {
+      await act(async () => {
+        const { waitForNextUpdate } = render();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).toHaveBeenCalledWith(false);
       });
     });
 
@@ -359,7 +379,16 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(onError).toHaveBeenCalledTimes(1);
-        expect(onError).toHaveBeenCalledWith(error);
+        expect(onError).toHaveBeenCalledWith(error, null, null);
+      });
+    });
+
+    it('does not call onSuccess', async () => {
+      await act(async () => {
+        const { waitForNextUpdate } = render();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
     });
   });

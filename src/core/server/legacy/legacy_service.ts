@@ -21,7 +21,7 @@ import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription }
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Config, ConfigDeprecationProvider } from '../config';
+import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
@@ -29,7 +29,6 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig }
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
-import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
   LegacyServiceSetupDeps,
@@ -145,18 +144,6 @@ export class LegacyService implements CoreService {
       navLinks,
     };
 
-    const deprecationProviders = await pluginSpecs
-      .map((spec) => spec.getDeprecationsProvider())
-      .reduce(async (providers, current) => {
-        if (current) {
-          return [...(await providers), await convertLegacyDeprecationProvider(current)];
-        }
-        return providers;
-      }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach((provider) =>
-      this.coreContext.configService.addDeprecationProvider('', provider)
-    );
-
     this.legacyRawConfig = pluginExtendedConfig;
 
     // check for unknown uiExport types
@@ -188,7 +175,7 @@ export class LegacyService implements CoreService {
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals(
       this.legacyPlugins.uiExports,
@@ -277,6 +264,7 @@ export class LegacyService implements CoreService {
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       metrics: {
+        collectionInterval: startDeps.core.metrics.collectionInterval,
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
@@ -288,10 +276,7 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        legacy: {
-          client: setupDeps.core.elasticsearch.legacy.client,
-          createClient: setupDeps.core.elasticsearch.legacy.createClient,
-        },
+        legacy: setupDeps.core.elasticsearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -325,12 +310,21 @@ export class LegacyService implements CoreService {
       },
       status: {
         core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
+        set: () => {
+          throw new Error(`core.status.set is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get dependencies$() {
+          throw new Error(`core.status.dependencies$ is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get derivedStatus$() {
+          throw new Error(`core.status.derivedStatus$ is unsupported in legacy`);
+        },
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
-      },
-      uuid: {
-        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
@@ -359,11 +353,9 @@ export class LegacyService implements CoreService {
             registerStaticDir: setupDeps.core.http.registerStaticDir,
           },
           hapiServer: setupDeps.core.http.server,
-          kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
-          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
           legacy: this.legacyInternals,
         },
         logger: this.coreContext.logger,
@@ -375,6 +367,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

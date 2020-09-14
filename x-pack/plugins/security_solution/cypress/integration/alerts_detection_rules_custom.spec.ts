@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRulesInEsArchiveCustomRule } from '../objects/rule';
+import { newRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -58,20 +58,21 @@ import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  expectDefineFormToRepopulateAndContinue,
+  expectAboutFormToRepopulateAndContinue,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// Flaky: https://github.com/elastic/kibana/issues/67814
-describe.skip('Detection rules, custom', () => {
+describe('Detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('custom_rule_with_timeline');
+    esArchiverLoad('timeline');
   });
 
   after(() => {
-    esArchiverUnload('custom_rule_with_timeline');
+    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new custom rule', () => {
@@ -83,6 +84,8 @@ describe.skip('Detection rules, custom', () => {
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
+    expectDefineFormToRepopulateAndContinue(newRule);
+    expectAboutFormToRepopulateAndContinue(newRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
@@ -90,7 +93,7 @@ describe.skip('Detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchiveCustomRule + 1;
+    const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });

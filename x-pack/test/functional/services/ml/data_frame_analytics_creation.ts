@@ -5,34 +5,18 @@
  */
 import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-import {
-  ClassificationAnalysis,
-  RegressionAnalysis,
-} from '../../../../plugins/ml/public/application/data_frame_analytics/common/analytics';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommon } from './common';
+import { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
-
-enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-}
-
-const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
-};
-
-const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
-};
+import {
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon,
+  mlCommonUI: MlCommonUI,
   mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
@@ -46,14 +30,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
-      const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardJobTypeSelect',
-        'value'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualSelection = await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardJobTypeSelect',
+          'value'
+        );
+        expect(actualSelection).to.eql(
+          expectedSelection,
+          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
+        );
+      });
     },
 
     async selectJobType(jobType: string) {
@@ -111,16 +97,20 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setJobId(jobId: string) {
-      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
+      await mlCommonUI.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
     },
 
     async setJobDescription(jobDescription: string) {
-      await mlCommon.setValueWithChecks('mlDFAnalyticsJobCreationJobDescription', jobDescription, {
-        clearWithKeyboard: true,
-      });
+      await mlCommonUI.setValueWithChecks(
+        'mlDFAnalyticsJobCreationJobDescription',
+        jobDescription,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertJobDescriptionValue(jobDescription);
     },
 
@@ -181,7 +171,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertIncludeFieldsSelectionExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
+
+      await retry.tryForTime(8000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
+      });
     },
 
     // async assertIncludedFieldsSelection(expectedSelection: string[]) {
@@ -195,7 +189,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     // },
 
     async assertDestIndexInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      });
     },
 
     async assertDestIndexValue(expectedValue: string) {
@@ -210,7 +206,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setDestIndex(destIndex: string) {
-      await mlCommon.setValueWithChecks(
+      await mlCommonUI.setValueWithChecks(
         'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
         destIndex,
         {
@@ -220,23 +216,33 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexValue(destIndex);
     },
 
+    async waitForDependentVariableInputLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsCreateJobWizardDependentVariableSelect', {
+        timeout: 5 * 1000,
+      });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDependentVariableSelect loaded', {
+        timeout: 30 * 1000,
+      });
+    },
+
     async assertDependentVariableInputExists() {
       await retry.tryForTime(8000, async () => {
         await testSubjects.existOrFail(
-          'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+          '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
     },
 
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableSelection(expectedSelection: string[]) {
+      await this.waitForDependentVariableInputLoaded();
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
       expect(actualSelection).to.eql(
         expectedSelection,
@@ -245,8 +251,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectDependentVariable(dependentVariable: string) {
+      await this.waitForDependentVariableInputLoaded();
       await comboBox.set(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);
@@ -329,18 +336,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToAdditionalOptionsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertAdditionalOptionsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertAdditionalOptionsStepActive();
+      });
     },
 
     async continueToDetailsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertDetailsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertDetailsStepActive();
+      });
     },
 
     async continueToCreateStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertCreateStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertCreateStepActive();
+      });
     },
 
     async assertModelMemoryInputExists() {
@@ -380,7 +393,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setModelMemory(modelMemory: string) {
       await retry.tryForTime(15 * 1000, async () => {
-        await mlCommon.setValueWithChecks(
+        await mlCommonUI.setValueWithChecks(
           'mlAnalyticsCreateJobWizardModelMemoryInput',
           modelMemory,
           {
@@ -411,6 +424,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedCheckState,
         `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {

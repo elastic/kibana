@@ -88,7 +88,6 @@ This reducer format was chosen so that it will be easier to look back at these r
 
 The [`ui_exports/ui_export_defaults`][UiExportDefaults] module defines the default shape of the uiExports object produced by `collectUiExports()`. The defaults generally describe the `uiExports` from the UI System itself, like default visTypes and such.
 
-[UiApp]: ../ui_apps/ui_app.js "UiApp class definition"
 [UiExportDefaults]: ./ui_export_defaults.js "uiExport defaults definition"
 [UiExportTypes]: ./ui_export_types/index.js "Index of default ui_export_types module"
 [UiAppExportType]: ./ui_export_types/ui_apps.js "UiApp extension type definition"

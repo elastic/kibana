@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
-import { useTimefilter, useMlKibana } from '../contexts/kibana';
+import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 import { getMaxBytesFormatted } from './file_based/components/utils';
@@ -54,6 +54,7 @@ export const DatavisualizerSelector: FC = () => {
   const {
     services: { licenseManagement },
   } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
     licenseManagement !== undefined &&
@@ -124,7 +125,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/filedatavisualizer"
+                    onClick={() => navigateToPath('/filedatavisualizer')}
                     data-test-subj="mlDataVisualizerUploadFileButton"
                   >
                     <FormattedMessage
@@ -154,7 +155,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/datavisualizer_index_select"
+                    onClick={() => navigateToPath('/datavisualizer_index_select')}
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage

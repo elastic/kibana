@@ -9,6 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -75,6 +76,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
+  }
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    const types = this.getUniqueObjectTypes(objects);
+    const args = { objects, options };
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
+
+    const response = await this.baseClient.checkConflicts(objects, options);
+    return response;
   }
 
   public async bulkCreate<T = unknown>(
@@ -164,7 +177,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // result in a 404 error.
     await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
 
-    return await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async deleteFromNamespaces(
@@ -177,19 +191,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
     await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
 
-    return await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_update',
-      options && options.namespace,
-      { objects, options }
-    );
+    const objectNamespaces = objects
+      // The repository treats an `undefined` object namespace is treated as the absence of a namespace, falling back to options.namespace;
+      // in this case, filter it out here so we don't accidentally check for privileges in the Default space when we shouldn't be doing so.
+      .filter(({ namespace }) => namespace !== undefined)
+      .map(({ namespace }) => namespace!);
+    const namespaces = [options?.namespace, ...objectNamespaces];
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
+      objects,
+      options,
+    });
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -197,7 +216,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async checkPrivileges(
     actions: string | string[],
-    namespaceOrNamespaces?: string | string[]
+    namespaceOrNamespaces?: string | Array<undefined | string>
   ) {
     try {
       return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespaceOrNamespaces);
@@ -209,7 +228,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async ensureAuthorized(
     typeOrTypes: string | string[],
     action: string,
-    namespaceOrNamespaces?: string | string[],
+    namespaceOrNamespaces?: string | Array<undefined | string>,
     args?: Record<string, unknown>,
     auditAction: string = action,
     requiresAll = true

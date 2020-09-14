@@ -30,7 +30,7 @@ function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
-export const APMSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
+export function APMSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
@@ -43,7 +43,7 @@ export const APMSection = ({ absoluteTime, relativeTime, bucketSize }: Props) =>
         bucketSize,
       });
     }
-  }, [start, end, bucketSize]);
+  }, [start, end, bucketSize, relativeTime]);
 
   const { appLink, stats, series } = data || {};
 
@@ -112,7 +112,7 @@ export const APMSection = ({ absoluteTime, relativeTime, bucketSize }: Props) =>
             <Axis
               id="y-axis"
               position={Position.Left}
-              showGridLines
+              gridLine={{ visible: true }}
               tickFormat={(value) => `${formatTpm(value)} tpm`}
             />
             <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
@@ -121,4 +121,4 @@ export const APMSection = ({ absoluteTime, relativeTime, bucketSize }: Props) =>
       </ChartContainer>
     </SectionContainer>
   );
-};
+}

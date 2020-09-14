@@ -8,6 +8,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { getFilterClause } from '../helper';
 import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
+import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
@@ -36,22 +37,6 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   }
   const filter = getFilterClause(from, to, additionalFilters);
 
-  const seriesHistogram: any = {};
-
-  if (bucketSize) {
-    seriesHistogram.date_histogram = {
-      field: '@timestamp',
-      fixed_interval: bucketSize,
-      missing: 0,
-    };
-  } else {
-    seriesHistogram.auto_date_histogram = {
-      field: '@timestamp',
-      buckets: QUERY.DEFAULT_BUCKET_COUNT,
-      missing: 0,
-    };
-  }
-
   const params = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -63,7 +48,12 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          ...seriesHistogram,
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval:
+              bucketSize || getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT) + 'ms',
+            missing: 0,
+          },
           aggs: {
             down: {
               filter: {

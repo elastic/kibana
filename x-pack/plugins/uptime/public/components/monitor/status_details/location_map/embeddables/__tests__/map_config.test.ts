@@ -5,9 +5,9 @@
  */
 
 import { getLayerList } from '../map_config';
-import { mockLayerList } from './__mocks__/mock';
+import { mockLayerList } from './__mocks__/poly_layer_mock';
 import { LocationPoint } from '../embedded_map';
-import { UptimeAppColors } from '../../../../../../uptime_app';
+import { UptimeAppColors } from '../../../../../../apps/uptime_app';
 
 jest.mock('uuid', () => {
   return {

@@ -133,12 +133,24 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             </Fragment>
           )}
           <TemplateForm
+            title={
+              <EuiTitle size="l">
+                <h1 data-test-subj="pageTitle">
+                  <FormattedMessage
+                    id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
+                    defaultMessage="Edit template '{name}'"
+                    values={{ name: decodedTemplateName }}
+                  />
+                </h1>
+              </EuiTitle>
+            }
             defaultValue={template}
             onSave={onSave}
             isSaving={isSaving}
             saveError={saveError}
             clearSaveError={clearSaveError}
             isEditing={true}
+            isLegacy={isLegacy}
           />
         </Fragment>
       );
@@ -147,19 +159,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-              defaultMessage="Edit template '{name}'"
-              values={{ name: decodedTemplateName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
+      <EuiPageContent>{content}</EuiPageContent>
     </EuiPageBody>
   );
 };

@@ -32,7 +32,7 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
             <h1>
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.pageTitle"
-                defaultMessage="Datasets"
+                defaultMessage="Data streams"
               />
             </h1>
           </EuiText>
@@ -64,9 +64,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions } = usePagination();
 
   // Fetch data streams
-  const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
+  const { isLoading, data: dataStreamsData, resendRequest } = useGetDataStreams();
 
-  // Some configs retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<
       EuiTableFieldDataColumnType<DataStream> | EuiTableActionsColumnType<DataStream>
@@ -75,7 +75,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         field: 'dataset',
         sortable: true,
         width: '25%',
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
           defaultMessage: 'Dataset',
         }),
@@ -83,7 +82,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'type',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
@@ -91,7 +89,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'namespace',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
           defaultMessage: 'Namespace',
         }),
@@ -102,7 +99,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'package',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
@@ -177,7 +173,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           <h2>
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noDataStreamsPrompt"
-              defaultMessage="No datasets"
+              defaultMessage="No data streams"
             />
           </h2>
         }
@@ -220,14 +216,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           isLoading ? (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.loadingDataStreamsMessage"
-              defaultMessage="Loading datasets…"
+              defaultMessage="Loading data streams…"
             />
           ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
             emptyPrompt
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noFilteredDataStreamsMessage"
-              defaultMessage="No matching datasets found"
+              defaultMessage="No matching data streams found"
             />
           )
         }
@@ -245,7 +241,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               key="reloadButton"
               color="primary"
               iconType="refresh"
-              onClick={() => sendRequest()}
+              onClick={() => resendRequest()}
             >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
@@ -257,7 +253,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             placeholder: i18n.translate(
               'xpack.ingestManager.dataStreamList.searchPlaceholderTitle',
               {
-                defaultMessage: 'Filter datasets',
+                defaultMessage: 'Filter data streams',
               }
             ),
             incremental: true,

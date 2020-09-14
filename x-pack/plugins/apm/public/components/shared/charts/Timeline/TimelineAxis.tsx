@@ -42,11 +42,11 @@ interface TimelineAxisProps {
   topTraceDuration: number;
 }
 
-export const TimelineAxis = ({
+export function TimelineAxis({
   plotValues,
   marks = [],
   topTraceDuration,
-}: TimelineAxisProps) => {
+}: TimelineAxisProps) {
   const theme = useTheme();
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
@@ -107,4 +107,4 @@ export const TimelineAxis = ({
       }}
     </Sticky>
   );
-};
+}

@@ -7,7 +7,7 @@
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';

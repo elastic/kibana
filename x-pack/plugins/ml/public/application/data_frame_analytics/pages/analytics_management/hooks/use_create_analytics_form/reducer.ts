@@ -8,13 +8,17 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State } from './state';
+import {
+  getInitialState,
+  getFormStateFromJobConfig,
+  getJobConfigFromFormState,
+  State,
+} from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
@@ -41,6 +45,7 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
+import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '
@@ -458,13 +463,16 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
       let resultJobConfig;
+      let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
       } catch (e) {
         return {
           ...state,
           advancedEditorRawString: action.advancedEditorRawString,
           isAdvancedEditorValidJson: false,
+          disableSwitchToForm: true,
           advancedEditorMessages: [],
         };
       }
@@ -473,6 +481,7 @@ export function reducer(state: State, action: Action): State {
         ...validateAdvancedEditor({ ...state, jobConfig: resultJobConfig }),
         advancedEditorRawString: action.advancedEditorRawString,
         isAdvancedEditorValidJson: true,
+        disableSwitchToForm,
       };
 
     case ACTION.SET_FORM_STATE:
@@ -480,9 +489,6 @@ export function reducer(state: State, action: Action): State {
 
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
-        newFormState.destinationIndexNameExists = state.indexNames.some(
-          (name) => newFormState.destinationIndex === name
-        );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
         newFormState.destinationIndexPatternTitleExists =
@@ -514,14 +520,6 @@ export function reducer(state: State, action: Action): State {
         ? validateAdvancedEditor({ ...state, form: newFormState })
         : validateForm({ ...state, form: newFormState });
 
-    case ACTION.SET_INDEX_NAMES: {
-      const newState = { ...state, indexNames: action.indexNames };
-      newState.form.destinationIndexNameExists = newState.indexNames.some(
-        (name) => newState.form.destinationIndex === name
-      );
-      return newState;
-    }
-
     case ACTION.SET_INDEX_PATTERN_TITLES: {
       const newState = {
         ...state,
@@ -549,15 +547,51 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
       let { jobConfig } = state;
-      const isJobConfigEmpty = isEmpty(state.jobConfig);
-      if (isJobConfigEmpty) {
-        jobConfig = getJobConfigFromFormState(state.form);
-      }
+      jobConfig = getJobConfigFromFormState(state.form);
+      const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
+
       return validateAdvancedEditor({
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
         isAdvancedEditorEnabled: true,
+        disableSwitchToForm: shouldDisableSwitchToForm,
+        hasSwitchedToEditor: true,
         jobConfig,
+      });
+
+    case ACTION.SWITCH_TO_FORM:
+      const { jobConfig: config, jobIds } = state;
+      const { jobId } = state.form;
+      // @ts-ignore
+      const formState = getFormStateFromJobConfig(config, false);
+
+      if (typeof jobId === 'string' && jobId.trim() !== '') {
+        formState.jobId = jobId;
+      }
+
+      formState.jobIdExists = jobIds.some((id) => formState.jobId === id);
+      formState.jobIdEmpty = jobId === '';
+      formState.jobIdValid = isJobIdValid(jobId);
+      formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);
+
+      formState.destinationIndexNameEmpty = formState.destinationIndex === '';
+      formState.destinationIndexNameValid = isValidIndexName(formState.destinationIndex || '');
+      formState.destinationIndexPatternTitleExists =
+        state.indexPatternsMap[formState.destinationIndex || ''] !== undefined;
+
+      if (formState.numTopFeatureImportanceValues !== undefined) {
+        formState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          formState.numTopFeatureImportanceValues
+        );
+      }
+
+      return validateForm({
+        ...state,
+        // @ts-ignore
+        form: formState,
+        isAdvancedEditorEnabled: false,
+        advancedEditorRawString: JSON.stringify(config, null, 2),
+        jobConfig: config,
       });
 
     case ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT:

@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateUrls } from '../../common';
 import { cryptoFactory } from '../../../lib';
-import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../../types';
+import { validateUrls } from '../../common';
 import { JobParamsPDF } from '../types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTaskFn(
+  return async function createJob(
     { title, relativeUrls, browserTimezone, layout, objectType },
     context,
     req
@@ -26,7 +25,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      basePath: setupDeps.basePath(req),
+      basePath: config.kbnConfig.get('server', 'basePath'),
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,

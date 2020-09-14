@@ -33,6 +33,7 @@ import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
@@ -175,13 +176,17 @@ const createHttpServiceMock = () => {
   return mocked;
 };
 
-const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({
+const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
   next: jest.fn(),
-  rewriteUrl: jest.fn(),
 });
 
 const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
   next: jest.fn(),
+});
+
+const createOnPreRoutingToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({
+  next: jest.fn(),
+  rewriteUrl: jest.fn(),
 });
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
@@ -205,6 +210,7 @@ export const httpServiceMock = {
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createOnPostAuthToolkit: createOnPostAuthToolkitMock,
   createOnPreResponseToolkit: createOnPreResponseToolkitMock,
+  createOnPreRoutingToolkit: createOnPreRoutingToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
   createRouter: mockRouter.create,
 };

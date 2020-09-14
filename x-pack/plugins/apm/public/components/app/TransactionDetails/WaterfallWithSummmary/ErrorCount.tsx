@@ -12,21 +12,23 @@ interface Props {
   count: number;
 }
 
-export const ErrorCount = ({ count }: Props) => (
-  <EuiText size="xs">
-    <h4>
-      <EuiTextColor
-        color="danger"
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-        }}
-      >
-        {i18n.translate('xpack.apm.transactionDetails.errorCount', {
-          defaultMessage:
-            '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
-          values: { errorCount: count },
-        })}
-      </EuiTextColor>
-    </h4>
-  </EuiText>
-);
+export function ErrorCount({ count }: Props) {
+  return (
+    <EuiText size="xs">
+      <h4>
+        <EuiTextColor
+          color="danger"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+          }}
+        >
+          {i18n.translate('xpack.apm.transactionDetails.errorCount', {
+            defaultMessage:
+              '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
+            values: { errorCount: count },
+          })}
+        </EuiTextColor>
+      </h4>
+    </EuiText>
+  );
+}

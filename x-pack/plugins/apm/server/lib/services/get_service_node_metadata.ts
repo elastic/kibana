@@ -14,8 +14,8 @@ import {
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
 
 export async function getServiceNodeMetadata({
   serviceName,
@@ -26,7 +26,7 @@ export async function getServiceNodeMetadata({
   serviceNodeName: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const query = mergeProjection(
     getServiceNodesProjection({
@@ -55,7 +55,7 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await client.search(query);
+  const response = await apmEventClient.search(query);
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,

@@ -28,11 +28,12 @@ const astFunctionType = ['is', 'range', 'nested'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
-  filter: string,
+  filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
-  if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = esKuery.fromKueryExpression(filter);
+  if (filter && indexMapping) {
+    const filterKueryNode =
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,

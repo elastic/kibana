@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
@@ -17,6 +16,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
+
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
@@ -66,11 +66,10 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
-
   return (
     <>
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <FiltersGlobal>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
@@ -140,7 +139,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <OverviewEmpty />
       )}

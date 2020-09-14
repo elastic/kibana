@@ -9,6 +9,7 @@ import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
+  statusAgentIDs?: string[];
 }
 
 export async function kibanaRequestToMetadataListESQuery(
@@ -22,25 +23,14 @@ export async function kibanaRequestToMetadataListESQuery(
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
-      query: buildQueryBody(request, queryBuilderOptions?.unenrolledAgentIds!),
-      collapse: {
-        field: 'host.id',
-        inner_hits: {
-          name: 'most_recent',
-          size: 1,
-          sort: [{ 'event.created': 'desc' }],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'host.id',
-          },
-        },
-      },
+      query: buildQueryBody(
+        request,
+        queryBuilderOptions?.unenrolledAgentIds!,
+        queryBuilderOptions?.statusAgentIDs!
+      ),
       sort: [
         {
-          'event.created': {
+          'HostDetails.event.created': {
             order: 'desc',
           },
         },
@@ -76,47 +66,52 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
-  unerolledAgentIds: string[] | undefined
+  unerolledAgentIds: string[] | undefined,
+  statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
-  const filterUnenrolledAgents = unerolledAgentIds && unerolledAgentIds.length > 0;
-  if (typeof request?.body?.filter === 'string') {
-    const kqlQuery = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
-    return {
-      bool: {
-        must: filterUnenrolledAgents
-          ? [
-              {
-                bool: {
-                  must_not: {
-                    terms: {
-                      'elastic.agent.id': unerolledAgentIds,
-                    },
-                  },
-                },
-              },
-              {
-                ...kqlQuery,
-              },
-            ]
-          : [
-              {
-                ...kqlQuery,
-              },
-            ],
-      },
-    };
-  }
-  return filterUnenrolledAgents
-    ? {
-        bool: {
+  const filterUnenrolledAgents =
+    unerolledAgentIds && unerolledAgentIds.length > 0
+      ? {
           must_not: {
             terms: {
-              'elastic.agent.id': unerolledAgentIds,
+              'HostDetails.elastic.agent.id': unerolledAgentIds,
             },
+          },
+        }
+      : null;
+  const filterStatusAgents = statusAgentIDs
+    ? {
+        must: {
+          terms: {
+            'HostDetails.elastic.agent.id': statusAgentIDs,
           },
         },
       }
+    : null;
+
+  const idFilter = {
+    bool: {
+      ...filterUnenrolledAgents,
+      ...filterStatusAgents,
+    },
+  };
+
+  if (request?.body?.filters?.kql) {
+    const kqlQuery = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(request.body.filters.kql)
+    );
+    const q = [];
+    if (filterUnenrolledAgents || filterStatusAgents) {
+      q.push(idFilter);
+    }
+    q.push({ ...kqlQuery });
+    return {
+      bool: { must: q },
+    };
+  }
+  return filterUnenrolledAgents || filterStatusAgents
+    ? idFilter
     : {
         match_all: {},
       };
@@ -127,12 +122,12 @@ export function getESQueryHostMetadataByID(hostID: string, index: string) {
     body: {
       query: {
         match: {
-          'host.id': hostID,
+          'HostDetails.host.id': hostID,
         },
       },
       sort: [
         {
-          'event.created': {
+          'HostDetails.event.created': {
             order: 'desc',
           },
         },

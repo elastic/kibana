@@ -103,5 +103,64 @@ export default function ({ getService, getPageObjects }) {
         });
       });
     });
+
+    describe('Advanced', () => {
+      describe('Active Nodes', () => {
+        const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+        before(async () => {
+          await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          });
+
+          // go to nodes listing
+          await overview.clickEsNodes();
+          expect(await nodesList.isOnListing()).to.be(true);
+        });
+
+        after(async () => {
+          await tearDown();
+        });
+
+        afterEach(async () => {
+          await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsNodes'); // return back for next test
+        });
+
+        it('should show node summary of master node with 20 indices and 38 shards', async () => {
+          await nodesList.clickRowByResolver('jUT5KdxfRbORSCWkb5zjmA');
+          await nodeDetail.clickAdvanced();
+
+          expect(await nodeDetail.getSummary()).to.eql({
+            transportAddress: 'Transport Address\n127.0.0.1:9300',
+            jvmHeap: 'JVM Heap\n29%',
+            freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
+            documentCount: 'Documents\n24.8k',
+            dataSize: 'Data\n50.4 MB',
+            indicesCount: 'Indices\n20',
+            shardsCount: 'Shards\n38',
+            nodeType: 'Type\nMaster Node',
+            status: 'Status: Online',
+          });
+        });
+
+        it('should show node summary of data node with 4 indices and 4 shards', async () => {
+          await nodesList.clickRowByResolver('bwQWH-7IQY-mFPpfoaoFXQ');
+          await nodeDetail.clickAdvanced();
+
+          expect(await nodeDetail.getSummary()).to.eql({
+            transportAddress: 'Transport Address\n127.0.0.1:9302',
+            jvmHeap: 'JVM Heap\n17%',
+            freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
+            documentCount: 'Documents\n240',
+            dataSize: 'Data\n1.4 MB',
+            indicesCount: 'Indices\n4',
+            shardsCount: 'Shards\n4',
+            nodeType: 'Type\nNode',
+            status: 'Status: Online',
+          });
+        });
+      });
+    });
   });
 }

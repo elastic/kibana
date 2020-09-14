@@ -13,7 +13,7 @@ import {
 } from './use_field_value_autocomplete';
 import { useKibana } from '../../../../common/lib/kibana';
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
-import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
 jest.mock('../../../../common/lib/kibana');
@@ -199,12 +199,17 @@ describe('useFieldValueAutocomplete', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current[2]({
-        fieldSelected: getField('@tags'),
-        value: 'hello',
-        patterns: stubIndexPatternWithFields,
-        signal: new AbortController().signal,
-      });
+      expect(result.current[2]).not.toBeNull();
+
+      // Added check for typescripts sake, if null,
+      // would not reach below logic as test would stop above
+      if (result.current[2] != null) {
+        result.current[2]({
+          fieldSelected: getField('@tags'),
+          value: 'hello',
+          patterns: stubIndexPatternWithFields,
+        });
+      }
 
       await waitForNextUpdate();
 

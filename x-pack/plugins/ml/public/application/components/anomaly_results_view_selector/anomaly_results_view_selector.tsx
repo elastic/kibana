@@ -27,7 +27,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
         label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
           defaultMessage: 'View results in the Single Metric Viewer',
         }),
-        iconType: 'stats',
+        iconType: 'visLine',
         value: 'timeseriesexplorer',
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
       },
@@ -36,7 +36,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
         label: i18n.translate('xpack.ml.anomalyResultsViewSelector.anomalyExplorerLabel', {
           defaultMessage: 'View results in the Anomaly Explorer',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'visTable',
         value: 'explorer',
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },

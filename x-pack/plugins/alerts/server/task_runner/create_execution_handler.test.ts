@@ -20,7 +20,7 @@ const alertType: AlertType = {
   ],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
-  producer: 'alerting',
+  producer: 'alerts',
 };
 
 const actionsClient = actionsClientMock.create();
@@ -50,6 +50,11 @@ const createExecutionHandlerParams = {
     },
   ],
   request: {} as KibanaRequest,
+  alertParams: {
+    foo: true,
+    contextVal: 'My other {{context.value}} goes here',
+    stateVal: 'My other {{state.value}} goes here',
+  },
 };
 
 beforeEach(() => {

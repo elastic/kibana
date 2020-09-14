@@ -49,6 +49,8 @@ npm-debug.log*
 .tern-project
 .nyc_output
 .ci/pipeline-library/build/
+.ci/runbld
+.ci/bash_standard_lib.sh
 .gradle
 
 # apm plugin
@@ -58,3 +60,6 @@ apm.tsconfig.json
 # release notes script output
 report.csv
 report.asciidoc
+
+# TS incremental build cache
+*.tsbuildinfo

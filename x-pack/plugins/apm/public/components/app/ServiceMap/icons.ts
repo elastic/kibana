@@ -111,7 +111,7 @@ function getSpanIcon(type?: string, subtype?: string) {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {

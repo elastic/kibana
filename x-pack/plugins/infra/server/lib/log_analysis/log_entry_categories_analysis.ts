@@ -15,11 +15,7 @@ import {
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
-import {
-  InsufficientLogAnalysisMlJobConfigurationError,
-  NoLogAnalysisResultsIndexError,
-  UnknownCategoryError,
-} from './errors';
+import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import {
   createLogEntryCategoriesQuery,
   logEntryCategoriesResponseRT,
@@ -235,38 +231,33 @@ async function fetchTopLogEntryCategories(
 
   const esSearchSpan = finalizeEsSearchSpan();
 
-  if (topLogEntryCategoriesResponse._shards.total === 0) {
-    throw new NoLogAnalysisResultsIndexError(
-      `Failed to find ml result index for job ${logEntryCategoriesCountJobId}.`
-    );
-  }
+  const topLogEntryCategories =
+    topLogEntryCategoriesResponse.aggregations?.terms_category_id.buckets.map(
+      (topCategoryBucket) => {
+        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
+          Record<string, number>
+        >(
+          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+            ...accumulatedMaximumAnomalyScores,
+            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+          }),
+          {}
+        );
 
-  const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
-    (topCategoryBucket) => {
-      const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
-        Record<string, number>
-      >(
-        (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
-          ...accumulatedMaximumAnomalyScores,
-          [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
-        }),
-        {}
-      );
-
-      return {
-        categoryId: parseCategoryId(topCategoryBucket.key),
-        logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
-        datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
-          .map((datasetBucket) => ({
-            name: datasetBucket.key,
-            maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
-          }))
-          .sort(compareDatasetsByMaximumAnomalyScore)
-          .reverse(),
-        maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
-      };
-    }
-  );
+        return {
+          categoryId: parseCategoryId(topCategoryBucket.key),
+          logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
+          datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets
+            .map((datasetBucket) => ({
+              name: datasetBucket.key,
+              maximumAnomalyScore: maximumAnomalyScoresByDataset[datasetBucket.key] ?? 0,
+            }))
+            .sort(compareDatasetsByMaximumAnomalyScore)
+            .reverse(),
+          maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
+        };
+      }
+    ) ?? [];
 
   return {
     topLogEntryCategories,

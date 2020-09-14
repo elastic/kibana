@@ -6,9 +6,9 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import {
   canDeleteMLJobSelector,
   hasMLJobSelector,
@@ -22,7 +22,7 @@ import { useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
 import { ConfirmAlertDeletion } from './confirm_alert_delete';
-import { deleteAlertAction } from '../../../state/actions/alerts';
+import { deleteAnomalyAlertAction } from '../../../state/alerts/alerts';
 
 interface Props {
   hasMLJob: boolean;
@@ -52,19 +52,23 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const [isConfirmAlertDeleteOpen, setIsConfirmAlertDeleteOpen] = useState(false);
 
   const deleteAnomalyAlert = () =>
-    dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
+    dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
+
+  const showLoading = isMLJobCreating || isMLJobLoading;
+
+  const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
-      iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={isMLJobCreating || isMLJobLoading}
+      size="s"
+      aria-label={labels.ENABLE_MANAGE_JOB}
     >
-      {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
-    </EuiButtonEmpty>
+      {showLoading ? '' : btnText}
+    </EuiButton>
   );
 
   const panels = [
@@ -80,7 +84,6 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
             monitorId,
             dateRange: { from: dateRangeStart, to: dateRangeEnd },
           }),
-          target: '_blank',
         },
         {
           name: anomalyAlert ? labels.DISABLE_ANOMALY_ALERT : labels.ENABLE_ANOMALY_ALERT,
@@ -116,6 +119,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         button={button}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
+        panelPaddingSize="none"
       >
         <EuiContextMenu
           initialPanelId={0}

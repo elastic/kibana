@@ -155,6 +155,21 @@ export class NodesChangedAlert extends BaseAlert {
       };
     }
 
+    if (
+      Object.values(states.added).length === 0 &&
+      Object.values(states.removed).length === 0 &&
+      Object.values(states.restarted).length === 0
+    ) {
+      return {
+        text: i18n.translate(
+          'xpack.monitoring.alerts.nodesChanged.ui.nothingDetectedFiringMessage',
+          {
+            defaultMessage: `Elasticsearch nodes have changed`,
+          }
+        ),
+      };
+    }
+
     const addedText =
       Object.values(states.added).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.addedFiringMessage', {

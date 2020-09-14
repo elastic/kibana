@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ import { DetectionEngineHeaderPage } from '../../../components/detection_engine_
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
-import { useUserInfo } from '../../../components/user_info';
+import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
@@ -40,20 +40,21 @@ type Func = (refreshPrePackagedRule?: boolean) => void;
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
-  const [isValueListsModalShown, setIsValueListsModalShown] = useState(false);
-  const showValueListsModal = useCallback(() => setIsValueListsModalShown(true), []);
-  const hideValueListsModal = useCallback(() => setIsValueListsModalShown(false), []);
+  const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    hasIndexWrite,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      hasIndexWrite,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
+    canWriteIndex: canWriteListsIndex,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
@@ -147,7 +148,10 @@ const RulesPageComponent: React.FC = () => {
   return (
     <>
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
-      <ValueListsModal showModal={isValueListsModalShown} onClose={hideValueListsModal} />
+      <ValueListsModal
+        showModal={showValueListsModal}
+        onClose={() => setShowValueListsModal(false)}
+      />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
@@ -204,13 +208,16 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="importAction"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
-                onClick={showValueListsModal}
-              >
-                {i18n.UPLOAD_VALUE_LISTS}
-              </EuiButton>
+              <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
+                <EuiButton
+                  data-test-subj="open-value-lists-modal-button"
+                  iconType="importAction"
+                  isDisabled={!canWriteListsIndex || loading}
+                  onClick={() => setShowValueListsModal(true)}
+                >
+                  {i18n.UPLOAD_VALUE_LISTS}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

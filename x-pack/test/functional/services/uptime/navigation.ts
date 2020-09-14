@@ -16,8 +16,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     await retry.tryForTime(60 * 1000, async () => {
       if (await testSubjects.exists('uptimeSettingsToOverviewLink', { timeout: 0 })) {
         await testSubjects.click('uptimeSettingsToOverviewLink');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
-      } else if (!(await testSubjects.exists('uptimeOverviewPage', { timeout: 0 }))) {
+      } else {
         await PageObjects.common.navigateToApp('uptime');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
@@ -41,7 +42,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToSettings: async () => {
       await goToUptimeRoot();
       await testSubjects.click('settings-page-link', 5000);
-      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 2000 });
+      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 10000 });
     },
 
     checkIfOnMonitorPage: async (monitorId: string) => {

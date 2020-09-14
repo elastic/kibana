@@ -13,23 +13,32 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
-storiesOf('app/ErrorRateAlertTrigger', module).add('example', () => {
-  const params = {
-    threshold: 2,
-    window: '5m',
-  };
+storiesOf('app/ErrorRateAlertTrigger', module).add(
+  'example',
+  () => {
+    const params = {
+      threshold: 2,
+      window: '5m',
+    };
 
-  return (
-    <MockApmPluginContextWrapper
-      value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
-    >
-      <div style={{ width: 400 }}>
-        <ErrorRateAlertTrigger
-          alertParams={params as any}
-          setAlertParams={() => undefined}
-          setAlertProperty={() => undefined}
-        />
-      </div>
-    </MockApmPluginContextWrapper>
-  );
-});
+    return (
+      <MockApmPluginContextWrapper
+        value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
+      >
+        <div style={{ width: 400 }}>
+          <ErrorRateAlertTrigger
+            alertParams={params as any}
+            setAlertParams={() => undefined}
+            setAlertProperty={() => undefined}
+          />
+        </div>
+      </MockApmPluginContextWrapper>
+    );
+  },
+  {
+    info: {
+      propTablesExclude: [ErrorRateAlertTrigger, MockApmPluginContextWrapper],
+      source: false,
+    },
+  }
+);

@@ -8,9 +8,9 @@ import {
   CustomLink,
   CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
-import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
 import { toESFormat } from './helper';
+import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
 export async function createOrUpdateCustomLink({
   customLinkId,

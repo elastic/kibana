@@ -7,16 +7,16 @@
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../types';
+import { BasePayload, RunTaskFnFactory, TaskRunResult } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
-import { JobParamsPanelCsv, SearchPanel } from './types';
 import { getGenerateCsvParams } from './lib/get_csv_job';
+import { JobParamsPanelCsv, SearchPanel } from './types';
 
 /*
  * The run function receives the full request which provides the un-encrypted
  * headers, so encrypted headers are not part of these kind of job params
  */
-type ImmediateJobParams = Omit<ScheduledTaskParams<JobParamsPanelCsv>, 'headers'>;
+type ImmediateJobParams = Omit<BasePayload<JobParamsPanelCsv>, 'headers'>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -41,7 +41,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const { jobParams } = jobPayload;
-    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
+    const jobLogger = logger.clone(['immediate']);
     const generateCsv = createGenerateCsv(jobLogger);
     const { panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
 

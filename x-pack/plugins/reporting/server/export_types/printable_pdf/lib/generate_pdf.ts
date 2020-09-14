@@ -10,7 +10,8 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutInstance, LayoutParams } from '../../../lib/layouts';
-import { ConditionalHeaders, ScreenshotResults } from '../../../types';
+import { ScreenshotResults } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 import { getTracker } from './tracker';
@@ -90,7 +91,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
           tracker.endGetBuffer();
         } catch (err) {
-          logger.error(`Could not generate the PDF buffer! ${err}`);
+          logger.error(`Could not generate the PDF buffer!`);
+          logger.error(err);
         }
 
         tracker.end();

@@ -25,6 +25,8 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export class Listing extends PureComponent {
   getColumns() {
@@ -40,7 +42,7 @@ export class Listing extends PureComponent {
         sortable: true,
         render: (name, node) => {
           let setupModeStatus = null;
-          if (setupMode && setupMode.enabled) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const uuid = get(node, 'logstash.uuid');
             const status = list[uuid] || {};
@@ -167,7 +169,7 @@ export class Listing extends PureComponent {
     }));
 
     let setupModeCallOut = null;
-    if (setupMode.enabled && setupMode.data) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}

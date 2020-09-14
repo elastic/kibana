@@ -19,13 +19,12 @@ A few notable services are called out below.
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 
+include::security/index.asciidoc[leveloffset=+1]
 
-include::security/index.asciidoc[]
+include::development-plugin-saved-objects.asciidoc[leveloffset=+1]
 
-include::development-plugin-saved-objects.asciidoc[]
+include::add-data-tutorials.asciidoc[leveloffset=+1]
 
-include::add-data-tutorials.asciidoc[]
-
-include::development-visualize-index.asciidoc[]
+include::development-visualize-index.asciidoc[leveloffset=+1]
 
 

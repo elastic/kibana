@@ -13,8 +13,8 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-set CONFIG_DIR=%KIBANA_PATH_CONF%
-If [%KIBANA_PATH_CONF%] == [] (
+set CONFIG_DIR=%KBN_PATH_CONF%
+If [%KBN_PATH_CONF%] == [] (
   set CONFIG_DIR=%DIR%\config
 )
 

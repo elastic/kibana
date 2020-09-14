@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ENDPOINT_LIST_ID } from '../../../../plugins/lists/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -20,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
         namespace_type: 'agnostic',
         description: 'bad endpoint item for testing',
         name: 'bad endpoint item',
-        list_id: 'endpoint_list',
+        list_id: ENDPOINT_LIST_ID,
         type: 'simple',
         entries: [
           {
@@ -39,9 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send(badItem)
         .expect(400);
-      expect(body.message).to.eql(
-        'cannot add exception item with entry of type "list" to endpoint exception list'
-      );
+      expect(body.message).to.eql([
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "undefined" supplied to "entries"',
+      ]);
     });
 
     it('should return a 400 if endpoint exception entry has disallowed field', async () => {
@@ -50,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         namespace_type: 'agnostic',
         description: 'bad endpoint item for testing',
         name: 'bad endpoint item',
-        list_id: 'endpoint_list',
+        list_id: ENDPOINT_LIST_ID,
         type: 'simple',
         entries: [
           {

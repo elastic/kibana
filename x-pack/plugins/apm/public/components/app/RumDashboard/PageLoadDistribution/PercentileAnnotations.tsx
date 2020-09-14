@@ -16,11 +16,11 @@ import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  percentiles?: Record<string, number>;
+  percentiles?: Record<string, number | null>;
 }
 
 function generateAnnotationData(
-  values?: Record<string, number>
+  values?: Record<string, number | null>
 ): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],
@@ -33,7 +33,7 @@ const PercentileMarker = styled.span`
   bottom: 205px;
 `;
 
-export const PercentileAnnotations = ({ percentiles }: Props) => {
+export function PercentileAnnotations({ percentiles }: Props) {
   const dataValues = generateAnnotationData(percentiles) ?? [];
 
   const style: Partial<LineAnnotationStyle> = {
@@ -44,17 +44,17 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
     },
   };
 
-  const PercentileTooltip = ({
+  function PercentileTooltip({
     annotation,
   }: {
     annotation: LineAnnotationDatum;
-  }) => {
+  }) {
     return (
       <span data-cy="percentileTooltipTitle">
         {annotation.details}th Percentile
       </span>
     );
-  };
+  }
 
   return (
     <>
@@ -82,4 +82,4 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
       ))}
     </>
   );
-};
+}

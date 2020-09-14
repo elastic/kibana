@@ -49,7 +49,7 @@ export interface TaskRunner {
   toString: () => string;
 }
 
-interface Updatable {
+export interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;

@@ -7,7 +7,7 @@
 import { flatten } from 'lodash';
 import { TimeSeries } from '../../typings/timeseries';
 
-export const getRangeFromTimeSeries = (timeseries: TimeSeries[]) => {
+export function getRangeFromTimeSeries(timeseries: TimeSeries[]) {
   const dataPoints = flatten(timeseries.map((series) => series.data));
 
   if (dataPoints.length) {
@@ -18,4 +18,4 @@ export const getRangeFromTimeSeries = (timeseries: TimeSeries[]) => {
   }
 
   return null;
-};
+}

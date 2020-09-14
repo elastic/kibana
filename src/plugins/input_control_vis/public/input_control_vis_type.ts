@@ -65,6 +65,7 @@ export function createInputControlVisTypeDefinition(deps: InputControlVisDepende
         },
       ],
     },
+    inspectorAdapters: {},
     requestHandler: 'none',
     responseHandler: 'none',
   };

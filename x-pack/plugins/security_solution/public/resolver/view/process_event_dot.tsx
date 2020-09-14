@@ -12,14 +12,13 @@ import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } 
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3 } from '../types';
+import { Vector2, Matrix3, ResolverState } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
-import * as processEventModel from '../models/process_event';
 import * as selectors from '../store/selectors';
-import { useResolverQueryParams } from './use_resolver_query_params';
+import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -39,6 +38,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   position: absolute;
   top: ${(props) => `${props.topPct}%`};
   width: auto;
+  pointer-events: all;
 `;
 
 interface StyledDescriptionText {
@@ -62,6 +62,11 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   width: fit-content;
 `;
 
+const StyledOuterGroup = styled.g`
+  fill: none;
+  pointer-events: visiblePainted;
+`;
+
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
@@ -72,8 +77,6 @@ const UnstyledProcessEventDot = React.memo(
     event,
     projectionMatrix,
     isProcessTerminated,
-    isProcessOrigin,
-    relatedEventsStatsForProcess,
     timeAtRender,
   }: {
     /**
@@ -87,7 +90,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * An event which contains details about the process node.
      */
-    event: ResolverEvent;
+    event: SafeResolverEvent;
     /**
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
@@ -96,16 +99,6 @@ const UnstyledProcessEventDot = React.memo(
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
-    /**
-     * Whether or not to show the process as the originating event.
-     */
-    isProcessOrigin: boolean;
-    /**
-     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
-     * to provide the user some visibility regarding the contents thereof.
-     * Statistics for the number of related events and alerts for this process node
-     */
-    relatedEventsStatsForProcess?: ResolverNodeStats;
 
     /**
      * The time (unix epoch) at render.
@@ -124,9 +117,16 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
-    const nodeID = processEventModel.uniquePidForProcess(event);
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
+    const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
+    if (nodeID === undefined) {
+      // NB: this component should be taking nodeID as a `string` instead of handling this logic here
+      throw new Error('Tried to render a node with no ID');
+    }
+    const relatedEventStats = useSelector((state: ResolverState) =>
+      selectors.relatedEventsStats(state)(nodeID)
+    );
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -134,11 +134,13 @@ const UnstyledProcessEventDot = React.memo(
       htmlIDPrefix,
     ]);
 
-    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+    const ariaLevel: number | null = useSelector((state: ResolverState) =>
+      selectors.ariaLevel(state)(nodeID)
+    );
 
     // the node ID to 'flowto'
-    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
-      nodeID
+    const ariaFlowtoNodeID: string | null = useSelector((state: ResolverState) =>
+      selectors.ariaFlowtoNodeID(state)(timeAtRender)(nodeID)
     );
 
     const isShowingEventActions = xScale > 0.8;
@@ -206,7 +208,7 @@ const UnstyledProcessEventDot = React.memo(
              * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
              * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
              */
-            beginElement: () => void;
+            beginElement?: () => void;
           })
         | null;
     } = React.createRef();
@@ -218,23 +220,26 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+    } = cubeAssetsForNode(
+      isProcessTerminated,
+      /**
+       * There is no definition for 'trigger process' yet. return false.
+       */ false
+    );
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isAriaCurrent = nodeID === activeDescendantId;
-    const isAriaSelected = nodeID === selectedDescendantId;
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
+    const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
 
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-        },
+        payload: nodeID,
       });
-    }, [dispatch, nodeHTMLID, nodeID]);
+    }, [dispatch, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
@@ -243,23 +248,18 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const { pushToQueryParams } = useResolverQueryParams();
+    const pushToQueryParams = useReplaceBreadcrumbParameters();
 
     const handleClick = useCallback(() => {
-      if (animationTarget.current !== null) {
-        // This works but the types are missing in the typescript DOM lib
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (animationTarget.current as any).beginElement();
+      if (animationTarget.current?.beginElement) {
+        animationTarget.current.beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-          selectedProcessId: nodeID,
-        },
+        payload: nodeID,
       });
-      pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -270,15 +270,13 @@ const UnstyledProcessEventDot = React.memo(
     const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
-      if (!relatedEventsStatsForProcess) {
+      if (!relatedEventStats) {
         // Return an empty set of options if there are no stats to report
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
 
-      for (const [category, total] of Object.entries(
-        relatedEventsStatsForProcess.events.byCategory
-      )) {
+      for (const [category, total] of Object.entries(relatedEventStats.events.byCategory)) {
         relatedStatsList.push({
           prefix: <EuiI18nNumber value={total || 0} />,
           optionTitle: category,
@@ -296,13 +294,15 @@ const UnstyledProcessEventDot = React.memo(
         });
       }
       return relatedStatsList;
-    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, nodeID]);
+    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
 
-    const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
+    const relatedEventStatusOrOptions = !relatedEventStats
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
-    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(event);
+    const grandTotal: number | null = useSelector((state: ResolverState) =>
+      selectors.relatedEventTotalForProcess(state)(event as ResolverEvent)
+    );
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -310,7 +310,8 @@ const UnstyledProcessEventDot = React.memo(
      */
     return (
       <div
-        data-test-subj={'resolverNode'}
+        data-test-subj="resolver:node"
+        data-test-resolver-node-id={nodeID}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
@@ -326,6 +327,15 @@ const UnstyledProcessEventDot = React.memo(
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
+          onClick={
+            () => {
+              handleFocus();
+              handleClick();
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
+          }
+          role="img"
+          aria-labelledby={labelHTMLID}
+          fill="none"
           style={{
             display: 'block',
             width: '100%',
@@ -333,9 +343,12 @@ const UnstyledProcessEventDot = React.memo(
             position: 'absolute',
             top: '0',
             left: '0',
+            outline: 'transparent',
+            border: 'none',
+            pointerEvents: 'none',
           }}
         >
-          <g>
+          <StyledOuterGroup>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -367,7 +380,7 @@ const UnstyledProcessEventDot = React.memo(
                 ref={animationTarget}
               />
             </use>
-          </g>
+          </StyledOuterGroup>
         </svg>
         <StyledActionsContainer
           color={colorMap.full}
@@ -402,11 +415,13 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={eventModel.eventName(event)}
+              title={eventModel.processNameSafeVersion(event)}
+              data-test-subj="resolver:node:primary-button"
+              data-test-resolver-node-id={nodeID}
             >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.eventName(event)}
+                  {eventModel.processNameSafeVersion(event)}
                 </span>
               </span>
             </EuiButton>
@@ -418,7 +433,7 @@ const UnstyledProcessEventDot = React.memo(
               alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
-              margin: 0,
+              margin: '2px 0 0 0',
               padding: 0,
             }}
           >
@@ -430,7 +445,9 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
                   menuTitle={subMenuAssets.relatedEvents.title}
+                  projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
+                  nodeID={nodeID}
                 />
               )}
             </EuiFlexItem>
@@ -455,6 +472,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;
+  pointer-events: none;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.

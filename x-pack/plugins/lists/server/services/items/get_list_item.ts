@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { transformElasticToListItem } from '../utils';
@@ -21,7 +22,10 @@ export const getListItem = async ({
   callCluster,
   listItemIndex,
 }: GetListItemOptions): Promise<ListItemSchema | null> => {
-  const listItemES = await callCluster<SearchEsListItemSchema>('search', {
+  // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+  // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
+  // to explicitly define the type <T>.
+  const listItemES = await callCluster<SearchResponse<SearchEsListItemSchema>>('search', {
     body: {
       query: {
         term: {
@@ -31,6 +35,7 @@ export const getListItem = async ({
     },
     ignoreUnavailable: true,
     index: listItemIndex,
+    seq_no_primary_term: true,
   });
 
   if (listItemES.hits.hits.length) {

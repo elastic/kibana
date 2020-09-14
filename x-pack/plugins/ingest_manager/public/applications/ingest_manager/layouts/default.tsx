@@ -77,13 +77,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       defaultMessage="Integrations"
                     />
                   </EuiTab>
-                  <EuiTab
-                    isSelected={section === 'agent_config'}
-                    href={getHref('configurations_list')}
-                  >
+                  <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.configurationsLinkText"
-                      defaultMessage="Configurations"
+                      id="xpack.ingestManager.appNavigation.policiesLinkText"
+                      defaultMessage="Policies"
                     />
                   </EuiTab>
                   <EuiTab
@@ -99,7 +96,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
                     <FormattedMessage
                       id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
-                      defaultMessage="Datasets"
+                      defaultMessage="Data streams"
                     />
                   </EuiTab>
                 </EuiTabs>
@@ -114,7 +111,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     >
                       <FormattedMessage
                         id="xpack.ingestManager.appNavigation.sendFeedbackButton"
-                        defaultMessage="Send Feedback"
+                        defaultMessage="Send feedback"
                       />
                     </EuiButtonEmpty>
                   </EuiFlexItem>

@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
-import { description, id, meta, name } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { _version, description, id, meta, name, version } from '../common/schemas';
+import { RequiredKeepUndefined } from '../../types';
 
 export const patchListSchema = t.intersection([
   t.exact(
@@ -17,8 +15,16 @@ export const patchListSchema = t.intersection([
       id,
     })
   ),
-  t.exact(t.partial({ description, meta, name })),
+  t.exact(
+    t.partial({
+      _version, // is undefined if not set during decode
+      description, // is undefined if not set during decode
+      meta, // is undefined if not set during decode
+      name, // is undefined if not set during decode
+      version, // is undefined if not set during decode
+    })
+  ),
 ]);
 
-export type PatchListSchemaPartial = Identity<t.TypeOf<typeof patchListSchema>>;
-export type PatchListSchema = RequiredKeepUndefined<Identity<t.TypeOf<typeof patchListSchema>>>;
+export type PatchListSchema = t.OutputOf<typeof patchListSchema>;
+export type PatchListSchemaDecoded = RequiredKeepUndefined<t.TypeOf<typeof patchListSchema>>;

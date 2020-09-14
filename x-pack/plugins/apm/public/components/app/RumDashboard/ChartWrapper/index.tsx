@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, HTMLAttributes } from 'react';
+import React, { HTMLAttributes, ReactNode } from 'react';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
+  children?: ReactNode;
   /**
    * Height for the chart
    */
@@ -25,14 +26,17 @@ interface Props {
    * aria-label for accessibility
    */
   'aria-label'?: string;
+
+  maxWidth?: string;
 }
 
-export const ChartWrapper: FC<Props> = ({
+export function ChartWrapper({
   loading = false,
   height = '100%',
+  maxWidth,
   children,
   ...rest
-}) => {
+}: Props) {
   const opacity = loading === true ? 0.3 : 1;
 
   return (
@@ -42,6 +46,7 @@ export const ChartWrapper: FC<Props> = ({
           height,
           opacity,
           transition: 'opacity 0.2s',
+          ...(maxWidth ? { maxWidth } : {}),
         }}
         {...(rest as HTMLAttributes<HTMLDivElement>)}
       >
@@ -51,7 +56,12 @@ export const ChartWrapper: FC<Props> = ({
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}`, marginBottom: 0 }}
+          style={{
+            height,
+            marginTop: `-${height}`,
+            marginBottom: 0,
+            ...(maxWidth ? { maxWidth } : {}),
+          }}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="xl" />
@@ -60,4 +70,4 @@ export const ChartWrapper: FC<Props> = ({
       )}
     </EuiErrorBoundary>
   );
-};
+}

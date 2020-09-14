@@ -33,9 +33,7 @@ export const useTimelineStatus = ({
   templateTimelineFilter: JSX.Element[] | null;
   installPrepackagedTimelines: () => void;
 } => {
-  const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(
-    TemplateTimelineType.elastic
-  );
+  const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
   const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
     timelineType,
   ]);
@@ -104,7 +102,7 @@ export const useTimelineStatus = ({
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   const installPrepackagedTimelines = useCallback(async () => {
-    if (templateTimelineType === TemplateTimelineType.elastic) {
+    if (templateTimelineType !== TemplateTimelineType.custom) {
       await installPrepackedTimelines();
     }
   }, [templateTimelineType]);

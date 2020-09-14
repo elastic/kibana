@@ -36,7 +36,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   columnHeaders,
   browserFields,
   height,
-  isEventViewer = false,
   onFieldSelected,
   onUpdateColumns,
   timelineId,
@@ -138,10 +137,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setShow(false);
   }, []);
   // only merge in the default category if the field browser is visible
-  const browserFieldsWithDefaultCategory = useMemo(
-    () => (show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {}),
-    [show, browserFields]
-  );
+  const browserFieldsWithDefaultCategory = useMemo(() => {
+    return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
+  }, [show, browserFields]);
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
@@ -165,7 +163,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
           }
           height={height}
-          isEventViewer={isEventViewer}
           isSearching={isSearching}
           onCategorySelected={updateSelectedCategoryId}
           onFieldSelected={onFieldSelected}

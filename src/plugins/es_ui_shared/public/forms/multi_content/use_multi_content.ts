@@ -94,7 +94,7 @@ export function useMultiContent<T extends object>({
     const activeContentData: Partial<T> = {};
 
     for (const [id, _content] of Object.entries(contents.current)) {
-      if (validation.contents[id as keyof T]) {
+      if (validation.contents[id as keyof T] !== false) {
         const contentData = (_content as Content).getData();
 
         // Replace the getData() handler with the cached value
@@ -161,7 +161,7 @@ export function useMultiContent<T extends object>({
   );
 
   /**
-   * Validate the multi-content active content(s) in the DOM
+   * Validate the content(s) currently in the DOM
    */
   const validate = useCallback(async () => {
     if (Object.keys(contents.current).length === 0) {

@@ -23,6 +23,7 @@ export const transformNewUserAction = ({
   action,
   actionAt,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   newValue = null,
   oldValue = null,

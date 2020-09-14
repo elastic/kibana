@@ -126,6 +126,34 @@ describe('Reporting Config Schema', () => {
     ).toMatchObject({ hostname: 'Frodo' });
   });
 
+  it('allows setting a wildcard for chrome proxy bypass', () => {
+    expect(
+      ConfigSchema.validate({
+        capture: {
+          browser: {
+            chromium: {
+              proxy: {
+                enabled: true,
+                server: 'http://example.com:8080',
+                bypass: ['*.example.com', '*bar.example.com', 'bats.example.com'],
+              },
+            },
+          },
+        },
+      }).capture.browser.chromium.proxy
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bypass": Array [
+          "*.example.com",
+          "*bar.example.com",
+          "bats.example.com",
+        ],
+        "enabled": true,
+        "server": "http://example.com:8080",
+      }
+    `);
+  });
+
   it(`logs the proper validation messages`, () => {
     // kibanaServer
     const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { EsArchiver } from 'src/es_archiver';
+import { EsArchiver } from '@kbn/es-archiver';
 import { AppSearchService, IEngine } from '../../../../services/app_search_service';
 import { Browser } from '../../../../../../../test/functional/services/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -52,6 +52,9 @@ export default function enterpriseSearchSetupEnginesTests({
         await retry.try(async function () {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain('/app_search');
+
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('App Search - Elastic');
         });
       });
 

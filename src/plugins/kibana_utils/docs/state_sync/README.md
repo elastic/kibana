@@ -58,3 +58,4 @@ To run them, start kibana with `--run-examples` flag.
 - [On-the-fly state migrations](./on_fly_state_migrations.md).
 - [syncStates helper](./sync_states.md).
 - [Helpers for Data plugin (syncing TimeRange, RefreshInterval and Filters)](./data_plugin_helpers.md).
+- [Error handling](./error_handling.md)

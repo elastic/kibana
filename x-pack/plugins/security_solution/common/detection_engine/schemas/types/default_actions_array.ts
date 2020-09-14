@@ -10,14 +10,12 @@ import { actions, Actions } from '../common/schemas';
 
 /**
  * Types the DefaultStringArray as:
- *   - If null or undefined, then a default action array will be set
+ *   - If undefined, then a default action array will be set
  */
-export const DefaultActionsArray = new t.Type<Actions, Actions, unknown>(
+export const DefaultActionsArray = new t.Type<Actions, Actions | undefined, unknown>(
   'DefaultActionsArray',
   actions.is,
   (input, context): Either<t.Errors, Actions> =>
     input == null ? t.success([]) : actions.validate(input, context),
   t.identity
 );
-
-export type DefaultActionsArrayC = typeof DefaultActionsArray;

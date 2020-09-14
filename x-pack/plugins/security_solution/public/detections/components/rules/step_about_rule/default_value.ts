@@ -5,6 +5,7 @@
  */
 
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 export const threatDefault = [
   {
@@ -20,9 +21,8 @@ export const stepAboutDefaultValue: AboutStepRule = {
   description: '',
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
-  isNew: true,
-  severity: { value: 'low', mapping: [] },
-  riskScore: { value: 50, mapping: [] },
+  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  riskScore: { value: 21, mapping: [], isMappingChecked: false },
   references: [''],
   falsePositives: [''],
   license: '',

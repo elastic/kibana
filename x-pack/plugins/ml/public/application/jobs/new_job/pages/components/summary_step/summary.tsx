@@ -15,22 +15,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
   resetJob,
@@ -42,6 +40,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const {
     services: { notifications },
   } = useMlKibana();
+
+  const navigateToPath = useNavigateToPath();
+
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
@@ -51,13 +52,14 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
+  const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
   }, []);
 
   async function start() {
-    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+    if (isAdvanced) {
       await startAdvanced();
     } else {
       await startInline();
@@ -70,15 +72,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
     } catch (error) {
-      // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        }),
-        text: getErrorMessage(error),
-      });
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
   }
 
@@ -87,18 +81,21 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator);
+      advancedStartDatafeed(jobCreator, navigateToPath);
     } catch (error) {
-      // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        }),
-        text: getErrorMessage(error),
-      });
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
+  }
+
+  function handleJobCreationError(error: any) {
+    const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
+    displayErrorToast(
+      error,
+      i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+        defaultMessage: `Job creation error`,
+      })
+    );
+    setCreatingJob(false);
   }
 
   function viewResults() {
@@ -112,11 +109,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function clickResetJob() {
-    resetJob(jobCreator);
+    resetJob(jobCreator, navigateToPath);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator);
+    convertToAdvancedJob(jobCreator, navigateToPath);
   };
 
   useEffect(() => {
@@ -173,15 +170,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 <EuiFlexItem grow={false}>
                   <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    jobEditorMode={EDITOR_MODE.READONLY}
-                    datafeedEditorMode={EDITOR_MODE.READONLY}
+                    jobEditorMode={jsonEditorMode}
+                    datafeedEditorMode={jsonEditorMode}
                   />
                 </EuiFlexItem>
-                {jobCreator.type === JOB_TYPE.ADVANCED ? (
-                  <EuiFlexItem grow={false}>
-                    <DatafeedPreviewFlyout isDisabled={false} />
-                  </EuiFlexItem>
-                ) : (
+                {isAdvanced === false && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={convertToAdvanced}>
                       <FormattedMessage

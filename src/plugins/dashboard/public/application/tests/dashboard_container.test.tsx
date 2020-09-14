@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { mount } from 'enzyme';

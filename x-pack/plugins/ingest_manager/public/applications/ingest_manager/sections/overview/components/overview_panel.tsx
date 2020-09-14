@@ -60,7 +60,7 @@ export const OverviewPanel = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIconTip content={tooltip} position="top" type="iInCircle" />
+            <EuiIconTip content={tooltip} position="top" type="iInCircle" color="subdued" />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiButtonEmpty size="xs" flush="right" href={linkTo}>

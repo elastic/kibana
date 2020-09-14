@@ -78,7 +78,8 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
@@ -307,7 +308,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {

@@ -148,7 +148,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
-            all: ['dashboard', 'url', 'query'],
+            all: ['dashboard', 'query'],
             read: [
               'index-pattern',
               'search',
@@ -172,6 +172,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'visualization',
               'timelion-sheet',
               'canvas-workpad',
+              'lens',
               'map',
               'dashboard',
               'query',
@@ -349,7 +350,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
+          ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
         },
         read: {
           app: ['kibana'],

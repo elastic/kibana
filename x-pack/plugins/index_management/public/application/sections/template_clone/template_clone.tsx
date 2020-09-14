@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
@@ -94,30 +94,30 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
 
     content = (
       <TemplateForm
+        title={
+          <EuiTitle size="l">
+            <h1 data-test-subj="pageTitle">
+              <FormattedMessage
+                id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
+                defaultMessage="Clone template '{name}'"
+                values={{ name: decodedTemplateName }}
+              />
+            </h1>
+          </EuiTitle>
+        }
         defaultValue={templateData}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
         clearSaveError={clearSaveError}
+        isLegacy={isLegacy}
       />
     );
   }
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
-              defaultMessage="Clone template '{name}'"
-              values={{ name: decodedTemplateName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
+      <EuiPageContent>{content}</EuiPageContent>
     </EuiPageBody>
   );
 };

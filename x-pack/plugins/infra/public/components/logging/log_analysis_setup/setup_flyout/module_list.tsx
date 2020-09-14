@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { useLogAnalysisCapabilitiesContext } from '../../../../containers/logs/log_analysis';
 import {
   logEntryCategoriesModule,
   useLogEntryCategoriesModuleContext,
@@ -20,8 +21,15 @@ import type { ModuleId } from './setup_flyout_state';
 export const LogAnalysisModuleList: React.FC<{
   onViewModuleSetup: (module: ModuleId) => void;
 }> = ({ onViewModuleSetup }) => {
-  const { setupStatus: logEntryRateSetupStatus } = useLogEntryRateModuleContext();
-  const { setupStatus: logEntryCategoriesSetupStatus } = useLogEntryCategoriesModuleContext();
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
+  const {
+    setupStatus: logEntryRateSetupStatus,
+    jobIds: logEntryRateJobIds,
+  } = useLogEntryRateModuleContext();
+  const {
+    setupStatus: logEntryCategoriesSetupStatus,
+    jobIds: logEntryCategoriesJobIds,
+  } = useLogEntryCategoriesModuleContext();
 
   const viewLogEntryRateSetupFlyout = useCallback(() => {
     onViewModuleSetup('logs_ui_analysis');
@@ -35,6 +43,8 @@ export const LogAnalysisModuleList: React.FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            jobId={logEntryRateJobIds['log-entry-rate']}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryRateModule.moduleDescription}
             moduleName={logEntryRateModule.moduleName}
             moduleStatus={logEntryRateSetupStatus}
@@ -43,6 +53,8 @@ export const LogAnalysisModuleList: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            jobId={logEntryCategoriesJobIds['log-entry-categories-count']}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryCategoriesModule.moduleDescription}
             moduleName={logEntryCategoriesModule.moduleName}
             moduleStatus={logEntryCategoriesSetupStatus}

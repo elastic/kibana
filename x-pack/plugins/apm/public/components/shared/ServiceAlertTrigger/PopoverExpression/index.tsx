@@ -8,12 +8,12 @@ import React, { useState } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 
 interface Props {
-  title: string;
-  value: string;
+  title: React.ReactNode;
+  value: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export const PopoverExpression = (props: Props) => {
+export function PopoverExpression(props: Props) {
   const { title, value, children } = props;
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -36,4 +36,4 @@ export const PopoverExpression = (props: Props) => {
       {children}
     </EuiPopover>
   );
-};
+}

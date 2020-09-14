@@ -102,6 +102,30 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    tickLabelsVisibilitySettings: {
+      types: ['lens_xy_tickLabelsConfig'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+        defaultMessage: 'Show x and y axes tick labels',
+      }),
+    },
+    gridlinesVisibilitySettings: {
+      types: ['lens_xy_gridlinesConfig'],
+      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+        defaultMessage: 'Show x and y axes gridlines',
+      }),
+    },
+    showXAxisTitle: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.showXAxisTitle.help', {
+        defaultMessage: 'Show x axis title',
+      }),
+    },
+    showYAxisTitle: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.showYAxisTitle.help', {
+        defaultMessage: 'Show y axis title',
+      }),
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -180,7 +204,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
-  }, []);
+  }, [setState]);
 
   return (
     <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
@@ -199,7 +223,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -237,7 +261,10 @@ export function XYChart({
     shouldRotate
   );
 
-  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
+  const showXAxisTitle = args.showXAxisTitle ?? true;
+  const showYAxisTitle = args.showYAxisTitle ?? true;
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -279,10 +306,30 @@ export function XYChart({
       }
     : undefined;
 
+  const getYAxesTitles = (
+    axisSeries: Array<{ layer: string; accessor: string }>,
+    index: number
+  ) => {
+    if (index > 0 && args.yTitle) return;
+    return (
+      args.yTitle ||
+      axisSeries
+        .map(
+          (series) =>
+            data.tables[series.layer].columns.find((column) => column.id === series.accessor)?.name
+        )
+        .filter((name) => Boolean(name))[0]
+    );
+  };
+
   return (
     <Chart>
       <Settings
-        showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
+        showLegend={
+          legend.isVisible && !legend.showSingleSeries
+            ? chartHasMoreThanOneSeries
+            : legend.isVisible
+        }
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}
@@ -374,9 +421,20 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        showGridLines={false}
+        gridLine={{
+          visible: gridlinesVisibilitySettings?.x,
+          strokeWidth: 2,
+        }}
         hide={filteredLayers[0].hide}
         tickFormat={(d) => xAxisFormatter.convert(d)}
+        style={{
+          tickLabel: {
+            visible: tickLabelsVisibilitySettings?.x,
+          },
+          axisTitle: {
+            visible: showXAxisTitle,
+          },
+        }}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -385,18 +443,20 @@ export function XYChart({
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={
-            axis.series
-              .map(
-                (series) =>
-                  data.tables[series.layer].columns.find((column) => column.id === series.accessor)
-                    ?.name
-              )
-              .filter((name) => Boolean(name))[0] || args.yTitle
-          }
-          showGridLines={false}
+          title={getYAxesTitles(axis.series, index)}
+          gridLine={{
+            visible: gridlinesVisibilitySettings?.y,
+          }}
           hide={filteredLayers[0].hide}
           tickFormat={(d) => axis.formatter.convert(d)}
+          style={{
+            tickLabel: {
+              visible: tickLabelsVisibilitySettings?.y,
+            },
+            axisTitle: {
+              visible: showYAxisTitle,
+            },
+          }}
         />
       ))}
 
@@ -489,7 +549,9 @@ export function XYChart({
             case 'bar_horizontal_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             case 'area_stacked':
-              return <AreaSeries key={index} {...seriesProps} />;
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'area':
               return (
                 <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />

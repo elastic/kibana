@@ -20,6 +20,7 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
   );
 
   describe('get all', () => {
+    /* eslint-disable @typescript-eslint/naming-convention */
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -73,6 +74,7 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
+      /* eslint-enable @typescript-eslint/naming-convention */
     ].forEach((scenario) => {
       getAllTest(`user with no access can't access any spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
@@ -83,6 +85,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: expectRbacForbidden,
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -101,6 +107,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
 
@@ -113,6 +123,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
           copySavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
@@ -131,6 +145,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
 
@@ -143,6 +161,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: expectRbacForbidden,
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -161,6 +183,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -173,6 +199,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -191,6 +221,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('space_1'),
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('space_1'),
+          },
         },
       });
 
@@ -203,6 +237,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: createExpectResults('space_1'),
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -220,6 +258,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               response: createExpectResults('default'),
             },
             copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            shareSavedObjectsPurpose: {
               statusCode: 200,
               response: createExpectResults('default'),
             },
@@ -241,6 +283,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: expectRbacForbidden,
             },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
         }
       );
@@ -256,6 +302,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               response: createExpectResults('default'),
             },
             copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            shareSavedObjectsPurpose: {
               statusCode: 200,
               response: createExpectResults('default'),
             },
@@ -277,6 +327,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: expectRbacForbidden,
             },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
         }
       );
@@ -292,6 +346,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               response: createExpectResults('space_1'),
             },
             copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            shareSavedObjectsPurpose: {
               statusCode: 200,
               response: createExpectResults('space_1'),
             },
@@ -313,6 +371,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: expectRbacForbidden,
             },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
         }
       );
@@ -326,6 +388,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: expectRbacForbidden,
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -344,6 +410,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -359,6 +429,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          shareSavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -371,6 +445,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             response: expectRbacForbidden,
           },
           copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          shareSavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },

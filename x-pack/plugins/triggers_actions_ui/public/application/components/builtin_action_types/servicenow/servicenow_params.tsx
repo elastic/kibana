@@ -61,7 +61,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable === 'alertId')) {
+    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {
@@ -79,7 +79,14 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Incident</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.title',
+            {
+              defaultMessage: 'Incident',
+            }
+          )}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow

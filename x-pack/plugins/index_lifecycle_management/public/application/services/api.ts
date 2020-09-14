@@ -5,7 +5,8 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { trackUiMetric } from './ui_metric';
+
+import { PolicyFromES, SerializedPolicy } from '../../../common/types';
 
 import {
   UIM_POLICY_DELETE,
@@ -14,16 +15,27 @@ import {
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
 } from '../constants';
-
+import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
 
-export async function loadNodes() {
-  return await sendGet(`nodes/list`);
+interface GenericObject {
+  [key: string]: any;
 }
 
-export async function loadNodeDetails(selectedNodeAttrs: string) {
-  return await sendGet(`nodes/${selectedNodeAttrs}/details`);
-}
+export const useLoadNodes = () => {
+  return useRequest({
+    path: `nodes/list`,
+    method: 'get',
+    initialData: [],
+  });
+};
+
+export const useLoadNodeDetails = (selectedNodeAttrs: string) => {
+  return useRequest({
+    path: `nodes/${selectedNodeAttrs}/details`,
+    method: 'get',
+  });
+};
 
 export async function loadIndexTemplates() {
   return await sendGet(`templates`);
@@ -33,7 +45,15 @@ export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
 }
 
-export async function savePolicy(policy: any) {
+export const useLoadPoliciesList = (withIndices: boolean) => {
+  return useRequest<PolicyFromES[]>({
+    path: `policies`,
+    method: 'get',
+    query: { withIndices },
+  });
+};
+
+export async function savePolicy(policy: SerializedPolicy) {
   return await sendPost(`policies`, policy);
 }
 
@@ -58,14 +78,18 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   return response;
 };
 
-export const addLifecyclePolicyToIndex = async (body: any) => {
+export const addLifecyclePolicyToIndex = async (body: {
+  indexName: string;
+  policyName: string;
+  alias: string;
+}) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX);
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async (body: any) => {
+export const addLifecyclePolicyToTemplate = async (body: GenericObject) => {
   const response = await sendPost(`template`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);

@@ -8,8 +8,11 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types/entries';
-import { getFullEndpointExceptionList } from './lists';
+import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types';
+import { buildArtifact, getFullEndpointExceptionList } from './lists';
+import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import { ArtifactConstants } from './common';
+import { ENDPOINT_LIST_ID } from '../../../../../lists/common';
 
 describe('buildEventTypeSignal', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -46,7 +49,12 @@ describe('buildEventTypeSignal', () => {
 
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -87,7 +95,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -133,7 +146,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -181,7 +199,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -228,7 +251,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -266,7 +294,12 @@ describe('buildEventTypeSignal', () => {
     first.data[1].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -304,7 +337,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -313,21 +351,28 @@ describe('buildEventTypeSignal', () => {
   test('it should convert the exception lists response to the proper endpoint format while paging', async () => {
     // The first call returns two exceptions
     const first = getFoundExceptionListItemSchemaMock();
+    first.per_page = 2;
+    first.total = 4;
     first.data.push(getExceptionListItemSchemaMock());
 
     // The second call returns two exceptions
     const second = getFoundExceptionListItemSchemaMock();
+    second.per_page = 2;
+    second.total = 4;
     second.data.push(getExceptionListItemSchemaMock());
 
-    // The third call returns no exceptions, paging stops
-    const third = getFoundExceptionListItemSchemaMock();
-    third.data = [];
     mockExceptionClient.findExceptionListItem = jest
       .fn()
       .mockReturnValueOnce(first)
-      .mockReturnValueOnce(second)
-      .mockReturnValueOnce(third);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+      .mockReturnValueOnce(second);
+
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
+
     // Expect 2 exceptions, the first two calls returned the same exception list items
     expect(resp.entries.length).toEqual(2);
   });
@@ -337,7 +382,123 @@ describe('buildEventTypeSignal', () => {
     exceptionsResponse.data = [];
     exceptionsResponse.total = 0;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp.entries.length).toEqual(0);
+  });
+
+  test('it should return a stable hash regardless of order of entries', async () => {
+    const translatedEntries: TranslatedEntry[] = [
+      {
+        entries: [
+          {
+            field: 'some.nested.field',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'some value',
+          },
+        ],
+        field: 'some.parentField',
+        type: 'nested',
+      },
+      {
+        field: 'nested.field',
+        operator: 'included',
+        type: 'exact_cased',
+        value: 'some value',
+      },
+    ];
+    const translatedEntriesReversed = translatedEntries.reverse();
+
+    const translatedExceptionList = {
+      entries: [
+        {
+          type: 'simple',
+          entries: translatedEntries,
+        },
+      ],
+    };
+
+    const translatedExceptionListReversed = {
+      entries: [
+        {
+          type: 'simple',
+          entries: translatedEntriesReversed,
+        },
+      ],
+    };
+
+    const artifact1 = await buildArtifact(
+      translatedExceptionList,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    const artifact2 = await buildArtifact(
+      translatedExceptionListReversed,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
+  });
+
+  test('it should return a stable hash regardless of order of items', async () => {
+    const translatedItems: TranslatedExceptionListItem[] = [
+      {
+        type: 'simple',
+        entries: [
+          {
+            entries: [
+              {
+                field: 'some.nested.field',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'some value',
+              },
+            ],
+            field: 'some.parentField',
+            type: 'nested',
+          },
+        ],
+      },
+      {
+        type: 'simple',
+        entries: [
+          {
+            field: 'nested.field',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'some value',
+          },
+        ],
+      },
+    ];
+
+    const translatedExceptionList = {
+      entries: translatedItems,
+    };
+
+    const translatedExceptionListReversed = {
+      entries: translatedItems.reverse(),
+    };
+
+    const artifact1 = await buildArtifact(
+      translatedExceptionList,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    const artifact2 = await buildArtifact(
+      translatedExceptionListReversed,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
   });
 });

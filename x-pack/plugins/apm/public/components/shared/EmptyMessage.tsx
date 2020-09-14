@@ -14,7 +14,7 @@ interface Props {
   hideSubheading?: boolean;
 }
 
-const EmptyMessage: React.FC<Props> = ({
+function EmptyMessage({
   heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
     defaultMessage: 'No data found.',
   }),
@@ -22,7 +22,7 @@ const EmptyMessage: React.FC<Props> = ({
     defaultMessage: 'Try another time range or reset the search filter.',
   }),
   hideSubheading = false,
-}) => {
+}: Props) {
   return (
     <EuiEmptyPrompt
       titleSize="s"
@@ -30,6 +30,6 @@ const EmptyMessage: React.FC<Props> = ({
       body={!hideSubheading && subheading}
     />
   );
-};
+}
 
 export { EmptyMessage };

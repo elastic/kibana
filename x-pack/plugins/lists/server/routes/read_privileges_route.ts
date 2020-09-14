@@ -20,7 +20,7 @@ export const readPrivilegesRoute = (
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: LIST_PRIVILEGES_URL,
       validate: false,
@@ -36,7 +36,7 @@ export const readPrivilegesRoute = (
         );
         const clusterPrivilegesListItems = await readPrivileges(
           clusterClient.callAsCurrentUser,
-          lists.getListIndex()
+          lists.getListItemIndex()
         );
         const privileges = merge(
           {

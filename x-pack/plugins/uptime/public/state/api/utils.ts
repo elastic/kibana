@@ -8,7 +8,11 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import { HttpFetchQuery, HttpSetup } from 'src/core/public';
 import * as t from 'io-ts';
-import { isObject } from 'lodash';
+
+function isObject(value: unknown) {
+  const type = typeof value;
+  return value != null && (type === 'object' || type === 'function');
+}
 
 // TODO: Copied from https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/common/format_errors.ts
 // We should figure out a better way to share this

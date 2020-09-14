@@ -95,8 +95,19 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async waitForRefreshButtonLoaded() {
+      await testSubjects.existOrFail('~transformRefreshTransformListButton', {
+        timeout: 10 * 1000,
+      });
+      await testSubjects.existOrFail('transformRefreshTransformListButton loaded', {
+        timeout: 30 * 1000,
+      });
+    }
+
     public async refreshTransformList() {
-      await testSubjects.click('transformRefreshTransformListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~transformRefreshTransformListButton');
+      await this.waitForRefreshButtonLoaded();
       await this.waitForTransformsToLoad();
     }
 
@@ -105,12 +116,19 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string) {
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForTransformsToLoad();
       const tableListContainer = await testSubjects.find('transformListTableContainer');
       const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+
+      const rows = await this.parseTransformTable();
+      const filteredRows = rows.filter((row) => row.id === filter);
+      expect(filteredRows).to.have.length(
+        expectedRowCount,
+        `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+      );
     }
 
     public async assertTransformRowFields(transformId: string, expectedRow: object) {

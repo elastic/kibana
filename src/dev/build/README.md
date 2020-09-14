@@ -16,6 +16,16 @@ node scripts/build --release
 node scripts/build --skip-node-download --debug --no-oss
 ```
 
+# Fixing out of memory issues
+
+Building Kibana and its distributables can take a lot of memory to finish successfully. Builds do make use of child processes, which means you can increase the amount of memory available by specifying `NODE_OPTIONS="--max-old-space-size=VALUE-IN-MEGABYTES"`.
+
+```sh
+
+# Use 4GB instead of the standard 1GB for building
+NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
+```
+
 # Structure
 
 The majority of this logic is extracted from the grunt build that has existed forever, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.js] file defines which tasks are run.
@@ -39,14 +49,3 @@ The majority of this logic is extracted from the grunt build that has existed fo
 [lib/build.js]: ./lib/build.js
 [build_distributables.js]: ./build_distributables.js
 [../tooling_log/tooling_log.js]: ../tooling_log/tooling_log.js
-
-# Client Node Modules Cleaning
-
-We have introduced in our bundle a webpack dll for the client vendor modules in order to improve
-the optimization time both in dev and in production. As for those modules we already have the 
-code into the vendors_${chunk_number}.bundle.dll.js we have decided to delete those bundled modules from the 
-distributable node_modules folder. However, in order to accomplish this, we need to exclude 
-every node_module used in the server side code. This logic is performed 
-under `nodejs_modules/clean_client_modules_on_dll_task.js`. In case we need to add any new cli
-or any other piece of server code other than `x-pack` or `core_plugins` we'll need
-to update the globs present on `clean_client_modules_on_dll_task.js` accordingly.

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { extractJSONStringValues } from './parser';
+
 export function collapseLiteralStrings(data: string) {
   const splitData = data.split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
@@ -25,47 +27,60 @@ export function collapseLiteralStrings(data: string) {
   return splitData.join('');
 }
 
-/*
-  The following regex describes global match on:
-  1. one colon followed by any number of space characters
-  2. one double quote (not escaped, special case for JSON in JSON).
-  3. greedily match any non double quote and non newline char OR any escaped double quote char (non-capturing).
-  4. handle a special case where an escaped slash may be the last character
-  5. one double quote
+// 5 megabytes
+const MAX_EXPANDABLE_JSON_SIZE = 5 * 1024 * 1024;
 
-  For instance: `: "some characters \" here"`
-  Will match and be expanded to: `"""some characters " here"""`
-
+/**
+ * Takes in a string representing some JSON data and expands strings,
+ * where needed, to a string literal representation.
+ *
+ * For example; given a value like: "{ "my_string": "\nhey!\n" }"
+ *
+ * Will return: "{ "my_string": """
+ * hey!
+ * """
+ * }"
  */
-
-const LITERAL_STRING_CANDIDATES = /((:[\s\r\n]*)([^\\])"(\\"|[^"\n])*\\?")/g;
-
 export function expandLiteralStrings(data: string) {
-  return data.replace(LITERAL_STRING_CANDIDATES, (match, string) => {
-    // Expand to triple quotes if there are _any_ slashes
-    if (string.match(/\\./)) {
-      const firstDoubleQuoteIdx = string.indexOf('"');
-      const lastDoubleQuoteIdx = string.lastIndexOf('"');
+  // Assuming 1 byte per char
+  if (data.length > MAX_EXPANDABLE_JSON_SIZE) {
+    return data;
+  }
 
-      // Handle a special case where we may have a value like "\"test\"". We don't
-      // want to expand this to """"test"""" - so we terminate before processing the string
-      // further if we detect this either at the start or end of the double quote section.
+  const { stringValues } = extractJSONStringValues(data);
 
-      if (string[firstDoubleQuoteIdx + 1] === '\\' && string[firstDoubleQuoteIdx + 2] === '"') {
-        return string;
-      }
+  if (stringValues.length === 0) {
+    return data;
+  }
 
-      if (string[lastDoubleQuoteIdx - 1] === '"' && string[lastDoubleQuoteIdx - 2] === '\\') {
-        return string;
-      }
+  // Include JSON before our first string value
+  let result = data.substring(0, stringValues[0].startIndex);
 
-      const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
-      const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
-      // Remove one level of JSON stringification
-      const jsonValue = JSON.parse(rawStringifiedValue);
-      return `${colonAndAnySpacing}"""${jsonValue}"""`;
+  for (let x = 0; x < stringValues.length; x++) {
+    const { startIndex, endIndex } = stringValues[x];
+    const candidate = data.substring(startIndex, endIndex + 1);
+
+    // Handle a special case where we may have a value like "\"test\"". We don't
+    // want to expand this to """"test"""" - so we terminate before processing the string
+    // further if we detect this either at the start or end of the double quote section.
+    const skip =
+      (candidate[1] === '\\' && candidate[2] === '"') ||
+      (candidate[candidate.length - 2] === '"' && candidate[candidate.length - 3] === '\\');
+
+    if (!skip && candidate.match(/\\./)) {
+      result += `"""${JSON.parse(candidate)}"""`;
     } else {
-      return string;
+      result += candidate;
     }
-  });
+
+    if (stringValues[x + 1]) {
+      // Add any JSON between string values
+      result += data.substring(endIndex + 1, stringValues[x + 1].startIndex);
+    }
+  }
+
+  // Add any remaining JSON after all string values
+  result += data.substring(stringValues[stringValues.length - 1].endIndex + 1);
+
+  return result;
 }

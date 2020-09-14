@@ -6,10 +6,12 @@
 
 import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { usePrevious } from 'react-use';
+import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -34,15 +36,15 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 
-export const timeSeriesExplorerRoute: MlRoute = {
+export const timeSeriesExplorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/timeseriesexplorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB,
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
         defaultMessage: 'Single Metric Viewer',
@@ -50,7 +52,7 @@ export const timeSeriesExplorerRoute: MlRoute = {
       href: '',
     },
   ],
-};
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useResolver('', undefined, deps.config, {
@@ -89,6 +91,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -112,6 +115,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -298,6 +304,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         tableSeverity: tableSeverity.val,
         timefilter,
         zoom: zoomProp,
+        invalidTimeRangeError,
       }}
     />
   );

@@ -7,6 +7,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
@@ -28,7 +29,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
 
   useEffect(() => {
     const subscription = service.tooltipState$.subscribe((tooltipState) => {
-      if (refCallback.current) {
+      if (refCallback.current && typeof refCallback.current === 'function') {
         // update trigger
         refCallback.current(tooltipState.target);
       }
@@ -68,9 +69,14 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
                 .slice(1)
                 .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
                   const classes = classNames('mlChartTooltip__item', {
-                    /* eslint @typescript-eslint/camelcase:0 */
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     echTooltip__rowHighlighted: isHighlighted,
                   });
+
+                  const renderValue = Array.isArray(value)
+                    ? value.map((v) => <div key={v}>{v}</div>)
+                    : value;
+
                   return (
                     <div
                       key={`${seriesIdentifier.key}__${valueAccessor}`}
@@ -79,8 +85,17 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
                         borderLeftColor: color,
                       }}
                     >
-                      <span className="mlChartTooltip__label">{label}</span>
-                      <span className="mlChartTooltip__value">{value}</span>
+                      <EuiFlexGroup>
+                        <EuiFlexItem
+                          className="eui-textBreakWord mlChartTooltip__label"
+                          grow={false}
+                        >
+                          {label}
+                        </EuiFlexItem>
+                        <EuiFlexItem className="eui-textBreakAll mlChartTooltip__value">
+                          {renderValue}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </div>
                   );
                 })}
