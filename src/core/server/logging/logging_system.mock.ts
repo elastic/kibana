@@ -48,15 +48,7 @@ const createLoggingSystemMock = () => {
 
 const collectLoggingSystemMock = (loggerFactory: LoggerFactory) => {
   const mockLog = loggerFactory.get() as MockedLogger;
-  return {
-    debug: mockLog.debug.mock.calls,
-    error: mockLog.error.mock.calls,
-    fatal: mockLog.fatal.mock.calls,
-    info: mockLog.info.mock.calls,
-    log: mockLog.log.mock.calls,
-    trace: mockLog.trace.mock.calls,
-    warn: mockLog.warn.mock.calls,
-  };
+  return loggerMock.collect(mockLog);
 };
 
 const clearLoggingSystemMock = (loggerFactory: LoggerFactory) => {
@@ -67,13 +59,7 @@ const clearLoggingSystemMock = (loggerFactory: LoggerFactory) => {
   mockedLoggerFactory.stop.mockClear();
 
   const mockLog = loggerFactory.get() as MockedLogger;
-  mockLog.debug.mockClear();
-  mockLog.info.mockClear();
-  mockLog.warn.mockClear();
-  mockLog.error.mockClear();
-  mockLog.trace.mockClear();
-  mockLog.fatal.mockClear();
-  mockLog.log.mockClear();
+  loggerMock.clear(mockLog);
 };
 
 export const loggingSystemMock = {

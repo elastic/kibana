@@ -24,6 +24,7 @@ import { mockApplyDeprecations } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
+import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 
 import { ConfigService, Env } from '.';
 
@@ -32,14 +33,14 @@ import { getEnvOptions } from './__mocks__/env';
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', {}, emptyArgv);
 
-// TODO: fix
-// import { loggingSystemMock } from '../logging/logging_system.mock';
-// const logger = loggingSystemMock.create();
-const loggingSystemMock: any = {};
-const logger: any = {};
+let logger: MockedLogger;
 
 const getRawConfigProvider = (rawConfig: Record<string, any>) =>
   rawConfigServiceMock.create({ rawConfig });
+
+beforeEach(() => {
+  logger = loggerMock.create();
+});
 
 test('returns config at path as observable', async () => {
   const rawConfig = getRawConfigProvider({ key: 'foo' });
@@ -446,9 +447,9 @@ test('logs deprecation warning during validation', async () => {
     return config;
   });
 
-  loggingSystemMock.clear(logger);
+  loggerMock.clear(logger);
   await configService.validate();
-  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`
     Array [
       Array [
         "some deprecation message",
