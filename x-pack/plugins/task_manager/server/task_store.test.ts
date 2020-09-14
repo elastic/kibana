@@ -633,7 +633,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:aaa',
           _source: {
             type: 'task',
             task: {
@@ -654,7 +654,104 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          // this is invalid as it doesn't have the `type` prefix
           _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it filters out invalid tasks that arent SavedObjects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
           _source: {
             type: 'task',
             task: {
@@ -729,7 +826,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:aaa',
           _source: {
             type: 'task',
             task: {
@@ -750,7 +847,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'bbb',
+          _id: 'task:bbb',
           _source: {
             type: 'task',
             task: {
@@ -1069,7 +1166,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'claimed-by-id',
+          _id: 'task:claimed-by-id',
           _source: {
             type: 'task',
             task: {
@@ -1093,7 +1190,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'claimed-by-schedule',
+          _id: 'task:claimed-by-schedule',
           _source: {
             type: 'task',
             task: {
@@ -1117,7 +1214,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['b', 2],
         },
         {
-          _id: 'already-running',
+          _id: 'task:already-running',
           _source: {
             type: 'task',
             task: {
@@ -1378,8 +1475,8 @@ if (doc['task.runAt'].size()!=0) {
 });
 
 function generateFakeTasks(count: number = 1) {
-  return _.times(count, () => ({
-    _id: 'aaa',
+  return _.times(count, (index) => ({
+    _id: `task:id-${index}`,
     _source: {
       type: 'task',
       task: {},
