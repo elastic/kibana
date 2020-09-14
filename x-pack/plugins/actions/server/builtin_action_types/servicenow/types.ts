@@ -16,8 +16,8 @@ import {
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceCommentResponse } from '../case/common_types';
-import { IncidentConfigurationSchema } from '../case/common_schema';
+import { ExternalServiceCommentResponse } from '../case/types';
+import { IncidentConfigurationSchema } from '../case/schema';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -81,6 +81,13 @@ export type ExecutorSubActionGetIncidentParams = TypeOf<
 export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
+
+export type Incident = Pick<
+  ExecutorSubActionPushParams,
+  'description' | 'severity' | 'urgency' | 'impact'
+> & {
+  short_description: string;
+};
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
