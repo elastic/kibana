@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NodeRole, ListNodesRouteResponse } from '../../../../common/types';
+import { NodeRole, ListNodesRouteResponse, PhaseWithAllocation } from '../../../../common/types';
 
 /**
  * Given a phase and current node roles, determine whether the phase
