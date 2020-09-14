@@ -287,6 +287,17 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_maps_read: {
+          kibana: [
+            {
+              feature: {
+                maps: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         geoshape_data_reader: {
           elasticsearch: {
             indices: [

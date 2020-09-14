@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('docvalue_fields', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], false);
+      await security.testUser.setRoles(['global_maps_read', 'test_logstash_reader'], false);
       await PageObjects.maps.loadSavedMap('document example');
     });
 
