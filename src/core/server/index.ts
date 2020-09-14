@@ -322,8 +322,8 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
-  DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
   modifyUrl,
@@ -331,7 +331,7 @@ export {
   Freezable,
   deepFreeze,
   assertNever,
-} from '../utils';
+} from '@kbn/std';
 
 export {
   SavedObject,

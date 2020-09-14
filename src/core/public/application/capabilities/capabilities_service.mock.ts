@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { deepFreeze } from '@kbn/std';
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
-import { deepFreeze } from '../../../utils';
 
 const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
   capabilities: deepFreeze({

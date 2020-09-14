@@ -68,7 +68,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
   IContextProvider,
@@ -78,9 +77,8 @@ import {
   HandlerParameters,
 } from './context';
 
-export { CoreContext, CoreSystem } from './core_system';
+export { PackageInfo, EnvironmentMode } from '../server/types';
 export {
-  DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
   modifyUrl,
@@ -88,7 +86,9 @@ export {
   Freezable,
   deepFreeze,
   assertNever,
-} from '../utils';
+} from '@kbn/std';
+export { CoreContext, CoreSystem } from './core_system';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
