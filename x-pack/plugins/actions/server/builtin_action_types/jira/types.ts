@@ -19,8 +19,8 @@ import {
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { IncidentConfigurationSchema } from '../case/common_schema';
-import { Comment } from '../case/common_types';
+import { IncidentConfigurationSchema } from '../case/schema';
+import { Comment } from '../case/types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
