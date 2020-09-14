@@ -30,6 +30,12 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
+import {
+  isGetTransformsStatsResponseSchema,
+  isPutTransformsResponseSchema,
+  isStartTransformsResponseSchema,
+} from '../../../../../../common/api_schemas/type_guards';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -93,40 +99,43 @@ export const StepCreateForm: FC<Props> = React.memo(
     async function createTransform() {
       setLoading(true);
 
-      try {
-        const resp = await api.createTransform(transformId, transformConfig);
-        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
-          if (resp.errors.length === 1) {
-            throw resp.errors[0];
-          }
+      const resp = await api.createTransform(transformId, transformConfig);
 
-          if (resp.errors.length > 1) {
-            throw resp.errors;
-          }
+      if (!isPutTransformsResponseSchema(resp) || resp.errors.length > 0) {
+        let respErrors:
+          | PutTransformsResponseSchema['errors']
+          | PutTransformsResponseSchema['errors'][number]
+          | undefined;
+
+        if (isPutTransformsResponseSchema(resp) && resp.errors.length > 0) {
+          respErrors = resp.errors.length === 1 ? resp.errors[0] : resp.errors;
         }
 
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Request to create transform {transformId} acknowledged.',
-            values: { transformId },
-          })
-        );
-        setCreated(true);
-        setLoading(false);
-      } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
             defaultMessage: 'An error occurred creating the transform {transformId}:',
             values: { transformId },
           }),
           text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            <ToastNotificationText
+              overlays={deps.overlays}
+              text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
+            />
           ),
         });
         setCreated(false);
         setLoading(false);
         return false;
       }
+
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
+          defaultMessage: 'Request to create transform {transformId} acknowledged.',
+          values: { transformId },
+        })
+      );
+      setCreated(true);
+      setLoading(false);
 
       if (createIndexPattern) {
         createKibanaIndexPattern();
@@ -138,37 +147,36 @@ export const StepCreateForm: FC<Props> = React.memo(
     async function startTransform() {
       setLoading(true);
 
-      try {
-        const resp = await api.startTransforms([{ id: transformId }]);
-        if (typeof resp === 'object' && resp !== null && resp[transformId]?.success === true) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
-              defaultMessage: 'Request to start transform {transformId} acknowledged.',
-              values: { transformId },
-            })
-          );
-          setStarted(true);
-          setLoading(false);
-        } else {
-          const errorMessage =
-            typeof resp === 'object' && resp !== null && resp[transformId]?.success === false
-              ? resp[transformId].error
-              : resp;
-          throw new Error(errorMessage);
-        }
-      } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-            defaultMessage: 'An error occurred starting the transform {transformId}:',
+      const resp = await api.startTransforms([{ id: transformId }]);
+
+      if (isStartTransformsResponseSchema(resp) && resp[transformId]?.success === true) {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
+            defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
-          ),
-        });
-        setStarted(false);
+          })
+        );
+        setStarted(true);
         setLoading(false);
+        return;
       }
+
+      const errorMessage =
+        isStartTransformsResponseSchema(resp) && resp[transformId]?.success === false
+          ? resp[transformId].error
+          : resp;
+
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
+          defaultMessage: 'An error occurred starting the transform {transformId}:',
+          values: { transformId },
+        }),
+        text: toMountPoint(
+          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(errorMessage)} />
+        ),
+      });
+      setStarted(false);
+      setLoading(false);
     }
 
     async function createAndStartTransform() {
@@ -250,27 +258,30 @@ export const StepCreateForm: FC<Props> = React.memo(
       // wrapping in function so we can keep the interval id in local scope
       function startProgressBar() {
         const interval = setInterval(async () => {
-          try {
-            const stats = await api.getTransformsStats(transformId);
-            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
-              const percent =
-                getTransformProgress({
-                  id: transformConfig.id,
-                  config: transformConfig,
-                  stats: stats.transforms[0],
-                }) || 0;
-              setProgressPercentComplete(percent);
-              if (percent >= 100) {
-                clearInterval(interval);
-              }
+          const stats = await api.getTransformStats(transformId);
+
+          if (
+            isGetTransformsStatsResponseSchema(stats) &&
+            Array.isArray(stats.transforms) &&
+            stats.transforms.length > 0
+          ) {
+            const percent =
+              getTransformProgress({
+                id: transformConfig.id,
+                config: transformConfig,
+                stats: stats.transforms[0],
+              }) || 0;
+            setProgressPercentComplete(percent);
+            if (percent >= 100) {
+              clearInterval(interval);
             }
-          } catch (e) {
+          } else {
             toastNotifications.addDanger({
               title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
               text: toMountPoint(
-                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(stats)} />
               ),
             });
             clearInterval(interval);
