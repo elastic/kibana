@@ -171,80 +171,81 @@
         "hasMonitoringData": {
           "type": "boolean"
         },
-        "license": {
-          "type": "keyword"
-        },
-        "clusterUuid": {
-          "type": "keyword"
-        },
-        "allClusterUuids": {
-          "type": "keyword"
-        },
-        "metricbeatUsed": {
-          "type": "boolean"
-        },
-        "elasticsearch": {
+        "clusters": {
           "properties": {
-            "enabled": {
-              "type": "boolean"
+            "license": {
+              "type": "keyword"
             },
-            "count": {
-              "type": "long"
+            "clusterUuid": {
+              "type": "keyword"
             },
             "metricbeatUsed": {
               "type": "boolean"
-            }
-          }
-        },
-        "kibana": {
-          "properties": {
-            "enabled": {
-              "type": "boolean"
             },
-            "count": {
-              "type": "long"
+            "elasticsearch": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
             },
-            "metricbeatUsed": {
-              "type": "boolean"
-            }
-          }
-        },
-        "logstash": {
-          "properties": {
-            "enabled": {
-              "type": "boolean"
+            "kibana": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
             },
-            "count": {
-              "type": "long"
+            "logstash": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
             },
-            "metricbeatUsed": {
-              "type": "boolean"
-            }
-          }
-        },
-        "beats": {
-          "properties": {
-            "enabled": {
-              "type": "boolean"
+            "beats": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
             },
-            "count": {
-              "type": "long"
-            },
-            "metricbeatUsed": {
-              "type": "boolean"
-            }
-          }
-        },
-        "apm": {
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "count": {
-              "type": "long"
-            },
-            "metricbeatUsed": {
-              "type": "boolean"
+            "apm": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "metricbeatUsed": {
+                  "type": "boolean"
+                }
+              }
             }
           }
         }
