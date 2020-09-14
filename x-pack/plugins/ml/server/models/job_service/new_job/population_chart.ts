@@ -142,7 +142,7 @@ function getPopulationSearchJsonFromConfig(
         times: {
           date_histogram: {
             field: timeField,
-            interval: intervalMs,
+            fixed_interval: `${intervalMs}ms`,
             min_doc_count: 0,
             extended_bounds: {
               min: start,

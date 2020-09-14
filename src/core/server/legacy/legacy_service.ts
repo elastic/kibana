@@ -264,6 +264,7 @@ export class LegacyService implements CoreService {
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       metrics: {
+        collectionInterval: startDeps.core.metrics.collectionInterval,
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
@@ -310,6 +311,17 @@ export class LegacyService implements CoreService {
       status: {
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
+        set: () => {
+          throw new Error(`core.status.set is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get dependencies$() {
+          throw new Error(`core.status.dependencies$ is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get derivedStatus$() {
+          throw new Error(`core.status.derivedStatus$ is unsupported in legacy`);
+        },
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -341,11 +353,9 @@ export class LegacyService implements CoreService {
             registerStaticDir: setupDeps.core.http.registerStaticDir,
           },
           hapiServer: setupDeps.core.http.server,
-          kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
-          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
           legacy: this.legacyInternals,
         },
         logger: this.coreContext.logger,
