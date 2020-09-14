@@ -33,6 +33,14 @@ class LicenseService {
   public getLicenseInformation$() {
     return this.observable;
   }
+
+  public isGoldPlus() {
+    return (
+      this.licenseInformation?.isAvailable &&
+      this.licenseInformation?.isActive &&
+      this.licenseInformation?.hasAtLeast('gold')
+    );
+  }
 }
 
 export const licenseService = new LicenseService();
