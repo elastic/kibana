@@ -65,7 +65,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
             <EuiFormRow>
               <>
                 <DataTierAllocation
-                  hasNodeAttributes={!hasNodeAttrs}
+                  hasNodeAttributes={hasNodeAttrs}
                   phase={phase}
                   errors={errors}
                   setPhaseData={setPhaseData}
@@ -73,14 +73,17 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                   isShowingErrors={isShowingErrors}
                   nodes={nodesData.nodesByAttributes}
                 />
-                {phaseData.dataTierAllocationType === 'default' && isCompatible && (
+
+                {/* Data tier related warnings */}
+
+                {phaseData.dataTierAllocationType === 'default' && !isCompatible && (
                   <DefaultAllocationWarning
                     title={defaultAllocationWarningTitle}
                     body={defaultAllocationWarningBody}
                   />
                 )}
 
-                {phaseData.dataTierAllocationType === 'custom' && hasNodeAttrs && (
+                {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
                   <NoNodeAttributesWarning phase={phase} />
                 )}
               </>
