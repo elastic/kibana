@@ -100,6 +100,8 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
         buildType(OssCiGroups)
         buildType(OssVisualRegression)
         buildType(OssFirefox)
+        buildType(OssAccessibility)
+        buildType(OssPluginFunctional)
 
         subProject {
           id("CIGroups")

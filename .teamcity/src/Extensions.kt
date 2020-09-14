@@ -29,7 +29,7 @@ fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
     param("profileId", "kibana")
     param("diskType", "pd-ssd")
     param("machineCustom", "false")
-    param("maxInstances", "20")
+    param("maxInstances", "200")
     param("imageType", "ImageFamily")
     param("diskSizeGb", "")
     init()
