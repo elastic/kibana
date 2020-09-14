@@ -97,6 +97,13 @@ export async function executeEsQueryFactory(
                   entityHits: {
                     top_hits: {
                       size: topHitsQty,
+                      sort: [
+                        {
+                          [dateField]: {
+                            order: 'desc',
+                          },
+                        },
+                      ],
                       docvalue_fields: [entity, dateField, geoField],
                       _source: false,
                     },

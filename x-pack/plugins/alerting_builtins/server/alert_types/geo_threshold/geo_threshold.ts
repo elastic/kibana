@@ -22,8 +22,8 @@ function transformResults(results, dateField, geoField) {
         dateInShape: _.get(subBucket, `entityHits.hits.hits[0].fields.${dateField}[0]`, null),
       }));
     })
-    .orderBy(['entityName', 'dateInShape'], ['desc', 'desc'])
-    .uniqBy('entityName')
+    .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
+    .sortedUniqBy('entityName')
     .value();
 }
 
