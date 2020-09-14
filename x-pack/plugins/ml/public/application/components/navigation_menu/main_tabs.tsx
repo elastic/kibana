@@ -151,7 +151,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   };
 
   useEffect(() => {
-    docTitle.change([TAB_DATA[selectedTabId].name, ML_APP_NAME, 'Elastic']);
+    docTitle.change([TAB_DATA[selectedTabId].name, ML_APP_NAME]);
   }, [selectedTabId]);
 
   return (

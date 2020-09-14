@@ -60,7 +60,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(
-      'Could not parse global state. Redirecting to Dataframe Analytics Management Page.'
+      'Could not parse global state. Redirecting to Data Frame Analytics Management Page.'
     );
     redirectToAnalyticsManagementPage();
     return <></>;
