@@ -233,6 +233,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {

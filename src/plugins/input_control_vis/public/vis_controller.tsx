@@ -18,8 +18,10 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { Subscription } from 'rxjs';
 import { I18nStart } from 'kibana/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -34,11 +36,13 @@ import { VisParams, Vis } from '../../visualizations/public';
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
+    private isLoaded = false;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
     filterManager: FilterManager;
     updateSubsciption: any;
+    timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
     constructor(public el: Element, public vis: Vis) {
@@ -50,19 +54,32 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       this.updateSubsciption = this.filterManager
         .getUpdates$()
         .subscribe(this.queryBarUpdateHandler);
+      this.timeFilterSubscription = deps.data.query.timefilter.timefilter
+        .getTimeUpdate$()
+        .subscribe(() => {
+          if (this.visParams?.useTimeFilter) {
+            this.isLoaded = false;
+          }
+        });
     }
 
     async render(visData: any, visParams: VisParams) {
-      this.visParams = visParams;
-      this.controls = [];
-      this.controls = await this.initControls();
-      const [{ i18n }] = await deps.core.getStartServices();
-      this.I18nContext = i18n.Context;
+      if (!this.I18nContext) {
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
+      }
+      if (!this.isLoaded || !isEqual(visParams, this.visParams)) {
+        this.visParams = visParams;
+        this.controls = [];
+        this.controls = await this.initControls();
+        this.isLoaded = true;
+      }
       this.drawVis();
     }
 
     destroy() {
       this.updateSubsciption.unsubscribe();
+      this.timeFilterSubscription.unsubscribe();
       unmountComponentAtNode(this.el);
       this.controls.forEach((control) => control.destroy());
     }

@@ -13,6 +13,7 @@ describe('WebhookParamsFields renders', () => {
     const actionParams = {
       body: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}

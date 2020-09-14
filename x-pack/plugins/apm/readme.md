@@ -162,4 +162,5 @@ You can access the development environment at http://localhost:9001.
 - [Cypress integration tests](./e2e/README.md)
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
 - [Github PR commands](./dev_docs/github_commands.md)
+- [Routing and Linking](./dev_docs/routing_and_linking.md)
 - [Telemetry](./dev_docs/telemetry.md)

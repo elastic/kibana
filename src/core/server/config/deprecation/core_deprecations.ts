@@ -146,6 +146,8 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
   renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
+  renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
+  renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
